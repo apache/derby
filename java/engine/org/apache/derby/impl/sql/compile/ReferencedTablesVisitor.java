@@ -22,22 +22,20 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * Build a JBitSet of all of the referenced tables in the tree.
  *
  */
-public class ReferencedTablesVisitor implements Visitor 
+class ReferencedTablesVisitor implements Visitor
 {
 	private JBitSet tableMap;
 
-	public ReferencedTablesVisitor(JBitSet tableMap)
+    ReferencedTablesVisitor(JBitSet tableMap)
 	{
 		this.tableMap = tableMap;
 	}

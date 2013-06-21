@@ -22,20 +22,13 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
 import org.apache.derby.iapi.types.SQLBoolean;
-import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-import java.sql.Types;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 public final class BooleanConstantNode extends ConstantNode
 {
@@ -45,50 +38,35 @@ public final class BooleanConstantNode extends ConstantNode
 	boolean booleanValue;
 	boolean unknownValue;
 
-	/**
-	 * Initializer for a BooleanConstantNode.
-	 *
-	 * @param arg1	A boolean containing the value of the constant OR The TypeId for the type of the node
-	 *
-	 * @exception StandardException
-	 */
-	public void init(
-					Object arg1)
-		throws StandardException
-	{
+    /**
+     * @param cm context manager
+     * @throws StandardException
+     */
+    BooleanConstantNode(ContextManager cm) throws StandardException {
 		/*
 		** RESOLVE: The length is fixed at 1, even for nulls.
 		** Is that OK?
 		*/
+        // Fill in the type information in the parent ValueNode
+        super(TypeId.BOOLEAN_ID, true, 1, cm);
+        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
+        setValue( null );
+    }
 
-		if ( arg1 == null )
-		{
-			/* Fill in the type information in the parent ValueNode */
-			super.init(TypeId.BOOLEAN_ID,
-			 Boolean.TRUE,
-			 ReuseFactory.getInteger(1));
+    BooleanConstantNode(boolean value, ContextManager cm)
+            throws StandardException {
+        super(TypeId.BOOLEAN_ID, false, 1, cm);
+        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
+        super.setValue(new SQLBoolean(value));
+        this.booleanValue = value;
+    }
 
-            setValue( null );
-		}
-		else if ( arg1 instanceof Boolean )
-		{
-			/* Fill in the type information in the parent ValueNode */
-			super.init(TypeId.BOOLEAN_ID,
-			 Boolean.FALSE,
-			 ReuseFactory.getInteger(1));
-
-			booleanValue = ((Boolean) arg1).booleanValue();
-			super.setValue(new SQLBoolean(booleanValue));
-		}
-		else
-		{
-			super.init(
-				arg1,
-				Boolean.TRUE,
-				ReuseFactory.getInteger(0));
-			unknownValue = true;
-		}
-	}
+    BooleanConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, 0, cm);
+        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
+        this.unknownValue = true;
+    }
 
 	/**
 	 * Return the value from this BooleanConstantNode
@@ -126,6 +104,7 @@ public final class BooleanConstantNode extends ConstantNode
 	 *			(null if not a bind time constant.)
 	 *
 	 */
+    @Override
 	Object getConstantValueAsObject()
 	{
 		return booleanValue ? Boolean.TRUE : Boolean.FALSE;
@@ -154,6 +133,7 @@ public final class BooleanConstantNode extends ConstantNode
 	 *
 	 * @return Whether or not this node represents a true constant.
 	 */
+    @Override
 	boolean isBooleanTrue()
 	{
 		return (booleanValue && !unknownValue);
@@ -164,6 +144,7 @@ public final class BooleanConstantNode extends ConstantNode
 	 *
 	 * @return Whether or not this node represents a false constant.
 	 */
+    @Override
 	boolean isBooleanFalse()
 	{
 		return (!booleanValue && !unknownValue);
@@ -173,6 +154,7 @@ public final class BooleanConstantNode extends ConstantNode
 	 * The default selectivity for value nodes is 50%.  This is overridden
 	 * in specific cases, such as the RelationalOperators.
 	 */
+    @Override
 	public double selectivity(Optimizable optTable)
 	{
 		if (isBooleanTrue())
@@ -200,6 +182,7 @@ public final class BooleanConstantNode extends ConstantNode
 	 * @return		The modified expression
 	 *
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 	{
 		if (! underNotNode)
@@ -229,7 +212,8 @@ public final class BooleanConstantNode extends ConstantNode
 	/**
 	 * Set the value in this ConstantNode.
 	 */
-	public void setValue(DataValueDescriptor value)
+    @Override
+    void setValue(DataValueDescriptor value)
 	{
 		super.setValue( value);
         unknownValue = true;

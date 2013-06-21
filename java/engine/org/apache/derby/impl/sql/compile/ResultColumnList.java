@@ -20,15 +20,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
 import java.lang.reflect.Modifier;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
+import java.util.Map;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -42,7 +40,6 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -61,7 +58,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  * A ResultColumnList is the target list of a SELECT, INSERT, or UPDATE.
@@ -69,7 +65,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
  * @see ResultColumn
  */
 
-public class ResultColumnList extends QueryTreeNodeVector
+class ResultColumnList extends QueryTreeNodeVector
 {
 	/* Is this the ResultColumnList for an index row? */
 	protected boolean indexRow;
@@ -110,8 +106,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 	// ones were added internally.
 	private int initialListSize = 0;
 
-	public ResultColumnList()
-	{
+    ResultColumnList(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.RESULT_COLUMN_LIST);
 	}
 
 	/**
@@ -121,7 +118,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param resultColumn	The ResultColumn to add to the list
 	 */
 
-	public void addResultColumn(ResultColumn resultColumn)
+    void addResultColumn(ResultColumn resultColumn)
 	{
 		/* Vectors are 0-based, ResultColumns are 1-based */
 		resultColumn.setVirtualColumnId(size() + 1);
@@ -136,7 +133,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param destructiveCopy	Whether or not this is a descructive copy
 	 *							from resultColumns
 	 */
-	public void appendResultColumns(ResultColumnList resultColumns,
+    void appendResultColumns(ResultColumnList resultColumns,
 									boolean destructiveCopy)
 	{
 		int	oldSize = size();
@@ -174,7 +171,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column at that position.
 	 */
 
-	public ResultColumn getResultColumn(int position)
+    ResultColumn getResultColumn(int position)
 	{
 		/*
 		** First see if it falls in position x.  If not,
@@ -219,19 +216,17 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *  is also returned via the whichRC parameter.  If no match is found,
 	 *  return null and leave whichRC untouched.
 	 */
-	public ResultColumn getResultColumn(int colNum, ResultSetNode rsn,
+    ResultColumn getResultColumn(int colNum, ResultSetNode rsn,
 		int [] whichRC) throws StandardException
 	{
 		if (colNum == -1)
 			return null;
 
-		ResultColumn rc = null;
-		ColumnReference colRef = null;
 		int [] crColNum = new int[] { -1 };
 
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			rc = (ResultColumn) elementAt(index);
+            ResultColumn rc = (ResultColumn) elementAt(index);
 			if (!(rc.getExpression() instanceof ColumnReference))
 			{
 				// If the rc's expression isn't a column reference then
@@ -239,7 +234,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 				continue;
 			}
 
-			colRef = (ColumnReference)rc.getExpression();
+            ColumnReference colRef = (ColumnReference)rc.getExpression();
 			if ((rsn == colRef.getSourceResultSet(crColNum)) &&
 				(crColNum[0] == colNum))
 			{
@@ -260,7 +255,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	the column at that position, null if out of range
 	 */
-	public ResultColumn getOrderByColumn(int position)
+    ResultColumn getOrderByColumn(int position)
 	{
 		// this wraps the cast needed, and the 0-based nature of the Vectors.
 		if (position == 0) 
@@ -278,7 +273,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column that matches that name.
 	 */
 
-	public ResultColumn getResultColumn(String columnName)
+    ResultColumn getResultColumn(String columnName)
 	{
         return getResultColumn( columnName, true );
 	}
@@ -293,7 +288,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column that matches that name.
 	 */
 
-	public ResultColumn getResultColumn(String columnName, boolean markIfReferenced )
+    ResultColumn getResultColumn(String columnName, boolean markIfReferenced )
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -453,7 +448,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column that matches that name.
 	 */
 
-	public ResultColumn getResultColumn(String columnsTableName, String columnName)
+    ResultColumn getResultColumn(String columnsTableName, String columnName)
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -504,7 +499,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @exception StandardException	Thrown on error
 	 */
 
-	public ResultColumn getAtMostOneResultColumn(
+    ResultColumn getAtMostOneResultColumn(
 								ColumnReference cr,
 								String exposedTableName,
 								boolean considerGeneratedColumns)
@@ -574,7 +569,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column that matches that name.
 	 * @exception StandardException thrown on ambiguity
 	 */
-	public ResultColumn getOrderByColumnToBind(
+    ResultColumn getOrderByColumnToBind(
             String columnName,
             TableName tableName,
             int tableNumber,
@@ -704,7 +699,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return	the column that matches that name, or NULL if pull-up needed
 	 * @exception StandardException thrown on ambiguity
 	 */
-	public ResultColumn findResultColumnForOrderBy(
+    ResultColumn findResultColumnForOrderBy(
                             String columnName, TableName tableName)
 		throws StandardException
 	{
@@ -843,7 +838,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnsToExpressions()
+    void bindResultColumnsToExpressions()
 					throws StandardException
 	{
 		int size = size();
@@ -862,7 +857,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnsByName(TableDescriptor targetTableDescriptor)
+    void bindResultColumnsByName(TableDescriptor targetTableDescriptor)
 					throws StandardException
 	{
 		int			size = size();
@@ -1015,7 +1010,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnsByPosition(TableDescriptor targetTableDescriptor)
+    void bindResultColumnsByPosition(TableDescriptor targetTableDescriptor)
 					throws StandardException
 	{
 		int size = size();
@@ -1046,7 +1041,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -1095,7 +1090,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	  @param heapColCount the number of heap columns
 	  @exception StandardException	Thrown on error
 	 */
-	public int[] getStreamStorableColIds(int heapColCount) throws StandardException
+    int[] getStreamStorableColIds(int heapColCount) throws StandardException
 	{
 		//@#$
 		//System.out.println("getStreamStorableColids");
@@ -1158,6 +1153,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 			throws StandardException
 	{
@@ -1637,7 +1633,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	A ResultDescription for this ResultSetNode.
 	 */
-	public ResultColumnDescriptor[] makeResultDescriptors()
+    ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    ResultColumnDescriptor colDescs[] = new ResultColumnDescriptor[size()];
 		int size = size();
@@ -1660,7 +1656,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void expandAllsAndNameColumns(FromList fromList)
+    void expandAllsAndNameColumns(FromList fromList)
 					throws StandardException
 	{
 		boolean			expanded = false;
@@ -1739,7 +1735,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void nameAllResultColumns()
+    void nameAllResultColumns()
 		throws StandardException
 	{
 		int size = size();
@@ -1829,7 +1825,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	true if this RCL is a No-Op projection of the given RCL.
 	 */
-	public boolean nopProjection(ResultColumnList childRCL)
+    boolean nopProjection(ResultColumnList childRCL)
 	{
 		/*
 		** This RCL is a useless projection if each column in the child
@@ -1851,7 +1847,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn thisColumn = (ResultColumn) elementAt(index);
-			ResultColumn referencedColumn = null;
+            ResultColumn referencedColumn;
 
 			/*
 			** A No-Op projection can point to a VirtualColumnNode or a
@@ -1894,7 +1890,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList copyListAndObjects()
+    ResultColumnList copyListAndObjects()
 					throws StandardException
 	{
 		ResultColumn	 newResultColumn;
@@ -1902,9 +1898,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		ResultColumnList newList;
 
 		/* Create the new ResultColumnList */
-		newList = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+        newList = new ResultColumnList(getContextManager());
 
 		/* Walk the current list - for each ResultColumn in the list, make a copy
 		 * and add it to the new list.
@@ -1931,7 +1925,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * to be removed. 
 	 *
 	 */
-	public void removeOrderByColumns() 
+    void removeOrderByColumns()
 	{
 		int idx = size() - 1;
 		for (int i = 0; i < orderBySelect; i++, idx--) {
@@ -1950,7 +1944,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void genVirtualColumnNodes(ResultSetNode sourceResultSet, 
+    void genVirtualColumnNodes(ResultSetNode sourceResultSet,
 									  ResultColumnList sourceResultColumnList)
 				throws StandardException
 	{
@@ -1970,7 +1964,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void genVirtualColumnNodes(ResultSetNode sourceResultSet, 
+    void genVirtualColumnNodes(ResultSetNode sourceResultSet,
 									  ResultColumnList sourceResultColumnList,
 									  boolean markReferenced)
 				throws StandardException
@@ -1985,12 +1979,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 			DataTypeDescriptor dts = resultColumn.getTypeServices();
 
 			/* Vectors are 0-based, VirtualColumnIds are 1-based */
-			resultColumn.expression = (ValueNode) getNodeFactory().getNode(
-							C_NodeTypes.VIRTUAL_COLUMN_NODE,
-							sourceResultSet,
-							sourceResultColumnList.elementAt(index),
-							ReuseFactory.getInteger(index + 1),
-							getContextManager());
+            resultColumn.expression = new VirtualColumnNode(
+                    sourceResultSet,
+                    (ResultColumn)sourceResultColumnList.elementAt(index),
+                    index + 1,
+                    getContextManager());
 
 			/* Mark the ResultColumn as being referenced */
 			if (markReferenced)
@@ -2007,7 +2000,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param adjust		The size of the increment.
 	 */
-	public void adjustVirtualColumnIds(int adjust)
+    void adjustVirtualColumnIds(int adjust)
 	{
 		int size = size();
 
@@ -2039,11 +2032,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * 
 	 * @exception StandardException		Thrown on error
 	 */
-	public void	doProjection() throws StandardException
+    void    doProjection() throws StandardException
 	{
 		int				numDeleted = 0;
 		int size = size();
-		ResultColumnList deletedRCL = new ResultColumnList();
+        ResultColumnList deletedRCL = new ResultColumnList(getContextManager());
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
@@ -2092,7 +2085,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return String	The first duplicate column name, if any.
 	 */
-	public String verifyUniqueNames(boolean errForGenCols)
+    String verifyUniqueNames(boolean errForGenCols)
 					throws StandardException
 	{
 		int size = size();
@@ -2127,7 +2120,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
-	public void propagateDCLInfo(ResultColumnList derivedRCL, String tableName)
+    void propagateDCLInfo(ResultColumnList derivedRCL, String tableName)
 					throws StandardException
 	{
 		String duplicateColName;
@@ -2215,15 +2208,15 @@ public class ResultColumnList extends QueryTreeNodeVector
 	void rejectXMLValues() throws StandardException
 	{
 		int sz = size();
-		ResultColumn rc = null;
-		for (int i = 1; i <= sz; i++) {
+
+        for (int i = 1; i <= sz; i++) {
 
 			if (i > initialListSize)
 			// this RC was generated internally and will not
 			// be returned to the user, so don't throw error.
 				continue;
 
-			rc = getResultColumn(i);
+            ResultColumn rc = getResultColumn(i);
 			if ((rc != null) && (rc.getType() != null) &&
 				rc.getType().getTypeId().isXMLTypeId())
 			{ // Disallow it.
@@ -2239,7 +2232,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param resultSetNumber	The resultSetNumber
 	 */
-	public void setResultSetNumber(int resultSetNumber)
+    void setResultSetNumber(int resultSetNumber)
 	{
 		int size = size();
 
@@ -2254,7 +2247,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Useful when chopping a ResultSetNode out of a tree when there are
 	 * still references to its RCL.
 	 */
-	public void setRedundant()
+    void setRedundant()
 	{
 		int size = size();
 
@@ -2311,7 +2304,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void	setUnionResultExpression(ResultColumnList otherRCL,
+    void    setUnionResultExpression(ResultColumnList otherRCL,
                                          int tableNumber,
                                          int level,
                                          String operatorName)
@@ -2339,18 +2332,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 
 		/* Make a dummy TableName to be shared by all new CRs */
-		dummyTN = (TableName) getNodeFactory().getNode(
-										C_NodeTypes.TABLE_NAME,
-										null,
-										null,
-										getContextManager());
-
-		ContextManager cm = getContextManager();
+        dummyTN = new TableName(null, null, getContextManager());
 
 		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
-			boolean		 nullableResult;
 			ColumnReference newCR;
 			ResultColumn thisRC = (ResultColumn) elementAt(index);
 			ResultColumn otherRC = (ResultColumn) otherRCL.elementAt(index);
@@ -2396,11 +2382,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 												otherExpr.getTypeServices(),
 												cf);
 
-			newCR = (ColumnReference) getNodeFactory().getNode(
-										C_NodeTypes.COLUMN_REFERENCE,
-										thisRC.getName(),
-										dummyTN,
-										getContextManager());
+            newCR = new ColumnReference(
+                    thisRC.getName(), dummyTN, getContextManager());
 			newCR.setType(resultType);
 			/* Set the tableNumber and nesting levels in newCR.
 			 * If thisExpr is not a CR, then newCR cannot be
@@ -2481,7 +2464,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not there is an exact UNION type match on the 2 RCLs.
 	 */
-	public boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL) throws StandardException
+    boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL)
+            throws StandardException
 	{
 
         if (SanityManager.DEBUG) {
@@ -2604,7 +2588,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList expandToAll(TableDescriptor td,
+    ResultColumnList expandToAll(TableDescriptor td,
 								TableName tableName)
 						throws StandardException
 	{
@@ -2615,10 +2599,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		int							posn;
 
 		/* Get a new ResultColumnList */
-		retval = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
-
+        retval = new ResultColumnList(getContextManager());
 		/*
 		** Form a sorted array of the ResultColumns
 		*/
@@ -2632,7 +2613,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 		for (int index = 0; index < cdlSize; index++)
 		{
-			cd = (ColumnDescriptor) cdl.elementAt(index);
+            cd = cdl.elementAt(index);
 
 			if ((posn < originalRCS.length) &&
 				(cd.getPosition() == originalRCS[posn].getColumnPosition()))
@@ -2672,7 +2653,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
+    void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
 		if (bindingRCL == null)
@@ -2735,7 +2716,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * 
 	 * @return String	The 1st column name, if any, that is not in the list.
 	 */
-	public String verifyCreateConstraintColumnList(TableElementList tel)
+    String verifyCreateConstraintColumnList(TableElementList tel)
 	{
 		int size = size();
 
@@ -2756,7 +2737,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param columnNames	String[] to hold the column names.
 	 */
-	public void exportNames(String[] columnNames)
+    void exportNames(String[] columnNames)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -2787,7 +2768,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return ResultColumn	The parent ResultColumn
 	 */
-	public ResultColumn findParentResultColumn(ResultColumn childRC)
+    ResultColumn findParentResultColumn(ResultColumn childRC)
 	{
 		ResultColumn	parentRC = null;
 
@@ -2868,7 +2849,7 @@ public class ResultColumnList extends QueryTreeNodeVector
      * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
-	void markColumnsInSelectListUpdatableByCursor(List updateColumns)
+    void markColumnsInSelectListUpdatableByCursor(List<String> updateColumns)
 	{
 		commonCodeForUpdatableByCursor(updateColumns, true);
 	}
@@ -2885,13 +2866,14 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * list but we will not find updatable column c12 in the select column list
 	 */
     private void commonCodeForUpdatableByCursor(
-            List updateColumns, boolean dealingWithSelectResultColumnList)
+            List<String> updateColumns,
+            boolean dealingWithSelectResultColumnList)
 	{
 		/*
 		** If there is no update column list, or the list is empty, then it means that
 		** all the columns which have a base table associated with them are updatable.
 		*/
-		if ( (updateColumns == null) || (updateColumns.size() == 0) )
+        if ( (updateColumns == null) || (updateColumns.isEmpty()) )
 		{
 			markUpdatableByCursor();
 		}
@@ -2903,7 +2885,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			for (int index = 0; index < ucSize; index++)
 			{
-				columnName = (String) updateColumns.get(index);
+                columnName = updateColumns.get(index);
 
 				resultColumn = getResultColumn(columnName);
 				if (SanityManager.DEBUG)
@@ -2930,7 +2912,7 @@ public class ResultColumnList extends QueryTreeNodeVector
      * @param updateColumns     A list representing the columns
 	 *							to be updated.
 	 */
-	void markUpdatableByCursor(List updateColumns)
+    void markUpdatableByCursor(List<String> updateColumns)
 	{
 		commonCodeForUpdatableByCursor(updateColumns, false);
 	}
@@ -2955,7 +2937,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not this RCL can be flattened out of a tree.
 	 */
-	public boolean isCloneable()
+    boolean isCloneable()
 	{
 		boolean retcode = true;
 		int size = size();
@@ -2980,7 +2962,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void remapColumnReferencesToExpressions() throws StandardException
+    void remapColumnReferencesToExpressions() throws StandardException
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3020,7 +3002,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not the type information is consistent
 	 */
-	public boolean hasConsistentTypeInfo() throws StandardException
+    boolean hasConsistentTypeInfo() throws StandardException
 	{
 		boolean isConsistent = true;
 
@@ -3060,7 +3042,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return Whether or not this RCL contains an AllResultColumn.
 	 */
-	public boolean containsAllResultColumn()
+    boolean containsAllResultColumn()
 	{
 		boolean	containsAllResultColumn = false;
 
@@ -3082,7 +3064,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	The number of RCs in the list that are referenced.
 	 */
-	public int countReferencedColumns()
+    int countReferencedColumns()
 	{
 		int numReferenced = 0;
 
@@ -3104,7 +3086,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param idArray	int[] for column ids
 	 * @param basis		0 (for 0-based ids) or 1 (for 1-based ids)
 	 */
-	public void recordColumnReferences(int[] idArray, int basis)
+    void recordColumnReferences(int[] idArray, int basis)
 	{
 		int currArrayElement = 0;
 		int size = size();
@@ -3125,7 +3107,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param name       Name of the column
 	 * @param basis		0 (for 0-based ids) or 1 (for 1-based ids)
 	 */
-	public int getPosition( String name, int basis )
+    int getPosition( String name, int basis )
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3153,7 +3135,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param tableColMap	JBitSet[] for tables
 	 * @param tableNumber	Table number of column references
 	 */
-	public void recordColumnReferences(boolean[] colArray1, JBitSet[] tableColMap,
+    void recordColumnReferences(boolean[] colArray1, JBitSet[] tableColMap,
 			int tableNumber)
 	{
 		int size = size();
@@ -3216,7 +3198,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Clear the column references from the RCL. (Restore RCL back to a state
 	 * where none of the RCs are marked as referenced.)
 	 */
-	public void clearColumnReferences()
+    void clearColumnReferences()
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3235,7 +3217,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @param targetList	The list to copy to
 	 */
-	public void copyReferencedColumnsToNewList(ResultColumnList targetList)
+    void copyReferencedColumnsToNewList(ResultColumnList targetList)
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3255,7 +3237,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @param targetList	The list to copy to,
 	 * @param copyList      1 based bitMap we copy columns associated with set bits.
 	 */
-	public void copyColumnsToNewList(ResultColumnList targetList, FormatableBitSet copyList)
+    void copyColumnsToNewList(
+        ResultColumnList targetList, FormatableBitSet copyList)
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3274,7 +3257,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return the FormatableBitSet
 	 */
-	public FormatableBitSet getColumnReferenceMap()
+    FormatableBitSet getColumnReferenceMap()
 	{
 		FormatableBitSet colMap = new FormatableBitSet(size());
 		int size = size();
@@ -3304,7 +3287,7 @@ public class ResultColumnList extends QueryTreeNodeVector
         }
     } // end of pullVirtualIsReferenced
 
-	public void clearTableNames()
+    void clearTableNames()
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -3350,7 +3333,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return the size
 	 */
-	public int getTotalColumnSize()
+    int getTotalColumnSize()
 	{
 		int colSize = 0;
 		int size = size();
@@ -3371,7 +3354,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void createListFromResultSetMetaData(ResultSetMetaData rsmd,
+    void createListFromResultSetMetaData(ResultSetMetaData rsmd,
 												TableName tableName,
 												String javaClassName)
 			throws StandardException
@@ -3463,24 +3446,19 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
     /** 
-     * Add a column to the list given a tablename, columnname, and datatype.
+     * Add a column to the list given a table name, column name, and data type.
      * Return the just-added column.
      *
      */
     public ResultColumn addColumn( TableName tableName, String columnName, DataTypeDescriptor dts )
         throws StandardException
     {
-        ValueNode bcn = (ValueNode) getNodeFactory().getNode(
-                                                             C_NodeTypes.BASE_COLUMN_NODE,
-                                                             columnName,
-                                                             tableName,
-                                                             dts,
-                                                             getContextManager());
-        ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
-                                                                  C_NodeTypes.RESULT_COLUMN,
-                                                                  columnName,
-                                                                  bcn,
-                                                                  getContextManager());
+        ValueNode bcn = new BaseColumnNode(columnName,
+                                           tableName,
+                                           dts,
+                                           getContextManager());
+        ResultColumn rc =
+                new ResultColumn(columnName, bcn, getContextManager());
         rc.setType(dts);
         addResultColumn(rc);
 
@@ -3496,22 +3474,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void addRCForRID()
+    void addRCForRID()
 		throws StandardException
 	{
 		ResultColumn		rowLocationColumn;
 		CurrentRowLocationNode		rowLocationNode;
 
 		/* Generate the RowLocation column */
-		rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
-										C_NodeTypes.CURRENT_ROW_LOCATION_NODE,
-										getContextManager());
+        rowLocationNode = new CurrentRowLocationNode(getContextManager());
 		rowLocationColumn =
-				(ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									"",
-									rowLocationNode,
-									getContextManager());
+               new ResultColumn("", rowLocationNode, getContextManager());
 		rowLocationColumn.markGenerated();
 
 		/* Append to the ResultColumnList */
@@ -3526,7 +3498,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void markAllUnreferenced()
+    void markAllUnreferenced()
 				throws StandardException
 	{
 		int size = size();
@@ -3683,7 +3655,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	/** Set the nullability of every ResultColumn in this list 
 	 * @throws StandardException */
-	public void setNullability(boolean nullability) throws StandardException
+    void setNullability(boolean nullability) throws StandardException
 	{
 		int size = size();
 
@@ -3801,9 +3773,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			return this;
 		}
 	
-		ResultColumnList newCols = (ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList newCols = new ResultColumnList(getContextManager());
 
 		int size = size();
 		for (index = 0; index < size; index++)
@@ -3873,7 +3843,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	ResultColumnList getJoinColumns(ResultColumnList joinColumns)
             throws StandardException
 	{
-		ResultColumnList	newRCL = new ResultColumnList();
+        ResultColumnList    newRCL = new ResultColumnList(getContextManager());
 
 		/* Find all of the join columns and put them 1st on the
 		 * new RCL.
@@ -3954,7 +3924,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 *	@exception	throws StandardException on error
 	 */
-	public int[] getColumnPositions( TableDescriptor td )
+    int[] getColumnPositions( TableDescriptor td )
 		throws StandardException
 	{
 		int 				size = size();
@@ -3986,7 +3956,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return the array of strings
 	 */
-	public String[] getColumnNames()
+    String[] getColumnNames()
 	{
 		String strings[] = new String[size()];
 
@@ -4079,9 +4049,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 				else
 				{
 					rc.setExpression(
-						(ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-										getContextManager()));
+                            new UntypedNullConstantNode(getContextManager()));
                     rc.setWasDefaultColumn( true );
 				}
                 rc.setDefaultColumn(false);
@@ -4153,7 +4121,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		if ( columnIDs == null ) { return; }
 
 		int						count = columnIDs.length;
-		TableName				tableName = makeTableName( table.getSchemaName(), table.getName() );
 		String					columnName;
 		int						columnPosition;
 		ResultColumn			rc;
@@ -4173,15 +4140,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	private	ResultColumn	makeColumnFromName( String columnName )
 		throws StandardException
 	{
-		ResultColumn	resultColumn = (ResultColumn) getNodeFactory().getNode
-			(
-				C_NodeTypes.RESULT_COLUMN,
-				columnName,
-				null,
-				getContextManager()
-			);
-
-		return resultColumn;
+       return new ResultColumn(columnName, null, getContextManager());
 	}
 
 	private	ResultColumn	makeColumnReferenceFromName
@@ -4192,19 +4151,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 		throws StandardException
 	{
 		ContextManager	cm = getContextManager();
-		NodeFactory		nodeFactory = getNodeFactory();
 
-		ResultColumn	rc = (ResultColumn) nodeFactory.getNode
-			(
-				C_NodeTypes.RESULT_COLUMN,
+        ResultColumn rc = new ResultColumn(
 				columnName,
-				nodeFactory.getNode
-				(
-					C_NodeTypes.COLUMN_REFERENCE,
-					columnName,
-					tableName,
-					cm
-				),
+                new ColumnReference(columnName, tableName, cm),
 				cm
 			);
 
@@ -4218,7 +4168,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		If the column is an ai column
 	 */
-	public void forbidOverrides(ResultColumnList sourceRSRCL)
+    void forbidOverrides(ResultColumnList sourceRSRCL)
 		throws StandardException
 	{
 		int size = size();
@@ -4256,7 +4206,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 	}
 
-	public void incOrderBySelect()
+    void incOrderBySelect()
 	{
 		orderBySelect++;
 	}
@@ -4266,7 +4216,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		orderBySelect--;
 	}
 
-	public int getOrderBySelect()
+    int getOrderBySelect()
 	{
 		return orderBySelect;
 	}
@@ -4349,7 +4299,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * During compilation we can add columns for a group by/order by but these
 	 * to an RCL but these are projected out during query execution. 
 	 */
-	public int visibleSize() 
+    int visibleSize()
 	{
 		return size() - orderBySelect - numGeneratedColumns();
 	}
@@ -4360,6 +4310,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG) {
@@ -4397,8 +4348,7 @@ public class ResultColumnList extends QueryTreeNodeVector
         mapArray[index] = vcId;
 
         if (streamableType(rc)) {
-            Integer seenIndex =
-                (Integer)seenMap.get(new Integer(vcId));
+            Integer seenIndex = seenMap.get(Integer.valueOf(vcId));
 
             if (seenIndex != null) {
                 // We have already mapped this column at index

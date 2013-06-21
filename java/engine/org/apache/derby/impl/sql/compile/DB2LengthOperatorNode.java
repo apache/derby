@@ -21,24 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.lang.reflect.Modifier;
-
 import java.sql.Types;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a unary DB2 compatible length operator
@@ -47,19 +42,18 @@ import java.util.List;
 
 public final class DB2LengthOperatorNode extends UnaryOperatorNode
 {
-    
-	/**
-	 * Initializer for a DB2LengthOperatorNode
-	 *
-	 * @param operand	The operand of the node
-	 */
-	public void init(Object	operand)
-	{
-		super.init( operand, "length", "getDB2Length");
+    /**
+     * @param operand The operand of the node
+     * @param cm context manager
+     * @throws StandardException
+     */
+    DB2LengthOperatorNode(ValueNode operand, ContextManager cm)
+            throws StandardException {
+        super(operand, "length", "getDB2Length", cm);
+        setNodeType(C_NodeTypes.DB2_LENGTH_OPERATOR_NODE);
     }
 
- 
-	/**
+    /**
 	 * Bind this operator
 	 *
 	 * @param fromList			The query's FROM list
@@ -70,7 +64,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -94,7 +88,8 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 	 * This is a length operator node.  Overrides this method
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
-	public String getReceiverInterfaceName() {
+    @Override
+    String getReceiverInterfaceName() {
 	    return ClassName.ConcatableDataValue;
 	}
 
@@ -107,7 +102,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{

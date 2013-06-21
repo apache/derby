@@ -21,24 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
 import org.apache.derby.iapi.util.JBitSet;
-
-import java.lang.reflect.Modifier;
-
-import java.util.List;
 
 /**
  * This node represents coalesce/value function which returns the first argument that is not null.
@@ -54,15 +49,15 @@ import java.util.List;
  * This table has FOR BIT DATA TYPES broken out into separate columns for clarity
  *
  * Note that are few differences between Derby and DB2
- * 1)there are few differences between what datatypes are consdiered compatible
- * In DB2, CHAR FOR BIT DATA datatypes are compatible with CHAR datatypes
+ * 1)there are few differences between what data types are considered compatible
+ * In DB2, CHAR FOR BIT DATA data types are compatible with CHAR data types
  * ie in addition to following table, CHAR is compatible with CHAR FOR BIT DATA, VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA
  * ie in addition to following table, VARCHAR is compatible with CHAR FOR BIT DATA, VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA
  * ie in addition to following table, LONG VARCHAR is compatible with CHAR FOR BIT DATA, VARCHAR FOR BIT DATA and LONG VARCHAR FOR BIT DATA
  * ie in addition to following table, CHAR FOR BIT DATA is compatible with DATE, TIME, TIMESTAMP
  * ie in addition to following table, VARCHAR FOR BIT DATA is compatible with DATE, TIME, TIMESTAMP
  *
- * 2)few datatypes donot have matching precision in Derby and DB2
+ * 2)few data types do not have matching precision in Derby and DB2
  * In DB2, precision of TIME is 8. In Derby, precision of TIME is 0.
  * In DB2, precision,scale of TIMESTAMP is 26,6. In Derby, precision of TIMESTAMP is 0,0.
  * In DB2, precision of DOUBLE is 15. In Derby, precision of DOUBLE is 52.
@@ -100,7 +95,7 @@ import java.util.List;
  * BLOB             { "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "BLOB" }
  */
 
-public class CoalesceFunctionNode extends ValueNode
+class CoalesceFunctionNode extends ValueNode
 {
 	String	functionName; //Are we here because of COALESCE function or VALUE function
 	ValueNodeList	argumentsList; //this is the list of arguments to the function. We are interested in the first not-null argument
@@ -112,15 +107,21 @@ public class CoalesceFunctionNode extends ValueNode
 	private int firstNonParameterNodeIdx = -1;
 
 	/**
-	 * Initializer for a CalesceFunctionNode
+     * Constructor for a CoalesceFunctionNode
 	 *
 	 * @param functionName	Tells if the function was called with name COALESCE or with name VALUE
 	 * @param argumentsList	The list of arguments to the coalesce/value function
+     * @param cm            The context manager
 	 */
-	public void init(Object functionName, Object argumentsList)
+    CoalesceFunctionNode(
+            String functionName,
+            ValueNodeList argumentsList,
+            ContextManager cm)
 	{
-		this.functionName = (String) functionName;
-		this.argumentsList = (ValueNodeList) argumentsList;
+        super(cm);
+        this.functionName = functionName;
+        this.argumentsList = argumentsList;
+        setNodeType(C_NodeTypes.COALESCE_FUNCTION_NODE);
 	}
 
 	/**
@@ -135,6 +136,7 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 					throws StandardException
 	{
@@ -191,7 +193,7 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -313,6 +315,7 @@ public class CoalesceFunctionNode extends ValueNode
 	/*
 		print the non-node subfields
 	 */
+    @Override
 	public String toString() 
 	{
 		if (SanityManager.DEBUG)
@@ -334,8 +337,8 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -373,6 +376,7 @@ public class CoalesceFunctionNode extends ValueNode
 	 * @param v the visitor
 	 * @throws StandardException on error in the visitor
 	 */
+    @Override
 	void acceptChildren(Visitor v) throws StandardException
 	{
 		super.acceptChildren(v);
@@ -385,6 +389,7 @@ public class CoalesceFunctionNode extends ValueNode
      *
      * @see ValueNode#categorize(JBitSet, boolean)
      */
+    @Override
     public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
         throws StandardException
     {
@@ -406,7 +411,8 @@ public class CoalesceFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -428,6 +434,7 @@ public class CoalesceFunctionNode extends ValueNode
      * @return the remapped tree
      * @throws StandardException if an error occurs
      */
+    @Override
     public ValueNode remapColumnReferencesToExpressions()
             throws StandardException
     {

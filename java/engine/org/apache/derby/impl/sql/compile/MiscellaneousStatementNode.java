@@ -21,32 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.reference.ClassName;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
  * A MiscellaneousStatement represents any type of statement that doesn't
- * fit into the well defined categores: 
+ * fit into the well defined categories:
  * SET (non-transaction).
  *
  */
 
 abstract class MiscellaneousStatementNode extends StatementNode
 {
+
+    MiscellaneousStatementNode(ContextManager cm) {
+        super(cm);
+    }
 
 	int activationKind()
 	{
@@ -62,7 +55,7 @@ abstract class MiscellaneousStatementNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -84,6 +77,7 @@ abstract class MiscellaneousStatementNode extends StatementNode
 	 *
 	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
 	 */
+    @Override
 	public boolean needsSavepoint()
 	{
 		return false;

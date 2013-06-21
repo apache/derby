@@ -22,32 +22,26 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 /**
- * A DistinctNode represents a result set for a disinct operation
+ * A DistinctNode represents a result set for a distinct operation
  * on a select.  It has the same description as its input result set.
  *
  * For the most part, it simply delegates operations to its childResultSet,
@@ -57,26 +51,28 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * NOTE: A DistinctNode extends FromTable since it can exist in a FromList.
  *
  */
-public class DistinctNode extends SingleChildResultSetNode
+class DistinctNode extends SingleChildResultSetNode
 {
 	boolean inSortedOrder;
 
 	/**
-	 * Initializer for a DistinctNode.
+     * Constructor for a DistinctNode.
 	 *
 	 * @param childResult	The child ResultSetNode
 	 * @param inSortedOrder	Whether or not the child ResultSetNode returns its
 	 *						output in sorted order.
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-						Object childResult,
-						Object inSortedOrder,
-						Object tableProperties) throws StandardException
+    DistinctNode(ResultSetNode childResult,
+                 boolean inSortedOrder,
+                 Properties tableProperties,
+                 ContextManager cm) throws StandardException
 	{
-		super.init(childResult, tableProperties);
+        super(childResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.DISTINCT_NODE);
 
 		if (SanityManager.DEBUG)
 		{
@@ -92,8 +88,6 @@ public class DistinctNode extends SingleChildResultSetNode
 			}
 		}
 
-		ResultColumnList prRCList;
-
 		/*
 			We want our own resultColumns, which are virtual columns
 			pointing to the child result's columns.
@@ -105,22 +99,22 @@ public class DistinctNode extends SingleChildResultSetNode
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = this.childResult.getResultColumns().copyListAndObjects();
-		resultColumns = this.childResult.getResultColumns();
+        final ResultColumnList prRCList =
+                this.childResult.getResultColumns().copyListAndObjects();
+        this.resultColumns = this.childResult.getResultColumns();
 		this.childResult.setResultColumns(prRCList);
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the DistinctNode's RCL.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-		resultColumns.genVirtualColumnNodes(this, prRCList);
+        this.resultColumns.genVirtualColumnNodes(this, prRCList);
 
 		/* Verify that we can perform a DISTINCT on the
 		 * underlying tree.
 		 */
-		resultColumns.verifyAllOrderable();
-
-		this.inSortedOrder = ((Boolean) inSortedOrder).booleanValue();
+        this.resultColumns.verifyAllOrderable();
+        this.inSortedOrder = inSortedOrder;
 	}
 
 	/*
@@ -132,17 +126,17 @@ public class DistinctNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(Optimizer optimizer,
 									OptimizablePredicateList predList,
 									CostEstimate outerCost,
 									RowOrdering rowOrdering)
 			throws StandardException
 	{
-		CostEstimate childCost =
-			((Optimizable) childResult).optimizeIt(optimizer,
-									predList,
-									outerCost,
-									rowOrdering);
+        ((Optimizable) childResult).optimizeIt(optimizer,
+                predList,
+                outerCost,
+                rowOrdering);
 
 		return super.optimizeIt(optimizer, predList, outerCost, rowOrdering);
 	}
@@ -152,6 +146,7 @@ public class DistinctNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate estimateCost(OptimizablePredicateList predList,
 									ConglomerateDescriptor cd,
 									CostEstimate outerCost,
@@ -186,7 +181,7 @@ public class DistinctNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 			throws StandardException
 	{
@@ -207,8 +202,8 @@ public class DistinctNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
 					throws StandardException
@@ -216,14 +211,12 @@ public class DistinctNode extends SingleChildResultSetNode
 		/* We need to implement this method since a PRN can appear above a
 		 * SelectNode in a query tree.
 		 */
-		childResult = (ResultSetNode) childResult.optimize(
-															dataDictionary,
-															predicates,
-															outerRows);
-		Optimizer optimizer = getOptimizer(
-						(FromList) getNodeFactory().getNode(
-							C_NodeTypes.FROM_LIST,
-							getNodeFactory().doJoinOrderOptimization(),
+        childResult = childResult.optimize(dataDictionary,
+                                           predicates,
+                                           outerRows);
+        Optimizer opt = getOptimizer(
+                        new FromList(
+                            getOptimizerFactory().doJoinOrderOptimization(),
 							this,
 							getContextManager()),
 						predicates,
@@ -232,7 +225,7 @@ public class DistinctNode extends SingleChildResultSetNode
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
-		costEstimate = optimizer.newCostEstimate();
+        costEstimate = opt.newCostEstimate();
 
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							 childResult.getCostEstimate().rowCount(),
@@ -254,7 +247,10 @@ public class DistinctNode extends SingleChildResultSetNode
 	 * @return	Whether the underlying ResultSet tree
 	 * is ordered on the specified column.
 	 */
-    boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List fbtHolder)
+    @Override
+    boolean isOrderedOn(ColumnReference[] crs,
+                        boolean permuteOrdering,
+                        List<FromBaseTable> fbtHolder)
 	{
 		/* RESOLVE - DistinctNodes are ordered on their RCLs.
 		 * Walk RCL to see if cr is 1st non-constant column in the
@@ -265,10 +261,11 @@ public class DistinctNode extends SingleChildResultSetNode
 
     /**
      * generate the distinct result set operating over the source
-	 * resultset.
+     * result set.
      *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{

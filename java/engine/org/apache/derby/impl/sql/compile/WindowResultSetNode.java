@@ -26,46 +26,50 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 
 /**
  * A WindowResultSetNode represents a result set for a window partitioning on a
- * select. Modelled on the code in GroupByNode.
+ * select. Modeled on the code in GroupByNode.
  */
-public class WindowResultSetNode extends SingleChildResultSetNode
+class WindowResultSetNode extends SingleChildResultSetNode
 {
     /**
      * The parent to the WindowResultSetNode.  We generate a ProjectRestrict
      * over the windowing node and parent is set to that node.
      */
     FromTable   parent;
-    List windowFuncCalls;
+    List<WindowFunctionNode> windowFuncCalls;
     WindowDefinitionNode wdn;
 
     /**
-     * Intializer for a WindowResultSetNode.
-     * @param bottomPR The project restrict result set we want to wrap
-     * @param windowDef The window definition
-     * @param windowFuncCalls All window function calls in SELECT's select list
-     * and order by list.
+     * Constructor for a WindowResultSetNode.
+     *
+     * @param bottomPR     The project restrict result set we want to wrap
+     * @param windowDef    The window definition
+     * @param windowFuncCalls
+     *                     All window function calls in SELECT's select list
+     *                     and order by list.
      * @param nestingLevel Nesting level
+     * @param cm           The context manager
      *
      * @exception StandardException     Thrown on error
      */
-    public void init(
-        Object bottomPR,
-        Object windowDef,
-        Object windowFuncCalls,
-        Object nestingLevel) throws StandardException
+    WindowResultSetNode(ResultSetNode            bottomPR,
+                        WindowDefinitionNode     windowDef,
+                        List<WindowFunctionNode> windowFuncCalls,
+                        int                      nestingLevel,
+                        ContextManager           cm) throws StandardException
     {
-        super.init(bottomPR, null);
-        this.wdn = (WindowDefinitionNode)windowDef;
-        this.windowFuncCalls = (List) windowFuncCalls;
-        setLevel(((Integer)nestingLevel).intValue());
+        super(bottomPR, null, cm);
+        setNodeType(C_NodeTypes.WINDOW_RESULTSET_NODE);
+        this.wdn = windowDef;
+        this.windowFuncCalls = windowFuncCalls;
+        setLevel(nestingLevel);
 
         ResultColumnList newBottomRCL;
 
@@ -98,9 +102,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         /*
         ** Get the new PR, put above the WindowResultSetNode.
         */
-        ResultColumnList rclNew = (ResultColumnList)getNodeFactory().
-            getNode(C_NodeTypes.RESULT_COLUMN_LIST,
-                    getContextManager());
+        ResultColumnList rclNew = new ResultColumnList(getContextManager());
 
         int sz = resultColumns.size();
         for (int i = 0; i < sz; i++)
@@ -116,32 +118,25 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         // have to be projected out upstream.
         rclNew.copyOrderBySelect(resultColumns);
 
-        parent = (FromTable) getNodeFactory().getNode(
-                                        C_NodeTypes.PROJECT_RESTRICT_NODE,
-                                        this, // child
-                                        rclNew,
-                                        null, // havingClause,
-                                        null, // restriction list
-                                        null, // project subqueries
-                                        null, // havingSubquerys,
-                                        null, // tableProperties,
-                                        getContextManager());
+        parent = new ProjectRestrictNode(this, // child
+                                         rclNew,
+                                         null, // havingClause,
+                                         null, // restriction list
+                                         null, // project subqueries
+                                         null, // havingSubquerys,
+                                         null, // tableProperties,
+                                         getContextManager());
 
 
         /*
          * Reset the bottom RCL to be empty.
          */
-        childResult.setResultColumns((ResultColumnList)
-                                            getNodeFactory().getNode(
-                                                C_NodeTypes.RESULT_COLUMN_LIST,
-                                                getContextManager()));
+        childResult.setResultColumns(new ResultColumnList(getContextManager()));
 
         /*
          * Set the Windowing RCL to be empty
          */
-        resultColumns = (ResultColumnList) getNodeFactory().getNode(
-                                            C_NodeTypes.RESULT_COLUMN_LIST,
-                                            getContextManager());
+        resultColumns = new ResultColumnList(getContextManager());
 
 
         // Add all referenced columns in select list to windowing node's RCL
@@ -149,8 +144,6 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         // result set. (modelled on GroupByNode's action for addUnAggColumns)
         CollectNodesVisitor<ColumnReference> getCRVisitor =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
-
-        ResultColumnList prcl = parent.getResultColumns();
 
         parent.getResultColumns().accept(getCRVisitor);
 
@@ -179,10 +172,9 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         ResultColumnList windowingRCL = resultColumns;
 
         for (int i= 0; i< uniqueCols.size(); i++) {
-            ValueNode crOrVcn = (ValueNode) uniqueCols.get(i);
+            ValueNode crOrVcn = uniqueCols.get(i);
 
-            ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
+            ResultColumn newRC = new ResultColumn(
                     "##UnWindowingColumn",
                     crOrVcn,
                     getContextManager());
@@ -194,8 +186,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
             newRC.setVirtualColumnId(bottomRCL.size());
 
             // now add this column to the windowing result column list
-            ResultColumn wRC = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
+            ResultColumn wRC = new ResultColumn(
                     "##UnWindowingColumn",
                     crOrVcn,
                     getContextManager());
@@ -208,11 +199,10 @@ public class WindowResultSetNode extends SingleChildResultSetNode
              ** Reset the original node to point to the
              ** Windowing result set.
              */
-            VirtualColumnNode vc = (VirtualColumnNode) getNodeFactory().getNode(
-                    C_NodeTypes.VIRTUAL_COLUMN_NODE,
+            VirtualColumnNode vc = new VirtualColumnNode(
                     this, // source result set.
                     wRC,
-                    new Integer(windowingRCL.size()),
+                    windowingRCL.size(),
                     getContextManager());
 
             SubstituteExpressionVisitor seVis =
@@ -223,15 +213,15 @@ public class WindowResultSetNode extends SingleChildResultSetNode
 
 
     /**
-     * @return true if an equivalent column reference to cand is already
-     * present in uniqueColRefs
+     * @return {@code true} if an equivalent column reference to {@code cand}
+     *         is already present in {@code uniqueColRefs}
      */
-    private boolean colRefAlreadySeen(List uniqueColRefs,
+    private boolean colRefAlreadySeen(List<ValueNode> uniqueColRefs,
                                       ColumnReference cand)
             throws StandardException {
 
         for (int i= 0; i< uniqueColRefs.size(); i++) {
-            ColumnReference cr = (ColumnReference) uniqueColRefs.get(i);
+            ColumnReference cr = (ColumnReference)uniqueColRefs.get(i);
 
             if (cr.isEquivalent(cand)) {
                 return true;
@@ -250,24 +240,18 @@ public class WindowResultSetNode extends SingleChildResultSetNode
          * call with an RC.  We toss out the list of RCs, we need to get
          * each RC as we process its corresponding window function.
          */
-        LanguageFactory lf =
-            getLanguageConnectionContext().getLanguageFactory();
-
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = resultColumns;
 
         ReplaceWindowFuncCallsWithCRVisitor replaceCallsVisitor =
             new ReplaceWindowFuncCallsWithCRVisitor(
-                (ResultColumnList) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN_LIST,
-                    getContextManager()),
+                new ResultColumnList(getContextManager()),
                 ((FromTable) childResult).getTableNumber(),
                 ResultSetNode.class);
         parent.getResultColumns().accept(replaceCallsVisitor);
 
         for (int i=0; i < windowFuncCalls.size(); i++) {
-            WindowFunctionNode winFunc =
-                (WindowFunctionNode) windowFuncCalls.get(i);
+            WindowFunctionNode winFunc = windowFuncCalls.get(i);
 
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
@@ -280,8 +264,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
                 (WindowDefinitionNode)winFunc.getWindow();
 
             if (funcWindow == wdn) {
-                ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
+                ResultColumn newRC = new ResultColumn(
                     "##winFuncResult",
                     winFunc.getNewNullResultExpression(),
                     getContextManager());
@@ -290,27 +273,21 @@ public class WindowResultSetNode extends SingleChildResultSetNode
                 newRC.bindResultColumnToExpression();
                 bottomRCL.addElement(newRC);
                 newRC.setVirtualColumnId(bottomRCL.size());
-                int winFuncResultVColId = newRC.getVirtualColumnId();
 
                 /*
                 ** Set the WindowResultSetNode result column to point to this.
                 ** The Windowing Node result was created when we called
                 ** ReplaceWindowFuncCallsWithCRVisitor.
                 */
-                ColumnReference newColumnRef =
-                    (ColumnReference) getNodeFactory().getNode(
-                        C_NodeTypes.COLUMN_REFERENCE,
-                        newRC.getName(),
-                        null,
-                        getContextManager());
+                ColumnReference newColumnRef = new ColumnReference(
+                        newRC.getName(), null, getContextManager());
 
                 newColumnRef.setSource(newRC);
                 newColumnRef.setNestingLevel(this.getLevel());
                 newColumnRef.setSourceLevel(this.getLevel());
                 newColumnRef.markGeneratedToReplaceWindowFunctionCall();
 
-                ResultColumn tmpRC = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
+                ResultColumn tmpRC = new ResultColumn(
                     newRC.getColumnName(),
                     newColumnRef,
                     getContextManager());
@@ -338,6 +315,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * override
      * @see QueryTreeNode#generate
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
             throws StandardException
     {
@@ -415,6 +393,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
      * QueryTreeNode override
      * @see QueryTreeNode#printSubNodes
      */
+    @Override
     public void printSubNodes(int depth) {
         if (SanityManager.DEBUG) {
 			super.printSubNodes(depth);

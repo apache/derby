@@ -21,11 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * If a RCL (SELECT list) contains an aggregate, then we must verify
@@ -39,11 +38,11 @@ import org.apache.derby.iapi.error.StandardException;
  * an aggregate are grouping columns.
  *
  */
-public class VerifyAggregateExpressionsVisitor implements Visitor
+class VerifyAggregateExpressionsVisitor implements Visitor
 {
 	private GroupByList groupByList;
 
-	public VerifyAggregateExpressionsVisitor(GroupByList groupByList)
+    VerifyAggregateExpressionsVisitor(GroupByList groupByList)
 	{
 		this.groupByList = groupByList;
 	}

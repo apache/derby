@@ -22,13 +22,12 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -61,8 +60,8 @@ public abstract class ValueNode extends QueryTreeNode
 	** Binding will replace all untyped ValueNodes with typed ValueNodes
 	** when it figures out what their types should be.
 	*/
-	public ValueNode()
-	{
+    ValueNode(ContextManager cm) {
+        super(cm);
 	}
     
     /**
@@ -74,13 +73,7 @@ public abstract class ValueNode extends QueryTreeNode
        throws StandardException
        
        {
-        setType(
-                new DataTypeDescriptor(
-                            (TypeId) typeId,
-                            isNullable,
-                            maximumWidth
-                        )
-                    );           
+        setType(new DataTypeDescriptor(typeId, isNullable, maximumWidth));
        }
 
     /**
@@ -94,7 +87,7 @@ public abstract class ValueNode extends QueryTreeNode
     {
         setType(
                 new DataTypeDescriptor(
-                            (TypeId) typeId,
+                            typeId,
                             precision,
                             scale,
                             isNullable,
@@ -104,73 +97,13 @@ public abstract class ValueNode extends QueryTreeNode
     }
 
 	/**
-	 * Initializer for numeric types.
-	 * 
-	 *
-	 * @param typeId	The TypeID of this new node
-	 * @param precision	The precision of this new node
-	 * @param scale		The scale of this new node
-	 * @param isNullable	The nullability of this new node
-	 * @param maximumWidth	The maximum width of this new node
-	 *
-	 * @exception StandardException
-	 */
-
-	public void init(
-			Object typeId,
-			Object precision,
-			Object scale,
-			Object isNullable,
-			Object maximumWidth)
-		throws StandardException
-	{
-		setType(
-			new DataTypeDescriptor(
-						(TypeId) typeId,
-						((Integer) precision).intValue(),
-						((Integer) scale).intValue(),
-						((Boolean) isNullable).booleanValue(),
-						((Integer) maximumWidth).intValue()
-					)
-				);
-	}
-
-	/**
-	 * Initializer for non-numeric types.
-	 * 
-	 *
-	 * @param tcf		The factory to get the
-	 *					DataTypeServicesFactory from
-	 * @param typeId	The TypeID of this new node
-	 * @param isNullable	The nullability of this new node
-	 * @param maximumWidth	The maximum width of this new node
-	 *
-	 * @exception StandardException
-	 */
-
-	ValueNode(
-			Object tcf,
-			Object typeId,
-			Object isNullable,
-			Object maximumWidth)
-		throws StandardException
-	{
-		setType(new DataTypeDescriptor(
-						(TypeId) typeId,
-						((Boolean) isNullable).booleanValue(),
-						((Integer) maximumWidth).intValue()
-						)
-				);
-	}
-
-			
-	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
 	 * @return	This object as a String
 	 */
 
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -192,7 +125,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The DataTypeServices from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+    DataTypeDescriptor getTypeServices()
 	{
 		return dataTypeServices;
 	}
@@ -246,7 +179,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The TypeId from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public TypeId getTypeId() throws StandardException
+    TypeId getTypeId() throws StandardException
 	{
         DataTypeDescriptor dtd = getTypeServices();
         if (dtd != null)
@@ -269,7 +202,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	This ValueNode's TypeCompiler
 	 *
 	 */
-	public final TypeCompiler getTypeCompiler() throws StandardException
+    final TypeCompiler getTypeCompiler() throws StandardException
 	{
 		return getTypeCompiler(getTypeId());
 	}
@@ -282,7 +215,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *				ValueNode
 	 */
 
-	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
+    void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
         // bind the type in case it is a user defined type. this will create a dependency on the udt.
         if ( dataTypeServices != null )
@@ -338,7 +271,7 @@ public abstract class ValueNode extends QueryTreeNode
      * is not sourced by a column.
 	 */
 
-	public ResultColumn getSourceResultColumn()
+    ResultColumn getSourceResultColumn()
 	{
 		return null;
 	}
@@ -387,9 +320,10 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @exception StandardException	Thrown on error
 	 */
 
-    ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates, boolean forQueryRewrite)
-				throws StandardException
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates,
+                             boolean forQueryRewrite) throws StandardException
 	{
 		/* There are a bizillion classes which extend ValueNode.  Here is info
 		 * on some of the classes that bindExpression() should not be called on
@@ -418,7 +352,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
-	public ValueNode genSQLJavaSQLTree()
+    ValueNode genSQLJavaSQLTree()
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -429,15 +363,10 @@ public abstract class ValueNode extends QueryTreeNode
 				"genSQLJavaSQLTree() only expected to be called on user types");
 		}
 
-		JavaValueNode stjvn = (JavaValueNode) getNodeFactory().getNode(
-									C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
-									this,
-									getContextManager());
+        final ContextManager cm = getContextManager();
+        JavaValueNode stjvn = new SQLToJavaValueNode(this, cm);
 
-		ValueNode jtsvn = (ValueNode) getNodeFactory().getNode(
-									C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-									stjvn,
-									getContextManager());
+        ValueNode jtsvn = new JavaToSQLValueNode(stjvn, cm);
 
         DataTypeDescriptor  resultType;
         if ( (getTypeServices() != null) && getTypeId().userType() ) { resultType = getTypeServices(); }
@@ -463,7 +392,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -532,24 +461,19 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode genEqualsFalseTree()
+    ValueNode genEqualsFalseTree()
 			throws StandardException
 	{
 		BinaryRelationalOperatorNode equalsNode;
 		BooleanConstantNode		 falseNode;
 		boolean 				nullableResult;
-		NodeFactory				nodeFactory = getNodeFactory();
 
-		falseNode = (BooleanConstantNode) nodeFactory.getNode(
-									C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-									Boolean.FALSE,
-									getContextManager());
-		equalsNode = (BinaryRelationalOperatorNode)
-							nodeFactory.getNode(
+        falseNode = new BooleanConstantNode(false, getContextManager());
+        equalsNode = new BinaryRelationalOperatorNode(
 								C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 								this,
 								falseNode,
-								Boolean.FALSE,
+                                false,
 								getContextManager());
 		nullableResult = getTypeServices().isNullable();
 		equalsNode.setType(new DataTypeDescriptor(
@@ -566,16 +490,13 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode genIsNullTree()
+    ValueNode genIsNullTree()
 			throws StandardException
 	{
 		IsNullNode isNullNode;
 
-		isNullNode = (IsNullNode)
-							getNodeFactory().getNode(
-													C_NodeTypes.IS_NULL_NODE,
-													this,
-													getContextManager());
+       isNullNode = new IsNullNode(
+                this, IsNullNode.Sign.IS_NULL, getContextManager());
 		isNullNode.setType(new DataTypeDescriptor(
 									TypeId.BOOLEAN_ID,
 									false)
@@ -611,20 +532,12 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode putAndsOnTop() 
+    ValueNode putAndsOnTop()
 					throws StandardException
 	{
-		NodeFactory		nodeFactory = getNodeFactory();
-
-        QueryTreeNode trueNode = (QueryTreeNode) nodeFactory.getNode(
-										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-										Boolean.TRUE,
-										getContextManager());
-		AndNode andNode = (AndNode) nodeFactory.getNode(
-										C_NodeTypes.AND_NODE,
-										this,
-										trueNode,
-										getContextManager());
+        BooleanConstantNode trueNode =
+                new BooleanConstantNode(true, getContextManager());
+        AndNode andNode = new AndNode(this, trueNode, getContextManager());
 		andNode.postBindFixup();
 		return andNode;
 	}
@@ -635,7 +548,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
-	public boolean verifyPutAndsOnTop()
+    boolean verifyPutAndsOnTop()
 	{
 		return true;
 	}
@@ -668,7 +581,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode changeToCNF(boolean underTopAndNode) 
+    ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
 		return this;
@@ -683,7 +596,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
-	public boolean verifyChangeToCNF()
+    boolean verifyChangeToCNF()
 	{
 		return true;
 	}
@@ -714,7 +627,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		return true;
@@ -735,7 +648,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default schema name for an expression -- null
 	 */
-	public String getSchemaName() throws StandardException
+    String getSchemaName() throws StandardException
 	{
 		return null;
 	}
@@ -755,7 +668,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default table name for an expression -- null
 	 */
-	public String getTableName()
+    String getTableName()
 	{
 		return null;
 	}
@@ -774,7 +687,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return the default column name for an expression -- null.
 	 */
-	public String getColumnName()
+    String getColumnName()
 	{
 		return null;
 	}
@@ -799,7 +712,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return boolean	Whether or not this expression tree is cloneable.
 	 */
-	public boolean isCloneable()
+    boolean isCloneable()
 	{
 		return false;
 	}
@@ -811,7 +724,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode getClone() throws StandardException
+    ValueNode getClone() throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -828,7 +741,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param oldVN		The ValueNode to copy from.
 	 *
 	 */
-	public void copyFields(ValueNode oldVN) throws StandardException
+    void copyFields(ValueNode oldVN) throws StandardException
 	{
 		dataTypeServices = oldVN.getTypeServices();
 	}
@@ -841,7 +754,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions() throws StandardException
+    ValueNode remapColumnReferencesToExpressions() throws StandardException
 	{
 		return this;
 	}
@@ -851,7 +764,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    boolean isConstantExpression()
 	{
 		return false;
 	}
@@ -864,7 +777,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return	True means this expression tree represents a constant value.
 	 */
-	public boolean constantExpression(PredicateList whereClause)
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return false;
 	}
@@ -970,7 +883,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     final void generate(ActivationClassBuilder acb, MethodBuilder mb)
 								throws StandardException
 	{
@@ -1258,7 +1171,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @see BinaryRelationalOperatorNode
 	 * @see IsNullNode
 	*/
-	public boolean isRelationalOperator()
+    boolean isRelationalOperator()
 	{
 		return false;
 	}
@@ -1268,7 +1181,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @see ValueNode#isRelationalOperator
 	 */
-	public boolean isBinaryEqualsOperatorNode()
+    boolean isBinaryEqualsOperatorNode()
 	{
 		return false;
 	}
@@ -1281,7 +1194,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * an equals operator of the form "col = ?" that we generated
 	 * during preprocessing to allow index multi-probing.
 	 */
-	public boolean isInListProbeNode()
+    boolean isInListProbeNode()
 	{
 		return false;
 	}
@@ -1305,7 +1218,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @param isNullOkay if set to true we also consider IS NULL predicates;
 	 * otherwise consider only = predicates.
 	 */
-	public boolean optimizableEqualityNode(Optimizable optTable, 
+    boolean optimizableEqualityNode(Optimizable optTable,
 										   int columnNumber, 
 										   boolean isNullOkay)
 		throws StandardException
@@ -1321,7 +1234,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 *
 	 * @return Whether this node's type will be determined from the context
 	 */
-	public boolean requiresTypeFromContext()
+    boolean requiresTypeFromContext()
 	{
 		return false;
 	}
@@ -1331,7 +1244,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * with Parameter Nodes.
 	 *
 	 */
-	public boolean isParameterNode()
+    boolean isParameterNode()
 	{
 		return false;
 	}
@@ -1385,7 +1298,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * 
 	 * @throws StandardException 
 	 */
-	protected abstract boolean isEquivalent(ValueNode other)
+    abstract boolean isEquivalent(ValueNode other)
 		throws StandardException;
 
 	/**

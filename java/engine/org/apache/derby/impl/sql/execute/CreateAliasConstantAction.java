@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.List;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
@@ -243,10 +244,14 @@ class CreateAliasConstantAction extends DDLConstantAction
             }
 
             // also don't want to collide with 1-arg functions by the same name
-            java.util.List funcList = dd.getRoutineList( sd.getUUID().toString(), aliasName, AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR );
+            List<AliasDescriptor> funcList =
+                dd.getRoutineList(sd.getUUID().toString(),
+                                  aliasName,
+                                  AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR);
+
             for ( int i = 0; i < funcList.size(); i++ )
             {
-				AliasDescriptor func = (AliasDescriptor) funcList.get(i);
+                AliasDescriptor func = funcList.get(i);
 
 				RoutineAliasInfo funcInfo = (RoutineAliasInfo) func.getAliasInfo();
                 if ( funcInfo.getParameterCount() == 1 )
@@ -362,11 +367,12 @@ class CreateAliasConstantAction extends DDLConstantAction
          )
         throws StandardException
     {
-        java.util.List list = dd.getRoutineList( sd.getUUID().toString(), aliasName, aliasType );
+        List<AliasDescriptor> list = dd.getRoutineList(
+            sd.getUUID().toString(), aliasName, aliasType);
         
         for (int i = list.size() - 1; i >= 0; i--)
         {
-            AliasDescriptor proc = (AliasDescriptor) list.get(i);
+            AliasDescriptor proc = list.get(i);
             
             RoutineAliasInfo procedureInfo = (RoutineAliasInfo) proc.getAliasInfo();
             int parameterCount = procedureInfo.getParameterCount();

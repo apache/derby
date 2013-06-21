@@ -21,14 +21,12 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * A VirtualColumnNode represents a virtual column reference to a column in
@@ -40,7 +38,7 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
  *
  */
 
-public class VirtualColumnNode extends ValueNode
+class VirtualColumnNode extends ValueNode
 {
 	/* A VirtualColumnNode contains a pointer to the immediate child result
 	 * that is materializing the virtual column and the ResultColumn
@@ -58,24 +56,24 @@ public class VirtualColumnNode extends ValueNode
 
 
 	/**
-	 * Initializer for a VirtualColumnNode.
+     * Constructor for a VirtualColumnNode.
 	 *
 	 * @param sourceResultSet	The ResultSetNode where the value is originating
 	 * @param sourceColumn		The ResultColumn where the value is originating
 	 * @param columnId			The columnId within the current Row
+     * @param cm                The context manager
 	 */
-
-	public void init(
-						Object sourceResultSet,
-						Object sourceColumn,
-						Object columnId) throws StandardException
+    VirtualColumnNode(ResultSetNode sourceResultSet,
+                      ResultColumn sourceColumn,
+                      int columnId,
+                      ContextManager cm) throws StandardException
 	{
-		ResultColumn source = (ResultColumn) sourceColumn;
-
-		this.sourceResultSet = (ResultSetNode) sourceResultSet;
-		this.sourceColumn = source;
-		this.columnId = ((Integer) columnId).intValue();
-		setType(source.getTypeServices());
+        super(cm);
+        setNodeType(C_NodeTypes.VIRTUAL_COLUMN_NODE);
+        this.sourceResultSet = sourceResultSet;
+        this.sourceColumn = sourceColumn;
+        this.columnId = columnId;
+        setType(sourceColumn.getTypeServices());
 	}
 
 
@@ -85,8 +83,8 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -104,7 +102,7 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @return ResultSetNode	
 	 */
-	public ResultSetNode getSourceResultSet()
+    ResultSetNode getSourceResultSet()
 	{
 		return sourceResultSet;
 	}
@@ -114,7 +112,7 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @return ResultSetNode	
 	 */
-	public ResultColumn getSourceColumn()
+    ResultColumn getSourceColumn()
 	{
 		return sourceColumn;
 	}
@@ -129,7 +127,8 @@ public class VirtualColumnNode extends ValueNode
 	 *		is in. If the column is not in a table (i.e. is a
 	 * 		derived column), it returns NULL.
 	 */
-	public String getTableName()
+    @Override
+    String getTableName()
 	{
 		return sourceColumn.getTableName();
 	}
@@ -144,7 +143,8 @@ public class VirtualColumnNode extends ValueNode
 	 * @return	A String containing the name of the schema for the Column's table.
 	 *		If the column is not in a schema (i.e. derived column), it returns NULL.
 	 */
-	public String getSchemaName() throws StandardException
+    @Override
+    String getSchemaName() throws StandardException
 	{
 		return sourceColumn.getSchemaName();
 	}
@@ -155,6 +155,7 @@ public class VirtualColumnNode extends ValueNode
 	 * @return TRUE, if the column is a base column of a table and is 
 	 * writable by a positioned update.
 	 */
+    @Override
 	public boolean updatableByCursor()
 	{
 		return sourceColumn.updatableByCursor();
@@ -165,7 +166,8 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @return ResultSetNode	
 	 */
-	public ResultColumn getSourceResultColumn()
+    @Override
+    ResultColumn getSourceResultColumn()
 	{
 		return sourceColumn;
 	}
@@ -194,7 +196,8 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @return boolean	Whether or not this expression tree is cloneable.
 	 */
-	public boolean isCloneable()
+    @Override
+    boolean isCloneable()
 	{
 		return true;
 	}
@@ -212,6 +215,7 @@ public class VirtualColumnNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -260,6 +264,7 @@ public class VirtualColumnNode extends ValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		/*
@@ -274,12 +279,14 @@ public class VirtualColumnNode extends ValueNode
 	 * @return	The DataTypeServices from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices()
+    @Override
+    final public DataTypeDescriptor getTypeServices()
 	{
         return sourceColumn.getTypeServices();
     }
     
-    public void setType(DataTypeDescriptor dtd) throws StandardException
+    @Override
+    final public void setType(DataTypeDescriptor dtd) throws StandardException
     {
         sourceColumn.setType(dtd);
     }

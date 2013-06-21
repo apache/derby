@@ -22,41 +22,27 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 {
 	boolean	shortCircuitValue;
 
-	/**
-	 * Initializer for a BinaryLogicalOperatorNode
-	 *
-	 * @param leftOperand	The left operand of the comparison
-	 * @param rightOperand	The right operand of the comparison
-	 * @param methodName	The name of the method to call in the generated
-	 *						class.  In this case, it's actually an operator
-	 *						name.
-	 */
-
-	public void init(
-				Object	leftOperand,
-				Object	rightOperand,
-				Object		methodName)
-	{
-		/* For logical operators, the operator and method names are the same */
-		super.init(leftOperand, rightOperand, methodName, methodName,
-				ClassName.BooleanDataValue, ClassName.BooleanDataValue);
-	}
+    BinaryLogicalOperatorNode(
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            String methodName,
+            ContextManager cm) {
+        super(leftOperand, rightOperand, methodName, methodName,
+                ClassName.BooleanDataValue, ClassName.BooleanDataValue, cm);
+    }
 
 	/**
 	 * Bind this logical operator.  All that has to be done for binding
@@ -71,7 +57,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -92,6 +78,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
+    @Override
 	boolean verifyEliminateNots()
 	{
 		if (SanityManager.ASSERT)
@@ -116,7 +103,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{		

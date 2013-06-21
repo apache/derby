@@ -21,23 +21,18 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.cache.ClassSize;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
 import java.io.IOException;
-
-import java.sql.ResultSet;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.ClassSize;
+import org.apache.derby.iapi.services.io.Storable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * SQLLongint satisfies the DataValueDescriptor
@@ -148,7 +143,7 @@ public final class SQLLongint
 	// this is for DataType's error generator
 	public String getTypeName()
 	{
-		return TypeId.LONGINT_NAME;
+        return TypeId.BIGINT_NAME;
 	}
 
 	/*

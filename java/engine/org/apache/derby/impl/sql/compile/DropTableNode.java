@@ -22,7 +22,9 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -34,25 +36,26 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
-public class DropTableNode extends DDLStatementNode
+class DropTableNode extends DDLStatementNode
 {
 	private long		conglomerateNumber;
 	private int			dropBehavior;
 	private	TableDescriptor	td;
 
 	/**
-	 * Intializer for a DropTableNode
+     * Constructor for a DropTableNode
 	 *
 	 * @param dropObjectName	The name of the object being dropped
 	 * @param dropBehavior		Drop behavior (RESTRICT | CASCADE)
+     * @param cm                The context manager
 	 *
 	 */
-
-	public void init(Object dropObjectName, Object dropBehavior)
+    DropTableNode(TableName dropObjectName, int dropBehavior, ContextManager cm)
 		throws StandardException
 	{
-		initAndCheck(dropObjectName);
-		this.dropBehavior = ((Integer) dropBehavior).intValue();
+        super(dropObjectName, cm);
+        this.dropBehavior = dropBehavior;
+        setNodeType(C_NodeTypes.DROP_TABLE_NODE);
 	}
 
 	/**
@@ -61,7 +64,7 @@ public class DropTableNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -77,7 +80,7 @@ public class DropTableNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "DROP TABLE";
 	}
@@ -89,7 +92,7 @@ public class DropTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
@@ -113,6 +116,7 @@ public class DropTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -128,7 +132,8 @@ public class DropTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropTableConstantAction(
 			getFullName(),

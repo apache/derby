@@ -21,26 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
-
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.Enumeration;
 
 
 /**
@@ -49,7 +44,7 @@ import java.util.Enumeration;
  *
  */
 
-public class FromList extends QueryTreeNodeVector implements OptimizableList
+class FromList extends QueryTreeNodeVector implements OptimizableList
 {
 	Properties	properties;
 	// RESOLVE: The default should be false
@@ -78,28 +73,54 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 */
 	private WindowList windows;
 
+    /**
+     *  Does not change the default for join order optimization, i.e.
+     * {@code false}.
+     * @param cm context manager
+     */
+    FromList(ContextManager cm) {
+        super(cm);
+        this.isTransparent = false;
+        setNodeType(C_NodeTypes.FROM_LIST);
+    }
 
-	/** Initializer for a FromList */
+    /**
+     * Constructor for a FromList
+     *
+     * @param optimizeJoinOrder {@code true} if join order optimization is to
+     *                          be performed
+     * @param cm                context manager
+     */
 
-	public void init(Object optimizeJoinOrder)
+    FromList(boolean optimizeJoinOrder, ContextManager cm)
 	{
-		fixedJoinOrder = ! (((Boolean) optimizeJoinOrder).booleanValue());
-		isTransparent = false;
+        super(cm);
+        constructorMinion(optimizeJoinOrder);
 	}
 
 	/**
-	 * Initializer for a FromList
+     * Constructor for a FromList
 	 *
+     * @param optimizeJoinOrder {@code true} if join order optimization is to
+     *                          be performed
+     * @param fromTable         initialize list with this table
+     * @param cm                context manager
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(Object optimizeJoinOrder, Object fromTable)
-				throws StandardException
+    FromList(boolean optimizeJoinOrder,
+             FromTable fromTable,
+             ContextManager cm) throws StandardException
 	{
-		init(optimizeJoinOrder);
-
-		addFromTable((FromTable) fromTable);
+        super(cm);
+        constructorMinion(optimizeJoinOrder);
+        addFromTable(fromTable);
 	}
 
+    private void constructorMinion(boolean optimizeJoinOrder) {
+        this.fixedJoinOrder = !optimizeJoinOrder;
+        this.isTransparent = false;
+        setNodeType(C_NodeTypes.FROM_LIST);
+    }
 	/*
 	 * OptimizableList interface
 	 */
@@ -142,7 +163,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-    void addFromTable(FromTable fromTable) throws StandardException
+    final void addFromTable(FromTable fromTable) throws StandardException
 	{
 		/* Don't worry about checking TableOperatorNodes since
 		 * they don't have exposed names.  This will potentially
@@ -153,8 +174,9 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		 * user is executing a really dumb query and we won't throw
 		 * and exception - consider it an ANSI extension.
 		 */
-        TableName leftTable = null;
-        TableName rightTable = null;
+        TableName leftTable;
+        TableName rightTable;
+
 		if (! (fromTable instanceof TableOperatorNode))
 		{
 			/* Check for duplicate table name in FROM list */
@@ -190,7 +212,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		FromTable		fromTable;
@@ -219,6 +241,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -289,7 +312,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
 	 */
 
-	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+    void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
 		FromTable	fromTable;
 		int size = size();
@@ -299,7 +322,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 			fromTable.isJoinColumnForRightOuterJoin(rc);
 		}
 	}
-	public void bindTables(DataDictionary dataDictionary, 
+    void bindTables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 			throws StandardException
 	{
@@ -344,7 +367,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindExpressions( FromList fromListParam )
+    void bindExpressions( FromList fromListParam )
 					throws StandardException
 	{
 		FromTable	fromTable;
@@ -373,7 +396,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(FromList fromListParam)
+    void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
 		FromTable	fromTable;
@@ -428,11 +451,11 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList expandAll(TableName allTableName)
+    ResultColumnList expandAll(TableName allTableName)
 			throws StandardException
 	{
 		ResultColumnList resultColumnList = null;
-		ResultColumnList tempRCList = null;
+        ResultColumnList tempRCList;
 		boolean			 matchfound = false;
 		FromTable	 fromTable;
  
@@ -547,13 +570,13 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultColumn bindColumnReference(ColumnReference columnReference)
+    ResultColumn bindColumnReference(ColumnReference columnReference)
 				throws StandardException
 	{
 		boolean			columnNameMatch = false;
 		boolean			tableNameMatch = false;
 		FromTable		fromTable;
-		int				currentLevel = -1;
+        int             currentLevel;
 		int				previousLevel = -1;
 		ResultColumn	matchingRC = null;
 		ResultColumn	resultColumn;
@@ -638,7 +661,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *									directly under a ResultColumn
 	 */
 
-	public void rejectParameters() throws StandardException
+    void rejectParameters() throws StandardException
 	{
 		FromTable	fromTable;
 
@@ -653,7 +676,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	// This method reorders LOJs in the FROM clause.
 	// For now, we process only a LOJ.  For example, "... from LOJ_1, LOJ2 ..."
 	// will not be processed. 
-	public boolean LOJ_reorderable(int numTables) throws StandardException
+    boolean LOJ_reorderable(int numTables) throws StandardException
 	{
 		boolean anyChange = false;
 
@@ -683,7 +706,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 						   GroupByList gbl,
 						   ValueNode predicateTree)
 								throws StandardException
@@ -715,7 +738,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void flattenFromTables(ResultColumnList rcl,
+    void flattenFromTables(ResultColumnList rcl,
 								  PredicateList predicateList,
 								  SubqueryList sql,
                                   GroupByList gbl,
@@ -853,7 +876,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @param level		The query block level for this table.
 	 */
-	public void setLevel(int level)
+    void setLevel(int level)
 	{
 		int size = size();
 		for (int index = 0; index < size; index++)
@@ -899,7 +922,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void setProperties(Properties props) throws StandardException
+    void setProperties(Properties props) throws StandardException
 	{
 		properties = props;
 
@@ -1062,7 +1085,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
+    void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
 		int size = size();
@@ -1193,8 +1216,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		ColumnReference	additionalCR = null;
 
 		PredicateList predicatesTemp;
-		predicatesTemp = (PredicateList) getNodeFactory().getNode(
-			C_NodeTypes.PREDICATE_LIST,	getContextManager());
+        predicatesTemp = new PredicateList(getContextManager());
 		int wherePredicatesSize = wherePredicates.size();
 		for (int index = 0; index < wherePredicatesSize; index++)
 			predicatesTemp.addPredicate((Predicate)wherePredicates.elementAt(index));
@@ -1276,7 +1298,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 				for (int predicatesTempIndex = predicatesTempSize-1;
 					predicatesTempIndex >= 0; predicatesTempIndex--)
 				{
-					AndNode topAndNode = (AndNode)
+                    AndNode topAndNode =
 						((Predicate) predicatesTemp.elementAt(predicatesTempIndex)).getAndNode();
 
 					for (ValueNode whereWalker = topAndNode; whereWalker instanceof AndNode;
@@ -1313,7 +1335,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		tableNumbers = getTableNumbers();
 		JBitSet[][] tableColMap = new JBitSet[size][size];
 		boolean[] oneRow = new boolean[size];
-		boolean oneRowResult = false;
+        boolean oneRowResult;
 
 		/* See if each table has a uniqueness condition */
 		for (int index = 0; index < size; index++)
@@ -1561,7 +1583,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    int updateTargetLockMode()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1614,7 +1636,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * Set windows field to the supplied value.
 	 * @param windows list of window definitions associated with a SELECT.
 	 */
-	public void setWindows(WindowList windows) {
+    void setWindows(WindowList windows) {
 		this.windows = windows;
 	}
 
@@ -1622,7 +1644,7 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	/**
 	 * @return list of window definitions associated with a SELECT.
 	 */
-	public WindowList getWindows() {
+    WindowList getWindows() {
 		return windows;
 	}
 }

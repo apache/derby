@@ -21,27 +21,20 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.types.StringDataValue;
-
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
 import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
@@ -52,11 +45,11 @@ import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
  *
  */
 
-public class AlterTableNode extends DDLStatementNode
+class AlterTableNode extends DDLStatementNode
 {
 	// The alter table action
 	public	TableElementList	tableElementList = null;
-	public  char				lockGranularity;
+     char               lockGranularity;
 
 	/**
 	 * updateStatistics will indicate that we are here for updating the
@@ -113,149 +106,153 @@ public class AlterTableNode extends DDLStatementNode
 
 
 	/**
-	 * Initializer for a TRUNCATE TABLE
+     * Constructor for TRUNCATE TABLE
 	 *
-	 * @param objectName		The name of the table being truncated
-	 * @exception StandardException		Thrown on error
+     * @param tableName The name of the table being truncated
+     * @param cm Context manager
+     * @exception StandardException
 	 */
-
-	public void init(Object objectName)
-		throws StandardException
-	{		
-		initAndCheck(objectName);
-		/* For now, this init() only called for truncate table */
+    AlterTableNode(TableName tableName,
+                   ContextManager cm) throws StandardException {
+        super(tableName, cm);
 		truncateTable = true;
 		schemaDescriptor = getSchemaDescriptor();
+        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 	
 	/**
-	 * Initializer for a AlterTableNode for COMPRESS using temporary tables
-	 * rather than inplace compress
+     * Constructor  for COMPRESS using temporary tables
+     * rather than in place compress
 	 *
-	 * @param objectName		The name of the table being altered
-	 * @param sequential		Whether or not the COMPRESS is SEQUENTIAL
+     * @param tableName The name of the table being altered
+     * @param sequential Whether or not the COMPRESS is SEQUENTIAL
+     * @param cm Context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(Object objectName,
-					 Object sequential)
-		throws StandardException
-	{
-		initAndCheck(objectName);
-
-		this.sequential = ((Boolean) sequential).booleanValue();
-		/* For now, this init() only called for compress table */
+    AlterTableNode(TableName tableName,
+                   boolean sequential,
+                   ContextManager cm) throws StandardException {
+        super(tableName, cm);
+        this.sequential = sequential;
 		compressTable = true;
-
 		schemaDescriptor = getSchemaDescriptor();
+        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 
 	/**
-	 * Initializer for a AlterTableNode for INPLACE COMPRESS
+     * Constructor for INPLACE COMPRESS
 	 *
-	 * @param objectName			The name of the table being altered
-	 * @param purge					PURGE during INPLACE COMPRESS?
-	 * @param defragment			DEFRAGMENT during INPLACE COMPRESS?
-	 * @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
+     * @param tableName The name of the table being altered
+     * @param purge PURGE during INPLACE COMPRESS?
+     * @param defragment DEFRAGMENT during INPLACE COMPRESS?
+     * @param truncateEndOfTable TRUNCATE END during INPLACE COMPRESS?
+     * @param cm Context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(Object objectName,
-			 Object purge,
-			 Object defragment,
-			 Object truncateEndOfTable)
-		throws StandardException
-	{
-		initAndCheck(objectName);
-
-		this.purge = ((Boolean) purge).booleanValue();
-		this.defragment = ((Boolean) defragment).booleanValue();
-		this.truncateEndOfTable = ((Boolean) truncateEndOfTable).booleanValue();
+    AlterTableNode(TableName tableName,
+                   boolean purge,
+                   boolean defragment,
+                   boolean truncateEndOfTable,
+                   ContextManager cm) throws StandardException {
+        super(tableName, cm);
+        this.purge = purge;
+        this.defragment = defragment;
+        this.truncateEndOfTable = truncateEndOfTable;
 		compressTable = true;
 		schemaDescriptor = getSchemaDescriptor(true, false);
+        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 
-	/**
-	 * Initializer for a AlterTableNode. The parameter values have different
-	 *  meanings based on what kind of ALTER TABLE is taking place. 
-	 *  
-	 * @param objectName		The name of the table being altered
-	 * @param changeType		ADD_TYPE or DROP_TYPE or UPDATE_STATISTICS or
-	 *                          or DROP_STATISTICS
-	 * @param param1 			For ADD_TYPE or DROP_TYPE, param1 gives the
-	 *                          elements impacted by ALTER TABLE.
-	 *                          For UPDATE_STATISTICS or or DROP_STATISTICS,
-	 *                          param1 is boolean - true means update or drop
-	 *                          the statistics of all the indexes on the table.
-	 *                          False means, update or drop the statistics of
-	 *                          only the index name provided by next parameter.
-	 * @param param2 			For ADD_TYPE or DROP_TYPE, param2 gives the
-	 *                          new lock granularity, if any
-	 *                          For UPDATE_STATISTICS or DROP_STATISTICS,
-	 *                          param2 can be the name of the specific index
-	 *                          whose statistics will be dropped/updated. This
-	 *                          param is used only if param1 is set to false
-	 * @param param3			For DROP_TYPE, param3 can indicate if the drop
-	 *                          column is CASCADE or RESTRICTED. This param is
-	 *                          ignored for all the other changeType.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(
-							Object objectName,
-							Object changeType,
-							Object param1,
-							Object param2,
-							Object param3 )
-		throws StandardException
-	{
-		initAndCheck(objectName);
+    /**
+     * Constructor for UPDATE_STATISTICS or DROP_STATISTICS
+     *
+     * @param tableName The name of the table being altered
+     * @param changeType update or drop statistics
+     * @param statsAll {@code true} means update or drop
+     *        the statistics of all the indexes on the table.
+     *        {@code false} means update or drop the statistics of
+     *        only the index name provided by next parameter.
+     * @param indexName Name of the index for which statistics is to be updated
+     *                  or dropped
+     * @param cm Context manager
+     * @throws StandardException
+     */
+    AlterTableNode(
+            TableName tableName,
+            int changeType,
+            boolean statsAll,
+            String indexName,
+            ContextManager cm) throws StandardException {
+        super(tableName, cm);
+        this.changeType = changeType;
+        this.indexNameForStatistics = indexName;
 
-		
-		int[]	ct = (int[]) changeType;
-		this.changeType = ct[0];
-		
-		switch ( this.changeType )
-		{
-		    case ADD_TYPE:
+        switch (changeType) {
+            case UPDATE_STATISTICS:
+                this.updateStatisticsAll = statsAll;
+                updateStatistics = true;
+                break;
+            case DROP_STATISTICS:
+                this.dropStatisticsAll = statsAll;
+                dropStatistics = true;
+                break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+        }
+
+        schemaDescriptor = getSchemaDescriptor();
+        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
+    }
+
+    /**
+     * Constructor for ADD_TYPE, DROP_TYPE, MODIFY_TYPE and LOCK_TYPE
+     * @param tableName  The name of the table being altered
+     * @param changeType add, drop, modify or lock
+     * @param impactedElements list of table elements impacted
+     * @param lockGranularity lock granularity encoded in a single character
+     * @param behavior cascade or restrict (for DROP_TYPE)
+     * @param cm Context Manager
+     * @throws StandardException
+     */
+    AlterTableNode(
+            TableName tableName,
+            int changeType,
+            TableElementList impactedElements,
+            char lockGranularity,
+            int behavior,
+            ContextManager cm) throws StandardException {
+        super(tableName, cm);
+        this.changeType = changeType;
+
+        switch (changeType) {
+            case ADD_TYPE:
 		    case DROP_TYPE:
 		    case MODIFY_TYPE:
 		    case LOCKING_TYPE:
-				this.tableElementList = (TableElementList) param1;
-				this.lockGranularity = ((Character) param2).charValue();
-				int[]	bh = (int[]) param3;
-				this.behavior = bh[0];
+                this.tableElementList = impactedElements;
+                this.lockGranularity = lockGranularity;
+                this.behavior = behavior;
 				break;
-
-		    case UPDATE_STATISTICS:
-				this.updateStatisticsAll = ((Boolean) param1).booleanValue();
-				this.indexNameForStatistics = (String)param2;
-				updateStatistics = true;
-				break;
-
-		    case DROP_STATISTICS:
-				this.dropStatisticsAll = ((Boolean) param1).booleanValue();
-				this.indexNameForStatistics = (String)param2;
-				dropStatistics = true;
-				break;
-
 		    default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+        }
+        schemaDescriptor = getSchemaDescriptor();
+        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
+    }
 
-				throw StandardException.newException(SQLState.NOT_IMPLEMENTED);
-		}
-
-		schemaDescriptor = getSchemaDescriptor();
-	}
-
-	/**
+    /**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -287,7 +284,8 @@ public class AlterTableNode extends DDLStatementNode
 	 * how tree printing is supposed to work.
 	 * @param depth		The depth to indent the sub-nodes
 	 */
-	public void printSubNodes(int depth) {
+    @Override
+    void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
 			if (tableElementList != null) {
 				printLabel(depth, "tableElementList: ");
@@ -318,6 +316,7 @@ public String statementToString()
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dd = getDataDictionary();
@@ -481,6 +480,7 @@ public String statementToString()
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -493,7 +493,8 @@ public String statementToString()
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		prepConstantAction();
 
@@ -589,6 +590,7 @@ public String statementToString()
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

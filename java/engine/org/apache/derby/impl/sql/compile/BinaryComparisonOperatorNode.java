@@ -22,16 +22,12 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node is the superclass  for all binary comparison operators, such as =,
@@ -46,7 +42,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	private boolean betweenSelectivity;
 
 	/**
-	 * Initializer for a BinaryComparisonOperatorNode
+     * Constructor for a BinaryComparisonOperatorNode
 	 *
 	 * @param leftOperand	The left operand of the comparison
 	 * @param rightOperand	The right operand of the comparison
@@ -65,18 +61,25 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *                      originalNode.getForQueryRewrite(). Examples of
 	 *                      this can be found in Predicate.Java and 
 	 *                      PredicateList.java
+     * @param cm            The context manager
 	 */
 
-	public void init(
-				Object	leftOperand,
-				Object	rightOperand,
-				Object		operator,
-				Object		methodName,
-                Object      forQueryRewrite)
+    BinaryComparisonOperatorNode(
+                ValueNode   leftOperand,
+                ValueNode   rightOperand,
+                String      operator,
+                String      methodName,
+                boolean     forQueryRewrite,
+                ContextManager cm) throws StandardException
 	{
-        this.forQueryRewrite = ((Boolean)forQueryRewrite).booleanValue();
-		super.init(leftOperand, rightOperand, operator, methodName,
-				ClassName.DataValueDescriptor, ClassName.DataValueDescriptor);
+        super(leftOperand,
+              rightOperand,
+              operator,
+              methodName,
+              ClassName.DataValueDescriptor,
+              ClassName.DataValueDescriptor,
+              cm);
+        this.forQueryRewrite = forQueryRewrite;
 	}
 
 	/**
@@ -84,7 +87,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 * normal comparability checks.
 	 * @param val  true if this was for a query rewrite
 	 */
-	public void setForQueryRewrite(boolean val)
+    void setForQueryRewrite(boolean val)
 	{
 		forQueryRewrite=val;
 	}
@@ -94,7 +97,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @return  true if it was generated in a query rewrite.
 	 */
-	public boolean getForQueryRewrite()
+    boolean getForQueryRewrite()
 	{
 		return forQueryRewrite;
 	}
@@ -131,15 +134,13 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
         super.bindExpression(fromList, subqueryList, aggregates);
 
-		TypeCompiler leftTC = leftOperand.getTypeCompiler();
-		TypeCompiler rightTC = rightOperand.getTypeCompiler();
 		TypeId leftTypeId = leftOperand.getTypeId();
 		TypeId rightTypeId = rightOperand.getTypeId();
 
@@ -157,9 +158,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		{
 			DataTypeDescriptor rightTypeServices = rightOperand.getTypeServices();
 
-			rightOperand =  (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+            rightOperand = new CastNode(
 					rightOperand, 
 					new DataTypeDescriptor(
 							rightTypeId,
@@ -172,9 +171,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		{
 			DataTypeDescriptor leftTypeServices = leftOperand.getTypeServices();
 
-			leftOperand =  (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+            leftOperand = new CastNode(
 					leftOperand, 
 					new DataTypeDescriptor(
 							leftTypeId,
@@ -198,16 +195,10 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindComparisonOperator()
+    void bindComparisonOperator()
 			throws StandardException
 	{
-		TypeId	leftType;
-		TypeId	rightType;
 		boolean				nullableResult;
-
-		leftType = leftOperand.getTypeId();
-		rightType = rightOperand.getTypeId();
-
 
 		/*
 		** Can the types be compared to each other?  If not, throw an
@@ -258,7 +249,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -318,6 +310,7 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -391,7 +384,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode changeToCNF(boolean underTopAndNode) 
+    @Override
+    ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
 		/* If our right child is a subquery and we are under a top and node
@@ -407,7 +401,8 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	}
 	
 	/** @see BinaryOperatorNode#genSQLJavaSQLTree */
-	public ValueNode genSQLJavaSQLTree() throws StandardException
+    @Override
+    ValueNode genSQLJavaSQLTree() throws StandardException
 	{
 		TypeId leftTypeId = leftOperand.getTypeId();
 

@@ -21,17 +21,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.util.JBitSet;
 
 /**
@@ -41,13 +39,13 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
-public class HalfOuterJoinNode extends JoinNode
+class HalfOuterJoinNode extends JoinNode
 {
 	private boolean rightOuterJoin;
 	private boolean transformed = false;
 
 	/**
-	 * Initializer for a HalfOuterJoinNode.
+     * Constructor for a HalfOuterJoinNode.
 	 *
 	 * @param leftResult		The ResultSetNode on the left side of this join
 	 * @param rightResult		The ResultSetNode on the right side of this join
@@ -56,28 +54,29 @@ public class HalfOuterJoinNode extends JoinNode
 	 * @param rightOuterJoin	Whether or not this node represents a user
 	 *							specified right outer join
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(
-							Object leftResult,
-							Object rightResult,
-							Object onClause,
-							Object usingClause,
-							Object rightOuterJoin,
-							Object tableProperties)
+    HalfOuterJoinNode(ResultSetNode leftResult,
+                      ResultSetNode rightResult,
+                      ValueNode onClause,
+                      ResultColumnList usingClause,
+                      boolean rightOuterJoin,
+                      Properties tableProperties,
+                      ContextManager cm)
 		throws StandardException
 	{
-		super.init(
-				leftResult,
-				rightResult,
-				onClause,
-				usingClause,
-				null,
+        super(  leftResult,
+                rightResult,
+                onClause,
+                usingClause,
+                null,
 				tableProperties,
-				null);
-		this.rightOuterJoin = ((Boolean) rightOuterJoin).booleanValue();
+                null,
+                cm);
+        setNodeType(C_NodeTypes.HALF_OUTER_JOIN_NODE);
+        this.rightOuterJoin = rightOuterJoin;
 
 		/* We can only flatten an outer join
 		 * using the null intolerant predicate xform.
@@ -95,7 +94,7 @@ public class HalfOuterJoinNode extends JoinNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 			throws StandardException
 	{
@@ -118,7 +117,7 @@ public class HalfOuterJoinNode extends JoinNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -157,7 +156,8 @@ public class HalfOuterJoinNode extends JoinNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -199,7 +199,8 @@ public class HalfOuterJoinNode extends JoinNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void pushExpressions(PredicateList outerPredicateList)
+    @Override
+    void pushExpressions(PredicateList outerPredicateList)
 					throws StandardException
 	{
 		FromTable		leftFromTable = (FromTable) leftResultSet;
@@ -234,10 +235,7 @@ public class HalfOuterJoinNode extends JoinNode
 		}
 
 		/* Recurse down both sides of tree */
-		PredicateList	noPredicates =
-						(PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
+        PredicateList noPredicates = new PredicateList(getContextManager());
 		leftFromTable.pushExpressions(getLeftPredicateList());
 		rightFromTable.pushExpressions(noPredicates);
 	}
@@ -284,7 +282,8 @@ public class HalfOuterJoinNode extends JoinNode
      *                 so caller can know whether rebinding may be necessary
      * @throws StandardException standard error policy
      */
-	public boolean LOJ_reorderable(int numTables)
+    @Override
+    boolean LOJ_reorderable(int numTables)
 		throws StandardException
 	{
 		boolean anyChange = false;
@@ -463,10 +462,9 @@ public class HalfOuterJoinNode extends JoinNode
                 // ((HalfOuterJoinNode)logicalRightResultSet).transformed =
                 //     local_transformed;
 
-                FromList localFromList = (FromList) getNodeFactory().getNode(
-                    C_NodeTypes.FROM_LIST,
-                    getNodeFactory().doJoinOrderOptimization(),
-                    getContextManager());
+                FromList localFromList = new FromList(
+                        getOptimizerFactory().doJoinOrderOptimization(),
+                        getContextManager());
 
                 // switch OJ nodes: by handling the current OJ node
                 leftResultSet  = logicalRightResultSet;
@@ -618,15 +616,15 @@ private boolean isNullRejecting (
 
 	// This method re-binds the result columns which may be referenced in the ON
 	// clause in this node.
-	public boolean LOJ_bindResultColumns(boolean anyChange)
+    boolean LOJ_bindResultColumns(boolean anyChange)
 		throws StandardException
 	{
 		if (anyChange)
 		{
 			this.resultColumns = null;
-			FromList localFromList = (FromList) getNodeFactory().getNode(C_NodeTypes.FROM_LIST,
-																		 getNodeFactory().doJoinOrderOptimization(),
-																		 getContextManager());
+            FromList localFromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager());
 			((JoinNode)this).bindResultColumns(localFromList);
 		}
 		return anyChange;
@@ -644,6 +642,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
 		throws StandardException
 	{
@@ -719,9 +718,7 @@ private boolean isNullRejecting (
 					if (refMap.get(bit) && innerMap.get(bit))
 					{
 						// OJ -> IJ
-						JoinNode ij =  (JoinNode)
-											getNodeFactory().getNode(
-												C_NodeTypes.JOIN_NODE,
+                        JoinNode ij =  new JoinNode(
 												leftResultSet,
 												rightResultSet,
 												joinClause,
@@ -751,6 +748,7 @@ private boolean isNullRejecting (
 	}
 
 	/** @see JoinNode#adjustNumberOfRowsReturned */
+    @Override
 	protected void adjustNumberOfRowsReturned(CostEstimate costEstimate)
 	{
 		/*
@@ -773,6 +771,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 						throws StandardException
 	{
@@ -802,6 +801,7 @@ private boolean isNullRejecting (
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     int addOuterJoinArguments(ActivationClassBuilder acb, MethodBuilder mb)
 		 throws StandardException
 	 {
@@ -817,12 +817,14 @@ private boolean isNullRejecting (
 	/**
 	 * Return the number of arguments to the join result set.
 	 */
+    @Override
 	protected int getNumJoinArguments()
 	{
 		/* We add two more arguments than the superclass does */
 		return super.getNumJoinArguments() + 2;
 	}
 
+    @Override
     void oneRowRightSide(ActivationClassBuilder acb, MethodBuilder mb)
 	{
 		// always return false for now
@@ -836,6 +838,7 @@ private boolean isNullRejecting (
 	 * (For RIGHT OUTER JOIN, the left is the right
 	 * and the right is the left and the JOIN is the NIOJ).
 	 */
+    @Override
 	ResultSetNode getLogicalLeftResultSet()
 	{
 		if (rightOuterJoin)
@@ -854,6 +857,7 @@ private boolean isNullRejecting (
 	 * (For RIGHT OUTER JOIN, the left is the right
 	 * and the right is the left and the JOIN is the NIOJ).
 	 */
+    @Override
 	ResultSetNode getLogicalRightResultSet()
 	{
 		if (rightOuterJoin)
@@ -870,7 +874,7 @@ private boolean isNullRejecting (
 	 * Return true if right outer join or false if left outer join
 	 * Used to set Nullability correctly in JoinNode
 	 */
-	public boolean isRightOuterJoin()
+    boolean isRightOuterJoin()
 	{
 		return rightOuterJoin;
 	}
@@ -880,7 +884,8 @@ private boolean isNullRejecting (
 	 *  check if the passed ResultColumn is a join column. If yes, then 
 	 *  ResultColumn should be marked such. DERBY-4631
 	 */
-	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+    @Override
+    void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
 		if (isRightOuterJoin() && usingClause != null &&  
 				usingClause.getResultColumn(rc.getUnderlyingOrAliasName()) != null) {
@@ -890,13 +895,13 @@ private boolean isNullRejecting (
 	}
 
 	// return the Null-producing table references
-	public JBitSet LOJgetNPReferencedTables(int numTables)
+    JBitSet LOJgetNPReferencedTables(int numTables)
 				throws StandardException
 	{
 		if (rightOuterJoin && !transformed)
-			return (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+            return leftResultSet.LOJgetReferencedTables(numTables);
 		else
-			return (JBitSet) rightResultSet.LOJgetReferencedTables(numTables);
+            return rightResultSet.LOJgetReferencedTables(numTables);
 	}
 
     // return the row-preserving table references
@@ -904,8 +909,8 @@ private boolean isNullRejecting (
                 throws StandardException
     {
         if (rightOuterJoin && !transformed)
-            return (JBitSet) rightResultSet.LOJgetReferencedTables(numTables);
+            return rightResultSet.LOJgetReferencedTables(numTables);
         else
-            return (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+            return leftResultSet.LOJgetReferencedTables(numTables);
     }
 }

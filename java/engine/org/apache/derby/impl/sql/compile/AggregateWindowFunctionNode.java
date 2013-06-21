@@ -24,40 +24,37 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 
 /**
  * Represents aggregate function calls on a window
  */
-public final class AggregateWindowFunctionNode extends WindowFunctionNode
+final class AggregateWindowFunctionNode extends WindowFunctionNode
 {
 
     private AggregateNode aggregateFunction;
 
-    /**
-     * Initializer. QueryTreeNode override.
-     *
-     * @param arg1 The window definition or reference
-     * @param arg2 aggregate function node
-     *
-     * @exception StandardException
-     */
-    public void init(Object arg1, Object arg2)
-        throws StandardException
-    {
-        super.init(null, "?", arg1);
-        aggregateFunction = (AggregateNode)arg2;
+    AggregateWindowFunctionNode(
+            WindowNode w,
+            AggregateNode agg,
+            ContextManager cm) throws StandardException {
+
+        super(null, "?", w, cm);
+        setNodeType(C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE);
+        aggregateFunction = agg;
 
         throw StandardException.newException(
             SQLState.NOT_IMPLEMENTED,
             "WINDOW/" + aggregateFunction.getAggregateName());
     }
 
-
     /**
      * ValueNode override.
      * @see ValueNode#bindExpression
      */
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException
@@ -75,7 +72,7 @@ public final class AggregateWindowFunctionNode extends WindowFunctionNode
      *
      * @param depth     The depth of this node in the tree
      */
-
+    @Override
     public void printSubNodes(int depth)
     {
         if (SanityManager.DEBUG)

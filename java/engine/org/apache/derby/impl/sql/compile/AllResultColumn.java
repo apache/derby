@@ -21,11 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * An AllResultColumn represents a "*" result column in a SELECT
@@ -34,26 +33,21 @@ import org.apache.derby.iapi.error.StandardException;
  *
  */
 
-public class AllResultColumn extends ResultColumn
+class AllResultColumn extends ResultColumn
 {
 	private TableName		tableName;
 
-	/**
-	 * This initializer is for use in the parser for a "*".
-	 * 
-	 * @param tableName	Dot expression qualifying "*"
-	 */
-	public void init(Object tableName)
-	{
-		this.tableName = (TableName) tableName;
-	}
-
+    AllResultColumn(TableName tableName, ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.ALL_RESULT_COLUMN);
+        this.tableName = tableName;
+    }
 	/** 
 	 * Return the full table name qualification for this node
 	 *
 	 * @return Full table name qualification as a String
 	 */
-	public String getFullTableName()
+    String getFullTableName()
 	{
 		if (tableName == null)
 		{
@@ -72,6 +66,7 @@ public class AllResultColumn extends ResultColumn
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ResultColumn cloneMe() throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -80,13 +75,11 @@ public class AllResultColumn extends ResultColumn
 					"columnDescriptor is expected to be non-null");
 		}
 
-		return (ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.ALL_RESULT_COLUMN,
-									tableName,
-									getContextManager());
+        return new AllResultColumn(tableName, getContextManager());
 	}
 
 
+    @Override
     public TableName getTableNameObject() {
         return tableName;
     }

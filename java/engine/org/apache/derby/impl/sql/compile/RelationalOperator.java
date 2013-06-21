@@ -21,15 +21,11 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -39,14 +35,14 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 interface RelationalOperator
 {
-	public final int EQUALS_RELOP = 1;
-	public final int NOT_EQUALS_RELOP = 2;
-	public final int GREATER_THAN_RELOP = 3;
-	public final int GREATER_EQUALS_RELOP = 4;
-	public final int LESS_THAN_RELOP = 5;
-	public final int LESS_EQUALS_RELOP = 6;
-	public final int IS_NULL_RELOP = 7;
-	public final int IS_NOT_NULL_RELOP = 8;
+    final int EQUALS_RELOP = 1;
+    final int NOT_EQUALS_RELOP = 2;
+    final int GREATER_THAN_RELOP = 3;
+    final int GREATER_EQUALS_RELOP = 4;
+    final int LESS_THAN_RELOP = 5;
+    final int LESS_EQUALS_RELOP = 6;
+    final int IS_NULL_RELOP = 7;
+    final int IS_NOT_NULL_RELOP = 8;
 
 	/**
 	 * Check whether this RelationalOperator is a comparison of the given
@@ -322,7 +318,7 @@ interface RelationalOperator
 	 *
 	 * @return int		The operator for this RelationalOperator.
 	 */
-	public int getOperator();
+    int getOperator();
 
 	/**
 	 * Return the variant type for the Qualifier's Orderable.
@@ -333,14 +329,15 @@ interface RelationalOperator
 	 * @return int		The variant type for the Qualifier's Orderable.
 	 * @exception StandardException	thrown on error
 	 */
-	public int getOrderableVariantType(Optimizable optTable)
+    int getOrderableVariantType(Optimizable optTable)
 		throws StandardException;
 
 	/**
 	 * Return whether this operator compares the given Optimizable with
 	 * a constant whose value is known at compile time.
 	 */
-	public boolean compareWithKnownConstant(Optimizable optTable, boolean considerParameters);
+    boolean compareWithKnownConstant(
+        Optimizable optTable, boolean considerParameters);
 
 	/**
 	 * Return an Object representing the known value that this relational
@@ -348,14 +345,14 @@ interface RelationalOperator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataValueDescriptor getCompareValue(Optimizable optTable)
+    DataValueDescriptor getCompareValue(Optimizable optTable)
 					throws StandardException;
 
 	/**
 	 * Return whether this operator is an equality comparison of the given
 	 * optimizable with a constant expression.
 	 */
-	public boolean equalsComparisonWithConstantExpression(Optimizable optTable);
+    boolean equalsComparisonWithConstantExpression(Optimizable optTable);
 
 	/**
 	 * Return a relational operator which matches the current one
@@ -368,6 +365,6 @@ interface RelationalOperator
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
+    RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException;
 }

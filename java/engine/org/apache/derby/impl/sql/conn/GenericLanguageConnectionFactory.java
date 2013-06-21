@@ -40,7 +40,6 @@ import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 
 import org.apache.derby.iapi.services.property.PropertyFactory;
@@ -96,7 +95,6 @@ public class GenericLanguageConnectionFactory
 	private 	UUIDFactory				uuidFactory;
 	private 	JavaFactory				javaFactory;
 	private 	ClassFactory			classFactory;
-	private 	NodeFactory				nodeFactory;
 	private 	PropertyFactory			pf;
 
 	private		int						nextLCCInstanceNumber;
@@ -204,15 +202,6 @@ public class GenericLanguageConnectionFactory
 	}
 
 	/**
-		Get the NodeFactory to use with this language connection
-		REMIND: is this only used by the compiler?
-	 */
-	public NodeFactory	getNodeFactory()
-	{
-		return nodeFactory;
-	}
-
-	/**
 		Get the ExecutionFactory to use with this language connection
 	 */
 	public ExecutionFactory	getExecutionFactory() {
@@ -311,7 +300,6 @@ public class GenericLanguageConnectionFactory
 		of = (OptimizerFactory) Monitor.bootServiceModule(create, this, OptimizerFactory.MODULE, startParams);
 		tcf =
 		   (TypeCompilerFactory) Monitor.startSystemModule(TypeCompilerFactory.MODULE);
-		nodeFactory = (NodeFactory) Monitor.bootServiceModule(create, this, NodeFactory.MODULE, startParams);
 
 		// If the system supports statement caching boot the CacheFactory module.
 		int cacheSize = statementCacheSize(startParams);

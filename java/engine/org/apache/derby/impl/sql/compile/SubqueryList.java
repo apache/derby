@@ -21,20 +21,24 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 /**
- * A SubqueryList represents a list of subquerys within a specific clause 
+ * A SubqueryList represents a list of subqueries within a specific clause
  * (select, where or having) in a DML statement.  It extends QueryTreeNodeVector.
  *
  */
 
-public class SubqueryList extends QueryTreeNodeVector
+class SubqueryList extends QueryTreeNodeVector
 {
+    SubqueryList(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.SUBQUERY_LIST);
+    }
+
 	/**
 	 * Add a subquery to the list.
 	 *
@@ -42,7 +46,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 */
 
-	public void addSubqueryNode(SubqueryNode subqueryNode) throws StandardException
+    void addSubqueryNode(SubqueryNode subqueryNode) throws StandardException
 	{
 		addElement(subqueryNode);
 	}
@@ -58,7 +62,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -86,7 +90,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void optimize(DataDictionary dataDictionary, double outerRows)
+    void optimize(DataDictionary dataDictionary, double outerRows)
 			throws StandardException
 	{
 		int size = size();
@@ -105,7 +109,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void modifyAccessPaths()
+    void modifyAccessPaths()
 			throws StandardException
 	{
 		int size = size();
@@ -127,7 +131,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		int size = size();
@@ -157,6 +161,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -183,7 +188,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void setPointOfAttachment(int pointOfAttachment)
+    void setPointOfAttachment(int pointOfAttachment)
 		throws StandardException
 	{
 		int size = size();
@@ -220,7 +225,7 @@ public class SubqueryList extends QueryTreeNodeVector
      * so we can avoid flattenning later.
 	 * 
 	 */
-	public void markHavingSubqueries() {
+    void markHavingSubqueries() {
 	    int size = size();
 	    
 	    for (int index = 0; index < size; index++)
@@ -236,7 +241,7 @@ public class SubqueryList extends QueryTreeNodeVector
 	 * Mark all of the subqueries in this list as being part of a where clause
 	 * so we can avoid flattening later if needed.
 	 */
-	public void markWhereSubqueries() {
+    void markWhereSubqueries() {
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{

@@ -21,21 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-
-
 import java.lang.reflect.Modifier;
 import java.util.List;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * The CurrentRowLocation operator is used by DELETE and UPDATE to get the
@@ -44,8 +40,14 @@ import org.apache.derby.iapi.error.StandardException;
  * that represents the ResultSet to be deleted or updated.
  */
 
-public class CurrentRowLocationNode extends ValueNode
+class CurrentRowLocationNode extends ValueNode
 {
+
+    CurrentRowLocationNode(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.CURRENT_ROW_LOCATION_NODE);
+    }
+
 	/**
 	 * Binding this expression means setting the result DataTypeServices.
 	 * In this case, the result type is always the same.
@@ -59,9 +61,11 @@ public class CurrentRowLocationNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
-					throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
 	{
 		setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(TypeId.REF_NAME),
 						false		/* Not nullable */
@@ -82,7 +86,7 @@ public class CurrentRowLocationNode extends ValueNode
 	 *
 	 *		...
 	 *
-	 *		public DataValueDescriptor exprx()
+     *      DataValueDescriptor exprx()
 	 *				throws StandardException
 	 *		{
 	 *			return fieldx = <SQLRefConstructor>(
@@ -107,6 +111,7 @@ public class CurrentRowLocationNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mbex)
 									throws StandardException
 	{

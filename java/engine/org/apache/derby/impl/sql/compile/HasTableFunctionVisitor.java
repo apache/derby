@@ -21,17 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitable; 
-import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Find out if we have a user-defined table function anywhere in the
  * tree.  Stop traversal as soon as we find one.
  */
-public class HasTableFunctionVisitor extends HasNodeVisitor
+class HasTableFunctionVisitor extends HasNodeVisitor
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -50,6 +46,7 @@ public class HasTableFunctionVisitor extends HasNodeVisitor
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    @Override
 	public Visitable visit(Visitable node)
 	{
 		if ( node instanceof FromVTI )

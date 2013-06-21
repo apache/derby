@@ -21,11 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Find out if we have a particular node anywhere in the
@@ -36,7 +33,7 @@ import org.apache.derby.iapi.error.StandardException;
  * parameter.
  *
  */
-public class HasNodeVisitor implements Visitor
+class HasNodeVisitor implements Visitor
 {
 	protected boolean hasNode;
 	private Class 	nodeClass;
@@ -47,7 +44,7 @@ public class HasNodeVisitor implements Visitor
 	 * @param nodeClass the class of the node that 
 	 * 	we are looking for.
 	 */
-	public HasNodeVisitor(Class nodeClass)
+    HasNodeVisitor(Class nodeClass)
 	{
 		this.nodeClass = nodeClass;
 	}
@@ -60,7 +57,7 @@ public class HasNodeVisitor implements Visitor
 	 * @param skipOverClass do not go below this
 	 * node when searching for nodeClass.
 	 */
-	public HasNodeVisitor(Class nodeClass, Class skipOverClass)
+    HasNodeVisitor(Class nodeClass, Class skipOverClass)
 	{
 		this.nodeClass = nodeClass;
 		this.skipOverClass = skipOverClass;
@@ -99,7 +96,7 @@ public class HasNodeVisitor implements Visitor
 	}
 
 	/**
-	 * Don't visit childen under the skipOverClass
+     * Don't visit children under the skipOverClass
 	 * node, if it isn't null.
 	 *
 	 * @return true/false
@@ -130,7 +127,7 @@ public class HasNodeVisitor implements Visitor
 	 *
 	 * @return true/false
 	 */
-	public boolean hasNode()
+    boolean hasNode()
 	{
 		return hasNode;
 	}
@@ -139,7 +136,7 @@ public class HasNodeVisitor implements Visitor
 	 * Reset the status so it can be run again.
 	 *
 	 */
-	public void reset()
+    void reset()
 	{
 		hasNode = false;
 	}

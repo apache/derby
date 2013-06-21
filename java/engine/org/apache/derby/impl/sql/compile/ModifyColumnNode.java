@@ -21,46 +21,49 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.sql.execute.ColumnInfo;
-import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
+import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.impl.sql.execute.ColumnInfo;
 
 /**
  * A ModifyColumnNode represents a modify column in an ALTER TABLE statement.
  *
  */
 
-public class ModifyColumnNode extends ColumnDefinitionNode
+class ModifyColumnNode extends ColumnDefinitionNode
 {
 	int		columnPosition = -1;
 	UUID	oldDefaultUUID;
 
+    ModifyColumnNode(int type,
+            String name,
+            ValueNode defaultNode,
+            DataTypeDescriptor dataTypeServices,
+            long[] autoIncrementInfo,
+            ContextManager cm) throws StandardException {
+        super(name, defaultNode, dataTypeServices, autoIncrementInfo, cm);
+        setNodeType(type);
+    }
 	/**
 	 * Get the UUID of the old column default.
 	 *
 	 * @return The UUID of the old column default.
 	 */
+    @Override
 	UUID getOldDefaultUUID()
 	{
 		return oldDefaultUUID;
@@ -71,7 +74,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 *
 	 * @return The column position for the column.
 	 */
-	public int getColumnPosition()
+    int getColumnPosition()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -89,8 +92,8 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void checkUserType(TableDescriptor td)
+    @Override
+    void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
 		if (getNodeType() != C_NodeTypes.MODIFY_COLUMN_TYPE_NODE)
@@ -151,7 +154,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 * @exception StandardException		Thrown on Error.
 	 *
 	 */
-	public void checkExistingConstraints(TableDescriptor td)
+    void checkExistingConstraints(TableDescriptor td)
 	             throws StandardException
 	{
 		if ((getNodeType() != C_NodeTypes.MODIFY_COLUMN_TYPE_NODE) &&
@@ -248,7 +251,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 * @param td Table Descriptor that holds the column which is being altered
 	 * @throws StandardException
 	 */
-	public void useExistingCollation(TableDescriptor td)
+    void useExistingCollation(TableDescriptor td)
     throws StandardException
     {
 		ColumnDescriptor cd;
@@ -272,6 +275,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 *
 	 * @return The action associated with this node.
 	 */
+    @Override
 	int getAction()
 	{
 		switch (getNodeType())
@@ -310,6 +314,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	void bindAndValidateDefault(DataDictionary dd, TableDescriptor td) 
 		throws StandardException
 	{
@@ -388,8 +393,10 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	 * modifying an existing column (includes checking if autoincrement is set
 	 * when making a column nullable)
 	 */
-	public void validateAutoincrement(DataDictionary dd, TableDescriptor td, int tableType)
-	         throws StandardException
+    @Override
+    void validateAutoincrement(DataDictionary dd,
+                               TableDescriptor td,
+                               int tableType) throws StandardException
 	{
 		ColumnDescriptor cd;
 

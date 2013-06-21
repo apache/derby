@@ -21,25 +21,19 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.sql.Types;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
-import java.sql.Types;
-
-import java.util.List;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a concatenation comparison operator
@@ -47,18 +41,28 @@ import java.util.List;
  * varying.
  */
 
-public class ConcatenationOperatorNode extends BinaryOperatorNode {
+class ConcatenationOperatorNode extends BinaryOperatorNode {
 	/**
-	 * Initializer for a ConcatenationOperatorNode
+     * Constructor for a ConcatenationOperatorNode
 	 * 
 	 * @param leftOperand
 	 *            The left operand of the concatenation
 	 * @param rightOperand
 	 *            The right operand of the concatenation
+     * @param cm  The context manager
 	 */
-	public void init(Object leftOperand, Object rightOperand) {
-		super.init(leftOperand, rightOperand, "||", "concatenate",
-				ClassName.ConcatableDataValue, ClassName.ConcatableDataValue);
+    ConcatenationOperatorNode(
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            ContextManager cm) {
+        super(leftOperand,
+              rightOperand,
+              "||",
+              "concatenate",
+              ClassName.ConcatableDataValue,
+              ClassName.ConcatableDataValue,
+              cm);
+        setNodeType(C_NodeTypes.CONCATENATION_OPERATOR_NODE);
 	}
 
     /**
@@ -68,6 +72,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
      * @return a constant node representing the result of this concatenation
      * operation, or {@code this} if the result is not known up front
      */
+    @Override
     ValueNode evaluateConstantExpressions() throws StandardException {
         if (leftOperand instanceof CharConstantNode &&
                 rightOperand instanceof CharConstantNode) {
@@ -80,10 +85,8 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
                     (StringDataValue) getTypeServices().getNull();
             resultValue.concatenate(leftValue, rightValue, resultValue);
 
-            return (ValueNode) getNodeFactory().getNode(
-                    C_NodeTypes.CHAR_CONSTANT_NODE,
-                    resultValue.getString(),
-                    getContextManager());
+            return new CharConstantNode(
+                resultValue.getString(), getContextManager());
         }
 
         return this;
@@ -96,6 +99,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 	 * @exception StandardException
 	 *                thrown on failure
 	 */
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException {
 		// deal with binding operands
@@ -220,11 +224,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 					Types.VARCHAR, true, tc
 					.getCastToCharWidth(leftOperand							.getTypeServices()));	
 
-			leftOperand = (ValueNode) getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
-					leftOperand,
-					dtd,
-					getContextManager());
+            leftOperand = new CastNode(leftOperand, dtd, getContextManager());
 
 			// DERBY-2910 - Match current schema collation for implicit cast as we do for
 			// explicit casts per SQL Spec 6.12 (10)			
@@ -240,11 +240,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 							.getCastToCharWidth(rightOperand
 									.getTypeServices()));
 
-			rightOperand = (ValueNode) getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
-					rightOperand,
-					dtd,
-					getContextManager());
+            rightOperand = new CastNode(rightOperand, dtd, getContextManager());
 			
 			// DERBY-2910 - Match current schema collation for implicit cast as we do for
 			// explicit casts per SQL Spec 6.12 (10)					

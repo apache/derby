@@ -21,32 +21,27 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.JSQLType;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.lang.reflect.Modifier;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * This node type converts a value in the SQL domain to a value in the Java
  * domain.
  */
 
-public class SQLToJavaValueNode extends JavaValueNode
+class SQLToJavaValueNode extends JavaValueNode
 {
 	ValueNode	value;
 
@@ -67,21 +62,22 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @param value		A ValueNode representing a SQL value to convert to
 	 *					the Java domain.
+     * @param cm        The context manager
 	 */
+    SQLToJavaValueNode(ValueNode value, ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.SQL_TO_JAVA_VALUE_NODE);
+        this.value = value;
+    }
 
-	public void init(Object value)
-	{
-		this.value = (ValueNode) value;
-	}
-
-	/**
+    /**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
 	 * how tree printing is supposed to work.
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -102,8 +98,9 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *	@return	name of java class type
 	  *
 	  */
+    @Override
     String getJavaTypeName()
-	throws StandardException
+            throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
 
@@ -118,6 +115,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
+    @Override
     String getPrimitiveTypeName()
 		throws StandardException
 	{
@@ -144,6 +142,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *	@return	the corresponding JSQLType
 	  *
 	  */
+    @Override
     JSQLType getJSQLType() throws StandardException
 	{
 		if ( jsqlType == null )
@@ -195,9 +194,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 		return this;
 	}
 
-    /**
-     * Override behavior in superclass.
-     */
+    @Override
     DataTypeDescriptor getDataType() throws StandardException
     {
         return value.getTypeServices();
@@ -287,6 +284,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
     int getOrderableVariantType() throws StandardException
 	{
 		return value.getOrderableVariantType();
@@ -483,6 +481,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	Object getConstantValueAsObject()
 		throws StandardException
 	{
@@ -496,6 +495,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

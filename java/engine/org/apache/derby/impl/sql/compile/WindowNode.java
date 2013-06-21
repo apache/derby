@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
  * Superclass of window definition and window reference.
@@ -32,24 +33,24 @@ public abstract class WindowNode extends QueryTreeNode
      * The provided name of the window if explicitly defined in a window
      * clause. If the definition is inlined, currently the definition has
      * windowName "IN_LINE".  The standard 2003 sec. 4.14.9 calls for a
-     * impl. defined one.
+     * implementation defined one.
      */
     private String windowName;
 
 
     /**
-     * Initializer
+     * Constructor
      *
-     * @param arg1 The window name
+     * @param windowName The window name
+     * @param cm         The context manager
      *
      * @exception StandardException
      */
-    public void init(Object arg1)
-        throws StandardException
+    WindowNode(String windowName, ContextManager cm) throws StandardException
     {
-        windowName = (String)arg1;
+        super(cm);
+        this.windowName = windowName;
     }
-
 
     /**
      * @return the name of this window
@@ -57,7 +58,4 @@ public abstract class WindowNode extends QueryTreeNode
     public String getName() {
         return windowName;
     }
-
-
-
 }

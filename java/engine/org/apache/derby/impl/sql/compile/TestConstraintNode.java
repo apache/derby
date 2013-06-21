@@ -22,18 +22,14 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.reference.ClassName;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * A TestConstraintNode is used to determine when a constraint
@@ -41,34 +37,35 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class TestConstraintNode extends UnaryLogicalOperatorNode
+class TestConstraintNode extends UnaryLogicalOperatorNode
 {
 	private String sqlState;
 	private String tableName;
 	private String constraintName;
 
-	/**
-	 * Initializer for a TestConstraintNode
-	 *
-	 * @param booleanValue	The operand of the constraint test
-	 * @param sqlState	The SQLState of the exception to throw if the
-	 *					constraint has failed
-	 * @param tableName	The name of the table that the constraint is on
-	 * @param constraintName	The name of the constraint being checked
-	 */
+    /**
+     * @param booleanValue The operand of the constraint test
+     * @param sqlState The SQLState of the exception to throw if the
+    *              constraint has failed
+     * @param tableName The name of the table that the constraint is on
+     * @param constraintName The name of the constraint being checked
+     * @param cm context manager
+     * @throws StandardException
+     */
+    TestConstraintNode(
+            ValueNode booleanValue,
+            String sqlState,
+            String tableName,
+            String constraintName,
+            ContextManager cm) throws StandardException {
+        super(booleanValue, "throwExceptionIfFalse", cm);
+        setNodeType(C_NodeTypes.TEST_CONSTRAINT_NODE);
+        this.sqlState = sqlState;
+       this.tableName = tableName;
+       this.constraintName = constraintName;
+    }
 
-	public void init(Object booleanValue,
-					 Object sqlState,
-					 Object tableName,
-					 Object constraintName)
-	{
-		super.init(booleanValue, "throwExceptionIfFalse");
-		this.sqlState = (String) sqlState;
-		this.tableName = (String) tableName;
-		this.constraintName = (String) constraintName;
-	}
-
-	/**
+    /**
 	 * Bind this logical operator.  All that has to be done for binding
 	 * a logical operator is to bind the operand, check that the operand
 	 * is SQLBoolean, and set the result type to SQLBoolean.
@@ -81,7 +78,6 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -94,9 +90,7 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 
 		if (!operand.getTypeServices().getTypeId().isBooleanTypeId())
 		{
-			operand = (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+            operand = new CastNode(
 					operand,
 					new DataTypeDescriptor(TypeId.BOOLEAN_ID, true),
 					getContextManager());
@@ -118,7 +112,7 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{

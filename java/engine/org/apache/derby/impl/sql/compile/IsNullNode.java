@@ -21,31 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.sql.Types;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.store.access.ScanController;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.types.Orderable;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import java.sql.Types;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents either a unary 
@@ -56,19 +44,29 @@ import java.sql.Types;
 public final class IsNullNode extends UnaryComparisonOperatorNode
 						implements RelationalOperator
 {
-
+    enum Sign {IS_NULL, IS_NOT_NULL};
 	private DataValueDescriptor nullValue;
 
-	public void setNodeType(int nodeType)
+    IsNullNode(ValueNode operand, Sign t, ContextManager cm)
+            throws StandardException {
+        super(operand, cm);
+        setNodeType(
+            t == Sign.IS_NOT_NULL ?
+                C_NodeTypes.IS_NOT_NULL_NODE :
+                C_NodeTypes.IS_NULL_NODE);
+    }
+
+    @Override
+    void setNodeType(int nodeType)
 	{
-		String operator;
-		String methodName;
+        String op;
+        String methodNam;
 
 		if (nodeType == C_NodeTypes.IS_NULL_NODE)
 		{
 			/* By convention, the method name for the is null operator is "isNull" */
-			operator = "is null";
-			methodName = "isNullOp";
+            op = "is null";
+            methodNam = "isNullOp";
 		}
 		else
 		{
@@ -83,11 +81,11 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 			/* By convention, the method name for the is not null operator is 
 			 * "isNotNull" 
 			 */
-			operator = "is not null";
-			methodName = "isNotNull";
+            op = "is not null";
+            methodNam = "isNotNull";
 		}
-		setOperator(operator);
-		setMethodName(methodName);
+        setOperator(op);
+        setMethodName(methodNam);
 		super.setNodeType(nodeType);
 	}
 
@@ -135,7 +133,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	void bindParameter()
 			throws StandardException
 	{
@@ -212,10 +210,10 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	/** @see RelationalOperator#getOperator */
 	public int getOperator()
 	{
-		int operator;
+        int op;
 		if (isNullNode())
 		{
-			operator = IS_NULL_RELOP;
+            op = IS_NULL_RELOP;
 		}
 		else
 		{
@@ -227,10 +225,10 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 						"Unexpected nodeType = " + getNodeType());
 				}
 			}
-			operator = IS_NOT_NULL_RELOP;
+            op = IS_NOT_NULL_RELOP;
 		}
 
-		return operator;
+        return op;
 	}
 
 	/** @see RelationalOperator#compareWithKnownConstant */
@@ -290,21 +288,24 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
-		return (RelationalOperator) getNodeFactory().getNode(
-									getNodeType(),
-									otherCR,
-									getContextManager());
+        return new IsNullNode(otherCR,
+                getNodeType() == C_NodeTypes.IS_NULL_NODE ?
+                Sign.IS_NULL :
+                Sign.IS_NOT_NULL,
+                getContextManager());
 	}
 
 	/**
 	 * null operators are defined on DataValueDescriptor.
 	 * Overrides method in UnaryOperatorNode for code generation purposes.
 	 */
-	public String getReceiverInterfaceName() {
+    @Override
+    String getReceiverInterfaceName() {
 	    return ClassName.DataValueDescriptor;
 	}
 
 	/** IS NULL is like =, so should have the same selectivity */
+    @Override
 	public double selectivity(Optimizable optTable) 
 	{
 		if (isNullNode())
@@ -337,13 +338,15 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	}
 	
 	/** @see ValueNode#isRelationalOperator */
-	public boolean isRelationalOperator()
+    @Override
+    boolean isRelationalOperator()
 	{
 		return true;
 	}
 
 	/** @see ValueNode#optimizableEqualityNode */
-	public boolean optimizableEqualityNode(Optimizable optTable, 
+    @Override
+    boolean optimizableEqualityNode(Optimizable optTable,
 										   int columnNumber, 
 										   boolean isNullOkay)
 	{

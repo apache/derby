@@ -21,40 +21,41 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import java.sql.Types;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.sql.Types;
-
-import java.util.List;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * The TimestampOperatorNode class implements the timestamp( date, time) function.
  */
 
-public class TimestampOperatorNode extends BinaryOperatorNode
+class TimestampOperatorNode extends BinaryOperatorNode
 {
 
     /**
-     * Initailizer for a TimestampOperatorNode.
+     * Constructor for a TimestampOperatorNode.
      *
      * @param date The date
      * @param time The time
+     * @param cm   The context manager
      */
 
-    public void init( Object date,
-                      Object time)
+    TimestampOperatorNode(ValueNode date,
+                          ValueNode time,
+                          ContextManager cm)
     {
-        leftOperand = (ValueNode) date;
-        rightOperand = (ValueNode) time;
+        super(cm);
+        setNodeType(C_NodeTypes.TIMESTAMP_OPERATOR_NODE);
+        leftOperand = date;
+        rightOperand = time;
         operator = "timestamp";
         methodName = "getTimestamp";
     }
@@ -73,7 +74,7 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -113,7 +114,7 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{

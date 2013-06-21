@@ -63,7 +63,7 @@ public final class AvgAggregator extends SumAggregator
 			if (   typeName.equals(TypeId.TINYINT_NAME)
 				|| typeName.equals(TypeId.SMALLINT_NAME)
 				|| typeName.equals(TypeId.INTEGER_NAME)
-				|| typeName.equals(TypeId.LONGINT_NAME)) {
+                || typeName.equals(TypeId.BIGINT_NAME)) {
 				scale = 0;
 			} else if (   typeName.equals(TypeId.REAL_NAME)
 				|| typeName.equals(TypeId.DOUBLE_NAME)) {

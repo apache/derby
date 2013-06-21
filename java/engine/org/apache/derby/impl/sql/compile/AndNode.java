@@ -22,29 +22,29 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-
-public class AndNode extends BinaryLogicalOperatorNode
+class AndNode extends BinaryLogicalOperatorNode
 {
+    /**
+     * @param leftOperand The left operand of the AND
+     * @param rightOperand The right operand of the AND
+     * @param cm context manager
+     * @throws StandardException
+     */
+    AndNode(
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            ContextManager cm) throws StandardException {
+        super(leftOperand, rightOperand, "and", cm);
+        setNodeType(C_NodeTypes.AND_NODE);
+        this.shortCircuitValue = false;
+    }
 
-	/**
-	 * Initializer for an AndNode
-	 *
-	 * @param leftOperand	The left operand of the AND
-	 * @param rightOperand	The right operand of the AND
-	 */
-
-	public void init(Object leftOperand, Object rightOperand)
-	{
-		super.init(leftOperand, rightOperand, "and");
-		this.shortCircuitValue = false;
-	}
-
-	/**
+    /**
 	 * Bind this logical operator.  All that has to be done for binding
 	 * a logical operator is to bind the operands, check that both operands
 	 * are BooleanDataValue, and set the result type to BooleanDataValue.
@@ -57,7 +57,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -84,7 +84,8 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -131,6 +132,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -144,11 +146,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 		/* Convert the AndNode to an OrNode */
 		ValueNode	orNode;
 
-		orNode = (ValueNode) getNodeFactory().getNode(
-												C_NodeTypes.OR_NODE,
-												leftOperand,
-												rightOperand,
-												getContextManager());
+        orNode = new OrNode(leftOperand, rightOperand, getContextManager());
 		orNode.setType(getTypeServices());
 		return orNode;
 	}
@@ -162,7 +160,8 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode putAndsOnTop() 
+    @Override
+    ValueNode putAndsOnTop()
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -179,7 +178,8 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
-	public boolean verifyPutAndsOnTop()
+    @Override
+    boolean verifyPutAndsOnTop()
 	{
 		boolean isValid = true;
 
@@ -225,7 +225,8 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode changeToCNF(boolean underTopAndNode) 
+    @Override
+    ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
 		AndNode curAnd = this;
@@ -240,19 +241,12 @@ public class AndNode extends BinaryLogicalOperatorNode
 		if (!(rightOperand instanceof AndNode) &&
 			!(rightOperand.isBooleanTrue()))
 		{
-			BooleanConstantNode	trueNode;
-
-			trueNode = (BooleanConstantNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.TRUE,
-											getContextManager());
-			curAnd.setRightOperand(
-					(ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.AND_NODE,
-											curAnd.getRightOperand(),
-											trueNode,
-											getContextManager()));
-			((AndNode) curAnd.getRightOperand()).postBindFixup();
+           BooleanConstantNode trueNode =
+                    new BooleanConstantNode(true, getContextManager());
+            AndNode newRightOperand = new AndNode(
+                    curAnd.getRightOperand(), trueNode, getContextManager());
+           curAnd.setRightOperand(newRightOperand);
+           newRightOperand.postBindFixup();
 		}
 
 		/* If leftOperand is an AndNode, then we modify the tree from:
@@ -312,7 +306,8 @@ public class AndNode extends BinaryLogicalOperatorNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
-	public boolean verifyChangeToCNF()
+    @Override
+    boolean verifyChangeToCNF()
 	{
 		boolean isValid = true;
 

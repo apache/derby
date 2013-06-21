@@ -22,12 +22,11 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -65,17 +64,10 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	ResultSetNode	resultSet;
 
-	/**
-	 * Initializer for a DMLStatementNode
-	 *
-	 * @param resultSet	A ResultSetNode for the result set of the
-	 *			DML statement
-	 */
-
-	public void init(Object resultSet)
-	{
-		this.resultSet = (ResultSetNode) resultSet;
-	}
+    DMLStatementNode(ResultSetNode resultSet, ContextManager cm) {
+        super(cm);
+        this.resultSet = resultSet;
+    }
 
 	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
@@ -83,8 +75,8 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -103,7 +95,7 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @return ResultSetNode	The ResultSetNode from this DMLStatementNode.
 	 */
-	public ResultSetNode getResultSetNode()
+    ResultSetNode getResultSetNode()
 	{
 		return resultSet;
 	}
@@ -161,7 +153,7 @@ abstract class DMLStatementNode extends StatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public QueryTreeNode bindResultSetsWithTables(DataDictionary dataDictionary)
+    QueryTreeNode bindResultSetsWithTables(DataDictionary dataDictionary)
 					 throws StandardException
 	{
 		/* Okay to bindly bind the tables, since ResultSets without tables
@@ -193,18 +185,11 @@ abstract class DMLStatementNode extends StatementNode
 		 * > 0 because the nodes are create for dependent tables also in the 
 		 * the same context.
 		 */
-
-		resultSet = resultSet.bindNonVTITables(
-						dataDictionary,
-						(FromList) getNodeFactory().getNode(
-							C_NodeTypes.FROM_LIST,
-							getNodeFactory().doJoinOrderOptimization(),
-							getContextManager()));
-		resultSet = resultSet.bindVTITables(
-						(FromList) getNodeFactory().getNode(
-							C_NodeTypes.FROM_LIST,
-							getNodeFactory().doJoinOrderOptimization(),
-							getContextManager()));
+        boolean doJOO = getOptimizerFactory().doJoinOrderOptimization();
+        ContextManager cm = getContextManager();
+        resultSet = resultSet.bindNonVTITables(dataDictionary,
+                                               new FromList(doJOO, cm));
+        resultSet = resultSet.bindVTITables(new FromList(doJOO, cm));
 	}
 
 	/**
@@ -216,10 +201,9 @@ abstract class DMLStatementNode extends StatementNode
 	protected void bindExpressions()
 			throws StandardException
 	{
-		FromList fromList = (FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
-								getContextManager());
+        FromList fromList =
+                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                             getContextManager());
 
 		/* Bind the expressions under the resultSet */
 		resultSet.bindExpressions(fromList);
@@ -240,10 +224,9 @@ abstract class DMLStatementNode extends StatementNode
 	protected void bindExpressionsWithTables()
 			throws StandardException
 	{
-		FromList fromList = (FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
-								getContextManager());
+        FromList fromList =
+                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                             getContextManager());
 
 		/* Bind the expressions under the resultSet */
 		resultSet.bindExpressionsWithTables(fromList);
@@ -265,7 +248,8 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	int activationKind()
 	{
-		List parameterList = getCompilerContext().getParameterList();
+        List<ParameterNode> parameterList =
+            getCompilerContext().getParameterList();
 		/*
 		** We need rows for all types of DML activations.  We need parameters
 		** only for those that have parameters.
@@ -295,6 +279,7 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		resultSet = resultSet.preprocess(getCompilerContext().getNumTables(),
@@ -338,13 +323,9 @@ abstract class DMLStatementNode extends StatementNode
 			siRCList.genVirtualColumnNodes(resultSet, childRCList);
 
 			/* Finally, we create the new ScrollInsensitiveResultSetNode */
-			resultSet = (ResultSetNode) getNodeFactory().
-							getNode(
-								C_NodeTypes.SCROLL_INSENSITIVE_RESULT_SET_NODE,
-								resultSet, 
-								siRCList,
-								null,
-								getContextManager());
+            resultSet = new ScrollInsensitiveResultSetNode(
+                    resultSet, siRCList, null, getContextManager());
+
 			// Propagate the referenced table map if it's already been created
 			if (siChild.getReferencedTableMap() != null)
 			{
@@ -368,7 +349,7 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @return	A ResultDescription for this DML statement
 	 */
-
+    @Override
 	public ResultDescription makeResultDescription()
 	{
 	    ResultColumnDescriptor[] colDescs = resultSet.makeResultDescriptors();
@@ -390,7 +371,8 @@ abstract class DMLStatementNode extends StatementNode
 	void generateParameterValueSet(ActivationClassBuilder acb)
 		throws StandardException
 	{
-		List parameterList = getCompilerContext().getParameterList();
+        List<ParameterNode> parameterList =
+            getCompilerContext().getParameterList();
 		int	numberOfParameters = (parameterList == null) ? 0 : parameterList.size();
 
 		if (numberOfParameters <= 0)
@@ -416,6 +398,7 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @exception StandardException on error
 	 */	
+    @Override
 	public boolean isAtomic() throws StandardException
 	{
 		/*
@@ -443,6 +426,7 @@ abstract class DMLStatementNode extends StatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

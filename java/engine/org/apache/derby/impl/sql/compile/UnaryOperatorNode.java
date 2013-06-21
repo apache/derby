@@ -21,27 +21,22 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import java.lang.reflect.Modifier;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.sql.Types;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A UnaryOperatorNode represents a built-in unary operator as defined by
@@ -51,7 +46,7 @@ import java.util.List;
  *
  */
 
-public class UnaryOperatorNode extends OperatorNode
+class UnaryOperatorNode extends OperatorNode
 {
 	String	operator;
 	String	methodName;
@@ -83,8 +78,8 @@ public class UnaryOperatorNode extends OperatorNode
     // node implementations, in its other mode it is a concrete
     // class for XMLPARSE and XMLSERIALIZE.
 
-	public final static int XMLPARSE_OP = 0;
-	public final static int XMLSERIALIZE_OP = 1;
+    final static int XMLPARSE_OP = 0;
+    final static int XMLSERIALIZE_OP = 1;
 
 	// NOTE: in the following 4 arrays, order
 	// IS important.
@@ -115,69 +110,61 @@ public class UnaryOperatorNode extends OperatorNode
     /** Whether or not an XMLParse operator should preserve whitespace. */
     private boolean preserveWhitespace;
 
-	/**
-	 * Initializer for a UnaryOperatorNode.
-	 *
-	 * <ul>
-	 * @param operand	The operand of the node
-	 * @param operatorOrOpType	Either 1) the name of the operator,
-	 *  OR 2) an Integer holding the operatorType for this operator.
-	 * @param methodNameOrAddedArgs	Either 1) name of the method
-	 *  to call for this operator, or 2) an array of Objects
-	 *  from which primitive method parameters can be
-	 *  retrieved.
-	 */
+    UnaryOperatorNode(ValueNode operand,
+            String operator,
+            String methodNameOrAddedArgs,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        this.operand = operand;
+        this.operator = operator;
+        this.methodName = methodNameOrAddedArgs;
+        this.operatorType = -1;
+    }
 
-	public void init(
-					Object	operand,
-					Object		operatorOrOpType,
-					Object		methodNameOrAddedArgs)
+    UnaryOperatorNode(ValueNode operand, ContextManager cm) {
+        super(cm);
+        this.operand = operand;
+        this.operatorType = -1;
+    }
+
+	/**
+     * Constructor for a UnaryOperatorNode.
+	 *
+     * @param operand       The operand of the node
+     * @param operatorType  Either 1) the name of the operator,
+     *                      OR 2) an Integer holding the operatorType
+     *                      for this operator.
+     * @param methodNameOrAddedArgs
+     *                      Either 1) name of the method to call for
+     *                      this operator, or 2) an array of Objects
+     *                      from which primitive method parameters can
+     *                      be retrieved.
+     * @param cm            The context manager
+	 */
+    UnaryOperatorNode(int                nodeType,
+                      ValueNode          operand,
+                      int                operatorType,
+                      DataTypeDescriptor targetType,
+                      boolean            preserveWhiteSpace,
+                      ContextManager     cm)
 	{
-		this.operand = (ValueNode) operand;
-		if (operatorOrOpType instanceof String) {
-		// then 2nd and 3rd params are operator and methodName,
-		// respectively.
-			this.operator = (String) operatorOrOpType;
-			this.methodName = (String) methodNameOrAddedArgs;
-			this.operatorType = -1;
-		}
-		else {
-		// 2nd and 3rd params are operatorType and additional args,
-		// respectively.
-			if (SanityManager.DEBUG) {
-				SanityManager.ASSERT(
-					((operatorOrOpType instanceof Integer) &&
-                      ((methodNameOrAddedArgs instanceof DataTypeDescriptor) ||
-                       (methodNameOrAddedArgs instanceof Boolean))),
-					"Init params in UnaryOperator node have the " +
-					"wrong type.");
-			}
-			this.operatorType = ((Integer) operatorOrOpType).intValue();
-			this.operator = UnaryOperators[this.operatorType];
-			this.methodName = UnaryMethodNames[this.operatorType];
-			this.resultInterfaceType = UnaryResultTypes[this.operatorType];
-			this.receiverInterfaceType = UnaryArgTypes[this.operatorType];
-            if (operatorType == XMLSERIALIZE_OP) {
-                targetType = (DataTypeDescriptor) methodNameOrAddedArgs;
-            } else if (operatorType == XMLPARSE_OP) {
-                preserveWhitespace =
-                    ((Boolean) methodNameOrAddedArgs).booleanValue();
-            } else if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT(
+        super(cm);
+        setNodeType(nodeType);
+        this.operand = operand;
+        this.operatorType = operatorType;
+        this.operator = UnaryOperators[this.operatorType];
+        this.methodName = UnaryMethodNames[this.operatorType];
+        this.resultInterfaceType = UnaryResultTypes[this.operatorType];
+        this.receiverInterfaceType = UnaryArgTypes[this.operatorType];
+
+        if (operatorType == XMLSERIALIZE_OP) {
+            this.targetType = targetType;
+        } else if (operatorType == XMLPARSE_OP) {
+            this.preserveWhitespace = preserveWhiteSpace;
+        } else if (SanityManager.DEBUG) {
+            SanityManager.THROWASSERT(
                     "Don't know how to handle operator type " + operatorType);
-            }
-		}
-	}
-
-	/**
-	 * Initializer for a UnaryOperatorNode
-	 *
-	 * @param operand	The operand of the node
-	 */
-	public void init(Object	operand)
-	{
-		this.operand = (ValueNode) operand;
-		this.operatorType = -1;
+        }
 	}
 
 	/**
@@ -218,7 +205,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @return		This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -239,8 +226,8 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -259,7 +246,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @return	The operand of this unary operator.
 	 */
-	public ValueNode getOperand()
+    ValueNode getOperand()
 	{
 		return operand;
 	}
@@ -274,7 +261,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 * 
 	 * @return	The parameter operand of this unary operator else null.
 	 */
-	public ParameterNode getParameterOperand() throws StandardException
+    ParameterNode getParameterOperand() throws StandardException
 	{
 		if (requiresTypeFromContext() == false)
 			return null;
@@ -303,7 +290,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
@@ -453,7 +440,8 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -494,7 +482,8 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		return (operand == null) ? 
@@ -510,7 +499,8 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		if (operand != null)
@@ -525,13 +515,15 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return (operand == null) ? true: operand.isConstantExpression();
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return (operand == null) ?
 					true :
@@ -605,7 +597,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -657,7 +649,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public String getReceiverInterfaceName() throws StandardException {
+    String getReceiverInterfaceName() throws StandardException {
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(operand!=null,
@@ -684,6 +676,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		/*
@@ -702,6 +695,7 @@ public class UnaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

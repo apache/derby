@@ -21,12 +21,11 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.Visitable;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
 
 public class ParserImpl implements Parser
 {
@@ -101,7 +100,7 @@ public class ParserImpl implements Parser
         {
 	    SQLParserTokenManager tm = (SQLParserTokenManager) getTokenManager();
 	    /* returned a cached Parser if already exists, otherwise create */
-	    SQLParser p = (SQLParser) cachedParser;
+        SQLParser p = cachedParser;
 	    if (p == null) {
 		p = new SQLParser(tm);
 		p.setCompilerContext(cc);

@@ -58,7 +58,7 @@ public final class UCode_CharStream implements CharStream
   private int maxNextCharInd = 0;
   private int nextCharInd = -1;
 
-  private final void ExpandBuff(boolean wrapAround)
+  private void ExpandBuff(boolean wrapAround)
   {
      char[] newbuffer = new char[bufsize + 2048];
      int newbufline[] = new int[bufsize + 2048];
@@ -121,7 +121,7 @@ public final class UCode_CharStream implements CharStream
      tokenBegin = 0;
   }
 
-  private final void FillBuff() throws java.io.IOException
+  private void FillBuff() throws java.io.IOException
   {
      if (maxNextCharInd == nextCharBuf.length)
         maxNextCharInd = nextCharInd = 0;
@@ -136,7 +136,6 @@ public final class UCode_CharStream implements CharStream
         }
         else
            maxNextCharInd += i;
-        return;
      }
      catch(java.io.IOException e) {
         if (bufpos != 0)
@@ -155,7 +154,7 @@ public final class UCode_CharStream implements CharStream
      }
   }
 
-  private final char ReadChar() throws java.io.IOException
+  private char ReadChar() throws java.io.IOException
   {
      if (++nextCharInd >= maxNextCharInd)
         FillBuff();
@@ -179,7 +178,7 @@ public final class UCode_CharStream implements CharStream
      return c;
   }     
 
-  private final void UpdateLineColumn(char c)
+  private void UpdateLineColumn(char c)
   {
      column++;
 
@@ -225,7 +224,7 @@ public final class UCode_CharStream implements CharStream
      if (inBuf > 0)
      {
         --inBuf;
-        return (char)buffer[(bufpos == bufsize - 1) ? (bufpos = 0) : ++bufpos];
+        return buffer[(bufpos == bufsize - 1) ? (bufpos = 0) : ++bufpos];
      }
 
      if (++bufpos == available)
@@ -265,7 +264,7 @@ public final class UCode_CharStream implements CharStream
    * @deprecated 
    * @see #getEndColumn
    */
-
+  @Deprecated
   public final int getColumn() {
      return bufcolumn[bufpos];
   }
@@ -274,7 +273,7 @@ public final class UCode_CharStream implements CharStream
    * @deprecated 
    * @see #getEndLine
    */
-
+  @Deprecated
   public final int getLine() {
      return bufline[bufpos];
   }
@@ -443,13 +442,13 @@ public final class UCode_CharStream implements CharStream
      }
 
      int i = 0, j = 0, k = 0;
-     int nextColDiff = 0, columnDiff = 0;
+     int columnDiff = 0;
 
      while (i < len &&
             bufline[j = start % bufsize] == bufline[k = ++start % bufsize])
      {
         bufline[j] = newLine;
-        nextColDiff = columnDiff + bufcolumn[k] - bufcolumn[j];
+        int nextColDiff = columnDiff + bufcolumn[k] - bufcolumn[j];
         bufcolumn[j] = newCol + columnDiff;
         columnDiff = nextColDiff;
         i++;

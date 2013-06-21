@@ -21,43 +21,26 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.UserDataValue;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.types.*;
-
 import java.lang.reflect.Modifier;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLDate;
+import org.apache.derby.iapi.types.SQLTime;
+import org.apache.derby.iapi.types.SQLTimestamp;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
 	User type constants.  These are created by built-in types
@@ -67,10 +50,10 @@ import java.sql.Types;
 
 	This is also used to represent nulls in user types, which occurs
 	when NULL is inserted into or supplied as the update value for
-	a usertype column.
+   a user type column.
 
  */
-public class UserTypeConstantNode extends ConstantNode {
+class UserTypeConstantNode extends ConstantNode {
 	/*
 	** This value field hides the value in the super-type.  It is here
 	** Because user-type constants work differently from built-in constants.
@@ -80,96 +63,104 @@ public class UserTypeConstantNode extends ConstantNode {
 	** RESOLVE: This is a bit of a mess, and should be fixed.  All constants
 	** should be represented the same way.
 	*/
-	Object	value;
+    Object  val;
 
-	/**
-	 * Initializer for a typed null node
-	 * or a date, time, or timestamp value. Parameters may be:
-	 *
-	 * <ul>
-	 * <li>arg1	The TypeId for the type of the node</li>
-	 * <li>arg2	The factory to get the TypeId and DataTypeServices factories from.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * - OR -
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>arg1 the date, time, or timestamp value</li>
-	 * </ul>
-	 *
-	 * @exception StandardException thrown on failure
-	 */
-	public void init(Object arg1)
-			throws StandardException {
-        DataValueDescriptor dvd = null;
-        
-		if (arg1 instanceof TypeId)
-		{
-			super.init(
-					arg1,
-					Boolean.TRUE,
-					ReuseFactory.getInteger(
-										TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN));
-		}
-		else
-		{
-			Integer maxWidth = null;
-			TypeId	typeId = null;
+    UserTypeConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN, cm);
+        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
+    }
 
-            if( arg1 instanceof DataValueDescriptor)
-                dvd = (DataValueDescriptor) arg1;
-			if (arg1 instanceof Date
-                || (dvd != null && dvd.getTypeFormatId() == StoredFormatIds.SQL_DATE_ID))
-			{
-				maxWidth = ReuseFactory.getInteger(TypeId.DATE_MAXWIDTH);
-				typeId = TypeId.getBuiltInTypeId(Types.DATE);
-			}
-			else if (arg1 instanceof Time
-                     || (dvd != null && dvd.getTypeFormatId() == StoredFormatIds.SQL_TIME_ID))
-			{
-				maxWidth = ReuseFactory.getInteger(TypeId.TIME_MAXWIDTH);
-				typeId = TypeId.getBuiltInTypeId(Types.TIME);
-			}
-			else if (arg1 instanceof Timestamp
-                     || (dvd != null && dvd.getTypeFormatId() == StoredFormatIds.SQL_TIMESTAMP_ID))
-			{
-				maxWidth = ReuseFactory.getInteger(TypeId.TIMESTAMP_MAXWIDTH);
-				typeId = TypeId.getBuiltInTypeId(Types.TIMESTAMP);
-			}
-			else
-			{
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT(
-							"Unexpected class " + arg1.getClass().getName());
-				}
-			}
+    UserTypeConstantNode(Date d, ContextManager cm)
+            throws StandardException {
+        super(TypeId.getBuiltInTypeId(Types.DATE),
+              d == null,
+              TypeId.DATE_MAXWIDTH,
+              cm);
+        setValue(new SQLDate(d));
+        val = d;
+        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
+    }
 
-			super.init( 
-				typeId,
-				(arg1 == null) ? Boolean.TRUE : Boolean.FALSE,
-				maxWidth);
+    UserTypeConstantNode(Time t, ContextManager cm)
+            throws StandardException {
+        super(TypeId.getBuiltInTypeId(Types.TIME),
+              t == null,
+              TypeId.TIME_MAXWIDTH,
+              cm);
+        setValue(new SQLTime(t));
+        val = t;
+        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
+    }
 
-            if( dvd != null)
-                setValue( dvd);
-			else if (arg1 instanceof Date)
-			{
-				setValue(new SQLDate((Date) arg1));
-			}
-			else if (arg1 instanceof Time)
-			{
-				setValue(new SQLTime((Time) arg1));
-			}
-			else if (arg1 instanceof Timestamp)
-			{
-				setValue(new SQLTimestamp((Timestamp) arg1));
-			}
+    UserTypeConstantNode(Timestamp t, ContextManager cm)
+            throws StandardException {
+        super(TypeId.getBuiltInTypeId(Types.TIMESTAMP),
+                t == null,
+                TypeId.TIMESTAMP_MAXWIDTH,
+                cm);
+        setValue(new SQLTimestamp(t));
+        val = t;
+        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
+    }
 
-			value = arg1;
-		}
-	}
+    /**
+     * @param dvd Must contain a Date, Time or Timestamp value
+     * @param cm context manager
+     * @throws StandardException
+     */
+    UserTypeConstantNode(DataValueDescriptor dvd, ContextManager cm)
+            throws StandardException {
+        super(getTypeId(dvd),
+              dvd == null,
+              getWidth(dvd),
+              cm);
+        setValue(dvd);
+        val = dvd;
+        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
+    }
+
+    private static TypeId getTypeId(DataValueDescriptor dvd) {
+        if (dvd != null) {
+            switch (dvd.getTypeFormatId()) {
+                case StoredFormatIds.SQL_DATE_ID:
+                    return TypeId.getBuiltInTypeId(Types.DATE);
+                case StoredFormatIds.SQL_TIME_ID:
+                    return TypeId.getBuiltInTypeId(Types.TIME);
+                case StoredFormatIds.SQL_TIMESTAMP_ID:
+                    return TypeId.getBuiltInTypeId(Types.TIMESTAMP);
+                default:
+                    if (SanityManager.DEBUG) {
+                        SanityManager.THROWASSERT(
+                                "Unexpected class " + dvd.getClass().getName());
+                    }
+                    return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private static int getWidth(DataValueDescriptor dvd) {
+        if (dvd != null) {
+            switch (dvd.getTypeFormatId()) {
+                case StoredFormatIds.SQL_DATE_ID:
+                    return TypeId.DATE_MAXWIDTH;
+                case StoredFormatIds.SQL_TIME_ID:
+                    return TypeId.TIME_MAXWIDTH;
+                case StoredFormatIds.SQL_TIMESTAMP_ID:
+                    return TypeId.TIMESTAMP_MAXWIDTH;
+                default:
+                    if (SanityManager.DEBUG) {
+                        SanityManager.THROWASSERT(
+                                "Unexpected class " + dvd.getClass().getName());
+                    }
+                    return 0;
+            }
+        } else {
+            return 0;
+        }
+    }
 
 	/**
 	 * Return the object value of this user defined type.
@@ -178,15 +169,16 @@ public class UserTypeConstantNode extends ConstantNode {
 	 *			getValue() returns the DataValueDescriptor for the built-in
 	 *			types that are implemented as user types (date, time, timestamp)
 	 */
-    public	Object	getObjectValue() { return value; }
+    public  Object  getObjectValue() { return val; }
 
 	/**
 	 * Return whether or not this node represents a typed null constant.
 	 *
 	 */
-	public boolean isNull()
+    @Override
+    boolean isNull()
 	{
-		return (value == null);
+        return (val == null);
 	}
 
 	/**
@@ -200,9 +192,10 @@ public class UserTypeConstantNode extends ConstantNode {
 	 *			(null if not a bind time constant.)
 	 *
 	 */
-	public Object getConstantValueAsObject()
+    @Override
+    Object getConstantValueAsObject()
 	{
-		return value;
+        return val;
 	}
 
 	/**
@@ -231,6 +224,7 @@ public class UserTypeConstantNode extends ConstantNode {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException {
 
@@ -243,7 +237,7 @@ public class UserTypeConstantNode extends ConstantNode {
 		*/
 		
 		/* Are we generating a SQL null value? */
-	    if (value == null)
+        if (val == null)
 	    {
 			acb.generateNull(mb, tc, getTypeServices().getCollationType());
 	    }
@@ -283,7 +277,7 @@ public class UserTypeConstantNode extends ConstantNode {
 		 	*/
 			String typeName = getTypeId().getCorrespondingJavaTypeName();
 
-			mb.push(value.toString());
+            mb.push(val.toString());
 			mb.callMethod(VMOpcode.INVOKESTATIC, typeName, "valueOf", typeName, 1);
 
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);

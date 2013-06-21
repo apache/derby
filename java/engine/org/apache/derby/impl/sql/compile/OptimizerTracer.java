@@ -23,12 +23,11 @@ package org.apache.derby.impl.sql.compile;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
-
 import org.apache.derby.iapi.db.OptimizerTrace;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;

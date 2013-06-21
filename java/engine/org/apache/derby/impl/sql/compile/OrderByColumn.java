@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -35,7 +36,7 @@ import org.apache.derby.iapi.sql.compile.Visitor;
  * columns in that query, and that positions are within range.
  *
  */
-public class OrderByColumn extends OrderedColumn {
+class OrderByColumn extends OrderedColumn {
 
 	private ResultColumn	resultCol;
 	private boolean			ascending = true;
@@ -51,13 +52,16 @@ public class OrderByColumn extends OrderedColumn {
 
 
    	/**
-	 * Initializer.
+     * Constructor.
 	 *
 	 * @param expression            Expression of this column
+     * @param cm                    The context manager
 	 */
-	public void init(Object expression)
+    OrderByColumn(ValueNode expression, ContextManager cm)
 	{
-		this.expression = (ValueNode)expression;
+        super(cm);
+        setNodeType(C_NodeTypes.ORDER_BY_COLUMN);
+        this.expression = expression;
 	}
 	
 	/**
@@ -66,6 +70,7 @@ public class OrderByColumn extends OrderedColumn {
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString() {
 		if (SanityManager.DEBUG) {
 			return
@@ -84,7 +89,8 @@ public class OrderByColumn extends OrderedColumn {
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -105,7 +111,7 @@ public class OrderByColumn extends OrderedColumn {
 	/**
 	 * Mark the column as descending order
 	 */
-	public void setDescending() {
+    void setDescending() {
 		ascending = false;
 	}
 
@@ -115,14 +121,15 @@ public class OrderByColumn extends OrderedColumn {
 	 *
 	 * @return true if ascending, false if descending
 	 */
-	public boolean isAscending() {
+    @Override
+    boolean isAscending() {
 		return ascending;
 	}
 
 	/**
 	 * Mark the column as ordered NULL values lower than non-NULL values.
 	 */
-	public void setNullsOrderedLow() {
+    void setNullsOrderedLow() {
 		nullsOrderedLow = true;
 	}
 
@@ -132,7 +139,8 @@ public class OrderByColumn extends OrderedColumn {
 	 *
 	 * @return true if NULLs ordered low, false if NULLs ordered high
 	 */
-	public boolean isNullsOrderedLow() {
+    @Override
+    boolean isNullsOrderedLow() {
 		return nullsOrderedLow;
 	}
 
@@ -195,7 +203,7 @@ public class OrderByColumn extends OrderedColumn {
 	 * @exception StandardException		Thrown on error
 	 * @exception StandardException		Thrown when column not found
 	 */
-	public void bindOrderByColumn(ResultSetNode target, OrderByList oblist)
+    void bindOrderByColumn(ResultSetNode target, OrderByList oblist)
 				throws StandardException 
 	{
 		this.list = oblist;
@@ -244,9 +252,6 @@ public class OrderByColumn extends OrderedColumn {
 					((SelectNode)target).hasDistinct() &&
 					!expressionMatch(target))
 			{
-				String col=null;
-				boolean match=false;
-
                 CollectNodesVisitor<ColumnReference> collectNodesVisitor =
                     new CollectNodesVisitor<ColumnReference>(
                         ColumnReference.class);
@@ -254,8 +259,8 @@ public class OrderByColumn extends OrderedColumn {
 
                 for (ColumnReference cr1 : collectNodesVisitor.getList())
 				{//visits through the columns in this OrderByColumn
-					col=cr1.getColumnName();
-					match = columnMatchFound(target,cr1);
+                    String col=cr1.getColumnName();
+                    boolean match = columnMatchFound(target,cr1);
 					/* breaks if a match not found, this is needed
 					 * because all column references in this
 					 * OrderByColumn should be there in the select
@@ -377,7 +382,7 @@ public class OrderByColumn extends OrderedColumn {
 	 * @param target	The result set being selected from
 	 *
 	 */
-	public void pullUpOrderByColumn(ResultSetNode target)
+    void pullUpOrderByColumn(ResultSetNode target)
 				throws StandardException 
 	{
         ResultColumnList targetCols = target.getResultColumns();
@@ -390,20 +395,16 @@ public class OrderByColumn extends OrderedColumn {
                     cr.getColumnName(), cr.getTableNameNode());
 
 			if(resultCol == null){
-				resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
-										    cr.getColumnName(),
-										    cr,
-										    getContextManager());
+               resultCol = new ResultColumn(
+                        cr.getColumnName(), cr, getContextManager());
 				targetCols.addResultColumn(resultCol);
                 addedColumnOffset = targetCols.getOrderBySelect();
 				targetCols.incOrderBySelect();
 			}
 			
 		}else if(!isReferedColByNum(expression)){
-			resultCol = (ResultColumn) getNodeFactory().getNode(C_NodeTypes.RESULT_COLUMN,
-									    null,
-									    expression,
-									    getContextManager());
+           resultCol = new ResultColumn(
+                    (String)null, expression, getContextManager());
 			targetCols.addResultColumn(resultCol);
             addedColumnOffset = targetCols.getOrderBySelect();
 			targetCols.incOrderBySelect();
@@ -465,10 +466,7 @@ public class OrderByColumn extends OrderedColumn {
 	
 	private ResultColumn resolveColumnReference(ResultSetNode target,
 							   ColumnReference cr)
-	throws StandardException{
-		
-		ResultColumn resultCol = null;
-		
+            throws StandardException {
 		int					sourceTableNumber = -1;
 		
 		//bug 5716 - for db2 compatibility - no qualified names allowed in order by clause when union/union all operator is used 
@@ -514,7 +512,8 @@ public class OrderByColumn extends OrderedColumn {
 
 		ResultColumnList	targetCols = target.getResultColumns();
 
-		resultCol = targetCols.getOrderByColumnToBind(cr.getColumnName(),
+        ResultColumn resCol = targetCols.getOrderByColumnToBind(
+                            cr.getColumnName(),
 							cr.getTableNameNode(),
 							sourceTableNumber,
 							this);
@@ -523,15 +522,15 @@ public class OrderByColumn extends OrderedColumn {
          * order by clause may be found in the user specified select list now even though it was
          * not found when pullUpOrderByColumn was called.
          */
-        if( resultCol == null && addedColumnOffset >= 0)
+        if( resCol == null && addedColumnOffset >= 0)
             resolveAddedColumn(target);
 							
-		if (resultCol == null || resultCol.isNameGenerated()){
+        if (resCol == null || resCol.isNameGenerated()){
 			String errString = cr.columnName;
 			throw StandardException.newException(SQLState.LANG_ORDER_BY_COLUMN_NOT_FOUND, errString);
 		}
 
-		return resultCol;
+        return resCol;
 
 	}
 
@@ -576,6 +575,7 @@ public class OrderByColumn extends OrderedColumn {
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

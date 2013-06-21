@@ -23,13 +23,10 @@ package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.RowOrdering;
 
 class RowOrderingImpl implements RowOrdering {
 
@@ -99,7 +96,7 @@ class RowOrderingImpl implements RowOrdering {
 		if (orderPosition >= ordering.size())
 			return false;
 
-		ColumnOrdering co = (ColumnOrdering) ordering.get(orderPosition);
+        ColumnOrdering co = ordering.get(orderPosition);
 
 		/*
 		** Is the column in question ordered with the given direction at
@@ -136,7 +133,7 @@ class RowOrderingImpl implements RowOrdering {
 		boolean ordered = false;
 
 		for (int i = 0; i < ordering.size(); i++) {
-			ColumnOrdering co = (ColumnOrdering) ordering.get(i);
+            ColumnOrdering co = ordering.get(i);
 
 			/*
 			** Is the column in question ordered with the given direction at
@@ -164,30 +161,30 @@ class RowOrderingImpl implements RowOrdering {
 			return;
         }
 
-		ColumnOrdering currentColumnOrdering;
+        ColumnOrdering currColOrder;
 
 		if (ordering.isEmpty())
 		{
-			currentColumnOrdering = new ColumnOrdering(direction);
-			ordering.add(currentColumnOrdering);
+            currColOrder = new ColumnOrdering(direction);
+            ordering.add(currColOrder);
 		}
 		else
 		{
-			currentColumnOrdering =
+            currColOrder =
 				ordering.get(ordering.size() - 1);
 		}
 
 		if (SanityManager.DEBUG)
 		{
-			if (currentColumnOrdering.direction() != direction)
+            if (currColOrder.direction() != direction)
 			{
 				SanityManager.THROWASSERT("direction == " + direction +
 					", currentColumnOrdering.direction() == " +
-					currentColumnOrdering.direction());
+                    currColOrder.direction());
 			}
 		}
 
-		currentColumnOrdering.addColumn(tableNumber, columnNumber);
+        currColOrder.addColumn(tableNumber, columnNumber);
 	}
 
 	/** @see RowOrdering#nextOrderPosition */
@@ -227,9 +224,7 @@ class RowOrderingImpl implements RowOrdering {
 			(
 				(ordering.isEmpty()) ||
 				(
-					hasTableNumber &&
-					((ColumnOrdering) ordering.get(0)).hasTable(
-																	tableNumber)
+                    hasTableNumber && ordering.get(0).hasTable(tableNumber)
 				)
 			)
 			&&
@@ -284,7 +279,7 @@ class RowOrderingImpl implements RowOrdering {
 			/*
 			** First, remove the table from all the ColumnOrderings
 			*/
-			ColumnOrdering ord = (ColumnOrdering) ordering.get(i);
+            ColumnOrdering ord = ordering.get(i);
 			ord.removeColumns(tableNumber);
 			if (ord.empty())
 				ordering.remove(i);
@@ -367,9 +362,10 @@ class RowOrderingImpl implements RowOrdering {
 	}
 
 	private void rememberCurrentColumnOrdering(int posn) {
-		currentColumnOrdering = (ColumnOrdering) ordering.get(posn);
+        currentColumnOrdering = ordering.get(posn);
 	}
 
+    @Override
 	public String toString() {
 		String retval = null;
 
@@ -380,7 +376,7 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < unorderedOptimizables.size(); i++) 
 			{
-				Optimizable opt = (Optimizable) unorderedOptimizables.get(i);
+                Optimizable opt = unorderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
 					retval += opt.getBaseTableName();

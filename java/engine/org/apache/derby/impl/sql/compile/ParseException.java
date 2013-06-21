@@ -114,6 +114,7 @@ class ParseException extends Exception {
    * of the final stack trace, and hence the correct error message
    * gets displayed.
    */
+  @Override
   public String getMessage() {
     if (!specialConstructor) {
       return super.getMessage();
@@ -169,7 +170,7 @@ class ParseException extends Exception {
    * string literal.
    */
   protected String add_escapes(String str) {
-      StringBuffer retval = new StringBuffer();
+      StringBuilder retval = new StringBuilder();
       char ch;
       for (int i = 0; i < str.length(); i++) {
         switch (str.charAt(i))
@@ -203,7 +204,8 @@ class ParseException extends Exception {
            default:
               if ((ch = str.charAt(i)) < 0x20 || ch > 0x7e) {
                  String s = "0000" + Integer.toString(ch, 16);
-                 retval.append("\\u" + s.substring(s.length() - 4, s.length()));
+                 retval.append("\\u");
+                 retval.append(s.substring(s.length() - 4, s.length()));
               } else {
                  retval.append(ch);
               }

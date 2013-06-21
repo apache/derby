@@ -22,16 +22,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Replace all aggregates with result columns.
  *
  */
-public class ReplaceAggregatesWithCRVisitor implements Visitor
+class ReplaceAggregatesWithCRVisitor implements Visitor
 {
 	private ResultColumnList rcl;
 	private Class skipOverClass;
@@ -45,12 +44,13 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 	 * @param rcl the result column list
 	 * @param tableNumber	The tableNumber for the new CRs
 	 */
-	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber)
+    ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber)
 	{
 		this(rcl, tableNumber, null);
 	}
 
-	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, int tableNumber, Class skipOverClass)
+    ReplaceAggregatesWithCRVisitor(
+        ResultColumnList rcl, int tableNumber, Class skipOverClass)
 	{
 		this.rcl = rcl;
 		this.tableNumber = tableNumber;
@@ -66,7 +66,7 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 	 * @param rcl the result column list
 	 * @param nodeToSkip don't examine anything below nodeToSkip
 	 */
-	public ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, Class nodeToSkip)
+    ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, Class nodeToSkip)
 	{
 		this.rcl = rcl;
 		this.skipOverClass = nodeToSkip;
@@ -104,7 +104,7 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 	}
 
 	/**
-	 * Don't visit childen under the skipOverClass
+     * Don't visit children under the skipOverClass
 	 * node, if it isn't null.
 	 *
 	 * @return true/false

@@ -21,16 +21,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * A DropSchemaNode is the root of a QueryTree that represents 
@@ -38,26 +37,28 @@ import org.apache.derby.iapi.reference.SQLState;
  *
  */
 
-public class DropSchemaNode extends DDLStatementNode
+class DropSchemaNode extends DDLStatementNode
 {
 	private int			dropBehavior;
 	private String		schemaName;
 
 	/**
-	 * Initializer for a DropSchemaNode
+     * Constructor for a DropSchemaNode
 	 *
 	 * @param schemaName		The name of the object being dropped
 	 * @param dropBehavior		Drop behavior (RESTRICT | CASCADE)
+     * @param cm                Context Manager
 	 *
 	 */
-	public void init(Object schemaName, Object dropBehavior)
-		throws StandardException
+    DropSchemaNode(String schemaName, int dropBehavior, ContextManager cm)
 	{
-		initAndCheck(null);
-		this.schemaName = (String) schemaName;
-		this.dropBehavior = ((Integer) dropBehavior).intValue();
+        super(null, cm);
+        setNodeType(C_NodeTypes.DROP_SCHEMA_NODE);
+        this.schemaName = schemaName;
+        this.dropBehavior = dropBehavior;
 	}
 
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		/* 
@@ -93,7 +94,7 @@ public class DropSchemaNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -107,7 +108,7 @@ public class DropSchemaNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "DROP SCHEMA";
 	}
@@ -120,7 +121,8 @@ public class DropSchemaNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropSchemaConstantAction(schemaName);
 	}

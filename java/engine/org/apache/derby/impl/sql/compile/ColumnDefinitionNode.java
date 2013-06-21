@@ -29,6 +29,7 @@ import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -88,25 +89,27 @@ public class ColumnDefinitionNode extends TableElementNode
 	public static final int MODIFY_AUTOINCREMENT_INC_VALUE = 2;
 	
 	/**
-	 * Initializer for a ColumnDefinitionNode
+     * Constructor for a ColumnDefinitionNode
 	 *
 	 * @param name			The name of the column
 	 * @param defaultNode	The default value of the column
 	 * @param dataTypeServices	A DataTypeServices telling the type
 	 *				of the column
-	 * @param autoIncrementInfo	Info for autoincrement columns
-	 *
+     * @param autoIncrementInfo Info for auto-increment columns
+     * @param cm            The context manager
 	 */
 
-	public void init(
-					Object name,
-					Object defaultNode,
-					Object dataTypeServices,
-					Object autoIncrementInfo)
+    ColumnDefinitionNode(
+                    String name,
+                    ValueNode defaultNode,
+                    DataTypeDescriptor dataTypeServices,
+                    long[] autoIncrementInfo,
+                    ContextManager cm)
 		throws StandardException
 	{
-		super.init(name);
-		this.type = (DataTypeDescriptor) dataTypeServices;
+        super(name, cm);
+        setNodeType(C_NodeTypes.COLUMN_DEFINITION_NODE);
+        this.type = dataTypeServices;
 		if (defaultNode instanceof UntypedNullConstantNode)
 		{
 			/* No DTS yet for MODIFY DEFAULT */
@@ -136,7 +139,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			this.defaultNode = (DefaultNode) defaultNode;
 			if (autoIncrementInfo != null)
 			{
-				long[] aii = (long[]) autoIncrementInfo;
+                long[] aii = autoIncrementInfo;
 				autoincrementStart = aii[QueryTreeNode.AUTOINCREMENT_START_INDEX];
 				autoincrementIncrement = aii[QueryTreeNode.AUTOINCREMENT_INC_INDEX];
 				//Parser has passed the info about autoincrement column's status in the
@@ -180,7 +183,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -200,7 +203,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	the name of the column
 	 */
-	public String getColumnName()
+    String getColumnName()
 	{
 		return this.name;
 	}
@@ -210,7 +213,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	the data type of the column
 	 */
-	public final DataTypeDescriptor getType()
+    final DataTypeDescriptor getType()
 	{
 		return type;
 	}
@@ -221,7 +224,7 @@ public class ColumnDefinitionNode extends TableElementNode
     /**
      * Set the nullability of the column definition node.
       */
-    void setNullability(boolean nullable)
+    final void setNullability(boolean nullable)
     {
         type = getType().getNullabilityType(nullable);
     }
@@ -243,7 +246,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @return	The default value of the column
 	 */
 
-	public DataValueDescriptor getDefaultValue()
+    DataValueDescriptor getDefaultValue()
 	{
 		return this.defaultValue;
 	}
@@ -255,7 +258,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @return	The default info for the column
 	 */
 
-	public DefaultInfo getDefaultInfo()
+    DefaultInfo getDefaultInfo()
 	{
 		return defaultInfo;
 	}
@@ -270,7 +273,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return The DefaultNode, if any, associated with this node.
 	 */
-	public DefaultNode getDefaultNode()
+    DefaultNode getDefaultNode()
 	{
 		return defaultNode;
 	}
@@ -283,14 +286,16 @@ public class ColumnDefinitionNode extends TableElementNode
 	/**
 	 * Get the generation clause.
 	 */
-	public GenerationClauseNode getGenerationClauseNode() { return generationClauseNode; }
+    GenerationClauseNode getGenerationClauseNode() {
+        return generationClauseNode;
+    }
 
 	/**
 	 * Is this an autoincrement column?
 	 *
 	 * @return Whether or not this is an autoincrement column.
 	 */
-	public boolean isAutoincrementColumn()
+    boolean isAutoincrementColumn()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -372,7 +377,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void checkUserType(TableDescriptor td) 
+    void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
 		String			columnTypeName;
@@ -492,8 +497,9 @@ public class ColumnDefinitionNode extends TableElementNode
 	 * 				if increment is 0 or if initial or increment values are out
 	 * 				of range for the datatype.
 	 */
-	public void validateAutoincrement(DataDictionary dd, TableDescriptor td, int tableType)
-	     throws StandardException
+    void validateAutoincrement(DataDictionary dd,
+                               TableDescriptor td,
+                               int tableType) throws StandardException
 	{
 		if (isAutoincrement == false)
 			return;
@@ -528,7 +534,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			break;
 		case Types.BIGINT:
 			autoincrementCheckRange(Long.MIN_VALUE, Long.MAX_VALUE,
-									TypeId.LONGINT_NAME);
+                                    TypeId.BIGINT_NAME);
 			break;
 		default:
 			throw StandardException.newException(SQLState.LANG_AI_INVALID_TYPE,
@@ -609,9 +615,8 @@ public class ColumnDefinitionNode extends TableElementNode
 			// Tell the compiler context to only allow deterministic nodes
 			cc.setReliability( CompilerContext.DEFAULT_RESTRICTION );
 			defaultTree = defaultTree.bindExpression(
-							(FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
+                            new FromList(
+                                getOptimizerFactory().doJoinOrderOptimization(),
 								getContextManager()), 
 							(SubqueryList) null,
 							(List<AggregateNode>) null);
@@ -686,7 +691,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 */
 
-	public boolean defaultTypeIsValid(TypeId columnType,
+    boolean defaultTypeIsValid(TypeId columnType,
 		DataTypeDescriptor columnDesc, TypeId defaultType,
 		ValueNode defaultNode, String defaultText)
 	throws StandardException
@@ -765,13 +770,13 @@ public class ColumnDefinitionNode extends TableElementNode
 			// value if it's integer.
 				return (defType == StoredFormatIds.INT_TYPE_ID);
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 			// This is a BIGINT column: we allow smallints, ints,
 			// and big int constants.  Smallint and int literals
 			// are both covered by INT_TYPE; big int literals are
 			// covered by LONG_INT type.
 				return ((defType == StoredFormatIds.INT_TYPE_ID)
-					|| (defType == StoredFormatIds.LONGINT_TYPE_ID));
+                    || (defType == StoredFormatIds.BIGINT_TYPE_ID));
 	
 			case StoredFormatIds.DECIMAL_TYPE_ID:
 				if (defType == StoredFormatIds.DECIMAL_TYPE_ID) {
@@ -790,7 +795,7 @@ public class ColumnDefinitionNode extends TableElementNode
 						((precision - scale) <=
 						(columnDesc.getPrecision() - columnDesc.getScale())));
 				}
-				else if ((defType == StoredFormatIds.LONGINT_TYPE_ID) ||
+                else if ((defType == StoredFormatIds.BIGINT_TYPE_ID) ||
 					(defType == StoredFormatIds.INT_TYPE_ID)) {
 				// only valid if number of digits is within limits of
 				// the decimal column.  We'll check this at insertion time;
@@ -856,7 +861,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{

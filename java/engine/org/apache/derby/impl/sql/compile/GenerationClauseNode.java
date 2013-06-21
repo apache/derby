@@ -22,22 +22,19 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
-import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.depend.ProviderList;
 
 /**
  * This node describes a Generation Clause in a column definition.
  *
  */
-public class GenerationClauseNode extends ValueNode
+class GenerationClauseNode extends ValueNode
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -59,15 +56,19 @@ public class GenerationClauseNode extends ValueNode
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // INITIALIZATION
+    // CONSTRUCTOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
 
-	public void init( Object generationExpression, Object expressionText )
+    GenerationClauseNode( ValueNode generationExpression,
+                          String expressionText,
+                          ContextManager cm)
     {
-        _generationExpression = (ValueNode) generationExpression;
-        _expressionText = (String) expressionText;
+        super(cm);
+        setNodeType(C_NodeTypes.GENERATION_CLAUSE_NODE);
+        _generationExpression = generationExpression;
+        _expressionText = expressionText;
 	}
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +84,7 @@ public class GenerationClauseNode extends ValueNode
 	void setAuxiliaryProviderList(ProviderList apl) { _apl = apl; }
 
 	/** Return the auxiliary provider list. */
-	public ProviderList getAuxiliaryProviderList() { return _apl; }
+    ProviderList getAuxiliaryProviderList() { return _apl; }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -94,6 +95,7 @@ public class GenerationClauseNode extends ValueNode
 	/**
 	 * Binding the generation clause.
 	 */
+    @Override
     ValueNode bindExpression
         ( FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
@@ -111,6 +113,7 @@ public class GenerationClauseNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -146,6 +149,7 @@ public class GenerationClauseNode extends ValueNode
 	/*
 		Stringify.
 	 */
+    @Override
 	public String toString()
     {
         return
@@ -161,7 +165,8 @@ public class GenerationClauseNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{

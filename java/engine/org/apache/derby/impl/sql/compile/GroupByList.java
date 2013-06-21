@@ -22,12 +22,12 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A GroupByList represents the list of expressions in a GROUP BY clause in
@@ -35,17 +35,23 @@ import org.apache.derby.iapi.reference.Limits;
  *
  */
 
-public class GroupByList extends OrderedColumnList
+class GroupByList extends OrderedColumnList
 {
 	int		numGroupingColsAdded = 0;
 	boolean         rollup = false;
+
+    public GroupByList(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.GROUP_BY_LIST);
+    }
+
 
 	/**
 		Add a column to the list
 
 		@param column	The column to add to the list
 	 */
-	public void addGroupByColumn(GroupByColumn column)
+    void addGroupByColumn(GroupByColumn column)
 	{
 		addElement(column);
 	}
@@ -55,7 +61,7 @@ public class GroupByList extends OrderedColumnList
 
 		@param position	The column to get from the list
 	 */
-	public GroupByColumn getGroupByColumn(int position)
+    GroupByColumn getGroupByColumn(int position)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -67,11 +73,11 @@ public class GroupByList extends OrderedColumnList
 	}
 
 
-	public void setRollup()
+    void setRollup()
 	{
 		rollup = true;
 	}
-	public boolean isRollup()
+    boolean isRollup()
 	{
 		return rollup;
 	}
@@ -83,7 +89,7 @@ public class GroupByList extends OrderedColumnList
 	 * @return int	The number of grouping columns that need to be added to
 	 *				the SELECT list.
 	 */
-	public int getNumNeedToAddGroupingCols()
+    int getNumNeedToAddGroupingCols()
 	{
 		return numGroupingColsAdded;
 	}
@@ -106,10 +112,7 @@ public class GroupByList extends OrderedColumnList
 	{
 		FromList		 fromList = select.getFromList();
 		ResultColumnList selectRCL = select.getResultColumns();
-		SubqueryList	 dummySubqueryList =
-									(SubqueryList) getNodeFactory().getNode(
-													C_NodeTypes.SUBQUERY_LIST,
-													getContextManager());
+        SubqueryList dummySubqueryList = new SubqueryList(getContextManager());
 		int				 numColsAddedHere = 0;
 		int				 size = size();
 
@@ -172,11 +175,10 @@ public class GroupByList extends OrderedColumnList
 				ResultColumn newRC;
 
 				/* Get a new ResultColumn */
-				newRC = (ResultColumn) getNodeFactory().getNode(
-								C_NodeTypes.RESULT_COLUMN,
-								groupingCol.getColumnName(),
-								groupingCol.getColumnExpression().getClone(),
-								getContextManager());
+                newRC = new ResultColumn(
+                        groupingCol.getColumnName(),
+                        groupingCol.getColumnExpression().getClone(),
+                        getContextManager());
 				newRC.setVirtualColumnId(selectRCL.size() + 1);
 				newRC.markGenerated();
 				newRC.markAsGroupingColumn();
@@ -237,7 +239,7 @@ public class GroupByList extends OrderedColumnList
 	 * 
 	 * @throws StandardException
 	 */
-	public GroupByColumn findGroupingColumn(ValueNode node)
+    GroupByColumn findGroupingColumn(ValueNode node)
 	        throws StandardException
 	{
 		int sz = size();
@@ -258,7 +260,7 @@ public class GroupByList extends OrderedColumnList
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void remapColumnReferencesToExpressions() throws StandardException
+    void remapColumnReferencesToExpressions() throws StandardException
 	{
 		GroupByColumn	gbc;
 		int				size = size();
@@ -293,6 +295,7 @@ public class GroupByList extends OrderedColumnList
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG) {
@@ -304,7 +307,7 @@ public class GroupByList extends OrderedColumnList
 	}
 
 
-	public void preprocess(
+    void preprocess(
 			int numTables, FromList fromList, SubqueryList whereSubquerys, 
 			PredicateList wherePredicates) throws StandardException 
 	{

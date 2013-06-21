@@ -22,7 +22,9 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -33,33 +35,34 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
-public class CreateSchemaNode extends DDLStatementNode
+class CreateSchemaNode extends DDLStatementNode
 {
 	private String 	name;
 	private String	aid;
 	
 	/**
-	 * Initializer for a CreateSchemaNode
+     * Constructor for a CreateSchemaNode
 	 *
 	 * @param schemaName	The name of the new schema
 	 * @param aid		 	The authorization id
+     * @param cm            The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-			Object	schemaName,
-			Object	aid)
-		throws StandardException
+    CreateSchemaNode(
+            String schemaName,
+            String aid,
+            ContextManager cm) throws StandardException
 	{
 		/*
 		** DDLStatementNode expects tables, null out
 		** objectName explicitly to clarify that we
 		** can't hang with schema.object specifiers.
 		*/
-		initAndCheck(null);	
-	
-		this.name = (String) schemaName;
-		this.aid = (String) aid;
+        super(null, cm);
+        this.name = schemaName;
+        this.aid = aid;
+        setNodeType(C_NodeTypes.CREATE_SCHEMA_NODE);
 	}
 
 	/**
@@ -68,7 +71,7 @@ public class CreateSchemaNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -87,6 +90,7 @@ public class CreateSchemaNode extends DDLStatementNode
 	 * Bind this createSchemaNode. Main work is to create a StatementPermission
 	 * object to require CREATE_SCHEMA_PRIV at execution time.
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext cc = getCompilerContext();
@@ -95,7 +99,7 @@ public class CreateSchemaNode extends DDLStatementNode
 
 	}
 	
-	public String statementToString()
+    String statementToString()
 	{
 		return "CREATE SCHEMA";
 	}
@@ -107,7 +111,8 @@ public class CreateSchemaNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction()
+    @Override
+    public ConstantAction makeConstantAction()
 	{
 		return	getGenericConstantActionFactory().getCreateSchemaConstantAction(name, aid);
 	}

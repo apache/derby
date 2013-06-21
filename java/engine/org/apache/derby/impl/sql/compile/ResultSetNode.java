@@ -21,44 +21,36 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.List;
+import java.util.Set;
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.OptimizerFactory;
-import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
+import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.ResultDescription;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.catalog.types.DefaultInfoImpl;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * A ResultSetNode represents a result set, that is, a set of rows.  It is
@@ -87,13 +79,17 @@ public abstract class ResultSetNode extends QueryTreeNode
 	// query. Subclasses will set this value where appropriate.
 	CostEstimate		finalCostEstimate;
 
-	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
+    ResultSetNode(ContextManager cm) {
+        super(cm);
+    }
 
+    /**
+     * Convert this object to a String.  See comments in QueryTreeNode.java
+     * for how this should be done for tree printing.
+     *
+     * @return  This object as a String
+     */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -119,7 +115,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @param depth		The depth of this node in the tree
 	 */
 
-	public void printSubNodes(int depth)
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -150,7 +146,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return	The CostEstimate for this ResultSetNode.
 	 */
-	public CostEstimate getCostEstimate()
+    CostEstimate getCostEstimate()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -169,7 +165,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -191,7 +187,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void assignResultSetNumber() throws StandardException
+    void assignResultSetNumber() throws StandardException
 	{
 		resultSetNumber = getCompilerContext().getNextResultSetNumber();
 		resultColumns.setResultSetNumber(resultSetNumber);
@@ -209,7 +205,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 							throws StandardException {
 		return this;
@@ -227,7 +223,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode bindVTITables(FromList fromListParam) 
+    ResultSetNode bindVTITables(FromList fromListParam)
 		throws StandardException {
 		return this;
 	}
@@ -241,7 +237,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressions(FromList fromListParam)
+    void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -259,7 +255,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressionsWithTables(FromList fromListParam)
+    void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -278,7 +274,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindTargetExpressions(FromList fromListParam)
+    void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -315,7 +311,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * Remember that this node is the source result set for an INSERT.
 	 */
-	public void setInsertSource()
+    void setInsertSource()
 	{
 		insertSource = true;
 	}
@@ -328,7 +324,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
+    void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 {
 		if (SanityManager.DEBUG)
@@ -349,7 +345,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(TableName allTableName)
+    ResultColumnList getAllResultColumns(TableName allTableName)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -372,7 +368,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultColumn getMatchingColumn(
+    ResultColumn getMatchingColumn(
 						ColumnReference columnReference)
 						throws StandardException
 	{
@@ -399,10 +395,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
+    ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
 		throws StandardException
 	{
-		BooleanConstantNode	booleanNode;
 		ResultColumn		resultColumn;
 
 		/* We need to be able to handle both ResultColumn and AllResultColumn
@@ -410,11 +405,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 */
 		if (resultColumns.elementAt(0) instanceof AllResultColumn)
 		{
-			resultColumn = (ResultColumn) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN,
-												"",
-												null,
-												getContextManager());
+           resultColumn = new ResultColumn("", null, getContextManager());
 		}
 		else if (onlyConvertAlls)
 		{
@@ -432,10 +423,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 		}
 		
-		booleanNode = (BooleanConstantNode) getNodeFactory().getNode(
-										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-										Boolean.TRUE,
-										getContextManager());
+       BooleanConstantNode booleanNode =
+                new BooleanConstantNode(true, getContextManager());
 
 		resultColumn.setExpression(booleanNode);
 		resultColumn.setType(booleanNode.getTypeServices());
@@ -455,13 +444,11 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return FromList
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromList getFromList()
+    FromList getFromList()
 		throws StandardException
 	{
-		return (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+        return new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                            getContextManager());
 	}
 
 	/**
@@ -475,7 +462,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(FromList fromListParam)
+    void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
 		resultColumns.bindResultColumnsToExpressions();
@@ -534,7 +521,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			if (targetTableDescriptor != null)
 			{
 				resultColumns.bindResultColumnsByName(
-						targetTableDescriptor, (DMLStatementNode)statement);
+                        targetTableDescriptor, statement);
 			}
 			else
 			{
@@ -556,10 +543,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList rcl)
+    void bindUntypedNullsToResultColumns(ResultColumnList rcl)
 				throws StandardException
 	{
-		return;
 	}
 
 	/**
@@ -581,7 +567,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode preprocess(int numTables,
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -608,7 +594,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -628,7 +614,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode addNewPredicate(Predicate predicate)
+    ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -649,7 +635,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		if (SanityManager.DEBUG)
 		SanityManager.THROWASSERT(
@@ -685,8 +671,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 */
 		prRCList.genVirtualColumnNodes(this, resultColumns, false);
 		/* Finally, we create the new ProjectRestrictNode */
-		return (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
+        return new ProjectRestrictNode(
 								this,
 								prRCList,
 								null,	/* Restriction */
@@ -715,7 +700,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
 				throws StandardException	
@@ -736,7 +721,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		/* Default behavior is to do nothing */
 		return this;
@@ -752,7 +737,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return The modified query tree
 	 * @exception StandardException        Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths(PredicateList predList)
+    ResultSetNode modifyAccessPaths(PredicateList predList)
 		throws StandardException
 	{
 		// Default behavior is to call the no-arg version of this method.
@@ -787,7 +772,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param newRCL		The new ResultColumnList for this ResultSetNode
 	 */
-	public void setResultColumns(ResultColumnList newRCL)
+    void setResultColumns(ResultColumnList newRCL)
 	{
 		resultColumns = newRCL;
 	}
@@ -797,7 +782,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return ResultColumnList for this ResultSetNode
 	 */
-	public ResultColumnList getResultColumns()
+    ResultColumnList getResultColumns()
 	{
 		return resultColumns;
 	}
@@ -807,7 +792,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param newRTM	The new referencedTableMap for this ResultSetNode
 	 */
-	public void setReferencedTableMap(JBitSet newRTM)
+    void setReferencedTableMap(JBitSet newRTM)
 	{
 		referencedTableMap = newRTM;
 	}
@@ -827,7 +812,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param passedMap	The table map to fill in.
 	 */
-	public void fillInReferencedTableMap(JBitSet passedMap)
+    void fillInReferencedTableMap(JBitSet passedMap)
 	{
 	}
 
@@ -839,7 +824,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *									directly under a ResultColumn
 	 */
 
-	public void rejectParameters() throws StandardException
+    void rejectParameters() throws StandardException
 	{
 		/* Okay if no resultColumns yet - means no parameters there */
 		if (resultColumns != null)
@@ -858,7 +843,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown if an XML value found
 	 *									directly under a ResultColumn
 	 */
-	public void rejectXMLValues() throws StandardException
+    void rejectXMLValues() throws StandardException
 	{
 		if (resultColumns != null)
 		{
@@ -870,7 +855,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Rename generated result column names as '1', '2' etc... These will be the result
 	 * column names seen by JDBC clients.
 	 */
-	public void renameGeneratedResultNames() throws StandardException
+    void renameGeneratedResultNames() throws StandardException
 	{
 		for (int i=0; i<resultColumns.size(); i++)
 		{
@@ -885,7 +870,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		if it is the one controlling the statement -- i.e., it is
 		the outermost result set node for the statement.
 	 */
-	public void markStatementResultSet()
+    void markStatementResultSet()
 	{
 		statementResultSet = true;
 	}
@@ -933,10 +918,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			throws StandardException
 	{
 		// our newResultCols are put into the bound form straight away.
-		ResultColumnList newResultCols =
-							(ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList
+                newResultCols = new ResultColumnList(getContextManager());
 
 		/* Create a massaged version of the source RCL.
 		 * (Much simpler to build new list and then assign to source,
@@ -945,7 +928,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		int numTargetColumns = target.resultColumnList.size();
 		for (int index = 0; index < numTargetColumns; index++)
 		{
-			ResultColumn	newResultColumn = null;
+            ResultColumn newResultColumn;
 
 			if (colMap[index] != -1)
 			{
@@ -985,7 +968,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 								   DataDictionary dataDictionary)
 		throws StandardException
 	{
-		ResultColumn newResultColumn = null;
+        ResultColumn newResultColumn;
 
 		// the i-th column's value was not specified, so create an
 		// expression containing its default value (null for now)
@@ -1031,8 +1014,10 @@ public abstract class ResultSetNode extends QueryTreeNode
                         ValueNode defaultTree = parseDefault(defaultText);
                         defaultTree = defaultTree.bindExpression
                             (getFromList(), (SubqueryList) null, (List<AggregateNode>) null);
-                        newResultColumn = (ResultColumn) getNodeFactory().getNode
-                            ( C_NodeTypes.RESULT_COLUMN, defaultTree.getTypeServices(), defaultTree, getContextManager());
+                        newResultColumn = new ResultColumn(
+                                defaultTree.getTypeServices(),
+                                defaultTree,
+                                getContextManager());
                     }
 
                     DefaultDescriptor defaultDescriptor = colDesc.getDefaultDescriptor(dataDictionary);
@@ -1046,21 +1031,14 @@ public abstract class ResultSetNode extends QueryTreeNode
             }
             else if (colDesc.isAutoincrement())
             {
-                newResultColumn = 
-                  (ResultColumn)getNodeFactory().getNode(
-                      C_NodeTypes.RESULT_COLUMN,
-                      colDesc, null,
-                      getContextManager());
+                newResultColumn =
+                        new ResultColumn(colDesc, null, getContextManager());
                 newResultColumn.setAutoincrementGenerated();
             }
             else
             {
-                newResultColumn = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
-                    colType,
-                    getNullNode(colType),
-                    getContextManager()
-                    );
+                newResultColumn = new ResultColumn(
+                        colType, getNullNode(colType), getContextManager());
             }
         }
 
@@ -1086,10 +1064,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 		throws StandardException
 	{
 		// our newResultCols are put into the bound form straight away.
-		ResultColumnList newResultCols =
-								(ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList
+                newResultCols = new ResultColumnList(getContextManager());
 
 		int numTargetColumns = target.resultColumnList.size();
 
@@ -1110,11 +1086,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 				oldResultColumn =
 						resultColumns.getResultColumn(colMap[index] + 1);
 
-				newColumnReference = (ColumnReference) getNodeFactory().getNode(
-												C_NodeTypes.COLUMN_REFERENCE,
-												oldResultColumn.getName(),
-												null,
-												getContextManager());
+                newColumnReference = new ColumnReference(
+                        oldResultColumn.getName(), null, getContextManager());
+
 				/* The ColumnReference points to the source of the value */
 				newColumnReference.setSource(oldResultColumn);
 				// colMap entry is 0-based, columnId is 1-based.
@@ -1128,8 +1102,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 				// column descriptors into the result, we grab it from there.
 				// alternatively, we could do what the else clause does,
 				// and look it up in the DD again.
-				newResultColumn = (ResultColumn) getNodeFactory().getNode(
-						C_NodeTypes.RESULT_COLUMN,
+               newResultColumn = new ResultColumn(
 						oldResultColumn.getType(),
 						newColumnReference,
 						getContextManager());
@@ -1155,16 +1128,14 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 *		   top of the query tree which has ColumnReferences under
 		 *		   its ResultColumnList prior to expression push down.
 		 */
-		return (ResultSetNode) getNodeFactory().getNode(
-									C_NodeTypes.PROJECT_RESTRICT_NODE,
-									this,
-									newResultCols,
-									null,
-									null,
-									null,
-									null,
-									null,
-									getContextManager());
+        return new ProjectRestrictNode(this,
+                                       newResultCols,
+                                       null,
+                                       null,
+                                       null,
+                                       null,
+                                       null,
+                                       getContextManager());
 	}
 
 	/**
@@ -1177,10 +1148,9 @@ public abstract class ResultSetNode extends QueryTreeNode
          )
         throws StandardException
     {
-        ValueNode       dummy = (ValueNode) getNodeFactory().getNode
-            ( C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
-        ResultColumn    newResultColumn = (ResultColumn) getNodeFactory().getNode
-            ( C_NodeTypes.RESULT_COLUMN, colDesc.getType(), dummy, getContextManager());
+        ValueNode dummy = new UntypedNullConstantNode(getContextManager());
+        ResultColumn newResultColumn =
+            new ResultColumn(colDesc.getType(), dummy, getContextManager());
         newResultColumn.setColumnDescriptor( targetTD, colDesc );
 
         return newResultColumn;
@@ -1204,7 +1174,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 		Parser						p;
 		ValueNode					defaultTree;
 		LanguageConnectionContext	lcc = getLanguageConnectionContext();
-		CompilerContext 			compilerContext = getCompilerContext();
 
 		/* Get a Statement to pass to the parser */
 
@@ -1295,7 +1264,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		cursor.  Most types of ResultSetNode can't be target tables.
 		@return true if the target table supports positioned updates.
 	 */
-	public boolean markAsCursorTargetTable()
+    boolean markAsCursorTargetTable()
 	{
 		return false;
 	}
@@ -1331,7 +1300,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode genProjectRestrict()
+    ResultSetNode genProjectRestrict()
 				throws StandardException
 	{
 		/* We get a shallow copy of the ResultColumnList and its 
@@ -1347,8 +1316,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		prRCList.genVirtualColumnNodes(this, resultColumns);
 
 		/* Finally, we create the new ProjectRestrictNode */
-		return (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
+        return new ProjectRestrictNode(
 								this,
 								prRCList,
 								null,	/* Restriction */
@@ -1356,7 +1324,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 								null,	/* Project subquery list */
 								null,	/* Restrict subquery list */
 								null,
-								getContextManager()				 );
+                                getContextManager());
 	}
 
 	/** 
@@ -1382,7 +1350,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	protected ResultSetNode genProjectRestrict(int numTables)
+    ResultSetNode genProjectRestrict(int numTables)
 				throws StandardException
 	{
 		return genProjectRestrict();
@@ -1442,7 +1410,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode changeAccessPath() throws StandardException
+    ResultSetNode changeAccessPath() throws StandardException
 	{
 		return this;
 	}
@@ -1457,7 +1425,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		return false;
@@ -1488,7 +1456,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @return Whether or not the underlying ResultSet tree will return a single row.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isOneRowResultSet()	throws StandardException
+    boolean isOneRowResultSet() throws StandardException
 	{
 		// Default is false
 		return false;
@@ -1500,7 +1468,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return Whether or not the underlying ResultSet tree if for NOT EXISTS.
 	 */
-	public boolean isNotExists()
+    boolean isNotExists()
 	{
 		// Default is false
 		return false;
@@ -1574,6 +1542,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -1593,7 +1562,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode considerMaterialization(JBitSet outerTables)
+    ResultSetNode considerMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
 		return this;
@@ -1607,7 +1576,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean performMaterialization(JBitSet outerTables)
+    boolean performMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
 		return false;
@@ -1715,7 +1684,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    int updateTargetLockMode()
 	{
 		return TransactionController.MODE_TABLE;
 	}
@@ -1791,7 +1760,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan(Set distinctColumns)
+    boolean isPossibleDistinctScan(Set<BaseColumnNode> distinctColumns)
 	{
 		return false;
 	}
@@ -1867,14 +1836,14 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @return number of aggregates
 	 */
-    static int numDistinctAggregates(List aggregates)
+    static int numDistinctAggregates(List<AggregateNode> aggregates)
 	{
 		int		count = 0;
         int     size = aggregates.size();
 
 		for (int index = 0; index < size; index++)
 		{
-            if (((AggregateNode) aggregates.get(index)).isDistinct()) {
+            if ((aggregates.get(index)).isDistinct()) {
                 count++;
             }
 		}
@@ -1884,7 +1853,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 	// It may be we have a SELECT view underneath a LOJ.
 	// Return null for now.. we don't do any optimization.
-	public JBitSet LOJgetReferencedTables(int numTables)
+    JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{
 		if (this instanceof FromTable)

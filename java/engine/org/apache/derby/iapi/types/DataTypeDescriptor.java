@@ -26,7 +26,6 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.sql.Types;
 import java.text.RuleBasedCollator;
-
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
@@ -1525,7 +1524,7 @@ public final class DataTypeDescriptor implements Formatable
 			case StoredFormatIds.INT_TYPE_ID:
 				return 4.0;
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 				return 8.0;
 
 			case StoredFormatIds.REAL_TYPE_ID:

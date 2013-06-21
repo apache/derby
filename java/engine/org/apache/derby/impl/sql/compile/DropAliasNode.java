@@ -21,49 +21,42 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.reference.SQLState;
-
+import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A DropAliasNode  represents a DROP ALIAS statement.
  *
  */
 
-public class DropAliasNode extends DDLStatementNode
+class DropAliasNode extends DDLStatementNode
 {
 	private char aliasType;
 	private char nameSpace;
 
 	/**
-	 * Initializer for a DropAliasNode
+     * Constructor for a DropAliasNode
 	 *
 	 * @param dropAliasName	The name of the method alias being dropped
 	 * @param aliasType				Alias type
+     * @param cm  Context manager
 	 *
 	 * @exception StandardException
 	 */
-	public void init(Object dropAliasName, Object aliasType)
+    DropAliasNode(TableName dropAliasName, char aliasType, ContextManager cm)
 				throws StandardException
 	{
-		TableName dropItem = (TableName) dropAliasName;
-		initAndCheck(dropItem);
-		this.aliasType = ((Character) aliasType).charValue();
+        super(dropAliasName, cm);
+        setNodeType(C_NodeTypes.DROP_ALIAS_NODE);
+        this.aliasType = aliasType;
 	
 		switch (this.aliasType)
 		{
@@ -97,7 +90,7 @@ public class DropAliasNode extends DDLStatementNode
 
 	public	char	getAliasType() { return aliasType; }
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "DROP ".concat(aliasTypeName(aliasType));
 	}
@@ -108,6 +101,7 @@ public class DropAliasNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dataDictionary = getDataDictionary();
@@ -143,7 +137,8 @@ public class DropAliasNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropAliasConstantAction(getSchemaDescriptor(), getRelativeName(), nameSpace);
 	}

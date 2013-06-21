@@ -23,27 +23,25 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
 import java.util.Map;
-
 import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RowMultiSetImpl;
+import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Node;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -69,14 +67,14 @@ import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
  *
  */
 
-public abstract class QueryTreeNode implements Node, Visitable
+public abstract class QueryTreeNode implements Visitable
 {
-	public static final int AUTOINCREMENT_START_INDEX = 0;
-	public static final int AUTOINCREMENT_INC_INDEX   = 1;
-	public static final int AUTOINCREMENT_IS_AUTOINCREMENT_INDEX   = 2;
+    static final int AUTOINCREMENT_START_INDEX = 0;
+    static final int AUTOINCREMENT_INC_INDEX   = 1;
+    static final int AUTOINCREMENT_IS_AUTOINCREMENT_INDEX   = 2;
 	//Parser uses this static field to make a note if the autoincrement column 
 	//is participating in create or alter table.
-	public static final int AUTOINCREMENT_CREATE_MODIFY  = 3;
+    static final int AUTOINCREMENT_CREATE_MODIFY  = 3;
 
 	private int		beginOffset = -1;		// offset into SQL input of the substring
 	                                // which this query node encodes.
@@ -111,28 +109,22 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 */
 	boolean isPrivilegeCollectionRequired = true;
 
-	/**
-	 * Set the ContextManager for this node.
-	 * 
-	 * @param cm	The ContextManager.
-	 */
-	public void setContextManager(ContextManager cm)
-	{
-		this.cm = cm;
-		
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(cm != null,
-				"cm not expected to be null");
-		}
-	}
+    QueryTreeNode(ContextManager cm) {
+        this.cm = cm;
 
-	/**
+        if (SanityManager.DEBUG)
+       {
+           SanityManager.ASSERT(cm != null,
+               "cm not expected to be null");
+       }
+    }
+
+    /**
 	 * Get the current ContextManager.
 	 *
 	 * @return The current ContextManager.
 	 */
-	public final ContextManager getContextManager()
+    final ContextManager getContextManager()
 	{
 		if (SanityManager.DEBUG) {
 			if (cm == null)
@@ -147,12 +139,11 @@ public abstract class QueryTreeNode implements Node, Visitable
 	  *	@return	the node factory for this database.
 	  *
 	  */
-	public	final NodeFactory	getNodeFactory() 
+    public  final OptimizerFactory getOptimizerFactory()
 	{
 		return getLanguageConnectionContext().getLanguageConnectionFactory().
-			                                            getNodeFactory();
+                                                        getOptimizerFactory();
 	}
-
 
 	/**
 	  *	Gets the constant action factory for this database.
@@ -277,11 +268,11 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @return	The node String reformatted with tab indentation
 	 */
 
-	public static String formatNodeString(String nodeString, int depth)
+    static String formatNodeString(String nodeString, int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer	nodeStringBuffer = new StringBuffer(nodeString);
+            StringBuilder   nodeStringBuilder = new StringBuilder(nodeString);
 			int		pos;
 			char		c;
 			char[]		indent = new char[depth];
@@ -296,23 +287,23 @@ public abstract class QueryTreeNode implements Node, Visitable
 			}
 
 			/* Indent the beginning of the string */
-			nodeStringBuffer.insert(0, indent);
+            nodeStringBuilder.insert(0, indent);
 
 			/*
 			** Look for newline characters, except for the last character.
 			** We don't want to indent after the last newline.
 			*/
-			for (pos = 0; pos < nodeStringBuffer.length() - 1; pos++)
+            for (pos = 0; pos < nodeStringBuilder.length() - 1; pos++)
 			{
-				c = nodeStringBuffer.charAt(pos);
+                c = nodeStringBuilder.charAt(pos);
 				if (c == '\n')
 				{
 					/* Indent again after each newline */
-					nodeStringBuffer.insert(pos + 1, indent);
+                    nodeStringBuilder.insert(pos + 1, indent);
 				}
 			}
 
-			return nodeStringBuffer.toString();
+            return nodeStringBuilder.toString();
 		}
 		else
 		{
@@ -347,7 +338,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * Print call stack for debug purposes
 	 */
 
-	public void stackPrint()
+    void stackPrint()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -371,7 +362,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *			the amount to indent it when printing it.
 	 */
 
-	public void treePrint(int depth)
+    void treePrint(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -417,7 +408,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @param outputString	The String to print
 	 */
 
-	public static void debugPrint(String outputString)
+    static void debugPrint(String outputString)
 	{
 		if (SanityManager.DEBUG) {
 			SanityManager.GET_DEBUG_STREAM().print(outputString);
@@ -459,7 +450,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @param depth		The depth to indent the sub-nodes
 	 */
 
-	public void printSubNodes(int depth)
+    void printSubNodes(int depth)
 	{
 	}
 
@@ -487,6 +478,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @return	This node formatted as a String
 	 */
 
+    @Override
 	public String toString()
 	{
 		return "";
@@ -500,7 +492,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @param label		The String to print
 	 */
 
-	public void printLabel(int depth, String label)
+    void printLabel(int depth, String label)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -540,7 +532,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	final boolean isSessionSchema(String schemaName)
+    static boolean isSessionSchema(String schemaName)
 	{
 		return SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME.equals(schemaName);
 	}
@@ -573,7 +565,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * 
 	 * @return true if need to collect privilege requirement for this node
 	 */
-	public boolean isPrivilegeCollectionRequired()
+    boolean isPrivilegeCollectionRequired()
 	{
 		return(isPrivilegeCollectionRequired);
 	}
@@ -618,7 +610,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	null;
 	}
@@ -628,7 +620,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @param nodeType The node type.
 	 */
-	public void setNodeType(int nodeType)
+    void setNodeType(int nodeType)
 	{
 		this.nodeType = nodeType;
 	}
@@ -658,12 +650,12 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 * @return The DataDictionary
 	 *
 	 */
-	public final DataDictionary getDataDictionary()
+    final public DataDictionary getDataDictionary()
 	{
 		return getLanguageConnectionContext().getDataDictionary();
 	}
 
-	public final DependencyManager getDependencyManager()
+    final DependencyManager getDependencyManager()
 	{
 		return getDataDictionary().getDependencyManager();
 	}
@@ -812,106 +804,110 @@ public abstract class QueryTreeNode implements Node, Visitable
     ConstantNode getNullNode(DataTypeDescriptor type)
 		throws StandardException
 	{
-        int constantNodeType;
-		switch (type.getTypeId().getJDBCTypeId())
-		{
-		  case Types.VARCHAR:
-              constantNodeType = C_NodeTypes.VARCHAR_CONSTANT_NODE;
-			break;
-
-		  case Types.CHAR:
-              constantNodeType = C_NodeTypes.CHAR_CONSTANT_NODE;
-			break;
-
-		  case Types.TINYINT:
-              constantNodeType = C_NodeTypes.TINYINT_CONSTANT_NODE;
-			break;
-
-		  case Types.SMALLINT:
-              constantNodeType = C_NodeTypes.SMALLINT_CONSTANT_NODE;
-			break;
-
-		  case Types.INTEGER:
-              constantNodeType = C_NodeTypes.INT_CONSTANT_NODE;
-			break;
-
-		  case Types.BIGINT:
-              constantNodeType = C_NodeTypes.LONGINT_CONSTANT_NODE;
-			break;
-
-		  case Types.REAL:
-              constantNodeType = C_NodeTypes.FLOAT_CONSTANT_NODE;
-			break;
-
-		  case Types.DOUBLE:
-              constantNodeType = C_NodeTypes.DOUBLE_CONSTANT_NODE;
-			break;
-
-		  case Types.NUMERIC:
-		  case Types.DECIMAL:
-              constantNodeType = C_NodeTypes.DECIMAL_CONSTANT_NODE;
-			break;
-
+        switch (type.getTypeId().getJDBCTypeId())
+        {
+          case Types.VARCHAR: {
+              CharConstantNode ccn = new CharConstantNode(
+                      C_NodeTypes.VARCHAR_CONSTANT_NODE,
+                      type.getTypeId(),
+                      cm);
+              ccn.setType(type.getNullabilityType(true));
+              return ccn;
+          }
+          case Types.CHAR: {
+              CharConstantNode ccn = new CharConstantNode(type.getTypeId(), cm);
+              ccn.setType(type.getNullabilityType(true));
+              return ccn;
+          }
+          case Types.TINYINT:
+          case Types.SMALLINT:
+          case Types.INTEGER:
+          case Types.BIGINT:
+          case Types.REAL:
+          case Types.DOUBLE:
+          case Types.DECIMAL: {
+              NumericConstantNode nvn =
+                      new NumericConstantNode(type.getTypeId(), cm);
+              nvn.setType(type.getNullabilityType(true)); // SUPERFLUOUS? FIXME
+              return nvn;
+          }
+          case Types.NUMERIC: {
+              // Map this to DECIMAL
+              NumericConstantNode ncn = new NumericConstantNode(
+                      TypeId.getBuiltInTypeId(Types.DECIMAL), cm);
+              ncn.setType(type.getNullabilityType(true)); // SUPERFLUOUS? FIXME
+              return ncn;
+          }
 		  case Types.DATE:
 		  case Types.TIME:
-		  case Types.TIMESTAMP:
-              constantNodeType = C_NodeTypes.USERTYPE_CONSTANT_NODE;
-			break;
+          case Types.TIMESTAMP: {
+              UserTypeConstantNode
+                      utcn = new UserTypeConstantNode(type.getTypeId(), cm);
+              utcn.setType(type.getNullabilityType(true));
+              return utcn;
+          }
+          case Types.BINARY: {
+              BitConstantNode bcn =
+                      new BitConstantNode(type.getTypeId(), cm);
+              bcn.setType(type.getNullabilityType(true));
+              return bcn;
+          }
+          case Types.VARBINARY: {
+              VarbitConstantNode vcn =
+                      new VarbitConstantNode(type.getTypeId(), cm);
+              vcn.setType(type.getNullabilityType(true));
+              return vcn;
+          }
+          case Types.LONGVARCHAR: {
+              CharConstantNode ccn = new CharConstantNode(
+                  C_NodeTypes.LONGVARCHAR_CONSTANT_NODE, type.getTypeId(), cm);
+              ccn.setType(type.getNullabilityType(true));
+              return ccn;
+          }
+          case Types.CLOB: {
+              CharConstantNode ccn = new CharConstantNode(
+                  C_NodeTypes.CLOB_CONSTANT_NODE, type.getTypeId(), cm);
+              ccn.setType(type.getNullabilityType(true));
+              return ccn;
+          }
+          case Types.LONGVARBINARY: {
+              VarbitConstantNode vcn =
+                      new VarbitConstantNode(type.getTypeId(), cm);
+              vcn.setType(type.getNullabilityType(true));
+              return vcn;
+          }
+          case Types.BLOB: {
+              VarbitConstantNode vcn =
+                  new VarbitConstantNode(type.getTypeId(), cm);
+              vcn.setType(type.getNullabilityType(true));
+              return vcn;
+          }
 
-		  case Types.BINARY:
-              constantNodeType = C_NodeTypes.BIT_CONSTANT_NODE;
-			break;
-
-		  case Types.VARBINARY:
-              constantNodeType = C_NodeTypes.VARBIT_CONSTANT_NODE;
-			break;
-
-		  case Types.LONGVARCHAR:
-              constantNodeType = C_NodeTypes.LONGVARCHAR_CONSTANT_NODE;
-			break;
-
-		  case Types.CLOB:
-              constantNodeType = C_NodeTypes.CLOB_CONSTANT_NODE;
-			break;
-
-		  case Types.LONGVARBINARY:
-              constantNodeType = C_NodeTypes.LONGVARBIT_CONSTANT_NODE;
-			break;
-
-		  case Types.BLOB:
-              constantNodeType = C_NodeTypes.BLOB_CONSTANT_NODE;
-			break;
-
-          case Types.SQLXML:
-              constantNodeType = C_NodeTypes.XML_CONSTANT_NODE;
-			break;
-            
-          case Types.BOOLEAN:
-              constantNodeType = C_NodeTypes.BOOLEAN_CONSTANT_NODE;
-              break;
-
+        case Types.SQLXML: {
+              XMLConstantNode xcn =
+                  new XMLConstantNode(type.getTypeId(), cm);
+             xcn.setType(type.getNullabilityType(true));
+              return xcn;
+          }
+          case Types.BOOLEAN: {
+              BooleanConstantNode bCn =
+                      new BooleanConstantNode(type.getTypeId(), cm);
+              bCn.setType(type.getNullabilityType(true));
+              return bCn;
+          }
 		  default:
-			if (type.getTypeId().userType())
-			{
-                constantNodeType = C_NodeTypes.USERTYPE_CONSTANT_NODE;
-			}
-			else
-			{
+           if (type.getTypeId().userType()) {
+                UserTypeConstantNode utcn =
+                        new UserTypeConstantNode(type.getTypeId(), cm);
+                utcn.setType(type.getNullabilityType(true));
+                return utcn;
+           } else {
 				if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT( "Unknown type " + 
                         type.getTypeId().getSQLTypeName() + " in getNullNode");
 				return null;
 			}
 		}
-        
-        ConstantNode constantNode = (ConstantNode) getNodeFactory().getNode(
-                constantNodeType,
-                type.getTypeId(),
-                cm);
-
-        constantNode.setType(type.getNullabilityType(true));
-
-		return constantNode;
 	}
 
 	/**
@@ -921,7 +917,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataValueDescriptor convertDefaultNode(DataTypeDescriptor typeDescriptor)
+    DataValueDescriptor convertDefaultNode(DataTypeDescriptor typeDescriptor)
 							throws StandardException
 	{
 		/*
@@ -929,282 +925,6 @@ public abstract class QueryTreeNode implements Node, Visitable
 		** can be converted to default value.
 		*/
 		return null;
-	}
-
-	/* Initializable methods */
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Single-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Two-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Three-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Four-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Five-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Six-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Seven-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Eight-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Nine-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9,
-						Object arg10) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Ten-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9,
-						Object arg10,
-						Object arg11) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Eleven-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9,
-						Object arg10,
-						Object arg11,
-						Object arg12) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Twelve-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9,
-						Object arg10,
-						Object arg11,
-						Object arg12,
-						Object arg13) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Thirteen-argument init() not implemented for " + getClass().getName());
-		}
-	}
-
-	/**
-	 * Initialize a query tree node.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void init(Object arg1,
-						Object arg2,
-						Object arg3,
-						Object arg4,
-						Object arg5,
-						Object arg6,
-						Object arg7,
-						Object arg8,
-						Object arg9,
-						Object arg10,
-						Object arg11,
-						Object arg12,
-						Object arg13,
-						Object arg14) throws StandardException
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("Fourteen-argument init() not implemented for " + getClass().getName());
-		}
 	}
 
 	public	TableName	makeTableName
@@ -1215,25 +935,18 @@ public abstract class QueryTreeNode implements Node, Visitable
 		throws StandardException
 	{
         return makeTableName
-            ( getNodeFactory(), getContextManager(), schemaName, flatName );
+            ( getContextManager(), schemaName, flatName );
 	}
 
 	public	static  TableName	makeTableName
 	(
-        NodeFactory nodeFactory,
         ContextManager contextManager,
 		String	schemaName,
 		String	flatName
 	)
 		throws StandardException
 	{
-		return (TableName) nodeFactory.getNode
-			(
-				C_NodeTypes.TABLE_NAME,
-				schemaName,
-				flatName,
-				contextManager
-			);
+        return new TableName(schemaName, flatName, contextManager);
 	}
 
 	public boolean isAtomic() throws StandardException
@@ -1431,7 +1144,7 @@ public abstract class QueryTreeNode implements Node, Visitable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public TableName resolveTableToSynonym(TableName tabName) throws StandardException
+    TableName resolveTableToSynonym(TableName tabName) throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
 		String nextSynonymTable = tabName.getTableName();
@@ -1464,8 +1177,11 @@ public abstract class QueryTreeNode implements Node, Visitable
 		if (!found)
 			return null;
 
-		TableName tableName = new TableName();
-		tableName.init(nextSynonymSchema, nextSynonymTable);
+        TableName tableName = new TableName(
+                nextSynonymSchema,
+                nextSynonymTable,
+                getContextManager());
+
 		return tableName;
 	}
 

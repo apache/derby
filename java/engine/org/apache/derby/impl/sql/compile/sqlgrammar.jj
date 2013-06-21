@@ -39,59 +39,46 @@ PARSER_BEGIN(SQLParser)
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.StatementType;
-
-import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.transaction.TransactionControl;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataTypeUtilities;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.sql.ParameterMetaData;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.StringTokenizer;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
+import org.apache.derby.iapi.transaction.TransactionControl;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DateTimeDataValue;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.iapi.util.IdUtil;
-
-import java.sql.ParameterMetaData;
-import java.sql.Types;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.StringTokenizer;
+import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 
 public class SQLParser
 {
@@ -164,7 +151,7 @@ public class SQLParser
 
 	private Object[]					paramDefaults;
 	private String						statementSQLText;
-	private NodeFactory					nodeFactory;
+    private OptimizerFactory            optimizerFactory;
 	private ContextManager				cm;
 	private CompilerContext				compilerContext;
 
@@ -181,8 +168,8 @@ public class SQLParser
 	 * xxx to upper case if we try to resolve it as a class
 	 * alias at bind time.
 	 */
-	private Boolean lastTokenDelimitedIdentifier = Boolean.FALSE;
-	private Boolean	nextToLastTokenDelimitedIdentifier = Boolean.FALSE;
+    private boolean lastTokenDelimitedIdentifier = false;
+    private boolean nextToLastTokenDelimitedIdentifier = false;
 
 
 	/*
@@ -202,19 +189,20 @@ public class SQLParser
 	}
 
 	/**
-	  *	Get the NodeFactory for this database.
+      * Get the OptimizerFactory for this database.
 	  *
-	  *	@return	The NodeFactory for this database.
+      * @return The OptimizerFactory for this database.
 	  * @exception StandardException		Thrown on error
 	  */
-	private	final NodeFactory	getNodeFactory()	throws StandardException
+    private final OptimizerFactory getOptimizerFactory()
+            throws StandardException
 	{
-		if ( nodeFactory == null )
+        if ( optimizerFactory == null )
 		{
-			nodeFactory = getCompilerContext().getNodeFactory();
+            optimizerFactory = getCompilerContext().getOptimizerFactory();
 		}
 
-		return	nodeFactory;
+        return optimizerFactory;
 	}
 
 	private final CompilerContext getCompilerContext()
@@ -410,21 +398,20 @@ public class SQLParser
 		switch (multiplicativeOperator)
 		{
 		  case BinaryOperatorNode.TIMES:
-			return (ValueNode) nodeFactory.getNode(
+            return new BinaryArithmeticOperatorNode(
 									C_NodeTypes.BINARY_TIMES_OPERATOR_NODE,
 									leftOperand,
 									rightOperand, 
 									getContextManager());
 
 		  case BinaryOperatorNode.DIVIDE:
-			return (ValueNode) nodeFactory.getNode(
+            return new BinaryArithmeticOperatorNode(
 									C_NodeTypes.BINARY_DIVIDE_OPERATOR_NODE,
 									leftOperand,
 									rightOperand,
 									getContextManager());
 		  case BinaryOperatorNode.CONCATENATE:
-			return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.CONCATENATION_OPERATOR_NODE,
+              return new ConcatenationOperatorNode(
 									leftOperand,
 									rightOperand,
 									getContextManager());
@@ -501,11 +488,7 @@ public class SQLParser
 			sdv = (DataValueDescriptor) paramDefaults[parameterNumber];
 		}
 
-		parm = (ParameterNode) nodeFactory.getNode(
-								C_NodeTypes.PARAMETER_NODE,
-								ReuseFactory.getInteger(parameterNumber),
-								sdv,
-								getContextManager());
+        parm = new ParameterNode(parameterNumber, sdv, getContextManager());
 
 		parameterNumber++;
 		parameterList.add(parm);
@@ -530,10 +513,10 @@ public class SQLParser
 		// first, see if it might be an integer
 		try
 		{
-			return (NumericConstantNode) nodeFactory.getNode(
-										C_NodeTypes.INT_CONSTANT_NODE,
-										new Integer(num),
-										cm);
+           return new NumericConstantNode(
+               TypeId.getBuiltInTypeId(Types.INTEGER),
+               Integer.valueOf(num),
+               cm);
 		}
 		catch (NumberFormatException nfe)
 		{
@@ -543,10 +526,10 @@ public class SQLParser
 		// next, see if it might be a long
 		try
 		{
-			return (NumericConstantNode) nodeFactory.getNode(
-										C_NodeTypes.LONGINT_CONSTANT_NODE,
-										new Long(num),
-										cm);
+            return new NumericConstantNode(
+                TypeId.getBuiltInTypeId(Types.BIGINT),
+                Long.valueOf(num),
+                cm);
 		}
 		catch (NumberFormatException nfe)
 		{
@@ -556,10 +539,8 @@ public class SQLParser
 			// else we want to continue on below
 		}
 
-		return (NumericConstantNode) nodeFactory.getNode(
-									C_NodeTypes.DECIMAL_CONSTANT_NODE,
-									num,
-									cm);
+       return new NumericConstantNode(
+           TypeId.getBuiltInTypeId(Types.DECIMAL), num, cm);
 	}
 	/**
 	 * Determine whether the current token represents one of
@@ -658,7 +639,7 @@ public class SQLParser
 		  case INTEGER:
 		  case INT:
 		  case SMALLINT:
-		  case LONGINT:
+          case BIGINT:
 		  case FLOAT:
 		  case REAL:
 		  case DATE:
@@ -728,28 +709,20 @@ public class SQLParser
 										 ValueNode whereClause)
 		throws StandardException
 	{
-		FromList   fromList = (FromList) nodeFactory.getNode(
-								C_NodeTypes.FROM_LIST,
-								getContextManager());
+        FromList   fromList = new FromList(getContextManager());
 
 		fromList.addFromTable(fromTable);
 
-		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
-										C_NodeTypes.SELECT_NODE,
-										null,
-										fromList, /* FROM list */
-					  					whereClause, /* WHERE clause */
-										null, /* GROUP BY list */
-										null, /* having clause */
-										null, /* window list */
-										getContextManager());
+        SelectNode resultSet = new SelectNode(null,
+                                              fromList, /* FROM list */
+                                              whereClause, /* WHERE clause */
+                                              null, /* GROUP BY list */
+                                              null, /* having clause */
+                                              null, /* window list */
+                                              getContextManager());
 
-		StatementNode retval =
-			(StatementNode) nodeFactory.getNode(
-							C_NodeTypes.DELETE_NODE,
-							tableName,
-							resultSet,
-							getContextManager());
+        StatementNode retval =
+            new DeleteNode(tableName, resultSet, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -768,28 +741,20 @@ public class SQLParser
 										 ValueNode whereClause)
 		throws StandardException
 	{
-		FromList   fromList = (FromList) nodeFactory.getNode(
-								C_NodeTypes.FROM_LIST,
-								getContextManager());
+        FromList   fromList = new FromList(getContextManager());
 
 		fromList.addFromTable(fromTable);
 
-		SelectNode resultSet = (SelectNode) nodeFactory.getNode(
-										C_NodeTypes.SELECT_NODE,
-										setClause,
-										fromList, /* FROM list */
-					  					whereClause, /* WHERE clause */
-										null, /* GROUP BY list */
-										null, /* having clause */
-										null, /* window list */
-										getContextManager());
+        SelectNode resultSet = new SelectNode(setClause,
+                                              fromList, /* FROM list */
+                                              whereClause, /* WHERE clause */
+                                              null, /* GROUP BY list */
+                                              null, /* having clause */
+                                              null, /* window list */
+                                              getContextManager());
 
-		StatementNode retval =
-			(StatementNode) nodeFactory.getNode(
-							C_NodeTypes.UPDATE_NODE,
-							tableName,
-							resultSet,
-							getContextManager());
+        StatementNode retval =
+            new UpdateNode(tableName, resultSet, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -808,18 +773,15 @@ public class SQLParser
     {
         if (trimChar == null)
         {
-        	trimChar = (CharConstantNode) nodeFactory.getNode(
-							C_NodeTypes.CHAR_CONSTANT_NODE,
-							" ",
-							getContextManager());
+           trimChar = new CharConstantNode(" ", getContextManager());
         }
-        return (ValueNode) nodeFactory.getNode(
+        return new TernaryOperatorNode(
 							C_NodeTypes.TRIM_OPERATOR_NODE,
 							trimSource, // receiver
 							trimChar,   // leftOperand.
 							null,
-							ReuseFactory.getInteger(TernaryOperatorNode.TRIM),
-							trimSpec,
+                            TernaryOperatorNode.TRIM,
+                            trimSpec.intValue(),
 							cm == null ? getContextManager() : cm);
     }
 
@@ -1638,13 +1600,12 @@ public class SQLParser
 	 */
 	StatementNode
 	getCreateAliasNode(
-		Object aliasName,
+        TableName aliasName,
 		Object targetName,
 		Object aliasSpecificInfo,
                 char aliasType)
 		throws StandardException
 	{
-        int nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
         String methodName = null;
 
         if (
@@ -1671,13 +1632,12 @@ public class SQLParser
             targetName = javaClassName;
         }
 
-        return (StatementNode) getNodeFactory().getNode(
-            nodeType,
+        return new CreateAliasNode(
             aliasName,
             targetName,
             methodName,
             aliasSpecificInfo,
-            new Character(aliasType),
+            aliasType,
             cm );
 	}
 
@@ -1685,16 +1645,9 @@ public class SQLParser
 		Create a node for the drop alias/procedure call.
 	*/
 	StatementNode
-	dropAliasNode(Object aliasName, char type) throws StandardException
+    dropAliasNode(TableName aliasName, char type) throws StandardException
 	{
-
-		StatementNode stmt = (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.DROP_ALIAS_NODE,
-								aliasName,
-								new Character(type),
-								getContextManager());
-
-		return stmt;
+        return new DropAliasNode(aliasName, type, getContextManager());
 	}
 
     /**
@@ -1702,26 +1655,19 @@ public class SQLParser
      *      - the string
      *      - the start position
      *      - the length
-     *      - a boolean values for specifying the kind of substring function
      * @exception StandardException  Thrown on error
      */
     ValueNode getSubstringNode( ValueNode stringValue, ValueNode startPosition, 
-                         ValueNode length, Boolean boolVal ) throws StandardException
+                         ValueNode length) throws StandardException
     {
-        return (ValueNode) nodeFactory.getNode(
+        return new TernaryOperatorNode(
 	    					C_NodeTypes.SUBSTRING_OPERATOR_NODE,
 		    				stringValue,
 			    			startPosition,
 				    		length,
-				    		ReuseFactory.getInteger(TernaryOperatorNode.SUBSTRING),
-					    	null,
+                            TernaryOperatorNode.SUBSTRING,
+                            -1,
 						    getContextManager());
-    }
-
-    final public TableName
-    qualifiedName(int id_length_limit) throws ParseException, StandardException
-    {
-	return qualifiedName( C_NodeTypes.TABLE_NAME, id_length_limit);
     }
 
     private void initStatement( String statementSQLText, Object[] paramDefaults)
@@ -1731,15 +1677,16 @@ public class SQLParser
         parameterNumber = 0;
        this.statementSQLText = statementSQLText;
         this.paramDefaults = paramDefaults;
-        nodeFactory = getNodeFactory();
+        optimizerFactory = getOptimizerFactory();
         initUnnamedParameterList();
     } // End of initStatement
 
     private ValueNode getJdbcIntervalNode( int intervalType) throws StandardException
     {
-        return (ValueNode) nodeFactory.getNode( C_NodeTypes.INT_CONSTANT_NODE,
-                                                ReuseFactory.getInteger( intervalType),
-                                                getContextManager());
+        return new NumericConstantNode(
+            TypeId.getBuiltInTypeId(Types.INTEGER),
+            ReuseFactory.getInteger(intervalType),
+            getContextManager());
     }
     
     /**
@@ -1796,7 +1743,7 @@ public class SQLParser
 			autoIncrementInfo = null;
 		}
 
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 			C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
 			columnName,
 			defaultNode,
@@ -1833,38 +1780,32 @@ public class SQLParser
         switch(joinType)
         {
             case JoinNode.INNERJOIN:
-                return (JoinNode) nodeFactory.getNode(
-                        C_NodeTypes.JOIN_NODE,
-                        leftRSN,
-                        rightRSN,
-                        onClause,
-                        usingClause,
-                        null,
-                        null,
-                        null,
-                        getContextManager());
+                return new JoinNode(leftRSN,
+                                    rightRSN,
+                                    onClause,
+                                    usingClause,
+                                    null,
+                                    null,
+                                    null,
+                                    getContextManager());
 
             case JoinNode.LEFTOUTERJOIN:
-                return (JoinNode) nodeFactory.getNode(
-                        C_NodeTypes.HALF_OUTER_JOIN_NODE,
-                        leftRSN,
-                        rightRSN,
-                        onClause,
-                        usingClause,
-                        Boolean.FALSE,
-                        null,
-                        getContextManager());
+                return new HalfOuterJoinNode(leftRSN,
+                                             rightRSN,
+                                             onClause,
+                                             usingClause,
+                                             false,
+                                             null,
+                                             getContextManager());
 
             case JoinNode.RIGHTOUTERJOIN:
-                return (JoinNode) nodeFactory.getNode(
-                        C_NodeTypes.HALF_OUTER_JOIN_NODE,
-                        leftRSN,
-                        rightRSN,
-                        onClause,
-                        usingClause,
-                        Boolean.TRUE,
-                        null,
-                        getContextManager());
+                return new HalfOuterJoinNode(leftRSN,
+                                             rightRSN,
+                                             onClause,
+                                             usingClause,
+                                             true,
+                                             null,
+                                             getContextManager());
 
             default:
                 if (SanityManager.DEBUG)
@@ -2477,7 +2418,7 @@ TOKEN [IGNORE_CASE] :
 |   <DATABASE: "database">
 |	<GET_CURRENT_CONNECTION: "getCurrentConnection">
 |	<EXPLAIN: "explain">
-|	<LONGINT: "bigint">
+|   <BIGINT: "bigint">
 |	<LONG: "long">
 |	<LTRIM: "ltrim">
 |	<NONE: "none">
@@ -3208,13 +3149,12 @@ deleteBody() throws StandardException :
 	<FROM> javaToSQLNode = newInvocation()
 	[ whereToken = <WHERE> whereClause = whereClause(whereToken) ]
 	{
-		fromTable =  (FromTable) nodeFactory.getNode(
-									C_NodeTypes.FROM_VTI,
-									javaToSQLNode.getJavaValueNode(), 
-									(String) null,
-									null, 
-									(Properties) null,
-									getContextManager()); 
+        fromTable =
+            new FromVTI((MethodCallNode)javaToSQLNode.getJavaValueNode(),
+                        (String)null,
+                        null,
+                        (Properties)null,
+                        getContextManager());
 
 		return getDeleteNode(fromTable, tableName, whereClause);
 	}
@@ -3253,14 +3193,11 @@ deleteBody() throws StandardException :
 	  	 * output should look like the language.
 		 */
 		if (fromTable == null)
-			fromTable = (FromTable) nodeFactory.getNode(
-										C_NodeTypes.FROM_BASE_TABLE,
-										tableName,
-										correlationName,
-										ReuseFactory.getInteger(
-												FromBaseTable.DELETE),
-										null,
-										getContextManager());
+            fromTable = new FromBaseTable(tableName,
+                                          correlationName,
+                                          FromBaseTable.DELETE,
+                                          null,
+                                          getContextManager());
 
 		/* Update the FromTable with any properties, if non-null */
 		if (targetProperties != null)
@@ -3291,12 +3228,8 @@ currentOfClause( String correlationName ) throws StandardException :
 {
 	<CURRENT> <OF> cursorName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{ 
-		return (FromTable) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_OF_NODE,
-								correlationName,
-								cursorName,
-								null,
-								getContextManager());
+        return new CurrentOfNode(
+            correlationName, cursorName, null, getContextManager());
 	}
 }
 
@@ -3336,16 +3269,15 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 		// must be READ ONLY or empty, and the cursor
 		// is implicitly READ_ONLY.
 
-		retval = (CursorNode) nodeFactory.getNode(
-				C_NodeTypes.CURSOR_NODE,
+        retval = new CursorNode(
 				"SELECT",
 				queryExpression,
 				null,
 				orderCols,
 				offsetClauses[ OFFSET_CLAUSE ],
 				offsetClauses[ FETCH_FIRST_CLAUSE ],
-                Boolean.valueOf( hasJDBClimitClause ),
-				ReuseFactory.getInteger(forUpdateState),
+                hasJDBClimitClause,
+                forUpdateState,
                 forUpdateState == CursorNode.READ_ONLY ?
                     null :
                     updateColumns.toArray(new String[updateColumns.size()]),
@@ -3400,13 +3332,11 @@ targetTable() throws StandardException :
 	LOOKAHEAD( { newInvocationFollows(1) } )
 	javaToSQLNode = newInvocation()
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
-								C_NodeTypes.FROM_VTI,
-								javaToSQLNode.getJavaValueNode(), 
-								correlationName,
-								null, 
-								(Properties) null,
-								getContextManager()); 
+        return new FromVTI((MethodCallNode)javaToSQLNode.getJavaValueNode(),
+                           correlationName,
+                           null,
+                           (Properties) null,
+                           getContextManager());
 	}
 |
 	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
@@ -3468,13 +3398,12 @@ updateBody() throws StandardException :
 		<SET> columnList = setClauseList()
 	[ whereToken = <WHERE> whereClause = whereClause(whereToken) ]
 	{
-		fromTable =  (FromTable) nodeFactory.getNode(
-									C_NodeTypes.FROM_VTI,
-									javaToSQLNode.getJavaValueNode(), 
-									(String) null,
-									null, 
-									(Properties) null,
-									getContextManager()); 
+        fromTable =
+            new FromVTI((MethodCallNode)javaToSQLNode.getJavaValueNode(),
+                        (String)null,
+                        null,
+                        (Properties)null,
+                        getContextManager());
 
 		return getUpdateNode(fromTable, tableName, columnList, whereClause);
 	}
@@ -3507,14 +3436,11 @@ updateBody() throws StandardException :
 		 * decision that the parser's output should look like the language.
 		 */
 		if (fromTable == null)
-			fromTable = (FromTable) nodeFactory.getNode(
-										C_NodeTypes.FROM_BASE_TABLE,
-										tableName,
-										correlationName,
-										ReuseFactory.getInteger(
-														FromBaseTable.UPDATE),
-										null,
-										getContextManager());
+            fromTable = new FromBaseTable(tableName,
+                                          correlationName,
+                                          FromBaseTable.UPDATE,
+                                          null,
+                                          getContextManager());
 
 		/* Update the FromTable with any properties, if non-null */
 		if (targetProperties != null)
@@ -3573,10 +3499,7 @@ bareCallStatement() throws StandardException :
 		}
 
 		StatementNode callStatement =
-									(StatementNode) nodeFactory.getNode(
-												C_NodeTypes.CALL_STATEMENT_NODE,
-												value,
-												getContextManager());
+        new CallStatementNode((JavaToSQLValueNode)value, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -3608,19 +3531,16 @@ bareCallStatement() throws StandardException :
 		}
 
 		// wrap the row result set in a cursor node
-		StatementNode cursorNode =
-					(StatementNode) nodeFactory.getNode(
-						C_NodeTypes.CURSOR_NODE,
-						"SELECT",
-						resultSetNode,
-						null,
-						null,
-						null,
-						null,
-						null,
-						ReuseFactory.getInteger(CursorNode.READ_ONLY),
-						null,
-						getContextManager());
+        StatementNode cursorNode = new CursorNode("SELECT",
+                                                  resultSetNode,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  false,
+                                                  CursorNode.READ_ONLY,
+                                                  null,
+                                                  getContextManager());
 
 		// set the 0th param to be a RETURN param
 		returnParam.setReturnOutputParam(value);
@@ -3691,11 +3611,8 @@ savepointStatement() throws StandardException :
 	}
 	)
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.SAVEPOINT_NODE,
-								savepointName,
-								ReuseFactory.getInteger(savepointStatementType),
-								getContextManager());
+        return new SavepointNode(
+            savepointName, savepointStatementType, getContextManager());
 	}
 }
 
@@ -3772,14 +3689,13 @@ globalTemporaryTableDeclaration() throws StandardException :
 		// if ON ROLLBACK behavior not explicitly specified in DECLARE command, resort to default ON ROLLBACK DELETE ROWS
 		if (declareTableClauses[2] == null)
 				declareTableClauses[2] = Boolean.TRUE;
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.CREATE_TABLE_NODE,
-								tableName,
-								tableElementList,
-								(Properties)null,
-								(Boolean) declareTableClauses[1],
-								(Boolean) declareTableClauses[2],
-								getContextManager());
+        return new CreateTableNode(
+            tableName,
+            tableElementList,
+            (Properties)null,
+            ((Boolean) declareTableClauses[1]).booleanValue(),
+            ((Boolean) declareTableClauses[2]).booleanValue(),
+            getContextManager());
 	}
 }
 
@@ -3839,10 +3755,8 @@ onCommit() :
 TableElementList
 tableElementList() throws StandardException :
 {
-	TableElementList	tableElementList =
-					(TableElementList) nodeFactory.getNode(
-									C_NodeTypes.TABLE_ELEMENT_LIST,
-									getContextManager());
+    TableElementList tableElementList =
+        new TableElementList(getContextManager());
 }
 {
 	<LEFT_PAREN> tableElement(tableElementList)
@@ -3899,8 +3813,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 			autoIncrementInfo = null;
 		}
 
-		return (TableElementNode) nodeFactory.getNode(
-								C_NodeTypes.COLUMN_DEFINITION_NODE,
+        return new ColumnDefinitionNode(
 								columnName,
 								defaultNode,
 								typeDescriptor[0],
@@ -4336,7 +4249,7 @@ exactIntegerType() throws StandardException :
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT);
 	}
 |
-	<LONGINT>
+    <BIGINT>
 	{
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.BIGINT);
 	}
@@ -4798,7 +4711,7 @@ datetimeType() throws StandardException :
  * <A NAME="qualifiedName">qualifiedName</A>
  */
 TableName
-qualifiedName( int nodeType, int id_length_limit) throws StandardException :
+qualifiedName(int id_length_limit) throws StandardException :
 {
 	//String	catalogName = null;
 	String	schemaName = null;
@@ -4833,13 +4746,12 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 		if (schemaName != null)
 			IdUtil.checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 
-		return (TableName) nodeFactory.getNode(
-								nodeType,
-								schemaName,
-								qualifiedId,
-								new Integer(lastIdentifierToken.beginOffset),
-								new Integer(lastIdentifierToken.endOffset),
-								getContextManager());
+        return new TableName(
+            schemaName,
+            qualifiedId,
+            lastIdentifierToken.beginOffset,
+            lastIdentifierToken.endOffset,
+            getContextManager());
 	}
 }
 
@@ -4926,62 +4838,46 @@ nonJoinQueryTerm(ResultSetNode leftSide, int operatorType) throws StandardExcept
             return term;
 
         case UNION_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.UNION_NODE,
-                leftSide,
-                term,
-                Boolean.FALSE,
-                Boolean.FALSE,
-                null,
-                getContextManager());
+            return new UnionNode(
+                leftSide, term, false, false, null, getContextManager());
 
         case UNION_ALL_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.UNION_NODE,
-                leftSide,
-                term,
-                Boolean.TRUE,
-                Boolean.FALSE,
-                null,
-                getContextManager());
+            return new UnionNode(
+                leftSide, term, true, false, null, getContextManager());
 
         case EXCEPT_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
-                ReuseFactory.getInteger( IntersectOrExceptNode.EXCEPT_OP),
+            return new IntersectOrExceptNode(
+                IntersectOrExceptNode.EXCEPT_OP,
                 leftSide,
                 term,
-                Boolean.FALSE,
+                false,
                 null,
                 getContextManager());
 
         case EXCEPT_ALL_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
-                ReuseFactory.getInteger( IntersectOrExceptNode.EXCEPT_OP),
+            return new IntersectOrExceptNode(
+                IntersectOrExceptNode.EXCEPT_OP,
                 leftSide,
                 term,
-                Boolean.TRUE,
+                true,
                 null,
                 getContextManager());
 
         case INTERSECT_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
-                ReuseFactory.getInteger( IntersectOrExceptNode.INTERSECT_OP),
+            return new IntersectOrExceptNode(
+                IntersectOrExceptNode.INTERSECT_OP,
                 leftSide,
                 term,
-                Boolean.FALSE,
+                false,
                 null,
                 getContextManager());
 
         case INTERSECT_ALL_OP:
-            return (ResultSetNode) nodeFactory.getNode(
-                C_NodeTypes.INTERSECT_OR_EXCEPT_NODE,
-                ReuseFactory.getInteger( IntersectOrExceptNode.INTERSECT_OP),
+            return new IntersectOrExceptNode(
+                IntersectOrExceptNode.INTERSECT_OP,
                 leftSide,
                 term,
-                Boolean.TRUE,
+                true,
                 null,
                 getContextManager());
 
@@ -5162,17 +5058,13 @@ ResultColumnList
 selectList() throws StandardException :
 {
 	ResultColumn	allResultColumn;
-	ResultColumnList	resultColumns = (ResultColumnList) nodeFactory.getNode(
-									C_NodeTypes.RESULT_COLUMN_LIST,
-									getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 }
 {
 	<ASTERISK>
 	{
-		allResultColumn = (ResultColumn) nodeFactory.getNode(
-										C_NodeTypes.ALL_RESULT_COLUMN,
-										null,
-										getContextManager());
+       allResultColumn = new AllResultColumn(null, getContextManager());
+
 		/* Add the new AllResultColumn to the end of the list */
 		resultColumns.addResultColumn(allResultColumn);
 		return resultColumns;
@@ -5220,10 +5112,7 @@ selectSublist(ResultColumnList resultColumns) throws StandardException :
 	)
 	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <PERIOD> <ASTERISK>
 	{
-		allResultColumn = (ResultColumn) nodeFactory.getNode(
-										C_NodeTypes.ALL_RESULT_COLUMN,
-										tableName,
-										getContextManager());
+       allResultColumn = new AllResultColumn(tableName, getContextManager());
 		/* Add the new AllResultColumn to the end of the list */
 		resultColumns.addResultColumn(allResultColumn);
 	}
@@ -5258,8 +5147,7 @@ derivedColumn(ResultColumnList resultColumns) throws StandardException :
 			columnName = ((ColumnReference) columnExpression).columnName;
 		}
 
-		return (ResultColumn) nodeFactory.getNode(
-						C_NodeTypes.RESULT_COLUMN,
+       return new ResultColumn(
 						columnName,
 						columnExpression,
 						getContextManager());
@@ -5317,11 +5205,7 @@ orExpression(ValueNode farLeftOperand) throws StandardException :
 		}
 		else
 		{
-			return (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.OR_NODE,
-										farLeftOperand,
-										leftOperand,
-										getContextManager());
+            return new OrNode(farLeftOperand, leftOperand, getContextManager());
 		}
 	}
 }
@@ -5343,19 +5227,12 @@ andExpression(ValueNode farLeftOperand) throws StandardException :
 		/* Put the NOT on top of test */
 		if (tok != null)
 		{
-			test = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.NOT_NODE,
-									test,
-									getContextManager());
+           test = new NotNode(test, getContextManager());
 		}
 
 		if (farLeftOperand != null)
 		{
-			test = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.AND_NODE,
-										farLeftOperand,
-										test,
-										getContextManager());
+           test = new AndNode(farLeftOperand, test, getContextManager());
 		}
 		return test;
 	}
@@ -5381,18 +5258,14 @@ isSearchCondition() throws StandardException :
 	{
 		if ( isToken != null )
 		{
-				result = (ValueNode) nodeFactory.getNode(
-											C_NodeTypes.IS_NULL_NODE,
-											booleanPrimary,
-											getContextManager());
+            result = new IsNullNode(booleanPrimary,
+                                    IsNullNode.Sign.IS_NULL,
+                                    getContextManager());
 		
 				/* Put the NOT on top of the tree */
 				if (notToken != null)
 				{
-					result = (ValueNode) nodeFactory.getNode(
-											C_NodeTypes.NOT_NODE,
-											result,
-											getContextManager());
+                   result = new NotNode(result, getContextManager());
 				}
 		}
 		else { result = booleanPrimary; }
@@ -5474,10 +5347,7 @@ remainingPredicate(ValueNode value) throws StandardException :
 		/* Put the NOT on top of the tree */
 		if (tok != null)
 		{
-			value = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.NOT_NODE,
-										value,
-										getContextManager());
+           value = new NotNode(value, getContextManager());
 		}
 
 		return value;
@@ -5546,8 +5416,7 @@ remainingNegatablePredicate(ValueNode leftOperand) throws StandardException :
                 <LEFT_BRACE> <ESCAPE> escapeValue = additiveExpression(null, 0) <RIGHT_BRACE>
             ]
 	{
-		tree = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.LIKE_OPERATOR_NODE,
+        tree = new LikeEscapeOperatorNode(
 								leftOperand,
 								likePattern,
 								escapeValue,
@@ -5559,13 +5428,10 @@ remainingNegatablePredicate(ValueNode leftOperand) throws StandardException :
 	<BETWEEN> betweenLeft = additiveExpression(null, 0) <AND>
 			betweenRight = additiveExpression(null, 0)
 	{
-		ValueNodeList betweenList = (ValueNodeList) nodeFactory.getNode(
-													C_NodeTypes.VALUE_NODE_LIST,
-													getContextManager());
+        ValueNodeList betweenList = new ValueNodeList(getContextManager());
 		betweenList.addElement(betweenLeft);
 		betweenList.addElement(betweenRight);
-		tree = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.BETWEEN_OPERATOR_NODE,
+        tree = new BetweenOperatorNode(
 								leftOperand,
 								betweenList,
 								getContextManager());
@@ -5668,11 +5534,11 @@ additiveExpression(ValueNode farLeftOperand, int compOp) throws StandardExceptio
 			break;
 		}
 
-		return (ValueNode) nodeFactory.getNode(
+        return new BinaryRelationalOperatorNode(
 							nodeType,
 							farLeftOperand,
 							leftOperand,
-							Boolean.FALSE,
+                            false,
 							getContextManager());
 	}
 }
@@ -5716,7 +5582,7 @@ multiplicativeExpression(ValueNode farLeftOperand, int additiveOperator) throws 
 		switch (additiveOperator)
 		{
 		  case BinaryOperatorNode.PLUS:
-			return (ValueNode) nodeFactory.getNode(
+            return new BinaryArithmeticOperatorNode(
 									C_NodeTypes.BINARY_PLUS_OPERATOR_NODE,
 									farLeftOperand,
 									leftOperand,
@@ -5724,7 +5590,7 @@ multiplicativeExpression(ValueNode farLeftOperand, int additiveOperator) throws 
 									);
 
 		  case BinaryOperatorNode.MINUS:
-			return (ValueNode) nodeFactory.getNode(
+              return new BinaryArithmeticOperatorNode(
 									C_NodeTypes.BINARY_MINUS_OPERATOR_NODE,
 									farLeftOperand,
 									leftOperand,
@@ -5793,17 +5659,17 @@ unaryExpression(ValueNode farLeftOperand, int multiplicativeOperator) throws Sta
 	{
 		if ("-".equals(sign))
 		{
-			value = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.UNARY_MINUS_OPERATOR_NODE,
-										value,
-										getContextManager());
+           value = new UnaryArithmeticOperatorNode(
+               value,
+               UnaryArithmeticOperatorNode.OperatorType.MINUS,
+               getContextManager());
 		}
 		else if ("+".equals(sign))
 		{
-			value = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.UNARY_PLUS_OPERATOR_NODE,
-										value,
-										getContextManager());
+           value = new UnaryArithmeticOperatorNode(
+               value,
+               UnaryArithmeticOperatorNode.OperatorType.PLUS,
+               getContextManager());
 		}
 		else if (SanityManager.DEBUG)
 		{
@@ -5907,10 +5773,7 @@ nonStaticMethodInvocation(ValueNode receiver) throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								methodNode,
-								getContextManager());
+        return new JavaToSQLValueNode(methodNode, getContextManager());
 	}
 |
         <PERIOD> methodNode = methodName(receiver)
@@ -5933,10 +5796,7 @@ nonStaticMethodInvocation(ValueNode receiver) throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								methodNode,
-								getContextManager());
+        return new JavaToSQLValueNode(methodNode, getContextManager());
 	}
 
 
@@ -5959,11 +5819,8 @@ methodName(ValueNode receiver) throws StandardException :
 	*/
 	methodName = caseSensitiveIdentifierPlusReservedWords()
 	{
-		return (MethodCallNode) nodeFactory.getNode(
-										C_NodeTypes.NON_STATIC_METHOD_CALL_NODE,
-										methodName,
-										receiver,
-										getContextManager());
+        return new NonStaticMethodCallNode(
+            methodName, receiver, getContextManager());
 	}
 }
 
@@ -5984,11 +5841,8 @@ staticMethodName(String javaClassName) throws StandardException :
 	*/
 	methodName = caseSensitiveIdentifierPlusReservedWords()
 	{
-		return (MethodCallNode) nodeFactory.getNode(
-								C_NodeTypes.STATIC_METHOD_CALL_NODE,
-								methodName,
-								javaClassName,
-								getContextManager());
+        return new StaticMethodCallNode(
+            methodName, javaClassName, getContextManager());
 	}
 }
 
@@ -6086,15 +5940,13 @@ staticClassFieldReference(String javaClassName) throws StandardException :
 {
 	fieldName = caseSensitiveIdentifierPlusReservedWords() 
 	{
-		return	(ValueNode) nodeFactory.getNode(
-					C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-					nodeFactory.getNode(
-								C_NodeTypes.STATIC_CLASS_FIELD_REFERENCE_NODE,
-								javaClassName,
-								fieldName,
-								nextToLastTokenDelimitedIdentifier,
-								getContextManager()),
-					getContextManager());
+        return  new JavaToSQLValueNode(
+            new StaticClassFieldReferenceNode(
+                javaClassName,
+                fieldName,
+                nextToLastTokenDelimitedIdentifier,
+                getContextManager()),
+            getContextManager());
 	}
 }
 
@@ -6150,27 +6002,23 @@ escapedValueFunction() throws StandardException :
 	/* Escaped function substring() */
     <SUBSTRING> <LEFT_PAREN> value = additiveExpression(null, 0) <COMMA> startPosition = additiveExpression(null, 0) [ <COMMA> length = additiveExpression(null, 0) ] <RIGHT_PAREN>
 	{
-        return getSubstringNode(value, startPosition, length, Boolean.FALSE);
+        return getSubstringNode(value, startPosition, length);
 	}
 |
 	/* CURDATE() is an escaped function supported by JCC 2.2 or higher */
 	<CURDATE> <LEFT_PAREN> <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-								ReuseFactory.getInteger(
-									CurrentDatetimeOperatorNode.CURRENT_DATE),
-								getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_DATE,
+            getContextManager());
 	}
 |
 	/* CURTIME() is an escaped function supported by JCC 2.2 or higher */
 	<CURTIME> <LEFT_PAREN> <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-							ReuseFactory.getInteger(
-								CurrentDatetimeOperatorNode.CURRENT_TIME),
-							getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_TIME,
+            getContextManager());
 	}
 |
     /* CONCAT( string1, string2 )
@@ -6179,8 +6027,7 @@ escapedValueFunction() throws StandardException :
     <CONCAT> <LEFT_PAREN> str1 = additiveExpression(null,0) <COMMA> 
             str2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode) nodeFactory.getNode(
-                            C_NodeTypes.CONCATENATION_OPERATOR_NODE,
+        return new ConcatenationOperatorNode(
                             str1,
                             str2,
                             getContextManager());
@@ -6224,19 +6071,15 @@ escapedSYSFUNFunction() throws StandardException :
     {
 	    String sysFunName = getEscapedSYSFUN(tok.image);
 	    
-	    TableName functionName = (TableName) nodeFactory.getNode(
-								C_NodeTypes.TABLE_NAME,
-								SchemaDescriptor.IBM_SYSTEM_FUN_SCHEMA_NAME,
+        TableName functionName = new TableName(
+                                SchemaDescriptor.IBM_SYSTEM_FUN_SCHEMA_NAME,
 								sysFunName,
-								new Integer(0),
-								new Integer(0),
+                                Integer.valueOf(0),
+                                Integer.valueOf(0),
 								getContextManager());
 	   
-		MethodCallNode methodNode = (MethodCallNode) nodeFactory.getNode(
-								C_NodeTypes.STATIC_METHOD_CALL_NODE,
-								functionName,
-								null,
-								getContextManager());
+        MethodCallNode methodNode = new StaticMethodCallNode(
+            functionName, null, getContextManager());
 
 		methodNode.addParms(parameterList);
 
@@ -6245,10 +6088,7 @@ escapedSYSFUNFunction() throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								methodNode,
-								getContextManager());
+        return new JavaToSQLValueNode(methodNode, getContextManager());
      }
 }
 
@@ -6269,26 +6109,26 @@ timestampArithmeticFuncion() throws StandardException :
        count = additiveExpression(null,0) <COMMA>
        tstamp1 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_ADD_FN_NODE,
-                                                tstamp1,
-                                                intervalType,
-                                                count,
-                                                ReuseFactory.getInteger( TernaryOperatorNode.TIMESTAMPADD),
-                                                null,
-                                                getContextManager());
+        return new TernaryOperatorNode(C_NodeTypes.TIMESTAMP_ADD_FN_NODE,
+                                       tstamp1,
+                                       intervalType,
+                                       count,
+                                       TernaryOperatorNode.TIMESTAMPADD,
+                                       -1,
+                                       getContextManager());
     }
 |
     <TIMESTAMPDIFF> <LEFT_PAREN> intervalType = jdbcIntervalType() <COMMA>
        tstamp1 = additiveExpression(null,0) <COMMA>
        tstamp2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_DIFF_FN_NODE,
-                                                tstamp2,
-                                                intervalType,
-                                                tstamp1,
-                                                ReuseFactory.getInteger( TernaryOperatorNode.TIMESTAMPDIFF),
-                                                null,
-                                                getContextManager());
+        return new TernaryOperatorNode(C_NodeTypes.TIMESTAMP_DIFF_FN_NODE,
+                                       tstamp2,
+                                       intervalType,
+                                       tstamp1,
+                                       TernaryOperatorNode.TIMESTAMPDIFF,
+                                       -1,
+                                       getContextManager());
     }
 }       
 
@@ -6372,9 +6212,9 @@ numericValueFunction() throws StandardException :
 |
     <SQRT> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode)nodeFactory.getNode(
-                C_NodeTypes.SQRT_OPERATOR_NODE,
+        return new UnaryArithmeticOperatorNode(
                 value,
+                UnaryArithmeticOperatorNode.OperatorType.SQRT,
                 getContextManager());
     }
 |
@@ -6387,9 +6227,8 @@ numericValueFunction() throws StandardException :
 |
 	<IDENTITY_VAL_LOCAL> <LEFT_PAREN> <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.IDENTITY_VAL_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.IDENTITY_VAL_NODE, getContextManager());
 	}
 }
 
@@ -6399,9 +6238,7 @@ numericValueFunction() throws StandardException :
 ValueNode
 coalesceFunction(String coalesceOrValue) throws StandardException :
 {
-    ValueNodeList expressionList = (ValueNodeList) nodeFactory.getNode(
-	C_NodeTypes.VALUE_NODE_LIST,
-	getContextManager());
+    ValueNodeList expressionList = new ValueNodeList(getContextManager());
 }
 {
     <LEFT_PAREN>
@@ -6409,8 +6246,7 @@ coalesceFunction(String coalesceOrValue) throws StandardException :
 		( <COMMA> coalesceExpression(expressionList) )* 
     <RIGHT_PAREN>
     {
-        return (ValueNode)nodeFactory.getNode(
-                C_NodeTypes.COALESCE_FUNCTION_NODE,
+        return new CoalesceFunctionNode(
                 coalesceOrValue,
                 expressionList,
                 getContextManager());
@@ -6443,9 +6279,9 @@ absFunction() throws StandardException :
 {
     <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode)nodeFactory.getNode(
-                C_NodeTypes.ABSOLUTE_OPERATOR_NODE,
+        return new UnaryArithmeticOperatorNode(
                 value,
+                UnaryArithmeticOperatorNode.OperatorType.ABS,
                 getContextManager());
     }
 }
@@ -6462,7 +6298,7 @@ modFunction() throws StandardException :
     <LEFT_PAREN> int1 = additiveExpression(null,0) <COMMA> 
             int2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return (ValueNode)nodeFactory.getNode(
+        return new BinaryArithmeticOperatorNode(
                 C_NodeTypes.MOD_OPERATOR_NODE,
                 int1, int2,
                 getContextManager());
@@ -6504,13 +6340,12 @@ characterValueFunction() throws StandardException :
 {
 	<SUBSTR> <LEFT_PAREN> value = additiveExpression(null,0) <COMMA> startPosition = additiveExpression(null,0) [ <COMMA> length = additiveExpression(null,0) ] <RIGHT_PAREN>
 	{
-        return getSubstringNode( value, startPosition, length, Boolean.FALSE );
+        return getSubstringNode( value, startPosition, length);
 	}
 |
 	( upperTok = <UPPER> | lowerTok = <LOWER> ) <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-					C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE,
+       return new SimpleStringOperatorNode(
 					value,
 					(upperTok != null) ? "upper" : "lower",
 					getContextManager());
@@ -6518,8 +6353,7 @@ characterValueFunction() throws StandardException :
 |
 	( upperTok = <UCASE> | lowerTok = <LCASE> ) <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-					C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE,
+       return new SimpleStringOperatorNode(
 					value,
 					(upperTok != null) ? "upper" : "lower",
 					getContextManager());
@@ -6539,17 +6373,18 @@ characterValueFunction() throws StandardException :
             <RIGHT_PAREN>
     {
 		// if start is missing, start is equal to 1
-        return (ValueNode) nodeFactory.getNode(
+        return new TernaryOperatorNode(
                             C_NodeTypes.LOCATE_FUNCTION_NODE,
                             str1,
                             str2,
-                            (value == null) ? getNodeFactory().getNode(
-                                        C_NodeTypes.INT_CONSTANT_NODE, 
-                                        ReuseFactory.getInteger(1), 
-                                        getContextManager() )
-											: value,
-                            ReuseFactory.getInteger(TernaryOperatorNode.LOCATE),
-                            null,
+                            (value == null) ?
+                                new NumericConstantNode(
+                                    TypeId.getBuiltInTypeId(Types.INTEGER),
+                                    ReuseFactory.getInteger(1),
+                                    getContextManager() ) :
+                                value,
+                            TernaryOperatorNode.LOCATE,
+                            -1,
                             getContextManager());
     }
 }
@@ -6679,17 +6514,15 @@ valueExpressionPrimary() throws StandardException :
 	LOOKAHEAD({getToken(2).kind == SCHEMA || getToken(2).kind == SQLID}) 
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_SCHEMA_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.CURRENT_SCHEMA_NODE, getContextManager());
 	}
 |
 	LOOKAHEAD({getToken(2).kind == ISOLATION}) 
 	<CURRENT> <ISOLATION>
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_ISOLATION_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.CURRENT_ISOLATION_NODE, getContextManager());
 	}
 |
 	/* Omitted "case_expression" */
@@ -6808,7 +6641,7 @@ miscBuiltins() throws StandardException :
 		getToken(1).kind == INTEGER ||
 		getToken(1).kind == INT || 
 		getToken(1).kind == SMALLINT ||
-		getToken(1).kind == LONGINT ||
+        getToken(1).kind == BIGINT ||
                 getToken(1).kind == YEAR ||
                 getToken(1).kind == MONTH ||
                 getToken(1).kind == DAY ||
@@ -6865,13 +6698,9 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
 
 	<GET_CURRENT_CONNECTION> <LEFT_PAREN> <RIGHT_PAREN>
 	{
+        ContextManager cm = getContextManager();
 		checkInternalFeature("GETCURRENTCONNECTION()");
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								nodeFactory.getNode(
-									C_NodeTypes.GET_CURRENT_CONNECTION_NODE,
-									getContextManager()),
-								getContextManager());
+        return new JavaToSQLValueNode(new GetCurrentConnectionNode(cm), cm);
 	}
 |
 	value = numericValueFunction() 
@@ -6903,18 +6732,14 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
 	{
 		ContextManager	localCM = getContextManager();
                 if( isJDBCEscape)
-                        return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE,
+                    return new LengthOperatorNode(
 								getTrimOperatorNode(
 									ReuseFactory.getInteger(StringDataValue.TRAILING),
 									null,
 									value,
 									localCM),
 								localCM);
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.DB2_LENGTH_OPERATOR_NODE,
-                                                        value,
-                                                        localCM);
+       return new DB2LengthOperatorNode(value, localCM);
 	}
 |
 	value = xmlFunction()
@@ -6945,27 +6770,18 @@ ValueNode
 	}
 	|
 	 dts = numericFunctionType() <LEFT_PAREN> operand = additiveExpression(null,0) <RIGHT_PAREN>
-	  {
-			value = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.CAST_NODE,
-									operand,
-									dts,
-									getContextManager());
-			((CastNode) value).setForDataTypeFunction(true);
-			((CastNode) value).setForExternallyGeneratedCASTnode();
+    {
+        value = new CastNode(operand, dts, getContextManager());
+        ((CastNode) value).setForDataTypeFunction(true);
+        ((CastNode) value).setForExternallyGeneratedCASTnode();
 
-			return value;
-	  }
+        return value;
+    }
 	 | charType = charOrVarchar() <LEFT_PAREN> operand = additiveExpression(null,0) [ <COMMA> length = length() ] <RIGHT_PAREN>
 	{
 		// Always check db2 limits for this function. It's new
 		checkTypeLimits(charType,length);
-		value = (ValueNode) nodeFactory.getNode(
-												C_NodeTypes.CAST_NODE,
-												operand,
-												new Integer(charType),
-												new Integer(length),
-												getContextManager());
+        value = new CastNode(operand, charType, length, getContextManager());
 
 		((CastNode) value).setForDataTypeFunction(true);
 		((CastNode) value).setForExternallyGeneratedCASTnode();
@@ -7048,11 +6864,12 @@ ValueNode
 }
 {
 	value = additiveExpression(null,0) wsOption = xmlPreserveWhitespace() {
-		return (ValueNode) nodeFactory.getNode(
+        return new UnaryOperatorNode(
 					C_NodeTypes.XML_PARSE_OPERATOR_NODE,
 					value,
-					ReuseFactory.getInteger(UnaryOperatorNode.XMLPARSE_OP),
-					Boolean.valueOf(wsOption),
+                    UnaryOperatorNode.XMLPARSE_OP,
+                    null, /* N/A for PARSE */
+                    wsOption,
 					getContextManager());
 	}
 }
@@ -7115,11 +6932,12 @@ ValueNode
 	value = additiveExpression(null,0)
 		targetType = xmlSerializeTargetType()
 	{
-		return (ValueNode) nodeFactory.getNode(
+        return new UnaryOperatorNode(
 					C_NodeTypes.XML_SERIALIZE_OPERATOR_NODE,
 					value,
-					ReuseFactory.getInteger(UnaryOperatorNode.XMLSERIALIZE_OP),
+                    UnaryOperatorNode.XMLSERIALIZE_OP,
 					targetType,
+                    false, /* N/A for SERIALIZE */
 					getContextManager());
 	}
 }
@@ -7239,15 +7057,15 @@ ValueNode
 		}
 	)
 	{
-		ValueNode vNode = (ValueNode) nodeFactory.getNode(
+        ValueNode vNode = new BinaryOperatorNode(
 			(existsOnly
 				? C_NodeTypes.XML_EXISTS_OPERATOR_NODE
 				: C_NodeTypes.XML_QUERY_OPERATOR_NODE),
 			xqueryExpr,
 			xmlValue,
 			(existsOnly
-				? ReuseFactory.getInteger(BinaryOperatorNode.XMLEXISTS_OP)
-				: ReuseFactory.getInteger(BinaryOperatorNode.XMLQUERY_OP)),
+                ? BinaryOperatorNode.XMLEXISTS_OP
+                : BinaryOperatorNode.XMLQUERY_OP),
 			getContextManager());
 
 		return vNode;
@@ -7517,22 +7335,20 @@ dateTimeScalarFunction() throws StandardException :
      */
         <TIME> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		ValueNode castValue = (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CAST_NODE,
-                                                        value,
-                                                        DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIME),
-                                                        getContextManager());
+        ValueNode castValue = new CastNode(
+            value,
+            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.TIME),
+            getContextManager());
 		((CastNode) castValue).setForExternallyGeneratedCASTnode();
 		return castValue;
         }
 |
         <DATE> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE,
-                                                        value,
-                                                        DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.DATE),
-                                                        getContextManager());
+       return new UnaryDateTimestampOperatorNode(
+            value,
+            UnaryDateTimestampOperatorNode.OperatorType.DATE,
+            getContextManager());
         }
 |
         <TIMESTAMP> <LEFT_PAREN> value = additiveExpression(null,0) timestampNode = timestampFunctionCompletion( value)
@@ -7542,8 +7358,7 @@ dateTimeScalarFunction() throws StandardException :
 |
         field = datetimeField() <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.EXTRACT_OPERATOR_NODE,
+       return new ExtractOperatorNode(
 								ReuseFactory.getInteger(field),
 								value,
 								getContextManager());
@@ -7562,21 +7377,17 @@ timestampFunctionCompletion( ValueNode firstArg) throws StandardException :
 {
         <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE,
-                                                        firstArg,
-                                                        DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIMESTAMP),
-                                                        getContextManager());
+       return new UnaryDateTimestampOperatorNode(
+            firstArg,
+            UnaryDateTimestampOperatorNode.OperatorType.TIMESTAMP,
+            getContextManager());
         }
 |
         <COMMA> timeValue = additiveExpression(null,0) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.TIMESTAMP_OPERATOR_NODE,
-                                                        firstArg,
-                                                        timeValue,
-                                                        getContextManager());
-        }
+        return
+            new TimestampOperatorNode(firstArg, timeValue, getContextManager());
+    }
 }
 
 /*
@@ -7631,23 +7442,20 @@ userNode() throws StandardException :
 {
 	<USER>
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.USER_NODE,
-								getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.USER_NODE, getContextManager());
 	}
 |
 	<CURRENT_USER>
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_USER_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.CURRENT_USER_NODE, getContextManager());
 	}
 |
 	<SESSION_USER>
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.SESSION_USER_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.SESSION_USER_NODE, getContextManager());
 	}
 }
 
@@ -7664,9 +7472,8 @@ currentRoleNode() throws StandardException :
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("CURRENT_ROLE");
-		return (ValueNode) nodeFactory.getNode(
-			C_NodeTypes.CURRENT_ROLE_NODE,
-			getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.CURRENT_ROLE_NODE, getContextManager());
 	}
 }
 
@@ -7677,7 +7484,7 @@ currentRoleNode() throws StandardException :
 JavaToSQLValueNode
 newInvocation() throws StandardException :
 {
-	QueryTreeNode	newNode;
+    NewInvocationNode   newNode;
 	ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
 	String	javaClassName;
 }
@@ -7688,9 +7495,7 @@ newInvocation() throws StandardException :
 		{
 			checkInternalFeature(javaClassName);
 		}
-		newNode = (QueryTreeNode) nodeFactory.getNode(
-									   C_NodeTypes.NEW_INVOCATION_NODE,
-									   javaClassName,
+        newNode = new NewInvocationNode(javaClassName,
 									   parameterList, 
 									   lastTokenDelimitedIdentifier,
 									   getContextManager());
@@ -7700,10 +7505,7 @@ newInvocation() throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (JavaToSQLValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								newNode,
-								getContextManager());
+        return new JavaToSQLValueNode(newNode, getContextManager());
 	}
 }
 
@@ -7735,7 +7537,7 @@ JavaToSQLValueNode
 vtiTableConstruct() throws StandardException :
 {
     NewInvocationNode newNode = null;
-    QueryTreeNode invocationNode = null;
+    MethodCallNode invocationNode = null;
     ArrayList<ValueNode> parameterList = new ArrayList<ValueNode>();
     TableName vtiTableName = null;
     TableDescriptor td;
@@ -7754,9 +7556,7 @@ vtiTableConstruct() throws StandardException :
         * TableDescriptor--we'll just create one from the table
         * name. See NewInvocationNode for more.
         */
-        newNode = (NewInvocationNode) nodeFactory.getNode
-        (
-            C_NodeTypes.NEW_INVOCATION_NODE,
+        newNode = new NewInvocationNode(
             vtiTableName,  // TableName
             null,          // TableDescriptor
             parameterList, 
@@ -7766,11 +7566,8 @@ vtiTableConstruct() throws StandardException :
         if ( newNode.isBuiltinVTI() ) { invocationNode = newNode; }
         else
         {
-            methodNode = (MethodCallNode) nodeFactory.getNode(
-                C_NodeTypes.STATIC_METHOD_CALL_NODE,
-                vtiTableName,
-                null,
-                getContextManager());
+            methodNode = new StaticMethodCallNode(
+                vtiTableName, null, getContextManager());
             methodNode.addParms(parameterList);
 
             invocationNode = methodNode;
@@ -7782,10 +7579,7 @@ vtiTableConstruct() throws StandardException :
         ** out that this is being returned to the Java domain, we will
         ** get rid of this node.
         */
-        return (JavaToSQLValueNode) nodeFactory.getNode(
-                    C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-                    invocationNode,
-                    getContextManager());
+        return new JavaToSQLValueNode(invocationNode, getContextManager());
     }
 }
 
@@ -7808,10 +7602,7 @@ staticMethodInvocation(String javaClassName) throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								methodNode,
-								getContextManager());
+        return new JavaToSQLValueNode(methodNode, getContextManager());
 	}
 }
 
@@ -7865,11 +7656,8 @@ routineExpression() throws StandardException :
 	routineName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		methodCallParameterList(parameterList)
 	{
-		methodNode = (MethodCallNode) nodeFactory.getNode(
-								C_NodeTypes.STATIC_METHOD_CALL_NODE,
-								routineName,
-								null,
-								getContextManager());
+        methodNode = new StaticMethodCallNode(
+            routineName, null,getContextManager());
 
 		methodNode.addParms(parameterList);
 
@@ -7878,10 +7666,7 @@ routineExpression() throws StandardException :
 		** out that this is being returned to the Java domain, we will
 		** get rid of this node.
 		*/
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								methodNode,
-								getContextManager());
+        return new JavaToSQLValueNode(methodNode, getContextManager());
 	}
 }
 
@@ -7905,13 +7690,11 @@ distinctUDA() throws StandardException :
         // non-distinct aggregates. That has to be figured out at
         // bind() time.
         //
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
-								value,
-								aggName, 
-								Boolean.TRUE,
-								"",
-								getContextManager());
+       return new AggregateNode(value,
+                                 aggName,
+                                 true,
+                                 "",
+                                 getContextManager());
 	}
 }
 
@@ -8017,24 +7800,21 @@ columnNameForInvocation() throws StandardException :
 		if (tableName != null)
 		{
 			// There is a table name, so get a TableName node
-			tabName =
-				(TableName) nodeFactory.getNode(
-							C_NodeTypes.TABLE_NAME,
-							schemaName,
-							tableName,
-							new Integer(nextToLastIdentifierToken.beginOffset),
-							new Integer(nextToLastIdentifierToken.endOffset),
-							getContextManager());
+            tabName = new TableName(
+                    schemaName,
+                    tableName,
+                    Integer.valueOf(nextToLastIdentifierToken.beginOffset),
+                    Integer.valueOf(nextToLastIdentifierToken.endOffset),
+                    getContextManager());
 		}
 
 		// Get the column reference
-		retval = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.COLUMN_REFERENCE,
-									columnName,
-									tabName,
-									new Integer(lastIdentifierToken.beginOffset),
-									new Integer(lastIdentifierToken.endOffset),
-									getContextManager());
+        retval = new ColumnReference(
+            columnName,
+            tabName,
+            Integer.valueOf(lastIdentifierToken.beginOffset),
+            Integer.valueOf(lastIdentifierToken.endOffset),
+            getContextManager());
 
 		return retval;
 	}
@@ -8108,22 +7888,20 @@ columnReference() throws StandardException :
 
 		if (tableName != null)
 		{
-			tabName = (TableName) nodeFactory.getNode(
-							C_NodeTypes.TABLE_NAME,
-							schemaName,
-							tableName,
-							new Integer(nextToLastIdentifierToken.beginOffset),
-							new Integer(nextToLastIdentifierToken.endOffset),
-							getContextManager());
+            tabName = new TableName(
+                schemaName,
+                tableName,
+                Integer.valueOf(nextToLastIdentifierToken.beginOffset),
+                Integer.valueOf(nextToLastIdentifierToken.endOffset),
+                getContextManager());
 		}
 
-		return (ColumnReference) nodeFactory.getNode(
-								C_NodeTypes.COLUMN_REFERENCE,
-								columnName,
-								tabName,
-								new Integer(lastIdentifierToken.beginOffset),
-								new Integer(lastIdentifierToken.endOffset),
-								getContextManager());
+        return new ColumnReference(
+            columnName,
+            tabName,
+            Integer.valueOf(lastIdentifierToken.beginOffset),
+            Integer.valueOf(lastIdentifierToken.endOffset),
+            getContextManager());
 	}
 }
 
@@ -8184,10 +7962,7 @@ atIsolationLevel() throws StandardException :
 OrderByList
 sortSpecificationList(ResultSetNode rs) throws StandardException :
 { 
-	OrderByList orderCols = (OrderByList) nodeFactory.getNode(
-											C_NodeTypes.ORDER_BY_LIST,
-                                           rs,
-											getContextManager()); 
+    OrderByList orderCols = new OrderByList(rs, getContextManager());
 }
 {
 	sortSpecification(orderCols) ( <COMMA> sortSpecification(orderCols) ) *
@@ -8214,10 +7989,7 @@ sortKey() throws StandardException :
 {
 	columnExpression = additiveExpression(null,0)
 	{
-		return (OrderByColumn) nodeFactory.getNode(
-								C_NodeTypes.ORDER_BY_COLUMN,
-								columnExpression,
-								getContextManager());
+        return new OrderByColumn(columnExpression, getContextManager());
 	}
 }
 
@@ -8438,9 +8210,7 @@ forUpdateColumn(List<String> columnList) throws StandardException :
 ResultColumnList
 setClauseList() throws StandardException :
 {
-	ResultColumnList	columnList = (ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+    ResultColumnList columnList = new ResultColumnList(getContextManager());
 }
 {
 	setClause(columnList) ( <COMMA> setClause(columnList) ) *
@@ -8468,9 +8238,7 @@ setClause(ResultColumnList columnList) throws StandardException :
 	 */
 	columnName = columnReference() <EQUALS_OPERATOR> valueNode = updateSource(columnName.getColumnName())
 	{
-		resultColumn = (ResultColumn) nodeFactory.getNode(
-										C_NodeTypes.RESULT_COLUMN,
-										columnName,
+       resultColumn = new ResultColumn(columnName,
 										valueNode,
 										getContextManager());
 		columnList.addResultColumn(resultColumn);
@@ -8498,10 +8266,7 @@ updateSource(String columnName) throws StandardException :
 |
 	<_DEFAULT>
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.DEFAULT_NODE,
-								columnName,
-								getContextManager());
+        return new DefaultNode(columnName, getContextManager());
 	}
 }
 
@@ -8514,9 +8279,7 @@ nullSpecification() throws StandardException :
 {
 	<NULL>
 	{
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-									getContextManager());
+       return new UntypedNullConstantNode(getContextManager());
 	}
 }
 
@@ -8571,8 +8334,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
             throw StandardException.newException( SQLState.LANG_SYNTAX_ERROR, tokenName );
         }
 
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.INSERT_NODE,
+        return new InsertNode(
 							targetTable,
 							columnList,
 							queryExpression,
@@ -8580,7 +8342,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 							orderCols,
                             offsetClauses[ OFFSET_CLAUSE ],
                             offsetClauses[ FETCH_FIRST_CLAUSE ],
-                            Boolean.valueOf( hasJDBClimitClause ),
+                            hasJDBClimitClause,
 							getContextManager());
 	}
 	/* RESOLVE: Ignoring default values for now
@@ -8599,9 +8361,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 ResultColumnList
 insertColumnList() throws StandardException :
 {
-	ResultColumnList	columnList = (ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+    ResultColumnList columnList = new ResultColumnList(getContextManager());
 }
 {
 	columnQualifiedNameList(columnList)
@@ -8643,9 +8403,7 @@ columnQualifiedNameItem(ResultColumnList columnList) throws StandardException :
 		** should be hooked up to each result column, so set that
 		** to null for now.
 		*/
-		resultColumn = (ResultColumn) nodeFactory.getNode(
-										C_NodeTypes.RESULT_COLUMN,
-										columnRef,
+       resultColumn = new ResultColumn(columnRef,
 										null,
 										getContextManager());
 		columnList.addResultColumn(resultColumn);
@@ -8658,9 +8416,7 @@ columnQualifiedNameItem(ResultColumnList columnList) throws StandardException :
 ResultSetNode
 rowValueConstructor(ResultSetNode leftRSN) throws StandardException :
 {
-	ResultColumnList	resultColumns = (ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 	ResultSetNode		newRSN;
 }
 {
@@ -8674,11 +8430,8 @@ rowValueConstructor(ResultSetNode leftRSN) throws StandardException :
 		 * return a UNION ALL above the 2 RSNs, after verifying that the size()
 		 * of both RSNs RCLs is the same.
 		 */
-		newRSN = (ResultSetNode) nodeFactory.getNode(
-								C_NodeTypes.ROW_RESULT_SET_NODE,
-								resultColumns,
-								null,
-								getContextManager());
+        newRSN = new RowResultSetNode(resultColumns, null, getContextManager());
+
 		if (leftRSN != null)
 		{
 			if (leftRSN.getResultColumns().size() !=
@@ -8687,14 +8440,8 @@ rowValueConstructor(ResultSetNode leftRSN) throws StandardException :
 				throw StandardException.newException(SQLState.LANG_ROW_VALUE_CONSTRUCTOR_UNMATCHED_COLUMNS);
 			}
 
-			newRSN = (ResultSetNode) nodeFactory.getNode(	
-									C_NodeTypes.UNION_NODE,
-									leftRSN,
-									newRSN,
-									Boolean.TRUE,
-									Boolean.TRUE,
-									null,
-									getContextManager());
+            newRSN = new UnionNode(
+                leftRSN, newRSN, true, true, null, getContextManager());
 		}
 		return newRSN;
 		
@@ -8706,11 +8453,8 @@ rowValueConstructor(ResultSetNode leftRSN) throws StandardException :
 		 * return a UNION ALL above the 2 RSNs, after verifying that the size()
 		 * of both RSNs RCLs is the same.
 		 */
-		newRSN = (ResultSetNode) nodeFactory.getNode(
-								C_NodeTypes.ROW_RESULT_SET_NODE,
-								resultColumns,
-								null,
-								getContextManager());
+        newRSN = new RowResultSetNode(resultColumns, null, getContextManager());
+
 		if (leftRSN != null)
 		{
 			if (leftRSN.getResultColumns().size() !=
@@ -8719,14 +8463,8 @@ rowValueConstructor(ResultSetNode leftRSN) throws StandardException :
 				throw StandardException.newException(SQLState.LANG_ROW_VALUE_CONSTRUCTOR_UNMATCHED_COLUMNS);
 			}
 
-			newRSN = (ResultSetNode) nodeFactory.getNode(
-									C_NodeTypes.UNION_NODE,
-									leftRSN,
-									newRSN,
-									Boolean.TRUE,
-									Boolean.TRUE,
-									null,
-									getContextManager());
+            newRSN = new UnionNode(
+                leftRSN, newRSN, true, true, null, getContextManager());
 		}
 		return newRSN;
 	}
@@ -8743,38 +8481,24 @@ rowValueConstructorElement(ResultColumnList resultColumns) throws StandardExcept
 {
 	value = valueExpression()
 	{
-		resultColumns.addResultColumn(
-			(ResultColumn) nodeFactory.getNode(
-							C_NodeTypes.RESULT_COLUMN,
-							null,
-							value,
-							getContextManager())
-				);
+       resultColumns.addResultColumn(new ResultColumn((String)null,
+                                                       value,
+                                                       getContextManager()));
 	}
 |
 	value = nullSpecification()
 	{
-		resultColumns.addResultColumn(
-			(ResultColumn) nodeFactory.getNode(
-							C_NodeTypes.RESULT_COLUMN,
-							null,
-							value,
-							getContextManager())
-				);
+       resultColumns.addResultColumn(new ResultColumn((String)null,
+                                                       value,
+                                                       getContextManager()));
 	}
 |
 	<_DEFAULT>
 	{
 		resultColumns.addResultColumn(
-			(ResultColumn) nodeFactory.getNode(
-							C_NodeTypes.RESULT_COLUMN,
-							null,
-							(ValueNode) nodeFactory.getNode(
-								C_NodeTypes.DEFAULT_NODE,
-								null,
-								getContextManager()),
-							getContextManager())
-				);
+            new ResultColumn((String)null,
+                             new DefaultNode( null, getContextManager()),
+                             getContextManager()));
 	}
 |
 	{
@@ -8827,15 +8551,13 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
    [ orderCols = orderByClause(queryExpression) ]
     hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	{
-		subqueryNode = (SubqueryNode) nodeFactory.getNode(
-										C_NodeTypes.SUBQUERY_NODE,
-										queryExpression, 
-										ReuseFactory.getInteger(subqueryType),
+        subqueryNode = new SubqueryNode(queryExpression,
+                                        subqueryType,
 										leftOperand,
 										orderCols,
                                         offsetClauses[ OFFSET_CLAUSE ],
                                         offsetClauses[ FETCH_FIRST_CLAUSE ],
-                                        Boolean.valueOf( hasJDBClimitClause ),
+                                        hasJDBClimitClause,
 										getContextManager());
 		return subqueryNode;
 	}
@@ -8875,18 +8597,12 @@ inPredicateValue(ValueNode leftOperand) throws StandardException :
 ValueNode
 inValueList(ValueNode leftOperand) throws StandardException:
 {
-	ValueNodeList	inList = (ValueNodeList) nodeFactory.getNode(
-											C_NodeTypes.VALUE_NODE_LIST,
-											getContextManager());
+    ValueNodeList inList = new ValueNodeList(getContextManager());
 }
 {
 	inElement(inList) ( <COMMA> inElement(inList) ) *
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.IN_LIST_OPERATOR_NODE,
-								leftOperand,
-								inList,
-								getContextManager());
+        return new InListOperatorNode(leftOperand, inList, getContextManager());
 	}
 }
 
@@ -9043,26 +8759,22 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 		// fix for HAVING without GROUP BY, makes sure we get one
 		// aggregate operator by adding a count(*), this fixes beetle 5853, 5890
 		if (havingClause != null && groupByList == null) {
-			ValueNode vn = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
+           AggregateNode n = new AggregateNode(
 								null,
 								org.apache.derby.impl.sql.compile.CountAggregateDefinition.class,
-								Boolean.FALSE, // distinct Boolean.TRUE?
+                               false, // distinct true?
 								"COUNT(*)",
 								getContextManager());
-			AggregateNode n = (AggregateNode) vn;
 			n.replaceAggregatesWithColumnReferences(selectList, 0);			
 		}
 		
-		selectNode = (SelectNode) nodeFactory.getNode(
-							C_NodeTypes.SELECT_NODE,
-							selectList,
-							fromList,
-							whereClause,
-							groupByList,
-							havingClause,
-							windows,
-							getContextManager());
+        selectNode = new SelectNode(selectList,
+                                    fromList,
+                                    whereClause,
+                                    groupByList,
+                                    havingClause,
+                                    windows,
+                                    getContextManager());
 
 		return selectNode;
 	}
@@ -9076,13 +8788,13 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 FromList
 fromClause() throws StandardException :
 {
-	FromList fromList = (FromList) nodeFactory.getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+    FromList fromList = new FromList(
+        getOptimizerFactory().doJoinOrderOptimization(),
+        getContextManager());
+
 	int	tokKind;
-        Token   beginToken;
-        Token   endToken;
+    Token   beginToken;
+    Token   endToken;
 }
 {
 	<FROM> {beginToken = getToken(1);}
@@ -9252,15 +8964,15 @@ FromTable tableFactor() throws StandardException :
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
 	{
-		fromTable = (FromTable) nodeFactory.getNode(
-								C_NodeTypes.FROM_VTI,
-								javaToSQLNode.getJavaValueNode(), 
-								correlationName,
-								derivedRCL, 
-								((optionalTableClauses != null) ? 
-									(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
-									(Properties) null),
-								getContextManager()); 
+        fromTable = new FromVTI(
+            (MethodCallNode)javaToSQLNode.getJavaValueNode(),
+            correlationName,
+            derivedRCL,
+            ((optionalTableClauses != null) ?
+                 (Properties)optionalTableClauses[
+                     OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
+                 (Properties)null),
+            getContextManager());
 		return fromTable;
 	}
 |
@@ -9268,13 +8980,15 @@ FromTable tableFactor() throws StandardException :
 	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		optionalTableClauses = optionalTableClauses()
 	{
-		fromTable = (FromTable) nodeFactory.getNode(
-											C_NodeTypes.FROM_BASE_TABLE,
-											tableName,
-												(String) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_CORRELATION_NAME],
-												(ResultColumnList) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_DERIVED_RCL],
-												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES],
-											getContextManager());
+        fromTable = new FromBaseTable(
+            tableName,
+            (String) optionalTableClauses[
+                OPTIONAL_TABLE_CLAUSES_CORRELATION_NAME],
+            (ResultColumnList) optionalTableClauses[
+                OPTIONAL_TABLE_CLAUSES_DERIVED_RCL],
+            (Properties) optionalTableClauses[
+                OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES],
+            getContextManager());
 		return fromTable;
 	}
 |
@@ -9305,19 +9019,19 @@ FromTable tableFactor() throws StandardException :
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
 	{
-		fromTable = (FromTable) nodeFactory.getNode(
-											C_NodeTypes.FROM_SUBQUERY,
-											derivedTable.getResultSet(),
-											derivedTable.getOrderByList(),
-                                            derivedTable.getOffset(),
-                                            derivedTable.getFetchFirst(),
-                                            Boolean.valueOf( derivedTable.hasJDBClimitClause() ),
-											correlationName,
-											derivedRCL,
-											((optionalTableClauses != null) ?
-												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
-												(Properties) null),
-											getContextManager()); 
+        fromTable = new FromSubquery(
+            derivedTable.getResultSet(),
+            derivedTable.getOrderByList(),
+            derivedTable.getOffset(),
+            derivedTable.getFetchFirst(),
+            derivedTable.hasJDBClimitClause(),
+            correlationName,
+            derivedRCL,
+            ((optionalTableClauses != null) ?
+             (Properties) optionalTableClauses[
+                 OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
+             (Properties) null),
+            getContextManager());
 
 		return fromTable;
 	}
@@ -9336,10 +9050,7 @@ FromTable tableFactor() throws StandardException :
 ResultColumnList
 derivedColumnList() throws StandardException :
 {
-	ResultColumnList	resultColumns =
-									(ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 }
 {
 	columnNameList(resultColumns)
@@ -9377,11 +9088,9 @@ columnNameItem(ResultColumnList columnList) throws StandardException :
 		** should be hooked up to each result column, so set that
 		** to null for now.
 		*/
-		resultColumn = (ResultColumn) nodeFactory.getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									columnName,
-									null,
-									getContextManager());
+       resultColumn = new ResultColumn(columnName,
+                                        null,
+                                        getContextManager());
 		columnList.addResultColumn(resultColumn);
 	}
 }
@@ -9602,8 +9311,7 @@ joinCondition() throws StandardException :
 ResultColumnList
 namedColumnsJoin() throws StandardException :
 {
-    ResultColumnList usingClause = (ResultColumnList) nodeFactory.getNode(
-            C_NodeTypes.RESULT_COLUMN_LIST, getContextManager());
+    ResultColumnList usingClause = new ResultColumnList(getContextManager());
 }
 {
     <USING> <LEFT_PAREN> columnNameList(usingClause) <RIGHT_PAREN>
@@ -9663,53 +9371,41 @@ datetimeValueFunction() throws StandardException :
 {
 	LOOKAHEAD({(getToken(1).kind == CURRENT && getToken(2).kind == DATE)}) <CURRENT> <DATE> 
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-								ReuseFactory.getInteger(
-									CurrentDatetimeOperatorNode.CURRENT_DATE),
-								getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_DATE,
+            getContextManager());
 	}
 	| <CURRENT_DATE>
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-								ReuseFactory.getInteger(
-									CurrentDatetimeOperatorNode.CURRENT_DATE),
-								getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_DATE,
+            getContextManager());
 	}
 |
 	LOOKAHEAD({(getToken(1).kind == CURRENT && getToken(2).kind == TIME)}) <CURRENT> <TIME> 
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-							ReuseFactory.getInteger(
-								CurrentDatetimeOperatorNode.CURRENT_TIME),
-							getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_TIME,
+            getContextManager());
 	}
 	| <CURRENT_TIME> 
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-							ReuseFactory.getInteger(
-								CurrentDatetimeOperatorNode.CURRENT_TIME),
-							getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_TIME,
+            getContextManager());
 	}
 |
 	LOOKAHEAD({(getToken(1).kind == CURRENT && getToken(2).kind == TIMESTAMP)}) <CURRENT> <TIMESTAMP> 
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-							ReuseFactory.getInteger(
-								CurrentDatetimeOperatorNode.CURRENT_TIMESTAMP),
-							getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_TIMESTAMP,
+            getContextManager());
 	}
 	| <CURRENT_TIMESTAMP> 
 	{
-		return (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE,
-							ReuseFactory.getInteger(
-								CurrentDatetimeOperatorNode.CURRENT_TIMESTAMP),
-							getContextManager());
+        return new CurrentDatetimeOperatorNode(
+            CurrentDatetimeOperatorNode.CURRENT_TIMESTAMP,
+            getContextManager());
 	}
 }
 
@@ -9721,63 +9417,50 @@ datetimeValueFunction() throws StandardException :
 ValueNode
 windowOrAggregateFunctionNode() throws StandardException :
 {
-	ValueNode winOrAgg;
-	QueryTreeNode window = null;
+   WindowNode window = null;
+    AggregateNode agg = null;
 }
 {
 	<COUNT> <LEFT_PAREN>
 	( <ASTERISK>
 	{
-			winOrAgg = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
-								null,
+        agg = new AggregateNode(null,
 								CountAggregateDefinition.class, 
-								Boolean.FALSE,
+                               false,
 								"COUNT(*)",
 								getContextManager());
 	}
 	|
-		winOrAgg = aggregateExpression("COUNT", CountAggregateDefinition.class)
+       agg = aggregateExpression("COUNT", CountAggregateDefinition.class)
 	)
 		<RIGHT_PAREN> [ window = overClause() ]
 	{
 		if (window != null) {
-			winOrAgg =  (ValueNode) nodeFactory.getNode(
-				C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE,
-				window,
-				winOrAgg,
-				getContextManager());
-		}
-
-		return winOrAgg;
+           return new AggregateWindowFunctionNode(
+                window, agg, getContextManager());
+       } else {
+            return agg;
+        }
 	}
 |
-	winOrAgg = generalAggregate() [ window = overClause() ]
+   agg = generalAggregate() [ window = overClause() ]
 	{
 		if (window != null) {
-			winOrAgg =  (ValueNode) nodeFactory.getNode(
-				C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE,
-				window,
-				winOrAgg,
-				getContextManager());
-		}
-
-		return winOrAgg;
+           return new AggregateWindowFunctionNode(
+               window, agg, getContextManager());
+       } else {
+            return agg;
+        }
 	}
 |
 	<ROWNUMBER> <LEFT_PAREN> <RIGHT_PAREN> window = overClause()
 	{
-		winOrAgg = (ValueNode) nodeFactory.getNode(
-			C_NodeTypes.ROW_NUMBER_FUNCTION_NODE,
-			null,
-			window,
-			getContextManager());
-		return winOrAgg;
+       return new RowNumberFunctionNode(null, window, getContextManager());
 	}
 }
 
 
-QueryTreeNode
+WindowNode
 overClause() throws StandardException :
 {
 	String windowRef;
@@ -9789,26 +9472,19 @@ overClause() throws StandardException :
 	<OVER>
   ( <LEFT_PAREN> [ orderCols = orderByClause(null) ] <RIGHT_PAREN>
 	{
-		return (QueryTreeNode) nodeFactory.getNode(
-			C_NodeTypes.WINDOW_DEFINITION_NODE,
-			null,
-			orderCols,
-			getContextManager());
+        return new WindowDefinitionNode(null, orderCols, getContextManager());
 	}
  |
    windowRef = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
    {
-	   return (QueryTreeNode) nodeFactory.getNode(
-			C_NodeTypes.WINDOW_REFERENCE_NODE,
-			windowRef,
-			getContextManager());
+       return new WindowReferenceNode(windowRef, getContextManager());
    }
  )
 
 }
 
 
-ValueNode
+AggregateNode
 aggregateExpression(String aggName, Class aggClass) throws StandardException :
 {
 	boolean		distinct = false;
@@ -9817,22 +9493,20 @@ aggregateExpression(String aggName, Class aggClass) throws StandardException :
 {
 	[ distinct = setQuantifier() ] value = additiveExpression(null, 0)
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.AGGREGATE_NODE,
-								value,
-								aggClass, 
-								distinct ? Boolean.TRUE : Boolean.FALSE,
-								aggName,
-								getContextManager());
+       return new AggregateNode(value,
+                                 aggClass,
+                                 distinct,
+                                 aggName,
+                                 getContextManager());
 	}
 }
 
-ValueNode
+AggregateNode
 generalAggregate() throws StandardException :
 {
 	Token			aggToken;
 	String			methodAliasString;
-	ValueNode	aggExpr;
+   AggregateNode   aggExpr;
 	ValueNode		value;
 }
 {
@@ -9883,11 +9557,7 @@ castSpecification() throws StandardException :
 {
 	<CAST> <LEFT_PAREN> value = castOperand() <AS> dts = dataTypeCast() <RIGHT_PAREN>
 	{
-		treeTop = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.CAST_NODE,
-									value,
-									dts,
-									getContextManager());
+        treeTop = new CastNode(value, dts, getContextManager());
 		((CastNode) treeTop).setForExternallyGeneratedCASTnode();
 
 		/* We need to generate a SQL->Java conversion tree above us if
@@ -9895,10 +9565,8 @@ castSpecification() throws StandardException :
 		 */
 		if (dts.getTypeId().userType())
 		{
-			treeTop = (ValueNode) nodeFactory.getNode(
-							C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-							nodeFactory.getNode(
-											C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
+            treeTop = new JavaToSQLValueNode(
+                            new SQLToJavaValueNode(
 											treeTop,
 											getContextManager()),
 							getContextManager());
@@ -9915,19 +9583,14 @@ castSpecification() throws StandardException :
 ValueNode
 nextValueExpression() throws StandardException :
 {
-	ValueNode		 nextValue;
 	TableName sequenceName;
 }
 {
        <NEXT> <VALUE> <FOR> sequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
        {
         checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, "NEXT VALUE");
-		nextValue = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.NEXT_SEQUENCE_NODE,
-									sequenceName,
-									getContextManager());
-
-		return nextValue;}	
+        return new NextSequenceNode(sequenceName, getContextManager());
+       }
 }
 
 /*
@@ -9962,9 +9625,7 @@ castOperand() throws StandardException :
 |
 	<NULL>
 	{
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-									getContextManager());
+       return new UntypedNullConstantNode(getContextManager());
 	}
 }
 
@@ -10030,9 +9691,7 @@ groupByClause() throws StandardException :
 GroupByList
 groupingColumnReferenceList() throws StandardException :
 {
-	GroupByList groupingCols = (GroupByList) nodeFactory.getNode(
-									C_NodeTypes.GROUP_BY_LIST,
-									getContextManager());
+    GroupByList groupingCols = new GroupByList(getContextManager());
 }
 {
 	groupingColumnReference(groupingCols) ( <COMMA> groupingColumnReference(groupingCols) ) *
@@ -10076,10 +9735,7 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
 			throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "?");
 	    	}
 		groupingCols.addGroupByColumn(
-			(GroupByColumn) nodeFactory.getNode(
-							C_NodeTypes.GROUP_BY_COLUMN,
-							columnExpression,
-							getContextManager()));
+            new GroupByColumn(columnExpression, getContextManager()));
 	}
 }
 
@@ -10100,8 +9756,7 @@ havingClause() throws StandardException :
 WindowList
 windowClause() throws StandardException :
 {
-	WindowList windows = new WindowList();
-	windows.setContextManager(getContextManager());
+    WindowList windows = new WindowList(getContextManager());
 }
 {
 	<WINDOW> windows = windowDefinition(windows)
@@ -10123,12 +9778,8 @@ windowDefinition(WindowList wl) throws StandardException :
 	<AS>
    <LEFT_PAREN> [ orderCols = orderByClause(null) ] <RIGHT_PAREN>
 	{
-		wl.addWindow(
-			(WindowDefinitionNode)nodeFactory.getNode(
-				C_NodeTypes.WINDOW_DEFINITION_NODE,
-				windowName,
-				orderCols,
-				getContextManager()));
+        wl.addWindow(new WindowDefinitionNode(
+                         windowName, orderCols, getContextManager()));
 
 		return wl;
 	}
@@ -10155,8 +9806,7 @@ schemaDefinition() throws StandardException :
 			if (schemaName.startsWith("SYS"))
 				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, schemaName);
  
-			return (StatementNode) nodeFactory.getNode(
-					C_NodeTypes.CREATE_SCHEMA_NODE,
+            return new CreateSchemaNode(
 					schemaName,
 					authName,
 					getContextManager()
@@ -10169,8 +9819,7 @@ schemaDefinition() throws StandardException :
 			if (authName.startsWith("SYS"))
 				throw StandardException.newException(SQLState.INVALID_SCHEMA_SYS, authName);
 
-			return (StatementNode) nodeFactory.getNode(
-					C_NodeTypes.CREATE_SCHEMA_NODE,
+            return new CreateSchemaNode(
 					authName,
 					authName,
 					getContextManager()
@@ -10205,10 +9854,7 @@ roleDefinition() throws StandardException :
                             (SQLState.INVALID_ROLE_SYS, roleName);
                 }
 
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.CREATE_ROLE_NODE,
-			roleName,
-			getContextManager());
+        return new CreateRoleNode(roleName, getContextManager());
 	}
 }
 
@@ -10257,15 +9903,14 @@ sequenceDefinition() throws StandardException :
         if ( optionalClauses[ IDX_CYCLE_OPTION ] != null )
         { cycle = (Boolean) optionalClauses[ IDX_CYCLE_OPTION ]; }
 
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.CREATE_SEQUENCE_NODE,
+        return new CreateSequenceNode(
 			qualifiedSequenceName,
             dtd,
             initialValue,
             stepValue,
             maxValue,
             minValue,
-            cycle,
+            cycle.booleanValue(),
 			getContextManager());
 	}
 }
@@ -10361,7 +10006,7 @@ exactIntegerObject() throws StandardException :
 {
 	exactNumeric = exactNumber()
     {
-        return new Long( exactNumeric );
+        return Long.valueOf( exactNumeric );
     }
 }
 
@@ -10376,7 +10021,7 @@ stepValue() throws StandardException :
 {
 	<INCREMENT> <BY> stepValue = exactNumber()
     {
-        return new Long( stepValue );
+        return Long.valueOf( stepValue );
     }
 }
 
@@ -10397,10 +10042,7 @@ dropSequenceStatement() throws StandardException :
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
 
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.DROP_SEQUENCE_NODE,
-			sequenceName,
-			getContextManager());
+        return new DropSequenceNode(sequenceName, getContextManager());
 	}
 }
 
@@ -10428,12 +10070,11 @@ tableDefinition() throws StandardException :
 			tableElementList = tableElementList()
 			[ properties = propertyList(false)<CHECK_PROPERTIES>]
 			{
-				return (StatementNode) nodeFactory.getNode(
-										C_NodeTypes.CREATE_TABLE_NODE,
+                return new CreateTableNode(
 										tableName,
 										tableElementList,
 										properties,
-										new Character(lockGranularity),
+                                        lockGranularity,
 										getContextManager());
 			}
 		|
@@ -10458,8 +10099,7 @@ tableDefinition() throws StandardException :
 						SQLState.LANG_NO_PARAMS_IN_TABLES);
 				}
 				
-				return (StatementNode) nodeFactory.getNode(
-										C_NodeTypes.CREATE_TABLE_NODE,
+                return new CreateTableNode(
 										tableName,
 										resultColumns,
 										queryExpression,
@@ -10471,9 +10111,7 @@ tableDefinition() throws StandardException :
 ResultColumnList
 tableColumnList() throws StandardException :
 {
-	ResultColumnList resultColumns = (ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 }
 {
 	columnNameList(resultColumns)
@@ -10623,9 +10261,8 @@ indexDefinition() throws StandardException :
 							tableName);
 			}
 		}
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.CREATE_INDEX_NODE,
-								unique,
+        return new CreateIndexNode(
+                                unique.booleanValue(),
 								DEFAULT_INDEX_TYPE,
 								indexName,
 								tableName,
@@ -11176,19 +10813,18 @@ viewDefinition(Token beginToken) throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_VIEWS);
 		}
 
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.CREATE_VIEW_NODE,
+        return new CreateViewNode(
 								tableName, 
 								resultColumns, 
 								queryExpression,
-								ReuseFactory.getInteger(checkOptionType),
+                                checkOptionType,
 								StringUtil.slice(statementSQLText,
 												beginToken.beginOffset,
 												endToken.endOffset,false),
 								orderCols,
                                 offsetClauses[ OFFSET_CLAUSE ],
                                 offsetClauses[ FETCH_FIRST_CLAUSE ],
-                                Boolean.valueOf( hasJDBClimitClause ),
+                                hasJDBClimitClause,
 								getContextManager());
 	}
 }
@@ -11196,9 +10832,7 @@ viewDefinition(Token beginToken) throws StandardException :
 ResultColumnList
 viewColumnList() throws StandardException :
 {
-	ResultColumnList	resultColumns = (ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 }
 {
 	/* RESOLVE: Passing null parameter for now just to keep Java happy */
@@ -11222,11 +10856,10 @@ triggerDefinition() throws StandardException :
 	int					actionBegin;
 	int					actionEnd;
 	int					triggerEvent;
-	QueryTreeNode		actionNode;
-	ResultColumnList	triggerColumns = (ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
-	List				refClause = null;
+    StatementNode       actionNode;
+    ResultColumnList    triggerColumns =
+                        new ResultColumnList(getContextManager());
+    List<TriggerReferencingStruct> refClause = null;
 }
 {
 	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -11259,25 +10892,23 @@ triggerDefinition() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_TRIGGER_ACTION);
 		}
 
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.CREATE_TRIGGER_NODE,
+        return new CreateTriggerNode(
 								triggerName, 
 								tableName,
-								ReuseFactory.getInteger(triggerEvent),
+                                triggerEvent,
 								triggerColumns,
-								isBefore,	
-								isRow,
-								Boolean.TRUE, 				// enabled
-								refClause,			// referencing clause
-								null,// when clause node
-								null, 		// when clause text
-								ReuseFactory.getInteger(0),
-											// when clause begin offset
+                                isBefore.booleanValue(),
+                                isRow.booleanValue(),
+                                true,        // enabled
+                                refClause,   // referencing clause
+                                null,        // when clause node
+                                null,        // when clause text
+                                0,           // when clause begin offset
 								actionNode,
 								StringUtil.slice(statementSQLText,
 									actionBegin,
 									actionEnd,false),
-								ReuseFactory.getInteger(actionBegin),
+                                actionBegin,
 								getContextManager());
 	}
 }
@@ -11353,7 +10984,7 @@ rowOrStatement() :
 	}
 }
 
-List
+List<TriggerReferencingStruct>
 triggerReferencingClause() throws StandardException :
 {
 	ArrayList<TriggerReferencingStruct> expressions = new ArrayList<TriggerReferencingStruct>();
@@ -11424,9 +11055,7 @@ defaultNullOnlyClause() throws StandardException :
 {
 	 <_DEFAULT> <NULL>
 	 {
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-									getContextManager());
+       return new UntypedNullConstantNode(getContextManager());
 	 }
 }
 
@@ -11505,8 +11134,7 @@ generatedByDefault(long[] autoIncrementInfo) throws StandardException :
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1,
 			     "GENERATED BY DEFAULT");
 
-		value = (ValueNode) nodeFactory.getNode(C_NodeTypes.DEFAULT_NODE,
-							getContextManager()) ;
+        value = new DefaultNode(getContextManager()) ;
 
 		return value;
     }
@@ -11544,19 +11172,16 @@ generationClause() throws StandardException :
     {
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, "GENERATED COLUMN");
 
-		return (ValueNode) nodeFactory.getNode
-        (
-            C_NodeTypes.GENERATION_CLAUSE_NODE,
-            value,
-            StringUtil.slice
-            (
-                statementSQLText,
-                beginToken.endOffset + 1,
-                endToken.beginOffset - 1,
-                true
-            ),
-            getContextManager()
-        );
+        return new GenerationClauseNode(value,
+                                        StringUtil.slice
+                                        (
+                                            statementSQLText,
+                                            beginToken.endOffset + 1,
+                                            endToken.beginOffset - 1,
+                                            true
+                                         ),
+                                        getContextManager()
+                                        );
     }
 }
 
@@ -11605,9 +11230,7 @@ defaultOption(Token beginToken, long[] autoIncrementInfo,
 			getToken(2).kind == DOUBLE_COLON)})
 	<NULL>
 	{
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-									getContextManager());
+       return new UntypedNullConstantNode(getContextManager());
 	}
 |
 	value = DB2DefaultOption(columnName)
@@ -11615,14 +11238,11 @@ defaultOption(Token beginToken, long[] autoIncrementInfo,
 		endToken = getToken(0);
 		value.setBeginOffset( beginToken.beginOffset );
 		value.setEndOffset( endToken.endOffset );
-		value = (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.DEFAULT_NODE,
-								value,
+        value = new DefaultNode(value,
 								StringUtil.slice(statementSQLText,
 									beginToken.beginOffset + 7,
 									endToken.endOffset,true),
-								getContextManager()
-							);
+                                getContextManager());
 		return value;
 	}
 }
@@ -11647,9 +11267,8 @@ DB2DefaultOption(String columnName) throws StandardException :
 	LOOKAHEAD({getToken(2).kind == SCHEMA || getToken(2).kind == SQLID}) 
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.CURRENT_SCHEMA_NODE,
-						getContextManager());
+        return new SpecialFunctionNode(
+            C_NodeTypes.CURRENT_SCHEMA_NODE, getContextManager());
 	}
 |
 	/* Revert DB2 restriction: DERBY-3013. Accept standard SQL CURRENT_USER,
@@ -11745,11 +11364,9 @@ literal() throws StandardException :
 |
 	tok = booleanLiteral()
 	{
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-									StringUtil.SQLEqualsIgnoreCase(tok.image, "true") ?
-										Boolean.TRUE : Boolean.FALSE,
- 									getContextManager());
+       return new BooleanConstantNode(
+           StringUtil.SQLEqualsIgnoreCase(tok.image, "true"),
+           getContextManager());
 	}
 /*
 	JDBC and ODBC do not support the interval type, so let's not do it
@@ -11876,10 +11493,10 @@ numericLiteral(String sign) throws StandardException :
 		if (Double.isNaN(dv) || Double.isInfinite(dv))
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.DOUBLE_NAME);
 
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.DOUBLE_CONSTANT_NODE,
-									doubleValue,
-									getContextManager());
+       return new NumericConstantNode(
+           TypeId.getBuiltInTypeId(Types.DOUBLE),
+           doubleValue,
+           getContextManager());
 	}
 }
 
@@ -11941,10 +11558,10 @@ bareDateLiteral() throws StandardException :
 {
 	dateString = string()
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.USERTYPE_CONSTANT_NODE,
-						getLanguageConnectionContext().getDataValueFactory().getDateValue(dateString, true),
-						getContextManager());
+       return new UserTypeConstantNode(
+            getLanguageConnectionContext().getDataValueFactory().
+                getDateValue(dateString, true),
+            getContextManager());
 	}
 }
 
@@ -11959,10 +11576,10 @@ bareTimeLiteral() throws StandardException :
 {
 	timeString = string()
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.USERTYPE_CONSTANT_NODE,
-						getLanguageConnectionContext().getDataValueFactory().getTimeValue(timeString, true),
-						getContextManager());
+       return new UserTypeConstantNode(
+            getLanguageConnectionContext().getDataValueFactory().
+                getTimeValue(timeString, true),
+            getContextManager());
 	}
 }
 
@@ -11977,10 +11594,10 @@ bareTimestampLiteral() throws StandardException :
 {
 	timestampString = string()
 	{
-		return (ValueNode) nodeFactory.getNode(
-						C_NodeTypes.USERTYPE_CONSTANT_NODE,
-						getLanguageConnectionContext().getDataValueFactory().getTimestampValue(timestampString, true),
-						getContextManager());
+       return new UserTypeConstantNode(
+            getLanguageConnectionContext().getDataValueFactory().
+                getTimestampValue(timestampString, true),
+            getContextManager());
 	}
 }
 
@@ -12019,10 +11636,7 @@ stringLiteral() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_DB2_STRING_CONSTANT_TOO_LONG, StringUtil.formatForPrint(tok.image));
 		string = StringUtil.compressQuotes(tok.image.substring(1, tok.image.length() - 1), SINGLEQUOTES);
 		/* Trim quotes from string. */
-		return (CharConstantNode) nodeFactory.getNode(
-								C_NodeTypes.CHAR_CONSTANT_NODE,
-								string,
-								getContextManager());
+       return new CharConstantNode(string, getContextManager());
 	}
 }
 
@@ -12046,10 +11660,10 @@ hexLiteral() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_DB2_INVALID_HEXADECIMAL_CONSTANT, StringUtil.formatForPrint(hexLiteral));
 
 		int bitLength = ((hexLiteral.length() - 3) / 2);
-		return (ValueNode)
-				nodeFactory.getNode(C_NodeTypes.VARBIT_CONSTANT_NODE,
-									hexLiteral.substring(2, hexLiteral.length() - 1), ReuseFactory.getInteger(bitLength),
-									getContextManager());
+       return new VarbitConstantNode(
+            hexLiteral.substring(2, hexLiteral.length() - 1),
+            bitLength,
+            getContextManager());
 	}
 }
 
@@ -12089,28 +11703,25 @@ checkConstraintDefinition(TableName constraintName, String columnName)
 		if (columnName != null)
 		{
 			/* Column check constraint */
-			rclList = (ResultColumnList) nodeFactory.getNode(
-									C_NodeTypes.RESULT_COLUMN_LIST,
-									getContextManager());
-			rclList.addElement((ResultColumn) nodeFactory.getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									columnName,
-									null,
-									getContextManager()));
+            rclList = new ResultColumnList(getContextManager());
+            rclList.addElement(new ResultColumn(columnName,
+                                                null,
+                                                getContextManager()));
 		}
 
 		value.setBeginOffset( beginToken.beginOffset );
 		value.setEndOffset( endToken.endOffset );
-		return (ConstraintDefinitionNode) nodeFactory.getNode(
-					C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
+        return new ConstraintDefinitionNode(
 					constraintName,
-					ReuseFactory.getInteger(DataDictionary.CHECK_CONSTRAINT),
+                    DataDictionary.CHECK_CONSTRAINT,
 					rclList,
 					null,
 					value,
 					StringUtil.slice(statementSQLText,
 						beginToken.beginOffset,
 						endToken.endOffset,true),
+                    StatementType.DROP_DEFAULT,
+                    DataDictionary.DROP_CONSTRAINT,
 					getContextManager()
 					);
 	}
@@ -12149,14 +11760,12 @@ renameTableStatement() throws StandardException :
 {
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.RENAME_NODE,
-								tableName,
-								null,
-								newTableName,
-								Boolean.FALSE,
-								ReuseFactory.getInteger(StatementType.RENAME_TABLE),
-								getContextManager());
+        return new RenameNode(tableName,
+                              null,
+                              newTableName,
+                              false,
+                              StatementType.RENAME_TABLE,
+                              getContextManager());
 	}
 }
 
@@ -12172,17 +11781,12 @@ renameIndexStatement() throws StandardException :
 {
 	<INDEX> oldIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newIndexName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		StatementNode qtn = (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.RENAME_NODE,
-								null,
-								oldIndexName,
-								newIndexName,
-								Boolean.FALSE,
-ReuseFactory.getInteger(StatementType.RENAME_INDEX),
-								getContextManager());
-
-		return qtn;
-
+        return new RenameNode(null,
+                              oldIndexName,
+                              newIndexName,
+                              false,
+                              StatementType.RENAME_INDEX,
+                              getContextManager());
 	}
 }
 StatementNode
@@ -12195,19 +11799,20 @@ renameColumnStatement() throws StandardException :
 	<COLUMN> oldColumnReference = columnReference()
 		<TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		if (oldColumnReference.getTableNameNode() == null)
+        if (oldColumnReference.getTableNameNode() == null) {
 			throw StandardException.newException(
 				SQLState.LANG_OBJECT_DOES_NOT_EXIST,
 				"RENAME COLUMN",
 				oldColumnReference.getColumnName());
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.RENAME_NODE,
+        }
+
+        return new RenameNode(
 			oldColumnReference.getTableNameNode(),
 			oldColumnReference.getColumnName(),
 			newColumnName,
-			Boolean.FALSE,
-			ReuseFactory.getInteger(StatementType.RENAME_COLUMN),
-				getContextManager());
+            false,
+            StatementType.RENAME_COLUMN,
+            getContextManager());
 	}
 }
 
@@ -12215,33 +11820,29 @@ renameColumnStatement() throws StandardException :
 StatementNode
 lockStatement() throws StandardException :
 {
-	Boolean						exclusiveMode;
+    boolean                     exclusiveMode;
 	TableName					tableName;
 }
 {
 	<LOCK> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <IN> exclusiveMode = lockMode() <MODE>
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.LOCK_TABLE_NODE,
-								tableName,
-								exclusiveMode,
-								getContextManager());
+        return new LockTableNode(tableName, exclusiveMode, getContextManager());
 	}
 }
 
-Boolean
+boolean
 lockMode() :
 {
 }
 {
 	<EXCLUSIVE>
 	{
-		return Boolean.TRUE;
+        return true;
 	}
 |
 	<SHARE>
 	{
-		return Boolean.FALSE;
+        return false;
 	}
 }
 
@@ -12253,10 +11854,7 @@ execStatement() throws StandardException :
 {
 	<EXECUTE> <STATEMENT> stmtName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.EXEC_SPS_NODE,
-								stmtName,
-								getContextManager());
+        return new ExecSPSNode(stmtName, getContextManager());
 	}
 }
 
@@ -12291,10 +11889,8 @@ transactionMode() throws StandardException :
 {
 	isolationLevel = isolationLevelDB2OrReset() 
 	{
-		return (TransactionStatementNode) nodeFactory.getNode(
-								C_NodeTypes.SET_TRANSACTION_ISOLATION_NODE,
-								ReuseFactory.getInteger(isolationLevel),
-								getContextManager());
+        return new SetTransactionIsolationNode(isolationLevel,
+                                               getContextManager());
 	}
 }
 
@@ -12469,28 +12065,25 @@ setRoleSpecification() throws StandardException :
 {
 	<NONE>
 	{
-		return (StatementNode) nodeFactory.getNode
-			(C_NodeTypes.SET_ROLE_NODE,
-			 roleName,
-			 null,
-			 getContextManager());
+        return new SetRoleNode(
+            roleName,
+            StatementType.UNKNOWN,
+            getContextManager());
 	}
 |
 	roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (StatementNode) nodeFactory.getNode
-			(C_NodeTypes.SET_ROLE_NODE,
+        return new SetRoleNode(
 			 roleName,
-			 null,
+             StatementType.UNKNOWN,
 			 getContextManager());
 	}
 |
 	dynamicParameterSpecification()
 	{
-		return (StatementNode) nodeFactory.getNode
-			(C_NodeTypes.SET_ROLE_NODE,
+        return new SetRoleNode(
 			 null,
-			 ReuseFactory.getInteger(StatementType.SET_ROLE_DYNAMIC),
+             StatementType.SET_ROLE_DYNAMIC,
 			 getContextManager());
 	}
 |
@@ -12498,10 +12091,9 @@ setRoleSpecification() throws StandardException :
 	{
 		roleName = IdUtil.parseRoleId(roleName);
 
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.SET_ROLE_NODE,
+        return new SetRoleNode(
 			roleName,
-			null,
+            StatementType.UNKNOWN,
 			getContextManager());
 	}
 }
@@ -12544,38 +12136,26 @@ setSchemaValues() throws StandardException :
 {
 	schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.SET_SCHEMA_NODE,
-								schemaName,
-								null,
-								getContextManager());
+        return new SetSchemaNode(
+            schemaName, StatementType.UNKNOWN, getContextManager());
 	}
 |
 	<USER>
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.SET_SCHEMA_NODE,
-								null,
-								ReuseFactory.getInteger(StatementType.SET_SCHEMA_USER),
-								getContextManager());
+        return new SetSchemaNode(
+            null, StatementType.SET_SCHEMA_USER, getContextManager());
 	}
 |   dynamicParameterSpecification()
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.SET_SCHEMA_NODE,
-								null,
-								ReuseFactory.getInteger(StatementType.SET_SCHEMA_DYNAMIC),
-								getContextManager());
+        return new SetSchemaNode(
+            null, StatementType.SET_SCHEMA_DYNAMIC, getContextManager());
 	}
 |	schemaName = string()
 	{
 		/* Max length for schema name is Limits.MAX_IDENTIFIER_LENGTH */
 		IdUtil.checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.SET_SCHEMA_NODE,
-								schemaName,
-								null,
-								getContextManager());
+        return new SetSchemaNode(
+            schemaName, StatementType.UNKNOWN, getContextManager());
 	}
 }
 
@@ -12595,9 +12175,7 @@ setMessageLocaleStatement() throws StandardException :
 	{
 		getContextManager().setMessageLocale(messageLocale);
 
-		return (StatementNode) nodeFactory.getNode(
-											C_NodeTypes.NOP_STATEMENT_NODE,
-											getContextManager());
+        return new NOPStatementNode(getContextManager());
 	}
 }
 
@@ -12627,25 +12205,21 @@ valueSpecification() throws StandardException :
 		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
 		// An impl assumption here is that Derby can promote CHAR to any comparable datatypes such as numeric
 		ContextManager cm = getContextManager();
-		ValueNodeList thenElseList = (ValueNodeList) nodeFactory.getNode(C_NodeTypes.VALUE_NODE_LIST, cm);
+        ValueNodeList thenElseList = new ValueNodeList(cm);
 
 		//Use untyped null for then clause at this point. At the bind time, we will cast it to the datatype of L 
-		thenElseList.addElement((ValueNode) nodeFactory.getNode(
-									C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-									cm));
+       thenElseList.addElement(new UntypedNullConstantNode(cm));
 		thenElseList.addElement(leftExpression);
 
-		return (ValueNode) nodeFactory.getNode(
-											C_NodeTypes.CONDITIONAL_NODE,
-											(ValueNode) nodeFactory.getNode(
-														C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-														leftExpression,
-														rightExpression,
-														Boolean.FALSE,
-														cm),
-											thenElseList,
-											Boolean.TRUE,//this node is for nullif 
-											cm);
+        return new ConditionalNode(new BinaryRelationalOperatorNode(
+                                       C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+                                       leftExpression,
+                                       rightExpression,
+                                       false,
+                                       cm),
+                                   thenElseList,
+                                   true, // this node is for nullif
+                                   cm);
 	}
 |
 	// CASE WHEN P1 THEN [T1 | NULL] (WHEN Pi THEN [Ti | NULL])* [ELSE E | NULL] END
@@ -12666,12 +12240,10 @@ caseExpression() throws StandardException :
 {
 	<END>
 	{
-		ValueNode value = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.CAST_NODE,
-										(ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-																		getContextManager()),
-										DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),	
-										getContextManager());
+        ValueNode value = new CastNode(
+            new UntypedNullConstantNode(getContextManager()),
+            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),
+            getContextManager());
 		((CastNode) value).setForExternallyGeneratedCASTnode();
 		return value;
 	}
@@ -12703,15 +12275,11 @@ whenThenExpression() throws StandardException :
 	elseExpr = caseExpression()
 	{
 		ContextManager cm = getContextManager();
-		ValueNodeList thenElseList = (ValueNodeList) nodeFactory.getNode(C_NodeTypes.VALUE_NODE_LIST, cm);
+        ValueNodeList thenElseList = new ValueNodeList(cm);
 		thenElseList.addElement(thenExpr); // then
 		thenElseList.addElement(elseExpr); // else
 
-		return((ValueNode) nodeFactory.getNode(C_NodeTypes.CONDITIONAL_NODE,
-												expr,
-												thenElseList,
-												Boolean.FALSE,
-												cm));
+        return new ConditionalNode(expr, thenElseList, false, cm);
 	}
 }
 
@@ -12727,12 +12295,10 @@ thenElseExpression() throws StandardException :
 	LOOKAHEAD ( {getToken(1).kind == NULL} )
 	<NULL>
 	{
-		ValueNode value = (ValueNode) nodeFactory.getNode(
-										C_NodeTypes.CAST_NODE,
-										(ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-																		getContextManager()),
-										DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),	
-										getContextManager());
+        ValueNode value = new CastNode(
+            new UntypedNullConstantNode(getContextManager()),
+            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),
+            getContextManager());
 		((CastNode) value).setForExternallyGeneratedCASTnode();
 		return value;
 	}
@@ -12796,14 +12362,15 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 	constraintType = uniqueSpecification(null) 
 		<LEFT_PAREN> uniqueColumnList = uniqueColumnList() <RIGHT_PAREN>
 	{
-		return (ConstraintDefinitionNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
+        return new ConstraintDefinitionNode(
+                        constraintName,
 						ReuseFactory.getInteger(constraintType),
 						uniqueColumnList,
 						null,
 						null,
 						null,
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.DROP_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -12830,9 +12397,7 @@ uniqueSpecification(String columnName) throws StandardException :
 ResultColumnList
 uniqueColumnList() throws StandardException :
 {
-	ResultColumnList	resultColumns = (ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+    ResultColumnList resultColumns = new ResultColumnList(getContextManager());
 }
 {
 	columnNameList(resultColumns)
@@ -12844,12 +12409,8 @@ uniqueColumnList() throws StandardException :
 ConstraintDefinitionNode
 referentialConstraintDefinition(TableName constraintName) throws StandardException :
 {
-	ResultColumnList fkRcl = (ResultColumnList) nodeFactory.getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
-	ResultColumnList refRcl = (ResultColumnList) nodeFactory.getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+    ResultColumnList fkRcl = new ResultColumnList(getContextManager());
+    ResultColumnList refRcl = new ResultColumnList(getContextManager());
 	TableName referencedTable;
 	int[] refActions = {StatementType.RA_NOACTION, 
 			    StatementType.RA_NOACTION}; //default values
@@ -12858,9 +12419,8 @@ referentialConstraintDefinition(TableName constraintName) throws StandardExcepti
 	<FOREIGN> <KEY> <LEFT_PAREN> columnNameList(fkRcl) <RIGHT_PAREN>
 		referencedTable = referencesSpecification(refRcl, refActions)
 	{
-		return (ConstraintDefinitionNode) nodeFactory.getNode(
-						C_NodeTypes.FK_CONSTRAINT_DEFINITION_NODE,
-						constraintName,
+        return new FKConstraintDefinitionNode(
+                        constraintName,
 						referencedTable,
 						fkRcl,
 						refRcl,
@@ -12994,9 +12554,7 @@ columnConstraint(TableName constraintName,
 	int constraintType;
 	Properties properties = null;
 	ConstraintDefinitionNode tcdn;
-	ResultColumnList refRcl = (ResultColumnList) nodeFactory.getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+    ResultColumnList refRcl = new ResultColumnList(getContextManager());
 	TableName referencedTable;
 	int[] refActions = {StatementType.RA_NOACTION,
                             StatementType.RA_NOACTION} ; //default: NO ACTION
@@ -13017,25 +12575,21 @@ columnConstraint(TableName constraintName,
 	constraintType = uniqueSpecification(columnName)
 		[ properties = propertyList(false) <CHECK_PROPERTIES>]
 	{
-		ResultColumnList uniqueColumnList =
-										(ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
-		uniqueColumnList.addElement(
-			(ResultColumn) nodeFactory.getNode(
-							C_NodeTypes.RESULT_COLUMN,
-							columnName,
-							null,
-							getContextManager()));
+        ResultColumnList uniqueColumnList =
+            new ResultColumnList(getContextManager());
+        uniqueColumnList.addElement(new ResultColumn(columnName,
+                                                     null,
+                                                     getContextManager()));
 
-		return (ConstraintDefinitionNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
+        return new ConstraintDefinitionNode(
+                        constraintName,
 						ReuseFactory.getInteger(constraintType),
 						uniqueColumnList,
 						properties,
 						null,
 						null,
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.DROP_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -13043,19 +12597,12 @@ columnConstraint(TableName constraintName,
 	referencedTable = referencesSpecification(refRcl, refActions)
 		[ properties = propertyList(false)<CHECK_PROPERTIES>] 
 	{
-		ResultColumnList fkRcl = (ResultColumnList) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
-		fkRcl.addElement(
-					(ResultColumn) nodeFactory.getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									columnName,
-									null,
-									getContextManager())
-				);
-		tcdn = (ConstraintDefinitionNode) nodeFactory.getNode(
-						C_NodeTypes.FK_CONSTRAINT_DEFINITION_NODE,
-						constraintName,
+        ResultColumnList fkRcl = new ResultColumnList(getContextManager());
+        fkRcl.addElement(new ResultColumn(columnName,
+                                          null,
+                                          getContextManager()));
+        tcdn = new FKConstraintDefinitionNode(
+                        constraintName,
 						referencedTable,
 						fkRcl,
 						refRcl,
@@ -13092,10 +12639,7 @@ dropRoleStatement() throws StandardException :
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("DROP ROLE");
 
-		return (StatementNode) nodeFactory.getNode(
-			C_NodeTypes.DROP_ROLE_NODE,
-			roleName,
-			getContextManager());
+        return new DropRoleNode(roleName, getContextManager());
 	}
 }
 
@@ -13108,11 +12652,10 @@ dropSchemaStatement() throws StandardException :
 {
 	<SCHEMA> schemaName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <RESTRICT>
 	{
-		StatementNode stmt =  (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.DROP_SCHEMA_NODE,
-							schemaName,
-							new Integer(StatementType.DROP_RESTRICT),
-							getContextManager());
+        StatementNode stmt = new DropSchemaNode(
+            schemaName,
+            StatementType.DROP_RESTRICT,
+            getContextManager());
 
 		return stmt;
 	}
@@ -13138,9 +12681,7 @@ alterTableBody(TableName tableName) throws StandardException :
 	char				lockGranularity = '\0';
 	String               newTableName;
 	TableElementList	tableElementList =
-									(TableElementList) nodeFactory.getNode(
-												C_NodeTypes.TABLE_ELEMENT_LIST,
-												getContextManager());
+                            new TableElementList(getContextManager());
 	int[]				changeType = new int[1];
 	int[]				behavior = new int[1];
         String indexName = null;
@@ -13179,14 +12720,11 @@ alterTableBody(TableName tableName) throws StandardException :
 		//This sql can only be generated internally (right now it is done for
 		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
 		checkInternalFeature("UPDATE STATISTICS");
-		changeType[0] = DDLStatementNode.UPDATE_STATISTICS;
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
-							Boolean.FALSE,
+                            DDLStatementNode.UPDATE_STATISTICS,
+                            false,
 							indexName,
-							null,
 							getContextManager());
 	}
 |
@@ -13200,14 +12738,11 @@ alterTableBody(TableName tableName) throws StandardException :
 		//This sql can only be generated internally (right now it is done for
 		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
 		checkInternalFeature("DROP STATISTICS");
-		changeType[0] = DDLStatementNode.DROP_STATISTICS;
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
-							Boolean.FALSE,
+                            DDLStatementNode.DROP_STATISTICS,
+                            false,
 							indexName,
-							null,
 							getContextManager());
 	}
 |
@@ -13223,13 +12758,12 @@ alterTableBody(TableName tableName) throws StandardException :
 |
 	lockGranularity = alterTableAction( tableElementList, changeType, behavior )
 	{
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
+                            changeType[0],
 							tableElementList,
-							new Character(lockGranularity),
-							behavior,
+                            lockGranularity,
+                            behavior[0],
 							getContextManager());
 	}
 }
@@ -13255,15 +12789,11 @@ dropStatistics(TableName tableName) throws StandardException :
 		//This sql can only be generated internally (right now it is done for
 		//syscs_util.SYSCS_DROP_STATISTICS procedure
 		checkInternalFeature("DROP STATISTICS");
-		int[] changeType = new int[1];
-		changeType[0] = DDLStatementNode.DROP_STATISTICS;
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
-							Boolean.TRUE,
-							null,
-							null,
+                            DDLStatementNode.DROP_STATISTICS,
+                            true, // drop all indexes
+                            null, // no specific index given
 							getContextManager());
 	}
 }
@@ -13290,14 +12820,11 @@ updateStatistics(TableName tableName) throws StandardException :
 		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
 		checkInternalFeature("UPDATE STATISTICS");
 		int[] changeType = new int[1];
-		changeType[0] = DDLStatementNode.UPDATE_STATISTICS;
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
-							Boolean.TRUE,
-							null,
-							null,
+                            DDLStatementNode.UPDATE_STATISTICS,
+                            true, // update all indexes
+                            null, // all indexes, so none given
 							getContextManager());
 	}
 }
@@ -13318,12 +12845,11 @@ inplaceCompress(TableName tableName) throws StandardException :
         )
 	{
 		checkInternalFeature("COMPRESS");
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							new Boolean(purge != null),
-							new Boolean(defragment != null),
-							new Boolean(truncate != null),
+                            purge != null,
+                            defragment != null,
+                            truncate != null,
 							getContextManager());
 	}
 }
@@ -13339,10 +12865,9 @@ sequentialCompress(TableName tableName) throws StandardException :
 	[ tok = <SEQUENTIAL> ]
 	{
 		checkInternalFeature("COMPRESS");
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							new Boolean(tok != null),
+                            tok != null,
 							getContextManager());
 	}
 }
@@ -13360,13 +12885,11 @@ alterTableRenameTableStatement(TableName tableName) throws StandardException :
 {
 	<TO> newTableName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.RENAME_NODE,
-							tableName,
+        return new RenameNode(
 							null,
 							newTableName,
-							Boolean.TRUE,
-ReuseFactory.getInteger(StatementType.RENAME_TABLE),
+                            true,
+                            StatementType.RENAME_TABLE,
 							getContextManager());
 	}
 }
@@ -13385,13 +12908,12 @@ alterTableRenameColumnStatement(TableName tableName) throws StandardException :
 {
 	oldColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) <TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.RENAME_NODE,
+        return new RenameNode(
 							tableName,
 							oldColumnName,
 							newColumnName,
-							Boolean.TRUE,
-ReuseFactory.getInteger(StatementType.RENAME_COLUMN),
+                            true,
+                            StatementType.RENAME_COLUMN,
 							getContextManager());
 	}
 }
@@ -13456,20 +12978,18 @@ dropColumnDefinition(TableName tableName, TableElementList tableElementList, int
 	[ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 				 dropColumnReferentialAction(behavior)
 	{
-		tableElement = (TableElementNode) nodeFactory.getNode(
+        tableElement = new ModifyColumnNode(
 						C_NodeTypes.DROP_COLUMN_NODE,
 						columnName, null,
 						null, null,
 						getContextManager());
-		changeType[0] = DDLStatementNode.DROP_TYPE;
 		tableElementList.addTableElement(tableElement);
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
+                            DDLStatementNode.DROP_TYPE,
 							tableElementList,
-							new Character('\0'),
-							behavior,
+                            '\0',
+                            behavior[0],
 							getContextManager());
 	}
 }
@@ -13526,7 +13046,7 @@ columnAlterClause(String columnName) throws StandardException :
 	LOOKAHEAD( {getToken(2).kind == DATA} )
 	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
 	{
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 						C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
 						columnName, null,
 						typeDescriptor, null,
@@ -13538,7 +13058,7 @@ columnAlterClause(String columnName) throws StandardException :
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
 						columnName,
 						null, null, autoIncrementInfo,
@@ -13549,7 +13069,7 @@ columnAlterClause(String columnName) throws StandardException :
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
 						columnName,
 						null, null, autoIncrementInfo,
@@ -13568,8 +13088,7 @@ columnAlterClause(String columnName) throws StandardException :
 	<DROP> <_DEFAULT>
     {
 
-		defaultNode = (ValueNode) nodeFactory.getNode(
-			C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
+       defaultNode = new UntypedNullConstantNode(getContextManager());
 
 		return wrapAlterColumnDefaultValue(defaultNode,
 										   columnName,
@@ -13584,7 +13103,7 @@ columnAlterClause(String columnName) throws StandardException :
 		// column constraint is specified by setting the right value
 		// in the nullability field of the data type but we don't have
 		// a datatype here.
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 								C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE,
 								columnName, null, null, null,
 								getContextManager());
@@ -13598,7 +13117,7 @@ columnAlterClause(String columnName) throws StandardException :
 		// column constraint is specified by setting the right value
 		// in the nullability field of the data type but we don't have
 		// a datatype here.
-		return (TableElementNode) nodeFactory.getNode(
+        return new ModifyColumnNode(
 								C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE,
 								columnName, null, null, null,
 								getContextManager());
@@ -13613,15 +13132,13 @@ dropTableConstraintDefinitionCore(TableName tableName, TableElementList tableEle
 {
 		tableElement = dropTableConstraintDefinition()
 		{
-		changeType[0] = DDLStatementNode.DROP_TYPE;
 		tableElementList.addTableElement(tableElement);
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
+        return new AlterTableNode(
 							tableName,
-							changeType,
+                            DDLStatementNode.DROP_TYPE,
 							tableElementList,
-							new Character('\0'),
-							behavior,
+                            '\0',
+                            behavior[0],
 							getContextManager());
 		}
 }
@@ -13636,15 +13153,15 @@ dropTableConstraintDefinition() throws StandardException :
 	/* changed constraintName() to qualifiedName() for compaction */
 	<CONSTRAINT> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
-						ReuseFactory.getInteger(DataDictionary.DROP_CONSTRAINT),
+        return new ConstraintDefinitionNode(
+                        constraintName,
+                        DataDictionary.DROP_CONSTRAINT,
 						null,
 						null,
 						null,
 						null,
-						ReuseFactory.getInteger(StatementType.DROP_DEFAULT),
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.DROP_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -13652,15 +13169,15 @@ dropTableConstraintDefinition() throws StandardException :
 	LOOKAHEAD( {getToken(1).kind == PRIMARY} )
 	<PRIMARY> <KEY>
 	{
-		return (TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						null,
-						ReuseFactory.getInteger(DataDictionary.DROP_CONSTRAINT),
-						null,
+        return new ConstraintDefinitionNode(
+                        null,
+                        DataDictionary.DROP_CONSTRAINT,
 						null,
 						null,
 						null,
-						ReuseFactory.getInteger(StatementType.DROP_DEFAULT),
+						null,
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.DROP_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -13668,16 +13185,15 @@ dropTableConstraintDefinition() throws StandardException :
 	LOOKAHEAD( {getToken(1).kind == FOREIGN} )
         <FOREIGN> <KEY> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
-						ReuseFactory.getInteger(DataDictionary.DROP_CONSTRAINT),
+        return new ConstraintDefinitionNode(
+                        constraintName,
+                        DataDictionary.DROP_CONSTRAINT,
 						null,
 						null,
 						null,
 						null,
-						ReuseFactory.getInteger(StatementType.DROP_DEFAULT),
-						ReuseFactory.getInteger(DataDictionary.FOREIGNKEY_CONSTRAINT),
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.FOREIGNKEY_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -13685,32 +13201,30 @@ dropTableConstraintDefinition() throws StandardException :
 	LOOKAHEAD( {getToken(1).kind == UNIQUE} )
         <UNIQUE> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
-						ReuseFactory.getInteger(DataDictionary.DROP_CONSTRAINT),
+        return new ConstraintDefinitionNode(
+                        constraintName,
+                        DataDictionary.DROP_CONSTRAINT,
 						null,
 						null,
 						null,
 						null,
-						ReuseFactory.getInteger(StatementType.DROP_DEFAULT),
-						ReuseFactory.getInteger(DataDictionary.UNIQUE_CONSTRAINT),
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.UNIQUE_CONSTRAINT,
 						getContextManager()
 						);
 	}
 |
         <CHECK> constraintName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (TableElementNode) nodeFactory.getNode(
-						C_NodeTypes.CONSTRAINT_DEFINITION_NODE,
-						constraintName,
-						ReuseFactory.getInteger(DataDictionary.DROP_CONSTRAINT),
+        return new ConstraintDefinitionNode(
+                        constraintName,
+                        DataDictionary.DROP_CONSTRAINT,
 						null,
 						null,
 						null,
 						null,
-						ReuseFactory.getInteger(StatementType.DROP_DEFAULT),
-						ReuseFactory.getInteger(DataDictionary.CHECK_CONSTRAINT),
+                        StatementType.DROP_DEFAULT,
+                        DataDictionary.CHECK_CONSTRAINT,
 						getContextManager()
 						);
 	}
@@ -13727,12 +13241,10 @@ dropTableStatement() throws StandardException :
 {
 	<TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		// DB2 does not support a drop behaviour
-		return (StatementNode) nodeFactory.getNode(
-											C_NodeTypes.DROP_TABLE_NODE,
-											tableName,
-											new Integer(StatementType.DROP_DEFAULT),
-											getContextManager());
+        return new DropTableNode(
+            tableName,
+            StatementType.DROP_DEFAULT,
+            getContextManager());
 	}
 }
 
@@ -13747,10 +13259,7 @@ dropIndexStatement() throws StandardException :
 {
 	<INDEX> indexName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.DROP_INDEX_NODE,
-								indexName,
-								getContextManager());
+        return new DropIndexNode(indexName, getContextManager());
 	}
 }
 
@@ -13760,7 +13269,7 @@ dropIndexStatement() throws StandardException :
 StatementNode
 dropAliasStatement() throws StandardException :
 {
-	Object aliasName;
+    TableName aliasName;
 }
 {
   	<PROCEDURE> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
@@ -13799,10 +13308,7 @@ dropViewStatement() throws StandardException :
 {
 	<VIEW> viewName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.DROP_VIEW_NODE,
-								viewName,
-								getContextManager());
+        return new DropViewNode(viewName, getContextManager());
 	}
 }
 
@@ -13814,10 +13320,7 @@ dropTriggerStatement() throws StandardException :
 {
 	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (StatementNode) nodeFactory.getNode(
-								C_NodeTypes.DROP_TRIGGER_NODE,
-								triggerName,
-								getContextManager());
+        return new DropTriggerNode(triggerName, getContextManager());
 	}
 }
 
@@ -13830,10 +13333,7 @@ truncateTableStatement() throws StandardException :
 {
 	<TRUNCATE> <TABLE> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 	{
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
-							tableName,
-							getContextManager());
+        return new AlterTableNode(tableName, getContextManager());
 	}
 }
 
@@ -13904,15 +13404,13 @@ StatementNode
 tableGrantStatement() throws StandardException :
 {
     PrivilegeNode privileges;
-    List grantees;
+    List<String> grantees;
 }
 {
        privileges = tablePrivileges()
        <TO> grantees = granteeList()
     {
-        return (StatementNode) nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
-                                    privileges, grantees,
-                                    getContextManager());
+        return new GrantNode(privileges, grantees, getContextManager());
     }
 }// end of tableGrantStatement
 
@@ -13928,10 +13426,10 @@ PrivilegeNode tablePrivileges() throws StandardException :
     tablePrivilegesNode = tableActions()
       <ON> [ <TABLE> ] objectName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
     {
-        return (PrivilegeNode) nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
-                                                    ReuseFactory.getInteger( PrivilegeNode.TABLE_PRIVILEGES),
-                                                    objectName, tablePrivilegesNode,
-                                                    getContextManager());
+        return new PrivilegeNode(PrivilegeNode.TABLE_PRIVILEGES,
+                                 objectName,
+                                 tablePrivilegesNode,
+                                 getContextManager());
     }
 } // end of   tablePrivilege                               
 
@@ -13940,8 +13438,8 @@ PrivilegeNode tablePrivileges() throws StandardException :
  */
 TablePrivilegesNode tableActions() throws StandardException :
 {
-    TablePrivilegesNode tableActionsNode = (TablePrivilegesNode)
-      nodeFactory.getNode( C_NodeTypes.TABLE_PRIVILEGES_NODE, getContextManager());
+    TablePrivilegesNode tableActionsNode =
+        new TablePrivilegesNode(getContextManager());
 }
 {
     <ALL> <PRIVILEGES>
@@ -13962,21 +13460,20 @@ TablePrivilegesNode tableActions() throws StandardException :
 StatementNode
 routineGrantStatement() throws StandardException :
 {
-    List grantees;
+    List<String> grantees;
     RoutineDesignator routine;
 }
 {
     <EXECUTE> <ON> routine = routineDesignator()
     <TO> grantees = granteeList()
     {
-        PrivilegeNode routinePrivilege = (PrivilegeNode)
-          nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
-                               ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
-                               routine, null,
-                               getContextManager());
-        return (StatementNode) nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
-                                    routinePrivilege, grantees,
-                                    getContextManager());
+        PrivilegeNode routinePrivilege =
+            new PrivilegeNode(PrivilegeNode.ROUTINE_PRIVILEGES,
+                              routine,
+                              null,
+                              getContextManager());
+
+        return new GrantNode(routinePrivilege, grantees, getContextManager());
     }
 }// end of routineGrantStatement
 
@@ -13986,7 +13483,7 @@ routineGrantStatement() throws StandardException :
 StatementNode
 usageGrantStatement() throws StandardException :
 {
-    List grantees;
+    List<String> grantees;
     TableName name;
     Integer objectType;
 }
@@ -13997,22 +13494,14 @@ usageGrantStatement() throws StandardException :
     <TO> grantees = granteeList()
     {
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "GRANT USAGE");
-        PrivilegeNode privilegeNode = (PrivilegeNode) nodeFactory.getNode
-            (
-                C_NodeTypes.PRIVILEGE_NODE,
-                objectType,
-                name,
-                PermDescriptor.USAGE_PRIV,
-                Boolean.FALSE,
-                getContextManager()
-            );
-        return (StatementNode) nodeFactory.getNode
-            (
-                C_NodeTypes.GRANT_NODE,
-                privilegeNode,
-                grantees,
-                getContextManager()
-            );
+        PrivilegeNode privilegeNode = new PrivilegeNode(
+            objectType,
+            name,
+            PermDescriptor.USAGE_PRIV,
+            false,
+            getContextManager());
+
+        return new GrantNode(privilegeNode, grantees, getContextManager());
     }
 }// end of usageGrantStatement
 
@@ -14054,8 +13543,7 @@ RoutineDesignator routineDesignator() throws StandardException :
       name = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
       [ <LEFT_PAREN> paramTypeList = parameterTypeList() <RIGHT_PAREN> ]
     {
-        return new RoutineDesignator( false,
-                                      name,
+        return new RoutineDesignator( name,
                                       (procOrFunction.kind == FUNCTION),
                                       paramTypeList);
     }
@@ -14130,8 +13618,7 @@ void tableAction( TablePrivilegesNode tablePrivilegesNode)  throws StandardExcep
  */
 ResultColumnList privilegeColumnList() throws StandardException :
 {
-    ResultColumnList cl = (ResultColumnList) nodeFactory.getNode( C_NodeTypes.RESULT_COLUMN_LIST,
-                                                                  getContextManager());
+    ResultColumnList cl = new ResultColumnList(getContextManager());
 }
 {
     <LEFT_PAREN> columnNameList( cl) <RIGHT_PAREN>
@@ -14143,7 +13630,7 @@ ResultColumnList privilegeColumnList() throws StandardException :
 /*
  * <A NAME="granteeList">granteeList</A>
  */
-List granteeList() throws StandardException :
+List<String> granteeList() throws StandardException :
 {
     ArrayList<String> list = new ArrayList<String>();
 }
@@ -14178,8 +13665,8 @@ grantee( List<String> list)  throws StandardException :
 StatementNode
 roleGrantStatement() throws StandardException :
 {
-	List rolesGranted;
-	List grantees;
+    List<String> rolesGranted;
+    List<String> grantees;
 }
 {
 	/*
@@ -14195,11 +13682,7 @@ roleGrantStatement() throws StandardException :
 		checkSqlStandardAccess("GRANT <role>");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 
-		return (StatementNode) nodeFactory.getNode
-			(C_NodeTypes.GRANT_ROLE_NODE,
-			 rolesGranted,
-			 grantees,
-			 getContextManager());
+        return new GrantRoleNode(rolesGranted, grantees, getContextManager());
 	}
 }
 
@@ -14207,7 +13690,7 @@ roleGrantStatement() throws StandardException :
 /*
  * <A NAME="roleList">roleList</A>
  */
-List roleList() throws StandardException :
+List<String> roleList() throws StandardException :
 {
     ArrayList<String> list = new ArrayList<String>();
 }
@@ -14299,15 +13782,13 @@ StatementNode
 tableRevokeStatement() throws StandardException :
 {
     PrivilegeNode privileges = null;
-    List grantees;
+    List<String> grantees;
 }
 {
        privileges = tablePrivileges()
        <FROM> grantees = granteeList()
     {
-        return (StatementNode) nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
-                                    privileges, grantees,
-                                    getContextManager());
+        return new RevokeNode(privileges, grantees, getContextManager());
     }
 }// end of tableRevokeStatement
 
@@ -14317,21 +13798,20 @@ tableRevokeStatement() throws StandardException :
 StatementNode
 routineRevokeStatement() throws StandardException :
 {
-    List grantees;
+    List<String> grantees;
     RoutineDesignator routine = null;
 }
 {
     <EXECUTE> <ON> routine = routineDesignator()
     <FROM> grantees = granteeList() <RESTRICT>
     {
-        PrivilegeNode routinePrivilege = (PrivilegeNode)
-          nodeFactory.getNode( C_NodeTypes.PRIVILEGE_NODE,
-                               ReuseFactory.getInteger( PrivilegeNode.ROUTINE_PRIVILEGES),
-                               routine, null,
-                               getContextManager());
-        return (StatementNode) nodeFactory.getNode( C_NodeTypes.REVOKE_NODE,
-                                    routinePrivilege, grantees,
-                                    getContextManager());
+        PrivilegeNode routinePrivilege = new PrivilegeNode(
+            PrivilegeNode.ROUTINE_PRIVILEGES,
+            routine,
+            null,
+            getContextManager());
+
+        return new RevokeNode(routinePrivilege, grantees, getContextManager());
     }
 }// end of routineRevokeStatement
 
@@ -14341,7 +13821,7 @@ routineRevokeStatement() throws StandardException :
 StatementNode
 usageRevokeStatement() throws StandardException :
 {
-    List grantees;
+    List<String> grantees;
     TableName name;
     Integer objectType;
 }
@@ -14352,22 +13832,14 @@ usageRevokeStatement() throws StandardException :
     <FROM> grantees = granteeList() <RESTRICT>
     {
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "REVOKE USAGE");
-        PrivilegeNode privilegeNode = (PrivilegeNode) nodeFactory.getNode
-            (
-                C_NodeTypes.PRIVILEGE_NODE,
+        PrivilegeNode privilegeNode = new PrivilegeNode(
                 objectType,
                 name,
                 PermDescriptor.USAGE_PRIV,
-                Boolean.TRUE,
-                getContextManager()
-            );
-        return (StatementNode) nodeFactory.getNode
-            (
-                C_NodeTypes.REVOKE_NODE,
-                privilegeNode,
-                grantees,
-                getContextManager()
-            );
+                true,
+                getContextManager());
+
+        return new RevokeNode(privilegeNode, grantees, getContextManager());
     }
 }// end of usageRevokeStatement
 
@@ -14378,19 +13850,15 @@ usageRevokeStatement() throws StandardException :
 StatementNode
 roleRevokeStatement() throws StandardException :
 {
-	List rolesRevokeed;
-	List grantees;
+    List<String> rolesRevoked;
+    List<String> grantees;
 }
 {
-	rolesRevokeed = roleList()
+    rolesRevoked = roleList()
 	<FROM>
 	grantees = granteeList()
 	{
-		return (StatementNode) nodeFactory.getNode
-			(C_NodeTypes.REVOKE_ROLE_NODE,
-			 rolesRevokeed,
-			 grantees,
-			 getContextManager());
+        return new RevokeRoleNode(rolesRevoked, grantees, getContextManager());
 	}
 }
 
@@ -14414,7 +13882,7 @@ internalIdentifier( int id_length_limit, boolean checkLength) throws StandardExc
 		}
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
-		lastTokenDelimitedIdentifier = Boolean.FALSE;
+        lastTokenDelimitedIdentifier = false;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 		return str;
@@ -14463,7 +13931,7 @@ delimitedIdentifier() :
 		str = normalizeDelimitedID( str );
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
-		lastTokenDelimitedIdentifier = Boolean.TRUE;
+        lastTokenDelimitedIdentifier = true;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 
@@ -14698,7 +14166,7 @@ reservedKeyword() :
 |	tok = <CALL>
 |   tok = <CURRENT_ROLE>
 |	tok = <EXPLAIN>
-|	tok = <LONGINT>
+|   tok = <BIGINT>
 |	tok = <LTRIM>
 |	tok = <RTRIM>
 |	tok = <TRIM>
@@ -14712,7 +14180,7 @@ reservedKeyword() :
 	{
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
-		lastTokenDelimitedIdentifier = Boolean.FALSE;
+        lastTokenDelimitedIdentifier = false;
 		return tok.image;
 	}
 }
@@ -14906,7 +14374,7 @@ nonReservedKeyword()  :
 	{
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
-		lastTokenDelimitedIdentifier = Boolean.FALSE;
+        lastTokenDelimitedIdentifier = false;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 		return tok.image;
@@ -14967,7 +14435,7 @@ caseSensitiveIdentifier() :
 	{
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
-		lastTokenDelimitedIdentifier = Boolean.FALSE;
+        lastTokenDelimitedIdentifier = false;
 		return tok.image;
 	}
 |

@@ -21,40 +21,30 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-import org.apache.derby.iapi.types.JSQLType;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-
 import java.lang.reflect.Modifier;
 import java.sql.ParameterMetaData;
 import java.util.List;
+import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A StaticMethodCallNode represents a static method call from a Class
@@ -92,8 +82,10 @@ import java.util.List;
 		- the parameter is passed directly to the method call (no casts or expressions).
 		- the method's parameter type is a Java array type.
 
-    Since this is a dynmaic decision we compile in code to take both paths, based upon a boolean isINOUT which is dervied from the
-	ParameterValueSet. Code is logically (only single parameter String[] shown here). Note, no casts can exist here.
+    Since this is a dynamic decision we compile in code to take both paths,
+    based upon a boolean is INOUT which is derived from the
+    ParameterValueSet. Code is logically (only single parameter String[] shown
+    here). Note, no casts can exist here.
 
 	boolean isINOUT = getParameterValueSet().getParameterMode(0) == PARAMETER_IN_OUT;
 	if (isINOUT) {
@@ -105,7 +97,7 @@ import java.util.List;
 
  *
  */
-public class StaticMethodCallNode extends MethodCallNode
+class StaticMethodCallNode extends MethodCallNode
 {
 	private TableName procedureName;
 
@@ -137,22 +129,39 @@ public class StaticMethodCallNode extends MethodCallNode
 
 
 	/**
-	 * Intializer for a NonStaticMethodCallNode
+     * Constructor for a NonStaticMethodCallNode
 	 *
 	 * @param methodName		The name of the method to call
-	 * @param javaClassName		The name of the java class that the static method belongs to.
+     * @param javaClassName     The name of the java class that the static
+     *                          method belongs to.
+     * @param cm                The context manager
 	 */
-	public void init(Object methodName, Object javaClassName)
-	{
-		if (methodName instanceof String)
-			init(methodName);
-		else {
-			procedureName = (TableName) methodName;
-			init(procedureName.getTableName());
-		}
+    StaticMethodCallNode(
+            String methodName,
+            String javaClassName,
+            ContextManager cm) {
+        super(methodName, cm);
+        setNodeType(C_NodeTypes.STATIC_METHOD_CALL_NODE);
+        this.javaClassName = javaClassName;
+    }
 
-		this.javaClassName = (String) javaClassName;
-	}
+    /**
+     * Constructor for a StaticMethodCallNode
+     *
+     * @param methodName        The name of the method to call
+     * @param javaClassName     The name of the java class that the static
+     *                          method belongs to.
+     * @param cm                The context manager
+     */
+    StaticMethodCallNode(
+            TableName methodName,
+            String javaClassName,
+            ContextManager cm) {
+        super(methodName.getTableName(), cm);
+        procedureName = methodName;
+        setNodeType(C_NodeTypes.STATIC_METHOD_CALL_NODE);
+        this.javaClassName = javaClassName;
+    }
 
     /**
      * Get the aggregate, if any, which this method call resolves to.
@@ -209,12 +218,10 @@ public class StaticMethodCallNode extends MethodCallNode
 
             if ( (ad != null) && (ad.getAliasType() == AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR) )
             {
-                resolvedAggregate = (AggregateNode) getNodeFactory().getNode
-                    (
-                     C_NodeTypes.AGGREGATE_NODE,
+                resolvedAggregate = new AggregateNode(
                      ((SQLToJavaValueNode) methodParms[ 0 ]).getSQLValueNode(),
                      new UserAggregateDefinition( ad ), 
-                     Boolean.FALSE,
+                     false,
                      ad.getJavaClassName(),
                      getContextManager()
                      );
@@ -376,13 +383,10 @@ public class StaticMethodCallNode extends MethodCallNode
 							);
 							
 
-					ValueNode returnValueToSQL = (ValueNode) getNodeFactory().getNode(
-								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-								this, 
-								getContextManager());
+                    ValueNode returnValueToSQL =
+                            new JavaToSQLValueNode(this, getContextManager());
 
-					ValueNode returnValueCastNode = (ValueNode) getNodeFactory().getNode(
-									C_NodeTypes.CAST_NODE,
+                    ValueNode returnValueCastNode = new CastNode(
 									returnValueToSQL, 
 									returnValueDtd,
 									getContextManager());
@@ -392,11 +396,8 @@ public class StaticMethodCallNode extends MethodCallNode
                             returnType.getCollationType(),
                             StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 
-
-					JavaValueNode returnValueToJava = (JavaValueNode) getNodeFactory().getNode(
-										C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
-										returnValueCastNode, 
-										getContextManager());
+                    JavaValueNode returnValueToJava = new SQLToJavaValueNode(
+                            returnValueCastNode, getContextManager());
 					returnValueToJava.setCollationType(returnType.getCollationType());
                     return returnValueToJava.bindExpression(fromList, subqueryList, aggregates);
 				}
@@ -498,14 +499,16 @@ public class StaticMethodCallNode extends MethodCallNode
             throws StandardException {
 		if (sd.getUUID() != null) {
 
-		java.util.List list = getDataDictionary().getRoutineList(
-			sd.getUUID().toString(), methodName,
-			forCallStatement ? AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR : AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR
-			);
+        List<AliasDescriptor> list = getDataDictionary().getRoutineList(
+            sd.getUUID().toString(),
+            methodName,
+            forCallStatement ?
+                AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR :
+                AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR);
 
 		for (int i = list.size() - 1; i >= 0; i--) {
 
-			AliasDescriptor proc = (AliasDescriptor) list.get(i);
+            AliasDescriptor proc = list.get(i);
 
 			RoutineAliasInfo rai = (RoutineAliasInfo) proc.getAliasInfo();
 			int parameterCount = rai.getParameterCount();
@@ -794,28 +797,19 @@ public class StaticMethodCallNode extends MethodCallNode
             
             if (sqlParamNode == null)
             {
-                sqlParamNode = (ValueNode) getNodeFactory().getNode
-                    (
-                     C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-                     methodParms[p], 
-                     getContextManager()
-                     );
+                sqlParamNode =
+                    new JavaToSQLValueNode(methodParms[p], getContextManager());
             }
 
             ValueNode castNode = makeCast
                 (
                  sqlParamNode,
                  paramdtd,
-                 getNodeFactory(),
                  getContextManager()
                  );
 
-            methodParms[p] = (JavaValueNode) getNodeFactory().getNode
-                (
-                 C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
-                 castNode, 
-                 getContextManager()
-                 );
+            methodParms[p] =
+                    new SQLToJavaValueNode(castNode, getContextManager());
 
             methodParms[p] = methodParms[p].bindExpression(
                     fromList, subqueryList, aggregates);
@@ -829,17 +823,12 @@ public class StaticMethodCallNode extends MethodCallNode
     /**
      * Wrap a parameter in a CAST node.
      */
-    public  static  ValueNode   makeCast
-        ( ValueNode parameterNode, DataTypeDescriptor targetType, NodeFactory nodeFactory, ContextManager cm )
+    public static ValueNode makeCast (ValueNode parameterNode,
+                                      DataTypeDescriptor targetType,
+                                      ContextManager cm)
         throws StandardException
     {
-        ValueNode castNode = (ValueNode) nodeFactory.getNode
-            (
-             C_NodeTypes.CAST_NODE,
-             parameterNode, 
-             targetType,
-             cm
-             );
+        ValueNode castNode = new CastNode(parameterNode, targetType, cm);
 
         // Argument type has the same semantics as assignment:
         // Section 9.2 (Store assignment). There, General Rule 
@@ -889,6 +878,7 @@ public class StaticMethodCallNode extends MethodCallNode
 		Push extra code to generate the casts within the
 		arrays for the parameters passed as arrays.
 	*/
+    @Override
     void generateOneParameter(ExpressionClassBuilder acb,
 											MethodBuilder mb,
 											int parameterNumber )
@@ -1026,6 +1016,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
@@ -1051,7 +1042,7 @@ public class StaticMethodCallNode extends MethodCallNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)

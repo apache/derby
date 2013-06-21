@@ -22,26 +22,17 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.store.access.ScanController;
-
-import org.apache.derby.iapi.error.StandardException;
-
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * This node is the superclass  for all unary comparison operators, such as is null
@@ -51,6 +42,11 @@ import org.apache.derby.iapi.util.JBitSet;
 
 public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 {
+    UnaryComparisonOperatorNode(ValueNode operator, ContextManager cm)
+            throws StandardException {
+        super(operator, cm);
+    }
+
 	/**
 	 * Bind this comparison operator.  All that has to be done for binding
 	 * a comparison operator is to bind the operand and set the result type 
@@ -64,7 +60,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -84,7 +80,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindComparisonOperator()
+    void bindComparisonOperator()
 			throws StandardException
 	{
 		/*
@@ -111,6 +107,7 @@ public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{

@@ -21,28 +21,28 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.AliasInfo;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.impl.sql.execute.GenericPrivilegeInfo;
-import org.apache.derby.impl.sql.execute.PrivilegeInfo;
-import org.apache.derby.catalog.TypeDescriptor;
-
 import java.util.HashMap;
 import java.util.List;
+import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.impl.sql.execute.GenericPrivilegeInfo;
+import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 
 /**
  * This node represents a set of privileges that are granted or revoked on one object.
  */
-public class PrivilegeNode extends QueryTreeNode
+class PrivilegeNode extends QueryTreeNode
 {
     // Privilege object type
     public static final int TABLE_PRIVILEGES = 0;
@@ -70,19 +70,25 @@ public class PrivilegeNode extends QueryTreeNode
     /**
      * Initialize a PrivilegeNode for use against SYS.SYSTABLEPERMS and SYS.SYSROUTINEPERMS.
      *
-     * @param objectType (an Integer)
-     * @param objectOfPrivilege (a TableName or RoutineDesignator)
+     * @param objectType
+     * @param objectOfPrivilege  (a TableName or RoutineDesignator)
      * @param specificPrivileges null for routines and usage
+     * @param cm                 the context manager
      */
-    public void init( Object objectType, Object objectOfPrivilege, Object specificPrivileges)
-        throws StandardException
-    {
-        this.objectType = ((Integer) objectType).intValue();
-        if( SanityManager.DEBUG)
+    PrivilegeNode(int                 objectType,
+                  Object              objectOfPrivilege,
+                  TablePrivilegesNode specificPrivileges,
+                  ContextManager      cm) throws StandardException {
+        super(cm);
+        setNodeType(C_NodeTypes.PRIVILEGE_NODE);
+        this.objectType = objectType;
+
+        if ( SanityManager.DEBUG)
         {
             SanityManager.ASSERT( objectOfPrivilege != null,
                                   "null privilge object");
         }
+
         switch( this.objectType)
         {
         case TABLE_PRIVILEGES:
@@ -92,7 +98,7 @@ public class PrivilegeNode extends QueryTreeNode
                                       "null specific privileges used with table privilege");
             }
             objectName = (TableName) objectOfPrivilege;
-            this.specificPrivileges = (TablePrivilegesNode) specificPrivileges;
+            this.specificPrivileges = specificPrivileges;
             break;
             
         case ROUTINE_PRIVILEGES:
@@ -111,19 +117,27 @@ public class PrivilegeNode extends QueryTreeNode
     }
 
     /**
-     * Initialize a PrivilegeNode for use against SYS.SYSPERMS.
+     * Constructor a PrivilegeNode for use against SYS.SYSPERMS.
      *
      * @param objectType E.g., SEQUENCE
      * @param objectName A possibles schema-qualified name
-     * @param privilege A PermDescriptor privilege, e.g. PermDescriptor.USAGE_PRIV
-     * @param restrict True if this is a REVOKE...RESTRICT action
+     * @param privilege  A PermDescriptor privilege, e.g.
+     *                   {@code PermDescriptor.USAGE_PRIV}
+     * @param restrict   True if this is a REVOKE...RESTRICT action
+     * @param cm         The context manager
      */
-    public void init( Object objectType, Object objectName, Object privilege, Object restrict )
+    PrivilegeNode(int            objectType,
+                  TableName      objectName,
+                  String         privilege,
+                  boolean        restrict,
+                  ContextManager cm)
     {
-        this.objectType = ((Integer) objectType).intValue();
-        this.objectName = (TableName) objectName;
-        this.privilege = (String) privilege;
-        this.restrict = ((Boolean) restrict).booleanValue();
+        super(cm);
+        setNodeType(C_NodeTypes.PRIVILEGE_NODE);
+        this.objectType = objectType;
+        this.objectName = objectName;
+        this.privilege = privilege;
+        this.restrict = restrict;
     }
     
     /**
@@ -139,7 +153,10 @@ public class PrivilegeNode extends QueryTreeNode
      *
      * @exception StandardException	Standard error policy.
      */
-	public QueryTreeNode bind( HashMap<Provider,Provider> dependencies, List grantees, boolean isGrant ) throws StandardException
+    public QueryTreeNode bind(
+            HashMap<Provider,Provider> dependencies,
+            List<String> grantees,
+            boolean isGrant ) throws StandardException
 	{
         // The below code handles the case where objectName.getSchemaName()
         // returns null, in which case we'll fetch the schema descriptor for
@@ -194,11 +211,12 @@ public class PrivilegeNode extends QueryTreeNode
             }
 				
             AliasDescriptor proc = null;
-            RoutineAliasInfo routineInfo = null;
-            java.util.List list = getDataDictionary().getRoutineList(
-                sd.getUUID().toString(), objectName.getTableName(),
-                routineDesignator.isFunction ? AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR : AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR
-                );
+            List<AliasDescriptor> list = getDataDictionary().getRoutineList(
+                sd.getUUID().toString(),
+                objectName.getTableName(),
+                routineDesignator.isFunction ?
+                    AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR :
+                    AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR);
 
             if( routineDesignator.paramTypeList == null)
             {
@@ -218,7 +236,7 @@ public class PrivilegeNode extends QueryTreeNode
                                 objectName.getFullTableName());
                     }
                 }
-                proc = (AliasDescriptor) list.get(0);
+                proc = list.get(0);
             }
             else
             {
@@ -226,9 +244,10 @@ public class PrivilegeNode extends QueryTreeNode
                 boolean found = false;
                 for (int i = list.size() - 1; (!found) && i >= 0; i--)
                 {
-                    proc = (AliasDescriptor) list.get(i);
+                    proc = list.get(i);
 
-                    routineInfo = (RoutineAliasInfo) proc.getAliasInfo();
+                    RoutineAliasInfo
+                        routineInfo = (RoutineAliasInfo) proc.getAliasInfo();
                     int parameterCount = routineInfo.getParameterCount();
                     if (parameterCount != routineDesignator.paramTypeList.size())
                         continue;
@@ -246,7 +265,8 @@ public class PrivilegeNode extends QueryTreeNode
                 if( ! found)
                 {
                     // reconstruct the signature for the error message
-                    StringBuffer sb = new StringBuffer( objectName.getFullTableName());
+                    StringBuilder sb =
+                            new StringBuilder(objectName.getFullTableName());
                     sb.append( "(");
                     for( int i = 0; i < routineDesignator.paramTypeList.size(); i++)
                     {

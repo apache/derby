@@ -21,21 +21,19 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-
 import org.apache.derby.iapi.store.access.StoreCostResult;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+class CostEstimateImpl implements CostEstimate {
+    double  cost;
+    double  rowCount;
+    double  singleScanRowCount;
 
-public class CostEstimateImpl implements CostEstimate {
-	public double	cost;
-	public double	rowCount;
-	public double	singleScanRowCount;
-
-	public CostEstimateImpl() {
+    CostEstimateImpl() {
 	}
 
-	public CostEstimateImpl(double theCost,
+    CostEstimateImpl(double theCost,
 							double theRowCount,
 							double theSingleScanRowCount) {
 		if (SanityManager.DEBUG)
@@ -313,7 +311,7 @@ public class CostEstimateImpl implements CostEstimate {
 		singleScanRowCount = (double) count;
 	}
 
-	public CostEstimateImpl setState(double theCost,
+    CostEstimateImpl setState(double theCost,
 										double theRowCount,
 										CostEstimateImpl retval) {
 		if (retval == null) {

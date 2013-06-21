@@ -23,17 +23,13 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.reference.SQLState;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * A BinaryListOperatorNode represents a built-in "binary" operator with a single
@@ -48,29 +44,21 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	/* operator used for error messages */
 	String	operator;
 
-	String		leftInterfaceType;
-	String		rightInterfaceType;
-
-	ValueNode		receiver; // used in generation
 	ValueNode		leftOperand;
 	ValueNodeList	rightOperandList;
 
-	/**
-	 * Initializer for a BinaryListOperatorNode
-	 *
-	 * @param leftOperand		The left operand of the node
-	 * @param rightOperandList	The right operand list of the node
-	 * @param operator			String representation of operator
-	 */
-
-	public void init(Object leftOperand, Object rightOperandList,
-					   Object operator, Object methodName)
-	{
-		this.leftOperand = (ValueNode) leftOperand;
-		this.rightOperandList = (ValueNodeList) rightOperandList;
-		this.operator = (String) operator;
-		this.methodName = (String) methodName;
-	}
+    BinaryListOperatorNode(
+            ValueNode leftOperand,
+            ValueNodeList rightOperandList,
+            String operator,
+            String methodName,
+            ContextManager cm) throws SecurityException {
+        super(cm);
+        this.leftOperand = leftOperand;
+        this.rightOperandList = rightOperandList;
+        this.operator = operator;
+        this.methodName = methodName;
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -78,7 +66,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -99,8 +87,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -133,7 +121,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -190,7 +178,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindComparisonOperator()
+    void bindComparisonOperator()
 			throws StandardException
 	{
 		boolean				nullableResult;
@@ -226,7 +214,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -246,7 +235,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
-	public void setLeftOperand(ValueNode newLeftOperand)
+    void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
 	}
@@ -256,7 +245,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return The current leftOperand.
 	 */
-	public ValueNode getLeftOperand()
+    ValueNode getLeftOperand()
 	{
 		return leftOperand;
 	}
@@ -267,7 +256,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @param newRightOperandList	The new rightOperandList
 	 *
 	 */
-	public void setRightOperandList(ValueNodeList newRightOperandList)
+    void setRightOperandList(ValueNodeList newRightOperandList)
 	{
 		rightOperandList = newRightOperandList;
 	}
@@ -277,7 +266,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return The current rightOperandList.
 	 */
-	public ValueNodeList getRightOperandList()
+    ValueNodeList getRightOperandList()
 	{
 		return rightOperandList;
 	}
@@ -307,7 +296,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		boolean pushable;
@@ -324,7 +314,8 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		// we need to assign back because a new object may be returned, beetle 4983
@@ -338,14 +329,16 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return (leftOperand.isConstantExpression() &&
 				rightOperandList.isConstantExpression());
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return (leftOperand.constantExpression(whereClause) &&
 				rightOperandList.constantExpression(whereClause));
@@ -364,6 +357,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		int leftType = leftOperand.getOrderableVariantType();
@@ -379,6 +373,7 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

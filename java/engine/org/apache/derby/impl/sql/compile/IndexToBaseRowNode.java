@@ -22,27 +22,22 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
+import java.util.Properties;
+import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.compile.AccessPath;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 
 /**
  * This node type translates an index row to a base row.  It takes a
@@ -50,7 +45,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  * IndexRowToBaseRowResultSet that takes a TableScanResultSet on an
  * index conglomerate as its source.
  */
-public class IndexToBaseRowNode extends FromTable
+class IndexToBaseRowNode extends FromTable
 {
 	protected FromBaseTable	source;
 	protected ConglomerateDescriptor	baseCD;
@@ -62,26 +57,28 @@ public class IndexToBaseRowNode extends FromTable
 	private FormatableBitSet	allReferencedCols;
 	private FormatableBitSet	heapOnlyReferencedCols;
 
-	public void init(
-			Object	source,
-			Object	baseCD,
-			Object	resultColumns,
-			Object	cursorTargetTable,
-			Object heapReferencedCols,
-			Object indexReferencedCols,
-			Object restrictionList,
-			Object forUpdate,
-			Object tableProperties)
+    IndexToBaseRowNode(
+            FromBaseTable    source,
+            ConglomerateDescriptor  baseCD,
+            ResultColumnList resultColumns,
+            boolean          cursorTargetTable,
+            FormatableBitSet heapReferencedCols,
+            FormatableBitSet indexReferencedCols,
+            PredicateList    restrictionList,
+            boolean          forUpdate,
+            Properties       tableProperties,
+            ContextManager   cm)
 	{
-		super.init(null, tableProperties);
-		this.source = (FromBaseTable) source;
-		this.baseCD = (ConglomerateDescriptor) baseCD;
-		this.resultColumns = (ResultColumnList) resultColumns;
-		this.cursorTargetTable = ((Boolean) cursorTargetTable).booleanValue();
-		this.restrictionList = (PredicateList) restrictionList;
-		this.forUpdate = ((Boolean) forUpdate).booleanValue();
-		this.heapReferencedCols = (FormatableBitSet) heapReferencedCols;
-		this.indexReferencedCols = (FormatableBitSet) indexReferencedCols;
+        super(null, tableProperties, cm);
+        setNodeType(C_NodeTypes.INDEX_TO_BASE_ROW_NODE);
+        this.source = source;
+        this.baseCD = baseCD;
+        this.resultColumns = resultColumns;
+        this.cursorTargetTable = cursorTargetTable;
+        this.restrictionList = restrictionList;
+        this.forUpdate = forUpdate;
+        this.heapReferencedCols = heapReferencedCols;
+        this.indexReferencedCols = indexReferencedCols;
 
 		if (this.indexReferencedCols == null) {
 			this.allReferencedCols = this.heapReferencedCols;
@@ -98,24 +95,28 @@ public class IndexToBaseRowNode extends FromTable
 	}
 
 	/** @see Optimizable#forUpdate */
+    @Override
 	public boolean forUpdate()
 	{
 		return source.forUpdate();
 	}
 
 	/** @see Optimizable#getTrulyTheBestAccessPath */
+    @Override
 	public AccessPath getTrulyTheBestAccessPath()
 	{
 		// Get AccessPath comes from base table.
 		return ((Optimizable) source).getTrulyTheBestAccessPath();
 	}
 
-	public CostEstimate getCostEstimate()
+    @Override
+    CostEstimate getCostEstimate()
 	{
 		return source.getTrulyTheBestAccessPath().getCostEstimate();
 	}
 
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 	{
 		return source.getFinalCostEstimate();
 	}
@@ -135,6 +136,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
@@ -151,6 +153,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -311,7 +314,8 @@ public class IndexToBaseRowNode extends FromTable
 	 * @return Whether or not the underlying ResultSet tree will return a single row.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isOneRowResultSet()	throws StandardException
+    @Override
+    boolean isOneRowResultSet() throws StandardException
 	{
 		// Default is false
 		return source.isOneRowResultSet();
@@ -322,7 +326,8 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @return Whether or not the underlying FBT is for NOT EXISTS.
 	 */
-	public boolean isNotExists()
+    @Override
+    boolean isNotExists()
 	{
 		return source.isNotExists();
 	}
@@ -333,6 +338,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @param decrement	The amount to decrement by.
 	 */
+    @Override
 	void decrementLevel(int decrement)
 	{
 		source.decrementLevel(decrement);
@@ -345,7 +351,8 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		return source.updateTargetLockMode();
 	}
@@ -353,6 +360,7 @@ public class IndexToBaseRowNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination()
 	{
 		/* NOTE: We use a different method to tell a FBT that
@@ -366,6 +374,7 @@ public class IndexToBaseRowNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
 		throws StandardException
 	{
@@ -417,6 +426,7 @@ public class IndexToBaseRowNode extends FromTable
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

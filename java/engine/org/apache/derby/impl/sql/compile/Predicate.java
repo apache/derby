@@ -23,25 +23,18 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-
-import org.apache.derby.iapi.store.access.ScanController;
-
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
-
 
 /**
  * A Predicate represents a top level predicate.
@@ -49,7 +42,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
  */
 
 public final class Predicate extends QueryTreeNode implements OptimizablePredicate,
-														Comparable
+                                                        Comparable<Predicate>
 {
 	/* Top of the predicate */
 	AndNode		andNode;
@@ -75,17 +68,20 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	private boolean scoped;
 
 	/**
-	 * Initializer.
+     * Constructor.
 	 *
 	 * @param andNode		The top of the predicate	 
 	 * @param referencedSet	Bit map of referenced tables
+     * @param cm            The context manager
 	 */
 
-	public void init(Object andNode, Object referencedSet)
+    Predicate(AndNode andNode, JBitSet referencedSet, ContextManager cm)
 	{
-		this.andNode = (AndNode) andNode;
+        super(cm);
+        setNodeType(C_NodeTypes.PREDICATE);
+        this.andNode = andNode;
 		pushable = false;
-		this.referencedSet = (JBitSet) referencedSet;
+        this.referencedSet = referencedSet;
 		scoped = false;
 	}
 
@@ -258,9 +254,9 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 	/* Comparable interface */
 
-	public int compareTo(Object other)
+    public int compareTo(Predicate other)
 	{
-		Predicate	otherPred = (Predicate) other;
+        Predicate otherPred = other;
 
 		/* Not all operators are "equal". If the predicates are on the
 		 * same key column, then a "=" opertor takes precedence over all
@@ -345,7 +341,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return AndNode	The andNode.
 	 */
-	public AndNode getAndNode()
+    AndNode getAndNode()
 	{
 		return andNode;
 	}
@@ -355,7 +351,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @param andNode	The new andNode.
 	 */
-	public void setAndNode(AndNode andNode)
+    void setAndNode(AndNode andNode)
 	{
 		this.andNode = andNode;
 	}
@@ -365,7 +361,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return boolean	Whether or not the predicate is pushable.
 	 */
-	public boolean getPushable()
+    boolean getPushable()
 	{
 		return pushable;
 	}
@@ -380,7 +376,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @param pushable Whether or not the predicate is pushable.
 	 */
-	public void setPushable(boolean pushable) {
+    void setPushable(boolean pushable) {
 		this.pushable = pushable;
 	}
 
@@ -389,7 +385,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return JBitSet	The referencedSet.
 	 */
-	public JBitSet getReferencedSet()
+    JBitSet getReferencedSet()
 	{
 		return referencedSet;
 	}
@@ -420,7 +416,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void categorize() throws StandardException
+    void categorize() throws StandardException
 	{
 		pushable = andNode.categorize(referencedSet, false);
 	}
@@ -433,7 +429,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * @return	The RelationalOperator on the left side of the AND node,
 	 *			if any.
 	 */
-	public RelationalOperator getRelop()
+    RelationalOperator getRelop()
 	{
 		
 		if (andNode.getLeftOperand() instanceof RelationalOperator)
@@ -446,7 +442,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		}
 	}
 
-	public final boolean isOrList()
+    final boolean isOrList()
     {
         return(andNode.getLeftOperand() instanceof OrNode);
     }
@@ -472,7 +468,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	public final boolean isStoreQualifier()
+    final boolean isStoreQualifier()
     {
 		if ((andNode.getLeftOperand() instanceof RelationalOperator) ||
 		    (andNode.getLeftOperand() instanceof OrNode))
@@ -498,7 +494,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	public final boolean isPushableOrClause(Optimizable optTable)
+    final boolean isPushableOrClause(Optimizable optTable)
         throws StandardException
 	{
         boolean ret_val = true;
@@ -711,7 +707,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -736,7 +732,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 * is referencing, especially when tracing through code and printing
 	 * assert failure.
 	 */
-	public String binaryRelOpColRefsToString()
+    String binaryRelOpColRefsToString()
 	{
 		// We only consider binary relational operators here.
 		if (!(getAndNode().getLeftOperand()
@@ -746,7 +742,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		}
 
 		final String DUMMY_VAL = "<expr>";
-		java.lang.StringBuffer sBuf = new java.lang.StringBuffer();
+        java.lang.StringBuilder sBuf = new java.lang.StringBuilder();
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
 
@@ -785,8 +781,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -803,6 +799,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -820,7 +817,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *
 	 */
 
-	public void copyFields(Predicate otherPred) {
+    void copyFields(Predicate otherPred) {
 
 		this.equivalenceClass = otherPred.getEquivalenceClass();
 		this.indexPosition = otherPred.getIndexPosition();
@@ -971,10 +968,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		// need to create an AndNode representing:
 		//    <scoped_bin_rel_op> AND TRUE
 		// First create the boolean constant for TRUE.
-		ValueNode trueNode = (ValueNode) getNodeFactory().getNode(
-			C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-			Boolean.TRUE,
-			getContextManager());
+        ValueNode trueNode = new BooleanConstantNode(true, getContextManager());
 
 		BinaryRelationalOperatorNode opNode =
 			(BinaryRelationalOperatorNode)getAndNode().getLeftOperand();
@@ -982,7 +976,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		// Create a new op node with left and right operands that point
 		// to the received result set's columns as appropriate.
 		BinaryRelationalOperatorNode newOpNode = 
-			(BinaryRelationalOperatorNode) getNodeFactory().getNode(
+            new BinaryRelationalOperatorNode(
 				opNode.getNodeType(),
 				opNode.getScopedOperand(
 					BinaryRelationalOperatorNode.LEFT,
@@ -994,7 +988,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 					parentRSNsTables,
 					childRSN,
 					whichRC),
-					Boolean.valueOf(opNode.getForQueryRewrite()),
+                opNode.getForQueryRewrite(),
 				getContextManager());
 
 		// Bind the new op node.
@@ -1002,11 +996,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 
 		// Create and bind a new AND node in CNF form,
 		// i.e. "<newOpNode> AND TRUE".
-		AndNode newAnd = (AndNode) getNodeFactory().getNode(
-			C_NodeTypes.AND_NODE,
-			newOpNode,
-			trueNode,
-			getContextManager());
+        AndNode newAnd = new AndNode(newOpNode, trueNode, getContextManager());
 		newAnd.postBindFixup();
 
 		// Categorize the new AND node; among other things, this
@@ -1018,11 +1008,8 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		newAnd.categorize(tableMap, false);
 
 		// Now put the pieces together to get a new predicate.
-		Predicate newPred = (Predicate) getNodeFactory().getNode(
-			C_NodeTypes.PREDICATE,
-			newAnd,
-			tableMap,
-			getContextManager());
+        Predicate newPred =
+                new Predicate(newAnd, tableMap, getContextManager());
 
 		// Copy all of this predicates other fields into the new predicate.
 		newPred.clearScanFlags();
@@ -1135,7 +1122,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		BinaryRelationalOperatorNode binRelOp =
 			(BinaryRelationalOperatorNode)andNode.getLeftOperand();
 
-		ValueNode operand = null;
+        ValueNode operand;
 
 		if (SanityManager.DEBUG)
 		{
@@ -1253,7 +1240,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		 * to a source result set further down the tree and
 		 * thus we return true.
 		 */
-		ValueNode exp = null;
+        ValueNode exp;
 		ColumnReference cRef = (ColumnReference)operand;
 		if (cRef.isScoped())
 		{

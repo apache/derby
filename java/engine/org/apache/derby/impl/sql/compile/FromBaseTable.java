@@ -21,61 +21,55 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import org.apache.derby.catalog.IndexDescriptor;
-import org.apache.derby.iapi.util.StringUtil;
-
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.io.FormatableIntHolder;
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableArrayHolder;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.FormatableIntHolder;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.LanguageProperties;
+import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.JoinStrategy;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.LanguageProperties;
-
+import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StoreCostController;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.store.access.TransactionController;
-
+import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.util.StringUtil;
 
 // Temporary until user override for disposable stats has been removed.
 import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
@@ -109,7 +103,7 @@ import org.apache.derby.impl.sql.catalog.SYSUSERSRowFactory;
  *
  */
 
-public class FromBaseTable extends FromTable
+class FromBaseTable extends FromTable
 {
 	static final int UNSET = -1;
 
@@ -186,8 +180,8 @@ public class FromBaseTable extends FromTable
 	PredicateList nonStoreRestrictionList;
 	PredicateList requalificationRestrictionList;
 
-	public static final int UPDATE = 1;
-	public static final int DELETE = 2;
+    static final int UPDATE = 1;
+    static final int DELETE = 2;
 
 	/* Variables for EXISTS FBTs */
 	private boolean	existsBaseTable;
@@ -200,60 +194,64 @@ public class FromBaseTable extends FromTable
     private boolean authorizeSYSUSERS;
 
 	/**
-	 * Initializer for a table in a FROM list. Parameters are as follows:
+     * Constructor for a table in a FROM list. Parameters are as follows:
 	 *
-	 * <ul>
-	 * <li>tableName			The name of the table</li>
-	 * <li>correlationName	The correlation name</li>
-	 * <li>derivedRCL		The derived column list</li>
-	 * <li>tableProperties	The Properties list associated with the table.</li>
-	 * </ul>
-	 *
-	 * <p>
-	 *  - OR -
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>tableName			The name of the table</li>
-	 * <li>correlationName	The correlation name</li>
-	 * <li>updateOrDelete	Table is being updated/deleted from. </li>
-	 * <li>derivedRCL		The derived column list</li>
-	 * </ul>
-	 */
-	public void init(
-							Object arg1,
-							Object arg2,
-				  			Object arg3,
-							Object arg4)
-	{
-		if (arg3 instanceof Integer)
-		{
-			init(arg2, null);
-			this.tableName = (TableName) arg1;
-			this.updateOrDelete = ((Integer) arg3).intValue();
-			resultColumns = (ResultColumnList) arg4;
-		}
-		else
-		{
-			init(arg2, arg4);
-			this.tableName = (TableName) arg1;
-			resultColumns = (ResultColumnList) arg3;
-		}
+     * @param tableName         The name of the table
+     * @param correlationName   The correlation name
+     * @param derivedRCL        The derived column list
+     * @param tableProperties   The Properties list associated with the table.
+     * @param cm                The context manager
+     */
+    FromBaseTable(TableName tableName,
+                  String correlationName,
+                  ResultColumnList derivedRCL,
+                  Properties tableProperties,
+                  ContextManager cm)
+    {
+        super(correlationName, tableProperties, cm);
+        setNodeType(C_NodeTypes.FROM_BASE_TABLE);
+        this.tableName = tableName;
+        resultColumns = derivedRCL;
+        setOrigTableName(this.tableName);
+        templateColumns = resultColumns;
+    }
 
+    /**
+     * Initializer for a table in a FROM list. Parameters are as follows:
+	 *
+     * @param tableName     The name of the table
+     * @param correlationName   The correlation name
+     * @param updateOrDelete    Table is being updated/deleted from.
+     * @param derivedRCL        The derived column list
+     * @param cm               The context manager
+	 */
+    FromBaseTable(TableName tableName,
+                  String correlationName,
+                  int updateOrDelete,
+                  ResultColumnList derivedRCL,
+                  ContextManager cm)
+	{
+        super(correlationName, null, cm);
+        setNodeType(C_NodeTypes.FROM_BASE_TABLE);
+        this.tableName = tableName;
+        this.updateOrDelete = updateOrDelete;
+        resultColumns = derivedRCL;
 		setOrigTableName(this.tableName);
 		templateColumns = resultColumns;
 	}
 
-	/**
+    /**
 	 * no LOJ reordering for base table.
 	 */
-	public boolean LOJ_reorderable(int numTables)
+    @Override
+    boolean LOJ_reorderable(int numTables)
 				throws StandardException
 	{
 		return false;
 	}
 
-	public JBitSet LOJgetReferencedTables(int numTables)
+    @Override
+    JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{
 		JBitSet map = new JBitSet(numTables);
@@ -270,6 +268,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean nextAccessPath(Optimizer optimizer,
 									OptimizablePredicateList predList,
 									RowOrdering rowOrdering)
@@ -502,6 +501,7 @@ public class FromBaseTable extends FromTable
 	}
 
 	/** Tell super-class that this Optimizable can be ordered */
+    @Override
 	protected boolean canBeOrdered()
 	{
 		return true;
@@ -512,6 +512,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(
 				Optimizer optimizer,
 				OptimizablePredicateList predList,
@@ -533,6 +534,7 @@ public class FromBaseTable extends FromTable
 	}
 
 	/** @see Optimizable#getTableDescriptor */
+    @Override
 	public TableDescriptor getTableDescriptor()
 	{
 		return tableDescriptor;
@@ -543,6 +545,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean isMaterializable()
 		throws StandardException
 	{
@@ -557,6 +560,7 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 		throws StandardException
 	{
@@ -577,6 +581,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void pullOptPredicates(
 								OptimizablePredicateList optimizablePredicates)
 					throws StandardException
@@ -592,6 +597,7 @@ public class FromBaseTable extends FromTable
 	 * @see Optimizable#isCoveringIndex
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean isCoveringIndex(ConglomerateDescriptor cd) throws StandardException
 	{
 		boolean coveringIndex = true;
@@ -653,6 +659,7 @@ public class FromBaseTable extends FromTable
 	/** @see Optimizable#verifyProperties 
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void verifyProperties(DataDictionary dDictionary)
 		throws StandardException
 	{
@@ -675,8 +682,7 @@ public class FromBaseTable extends FromTable
 		ConstraintDescriptor consDesc = null;
 		Enumeration e = tableProperties.keys();
 
-			StringUtil.SQLEqualsIgnoreCase(tableDescriptor.getSchemaName(), 
-										   "SYS");
+        StringUtil.SQLEqualsIgnoreCase(tableDescriptor.getSchemaName(), "SYS");
 		while (e.hasMoreElements())
 		{
 			String key = (String) e.nextElement();
@@ -846,12 +852,14 @@ public class FromBaseTable extends FromTable
 	}
 
 	/** @see Optimizable#getBaseTableName */
+    @Override
 	public String getBaseTableName()
 	{
 		return tableName.getTableName();
 	}
 
 	/** @see Optimizable#startOptimizing */
+    @Override
 	public void startOptimizing(Optimizer optimizer, RowOrdering rowOrdering)
 	{
 		AccessPath ap = getCurrentAccessPath();
@@ -873,20 +881,21 @@ public class FromBaseTable extends FromTable
 		** costEstimate will be copied to the best access paths as
 		** necessary.
 		*/
-		CostEstimate costEstimate = getCostEstimate(optimizer);
-		ap.setCostEstimate(costEstimate);
+        CostEstimate costEst = getCostEstimate(optimizer);
+        ap.setCostEstimate(costEst);
 
 		/*
 		** This is the initial cost of this optimizable.  Initialize it
 		** to the maximum cost so that the optimizer will think that
 		** any access path is better than none.
 		*/
-		costEstimate.setCost(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        costEst.setCost(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
 		super.startOptimizing(optimizer, rowOrdering);
 	}
 
 	/** @see Optimizable#convertAbsoluteToRelativeColumnPosition */
+    @Override
 	public int convertAbsoluteToRelativeColumnPosition(int absolutePosition)
 	{
 		return mapAbsoluteToRelativeColumnPosition(absolutePosition);
@@ -911,6 +920,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate estimateCost(OptimizablePredicateList predList,
 									ConglomerateDescriptor cd,
 									CostEstimate outerCost,
@@ -933,7 +943,7 @@ public class FromBaseTable extends FromTable
 			*/
 			statisticsForConglomerate = tableDescriptor.statisticsExist(cd);
 			statisticsForTable = tableDescriptor.statisticsExist(null);
-			unknownPredicateList = new PredicateList();
+            unknownPredicateList = new PredicateList(getContextManager());
 			predList.copyPredicatesToOtherList(unknownPredicateList);
             // If not already done, check if this table has indexes and if
             // their statistics need to get updated.
@@ -950,9 +960,9 @@ public class FromBaseTable extends FromTable
             }
         }
 
-		AccessPath currentAccessPath = getCurrentAccessPath();
+        AccessPath currAccessPath = getCurrentAccessPath();
 		JoinStrategy currentJoinStrategy = 
-			currentAccessPath.getJoinStrategy();
+            currAccessPath.getJoinStrategy();
 
         if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceEstimatingCostOfConglomerate( cd, tableNumber ); }
 
@@ -972,7 +982,7 @@ public class FromBaseTable extends FromTable
 		/* RESOLVE: Need to figure out how to cache the StoreCostController */
 		StoreCostController scc = getStoreCostController(cd);
 
-		CostEstimate costEstimate = getScratchCostEstimate(optimizer);
+        CostEstimate costEst = getScratchCostEstimate(optimizer);
 
 		/* First, get the cost for one scan */
 
@@ -997,7 +1007,7 @@ public class FromBaseTable extends FromTable
 
             if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceSingleMatchedRowCost( cost, tableNumber ); }
 
-			costEstimate.setCost(cost, 1.0d, 1.0d);
+            costEst.setCost(cost, 1.0d, 1.0d);
 
 			/*
 			** Let the join strategy decide whether the cost of the base
@@ -1005,17 +1015,17 @@ public class FromBaseTable extends FromTable
 			** NOTE: The multiplication should only be done against the
 			** total row count, not the singleScanRowCount.
 			*/
-			double newCost = costEstimate.getEstimatedCost();
+            double newCost = costEst.getEstimatedCost();
 
 			if (currentJoinStrategy.multiplyBaseCostByOuterRows())
 			{
 				newCost *= outerCost.rowCount();
 			}
 
-			costEstimate.setCost(
+            costEst.setCost(
 				newCost,
-				costEstimate.rowCount() * outerCost.rowCount(),
-				costEstimate.singleScanRowCount());
+                costEst.rowCount() * outerCost.rowCount(),
+                costEst.singleScanRowCount());
 
 			/*
 			** Choose the lock mode.  If the start/stop conditions are
@@ -1048,18 +1058,22 @@ public class FromBaseTable extends FromTable
 
 			if (constantStartStop)
 			{
-				currentAccessPath.setLockMode(
+                currAccessPath.setLockMode(
 											TransactionController.MODE_RECORD);
 
                 if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceConstantStartStopPositions(); }
 			}
 			else
 			{
-				setLockingBasedOnThreshold(optimizer, costEstimate.rowCount());
+                setLockingBasedOnThreshold(optimizer, costEst.rowCount());
 			}
 
-            if ( optimizer.tracingIsOn() )
-            { optimizer.tracer().traceCostOfNScans( tableNumber, outerCost.rowCount(), costEstimate ); }
+            if (optimizer.tracingIsOn()) {
+                optimizer.tracer().traceCostOfNScans(
+                    tableNumber,
+                    outerCost.rowCount(),
+                    costEst );
+            }
 
 			/* Add in cost of fetching base row for non-covering index */
 			if (cd.isIndex() && ( ! isCoveringIndex(cd) ) )
@@ -1086,10 +1100,10 @@ public class FromBaseTable extends FromTable
                 // making the row count at least 1 for the non-unique index.
                 // See reference to DERBY-6011 further down in this method.
 
-				cost = singleFetchCost * costEstimate.rowCount();
+                cost = singleFetchCost * costEst.rowCount();
 
-				costEstimate.setEstimatedCost(
-								costEstimate.getEstimatedCost() + cost);
+                costEst.setEstimatedCost(
+                                costEst.getEstimatedCost() + cost);
 
                 if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceNonCoveringIndexCost( cost, tableNumber ); }
 			}
@@ -1497,7 +1511,7 @@ public class FromBaseTable extends FromTable
 					stopOperator,
 					false,
 					0,
-					costEstimate);
+                    costEst);
 
 			/* initialPositionCost is the first part of the index scan cost we get above.
 			 * It's the cost of initial positioning/fetch of key.  So it's unrelated to
@@ -1517,11 +1531,11 @@ public class FromBaseTable extends FromTable
 				 * on cost (affecting decision for covering index) and rc (decision for
 				 * non-covering). The purpose is favoring unique index. beetle 5006.
 				 */
-				if (oneRowResultSetForSomeConglom && costEstimate.rowCount() <= 1)
+                if (oneRowResultSetForSomeConglom && costEst.rowCount() <= 1)
 				{
-					costEstimate.setCost(costEstimate.getEstimatedCost() * 2,
-										 costEstimate.rowCount() + 2,
-										 costEstimate.singleScanRowCount() + 2);
+                    costEst.setCost(costEst.getEstimatedCost() * 2,
+                                         costEst.rowCount() + 2,
+                                         costEst.singleScanRowCount() + 2);
 				}
 			}
 
@@ -1531,7 +1545,7 @@ public class FromBaseTable extends FromTable
                     (
                      tableNumber,
                      cd,
-                     costEstimate,
+                     costEst,
                      numExtraFirstColumnPreds,
                      extraFirstColumnSelectivity,
                      numExtraStartStopPreds,
@@ -1549,7 +1563,7 @@ public class FromBaseTable extends FromTable
 			   any predicates-- we use this at the end of the routine
 			   when we use statistics to recompute the row count.
 			*/
-			double initialRowCount = costEstimate.rowCount();
+            double initialRowCount = costEst.rowCount();
 
 			if (statStartStopSelectivity != 1.0d)
 			{
@@ -1561,17 +1575,19 @@ public class FromBaseTable extends FromTable
 				** we only applied the FirstColumnSelectivity to the 
 				** cost.
 				*/
-				costEstimate.setCost(
-							 scanCostAfterSelectivity(costEstimate.getEstimatedCost(),
-													  initialPositionCost,
-													  statStartStopSelectivity,
-													  oneRowResultSetForSomeConglom),
-							 costEstimate.rowCount() * statStartStopSelectivity,
-							 costEstimate.singleScanRowCount() *
-							 statStartStopSelectivity);
+                costEst.setCost(
+                    scanCostAfterSelectivity(costEst.getEstimatedCost(),
+                                             initialPositionCost,
+                                             statStartStopSelectivity,
+                                             oneRowResultSetForSomeConglom),
+                    costEst.rowCount() * statStartStopSelectivity,
+                    costEst.singleScanRowCount() *
+                    statStartStopSelectivity);
                 
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCostIncludingStatsForIndex( costEstimate, tableNumber ); }
+                if (optimizer.tracingIsOn()) {
+                    optimizer.tracer().
+                        traceCostIncludingStatsForIndex(costEst, tableNumber);
+                }
 			}
 			else
 			{
@@ -1583,16 +1599,20 @@ public class FromBaseTable extends FromTable
 				*/
 				if (extraFirstColumnSelectivity != 1.0d)
 				{
-					costEstimate.setCost(
-						 scanCostAfterSelectivity(costEstimate.getEstimatedCost(),
+                    costEst.setCost(
+                         scanCostAfterSelectivity(costEst.getEstimatedCost(),
 												  initialPositionCost,
 												  extraFirstColumnSelectivity,
 												  oneRowResultSetForSomeConglom),
-						 costEstimate.rowCount() * extraFirstColumnSelectivity,
-						 costEstimate.singleScanRowCount() * extraFirstColumnSelectivity);
+                         costEst.rowCount() * extraFirstColumnSelectivity,
+                         costEst.singleScanRowCount() *
+                             extraFirstColumnSelectivity);
 
-                    if ( optimizer.tracingIsOn() )
-                    { optimizer.tracer().traceCostIncludingExtra1stColumnSelectivity( costEstimate, tableNumber ); }
+                    if (optimizer.tracingIsOn()) {
+                        optimizer.tracer().
+                            traceCostIncludingExtra1stColumnSelectivity(
+                                costEst, tableNumber);
+                    }
 				}
 
 				/* Factor in the extra start/stop selectivity (see comment above).
@@ -1601,12 +1621,16 @@ public class FromBaseTable extends FromTable
 				 */
 				if (extraStartStopSelectivity != 1.0d)
 				{
-					costEstimate.setCost(
-						costEstimate.getEstimatedCost(),
-						costEstimate.rowCount() * extraStartStopSelectivity,
-						costEstimate.singleScanRowCount() * extraStartStopSelectivity);
+                    costEst.setCost(
+                        costEst.getEstimatedCost(),
+                        costEst.rowCount() * extraStartStopSelectivity,
+                        costEst.singleScanRowCount() *
+                            extraStartStopSelectivity);
 
-                    if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceCostIncludingExtraStartStop( costEstimate, tableNumber ); }
+                    if (optimizer.tracingIsOn()) {
+                        optimizer.tracer().traceCostIncludingExtraStartStop(
+                            costEst, tableNumber);
+                    }
 				}
 			}
 
@@ -1629,14 +1653,14 @@ public class FromBaseTable extends FromTable
 			if (ssKeySourceInList != null)
 			{
 				int listSize = ssKeySourceInList.getRightOperandList().size();
-				double rc = costEstimate.rowCount() * listSize;
-				double ssrc = costEstimate.singleScanRowCount() * listSize;
+                double rc = costEst.rowCount() * listSize;
+                double ssrc = costEst.singleScanRowCount() * listSize;
 
 				/* If multiplication by listSize returns more rows than are
 				 * in the scan then just use the number of rows in the scan.
 				 */
-				costEstimate.setCost(
-					costEstimate.getEstimatedCost() * listSize,
+                costEst.setCost(
+                    costEst.getEstimatedCost() * listSize,
 					rc > initialRowCount ? initialRowCount : rc,
 					ssrc > initialRowCount ? initialRowCount : ssrc);
 			}
@@ -1649,7 +1673,7 @@ public class FromBaseTable extends FromTable
 			*/
 			if (! startStopFound)
 			{
-				currentAccessPath.setLockMode(
+                currAccessPath.setLockMode(
 											TransactionController.MODE_TABLE);
 
                 if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceNoStartStopPosition(); }
@@ -1665,7 +1689,7 @@ public class FromBaseTable extends FromTable
 				** tell if we have one of those, because
 				** multiplyBaseCostByOuterRows() will return false.
 				*/
-				double rowsTouched = costEstimate.rowCount();
+                double rowsTouched = costEst.rowCount();
 
 				if ( (! constantStartStop) &&
 					 currentJoinStrategy.multiplyBaseCostByOuterRows())
@@ -1697,7 +1721,7 @@ public class FromBaseTable extends FromTable
 					double r = baseRowCount();
 					if (r > 0.0)
 					{
-						double s = costEstimate.rowCount();
+                        double s = costEst.rowCount();
 						double o = outerCost.rowCount();
 						double pRowsNotTouchedPerScan = 1.0 - (s / r);
 						double pRowsNotTouchedAllScans =
@@ -1736,7 +1760,7 @@ public class FromBaseTable extends FromTable
 																0);
 
                 // The number of rows we expect to fetch from the base table.
-                double rowsToFetch = costEstimate.rowCount();
+                double rowsToFetch = costEst.rowCount();
 
                 if (oneRowResultSetForSomeConglom) {
                     // DERBY-6011: We know that there is a unique index, and
@@ -1758,11 +1782,13 @@ public class FromBaseTable extends FromTable
 
                 cost = singleFetchCost * rowsToFetch;
 
-				costEstimate.setEstimatedCost(
-								costEstimate.getEstimatedCost() + cost);
+                costEst.setEstimatedCost(
+                                costEst.getEstimatedCost() + cost);
 
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCostOfNoncoveringIndex( costEstimate, tableNumber ); }
+                if (optimizer.tracingIsOn()) {
+                    optimizer.tracer().traceCostOfNoncoveringIndex(
+                        costEst, tableNumber);
+                }
 			}
 
 			/* Factor in the extra qualifier selectivity (see comment above).
@@ -1771,16 +1797,20 @@ public class FromBaseTable extends FromTable
 			 */
 			if (extraQualifierSelectivity != 1.0d)
 			{
-				costEstimate.setCost(
-						costEstimate.getEstimatedCost(),
-						costEstimate.rowCount() * extraQualifierSelectivity,
-						costEstimate.singleScanRowCount() * extraQualifierSelectivity);
+                costEst.setCost(
+                        costEst.getEstimatedCost(),
+                        costEst.rowCount() * extraQualifierSelectivity,
+                        costEst.singleScanRowCount() *
+                            extraQualifierSelectivity);
 
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCostIncludingExtraQualifierSelectivity( costEstimate, tableNumber ); }
+                if (optimizer.tracingIsOn()) {
+                    optimizer.tracer().
+                        traceCostIncludingExtraQualifierSelectivity(
+                            costEst, tableNumber);
+                }
 			}
 
-			singleScanRowCount = costEstimate.singleScanRowCount();
+            singleScanRowCount = costEst.singleScanRowCount();
 
 			/*
 			** Let the join strategy decide whether the cost of the base
@@ -1792,8 +1822,8 @@ public class FromBaseTable extends FromTable
 			** loop.  (eg, we will find at most 1 match when probing
 			** the hash table.)
 			*/
-			double newCost = costEstimate.getEstimatedCost();
-			double rowCount = costEstimate.rowCount();
+            double newCost = costEst.getEstimatedCost();
+            double rowCnt = costEst.rowCount();
 
 			/*
 			** RESOLVE - If there is a unique index on the joining
@@ -1815,7 +1845,7 @@ public class FromBaseTable extends FromTable
 				newCost *= outerCost.rowCount();
 			}
 
-			rowCount *= outerCost.rowCount();
+            rowCnt *= outerCost.rowCount();
 			initialRowCount *= outerCost.rowCount();
 
 
@@ -1828,9 +1858,9 @@ public class FromBaseTable extends FromTable
 			*/
 			if (oneRowResultSetForSomeConglom)
 			{
-				if (outerCost.rowCount() < rowCount)
+                if (outerCost.rowCount() < rowCnt)
 				{
-					rowCount = outerCost.rowCount();
+                    rowCnt = outerCost.rowCount();
 				}
 			}
 
@@ -1863,14 +1893,14 @@ public class FromBaseTable extends FromTable
 					*/
 					double maxRows =
 							((double) baseRowCount()) / scanUniquenessFactor;
-					if (rowCount > maxRows)
+                    if (rowCnt > maxRows)
 					{
 						/*
 						** The estimated row count is too high. Adjust the
 						** estimated cost downwards proportionately to
 						** match the maximum number of rows.
 						*/
-						newCost *= (maxRows / rowCount);
+                        newCost *= (maxRows / rowCnt);
 					}
 				}
 			}
@@ -1886,24 +1916,26 @@ public class FromBaseTable extends FromTable
 				*/
 				double maxRows =
 							((double) baseRowCount()) / tableUniquenessFactor;
-				if (rowCount > maxRows)
+                if (rowCnt > maxRows)
 				{
 					/*
 					** The estimated row count is too high. Set it to the
 					** maximum row count.
 					*/
-					rowCount = maxRows;
+                    rowCnt = maxRows;
 				}
 			}
 
-			costEstimate.setCost(
+            costEst.setCost(
 				newCost,
-				rowCount,
-				costEstimate.singleScanRowCount());
+                rowCnt,
+                costEst.singleScanRowCount());
 
 
-            if ( optimizer.tracingIsOn() )
-            { optimizer.tracer().traceCostOfNScans( tableNumber, outerCost.rowCount(), costEstimate ); }
+            if (optimizer.tracingIsOn()) {
+                optimizer.tracer().traceCostOfNScans(
+                    tableNumber, outerCost.rowCount(), costEst);
+            }
 
 			/*
 			** Now figure in the cost of the non-qualifier predicates.
@@ -1917,15 +1949,22 @@ public class FromBaseTable extends FromTable
 			// beetle 4787
 			else if (extraNonQualifierSelectivity != 1.0d)
 			{
-				rc = oneRowResultSetForSomeConglom ? costEstimate.rowCount() :
-											costEstimate.rowCount() * extraNonQualifierSelectivity;
-				src = costEstimate.singleScanRowCount() * extraNonQualifierSelectivity;
+                rc = oneRowResultSetForSomeConglom ?
+                    costEst.rowCount() :
+                    costEst.rowCount() * extraNonQualifierSelectivity;
+
+                src = costEst.singleScanRowCount() *
+                      extraNonQualifierSelectivity;
 			}
 			if (rc != -1) // changed
 			{
-				costEstimate.setCost(costEstimate.getEstimatedCost(), rc, src);
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCostIncludingExtraNonQualifierSelectivity( costEstimate, tableNumber ); }
+                costEst.setCost(costEst.getEstimatedCost(), rc, src);
+
+                if (optimizer.tracingIsOn()) {
+                    optimizer.tracer().
+                        traceCostIncludingExtraNonQualifierSelectivity(
+                            costEst, tableNumber);
+                }
 			}
 			
 		recomputeRowCount:
@@ -1964,21 +2003,24 @@ public class FromBaseTable extends FromTable
 				   Thus RC = initialRowCount * the selectivity from stats.
 				   SingleRC = RC / outerCost.rowCount().
 				*/
-				costEstimate.setCost(costEstimate.getEstimatedCost(),
+                costEst.setCost(costEst.getEstimatedCost(),
 									 compositeStatRC,
 									 (existsBaseTable) ? 
 									 1 : 
 									 compositeStatRC / outerCost.rowCount());
 
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCostIncludingCompositeSelectivityFromStats( costEstimate, tableNumber ); }
+                if (optimizer.tracingIsOn()) {
+                    optimizer.tracer().
+                        traceCostIncludingCompositeSelectivityFromStats(
+                            costEst, tableNumber);
+                }
 			}
 		}
 
 		/* Put the base predicates back in the predicate list */
 		currentJoinStrategy.putBasePredicates(predList,
 									   baseTableRestrictionList);
-		return costEstimate;
+        return costEst;
 	}
 
 	private double scanCostAfterSelectivity(double originalScanCost,
@@ -2032,12 +2074,14 @@ public class FromBaseTable extends FromTable
 	}
 
 	/** @see Optimizable#isBaseTable */
+    @Override
 	public boolean isBaseTable()
 	{
 		return true;
 	}
 
 	/** @see Optimizable#forUpdate */
+    @Override
 	public boolean forUpdate()
 	{
 		/* This table is updatable if it is the
@@ -2049,12 +2093,14 @@ public class FromBaseTable extends FromTable
 	}
 
 	/** @see Optimizable#initialCapacity */
+    @Override
 	public int initialCapacity()
 	{
 		return initialCapacity;
 	}
 
 	/** @see Optimizable#loadFactor */
+    @Override
 	public float loadFactor()
 	{
 		return loadFactor;
@@ -2063,6 +2109,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see Optimizable#memoryUsageOK
 	 */
+    @Override
 	public boolean memoryUsageOK(double rowCount, int maxMemoryPerTable)
 			throws StandardException
 	{
@@ -2072,6 +2119,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see Optimizable#isTargetTable
 	 */
+    @Override
 	public boolean isTargetTable()
 	{
 		return (updateOrDelete != 0);
@@ -2080,13 +2128,14 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see Optimizable#uniqueJoin
 	 */
+    @Override
 	public double uniqueJoin(OptimizablePredicateList predList)
 					throws StandardException
 	{
 		double retval = -1.0;
 		PredicateList pl = (PredicateList) predList;
 		int numColumns = getTableDescriptor().getNumberOfColumns();
-		int tableNumber = getTableNumber();
+        int tableNo = getTableNumber();
 
 		// This is supposed to be an array of table numbers for the current
 		// query block. It is used to determine whether a join is with a
@@ -2097,7 +2146,7 @@ public class FromBaseTable extends FromTable
 		JBitSet[] tableColMap = new JBitSet[1];
 		tableColMap[0] = new JBitSet(numColumns + 1);
 
-		pl.checkTopPredicatesForEqualsConditions(tableNumber,
+        pl.checkTopPredicatesForEqualsConditions(tableNo,
 												null,
 												tableNumbers,
 												tableColMap,
@@ -2117,6 +2166,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean isOneRowScan() 
 		throws StandardException
 	{
@@ -2135,6 +2185,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see Optimizable#legalJoinOrder
 	 */
+    @Override
 	public boolean legalJoinOrder(JBitSet assignedTableMap)
 	{
 		// Only an issue for EXISTS FBTs
@@ -2153,6 +2204,7 @@ public class FromBaseTable extends FromTable
 	 * @return	This object as a String
 	 */
 
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -2216,12 +2268,12 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @param locations	list of bit numbers to be cleared
 	 */
-	void clearDependency(List locations)
+    void clearDependency(List<Integer> locations)
 	{
 		if (this.dependencyMap != null)
 		{
 			for (int i = 0; i < locations.size() ; i++)
-				this.dependencyMap.clear(((Integer)locations.get(i)).intValue());
+                this.dependencyMap.clear(locations.get(i).intValue());
 		}
 	}
 
@@ -2230,7 +2282,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @param tableProperties	The new table properties.
 	 */
-	public void setTableProperties(Properties tableProperties)
+    void setTableProperties(Properties tableProperties)
 	{
 		this.tableProperties = tableProperties;
 	}
@@ -2247,15 +2299,16 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 					throws StandardException
 	{
-		TableDescriptor tableDescriptor = bindTableDescriptor();
+        TableDescriptor tabDescr = bindTableDescriptor();
 
-		if (tableDescriptor.getTableType() == TableDescriptor.VTI_TYPE) {
+        if (tabDescr.getTableType() == TableDescriptor.VTI_TYPE) {
 			ResultSetNode vtiNode = mapTableAsVTI(
-					tableDescriptor,
+                    tabDescr,
 					getCorrelationName(),
 					resultColumns,
 					getProperties(),
@@ -2266,12 +2319,8 @@ public class FromBaseTable extends FromTable
 		ResultColumnList	derivedRCL = resultColumns;
   
 		// make sure there's a restriction list
-		restrictionList = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
-		baseTableRestrictionList = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
+        restrictionList = new PredicateList(getContextManager());
+        baseTableRestrictionList = new PredicateList(getContextManager());
 
 
 		CompilerContext compilerContext = getCompilerContext();
@@ -2281,7 +2330,7 @@ public class FromBaseTable extends FromTable
 		templateColumns = resultColumns;
 
 		/* Resolve the view, if this is a view */
-		if (tableDescriptor.getTableType() == TableDescriptor.VIEW_TYPE)
+        if (tabDescr.getTableType() == TableDescriptor.VIEW_TYPE)
 		{
 			FromSubquery                fsq;
 			ResultSetNode				rsn;
@@ -2292,7 +2341,7 @@ public class FromBaseTable extends FromTable
 			/* Get the associated ViewDescriptor so that we can get 
 			 * the view definition text.
 			 */
-			vd = dataDictionary.getViewDescriptor(tableDescriptor);
+            vd = dataDictionary.getViewDescriptor(tabDescr);
 
 			/*
 			** Set the default compilation schema to be whatever
@@ -2310,12 +2359,6 @@ public class FromBaseTable extends FromTable
 				/* This represents a view - query is dependent on the ViewDescriptor */
 				compilerContext.createDependency(vd);
 	
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(vd != null,
-						"vd not expected to be null for " + tableName);
-				}
-
 				cvn = (CreateViewNode)
 				          parseStatement(vd.getViewText(), false);
 
@@ -2347,13 +2390,12 @@ public class FromBaseTable extends FromTable
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
 				}
 
-				fsq = (FromSubquery) getNodeFactory().getNode(
-					C_NodeTypes.FROM_SUBQUERY,
+                fsq = new FromSubquery(
 					rsn,
                     cvn.getOrderByList(),
                     cvn.getOffset(),
                     cvn.getFetchFirst(),
-                    Boolean.valueOf( cvn.hasJDBClimitClause() ),
+                    cvn.hasJDBClimitClause(),
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
 					resultColumns,
@@ -2403,12 +2445,12 @@ public class FromBaseTable extends FromTable
 		else
 		{
 			/* This represents a table - query is dependent on the TableDescriptor */
-			compilerContext.createDependency(tableDescriptor);
+            compilerContext.createDependency(tabDescr);
 
 			/* Get the base conglomerate descriptor */
 			baseConglomerateDescriptor =
-				tableDescriptor.getConglomerateDescriptor(
-					tableDescriptor.getHeapConglomerateId()
+                tabDescr.getConglomerateDescriptor(
+                    tabDescr.getHeapConglomerateId()
 					);
 
             // Bail out if the descriptor couldn't be found. The conglomerate
@@ -2416,7 +2458,7 @@ public class FromBaseTable extends FromTable
             if (baseConglomerateDescriptor == null) {
                 throw StandardException.newException(
                         SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
-                        new Long(tableDescriptor.getHeapConglomerateId()));
+                        Long.valueOf(tabDescr.getHeapConglomerateId()));
             }
 
 			/* Build the 0-based array of base column names. */
@@ -2441,7 +2483,9 @@ public class FromBaseTable extends FromTable
         //
         authorizeSYSUSERS =
             dataDictionary.usesSqlAuthorization() &&
-            tableDescriptor.getUUID().toString().equals( SYSUSERSRowFactory.SYSUSERS_UUID );
+            tabDescr.getUUID().toString().equals(
+                SYSUSERSRowFactory.SYSUSERS_UUID );
+
         if ( authorizeSYSUSERS )
         {
             String  databaseOwner = dataDictionary.getAuthorizationDatabaseOwner();
@@ -2481,19 +2525,18 @@ public class FromBaseTable extends FromTable
         // call is an indication that we are mapping to a no-argument VTI. Since
         // we have the table descriptor we do not need to pass in a TableName.
         // See NewInvocationNode for more.
-        QueryTreeNode newNode = (QueryTreeNode) getNodeFactory().getNode(
-                C_NodeTypes.NEW_INVOCATION_NODE,
+        final List<ValueNode> emptyList = Collections.emptyList();
+        MethodCallNode newNode = new NewInvocationNode(
                 null, // TableName
                 td, // TableDescriptor
-                Collections.EMPTY_LIST,
-                Boolean.FALSE,
+                emptyList,
+                false,
                 cm);
 
         QueryTreeNode vtiNode;
 
         if (correlationName != null) {
-            vtiNode = (QueryTreeNode) getNodeFactory().getNode(
-                    C_NodeTypes.FROM_VTI,
+            vtiNode = new FromVTI(
                     newNode,
                     correlationName,
                     resultColumns,
@@ -2503,10 +2546,9 @@ public class FromBaseTable extends FromTable
             TableName exposedName = newNode.makeTableName(td.getSchemaName(),
                     td.getDescriptorName());
 
-            vtiNode = (QueryTreeNode) getNodeFactory().getNode(
-                    C_NodeTypes.FROM_VTI,
+            vtiNode = new FromVTI(
                     newNode,
-                    correlationName,
+                    null, /* correlationName */
                     resultColumns,
                     tableProperties,
                     exposedName,
@@ -2529,6 +2571,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -2662,7 +2705,8 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		/* No expressions to bind for a FromBaseTable.
@@ -2682,7 +2726,8 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumns(FromList fromListParam)
+    @Override
+    void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
 		/* Nothing to do, since RCL bound in bindNonVTITables() */
@@ -2702,7 +2747,9 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultColumn getMatchingColumn(ColumnReference columnReference) throws StandardException
+    @Override
+    ResultColumn getMatchingColumn(ColumnReference columnReference)
+            throws StandardException
 	{
 		ResultColumn	resultColumn = null;
 		TableName		columnsTableName;
@@ -2789,7 +2836,8 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -2850,6 +2898,7 @@ public class FromBaseTable extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
+    @Override
 	protected ResultSetNode genProjectRestrict(int numTables)
 				throws StandardException
 	{
@@ -2873,8 +2922,7 @@ public class FromBaseTable extends FromTable
 		prRCList.doProjection();
 
 		/* Finally, we create the new ProjectRestrictNode */
-		return (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
+        return new ProjectRestrictNode(
 								this,
 								prRCList,
 								null,	/* Restriction */
@@ -2882,7 +2930,7 @@ public class FromBaseTable extends FromTable
 								null,	/* Project subquery list */
 								null,	/* Restrict subquery list */
 								null,
-								getContextManager()				 );
+                                getContextManager());
 	}
 
 	/**
@@ -2890,16 +2938,19 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode changeAccessPath() throws StandardException
+    @Override
+    ResultSetNode changeAccessPath() throws StandardException
 	{
 		ResultSetNode	retval;
 		AccessPath ap = getTrulyTheBestAccessPath();
 		ConglomerateDescriptor trulyTheBestConglomerateDescriptor = 
 							 					ap.getConglomerateDescriptor();
 		JoinStrategy trulyTheBestJoinStrategy = ap.getJoinStrategy();
-		Optimizer optimizer = ap.getOptimizer();
+        Optimizer opt = ap.getOptimizer();
 
-        if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceChangingAccessPathForTable( tableNumber ); }
+        if (opt.tracingIsOn()) {
+            opt.tracer().traceChangingAccessPathForTable(tableNumber);
+        }
 
 		if (SanityManager.DEBUG)
 		{
@@ -2947,17 +2998,11 @@ public class FromBaseTable extends FromTable
 		** Divide up the predicates for different processing phases of the
 		** best join strategy.
 		*/
-		storeRestrictionList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
-		nonStoreRestrictionList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
-		requalificationRestrictionList =
-									(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
-		trulyTheBestJoinStrategy.divideUpPredicateLists(
+        storeRestrictionList = new PredicateList(getContextManager());
+        nonStoreRestrictionList = new PredicateList(getContextManager());
+        requalificationRestrictionList = new PredicateList(getContextManager());
+
+        trulyTheBestJoinStrategy.divideUpPredicateLists(
 											this,
 											restrictionList,
 											storeRestrictionList,
@@ -3119,7 +3164,8 @@ public class FromBaseTable extends FromTable
 		 */
 		// Get the BitSet for all of the referenced columns
 		FormatableBitSet indexReferencedCols = null;
-		FormatableBitSet heapReferencedCols = null;
+        FormatableBitSet heapReferencedCols;
+
 		if ((bulkFetch == UNSET) && 
 			(requalificationRestrictionList == null || 
 			 requalificationRestrictionList.size() == 0))
@@ -3140,16 +3186,14 @@ public class FromBaseTable extends FromTable
 			heapReferencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, true, false) ;
 		}
 		ResultColumnList heapRCL = resultColumns.compactColumns(cursorTargetTable, false);
-		retval = (ResultSetNode) getNodeFactory().getNode(
-										C_NodeTypes.INDEX_TO_BASE_ROW_NODE,
-										this,
+        retval = new IndexToBaseRowNode(this,
 										baseConglomerateDescriptor,
 										heapRCL,
-										new Boolean(cursorTargetTable),
+                                        cursorTargetTable,
 										heapReferencedCols,
 										indexReferencedCols,
 										requalificationRestrictionList,
-										new Boolean(forUpdate()),
+                                        forUpdate(),
 										tableProperties,
 										getContextManager());
 
@@ -3227,10 +3271,7 @@ public class FromBaseTable extends FromTable
 	{
 		IndexRowGenerator	irg = idxCD.getIndexDescriptor();
 		int[]				baseCols = irg.baseColumnPositions();
-		ResultColumnList	newCols =
-								(ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList newCols = new ResultColumnList((getContextManager()));
 
 		for (int i = 0; i < baseCols.length; i++)
 		{
@@ -3254,12 +3295,10 @@ public class FromBaseTable extends FromTable
 			if (cloneRCs)
 			{
 				newCol = oldCol.cloneMe();
-				oldCol.setExpression(
-					(ValueNode) getNodeFactory().getNode(
-						C_NodeTypes.VIRTUAL_COLUMN_NODE,
+                oldCol.setExpression(new VirtualColumnNode(
 						this,
 						newCol,
-						ReuseFactory.getInteger(oldCol.getVirtualColumnId()),
+                        oldCol.getVirtualColumnId(),
 						getContextManager()));
 			}
 			else
@@ -3291,6 +3330,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{        
@@ -3315,6 +3355,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -3398,7 +3439,8 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @return	The final CostEstimate for this ResultSetNode.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 	{
 		return getTrulyTheBestAccessPath().getCostEstimate();
 	}
@@ -3410,32 +3452,31 @@ public class FromBaseTable extends FromTable
          * @param mb   Associated MethodBuilder
          * @throws StandardException
          */
-        private void pushIndexName(ConglomerateDescriptor cd, MethodBuilder mb) 
+    private void pushIndexName(ConglomerateDescriptor cd, MethodBuilder mb)
           throws StandardException
-        {
-            if (cd.isConstraint()) {
-                DataDictionary dd = getDataDictionary();
-                ConstraintDescriptor constraintDesc = 
+    {
+        if (cd.isConstraint()) {
+            DataDictionary dd = getDataDictionary();
+            ConstraintDescriptor constraintDesc =
                     dd.getConstraintDescriptor(tableDescriptor, cd.getUUID());
-                mb.push(constraintDesc.getConstraintName());
-            } else if (cd.isIndex())  {
-                mb.push(cd.getConglomerateName());
-            } else {
-             // If the conglomerate is the base table itself, make sure we push null.
-             //  Before the fix for DERBY-578, we would push the base table name 
-             //  and  this was just plain wrong and would cause statistics information to be incorrect.
-              mb.pushNull("java.lang.String");
-            }
+            mb.push(constraintDesc.getConstraintName());
+        } else if (cd.isIndex())  {
+            mb.push(cd.getConglomerateName());
+        } else {
+            // If the conglomerate is the base table itself, make sure we push
+            // null. Before the fix for DERBY-578, we would push the base table
+            // name and this was just plain wrong and would cause statistics
+            // information to be incorrect.
+            mb.pushNull("java.lang.String");
         }
+    }
 	
-        private void generateMaxSpecialResultSet
-	(
-		ExpressionClassBuilder	acb,
-		MethodBuilder mb
-	) throws StandardException
-	{
+    private void generateMaxSpecialResultSet(
+            ExpressionClassBuilder  acb,
+            MethodBuilder mb) throws StandardException
+    {
 		ConglomerateDescriptor cd = getTrulyTheBestAccessPath().getConglomerateDescriptor();
-		CostEstimate costEstimate = getFinalCostEstimate();
+        CostEstimate costEst = getFinalCostEstimate();
 		int colRefItem = (referencedCols == null) ?
 						-1 :
 						acb.addItem(referencedCols);
@@ -3480,8 +3521,8 @@ public class FromBaseTable extends FromTable
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
 		mb.push(tableLockGranularity);
 		mb.push(getCompilerContext().getScanIsolationLevel());
-		mb.push(costEstimate.singleScanRowCount());
-		mb.push(costEstimate.getEstimatedCost());
+        mb.push(costEst.singleScanRowCount());
+        mb.push(costEst.getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getLastIndexKeyResultSet",
 					ClassName.NoPutResultSet, 13);
@@ -3496,7 +3537,7 @@ public class FromBaseTable extends FromTable
 	) throws StandardException
 	{
 		ConglomerateDescriptor cd = getTrulyTheBestAccessPath().getConglomerateDescriptor();
-		CostEstimate costEstimate = getFinalCostEstimate();
+        CostEstimate costEst = getFinalCostEstimate();
 		int colRefItem = (referencedCols == null) ?
 						-1 :
 						acb.addItem(referencedCols);
@@ -3523,14 +3564,14 @@ public class FromBaseTable extends FromTable
 		*/
 
 		/* Get the hash key columns and wrap them in a formattable */
-		int[] hashKeyColumns;
+        int[] hashKeyCols;
 
-		hashKeyColumns = new int[resultColumns.size()];
+        hashKeyCols = new int[resultColumns.size()];
 		if (referencedCols == null)
 		{
-			for (int index = 0; index < hashKeyColumns.length; index++)
+            for (int index = 0; index < hashKeyCols.length; index++)
 			{
-				hashKeyColumns[index] = index;
+                hashKeyCols[index] = index;
 			}
 		}
 		else
@@ -3540,12 +3581,12 @@ public class FromBaseTable extends FromTable
 					colNum != -1;
 					colNum = referencedCols.anySetBit(colNum))
 			{
-				hashKeyColumns[index++] = colNum;
+                hashKeyCols[index++] = colNum;
 			}
 		}
 
 		FormatableIntHolder[] fihArray = 
-				FormatableIntHolder.getFormatableIntHolders(hashKeyColumns); 
+                FormatableIntHolder.getFormatableIntHolders(hashKeyCols);
 		FormatableArrayHolder hashKeyHolder = new FormatableArrayHolder(fihArray);
 		int hashKeyItem = acb.addItem(hashKeyHolder);
 		long conglomNumber = cd.getConglomerateNumber();
@@ -3576,8 +3617,8 @@ public class FromBaseTable extends FromTable
 		mb.push(getTrulyTheBestAccessPath().getLockMode());
 		mb.push(tableLockGranularity);
 		mb.push(getCompilerContext().getScanIsolationLevel());
-		mb.push(costEstimate.singleScanRowCount());
-		mb.push(costEstimate.getEstimatedCost());
+        mb.push(costEst.singleScanRowCount());
+        mb.push(costEst.getEstimatedCost());
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDistinctScanResultSet",
 							ClassName.NoPutResultSet, 16);
@@ -3738,7 +3779,8 @@ public class FromBaseTable extends FromTable
 	 * @return	The exposed name of this table.
 	 *
 	 */
-	public String getExposedName() 
+    @Override
+    String getExposedName()
 	{
 		if (correlationName != null)
 			return correlationName;
@@ -3768,7 +3810,7 @@ public class FromBaseTable extends FromTable
 	 * @return	The table name for this table.
 	 */
 
-	public TableName getTableNameField()
+    TableName getTableNameField()
 	{
 		return tableName;
 	}
@@ -3785,7 +3827,8 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(TableName allTableName)
+    @Override
+    ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		return getResultColumnsForList(allTableName, resultColumns, 
@@ -3801,32 +3844,27 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList genResultColList()
+    ResultColumnList genResultColList()
 			throws StandardException
 	{
-		ResultColumnList 			rcList = null;
 		ResultColumn	 			resultColumn;
 		ValueNode		 			valueNode;
-		ColumnDescriptor 			colDesc = null;
-		TableName		 			exposedName;
 
 		/* Cache exposed name for this table.
 		 * The exposed name becomes the qualifier for each column
 		 * in the expanded list.
 		 */
-		exposedName = getExposedTableName();
+        TableName exposedName = getExposedTableName();
 
 		/* Add all of the columns in the table */
-		rcList = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+        ResultColumnList rcList = new ResultColumnList((getContextManager()));
 		ColumnDescriptorList cdl = tableDescriptor.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
 
 		for (int index = 0; index < cdlSize; index++)
 		{
 			/* Build a ResultColumn/BaseColumnNode pair for the column */
-			colDesc = (ColumnDescriptor) cdl.elementAt(index);
+            ColumnDescriptor colDesc = cdl.elementAt(index);
 			//A ColumnDescriptor instantiated through SYSCOLUMNSRowFactory only has 
 			//the uuid set on it and no table descriptor set on it. Since we know here
 			//that this columnDescriptor is tied to tableDescriptor, set it so using
@@ -3834,17 +3872,12 @@ public class FromBaseTable extends FromTable
 			//to get ResultSetMetaData.getTableName & ResultSetMetaData.getSchemaName
 			colDesc.setTableDescriptor(tableDescriptor);
 
-			valueNode = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.BASE_COLUMN_NODE,
-											colDesc.getColumnName(),
+            valueNode = new BaseColumnNode(colDesc.getColumnName(),
 									  		exposedName,
 											colDesc.getType(),
 											getContextManager());
-			resultColumn = (ResultColumn) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											colDesc,
-											valueNode,
-											getContextManager());
+            resultColumn =
+                new ResultColumn(colDesc, valueNode, getContextManager());
 
 			/* Build the ResultColumnList to return */
 			rcList.addResultColumn(resultColumn);
@@ -3866,17 +3899,15 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList addColsToList
+    ResultColumnList addColsToList
 	(
 		ResultColumnList	inputRcl,
 		FormatableBitSet				colsWeWant
 	)
 			throws StandardException
 	{
-		ResultColumnList 			rcList = null;
 		ResultColumn	 			resultColumn;
 		ValueNode		 			valueNode;
-		ColumnDescriptor 			cd = null;
 		TableName		 			exposedName;
 
 		/* Cache exposed name for this table.
@@ -3886,16 +3917,14 @@ public class FromBaseTable extends FromTable
 		exposedName = getExposedTableName();
 
 		/* Add all of the columns in the table */
-		ResultColumnList newRcl = (ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList newRcl = new ResultColumnList((getContextManager()));
 		ColumnDescriptorList cdl = tableDescriptor.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
 
 		for (int index = 0; index < cdlSize; index++)
 		{
 			/* Build a ResultColumn/BaseColumnNode pair for the column */
-			cd = (ColumnDescriptor) cdl.elementAt(index);
+            ColumnDescriptor cd = cdl.elementAt(index);
 			int position = cd.getPosition();
 
 			if (!colsWeWant.get(position))
@@ -3905,17 +3934,11 @@ public class FromBaseTable extends FromTable
 
 			if ((resultColumn = inputRcl.getResultColumn(position)) == null)
 			{	
-				valueNode = (ValueNode) getNodeFactory().getNode(
-												C_NodeTypes.COLUMN_REFERENCE,
-												cd.getColumnName(), 
+                valueNode = new ColumnReference(cd.getColumnName(),
 												exposedName,
 												getContextManager());
-				resultColumn = (ResultColumn) getNodeFactory().
-												getNode(
-													C_NodeTypes.RESULT_COLUMN,
-													cd,
-													valueNode,
-													getContextManager());
+                resultColumn =
+                        new ResultColumn(cd, valueNode, getContextManager());
 			}
 
 			/* Build the ResultColumnList to return */
@@ -3930,7 +3953,8 @@ public class FromBaseTable extends FromTable
 	 * @return a TableName node representing this FromTable.
 	 * @exception StandardException		Thrown on error
 	 */
-	public TableName getTableName()
+    @Override
+    TableName getTableName()
 			throws StandardException
 	{
 		TableName tn;
@@ -3950,7 +3974,8 @@ public class FromBaseTable extends FromTable
 		Mark this ResultSetNode as the target table of an updatable
 		cursor.
 	 */
-	public boolean markAsCursorTargetTable()
+    @Override
+    boolean markAsCursorTargetTable()
 	{
 		cursorTargetTable = true;
 		return true;
@@ -3962,6 +3987,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @return true/false
 	 */
+    @Override
 	protected boolean cursorTargetTable()
 	{
 		return cursorTargetTable;
@@ -3989,7 +4015,8 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    @Override
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		return baseTable && name.equals(getBaseTableName());
@@ -4002,6 +4029,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -4020,7 +4048,8 @@ public class FromBaseTable extends FromTable
 	 * @return Whether or not the underlying ResultSet tree will return a single row.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isOneRowResultSet()	throws StandardException
+    @Override
+    boolean isOneRowResultSet() throws StandardException
 	{
 		// EXISTS FBT will only return a single row
 		if (existsBaseTable)
@@ -4042,9 +4071,8 @@ public class FromBaseTable extends FromTable
 
 		if (trulyTheBestJoinStrategy.isHashJoin())
 		{
-			pl = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
+            pl = new PredicateList(getContextManager());
+
 			if (storeRestrictionList != null)
 			{
 				pl.nondestructiveAppend(storeRestrictionList);
@@ -4066,12 +4094,14 @@ public class FromBaseTable extends FromTable
 	/**
 	 * Return whether or not this is actually a EBT for NOT EXISTS.
 	 */
-	public boolean isNotExists()
+    @Override
+    boolean isNotExists()
 	{
 		return isNotExists;
 	}
 
-	public boolean isOneRowResultSet(OptimizablePredicateList predList)	throws StandardException
+    boolean isOneRowResultSet(OptimizablePredicateList predList)
+            throws StandardException
 	{
 		ConglomerateDescriptor[] cds = tableDescriptor.getConglomerateDescriptors();
 
@@ -4221,7 +4251,8 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		/* if best access path is index scan, we always use row lock on heap,
 		 * consistent with IndexRowToBaseRowResultSet's openCore().  We don't
@@ -4285,6 +4316,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
@@ -4360,7 +4392,8 @@ public class FromBaseTable extends FromTable
 	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan(Set distinctColumns)
+    @Override
+    boolean isPossibleDistinctScan(Set<BaseColumnNode> distinctColumns)
 	{
 		if ((restrictionList != null && restrictionList.size() != 0)) {
 			return false;
@@ -4378,6 +4411,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * Mark the underlying scan as a distinct scan.
 	 */
+    @Override
 	void markForDistinctScan()
 	{
 		distinctScan = true;
@@ -4387,6 +4421,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination()
 	{
 		/* NOTE: IRTBR will use a different method to tell us that
@@ -4400,6 +4435,7 @@ public class FromBaseTable extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
 		throws StandardException
 	{
@@ -4616,7 +4652,7 @@ public class FromBaseTable extends FromTable
 			}
 		}
 
-		PredicateList restrictionList = (PredicateList) predList;
+        PredicateList restrictList = (PredicateList) predList;
 
 		if (! cd.isIndex())
 		{
@@ -4634,8 +4670,6 @@ public class FromBaseTable extends FromTable
 
 		int[] baseColumnPositions = irg.baseColumnPositions();
 
-		DataDictionary dd = getDataDictionary();
-
 		// Do we have an exact match on the full key
 		for (int index = 0; index < baseColumnPositions.length; index++)
 		{
@@ -4645,7 +4679,8 @@ public class FromBaseTable extends FromTable
 			/* Is there a pushable equality predicate on this key column?
 			 * (IS NULL is also acceptable)
 			 */
-			if (! restrictionList.hasOptimizableEqualityPredicate(this, curCol, true))
+            if (! restrictList.hasOptimizableEqualityPredicate(
+                        this, curCol, true))
 			{
 				return false;
 			}
@@ -4791,6 +4826,7 @@ public class FromBaseTable extends FromTable
 	 * set the Information gathered from the parent table that is 
      * required to perform a referential action on dependent table.
 	 */
+    @Override
     void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
@@ -4811,6 +4847,7 @@ public class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 	
 		throws StandardException

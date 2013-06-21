@@ -21,32 +21,26 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import java.sql.Types;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DateTimeDataValue;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a unary extract operator, used to extract
  * a field from a date/time. The field value is returned as an integer.
  *
  */
-public class ExtractOperatorNode extends UnaryOperatorNode {
+class ExtractOperatorNode extends UnaryOperatorNode {
 
-	static private final String fieldName[] = {
+static private final String fieldName[] = {
 		"YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND"
 	};
 	static private final String fieldMethod[] = {
@@ -55,18 +49,15 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 
 	private int extractField;
 
-	/**
-	 * Initializer for a ExtractOperatorNode
-	 *
-	 * @param field		The field to extract
-	 * @param operand	The operand
-	 */
-	public void init(Object field, Object operand) {
-		extractField = ((Integer) field).intValue();
-		super.init( operand,
-					"EXTRACT "+fieldName[extractField],
-					fieldMethod[extractField] );
-	}
+    ExtractOperatorNode(int field, ValueNode operand, ContextManager cm)
+            throws StandardException {
+        super(operand,
+                "EXTRACT " + fieldName[field],
+                fieldMethod[field],
+                cm);
+        setNodeType(C_NodeTypes.EXTRACT_OPERATOR_NODE);
+        this.extractField = field;
+    }
 
 	/**
 	 * Bind this operator
@@ -79,7 +70,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException 
@@ -102,9 +93,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 		{
             TypeCompiler tc = operand.getTypeCompiler();
 			int castType = (extractField < 3) ? Types.DATE : Types.TIME;
-			operand =  (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+            operand = new CastNode(
 					operand, 
 					DataTypeDescriptor.getBuiltInDataTypeDescriptor(castType, true, 
 										tc.getCastToCharWidth(
@@ -169,6 +158,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 		return this;
 	}
 
+    @Override
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{

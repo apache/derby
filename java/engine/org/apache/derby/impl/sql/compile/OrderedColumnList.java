@@ -22,9 +22,9 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.HashSet;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.impl.sql.execute.IndexColumnOrder;
-
 
 /**
  * List of OrderedColumns
@@ -32,10 +32,14 @@ import org.apache.derby.impl.sql.execute.IndexColumnOrder;
  */
 public abstract class OrderedColumnList extends QueryTreeNodeVector
 {
+    public OrderedColumnList(ContextManager cm) {
+        super(cm);
+    }
+
 	/**
 	 * Get an array of ColumnOrderings to pass to the store
 	 */
-	public IndexColumnOrder[] getColumnOrdering()
+    IndexColumnOrder[] getColumnOrdering()
 	{
 		IndexColumnOrder[] ordering;
 		int numCols = size();

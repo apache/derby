@@ -22,39 +22,41 @@
 package     org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.StatementType;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A SetRoleNode is the root of a QueryTree that represents a SET ROLE
  * statement.
  */
 
-public class SetRoleNode extends MiscellaneousStatementNode
+class SetRoleNode extends MiscellaneousStatementNode
 {
     private String      name;
     private int         type;
 
     /**
-     * Initializer for a SetRoleNode
      *
-     * @param roleName  The name of the new role, null if NONE specified
-     * @param type      Type of role name could be USER or dynamic parameter
-     *
+     * @param roleName The name of the new role, null if NONE specified
+     * @param type Type of role name could be USER or dynamic parameter
+     * @param cm Context manager
+     * @throws StandardException
      */
-    public void init(Object roleName, Object type)
-    {
-        this.name = (String) roleName;
-        if (type != null) {
-            this.type = ((Integer)type).intValue();
-        }
+    SetRoleNode(
+            String roleName,
+            int type,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        this.name = roleName;
+        this.type = type;
+        setNodeType(C_NodeTypes.SET_ROLE_NODE);
     }
 
     /**
@@ -63,7 +65,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
      *
      * @return  This object as a String
      */
-
+    @Override
     public String toString()
     {
         if (SanityManager.DEBUG) {
@@ -87,6 +89,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
      *
      * @exception StandardException         Thrown on failure
      */
+    @Override
     public ConstantAction   makeConstantAction() throws StandardException
     {
         return getGenericConstantActionFactory().
@@ -100,7 +103,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
      *
      * @exception StandardException         Thrown on error
      */
-
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
             throws StandardException
     {
@@ -132,7 +135,8 @@ public class SetRoleNode extends MiscellaneousStatementNode
     private void generateParameterValueSet(ActivationClassBuilder acb)
         throws StandardException
     {
-        List parameterList = getCompilerContext().getParameterList();
+        List<ParameterNode>
+            parameterList = getCompilerContext().getParameterList();
         // parameter list size should be 1
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(parameterList != null &&
@@ -149,6 +153,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
      *          NEED_NOTHING_ACTIVATION depending on params
      *
      */
+    @Override
     int activationKind()
     {
         /*
@@ -169,6 +174,7 @@ public class SetRoleNode extends MiscellaneousStatementNode
 	 *
 	 * @return false
 	 */
+    @Override
 	public boolean isAtomic()
 	{
 		return false;

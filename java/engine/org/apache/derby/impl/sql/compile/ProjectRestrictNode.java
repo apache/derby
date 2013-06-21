@@ -21,52 +21,29 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.AccessPath;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.util.Properties;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A ProjectRestrictNode represents a result set for any of the basic DML
@@ -79,12 +56,12 @@ import java.util.Set;
  *
  */
 
-public class ProjectRestrictNode extends SingleChildResultSetNode
+class ProjectRestrictNode extends SingleChildResultSetNode
 {
 	/**
 	 * The ValueNode for the restriction to be evaluated here.
 	 */
-	public ValueNode	restriction;
+    ValueNode   restriction;
 
 	/**
 	 * Constant expressions to be evaluated here.
@@ -94,7 +71,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * Restriction as a PredicateList
 	 */
-	public PredicateList restrictionList;
+    PredicateList restrictionList;
 
 	/**
 	 * List of subqueries in projection
@@ -108,19 +85,13 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 
 	private boolean accessPathModified;
 
-	private boolean accessPathConsidered;
-
-	private boolean childResultOptimized;
-
-	private boolean materialize;
-
 	/* Should we get the table number from this node,
 	 * regardless of the class of our child.
 	 */
 	private boolean getTableNumberHere;
 
 	/**
-	 * Initializer for a ProjectRestrictNode.
+     * Constructor for a ProjectRestrictNode.
 	 *
 	 * @param childResult	The child ResultSetNode
 	 * @param projection	The result column list for the projection
@@ -130,23 +101,25 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @param projectSubquerys List of subqueries in the projection
 	 * @param restrictSubquerys List of subqueries in the restriction
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 */
 
-	public void init(
-							Object childResult,
-			 				Object projection,
-							Object restriction,
-							Object restrictionList,
-							Object projectSubquerys,
-							Object restrictSubquerys,
-							Object tableProperties)
+    ProjectRestrictNode(ResultSetNode    childResult,
+                        ResultColumnList projection,
+                        ValueNode        restriction,
+                        PredicateList    restrictionList,
+                        SubqueryList     projectSubquerys,
+                        SubqueryList     restrictSubquerys,
+                        Properties       tableProperties,
+                        ContextManager   cm)
 	{
-		super.init(childResult, tableProperties);
-		resultColumns = (ResultColumnList) projection;
-		this.restriction = (ValueNode) restriction;
-		this.restrictionList = (PredicateList) restrictionList;
-		this.projectSubquerys = (SubqueryList) projectSubquerys;
-		this.restrictSubquerys = (SubqueryList) restrictSubquerys;
+        super(childResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.PROJECT_RESTRICT_NODE);
+        resultColumns = projection;
+        this.restriction = restriction;
+        this.restrictionList = restrictionList;
+        this.projectSubquerys = projectSubquerys;
+        this.restrictSubquerys = restrictSubquerys;
 
 		/* A PRN will only hold the tableProperties for
 		 * a result set tree if its child is not an
@@ -169,6 +142,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		@see Optimizable#nextAccessPath
 		@exception StandardException	Thrown on error
 	 */
+    @Override
 	public boolean nextAccessPath(Optimizer optimizer,
 									OptimizablePredicateList predList,
 									RowOrdering rowOrdering)
@@ -198,6 +172,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/** @see Optimizable#rememberAsBest 
 		@exception StandardException	Thrown on error
 	 */
+    @Override
 	public void rememberAsBest(int planType, Optimizer optimizer)
 		throws StandardException
 	{
@@ -206,14 +181,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			((Optimizable) childResult).rememberAsBest(planType, optimizer);
 	}
 
-	/* Don't print anything for a PRN, as their
-	 * child has the interesting info.
-	 */
-	void printRememberingBestAccessPath(int planType, AccessPath bestPath)
-	{
-	}
-
 	/** @see Optimizable#startOptimizing */
+    @Override
 	public void startOptimizing(Optimizer optimizer, RowOrdering rowOrdering)
 	{
 		if (childResult instanceof Optimizable)
@@ -222,13 +191,12 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		}
 		else
 		{
-			accessPathConsidered = false;
-
 			super.startOptimizing(optimizer, rowOrdering);
 		}
 	}
 
 	/** @see Optimizable#getTableNumber */
+    @Override
 	public int getTableNumber()
 	{
 		/* GROSS HACK - We need to get the tableNumber after
@@ -255,6 +223,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(
 							Optimizer optimizer,
 							OptimizablePredicateList predList,
@@ -411,6 +380,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean feasibleJoinStrategy(OptimizablePredicateList predList,
 										Optimizer optimizer)
 					throws StandardException
@@ -450,6 +420,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#getCurrentAccessPath */
+    @Override
 	public AccessPath getCurrentAccessPath()
 	{
 		if (childResult instanceof Optimizable)
@@ -459,6 +430,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#getBestAccessPath */
+    @Override
 	public AccessPath getBestAccessPath()
 	{
 		if (childResult instanceof Optimizable)
@@ -468,6 +440,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#getBestSortAvoidancePath */
+    @Override
 	public AccessPath getBestSortAvoidancePath()
 	{
 		if (childResult instanceof Optimizable)
@@ -477,6 +450,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#getTrulyTheBestAccessPath */
+    @Override
 	public AccessPath getTrulyTheBestAccessPath()
 	{
 		/* The childResult will always be an Optimizable
@@ -499,6 +473,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#rememberSortAvoidancePath */
+    @Override
 	public void rememberSortAvoidancePath()
 	{
 		if (childResult instanceof Optimizable)
@@ -508,6 +483,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	}
 
 	/** @see Optimizable#considerSortAvoidancePath */
+    @Override
 	public boolean considerSortAvoidancePath()
 	{
 		if (childResult instanceof Optimizable)
@@ -522,6 +498,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 			throws StandardException
 	{
@@ -537,9 +514,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Add the matching predicate to the restrictionList */
 		if (restrictionList == null)
 		{
-			restrictionList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+            restrictionList = new PredicateList(getContextManager());
 		}
 		restrictionList.addPredicate((Predicate) optimizablePredicate);
 
@@ -566,6 +541,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void pullOptPredicates(
 								OptimizablePredicateList optimizablePredicates)
 					throws StandardException
@@ -599,6 +575,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) 
 		throws StandardException
 	{
@@ -826,17 +803,11 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 * requalification list.
 		 */
 		PredicateList searchRestrictionList =
-								(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+                new PredicateList(getContextManager());
 		PredicateList joinQualifierList =
-								(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+                new PredicateList(getContextManager());
 		PredicateList requalificationRestrictionList =
-								(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+                new PredicateList(getContextManager());
 		trulyTheBestAccessPath.getJoinStrategy().divideUpPredicateLists(
 											this,
 											restrictionList,
@@ -848,9 +819,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		/* Break out the non-qualifiers from HTN's join qualifier list and make that
 		 * the new restriction list for this PRN.
 		 */
-		restrictionList = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
+        restrictionList = new PredicateList(getContextManager());
         /* For non-base table, we remove first 2 lists from requal list to avoid adding duplicates.
          */
 		for (int i = 0; i < searchRestrictionList.size(); i++)
@@ -887,25 +856,24 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		searchRestrictionList.accept(rcrv);
 
 		/* We can finally put the HTN between ourself and our old child. */
-		childResult = (ResultSetNode) getNodeFactory().getNode(
-											C_NodeTypes.HASH_TABLE_NODE,
-											childResult,
-											tableProperties, 
-											htRCList,
-											searchRestrictionList, 
-											joinQualifierList,
-											trulyTheBestAccessPath, 
-											getCostEstimate(),
-											projectSubquerys,
-											restrictSubquerys,
-											hashKeyColumns(),
-											getContextManager());
+        childResult = new HashTableNode(childResult,
+                                        tableProperties,
+                                        htRCList,
+                                        searchRestrictionList,
+                                        joinQualifierList,
+                                        trulyTheBestAccessPath,
+                                        getCostEstimate(),
+                                        projectSubquerys,
+                                        restrictSubquerys,
+                                        hashKeyColumns(),
+                                        getContextManager());
 		return this;
 	}
 
 	/** @see Optimizable#verifyProperties 
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void verifyProperties(DataDictionary dDictionary)
 		throws StandardException
 	{
@@ -927,6 +895,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * @see Optimizable#legalJoinOrder
 	 */
+    @Override
 	public boolean legalJoinOrder(JBitSet assignedTableMap)
 	{
 		if (childResult instanceof Optimizable)
@@ -944,6 +913,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public double uniqueJoin(OptimizablePredicateList predList)
 					throws StandardException
 	{
@@ -972,6 +942,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @return The user specified join strategy, if any for this table.
 	 */
+    @Override
 	String getUserSpecifiedJoinStrategy()
 	{
 		if (childResult instanceof FromTable)
@@ -990,8 +961,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1047,8 +1018,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList) 
 								throws StandardException
@@ -1072,11 +1043,10 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void pushExpressions(PredicateList predicateList)
+    @Override
+    void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
-		PredicateList	pushPList = null;
-
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(predicateList != null,
 							 "predicateList is expected to be non-null");
@@ -1092,7 +1062,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		}
 
 		/* Build a list of the single table predicates that we can push down */
-		pushPList = predicateList.getPushablePredicates(referencedTableMap);
+        PredicateList pushPList =
+                predicateList.getPushablePredicates(referencedTableMap);
 
 		/* If this is a PRN above a SelectNode, probably due to a 
 		 * view or derived table which couldn't be flattened, then see
@@ -1163,14 +1134,13 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode addNewPredicate(Predicate predicate)
+    @Override
+    ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
 		if (restrictionList == null)
 		{
-			restrictionList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+            restrictionList = new PredicateList(getContextManager());
 		}
 		restrictionList.addPredicate(predicate);
 		return this;
@@ -1188,7 +1158,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		/* Flattening currently involves merging predicates and FromLists.
 		 * We don't have a FromList, so we can't flatten for now.
@@ -1205,7 +1176,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    @Override
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		return this;
@@ -1223,8 +1195,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
 					throws StandardException
@@ -1236,19 +1208,18 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 											restrictionList,
 											outerRows);
 
-		Optimizer optimizer = getOptimizer(
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									this,
-									getContextManager()),
-								predicates,
-								dataDictionary,
-								(RequiredRowOrdering) null);
+        Optimizer opt = getOptimizer(
+            new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                this,
+                getContextManager()),
+            predicates,
+            dataDictionary,
+            (RequiredRowOrdering) null);
 
 		// RESOLVE: SHOULD FACTOR IN THE NON-OPTIMIZABLE PREDICATES THAT
 		// WERE NOT PUSHED DOWN
-		costEstimate = optimizer.newCostEstimate();
+        costEstimate = opt.newCostEstimate();
 
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
@@ -1263,7 +1234,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @return	The CostEstimate for this ProjectRestrictNode, which is
 	 * 			the cost estimate for the child node.
 	 */
-	public CostEstimate getCostEstimate()
+    @Override
+    CostEstimate getCostEstimate()
 	{
 		/*
 		** The cost estimate will be set here if either optimize() or
@@ -1285,7 +1257,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @return	The final CostEstimate for this ProjectRestrictNode, which is
 	 * 			the final cost estimate for the child node.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		if (finalCostEstimate != null)
@@ -1316,6 +1289,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -1345,7 +1319,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -1649,7 +1623,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void generateNOPProjectRestrict()
+    void generateNOPProjectRestrict()
 			throws StandardException
 	{
 		this.getResultColumns().setRedundant();
@@ -1663,7 +1637,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode considerMaterialization(JBitSet outerTables)
+    @Override
+    ResultSetNode considerMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
 		childResult = childResult.considerMaterialization(outerTables);
@@ -1708,8 +1683,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 				prRCList.genVirtualColumnNodes(this, resultColumns);
 
 				/* Finally, we create the new MaterializeResultSetNode */
-				mrsn = (MaterializeResultSetNode) getNodeFactory().getNode(
-									C_NodeTypes.MATERIALIZE_RESULT_SET_NODE,
+                mrsn = new MaterializeResultSetNode(
 									this,
 									prRCList,
 									tableProperties,
@@ -1739,9 +1713,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 				 * they get applied while building the MaterializeResultSet.
 				 */
 
-				/* Finally, we create the new MaterializeResultSetNode */
-				mrsn = (MaterializeResultSetNode) getNodeFactory().getNode(
-									C_NodeTypes.MATERIALIZE_RESULT_SET_NODE,
+                mrsn = new MaterializeResultSetNode(
 									childResult,
 									prRCList,
 									tableProperties,
@@ -1771,6 +1743,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -1784,7 +1757,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		if (restriction != null || constantRestriction != null)
 		{
@@ -1803,7 +1777,8 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * @param distinctColumns the set of distinct columns
 	 * @return Whether or not it is possible to do a distinct scan on this ResultSet tree.
 	 */
-	boolean isPossibleDistinctScan(Set distinctColumns)
+    @Override
+    boolean isPossibleDistinctScan(Set<BaseColumnNode> distinctColumns)
 	{
 		if (restriction != null || 
 			(restrictionList != null && restrictionList.size() != 0))
@@ -1825,6 +1800,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	/**
 	 * Mark the underlying scan as a distinct scan.
 	 */
+    @Override
 	void markForDistinctScan()
 	{
 		childResult.markForDistinctScan();
@@ -1838,6 +1814,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -1860,6 +1837,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 * set the Information gathered from the parent table that is 
      * required to perform a referential action on dependent table.
 	 */
+    @Override
     void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
@@ -1871,7 +1849,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 								   dependentScan);
 	}
 
-	public void setRestriction(ValueNode restriction) {
+    void setRestriction(ValueNode restriction) {
 		this.restriction = restriction;
 	}
 
@@ -1882,6 +1860,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @param orderByList	The order by list
 	 */
+    @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
 		childResult.pushOrderByList(orderByList);
@@ -1895,6 +1874,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
      * @param fetchFirst the OFFSET FIRST, if any
      * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
+    @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         childResult.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );

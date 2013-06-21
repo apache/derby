@@ -21,26 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.reference.ClassName;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.lang.reflect.Modifier;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A NotNode represents a NOT operator. Preprocessing will eliminate the 
@@ -51,18 +39,18 @@ import java.lang.reflect.Modifier;
 
 public final class NotNode extends UnaryLogicalOperatorNode
 {
-	/**
-	 * Initializer for a NotNode
-	 *
-	 * @param operand	The operand of the NOT
-	 */
+    /**
+     * @param operand The operand of the NOT
+     * @param cm context manager
+     * @throws StandardException
+     */
+    NotNode(ValueNode operand, ContextManager cm)
+            throws StandardException {
+        super(operand, "not", cm);
+        setNodeType(C_NodeTypes.NOT_NODE);
+    }
 
-	public void init(Object operand)
-	{
-		super.init(operand, "not");
-	}
-
-	/**
+    /**
 	 * Eliminate NotNodes in the current query block.  We traverse the tree, 
 	 * inverting ANDs and ORs and eliminating NOTs as we go.  We stop at 
 	 * ComparisonOperators and boolean expressions.  We invert 
@@ -76,6 +64,7 @@ public final class NotNode extends UnaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -90,7 +79,7 @@ public final class NotNode extends UnaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{

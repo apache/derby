@@ -21,40 +21,44 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.sql.execute.PrivilegeInfo;
-import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.derby.impl.sql.execute.PrivilegeInfo;
+import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 
 /**
  * This class represents a set of privileges on one table.
  */
-public class TablePrivilegesNode extends QueryTreeNode
+class TablePrivilegesNode extends QueryTreeNode
 {
 	private boolean[] actionAllowed = new boolean[ TablePrivilegeInfo.ACTION_COUNT];
 	private ResultColumnList[] columnLists = new ResultColumnList[ TablePrivilegeInfo.ACTION_COUNT];
 	private FormatableBitSet[] columnBitSets = new FormatableBitSet[ TablePrivilegeInfo.ACTION_COUNT];
 	private TableDescriptor td;  
 	private List<Provider> descriptorList; 
-	
+
+    TablePrivilegesNode(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.TABLE_PRIVILEGES_NODE);
+    }
+
 	/**
 	 * Add all actions
 	 */
-	public void addAll()
+    void addAll()
 	{
 		for( int i = 0; i < TablePrivilegeInfo.ACTION_COUNT; i++)
 		{
@@ -71,7 +75,7 @@ public class TablePrivilegesNode extends QueryTreeNode
 	 *
 	 * @exception StandardException standard error policy.
 	 */
-	public void addAction( int action, ResultColumnList privilegeColumnList)
+    void addAction( int action, ResultColumnList privilegeColumnList)
 	{
 		actionAllowed[ action] = true;
 		if( privilegeColumnList == null)
@@ -88,7 +92,7 @@ public class TablePrivilegesNode extends QueryTreeNode
 	 * @param td The table descriptor
 	 * @param isGrant grant if true; revoke if false
 	 */
-	public void bind( TableDescriptor td, boolean isGrant) throws StandardException
+    void bind( TableDescriptor td, boolean isGrant) throws StandardException
 	{
 		this.td = td;
 			

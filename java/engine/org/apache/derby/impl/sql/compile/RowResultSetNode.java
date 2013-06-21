@@ -23,41 +23,35 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
+import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 
 /**
  * A RowResultSetNode represents the result set for a VALUES clause.
  *
  */
 
-public class RowResultSetNode extends FromTable
+class RowResultSetNode extends FromTable
 {
 	SubqueryList subquerys;
     private List<AggregateNode> aggregates;
@@ -67,17 +61,22 @@ public class RowResultSetNode extends FromTable
     boolean   hasJDBClimitClause; //  were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
 
 	/**
-	 * Initializer for a RowResultSetNode.
+     * Constructor for a RowResultSetNode.
 	 *
 	 * @param valuesClause	The result column list for the VALUES clause.
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 */
-	public void init(Object valuesClause, Object tableProperties)
-	{
-		super.init(null, tableProperties);
-		resultColumns = (ResultColumnList) valuesClause;
-		if (resultColumns != null)
+    RowResultSetNode(ResultColumnList valuesClause,
+                     Properties tableProperties,
+                     ContextManager cm) {
+        super(null /* correlationName */, tableProperties, cm);
+        setNodeType(C_NodeTypes.ROW_RESULT_SET_NODE);
+        resultColumns = valuesClause;
+
+        if (resultColumns != null) {
 			resultColumns.markInitialSize();
+        }
 	}
 
 	/**
@@ -86,7 +85,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -101,7 +100,7 @@ public class RowResultSetNode extends FromTable
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "VALUES";
 	}
@@ -112,8 +111,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -146,6 +145,7 @@ public class RowResultSetNode extends FromTable
 	/**
 	 * Modify the RCL of this node to match the target of the insert.
 	 */
+    @Override
 	ResultSetNode enhanceRCLForInsert(
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
@@ -165,6 +165,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate estimateCost(OptimizablePredicateList predList,
 										ConglomerateDescriptor cd,
 										CostEstimate outerCost,
@@ -201,8 +202,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 							FromList fromListParam) 
 					throws StandardException
 	{
@@ -221,15 +222,13 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		int nestingLevel;
 
-		subquerys = (SubqueryList) getNodeFactory().getNode(
-										C_NodeTypes.SUBQUERY_LIST,
-										getContextManager());
+        subquerys = new SubqueryList(getContextManager());
 
         aggregates = new ArrayList<AggregateNode>();
 
@@ -288,11 +287,11 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressionsWithTables(FromList fromListParam)
+    @Override
+    void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
 		/* We don't have any tables, so just return */
-		return;
 	}
 
 	/**
@@ -304,8 +303,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindTargetExpressions(FromList fromListParam)
+    @Override
+    void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		bindExpressions(fromListParam);
@@ -318,7 +317,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
+    @Override
+    void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
 		/*
@@ -349,8 +349,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultColumn getMatchingColumn(
+    @Override
+    ResultColumn getMatchingColumn(
 						ColumnReference columnReference)
 						throws StandardException
 	{
@@ -365,7 +365,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public String getExposedName() throws StandardException
+    @Override
+    String getExposedName() throws StandardException
 	{
 		return null;
 	}
@@ -378,10 +379,10 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
+    @Override
+    void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
-		return; 
 	}
 
 	/**
@@ -392,6 +393,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @param orderByList	The order by list
 	 */
+    @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
 		this.orderByList = orderByList;
@@ -404,6 +406,7 @@ public class RowResultSetNode extends FromTable
      * @param fetchFirst the OFFSET FIRST, if any
      * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
+    @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         this.offset = offset;
@@ -436,8 +439,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -446,17 +449,12 @@ public class RowResultSetNode extends FromTable
 		if (subquerys.size() > 0)
 		{
 			subquerys.preprocess(
-								numTables,
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-								(SubqueryList) getNodeFactory().getNode(
-													C_NodeTypes.SUBQUERY_LIST,
-													getContextManager()),
-								(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager()));
+                numTables,
+                new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager()),
+                new SubqueryList(getContextManager()),
+                new PredicateList(getContextManager()));
 		}
 
 		/* Allocate a dummy referenced table map */ 
@@ -483,7 +481,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    @Override
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		return genProjectRestrict(numTables);
@@ -500,7 +499,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode addNewPredicate(Predicate predicate)
+    @Override
+    ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
 		PredicateList		predList;
@@ -525,14 +525,10 @@ public class RowResultSetNode extends FromTable
 		prRCList.genVirtualColumnNodes(this, resultColumns);
 
 		/* Put the new predicate in a list */
-		predList = (PredicateList) getNodeFactory().getNode(
-										C_NodeTypes.PREDICATE_LIST,
-										getContextManager());
+        predList = new PredicateList(getContextManager());
 		predList.addPredicate(predicate);
 
-		/* Finally, we create the new ProjectRestrictNode */
-		return (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
+        return new ProjectRestrictNode(
 								this,
 								prRCList,
 								null,	/* Restriction */
@@ -558,7 +554,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		if ((subquerys != null) &&
 			(subquerys.size() > 0))
@@ -617,7 +614,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList	predicateList,
 								  double outerRows) 
 			throws StandardException
@@ -627,16 +625,14 @@ public class RowResultSetNode extends FromTable
 		** CostEstimate object, so we can represent the cost of this node.
 		** This seems like overkill, but it's just an object allocation...
 		*/
-		Optimizer optimizer =
-					getOptimizer(
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-								predicateList,
-								dataDictionary,
-								(RequiredRowOrdering) null);
-		costEstimate = optimizer.newCostEstimate();
+        Optimizer opt = getOptimizer(
+                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                             getContextManager()),
+                predicateList,
+                dataDictionary,
+                (RequiredRowOrdering) null);
+
+        costEstimate = opt.newCostEstimate();
 
 		// RESOLVE: THE COST SHOULD TAKE SUBQUERIES INTO ACCOUNT
 		costEstimate.setCost(0.0d, outerRows, outerRows);
@@ -650,6 +646,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) throws StandardException
 	{
 		/* For most types of Optimizable, do nothing */
@@ -661,7 +658,8 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode treeTop = this;
 
@@ -672,12 +670,10 @@ public class RowResultSetNode extends FromTable
 		 */
 		if (orderByList != null)
 		{
-			treeTop = (ResultSetNode) getNodeFactory().getNode(
-											C_NodeTypes.ORDER_BY_NODE,
-											treeTop,
-											orderByList,
-											tableProperties,
-											getContextManager());
+            treeTop = new OrderByNode(treeTop,
+                                      orderByList,
+                                      tableProperties,
+                                      getContextManager());
 		}
 
         if (offset != null || fetchFirst != null) {
@@ -685,13 +681,12 @@ public class RowResultSetNode extends FromTable
                 treeTop.getResultColumns().copyListAndObjects();
             newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
 
-            treeTop = (ResultSetNode)getNodeFactory().getNode(
-                C_NodeTypes.ROW_COUNT_NODE,
+            treeTop = new RowCountNode(
                 treeTop,
                 newRcl,
                 offset,
                 fetchFirst,
-                Boolean.valueOf( hasJDBClimitClause ),
+                hasJDBClimitClause,
                 getContextManager());
         }
 
@@ -706,6 +701,7 @@ public class RowResultSetNode extends FromTable
 	 * @return Whether or not this ResultSet tree is guaranteed to return
 	 * at most 1 row based on heuristics.
 	 */
+    @Override
 	boolean returnsAtMostOneRow()
 	{
 		return true;
@@ -719,6 +715,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	void setTableConstructorTypes(ResultColumnList typeColumns)
 			throws StandardException
 	{
@@ -869,6 +866,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -921,6 +919,7 @@ public class RowResultSetNode extends FromTable
 	/**
      * {@inheritDoc}
 	 */
+    @Override
 	void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -936,6 +935,7 @@ public class RowResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	void optimizeSubqueries(DataDictionary dd, double rowCount)
 		throws StandardException
 	{
@@ -945,6 +945,7 @@ public class RowResultSetNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination()
 	{
 	}

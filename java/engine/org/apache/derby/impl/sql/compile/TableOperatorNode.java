@@ -21,22 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
 import org.apache.derby.iapi.util.JBitSet;
 
 /**
@@ -59,24 +56,26 @@ abstract class TableOperatorNode extends FromTable
 	private boolean 	leftModifyAccessPathsDone;
 	private boolean 	rightModifyAccessPathsDone;
 
-	/**
-	 * Initializer for a TableOperatorNode.
+    /**
+     * Constructor for a TableOperatorNode.
 	 *
 	 * @param leftResultSet		The ResultSetNode on the left side of this node
 	 * @param rightResultSet	The ResultSetNode on the right side of this node
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(Object leftResultSet,
-							 Object rightResultSet,
-							 Object tableProperties)
+    TableOperatorNode(ResultSetNode  leftResultSet,
+                      ResultSetNode  rightResultSet,
+                      Properties     tableProperties,
+                      ContextManager cm)
 				throws StandardException
 	{
 		/* correlationName is always null */
-		init(null, tableProperties);
-		this.leftResultSet = (ResultSetNode) leftResultSet;
-		this.rightResultSet = (ResultSetNode) rightResultSet;
+        super(null, tableProperties, cm);
+        this.leftResultSet = leftResultSet;
+        this.rightResultSet = rightResultSet;
 	}
 
 	/**
@@ -89,7 +88,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList rcl)
+    @Override
+    void bindUntypedNullsToResultColumns(ResultColumnList rcl)
 	throws StandardException
 	{
 		leftResultSet.bindUntypedNullsToResultColumns(rcl);
@@ -101,6 +101,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) throws StandardException
 	{
 		boolean callModifyAccessPaths = false;
@@ -177,6 +178,7 @@ abstract class TableOperatorNode extends FromTable
 	/** @see Optimizable#verifyProperties 
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void verifyProperties(DataDictionary dDictionary)
 		throws StandardException
 	{
@@ -200,6 +202,7 @@ abstract class TableOperatorNode extends FromTable
 	 * left and right child, in order to ensure that we've handled
 	 * the full plan all the way down this node's subtree. 
 	 */
+    @Override
 	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException
 	{
@@ -240,7 +243,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -260,8 +263,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -286,7 +289,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return ResultSetNode	The leftResultSet from this node.
 	 */
-	public ResultSetNode getLeftResultSet()
+    ResultSetNode getLeftResultSet()
 	{
 		return leftResultSet;
 	}
@@ -296,12 +299,12 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return ResultSetNode	The rightResultSet from this node.
 	 */
-	public ResultSetNode getRightResultSet()
+    ResultSetNode getRightResultSet()
 	{
 		return rightResultSet;
 	}
 
-	public ResultSetNode getLeftmostResultSet()
+    ResultSetNode getLeftmostResultSet()
 	{
 		if (leftResultSet instanceof TableOperatorNode)
 		{
@@ -313,7 +316,7 @@ abstract class TableOperatorNode extends FromTable
 		}
 	}
 
-	public void setLeftmostResultSet(ResultSetNode newLeftResultSet)
+    void setLeftmostResultSet(ResultSetNode newLeftResultSet)
 	{
 		if (leftResultSet instanceof TableOperatorNode)
 		{
@@ -330,7 +333,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @param level		The query block level for this FromTable.
 	 */
-	public void setLevel(int level)
+    @Override
+    void setLevel(int level)
 	{
 		super.setLevel(level);
 		if (leftResultSet instanceof FromTable)
@@ -349,8 +353,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @return	The exposed name for this table.
 	 */
-
-	public String getExposedName()
+    @Override
+    String getExposedName()
 	{
 		return null;
 	}
@@ -365,7 +369,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @param nestedInParens	Whether or not this node is nested in parens.
 	 */
-	public void setNestedInParens(boolean nestedInParens)
+    void setNestedInParens(boolean nestedInParens)
 	{
 	}
 
@@ -384,8 +388,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						  FromList fromListParam) 
 							throws StandardException
 	{
@@ -411,8 +415,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindVTITables(FromList fromListParam) 
+    @Override
+    ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
 		leftResultSet = leftResultSet.bindVTITables(fromListParam);
@@ -428,8 +432,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 				throws StandardException
 	{
 		/*
@@ -455,8 +459,8 @@ abstract class TableOperatorNode extends FromTable
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
-
-	public void rejectParameters() throws StandardException
+    @Override
+    void rejectParameters() throws StandardException
 	{
 		leftResultSet.rejectParameters();
 		rightResultSet.rejectParameters();
@@ -471,7 +475,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressionsWithTables(FromList fromListParam)
+    @Override
+    void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
 		/*
@@ -499,7 +504,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumns(FromList fromListParam)
+    @Override
+    void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
 		leftResultSet.bindResultColumns(fromListParam);
@@ -532,7 +538,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void bindResultColumns(TableDescriptor targetTableDescriptor,
             FromVTI targetVTI, ResultColumnList targetColumnList,
             DMLStatementNode statement, FromList fromListParam)
@@ -561,6 +567,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -600,8 +607,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -627,7 +634,7 @@ abstract class TableOperatorNode extends FromTable
 
 		/* Build the referenced table map (left || right) */
 		referencedTableMap = (JBitSet) leftResultSet.getReferencedTableMap().clone();
-		referencedTableMap.or((JBitSet) rightResultSet.getReferencedTableMap());
+        referencedTableMap.or(rightResultSet.getReferencedTableMap());
 		referencedTableMap.set(tableNumber);
 
 		/* Only generate a PRN if this node is not a flattenable join node. */
@@ -652,6 +659,7 @@ abstract class TableOperatorNode extends FromTable
      * Find the unreferenced result columns and project them out. This is used in pre-processing joins
      * that are not flattened into the where clause.
      */
+    @Override
     void projectResultColumns() throws StandardException
     {
         resultColumns.doProjection();
@@ -673,24 +681,22 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicateList,
 								  double outerRows)
 				throws StandardException
 	{
 		/* Get an optimizer, so we can get a cost structure */
-		Optimizer optimizer =
-							getOptimizer(
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									this,
-									getContextManager()),
-									predicateList,
-									dataDictionary,
-									(RequiredRowOrdering) null);
+        Optimizer opt = getOptimizer(
+                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                             this,
+                             getContextManager()),
+                predicateList,
+                dataDictionary,
+                (RequiredRowOrdering) null);
 
-		costEstimate = optimizer.newCostEstimate();
+        costEstimate = opt.newCostEstimate();
 
 		/* RESOLVE: This is just a stub for now */
 		leftResultSet = leftResultSet.optimize(
@@ -718,7 +724,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		/* Beetle 4454 - union all with another union all would modify access
 		 * paths twice causing NullPointerException, make sure we don't
@@ -801,7 +808,8 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    @Override
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		return leftResultSet.referencesTarget(name, baseTable) ||
@@ -815,6 +823,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -838,17 +847,14 @@ abstract class TableOperatorNode extends FromTable
 
 		if (sourceResultSet instanceof FromTable)
 		{
-			FromList optList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									sourceResultSet,
-									getContextManager());
+            FromList optList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    (FromTable)sourceResultSet,
+                    getContextManager());
 
 			/* If there is no predicate list, create an empty one */
 			if (predList == null)
-				predList = (PredicateList) getNodeFactory().getNode(
-												C_NodeTypes.PREDICATE_LIST,
-												getContextManager());
+                predList = new PredicateList(getContextManager());
 
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
 			OptimizerFactory optimizerFactory = lcc.getOptimizerFactory();
@@ -909,6 +915,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @param decrement	The amount to decrement by.
 	 */
+    @Override
 	void decrementLevel(int decrement)
 	{
 		leftResultSet.decrementLevel(decrement);
@@ -918,6 +925,7 @@ abstract class TableOperatorNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination()
 	{
 		leftResultSet.adjustForSortElimination();
@@ -927,6 +935,7 @@ abstract class TableOperatorNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
 		throws StandardException
 	{
@@ -941,6 +950,7 @@ abstract class TableOperatorNode extends FromTable
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -959,7 +969,8 @@ abstract class TableOperatorNode extends FromTable
 	/** 
 	 * apparently something special needs to be done for me....
 	 */
-	public boolean needsSpecialRCLBinding()
+    @Override
+    boolean needsSpecialRCLBinding()
 	{
 		return true;
 	}

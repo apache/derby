@@ -20,36 +20,39 @@
  */
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
 import java.sql.Types;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 
 /**
  * A class that represents a value obtained from a Sequence using 'NEXT VALUE'
  */
-public class NextSequenceNode extends ValueNode {
+class NextSequenceNode extends ValueNode {
 
     private TableName sequenceName;
     private SequenceDescriptor sequenceDescriptor;
 
     /**
-     * Initializer for a NextSequenceNode
+     * Constructor for a NextSequenceNode
      *
      * @param sequenceName The name of the sequence being called
-     * @throws org.apache.derby.iapi.error.StandardException
-     *          Thrown on error
+     * @param cm           The context manager
      */
-    public void init(Object sequenceName) throws StandardException {
-        this.sequenceName = (TableName) sequenceName;
+    NextSequenceNode(TableName sequenceName,
+                     ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.NEXT_SEQUENCE_NODE);
+        this.sequenceName = sequenceName;
     }
 
     /**
@@ -63,9 +66,11 @@ public class NextSequenceNode extends ValueNode {
      * @return The new top of the expression tree.
      * @throws StandardException Thrown on error
      */
-    ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates, boolean forQueryRewrite)
-            throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates,
+                             boolean forQueryRewrite) throws StandardException
     {
         //
         // Higher level bind() logic may try to redundantly re-bind this node. Unfortunately,
@@ -120,6 +125,7 @@ public class NextSequenceNode extends ValueNode {
     }
 
 
+    @Override
     void generateExpression
         (
          ExpressionClassBuilder acb, MethodBuilder mb)
@@ -172,7 +178,7 @@ public class NextSequenceNode extends ValueNode {
      *
      * @return This object as a String
      */
-
+    @Override
     public String toString() {
         if (SanityManager.DEBUG) {
             return super.toString();

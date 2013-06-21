@@ -22,11 +22,10 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
@@ -63,8 +62,8 @@ import org.apache.derby.iapi.util.StringUtil;
  *
  */
 
-public class ResultColumn extends ValueNode 
-				implements ResultColumnDescriptor, Comparable
+class ResultColumn extends ValueNode
+                implements ResultColumnDescriptor, Comparable<ResultColumn>
 {
 	/* name and exposedName should point to the same string, unless there is a
 	 * derived column list, in which case name will point to the underlying name
@@ -124,101 +123,101 @@ public class ResultColumn extends ValueNode
 	/* virtualColumnId is the ResultColumn's position (1-based) within the ResultSet */
 	private int		virtualColumnId;
 
-	/**
-	 * Different types of initializer parameters indicate different
-	 * types of initialization. Parameters may be:
-	 *
-	 * <ul>
-	 * <li>arg1	The name of the column, if any.</li>
-	 * <li>arg2	The expression this result column represents</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * - OR -
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>arg1	a column reference node</li>
-	 * <li>arg2	The expression this result column represents</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * - OR -
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>arg1	The column descriptor.</li>
-	 * <li>arg2	The expression this result column represents</li>
-	 * </ul>
-	 *
-	 * <p>
-	 * - OR -
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>dtd			The type of the column</li>
-	 * <li>expression	The expression this result column represents</li>
-	 * </ul>
-	 */
-	public void init(Object arg1, Object arg2) throws StandardException
-	{
-		// RESOLVE: This is something of a hack - it is not obvious that
-		// the first argument being null means it should be treated as
-		// a String.
-		if ((arg1 instanceof String) || (arg1 == null))
-		{
-			this.name = (String) arg1;
-			this.exposedName = this.name;
-			setExpression( (ValueNode) arg2 );
-		}
-		else if (arg1 instanceof ColumnReference)
-		{
-			ColumnReference ref = (ColumnReference) arg1;
+    ResultColumn(ContextManager cm) {
+        super(cm);
+    }
 
-			this.name = ref.getColumnName();
-			this.exposedName = ref.getColumnName();
-			/*
-				when we bind, we'll want to make sure
-				the reference has the right table name.
-		 	*/
-			this.reference = ref; 
-			setExpression( (ValueNode) arg2 );
-		}
-		else if (arg1 instanceof ColumnDescriptor)
-		{
-			ColumnDescriptor coldes = (ColumnDescriptor) arg1;
+    /**
+     * @param name The name of the column, if any.
+     * @param expression The expression this result column represents
+     * @param cm context manager
+     */
+    ResultColumn(
+            String name,
+            ValueNode expression,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        setTypeExpressionAndDefault(expression);
+        this.name = name;
+        this.exposedName = this.name;
+    }
 
-			this.name = coldes.getColumnName();
-			this.exposedName = name;
-			setType(coldes.getType());
-			this.columnDescriptor = coldes;
-			setExpression( (ValueNode) arg2 );
-			this.autoincrement = coldes.isAutoincrement();
-		}
-		else
-		{
-			setType((DataTypeDescriptor) arg1);
-			setExpression( (ValueNode) arg2 );
-			if (arg2 instanceof ColumnReference)
-			{
-				reference = (ColumnReference) arg2;
-			}
-		}
-		
-		/* this result column represents a <default> keyword in an insert or
-		 * update statement
-		 */
-		if (expression != null &&
-			expression.isInstanceOf(C_NodeTypes.DEFAULT_NODE))
-			defaultColumn = true;
-	}
-	
-	/**
+    /**
+     * @param cr A column reference node
+     * @param expression The expression this result column represents
+     * @param cm context manager
+     * @throws StandardException
+     */
+    ResultColumn(
+            ColumnReference cr,
+            ValueNode expression,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        setTypeExpressionAndDefault(expression);
+        this.name = cr.getColumnName();
+        this.exposedName = cr.getColumnName();
+
+        // When we bind, we'll want to make sure the reference has the right
+        // table name.
+        this.reference = cr;
+    }
+
+    /**
+     * @param cd The column descriptor
+     * @param expression The expression this result column represents
+     * @param cm context manager
+     * @throws StandardException
+     */
+    ResultColumn(
+            ColumnDescriptor cd,
+            ValueNode expression,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        setTypeExpressionAndDefault(expression);
+        this.name = cd.getColumnName();
+        this.exposedName = name;
+        setType(cd.getType());
+        this.columnDescriptor = cd;
+        this.autoincrement = cd.isAutoincrement();
+    }
+
+    /**
+     * @param dtd The type of the column
+     * @param expression The expression this result column represents
+     * @param cm context manager
+     * @throws StandardException
+     */
+    ResultColumn(
+            DataTypeDescriptor dtd,
+            ValueNode expression,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        setTypeExpressionAndDefault(expression);
+        setType(dtd);
+
+        if (expression instanceof ColumnReference) {
+            reference = (ColumnReference)expression;
+        }
+    }
+
+    private void setTypeExpressionAndDefault(ValueNode expression) {
+        setNodeType(C_NodeTypes.RESULT_COLUMN);
+        setExpression(expression);
+
+        if (expression != null &&
+           expression.isInstanceOf(C_NodeTypes.DEFAULT_NODE)) {
+            // This result column represents a <default> keyword in an insert or
+            // update statement
+            defaultColumn = true;
+        }
+    }
+
+    /**
 	 * Returns TRUE if the ResultColumn is join column for a RIGHT OUTER 
 	 *  JOIN with USING/NATURAL. More comments at the top of this class
 	 *  where rightOuterJoinUsingClause is defined.
 	 */
-	public boolean isRightOuterJoinUsingClause()
+    boolean isRightOuterJoinUsingClause()
 	{
 		return rightOuterJoinUsingClause;
 	}
@@ -244,7 +243,7 @@ public class ResultColumn extends ValueNode
 	 *  
 	 * @param value True/False
 	 */
-	public void setRightOuterJoinUsingClause(boolean value)
+    void setRightOuterJoinUsingClause(boolean value)
 	{
 		rightOuterJoinUsingClause = value;
 	}
@@ -261,7 +260,7 @@ public class ResultColumn extends ValueNode
 	 * rightOuterJoinUsingClause will be used during the code generation 
 	 * time.
 	 */
-	public JoinNode getJoinResultSet() {
+    JoinNode getJoinResultSet() {
 		return joinResultSet;
 	}
 
@@ -274,7 +273,7 @@ public class ResultColumn extends ValueNode
 	 *   This case is talking about column c as in "select c"
 	 * @param resultSet - The ResultColumn belongs to this JoinNode
 	 */
-	public void setJoinResultset(JoinNode resultSet)
+    void setJoinResultset(JoinNode resultSet)
 	{
 		joinResultSet = resultSet;
 	}
@@ -283,12 +282,12 @@ public class ResultColumn extends ValueNode
 	 * Returns TRUE if the ResultColumn is standing in for a DEFAULT keyword in
 	 * an insert/update statement.
 	 */
-	public boolean isDefaultColumn()
+    boolean isDefaultColumn()
 	{
 		return defaultColumn;
 	}
 
-	public void setDefaultColumn(boolean value)
+    void setDefaultColumn(boolean value)
 	{
 		defaultColumn = value;
 	}
@@ -297,12 +296,12 @@ public class ResultColumn extends ValueNode
 	 * Returns TRUE if the ResultColumn used to stand in for a DEFAULT keyword in
 	 * an insert/update statement.
 	 */
-	public boolean wasDefaultColumn()
+    boolean wasDefaultColumn()
 	{
 		return wasDefault;
 	}
 
-	public void setWasDefaultColumn(boolean value)
+    void setWasDefaultColumn(boolean value)
 	{
 		wasDefault = value;
 	}
@@ -376,7 +375,8 @@ public class ResultColumn extends ValueNode
 		return exposedName;
 	}
 
-	public String getSchemaName() throws StandardException
+    @Override
+    String getSchemaName() throws StandardException
 	{
 		if ((columnDescriptor!=null) &&
 			(columnDescriptor.getTableDescriptor() != null))
@@ -391,7 +391,8 @@ public class ResultColumn extends ValueNode
 		}
 	}
 
-	public String getTableName()
+    @Override
+    String getTableName()
 	{
 		if (tableName != null)
 		{
@@ -428,7 +429,7 @@ public class ResultColumn extends ValueNode
 	 * Clear the table name for the underlying ColumnReference.
 	 * See UpdateNode.scrubResultColumns() for full explaination.
 	 */
-	public void clearTableName()
+    void clearTableName()
 	{
 		if (expression instanceof ColumnReference)
 		{
@@ -460,7 +461,7 @@ public class ResultColumn extends ValueNode
 	 * @param expression	The expression to be set in this ResultColumn
 	 */
 
-	public void setExpression(ValueNode expression)
+    void setExpression(ValueNode expression)
 	{
 		this.expression = expression;
 	}
@@ -471,7 +472,7 @@ public class ResultColumn extends ValueNode
 	 * @return ValueNode	this.expression
 	 */
 
-	public ValueNode getExpression()
+    ValueNode getExpression()
 	{
 		return expression;
 	}
@@ -498,7 +499,7 @@ public class ResultColumn extends ValueNode
 	 * @param name	The name to set in this ResultColumn
 	 */
 
-	public void setName(String name)
+    void setName(String name)
 	{
 		if (this.name == null)
 		{
@@ -517,7 +518,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Is the name for this ResultColumn generated?
 	 */
-	public boolean isNameGenerated()
+    boolean isNameGenerated()
 	{
 		return isNameGenerated;
 	}
@@ -525,7 +526,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Set that this result column name is generated.
 	 */
-	public void setNameGenerated(boolean value)
+    void setNameGenerated(boolean value)
 	{
 		isNameGenerated = value;
 	}
@@ -538,7 +539,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @param resultSetNumber	The resultSetNumber.
 	 */
-	public void setResultSetNumber(int resultSetNumber)
+    void setResultSetNumber(int resultSetNumber)
 	{
 		this.resultSetNumber = resultSetNumber;
 	}
@@ -559,7 +560,7 @@ public class ResultColumn extends ValueNode
 	 * @param adjust	The adjustment for the virtualColumnId
 	 */
 
-	public void adjustVirtualColumnId(int adjust)
+    void adjustVirtualColumnId(int adjust)
 	{
 		virtualColumnId += adjust;
 	}
@@ -570,7 +571,7 @@ public class ResultColumn extends ValueNode
 	 * @param id	The virtualColumnId for this ResultColumn
 	 */
 
-	public void setVirtualColumnId(int id)
+    void setVirtualColumnId(int id)
 	{
 		virtualColumnId = id;
 	}
@@ -580,7 +581,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return virtualColumnId for this ResultColumn
 	 */
-	public int getVirtualColumnId()
+    int getVirtualColumnId()
 	{
 		return virtualColumnId;
 	}
@@ -599,7 +600,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @param removedColumnId   id of the column being removed.
 	 */
-	public void collapseVirtualColumnIdGap(int removedColumnId)
+    void collapseVirtualColumnIdGap(int removedColumnId)
 	{
 		if (columnDescriptor == null && virtualColumnId > removedColumnId)
 			virtualColumnId--;
@@ -611,7 +612,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void guaranteeColumnName() throws StandardException
+    void guaranteeColumnName() throws StandardException
 	{
 		if (exposedName == null)
 		{
@@ -627,7 +628,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -664,8 +665,8 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -701,7 +702,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -768,11 +769,11 @@ public class ResultColumn extends ValueNode
 					int columnId)
 				throws StandardException
 	{
-		ColumnDescriptor	columnDescriptor;
+        ColumnDescriptor    colDesc;
 
-		columnDescriptor = tableDescriptor.getColumnDescriptor(columnId);
+        colDesc = tableDescriptor.getColumnDescriptor(columnId);
 
-		if (columnDescriptor == null)
+        if (colDesc == null)
 		{
 			String		errorString;
 			String		schemaName;
@@ -786,7 +787,7 @@ public class ResultColumn extends ValueNode
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_RESULT_COLUMNS, errorString);
 		}
 
-		setColumnDescriptor(tableDescriptor, columnDescriptor);
+        setColumnDescriptor(tableDescriptor, colDesc);
 		setVirtualColumnId(columnId);
 	}
 
@@ -810,15 +811,15 @@ public class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void bindResultColumnByName(TableDescriptor tableDescriptor,
+    void bindResultColumnByName(TableDescriptor tableDescriptor,
 					int columnId)
 				throws StandardException
 	{
-		ColumnDescriptor	columnDescriptor;
+        ColumnDescriptor    colDesc;
 
-		columnDescriptor = tableDescriptor.getColumnDescriptor(exposedName);
+        colDesc = tableDescriptor.getColumnDescriptor(exposedName);
 
-		if (columnDescriptor == null)
+        if (colDesc == null)
 		{
 			String		errorString;
 			String		schemaName;
@@ -832,10 +833,10 @@ public class ResultColumn extends ValueNode
 			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, exposedName, errorString);
 		}
 
-		setColumnDescriptor(tableDescriptor, columnDescriptor);
+        setColumnDescriptor(tableDescriptor, colDesc);
 		setVirtualColumnId(columnId);
 		if (isPrivilegeCollectionRequired())
-			getCompilerContext().addRequiredColumnPriv( columnDescriptor);
+            getCompilerContext().addRequiredColumnPriv( colDesc);
 	}
 
 	/**
@@ -843,7 +844,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void typeUntypedNullExpression( ResultColumn bindingRC)
+    void typeUntypedNullExpression( ResultColumn bindingRC)
 			throws StandardException
 	{
         TypeId typeId = bindingRC.getTypeId();
@@ -927,7 +928,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumnToExpression()
+    void bindResultColumnToExpression()
 				throws StandardException
 	{
 		/*
@@ -951,7 +952,7 @@ public class ResultColumn extends ValueNode
 	 * Set the column source's table name
 	 * @param t The source table name
 	 */
-	public void setSourceTableName(String t) {
+    void setSourceTableName(String t) {
 		sourceTableName = t;
 	}
 
@@ -959,7 +960,7 @@ public class ResultColumn extends ValueNode
 	 * Set the column source's schema name
 	 * @param s The source schema name
 	 */
-	public void setSourceSchemaName(String s) {
+    void setSourceSchemaName(String s) {
 		sourceSchemaName = s;
 	}
 
@@ -978,7 +979,8 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -1003,7 +1005,7 @@ public class ResultColumn extends ValueNode
 
 		@exception StandardException thrown if types not suitable.
 	 */
-	public void checkStorableExpression(ResultColumn toStore)
+    void checkStorableExpression(ResultColumn toStore)
 					throws StandardException
 	{
         checkStorableExpression((ValueNode) toStore);
@@ -1033,7 +1035,7 @@ public class ResultColumn extends ValueNode
 
 		@exception StandardException thrown if types not suitable.
 	 */
-	public void checkStorableExpression()
+    void checkStorableExpression()
 					throws StandardException
 	{
         checkStorableExpression(getExpression());
@@ -1049,7 +1051,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder ecb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -1068,7 +1070,7 @@ public class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 /*PUSHCOMPILE
-	public void generateNulls(ExpressionClassBuilder acb,
+    void generateNulls(ExpressionClassBuilder acb,
 									MethodBuilder mb,
 									Expression getColumnExpress) 
 			throws StandardException
@@ -1283,7 +1285,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return Boolean - whether or not this column is a generated column.
 	 */
-	public boolean isGenerated()
+    boolean isGenerated()
 	{
 		return (isGenerated == true);
 	}
@@ -1293,7 +1295,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return Boolean - whether or not this columm was generated for an unmatched column in an insert.
 	 */
-	public boolean isGeneratedForUnmatchedColumnInInsert()
+    boolean isGeneratedForUnmatchedColumnInInsert()
 	{
 		return (isGeneratedForUnmatchedColumnInInsert == true);
 	}
@@ -1301,7 +1303,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this a columm as a generated column
 	 */
-	public void markGenerated()
+    void markGenerated()
 	{
 		isGenerated = true;
 		/* A generated column is a referenced column */
@@ -1311,7 +1313,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this a columm as generated for an unmatched column in an insert
 	 */
-	public void markGeneratedForUnmatchedColumnInInsert()
+    void markGeneratedForUnmatchedColumnInInsert()
 	{
 		isGeneratedForUnmatchedColumnInInsert = true;
 		/* A generated column is a referenced column */
@@ -1323,7 +1325,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return Boolean - whether or not this column is a referenced column.
 	 */
-	public boolean isReferenced()
+    boolean isReferenced()
 	{
 		return isReferenced;
 	}
@@ -1331,7 +1333,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this column as a referenced column.
 	 */
-	public void setReferenced()
+    void setReferenced()
 	{
 		isReferenced = true;
 	}
@@ -1361,7 +1363,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this column as an unreferenced column.
 	 */
-	public void setUnreferenced()
+    void setUnreferenced()
 	{
 		isReferenced = false;
 	}
@@ -1390,7 +1392,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return Boolean - whether or not this RC is redundant.
 	 */
-	public boolean isRedundant()
+    boolean isRedundant()
 	{
 		return isRedundant;
 	}
@@ -1398,7 +1400,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this ResultColumn as redundant.
 	 */
-	public void setRedundant()
+    void setRedundant()
 	{
 		isRedundant = true;
 	}
@@ -1406,7 +1408,7 @@ public class ResultColumn extends ValueNode
 	/**
 	 * Mark this ResultColumn as a grouping column in the SELECT list
 	 */
-	public void markAsGroupingColumn()
+    void markAsGroupingColumn()
 	{
 		isGroupingColumn = true;
 	}
@@ -1428,15 +1430,15 @@ public class ResultColumn extends ValueNode
 	/*
 	** The following methods implement the Comparable interface.
 	*/
-	public int compareTo(Object other)
+    public int compareTo(ResultColumn other)
 	{
-		ResultColumn otherResultColumn = (ResultColumn) other;
+        ResultColumn otherResultColumn = other;
 
 		return this.getColumnPosition() - otherResultColumn.getColumnPosition();
 	}
 
 	/**
-	 * Mark this column as being updated by an update statemment.
+     * Mark this column as being updated by an update statement.
 	 */
 	void markUpdated()
 	{
@@ -1467,6 +1469,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return	true means this column is updatable
 	 */
+    @Override
 	public boolean updatableByCursor()
 	{
 		return updatableByCursor;
@@ -1503,21 +1506,14 @@ public class ResultColumn extends ValueNode
 		/* If a columnDescriptor exists, then we must propagate it */
 		if (columnDescriptor != null)
 		{
-			newResultColumn = (ResultColumn) getNodeFactory().getNode(
-													C_NodeTypes.RESULT_COLUMN,
-													columnDescriptor,
-													expression,
-													getContextManager());
+            newResultColumn = new ResultColumn(
+                    columnDescriptor, expression, getContextManager());
 			newResultColumn.setExpression(cloneExpr);
 		}
 		else
 		{
-
-			newResultColumn = (ResultColumn) getNodeFactory().getNode(
-													C_NodeTypes.RESULT_COLUMN,
-													getName(),
-													cloneExpr,
-													getContextManager());
+            newResultColumn = new ResultColumn(
+                    getName(), cloneExpr, getContextManager());
 		}
 
 		/* Set the VirtualColumnId and name in the new node */
@@ -1579,12 +1575,13 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @return the max size
 	 */
-	public int getMaximumColumnSize()
+    int getMaximumColumnSize()
 	{
 		return getTypeServices().getTypeId()
 			.getApproximateLengthInBytes(getTypeServices());
 	}
     
+    @Override
     public DataTypeDescriptor getTypeServices()
     {
         DataTypeDescriptor type = super.getTypeServices();
@@ -1610,6 +1607,7 @@ public class ResultColumn extends ValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		/*
@@ -1649,6 +1647,7 @@ public class ResultColumn extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -1692,17 +1691,17 @@ public class ResultColumn extends ValueNode
 	 * Returns true if this result column is a placeholder for a generated
 	 * autoincrement value.
 	 */
-	public boolean isAutoincrementGenerated()
+    boolean isAutoincrementGenerated()
 	{
 		return autoincrementGenerated;
 	}
 
-	public void setAutoincrementGenerated()
+    void setAutoincrementGenerated()
 	{
 		autoincrementGenerated = true;
 	}
 
-	public void resetAutoincrementGenerated()
+    void resetAutoincrementGenerated()
 	{
 		autoincrementGenerated = false;
 	}
@@ -1712,7 +1711,7 @@ public class ResultColumn extends ValueNode
 		return autoincrement;
   	}
 
-  	public void setAutoincrement()
+    void setAutoincrement()
   	{
   		autoincrement = true;
   	}
@@ -1796,7 +1795,7 @@ public class ResultColumn extends ValueNode
 	 * @return a BaseColumnNode,
 	 *   or null if a BaseColumnNode cannot be found
 	 */
-	public BaseColumnNode getBaseColumnNode() {
+    BaseColumnNode getBaseColumnNode() {
 		ValueNode vn = expression;
 		while (true) {
 			if (vn instanceof ResultColumn) {
@@ -1831,7 +1830,7 @@ public class ResultColumn extends ValueNode
 	 * @return The number of the table to which this ResultColumn	
 	 *  points, or -1 if we can't determine that from where we are.
 	 */
-	public int getTableNumber()
+    int getTableNumber()
 		throws StandardException
 	{
 		if (expression instanceof ColumnReference)
@@ -1858,7 +1857,7 @@ public class ResultColumn extends ValueNode
 		return -1;
 	}
 	
-	public boolean isEquivalent(ValueNode o) throws StandardException 
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
         if (o.getNodeType() == getNodeType()) 
         {                

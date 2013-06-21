@@ -31,7 +31,9 @@ import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.UDTAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -44,7 +46,7 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
-public class CreateAliasNode extends DDLStatementNode
+class CreateAliasNode extends DDLStatementNode
 {
     // indexes into routineElements
     public static final int PARAMETER_ARRAY = 0;
@@ -118,27 +120,28 @@ public class CreateAliasNode extends DDLStatementNode
 
 
 	/**
-	 * Initializer for a CreateAliasNode
+     * Constructor
 	 *
 	 * @param aliasName				The name of the alias
-	 * @param targetObject			Target name
+     * @param targetObject          Target name string or, if
+     *        aliasType == ALIAS_TYPE_SYNONYM_AS_CHAR, a TableName
 	 * @param methodName		    The method name
-	 * @param aliasType				The alias type
-     *
-	 * @exception StandardException		Thrown on error
+     * @param aliasSpecificInfo     An array of objects, see code for
+     *                              interpretation
+     * @param cm                    The context manager
+     * @exception StandardException Thrown on error
 	 */
-	public void init(
-						Object aliasName,
+    CreateAliasNode(    TableName aliasName,
 						Object targetObject,
-						Object methodName,
+                        String methodName,
 						Object aliasSpecificInfo,
-                        Object aliasType)
+                        char aliasType,
+                        ContextManager cm)
 		throws StandardException
 	{		
-		TableName qn = (TableName) aliasName;
-		this.aliasType = ((Character) aliasType).charValue();
-
-		initAndCheck(qn);
+        super(aliasName, cm);
+        setNodeType(C_NodeTypes.CREATE_ALIAS_NODE);
+        this.aliasType = aliasType;
 
 		switch (this.aliasType)
 		{
@@ -173,7 +176,7 @@ public class CreateAliasNode extends DDLStatementNode
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 			{
 				this.javaClassName = (String) targetObject;
-				this.methodName = (String) methodName;
+                this.methodName = methodName;
 
 				//routineElements contains the description of the procedure.
 				// 
@@ -324,7 +327,7 @@ public class CreateAliasNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		switch (this.aliasType)
 		{
@@ -353,7 +356,7 @@ public class CreateAliasNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		//Are we dealing with user defined function or procedure?
@@ -473,15 +476,15 @@ public class CreateAliasNode extends DDLStatementNode
         // A user-defined aggregate cannot have the name of a builtin function which takes 1 argument.
         //
         SchemaDescriptor    sysfun = getSchemaDescriptor( "SYSFUN", true );
-        List                        systemFunctions = getDataDictionary().getRoutineList
-            (
-             sysfun.getUUID().toString(), unqualifiedName,
-             AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR
-             );
+        List<AliasDescriptor> systemFunctions =
+            getDataDictionary().getRoutineList(
+                sysfun.getUUID().toString(),
+                unqualifiedName,
+                AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR);
 
         for ( int i = 0; i < systemFunctions.size(); i++ )
         {
-			AliasDescriptor function = (AliasDescriptor) systemFunctions.get(i);
+            AliasDescriptor function = systemFunctions.get(i);
 
 			RoutineAliasInfo routineInfo = (RoutineAliasInfo) function.getAliasInfo();
 			int parameterCount = routineInfo.getParameterCount();
@@ -539,7 +542,8 @@ public class CreateAliasNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		String schemaName = getSchemaDescriptor().getSchemaName();
 

@@ -21,21 +21,18 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * A TableName represents a qualified name, externally represented as a schema name
- * and an object name separated by a dot. This class is mis-named: it is used to
+ * and an object name separated by a dot. This class is misnamed: it is used to
  * represent the names of other object types in addition to tables.
  *
  */
@@ -50,40 +47,49 @@ public class TableName extends QueryTreeNode
 	private boolean hasSchema;
 
 	/**
-	 * Initializer for when you have both the table and schema names.
+     * Constructor for when we have both the table and schema names.
 	 *
 	 * @param schemaName	The name of the schema being referenced
-	 * @param tableName		The name of the table being referenced	 
+     * @param tableName     The name of the table or other object being
+     *                      referenced
+     * @param cm            The context manager
 	 */
 
-	public void init(Object schemaName, Object tableName)
+    TableName(String schemaName, String tableName, ContextManager cm)
 	{
+        super(cm);
+        setNodeType(C_NodeTypes.TABLE_NAME);
 		hasSchema = schemaName != null;
-		this.schemaName = (String) schemaName;
-		this.tableName = (String) tableName;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
 	}
 
 	/**
-	 * Initializer for when you have both the table and schema names.
+     * Constructor for when we have both the table and schema names.
 	 *
 	 * @param schemaName	The name of the schema being referenced
-	 * @param tableName		The name of the table being referenced	 
+     * @param tableName     The name of the table or other object being
+     *                      referenced
 	 * @param tokBeginOffset begin position of token for the table name 
 	 *					identifier from parser.  pass in -1 if unknown
 	 * @param tokEndOffset	end position of token for the table name 
 	 *					identifier from parser.  pass in -1 if unknown
+     * @param cm            The context manager
 	 */
-	public void init
-	(
-		Object schemaName, 
-		Object tableName, 
-		Object	tokBeginOffset,
-		Object	tokEndOffset
-	)
+    TableName(
+        String schemaName,
+        String tableName,
+        int tokBeginOffset,
+        int tokEndOffset,
+        ContextManager cm)
 	{
-		init(schemaName, tableName);
-		this.setBeginOffset(((Integer) tokBeginOffset).intValue());
-		this.setEndOffset(((Integer) tokEndOffset).intValue());
+        super(cm);
+        setNodeType(C_NodeTypes.TABLE_NAME);
+        hasSchema = schemaName != null;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
+        this.setBeginOffset(tokBeginOffset);
+        this.setEndOffset(tokEndOffset);
 	}
 
 	/**
@@ -103,7 +109,7 @@ public class TableName extends QueryTreeNode
 	 * @return true if this instance was initialized with not null schemaName
 	 */
 	
-	public boolean hasSchema(){
+    boolean hasSchema(){
 		return hasSchema;
 	}
 
@@ -124,7 +130,7 @@ public class TableName extends QueryTreeNode
 	 * @param schemaName	 Schema name as a String
 	 */
 
-	public void setSchemaName(String schemaName)
+    void setSchemaName(String schemaName)
 	{
 		this.schemaName = schemaName;
 	}
@@ -136,7 +142,7 @@ public class TableName extends QueryTreeNode
 	 * @return Full table name as a String
 	 */
 
-	public String getFullTableName()
+    String getFullTableName()
 	{
 		if (schemaName != null)
 			return schemaName + "." + tableName;
@@ -158,7 +164,7 @@ public class TableName extends QueryTreeNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (hasSchema)
@@ -177,7 +183,7 @@ public class TableName extends QueryTreeNode
 	 *
 	 * @return boolean		Whether or not the 2 TableNames are equal.
 	 */
-	public boolean equals(TableName otherTableName)
+    boolean equals(TableName otherTableName)
 	{
         if( otherTableName == null)
             return false;
@@ -209,7 +215,7 @@ public class TableName extends QueryTreeNode
 	 *
 	 * @return boolean		Whether or not the 2 TableNames are equal.
 	 */
-	public boolean equals(String otherSchemaName, String otherTableName)
+    boolean equals(String otherSchemaName, String otherTableName)
 	{
 		String fullTableName = getFullTableName();
 		if (fullTableName == null)
@@ -241,7 +247,7 @@ public class TableName extends QueryTreeNode
 	  *
 	  *	@exception StandardException		Thrown on error
 	  */
-	public void	bind( DataDictionary	dataDictionary )
+    void    bind( DataDictionary    dataDictionary )
 		                       throws StandardException
 	{
         schemaName = getSchemaDescriptor(schemaName).getSchemaName();
@@ -254,11 +260,12 @@ public class TableName extends QueryTreeNode
 	///////////////////////////////////////////////////////////////////////
 
 	/**
-	  *	Returns a hashcode for this tableName. This allows us to use TableNames
+      * Returns a hash code for this tableName. This allows us to use TableNames
 	  *	as keys in hash lists.
 	  *
-	  *	@return	hashcode for this tablename
+      * @return hash code for this table name
 	  */
+    @Override
 	public	int	hashCode()
 	{
 		return	getFullTableName().hashCode();
@@ -269,6 +276,7 @@ public class TableName extends QueryTreeNode
 	  *
 	  *	@param	other	other tableName
 	  */
+    @Override
 	public	boolean	equals( Object other )
 	{
 		if ( !( other instanceof TableName ) ) { return false; }

@@ -21,29 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-
 import java.lang.reflect.Modifier;
-
+import java.sql.Types;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import java.sql.Types;
-
-import java.util.List;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
      SpecialFunctionNode handles system SQL functions.
@@ -72,12 +64,12 @@ import java.util.List;
 
 	 This node is used rather than some use of MethodCallNode for
 	 runtime performance. MethodCallNode does not provide a fast access
-	 to the current language connection or activatation, since it is geared
+     to the current language connection or activation, since it is geared
 	 towards user defined routines.
 
 
 */
-public class SpecialFunctionNode extends ValueNode 
+class SpecialFunctionNode extends ValueNode
 {
 	/**
 		Name of SQL function
@@ -94,9 +86,11 @@ public class SpecialFunctionNode extends ValueNode
 	*/
 	private String methodType;
 
-	/**
-	*/
-	//private boolean isActivationCall;
+    SpecialFunctionNode(int nodeType, ContextManager cm) {
+        super(cm);
+        setNodeType(nodeType); // valid nodeType checked below in bindExpression
+    }
+
 
 	/**
 	 * Binding this special function means setting the result DataTypeServices.
@@ -113,9 +107,13 @@ public class SpecialFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
-					throws StandardException
-	{		DataTypeDescriptor dtd;
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
+    {
+        DataTypeDescriptor dtd;
 		int nodeType = getNodeType();
 		switch (nodeType)
 		{
@@ -212,6 +210,7 @@ public class SpecialFunctionNode extends ValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		return Qualifier.QUERY_INVARIANT;
@@ -227,6 +226,7 @@ public class SpecialFunctionNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -256,6 +256,7 @@ public class SpecialFunctionNode extends ValueNode
 	/*
 		print the non-node subfields
 	 */
+    @Override
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{

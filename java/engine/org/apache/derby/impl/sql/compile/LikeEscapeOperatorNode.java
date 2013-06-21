@@ -21,32 +21,21 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-
-import org.apache.derby.iapi.util.ReuseFactory;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.iapi.types.Like;
-
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.Like;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
 
-  
 /**
     This node represents a like comparison operator (no escape)
 
@@ -110,7 +99,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     String  escape;
 
     /**
-     * Initializer for a LikeEscapeOperatorNode
+     * Constructor for a LikeEscapeOperatorNode
      *
      * receiver like pattern [ escape escapeValue ]
      *
@@ -118,16 +107,22 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      *                              column, CharConstant or Parameter
      * @param leftOperand   The right operand of the like: the pattern
      * @param rightOperand  The optional escape clause, null if not present
+     * @param cm            The context manager
      */
-    public void init(
-    Object receiver,
-    Object leftOperand,
-    Object rightOperand)
+    LikeEscapeOperatorNode(
+            ValueNode receiver,
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            ContextManager cm)
     {
         /* By convention, the method name for the like operator is "like" */
-        super.init(
-            receiver, leftOperand, rightOperand, 
-            ReuseFactory.getInteger(TernaryOperatorNode.LIKE), null); 
+        super(receiver,
+              leftOperand,
+              rightOperand,
+              TernaryOperatorNode.LIKE,
+              -1, // default trimType
+              cm);
+        setNodeType(C_NodeTypes.LIKE_ESCAPE_OPERATOR_NODE);
     }
 
     /**
@@ -254,9 +249,6 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
         bindToBuiltIn();
 
-        TypeCompiler receiverTC = receiver.getTypeCompiler();
-        TypeCompiler leftTC     = leftOperand.getTypeCompiler();
-
         /* The receiver must be a string type
         */
         if (! receiver.getTypeId().isStringTypeId())
@@ -271,7 +263,6 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         if (!leftOperand.getTypeId().isStringTypeId())
         {
             leftOperand = castArgToString(leftOperand);
-            leftTC      = leftOperand.getTypeCompiler();
         }
 
         if (rightOperand != null)
@@ -389,14 +380,12 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     //     /   \
                     //  column  'Derby'
                     BinaryComparisonOperatorNode equals = 
-                        (BinaryComparisonOperatorNode) getNodeFactory().getNode(
+                        new BinaryRelationalOperatorNode(
                             C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
                             leftClone, 
-                            (ValueNode) getNodeFactory().getNode(
-                                C_NodeTypes.CHAR_CONSTANT_NODE,
-                                newPattern,
-                                getContextManager()),
-                                Boolean.FALSE,
+                            new CharConstantNode(newPattern,
+                                                 getContextManager()),
+                            false,
                             getContextManager());
 
                     // Set forQueryRewrite to bypass comparability checks
@@ -414,12 +403,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     //           / \
                     //       column 'Derby'
 
-                    AndNode newAnd = 
-                        (AndNode) getNodeFactory().getNode(
-                                    C_NodeTypes.AND_NODE,
-                                    this,
-                                    equals,
-                                    getContextManager());
+                    AndNode newAnd =
+                            new AndNode(this, equals, getContextManager());
 
                     finishBindExpr();
                     newAnd.postBindFixup();
@@ -510,6 +495,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     *
     * @exception StandardException  Thrown on error
     */
+    @Override
     public ValueNode preprocess(
     int             numTables,
     FromList        outerFromList,
@@ -637,11 +623,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          */
 
         AndNode   newAnd   = null;
-        ValueNode trueNode = 
-            (ValueNode) getNodeFactory().getNode(
-                            C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-                            Boolean.TRUE,
-                            getContextManager());
+        ValueNode trueNode = new BooleanConstantNode(true, getContextManager());
 
         /* Create the AND <, if lessThanString is non-null or 
          * leftOperand is a parameter.
@@ -649,7 +631,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         if (lessThanString != null || 
             leftOperand.requiresTypeFromContext())
         {
-            QueryTreeNode likeLTopt;
+            ValueNode likeLTopt;
             if (leftOperand.requiresTypeFromContext())
             {
                 // pattern string is a parameter 
@@ -665,19 +647,16 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             {
                 // pattern string is a constant
                 likeLTopt = 
-                    (QueryTreeNode) getNodeFactory().getNode(
-                        C_NodeTypes.CHAR_CONSTANT_NODE,
-                        lessThanString,
-                        getContextManager());
+                    new CharConstantNode(lessThanString, getContextManager());
             }
 
             BinaryComparisonOperatorNode lessThan = 
-                (BinaryComparisonOperatorNode) getNodeFactory().getNode(
+                new BinaryRelationalOperatorNode(
                     C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
                     receiver.getClone(), 
                     likeLTopt,
-                    Boolean.FALSE,
-                   getContextManager());
+                    false,
+                    getContextManager());
 
             // Disable comparability checks
             lessThan.setForQueryRewrite(true);
@@ -688,11 +667,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             lessThan.setBetweenSelectivity();
 
             /* Create the AND */
-            newAnd = (AndNode) getNodeFactory().getNode(
-                C_NodeTypes.AND_NODE,
-                lessThan,
-                trueNode,
-                getContextManager());
+            newAnd = new AndNode(lessThan, trueNode, getContextManager());
 
             newAnd.postBindFixup();
         }
@@ -721,10 +696,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             // the pattern is a constant, eg. c1 LIKE 'Derby'
 
             likeGEopt = 
-                (ValueNode) getNodeFactory().getNode(
-                    C_NodeTypes.CHAR_CONSTANT_NODE,
-                    greaterEqualString,
-                    getContextManager());
+                new CharConstantNode(greaterEqualString, getContextManager());
         }
 
         // greaterEqual from (reciever LIKE pattern):
@@ -732,11 +704,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         //      /   \
         //  reciever pattern
         BinaryComparisonOperatorNode greaterEqual = 
-            (BinaryComparisonOperatorNode) getNodeFactory().getNode(
+            new BinaryRelationalOperatorNode(
                 C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
                 receiver.getClone(), 
                 likeGEopt,
-                Boolean.FALSE,
+                false,
                 getContextManager());
 
 
@@ -751,19 +723,11 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         /* Create the AND */
         if (newAnd == null)
         {
-            newAnd = (AndNode) getNodeFactory().getNode(
-                C_NodeTypes.AND_NODE,
-                greaterEqual,
-                trueNode,
-                getContextManager());
+            newAnd = new AndNode(greaterEqual, trueNode, getContextManager());
         }
         else
         {
-            newAnd = (AndNode) getNodeFactory().getNode(
-                C_NodeTypes.AND_NODE,
-                greaterEqual,
-                newAnd,
-                getContextManager());
+            newAnd = new AndNode(greaterEqual, newAnd, getContextManager());
         }
         newAnd.postBindFixup();
 
@@ -772,13 +736,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          */
         if (!eliminateLikeComparison)
         {
-            newAnd = (AndNode) 
-                getNodeFactory().getNode(
-                    C_NodeTypes.AND_NODE,
-                    this,
-                    newAnd,
-                    getContextManager());
-
+            newAnd = new AndNode(this, newAnd, getContextManager());
             newAnd.postBindFixup();
         }
 
@@ -801,7 +759,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      *
      * @exception StandardException Thrown on error
      */
-
+    @Override
     void generateExpression(
     ExpressionClassBuilder acb, MethodBuilder mb)
         throws StandardException
@@ -873,9 +831,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             methodName += "WithEsc";
         }
 
-        StaticMethodCallNode methodCall = (StaticMethodCallNode)
-            getNodeFactory().getNode(
-                C_NodeTypes.STATIC_METHOD_CALL_NODE,
+        StaticMethodCallNode methodCall = new StaticMethodCallNode(
                 methodName,
                 "org.apache.derby.iapi.types.Like",
                 getContextManager());
@@ -883,29 +839,23 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         // using a method call directly, thus need internal sql capability
         methodCall.internalCall = true;
 
-        QueryTreeNode maxWidthNode = (QueryTreeNode) getNodeFactory().getNode(
-            C_NodeTypes.INT_CONSTANT_NODE,
-            new Integer(maxWidth),
+        NumericConstantNode maxWidthNode = new NumericConstantNode(
+            TypeId.getBuiltInTypeId(Types.INTEGER),
+            Integer.valueOf(maxWidth),
             getContextManager());
 
-        QueryTreeNode[] param = (escapeNode == null) ?
-            new QueryTreeNode[] { parameterNode, maxWidthNode } :
-            new QueryTreeNode[] { parameterNode, escapeNode, maxWidthNode };
+        ValueNode[] param = (escapeNode == null) ?
+            new ValueNode[] { parameterNode, maxWidthNode } :
+            new ValueNode[] { parameterNode, escapeNode, maxWidthNode };
 
         methodCall.addParms(Arrays.asList(param));
 
         ValueNode java2SQL = 
-            (ValueNode) getNodeFactory().getNode(
-                C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-                methodCall,
-                getContextManager());
+                new JavaToSQLValueNode(methodCall, getContextManager());
 
+        java2SQL = java2SQL.bindExpression(null, null, null);
 
-        java2SQL = (ValueNode) java2SQL.bindExpression(null, null, null);
-
-        CastNode likeOpt = (CastNode)
-        getNodeFactory().getNode(
-            C_NodeTypes.CAST_NODE,
+        CastNode likeOpt = new CastNode(
             java2SQL,
             parameterNode.getTypeServices(),
             getContextManager());

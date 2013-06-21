@@ -21,27 +21,32 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * A DropTriggerNode is the root of a QueryTree that represents a DROP TRIGGER
  * statement.
  *
  */
-public class DropTriggerNode extends DDLStatementNode
+class DropTriggerNode extends DDLStatementNode
 {
 	private TableDescriptor td;
 
-	public String statementToString()
+    DropTriggerNode(TableName trigger, ContextManager cm) {
+        super(trigger, cm);
+        setNodeType(C_NodeTypes.DROP_TRIGGER_NODE);
+    }
+
+    String statementToString()
 	{
 		return "DROP TRIGGER";
 	}
@@ -53,6 +58,7 @@ public class DropTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
@@ -83,7 +89,8 @@ public class DropTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropTriggerConstantAction(
 										 	getSchemaDescriptor(),

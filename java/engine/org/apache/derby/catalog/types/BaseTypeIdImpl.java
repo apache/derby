@@ -21,24 +21,18 @@
 
 package org.apache.derby.catalog.types;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.sql.Types;
 import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.util.IdUtil;
-
-import java.sql.Types;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
 
 /**
  * This class is the base class for all type ids that are written to the
@@ -254,37 +248,60 @@ public class BaseTypeIdImpl implements Formatable
             // will lose the format id. This can happen if you pass one of these
             // objects across the network. Here we recover the format id.
             //
-            if ( TypeId.BOOLEAN_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
-            else if ( TypeId.LONGINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
-            else if ( TypeId.INTEGER_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.INT_TYPE_ID_IMPL; }
-            else if ( TypeId.SMALLINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.SMALLINT_TYPE_ID_IMPL; }
-            else if ( TypeId.TINYINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TINYINT_TYPE_ID_IMPL; }
-            else if ( TypeId.LONGINT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
-            else if ( TypeId.DECIMAL_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
-            else if ( TypeId.NUMERIC_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
-            else if ( TypeId.DOUBLE_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DOUBLE_TYPE_ID_IMPL; }
-            else if ( TypeId.REAL_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.REAL_TYPE_ID_IMPL; }
-            else if ( TypeId.REF_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.REF_TYPE_ID_IMPL; }
-            else if ( TypeId.CHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.CHAR_TYPE_ID_IMPL; }
-            else if ( TypeId.VARCHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.VARCHAR_TYPE_ID_IMPL; }
-            else if ( TypeId.LONGVARCHAR_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL; }
-            else if ( TypeId.CLOB_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.CLOB_TYPE_ID_IMPL; }
+            if ( TypeId.BOOLEAN_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
+            else if ( TypeId.BIGINT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.BIGINT_TYPE_ID_IMPL; }
+            else if ( TypeId.INTEGER_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.INT_TYPE_ID_IMPL; }
+            else if ( TypeId.SMALLINT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.SMALLINT_TYPE_ID_IMPL; }
+            else if ( TypeId.TINYINT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.TINYINT_TYPE_ID_IMPL; }
+            else if ( TypeId.DECIMAL_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( TypeId.NUMERIC_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( TypeId.DOUBLE_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.DOUBLE_TYPE_ID_IMPL; }
+            else if ( TypeId.REAL_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.REAL_TYPE_ID_IMPL; }
+            else if ( TypeId.REF_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.REF_TYPE_ID_IMPL; }
+            else if ( TypeId.CHAR_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.CHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.VARCHAR_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.VARCHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGVARCHAR_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL; }
+            else if ( TypeId.CLOB_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.CLOB_TYPE_ID_IMPL; }
             //DERBY-5407 Network Server on wire sends CHAR () FOR BIT DATA 
             // not CHAR FOR BIT DATA. Keeping the check for CHAR FOR BIT
             // DATA just in case if there is any dependency on that check
-            else if ( TypeId.BIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BIT_TYPE_ID_IMPL; }
-            else if ( "CHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.BIT_TYPE_ID_IMPL; }
+            else if ( TypeId.BIT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.BIT_TYPE_ID_IMPL; }
+            else if ( "CHAR FOR BIT DATA".equals( unqualifiedName ) ) {
+                return StoredFormatIds.BIT_TYPE_ID_IMPL; }
             //DERBY-5407 Network Server on wire sends VARCHAR () FOR BIT DATA 
             // not VARCHAR FOR BIT DATA. Keeping the check for VARCHAR FOR BIT
             // DATA just in case if there is any dependency on that check
-            else if ( TypeId.VARBIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
-            else if ( "VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
-            else if ( TypeId.LONGVARBIT_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL; }
-            else if ( TypeId.BLOB_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.BLOB_TYPE_ID_IMPL; }
-            else if ( TypeId.DATE_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.DATE_TYPE_ID_IMPL; }
-            else if ( TypeId.TIME_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TIME_TYPE_ID_IMPL; }
-            else if ( TypeId.TIMESTAMP_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL; }
-            else if ( TypeId.XML_NAME.equals( unqualifiedName ) ) { return StoredFormatIds.XML_TYPE_ID_IMPL; }
+            else if ( TypeId.VARBIT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
+            else if ( "VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) {
+                return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
+            else if ( TypeId.LONGVARBIT_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL; }
+            else if ( TypeId.BLOB_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.BLOB_TYPE_ID_IMPL; }
+            else if ( TypeId.DATE_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.DATE_TYPE_ID_IMPL; }
+            else if ( TypeId.TIME_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.TIME_TYPE_ID_IMPL; }
+            else if ( TypeId.TIMESTAMP_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL; }
+            else if ( TypeId.XML_NAME.equals( unqualifiedName ) ) {
+                return StoredFormatIds.XML_TYPE_ID_IMPL; }
             else { return 0; }
         }
     }
@@ -367,9 +384,9 @@ public class BaseTypeIdImpl implements Formatable
               JDBCTypeId = Types.TINYINT;
               break;
 
-          case StoredFormatIds.LONGINT_TYPE_ID_IMPL:
+          case StoredFormatIds.BIGINT_TYPE_ID_IMPL:
               schemaName = null;
-              unqualifiedName = TypeId.LONGINT_NAME;
+              unqualifiedName = TypeId.BIGINT_NAME;
               JDBCTypeId = Types.BIGINT;
               break;
 

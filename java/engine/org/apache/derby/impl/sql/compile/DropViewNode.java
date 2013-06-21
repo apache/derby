@@ -21,21 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.execute.BaseActivation;
-import org.apache.derby.iapi.sql.ResultSet;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A DropViewNode is the root of a QueryTree that represents a DROP VIEW
@@ -43,23 +35,23 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  */
 
-public class DropViewNode extends DDLStatementNode
+class DropViewNode extends DDLStatementNode
 {
 
 	/**
-	 * Initializer for a DropViewNode
+     * Constructor for a DropViewNode
 	 *
-	 * @param dropObjectName	The name of the object being dropped
+     * @param view              The name of the view being dropped
+     * @param cm                The context manager
 	 *
 	 */
-
-	public void init(Object dropObjectName)
-		throws StandardException
+    DropViewNode(TableName view, ContextManager cm)
 	{
-		initAndCheck(dropObjectName);
+        super(view, cm);
+        setNodeType(C_NodeTypes.DROP_VIEW_NODE);
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "DROP VIEW";
 	}
@@ -70,7 +62,7 @@ public class DropViewNode extends DDLStatementNode
  	 *
  	 * @exception StandardException		Thrown on error
  	 */
-	
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
@@ -100,7 +92,8 @@ public class DropViewNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropViewConstantAction( getFullName(),
 											 getRelativeName(),

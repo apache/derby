@@ -22,11 +22,10 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.SQLState;
-
-import java.sql.Types;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * This class represents an OLAP window definition.
@@ -45,25 +44,23 @@ public final class WindowDefinitionNode extends WindowNode
     private OrderByList orderByList;
 
     /**
-     * Initializer.
+     * Constructor.
      *
-     * @param arg1 The window name, null if in-lined definition
-     * @param arg2 ORDER BY list
+     * @param windowName  The window name, null if in-lined definition
+     * @param orderByList ORDER BY list
+     * @param cm          The context manager
      * @exception StandardException
      */
-    public void init(Object arg1,
-                     Object arg2)
-        throws StandardException
-    {
-        String name = (String)arg1;
+    WindowDefinitionNode(String         windowName,
+                         OrderByList    orderByList,
+                         ContextManager cm) throws StandardException {
+        super(windowName != null ? windowName : "IN-LINE", cm);
+        setNodeType(C_NodeTypes.WINDOW_DEFINITION_NODE);
+        this.orderByList = orderByList;
 
-        orderByList = (OrderByList)arg2;
-
-        if (name != null) {
-            super.init(arg1);
+        if (windowName != null) {
             inlined = false;
         } else {
-            super.init("IN-LINE");
             inlined = true;
         }
 
@@ -78,6 +75,7 @@ public final class WindowDefinitionNode extends WindowNode
      * java.lang.Object override.
      * @see QueryTreeNode#toString
      */
+    @Override
     public String toString() {
         return ("name: " + getName() + "\n" +
                 "inlined: " + inlined + "\n" +
@@ -92,7 +90,7 @@ public final class WindowDefinitionNode extends WindowNode
      *
      * @param depth     The depth of this node in the tree
      */
-
+    @Override
     public void printSubNodes(int depth)
     {
         if (SanityManager.DEBUG)

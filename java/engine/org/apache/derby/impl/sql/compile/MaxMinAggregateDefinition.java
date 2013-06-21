@@ -21,26 +21,17 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.impl.sql.execute.MaxMinAggregator;
-
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * Defintion for the MAX()/MIN() aggregates.
  *
  */
-public class MaxMinAggregateDefinition 
+class MaxMinAggregateDefinition
 		implements AggregateDefinition 
 {
 	private boolean isMax;
@@ -49,7 +40,7 @@ public class MaxMinAggregateDefinition
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-	public MaxMinAggregateDefinition() { super(); }
+    MaxMinAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype.  Accept NumberDataValues
@@ -94,7 +85,7 @@ public class MaxMinAggregateDefinition
 	/**
 	 * This is set by the parser.
 	 */
-	public final void setMaxOrMin(boolean isMax)
+    final void setMaxOrMin(boolean isMax)
 	{
 		this.isMax = isMax;
 	}
@@ -104,7 +95,7 @@ public class MaxMinAggregateDefinition
 	 *
 	 * @return boolean true/false
 	 */
-	public final boolean isMax()
+    final boolean isMax()
 	{
 		return(isMax);
 	}

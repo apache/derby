@@ -21,27 +21,22 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-
-import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Find out if we have an correlated column reference
  * anywhere below us.  Stop traversal as soon as we find one.
  *
  */
-public class HasCorrelatedCRsVisitor implements Visitor
+class HasCorrelatedCRsVisitor implements Visitor
 {
 	private boolean hasCorrelatedCRs;
 
 	/**
 	 * Construct a visitor
 	 */
-	public HasCorrelatedCRsVisitor()
+    HasCorrelatedCRsVisitor()
 	{
 	}
 
@@ -122,7 +117,7 @@ public class HasCorrelatedCRsVisitor implements Visitor
 	 *
 	 * @return true/false
 	 */
-	public boolean hasCorrelatedCRs()
+    boolean hasCorrelatedCRs()
 	{
 		return hasCorrelatedCRs;
 	}
@@ -132,7 +127,7 @@ public class HasCorrelatedCRsVisitor implements Visitor
 	 *
 	 *	@param	value	true/false
 	 */
-	public void setHasCorrelatedCRs(boolean value)
+    void setHasCorrelatedCRs(boolean value)
 	{
 		hasCorrelatedCRs = value;
 	}

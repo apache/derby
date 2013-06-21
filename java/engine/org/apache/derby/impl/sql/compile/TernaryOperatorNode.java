@@ -21,38 +21,34 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import java.lang.reflect.Modifier;
+import java.sql.Types;
+import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import java.lang.reflect.Modifier;
-
-import java.sql.Types;
-import java.util.List;
 /**
  * A TernaryOperatorNode represents a built-in ternary operators.
- * This covers  built-in functions like substr().
+ * This covers  built-in functions like {@code substr()}.
  * Java operators are not represented here: the JSQL language allows Java
  * methods to be called from expressions, but not Java operators.
  *
  */
 
-public class TernaryOperatorNode extends OperatorNode
+class TernaryOperatorNode extends OperatorNode
 {
 	String		operator;
 	String		methodName;
@@ -68,12 +64,12 @@ public class TernaryOperatorNode extends OperatorNode
 	String		rightInterfaceType;
 	int			trimType;
 
-	public static final int TRIM = 0;
-	public static final int LOCATE = 1;
-	public static final int SUBSTRING = 2;
-	public static final int LIKE = 3;
-	public static final int TIMESTAMPADD = 4;
-	public static final int TIMESTAMPDIFF = 5;
+    static final int TRIM = 0;
+    static final int LOCATE = 1;
+    static final int SUBSTRING = 2;
+    static final int LIKE = 3;
+    static final int TIMESTAMPADD = 4;
+    static final int TIMESTAMPDIFF = 5;
 	static final String[] TernaryOperators = {"trim", "LOCATE", "substring", "like", "TIMESTAMPADD", "TIMESTAMPDIFF"};
 	static final String[] TernaryMethodNames = {"ansiTrim", "locate", "substring", "like", "timestampAdd", "timestampDiff"};
 	static final String[] TernaryResultType = {ClassName.StringDataValue, 
@@ -92,34 +88,73 @@ public class TernaryOperatorNode extends OperatorNode
 	};
 
 	/**
-	 * Initializer for a TernaryOperatorNode
+     * Constructor for a TernaryOperatorNode
 	 *
-	 * @param receiver		The receiver (eg, string being operated on in substr())
+     * @param receiver      The receiver (e.g., string being operated on in
+     *                      {@code substr()})
 	 * @param leftOperand	The left operand of the node
 	 * @param rightOperand	The right operand of the node
 	 * @param operatorType	The type of the operand
-	 */
+     * @param cm            The context manager
+     */
+    TernaryOperatorNode(
+                    ValueNode receiver,
+                    ValueNode leftOperand,
+                    ValueNode rightOperand,
+                    int operatorType,
+                    int trimType,
+                    ContextManager cm)
+    {
+        super(cm);
+        constructorMinion(
+                receiver, leftOperand, rightOperand, operatorType, trimType);
+    }
 
-	public void init(
-					Object receiver,
-					Object leftOperand,
-					Object rightOperand,
-					Object operatorType,
-					Object trimType)
-	{
-		this.receiver = (ValueNode) receiver;
-		this.leftOperand = (ValueNode) leftOperand;
-		this.rightOperand = (ValueNode) rightOperand;
-		this.operatorType = ((Integer) operatorType).intValue();
-		this.operator = (String) TernaryOperators[this.operatorType];
-		this.methodName = (String) TernaryMethodNames[this.operatorType];
-		this.resultInterfaceType = (String) TernaryResultType[this.operatorType];
-		this.receiverInterfaceType = (String) TernaryArgType[this.operatorType][0];
-		this.leftInterfaceType = (String) TernaryArgType[this.operatorType][1];
-		this.rightInterfaceType = (String) TernaryArgType[this.operatorType][2];
-		if (trimType != null)
-				this.trimType = ((Integer) trimType).intValue();
-	}
+    /**
+     * Constructor for a TernaryOperatorNode
+     *
+     * @param nodeType      The node type
+     * @param receiver      The receiver (e.g., string being operated on in
+     *                      {@code substr()})
+     * @param leftOperand   The left operand of the node
+     * @param rightOperand  The right operand of the node
+     * @param operatorType  The type of the operand
+     * @param cm            The context manager
+     */
+    TernaryOperatorNode(int nodeType,
+                        ValueNode receiver,
+                        ValueNode leftOperand,
+                        ValueNode rightOperand,
+                        int operatorType,
+                        int trimType,
+                        ContextManager cm)
+    {
+        super(cm);
+        setNodeType(nodeType);
+        constructorMinion(
+                receiver, leftOperand, rightOperand, operatorType, trimType);
+    }
+
+    private void constructorMinion(ValueNode receiver,
+                                   ValueNode leftOperand,
+                                   ValueNode rightOperand,
+                                   int operatorType,
+                                   int trimType) {
+        this.receiver = receiver;
+        this.leftOperand = leftOperand;
+        this.rightOperand = rightOperand;
+        this.operatorType = operatorType;
+        this.operator = TernaryOperators[this.operatorType];
+        this.methodName = TernaryMethodNames[this.operatorType];
+        this.resultInterfaceType = TernaryResultType[this.operatorType];
+        this.receiverInterfaceType = TernaryArgType[this.operatorType][0];
+        this.leftInterfaceType = TernaryArgType[this.operatorType][1];
+        this.rightInterfaceType = TernaryArgType[this.operatorType][2];
+
+        if (trimType != -1) {
+            this.trimType = trimType;
+        }
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -128,6 +163,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 * @return	This object as a String
 	 */
 
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -152,8 +188,8 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -192,7 +228,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -236,7 +272,8 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -266,7 +303,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
@@ -345,7 +382,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
-	public void setLeftOperand(ValueNode newLeftOperand)
+    void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
 	}
@@ -355,7 +392,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current leftOperand.
 	 */
-	public ValueNode getLeftOperand()
+    ValueNode getLeftOperand()
 	{
 		return leftOperand;
 	}
@@ -365,7 +402,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @param newRightOperand	The new rightOperand
 	 */
-	public void setRightOperand(ValueNode newRightOperand)
+    void setRightOperand(ValueNode newRightOperand)
 	{
 		rightOperand = newRightOperand;
 	}
@@ -375,7 +412,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current rightOperand.
 	 */
-	public ValueNode getRightOperand()
+    ValueNode getRightOperand()
 	{
 		return rightOperand;
 	}
@@ -405,7 +442,8 @@ public class TernaryOperatorNode extends OperatorNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		boolean pushable;
@@ -426,7 +464,8 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		receiver = receiver.remapColumnReferencesToExpressions();
@@ -443,7 +482,8 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return (receiver.isConstantExpression() &&
 				leftOperand.isConstantExpression() &&
@@ -451,7 +491,8 @@ public class TernaryOperatorNode extends OperatorNode
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return (receiver.constantExpression(whereClause) &&
 				leftOperand.constantExpression(whereClause) &&
@@ -466,6 +507,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -604,7 +646,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ValueNode locateBind() throws StandardException
+    ValueNode locateBind() throws StandardException
 	{
 		TypeId	firstOperandType, secondOperandType, offsetType;
 
@@ -706,12 +748,7 @@ public class TernaryOperatorNode extends OperatorNode
 	                vnTC.getCastToCharWidth(
 		                    vn.getTypeServices()));
 
-			ValueNode newNode = (ValueNode)
-						getNodeFactory().getNode(
-							C_NodeTypes.CAST_NODE,
-							vn,
-							dtd,
-							getContextManager());
+            ValueNode newNode = new CastNode(vn, dtd, getContextManager());
             
             // DERBY-2910 - Match current schema collation for implicit cast as we do for
             // explicit casts per SQL Spec 6.12 (10)                                                
@@ -731,7 +768,7 @@ public class TernaryOperatorNode extends OperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
- 	public ValueNode substrBind() 
+    ValueNode substrBind()
 			throws StandardException
 	{
 		TypeId	receiverType;
@@ -908,7 +945,7 @@ public class TernaryOperatorNode extends OperatorNode
         return false;
     } // end of bindParameter
 
-	public ValueNode getReceiver()
+    ValueNode getReceiver()
 	{
 		return receiver;
 	}

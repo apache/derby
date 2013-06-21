@@ -21,27 +21,21 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.reference.ClassName;
 
 /**
  * This class implements TypeCompiler for the SQL LOB types.
  *
  */
 
-public class CLOBTypeCompiler extends BaseTypeCompiler
+class CLOBTypeCompiler extends BaseTypeCompiler
 {
         /**
          * Tell whether this type (LOB) can be converted to the given type.
@@ -121,6 +115,7 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
             }
         }
 
+        @Override
         String dataValueMethodName()
         {
             int formatId = getStoredFormatIdFromTypeId();
@@ -139,6 +134,7 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
          * @param collationType Collation type of character values.
          * @return true collationType will be pushed, false collationType will be ignored.
          */
+        @Override
         boolean pushCollationForDataValue(int collationType)
         {
             return collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC;

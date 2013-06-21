@@ -21,36 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.sql.Types;
+import java.util.BitSet;
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.NodeFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
-
-import java.sql.Types;
-
-import java.util.BitSet;
 
 /**
  * A IntersectOrExceptNode represents an INTERSECT or EXCEPT DML statement.
@@ -89,25 +78,27 @@ public class IntersectOrExceptNode extends SetOperatorNode
     private boolean[] intermediateOrderByNullsLow; // TRUE means NULL values should be ordered lower than non-NULL values
 
 	/**
-	 * Initializer for a SetOperatorNode.
+     * Constructor for a SetOperatorNode.
 	 *
+     * @param opType            The operator type: one of {@link #EXCEPT_OP} or
+     *                          {@link #INTERSECT_OP}.
 	 * @param leftResult		The ResultSetNode on the left side of this union
 	 * @param rightResult		The ResultSetNode on the right side of this union
-	 * @param all				Whether or not this is an ALL.
+     * @param all               {@code true} if this is an ALL set operation.
 	 * @param tableProperties	Properties list associated with the table
-	 *
+     * @param cm                The context manager
 	 * @exception StandardException		Thrown on error
 	 */
+    IntersectOrExceptNode(int            opType,
+                          ResultSetNode  leftResult,
+                          ResultSetNode  rightResult,
+                          boolean        all,
+                          Properties     tableProperties,
+                          ContextManager cm) throws StandardException {
 
-	public void init( Object opType,
-                      Object leftResult,
-                      Object rightResult,
-                      Object all,
-                      Object tableProperties)
-        throws StandardException
-	{
-        super.init( leftResult, rightResult, all, tableProperties);
-        this.opType = ((Integer) opType).intValue();
+        super(leftResult, rightResult, all, tableProperties, cm);
+        setNodeType(C_NodeTypes.INTERSECT_OR_EXCEPT_NODE);
+        this.opType = opType;
     }
 
     private int getOpType()
@@ -128,7 +119,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -202,20 +194,27 @@ public class IntersectOrExceptNode extends SetOperatorNode
         throws StandardException
     {
         ContextManager cm = getContextManager();
-        NodeFactory nf = getNodeFactory();
-        OrderByList orderByList = (OrderByList) nf.getNode( C_NodeTypes.ORDER_BY_LIST, cm);
+        OrderByList orderByList = new OrderByList(null, cm);
+
         for( int i = 0; i < intermediateOrderByColumns.length; i++)
         {
-            OrderByColumn orderByColumn = (OrderByColumn)
-              nf.getNode( C_NodeTypes.ORDER_BY_COLUMN,
-			  nf.getNode(C_NodeTypes.INT_CONSTANT_NODE,
-				     ReuseFactory.getInteger( intermediateOrderByColumns[i] + 1),
-				     cm),
-                          cm);
-            if( intermediateOrderByDirection[i] < 0)
+            OrderByColumn orderByColumn =
+                new OrderByColumn(
+                    new NumericConstantNode(
+                        TypeId.getBuiltInTypeId(Types.INTEGER),
+                        ReuseFactory.getInteger(
+                            intermediateOrderByColumns[i] + 1),
+                        cm),
+                    cm);
+
+            if( intermediateOrderByDirection[i] < 0) {
                 orderByColumn.setDescending();
-            if( intermediateOrderByNullsLow[i])
+            }
+
+            if( intermediateOrderByNullsLow[i]) {
                 orderByColumn.setNullsOrderedLow();
+            }
+
             orderByList.addOrderByColumn( orderByColumn);
         }
         orderByList.bindOrderByColumns( rsn);
@@ -225,6 +224,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
     /**
      * @see org.apache.derby.iapi.sql.compile.Optimizable#estimateCost
      */
+    @Override
     public CostEstimate estimateCost( OptimizablePredicateList predList,
                                       ConglomerateDescriptor cd,
                                       CostEstimate outerCost,
@@ -244,17 +244,23 @@ public class IntersectOrExceptNode extends SetOperatorNode
 							(PredicateList) null,
 							outerCost);
 
-		CostEstimate costEstimate = getCostEstimate(optimizer);
+        CostEstimate costEst = getCostEstimate(optimizer);
         CostEstimate leftCostEstimate = leftResultSet.getCostEstimate();
         CostEstimate rightCostEstimate = rightResultSet.getCostEstimate();
-        // The cost is the sum of the two child costs plus the cost of sorting the union.
-        costEstimate.setCost( leftCostEstimate.getEstimatedCost() + rightCostEstimate.getEstimatedCost(),
-                              getRowCountEstimate( leftCostEstimate.rowCount(),
-                                                   rightCostEstimate.rowCount()),
-                              getSingleScanRowCountEstimate( leftCostEstimate.singleScanRowCount(),
-                                                             rightCostEstimate.singleScanRowCount()));
 
-        return costEstimate;
+        // The cost is the sum of the two child costs plus the cost of
+        // sorting the union.
+        costEst.setCost(
+            leftCostEstimate.getEstimatedCost() +
+                rightCostEstimate.getEstimatedCost(),
+            getRowCountEstimate(
+                leftCostEstimate.rowCount(),
+                rightCostEstimate.rowCount()),
+            getSingleScanRowCountEstimate(
+                leftCostEstimate.singleScanRowCount(),
+                rightCostEstimate.singleScanRowCount()));
+
+        return costEst;
     } // End of estimateCost
 
 	/**
@@ -262,6 +268,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) throws StandardException
 	{
 		Optimizable retOptimizable;
@@ -280,7 +287,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode retRSN;
 		retRSN = super.modifyAccessPaths();
@@ -317,8 +325,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
         if( orderByLists[0] != null) {
             // Generate an order by node on top of the intersect/except
-            treeTop = (ResultSetNode) getNodeFactory().getNode(
-                C_NodeTypes.ORDER_BY_NODE,
+            treeTop = new OrderByNode(
                 treeTop,
                 orderByLists[0],
                 tableProperties,
@@ -330,13 +337,12 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 treeTop.getResultColumns().copyListAndObjects();
             newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
 
-            treeTop = (ResultSetNode)getNodeFactory().getNode(
-                C_NodeTypes.ROW_COUNT_NODE,
+            treeTop = new RowCountNode(
                 treeTop,
                 newRcl,
                 offset,
                 fetchFirst,
-                Boolean.valueOf( hasJDBClimitClause ),
+                hasJDBClimitClause,
                 getContextManager());
         }
         return treeTop;
@@ -348,6 +354,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate( ActivationClassBuilder acb, MethodBuilder mb)
         throws StandardException
 	{
@@ -407,7 +414,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
 	 *  rows depends on whether this is an INTERSECT or EXCEPT (see
 	 *  getRowCountEstimate() in this class for more).
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		if (finalCostEstimate != null)

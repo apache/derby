@@ -21,14 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A MaterializeResultSetNode represents a materialization result set for any 
@@ -36,22 +36,24 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class MaterializeResultSetNode extends SingleChildResultSetNode
+class MaterializeResultSetNode extends SingleChildResultSetNode
 {
 	/**
-	 * Initializer for a MaterializeResultSetNode.
+     * Constructor for a MaterializeResultSetNode.
 	 *
 	 * @param childResult	The child ResultSetNode
 	 * @param rcl			The RCL for the node
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 */
 
-	public void init(Object childResult,
-								Object rcl,
-								Object tableProperties)
-	{
-		super.init(childResult, tableProperties);
-		resultColumns = (ResultColumnList) rcl;
+    MaterializeResultSetNode(ResultSetNode childResult,
+                             ResultColumnList rcl,
+                             Properties tableProperties,
+                             ContextManager cm) {
+        super(childResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.MATERIALIZE_RESULT_SET_NODE);
+        resultColumns = rcl;
 	}
 
 	/**
@@ -60,8 +62,8 @@ public class MaterializeResultSetNode extends SingleChildResultSetNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -74,6 +76,7 @@ public class MaterializeResultSetNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{

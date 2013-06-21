@@ -61,7 +61,7 @@ public interface C_NodeTypes
 	static final int SQL_TO_JAVA_VALUE_NODE = 28;
 	static final int UNARY_MINUS_OPERATOR_NODE = 29;
 	static final int UNARY_PLUS_OPERATOR_NODE = 30;
-	static final int SQL_BOOLEAN_CONSTANT_NODE = 31;
+   // 31 is available
 	static final int UNARY_DATE_TIMESTAMP_OPERATOR_NODE = 32;
 	static final int TIMESTAMP_OPERATOR_NODE = 33;
 	static final int TABLE_NAME = 34;
@@ -81,7 +81,7 @@ public interface C_NodeTypes
 	static final int BINARY_PLUS_OPERATOR_NODE = 48;
 	static final int BINARY_TIMES_OPERATOR_NODE = 49;
 	static final int CONCATENATION_OPERATOR_NODE = 50;
-	static final int LIKE_OPERATOR_NODE = 51;
+    static final int LIKE_ESCAPE_OPERATOR_NODE = 51;
 	static final int OR_NODE = 52;
 	static final int BETWEEN_OPERATOR_NODE = 53;
 	static final int CONDITIONAL_NODE = 54;
@@ -99,9 +99,9 @@ public interface C_NodeTypes
 	// 66 available;
 	static final int DECIMAL_CONSTANT_NODE = 67;
 	static final int DOUBLE_CONSTANT_NODE = 68;
-	static final int FLOAT_CONSTANT_NODE = 69;
+    static final int REAL_CONSTANT_NODE = 69;
 	static final int INT_CONSTANT_NODE = 70;
-	static final int LONGINT_CONSTANT_NODE = 71;
+    static final int BIGINT_CONSTANT_NODE = 71;
 	static final int LONGVARBIT_CONSTANT_NODE = 72;
 	static final int LONGVARCHAR_CONSTANT_NODE = 73;
 	static final int SMALLINT_CONSTANT_NODE = 74;

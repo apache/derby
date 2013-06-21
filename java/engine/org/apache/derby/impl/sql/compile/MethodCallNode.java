@@ -21,46 +21,32 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.JSQLType;
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.catalog.types.TypeDescriptorImpl;
-import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
-
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.StringTokenizer;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.TypeDescriptorImpl;
+import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A MethodCallNode represents a Java method call.  Method calls can be done
@@ -116,17 +102,12 @@ abstract class MethodCallNode extends JavaValueNode
 	*/
 	String[] methodParameterTypes;
 
-	/**
-	 * Initializer for a MethodCallNode
-	 *
-	 * @param	methodName	The name of the method to call
-	 */
-	public void init(Object methodName)
-	{
-		this.methodName = (String) methodName;
-	}
+    MethodCallNode(String methodName, ContextManager cm) {
+        super(cm);
+        this.methodName = methodName;
+    }
 
-	public String getMethodName()
+    String getMethodName()
 	{
 		return  methodName;
 	}
@@ -163,32 +144,23 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void addParms(List parameterList) throws StandardException
+    void addParms(List<ValueNode> parameterList) throws StandardException
 	{
 		methodParms = new JavaValueNode[parameterList.size()];
 
 		int	plSize = parameterList.size();
 		for (int index = 0; index < plSize; index++)
 		{
-			QueryTreeNode	qt;
-
-			qt = (QueryTreeNode) parameterList.get(index);
+            ValueNode qt = parameterList.get(index);
 
 			/*
 			** Since we need the parameter to be in Java domain format, put a
-			** SQLToJavaValueNode on top of the parameter node if it is a 
-			** SQLValueNode. But if the parameter is already in Java domain 
-			** format, then we don't need to do anything.
+            ** SQLToJavaValueNode on top of the ValueNode parameter node.
 			*/
-			if ( ! (qt instanceof JavaValueNode))
-			{
-				qt = (QueryTreeNode) getNodeFactory().getNode(
-						C_NodeTypes.SQL_TO_JAVA_VALUE_NODE, 
-						qt, 
-						getContextManager());
-			}
+            JavaValueNode jqt =
+                new SQLToJavaValueNode(qt, getContextManager());
 
-			methodParms[index] = (JavaValueNode) qt;
+            methodParms[index] = jqt;
 		}
 	}
 
@@ -252,8 +224,8 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -280,7 +252,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -366,9 +338,7 @@ abstract class MethodCallNode extends JavaValueNode
 		throws StandardException
 	{
 		/* Put the parameter type names into a single string */
-		StringBuffer	parmTypes = new StringBuffer();
-        boolean hasVarargs = hasVarargs();
-        int     firstVarargIdx = getFirstVarargIdx();
+        StringBuilder   parmTypes = new StringBuilder();
         int     paramCount = signature.length;
 		for (int i = 0; i < paramCount; i++)
 		{
@@ -744,7 +714,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void	setNullParameterInfo(String[] parmTypeNames)
+    void    setNullParameterInfo(String[] parmTypeNames)
 			throws StandardException
 	{
 		for (int i = 0; i < methodParms.length; i++)
@@ -1313,16 +1283,16 @@ abstract class MethodCallNode extends JavaValueNode
 	{
 		int					count = signature.length;
 		String[] 			primParmTypeNames = new String[ count ];
-		JSQLType			jsqlType;
+        JSQLType            jsqlTyp;
 
 		for (int i = 0; i < count; i++)
 		{
-			jsqlType = signature[ i ];
+            jsqlTyp = signature[ i ];
 
-			if ( jsqlType == null ) { primParmTypeNames[i] = ""; }
+            if ( jsqlTyp == null ) { primParmTypeNames[i] = ""; }
 			else
 			{
-				switch( jsqlType.getCategory() )
+                switch( jsqlTyp.getCategory() )
 			    {
 			        case JSQLType.SQLTYPE:
 
@@ -1335,7 +1305,7 @@ abstract class MethodCallNode extends JavaValueNode
 						} else {
 
 
-							TypeId	ctid = mapToTypeID( jsqlType );
+                            TypeId  ctid = mapToTypeID( jsqlTyp );
 
 							if ((ctid.isNumericTypeId() && !ctid.isDecimalTypeId()) || ctid.isBooleanTypeId())
 							{
@@ -1350,19 +1320,23 @@ abstract class MethodCallNode extends JavaValueNode
 
 		            case JSQLType.JAVA_CLASS:
 
-						primParmTypeNames[i] = jsqlType.getJavaClassName();
+                        primParmTypeNames[i] = jsqlTyp.getJavaClassName();
 						break;
 
 		            case JSQLType.JAVA_PRIMITIVE:
 
-						primParmTypeNames[i] = JSQLType.getPrimitiveName( jsqlType.getPrimitiveKind() );
+                        primParmTypeNames[i] = JSQLType.getPrimitiveName(
+                            jsqlTyp.getPrimitiveKind());
+
 						if ( castToPrimitiveAsNecessary) { methodParms[i].castToPrimitive(true); }
 						break;
 
 		            default:
 
-						if (SanityManager.DEBUG)
-							{ SanityManager.THROWASSERT( "Unknown JSQLType: " + jsqlType ); }
+                        if (SanityManager.DEBUG) {
+                            SanityManager.THROWASSERT(
+                                "Unknown JSQLType: " + jsqlTyp );
+                        }
 
 				}	// end switch
 
@@ -1385,6 +1359,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
     int getOrderableVariantType() throws StandardException
 	{
 		// beetle 4880. We return the most variant type of the parameters. If no
@@ -1425,6 +1400,7 @@ abstract class MethodCallNode extends JavaValueNode
     /**
      * Override method in ancestor.
      */
+    @Override
     DataTypeDescriptor getDataType() throws StandardException
     {
         if ( routineInfo != null )
@@ -1448,7 +1424,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 * 
 	 * @return	The method parameters
 	 */
-	public JavaValueNode[]	getMethodParms()
+    JavaValueNode[] getMethodParms()
 	{
 		return methodParms;
 	}
@@ -1460,6 +1436,7 @@ abstract class MethodCallNode extends JavaValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

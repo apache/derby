@@ -21,12 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * Walk through a subtree and build a list of the assigned numbers for
@@ -36,7 +34,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * the bottom-most table number, which should correspond to a base
  * table.
  */
-public class BaseTableNumbersVisitor implements Visitor
+class BaseTableNumbersVisitor implements Visitor
 {
 	// JBitSet to hold the table numbers that we find.
 	private JBitSet tableMap;
@@ -56,7 +54,7 @@ public class BaseTableNumbersVisitor implements Visitor
 	 *
 	 * @param tableMap JBitSet into which we put the table numbers we find.
 	 */
-	public BaseTableNumbersVisitor(JBitSet tableMap)
+    BaseTableNumbersVisitor(JBitSet tableMap)
 	{
 		this.tableMap = tableMap;
 		columnNumber = -1;

@@ -21,24 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.HashMap;
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.util.JBitSet;
-
-import java.util.HashMap;
 
 /**
  * A SetOperatorNode represents a UNION, INTERSECT, or EXCEPT in a DML statement. Binding and optimization
@@ -82,26 +77,23 @@ abstract class SetOperatorNode extends TableOperatorNode
 	private HashMap<Predicate,Predicate> rightScopedPreds;
 
 	/**
-	 * Initializer for a SetOperatorNode.
+     * Constructor for a SetOperatorNode.
 	 *
 	 * @param leftResult		The ResultSetNode on the left side of this union
 	 * @param rightResult		The ResultSetNode on the right side of this union
 	 * @param all				Whether or not this is an ALL.
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(
-					Object leftResult,
-					Object rightResult,
-					Object all,
-					Object tableProperties)
-			throws StandardException
-	{
-		super.init(leftResult, rightResult, tableProperties);
-
-		this.all = ((Boolean) all).booleanValue();
+    SetOperatorNode(ResultSetNode leftResult,
+                    ResultSetNode rightResult,
+                    boolean all,
+                    Properties tableProperties,
+                    ContextManager cm) throws StandardException {
+        super(leftResult, rightResult, tableProperties, cm);
+        this.all = all;
 
 		/* resultColumns cannot be null, so we make a copy of the left RCL
 		 * for now.  At bind() time, we need to recopy the list because there
@@ -240,8 +232,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 			// _unscoped_ form, which means they are intended for _this_
 			// node instead of this node's children.  That's exactly what
 			// we want.
-			ResultSetNode prnRSN = (ResultSetNode) getNodeFactory().getNode(
-				C_NodeTypes.PROJECT_RESTRICT_NODE,
+            ResultSetNode prnRSN = new ProjectRestrictNode(
 				topNode,					// Child ResultSet
 				topNode.getResultColumns(),	// Projection
 				null,						// Restriction
@@ -308,6 +299,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 		throws StandardException
 	{
@@ -327,15 +319,14 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// Check to see if the child nodes reference any base tables; if either
 		// child does not reference at least one base table, then we don't try
 		// to push the predicate.
-		boolean canPush = false;
-
 		JBitSet tableNums = new JBitSet(getReferencedTableMap().size());
 		BaseTableNumbersVisitor btnVis =
 			new BaseTableNumbersVisitor(tableNums);
 
 		// Check the left child.
 		leftResultSet.accept(btnVis);
-		canPush = (tableNums.getFirstSetBit() != -1);
+
+        boolean canPush = (tableNums.getFirstSetBit() != -1);
 
 		/* If we can't push it to _both_ children, then we don't push at all.
 		 * RESOLVE: We can add the ability to push a predicate to one side
@@ -430,7 +421,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		// cases where predicates are not pushed all the way down; see
 		// modifyAccessPaths() in this class for more.
 		if (pushedPredicates == null)
-			pushedPredicates = new PredicateList();
+            pushedPredicates = new PredicateList(getContextManager());
 
 		pushedPredicates.addOptPredicate(pred);
 		return true;
@@ -441,6 +432,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void pullOptPredicates(
 		OptimizablePredicateList optimizablePredicates)
 		throws StandardException
@@ -476,11 +468,10 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 * which the scoped predicate was created because we can potentially
 		 * push that predicate elsewhere
 		 */
-		Predicate pred = null;
 		RemapCRsVisitor rcrv = new RemapCRsVisitor(false);
 		for (int i = 0; i < pushedPredicates.size(); i++)
 		{
-			pred = (Predicate)pushedPredicates.getOptPredicate(i);
+            Predicate pred = (Predicate)pushedPredicates.getOptPredicate(i);
 			if (pred.isScopedForPush())
 			{
 				/* We don't need to pull the predicate if it's scoped, but
@@ -529,7 +520,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -549,8 +540,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -584,7 +575,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumns(FromList fromListParam)
+    @Override
+    void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
 		super.bindResultColumns(fromListParam);
@@ -619,7 +611,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void bindResultColumns(TableDescriptor targetTableDescriptor,
             FromVTI targetVTI, ResultColumnList targetColumnList,
             DMLStatementNode statement, FromList fromListParam)
@@ -679,7 +671,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList rcl)
+    @Override
+    void bindUntypedNullsToResultColumns(ResultColumnList rcl)
 				throws StandardException
 	{
 		/*
@@ -706,6 +699,7 @@ abstract class SetOperatorNode extends TableOperatorNode
     /**
      * {@inheritDoc}
      */
+    @Override
     void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)
@@ -784,6 +778,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		}
 	}
 
+    @Override
     public void bindExpressions(FromList fromList) throws StandardException {
         // Actions for UnionNode qua top node of a multi-valued table value
         // constructor
@@ -805,8 +800,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindTargetExpressions(FromList fromListParam)
+    @Override
+    void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		leftResultSet.bindTargetExpressions(fromListParam);
@@ -821,6 +816,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @param orderByList	The order by list
 	 */
+    @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
         if (this.orderByLists[0] != null) {
@@ -858,6 +854,7 @@ abstract class SetOperatorNode extends TableOperatorNode
      * @param fetchFirst the OFFSET FIRST, if any
      * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
+    @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         this.offset = offset;
@@ -890,8 +887,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -904,7 +901,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 		/* Build the referenced table map (left || right) */
 		referencedTableMap = (JBitSet) leftResultSet.getReferencedTableMap().clone();
-		referencedTableMap.or((JBitSet) rightResultSet.getReferencedTableMap());
+        referencedTableMap.or(rightResultSet.getReferencedTableMap());
 
 		/* If this is a UNION without an all and we have
 		 * an order by then we can consider eliminating the sort for the
@@ -965,7 +962,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    @Override
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		return genProjectRestrict(numTables);
@@ -979,7 +977,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
+    @Override
+    void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
 		/* Check both sides - SELECT * is not valid on either side */
@@ -1000,6 +999,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -1064,15 +1064,15 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
+    @Override
+    ResultSetNode setResultToBooleanTrueNode(boolean onlyConvertAlls)
 		throws StandardException
 	{
 		// First create a FromList to hold this node (and only this node).
 
-		FromList fromList =
-			(FromList) getNodeFactory().getNode(
-				C_NodeTypes.FROM_LIST,
-				getContextManager());
+        FromList fromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
 
 		fromList.addFromTable(this);
 
@@ -1094,25 +1094,17 @@ abstract class SetOperatorNode extends TableOperatorNode
 
 		// Now create a ResultColumnList that simply holds the "*".
 
-		ResultColumnList rcl =
-			(ResultColumnList) getNodeFactory().getNode(
-				C_NodeTypes.RESULT_COLUMN_LIST,
-				getContextManager());
+        ResultColumnList rcl = new ResultColumnList(getContextManager());
 
-		ResultColumn allResultColumn =
-			(ResultColumn) getNodeFactory().getNode(
-				C_NodeTypes.ALL_RESULT_COLUMN,
-				null,
-				getContextManager());
+       ResultColumn allResultColumn =
+                new AllResultColumn(null, getContextManager());
 
 		rcl.addResultColumn(allResultColumn);
 
 		/* Create a new SELECT node of the form:
 		 *  SELECT * FROM <thisSetOperatorNode>
 		 */
-		ResultSetNode result =
-			(ResultSetNode) getNodeFactory().getNode(
-				C_NodeTypes.SELECT_NODE,
+        ResultSetNode result = new SelectNode(
 				rcl,      // ResultColumns
 				fromList, // FROM list
 				null,     // WHERE clause
@@ -1144,7 +1136,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		/* Unions in FromSubquerys are not flattenable.	 */
 		return false;
@@ -1158,7 +1151,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean performMaterialization(JBitSet outerTables)
+    @Override
+    boolean performMaterialization(JBitSet outerTables)
 		throws StandardException
 	{
 		// RESOLVE - just say no to materialization right now - should be a cost based decision
@@ -1185,10 +1179,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		throws StandardException
 	{
 		if (leftOptPredicates == null) {
-			leftOptPredicates =
-				(PredicateList) getNodeFactory().getNode(
-					C_NodeTypes.PREDICATE_LIST,
-					getContextManager());
+            leftOptPredicates = new PredicateList(getContextManager());
 		}
 
 		return leftOptPredicates;
@@ -1203,10 +1194,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		throws StandardException
 	{
 		if (rightOptPredicates == null) {
-			rightOptPredicates =
-				(PredicateList) getNodeFactory().getNode(
-					C_NodeTypes.PREDICATE_LIST,
-					getContextManager());
+            rightOptPredicates = new PredicateList(getContextManager());
 		}
 
 		return rightOptPredicates;

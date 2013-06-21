@@ -22,24 +22,15 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-
-import org.apache.derby.iapi.util.JBitSet;
-
 import org.apache.derby.iapi.reference.ClassName;
-
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * This node represents a unary getCurrentConnection operator
@@ -53,11 +44,12 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 {
 	/**
 	 * Constructor for a GetCurrentConnectionNode
-	 *
 	 */
 
-	public GetCurrentConnectionNode()
+    GetCurrentConnectionNode(ContextManager cm)
 	{
+        super(cm);
+        setNodeType(C_NodeTypes.GET_CURRENT_CONNECTION_NODE);
 		/*
 		** The result type of getCurrentConnection is
 		** java.sql.Connection
@@ -75,8 +67,9 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    JavaValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+    JavaValueNode bindExpression(FromList fromList,
+                                 SubqueryList subqueryList,
+                                 List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		return this;
@@ -164,6 +157,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
     int getOrderableVariantType()
 	{
 		return Qualifier.QUERY_INVARIANT;
@@ -191,6 +185,7 @@ public final class GetCurrentConnectionNode extends JavaValueNode
 
 		@see org.apache.derby.iapi.sql.compile.CompilerContext
 	*/
+    @Override
     void checkReliability(ValueNode sqlNode)
 		throws StandardException {
 		sqlNode.checkReliability("getCurrentConnection()",

@@ -21,42 +21,32 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.error.StandardException;
-
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
 import java.sql.Types;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a unary upper or lower operator
  *
  */
 
-public class SimpleStringOperatorNode extends UnaryOperatorNode
+class SimpleStringOperatorNode extends UnaryOperatorNode
 {
-	/**
-	 * Initializer for a SimpleOperatorNode
-	 *
-	 * @param operand		The operand
-	 * @param methodName	The method name
-	 */
+    SimpleStringOperatorNode(
+            ValueNode operand,
+            String methodName,
+            ContextManager cm) throws StandardException {
+        super(operand, methodName, methodName, cm);
+        setNodeType(C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE);
+    }
 
-	public void init(Object operand, Object methodName)
-	{
-		super.init(operand, methodName, methodName);
-	}
-
-	/**
+    /**
 	 * Bind this operator
 	 *
 	 * @param fromList			The query's FROM list
@@ -67,7 +57,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -103,12 +93,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 								getCastToCharWidth(
 									operand.getTypeServices()));
 			
-					operand =  (ValueNode)
-						getNodeFactory().getNode(
-							C_NodeTypes.CAST_NODE,
-							operand,
-							dtd,
-							getContextManager());
+                    operand = new CastNode(operand, dtd, getContextManager());
 					
 				// DERBY-2910 - Match current schema collation for implicit cast as we do for
 				// explicit casts per SQL Spec 6.12 (10)					
@@ -140,7 +125,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	void bindParameter()
 			throws StandardException
 	{
@@ -159,7 +144,8 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	 * This is a length operator node.  Overrides this method
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
-	public String getReceiverInterfaceName() {
+    @Override
+    String getReceiverInterfaceName() {
 	    return ClassName.StringDataValue;
 	}
 }

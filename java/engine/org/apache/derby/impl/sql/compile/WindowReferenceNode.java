@@ -22,6 +22,8 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * Represents a reference to an explicitly defined window
@@ -29,19 +31,21 @@ import org.apache.derby.iapi.error.StandardException;
 public final class WindowReferenceNode extends WindowNode
 {
     /**
-     * Initializer
+     * Constructor
      *
-     * @param arg1 The window name referenced
+     * @param windowName The window name referenced
+     * @param cm         The context manager
      *
      * @exception StandardException
      */
-    public void init(Object arg1)
+    WindowReferenceNode(String windowName, ContextManager cm)
         throws StandardException
     {
-        super.init(arg1);
+        super(windowName, cm);
+        setNodeType(C_NodeTypes.WINDOW_REFERENCE_NODE);
     }
 
-    // java.lang.Object override
+    @Override
     public String toString() {
         return "referenced window: " + getName() + "\n" +
             super.toString();

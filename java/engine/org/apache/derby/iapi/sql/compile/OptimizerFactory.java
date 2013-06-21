@@ -21,13 +21,9 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 /**
 	This is simply the factory for creating an optimizer.
@@ -93,4 +89,13 @@ public interface OptimizerFactory {
 	 * @return	maxMemoryPerTable value
 	 */
 	public int getMaxMemoryPerTable();
+
+    /**
+     * Tell whether to do join order optimization.
+     *
+     * @return  {@code true} means do join order optimization, {@code false}
+     *          means don't do it.
+     */
+    public abstract boolean doJoinOrderOptimization();
+
 }

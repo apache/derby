@@ -23,31 +23,16 @@ package    org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.util.ReuseFactory;
 
 public final class XMLConstantNode extends ConstantNode
 {
-    /**
-     * Initializer for an XMLConstantNode.
-     *
-     * @param arg1 The TypeId for the type of the node
-     *
-     * @exception StandardException
-     */
-    public void init(
-                    Object arg1)
-        throws StandardException
-    {
-        super.init(
-                    arg1,
-                    Boolean.TRUE,
-                    ReuseFactory.getInteger(0));
+    XMLConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, 0, cm);
+        setNodeType(C_NodeTypes.XML_CONSTANT_NODE);
     }
 
     /**
@@ -60,6 +45,7 @@ public final class XMLConstantNode extends ConstantNode
      *
      * @exception StandardException        Thrown on error
      */
+    @Override
     Object getConstantValueAsObject() throws StandardException 
     {
         return value.getObject();

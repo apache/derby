@@ -21,30 +21,21 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.impl.sql.execute.SumAggregator;
-import org.apache.derby.impl.sql.execute.AvgAggregator;
-
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
- * Defintion for the SUM()/AVG() aggregates.
+ * Definition for the SUM()/AVG() aggregates.
  *
  */
-public class SumAvgAggregateDefinition
+class SumAvgAggregateDefinition
 		implements AggregateDefinition 
 {
 	private boolean isSum;
@@ -52,7 +43,7 @@ public class SumAvgAggregateDefinition
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-	public SumAvgAggregateDefinition() { super(); }
+    SumAvgAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype.  Accept NumberDataValues
@@ -138,7 +129,7 @@ public class SumAvgAggregateDefinition
 	/**
 	 * This is set by the parser.
 	 */
-	public final void setSumOrAvg(boolean isSum)
+    final void setSumOrAvg(boolean isSum)
 	{
 		this.isSum = isSum;
 	}

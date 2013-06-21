@@ -21,34 +21,37 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-
 import java.util.Iterator;
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * This class represents a REVOKE role statement.
  */
-public class RevokeRoleNode extends DDLStatementNode
+class RevokeRoleNode extends DDLStatementNode
 {
-	private List roles;
-	private List grantees;
+    private List<String> roles;
+    private List<String> grantees;
 
 	/**
-	 * Initialize a RevokeRoleNode.
+     * Construct a RevokeRoleNode.
 	 *
 	 * @param roles list of strings containing role name to be revoked
 	 * @param grantees list of strings containing grantee names
+     * @param cm context manager
 	 */
-	public void init(Object roles, Object grantees) throws StandardException
+    RevokeRoleNode( List<String> roles,
+                    List<String> grantees,
+                    ContextManager cm) throws StandardException
 	{
-		initAndCheck(null);
-		this.roles = (List) roles;
-		this.grantees = (List) grantees;
+        super(cm);
+        setNodeType(C_NodeTypes.REVOKE_ROLE_NODE);
+        this.roles = roles;
+        this.grantees = grantees;
 	}
 
 
@@ -57,6 +60,7 @@ public class RevokeRoleNode extends DDLStatementNode
 	 *
 	 * @exception StandardException Standard error policy.
 	 */
+    @Override
 	public ConstantAction makeConstantAction() throws StandardException
 	{
 		return getGenericConstantActionFactory().
@@ -69,11 +73,11 @@ public class RevokeRoleNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG) {
-			StringBuffer sb1 = new StringBuffer();
+            StringBuilder sb1 = new StringBuilder();
 			for( Iterator it = roles.iterator(); it.hasNext();) {
 				if( sb1.length() > 0) {
 					sb1.append( ", ");
@@ -81,7 +85,7 @@ public class RevokeRoleNode extends DDLStatementNode
 				sb1.append( it.next().toString());
 			}
 
-			StringBuffer sb2 = new StringBuffer();
+            StringBuilder sb2 = new StringBuilder();
 			for( Iterator it = grantees.iterator(); it.hasNext();) {
 				if( sb2.length() > 0) {
 					sb2.append( ", ");
@@ -99,7 +103,7 @@ public class RevokeRoleNode extends DDLStatementNode
 	} // end of toString
 
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "REVOKE role";
 	}

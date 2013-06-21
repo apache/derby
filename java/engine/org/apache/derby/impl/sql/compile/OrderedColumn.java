@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
@@ -34,6 +35,11 @@ public abstract class OrderedColumn extends QueryTreeNode
 	protected static final int UNMATCHEDPOSITION = -1;
 	protected int	columnPosition = UNMATCHEDPOSITION;
 
+    public OrderedColumn(ContextManager cm) {
+        super(cm);
+    }
+
+
 	/**
 	 * Indicate whether this column is ascending or not.
 	 * By default assume that all ordered columns are
@@ -43,7 +49,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	 *
 	 * @return true
 	 */
-	public boolean isAscending()
+    boolean isAscending()
 	{
 		return true;
 	}
@@ -57,7 +63,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	 *
 	 * @return false
 	 */
-	public boolean isNullsOrderedLow()
+    boolean isNullsOrderedLow()
 	{
 		return false;
 	}
@@ -68,6 +74,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString() 
 	{
 		if (SanityManager.DEBUG)
@@ -86,7 +93,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	 *
 	 * @return	The position of this column
 	 */
-	public int getColumnPosition() 
+    int getColumnPosition()
 	{
 		return columnPosition;
 	}
@@ -94,7 +101,7 @@ public abstract class OrderedColumn extends QueryTreeNode
 	/**
 	 * Set the position of this column
 	 */
-	public void setColumnPosition(int columnPosition) 
+    void setColumnPosition(int columnPosition)
 	{
 		this.columnPosition = columnPosition;
 		if (SanityManager.DEBUG)

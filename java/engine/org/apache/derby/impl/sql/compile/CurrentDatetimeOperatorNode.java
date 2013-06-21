@@ -21,34 +21,28 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-
-import org.apache.derby.iapi.error.StandardException;
-
 import java.sql.Types;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * The CurrentDatetimeOperator operator is for the builtin CURRENT_DATE,
  * CURRENT_TIME, and CURRENT_TIMESTAMP operations.
  *
  */
-public class CurrentDatetimeOperatorNode extends ValueNode {
+class CurrentDatetimeOperatorNode extends ValueNode {
 
-	public static final int CURRENT_DATE = 0;
-	public static final int CURRENT_TIME = 1;
-	public static final int CURRENT_TIMESTAMP = 2;
+    static final int CURRENT_DATE = 0;
+    static final int CURRENT_TIME = 1;
+    static final int CURRENT_TIMESTAMP = 2;
 
 	static private final int jdbcTypeId[] = { 
 		Types.DATE, 
@@ -63,11 +57,14 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 
 	private int whichType;
 
-	public void init(Object whichType) {
-		this.whichType = ((Integer) whichType).intValue();
+    CurrentDatetimeOperatorNode(int whichType, ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE);
+        this.whichType = whichType;
 
-		if (SanityManager.DEBUG)
+        if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(this.whichType >= 0 && this.whichType <= 2);
+        }
 	}
 
 	//
@@ -89,8 +86,11 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
-					throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
 	{
 		checkReliability( methodName[whichType], CompilerContext.DATETIME_ILLEGAL );
 
@@ -114,6 +114,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		// CurrentDate, Time, Timestamp are invariant for the life of the query
@@ -133,6 +134,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -159,6 +161,7 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	/*
 		print the non-node subfields
 	 */
+    @Override
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{

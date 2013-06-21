@@ -21,28 +21,23 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
+import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-public class NestedLoopJoinStrategy extends BaseJoinStrategy {
-	public NestedLoopJoinStrategy() {
+class NestedLoopJoinStrategy extends BaseJoinStrategy {
+    NestedLoopJoinStrategy() {
 	}
 
 
@@ -267,10 +262,10 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 			 */
 			if (!genInListVals)
 			{
-				Predicate pred = null;
 				for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
 				{
-					pred = (Predicate)storeRestrictionList.getOptPredicate(i);
+                    Predicate pred =
+                            (Predicate)storeRestrictionList.getOptPredicate(i);
 					if (pred.isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found IN-list probing " +
@@ -322,6 +317,7 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 		return false;
 	}
 
+    @Override
 	public String toString() {
 		return getName();
 	}
@@ -331,8 +327,9 @@ public class NestedLoopJoinStrategy extends BaseJoinStrategy {
 	 * outermost table of a join.
 	 *
 	 * @return Whether or not this join strategy
-	 * can be used on the outermose table of a join.
+     * can be used on the outermost table of a join.
 	 */
+    @Override
 	protected boolean validForOutermostTable()
 	{
 		return true;

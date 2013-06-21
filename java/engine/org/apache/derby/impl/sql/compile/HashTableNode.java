@@ -21,32 +21,29 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.Properties;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
-
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 /**
  * A HashTableNode represents a result set where a hash table is built.
  *
  */
 
-public class HashTableNode extends SingleChildResultSetNode
+class HashTableNode extends SingleChildResultSetNode
 {
 	PredicateList	searchPredicateList;
 	PredicateList	joinPredicateList;
@@ -55,7 +52,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	SubqueryList	rSubqueryList;
 
 	/**
-	 * Initializer for a HashTableNode.
+     * Constructor for a HashTableNode.
 	 *
 	 * @param childResult			The child result set
 	 * @param tableProperties	Properties list associated with the table
@@ -67,29 +64,30 @@ public class HashTableNode extends SingleChildResultSetNode
 	 * @param pSubqueryList			List of subqueries in RCL
 	 * @param rSubqueryList			List of subqueries in Predicate lists
 	 * @param hashKeyColumns		Hash key columns
+     * @param cm                    The context manager
 	 */
-
-	public void init(
-						 Object childResult,
-						 Object tableProperties,
-						 Object resultColumns,
-						 Object searchPredicateList,
-						 Object joinPredicateList,
-						 Object accessPath,
-						 Object   costEstimate,
-						 Object	pSubqueryList,
-						 Object   rSubqueryList,
-						 Object hashKeyColumns)
+    HashTableNode(ResultSetNode  childResult,
+                  Properties     tableProperties,
+                  ResultColumnList resultColumns,
+                  PredicateList  searchPredicateList,
+                  PredicateList  joinPredicateList,
+                  AccessPathImpl accessPath,
+                  CostEstimate   costEstimate,
+                  SubqueryList   pSubqueryList,
+                  SubqueryList   rSubqueryList,
+                  int[]          hashKeyColumns,
+                  ContextManager cm)
 	{
-		super.init(childResult, tableProperties);
-		this.resultColumns = (ResultColumnList) resultColumns;
-		this.searchPredicateList = (PredicateList) searchPredicateList;
-		this.joinPredicateList = (PredicateList) joinPredicateList;
-		this.trulyTheBestAccessPath = (AccessPathImpl) accessPath;
-		this.costEstimate = (CostEstimate) costEstimate;
-		this.pSubqueryList = (SubqueryList) pSubqueryList;
-		this.rSubqueryList = (SubqueryList) rSubqueryList;
-		setHashKeyColumns((int[]) hashKeyColumns);
+        super(childResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.HASH_TABLE_NODE);
+        this.resultColumns = resultColumns;
+        this.searchPredicateList = searchPredicateList;
+        this.joinPredicateList = joinPredicateList;
+        this.trulyTheBestAccessPath = accessPath;
+        this.costEstimate = costEstimate;
+        this.pSubqueryList = pSubqueryList;
+        this.rSubqueryList = rSubqueryList;
+        setHashKeyColumns(hashKeyColumns);
 	}
 
 	/*
@@ -113,8 +111,8 @@ public class HashTableNode extends SingleChildResultSetNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -146,6 +144,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -177,7 +176,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -404,6 +403,7 @@ public class HashTableNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

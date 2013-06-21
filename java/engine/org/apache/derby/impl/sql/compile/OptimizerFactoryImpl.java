@@ -21,6 +21,10 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
@@ -28,24 +32,8 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.Property;
-
-import java.util.Properties;
 
 /**
 	This is simply the factory for creating an optimizer.
@@ -67,6 +55,10 @@ public class OptimizerFactoryImpl
 	*/
 	protected JoinStrategy[] joinStrategySet;
 
+    /* Do join order optimization by default */
+    private boolean joinOrderOptimization = true;
+
+
 	//
 	// ModuleControl interface
 	//
@@ -74,7 +66,19 @@ public class OptimizerFactoryImpl
 	public void boot(boolean create, Properties startParams)
 			throws StandardException {
 
-		/*
+        /*
+        ** This system property determines whether to optimize join order
+        ** by default.  It is used mainly for testing - there are many tests
+        ** that assume the join order is fixed.
+        */
+        String opt =
+            PropertyUtil.getSystemProperty(Optimizer.JOIN_ORDER_OPTIMIZATION);
+        if (opt != null)
+        {
+            joinOrderOptimization = Boolean.parseBoolean(opt);
+        }
+
+        /*
 		** This property determines whether to use rule-based or cost-based
 		** optimization.  It is used mainly for testing - there are many tests
 		** that assume rule-based optimization.  The default is cost-based
@@ -221,5 +225,11 @@ public class OptimizerFactoryImpl
 	{
 		return maxMemoryPerTable;
 	}
+
+    @Override
+    public boolean doJoinOrderOptimization()
+    {
+        return joinOrderOptimization;
+    }
 }
 

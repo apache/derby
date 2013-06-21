@@ -21,35 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
-
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import org.apache.derby.impl.sql.execute.ColumnInfo;
-import org.apache.derby.catalog.UUID;
 
 /**
  * A CreateViewNode is the root of a QueryTree that represents a CREATE VIEW
@@ -57,7 +47,7 @@ import org.apache.derby.catalog.UUID;
  *
  */
 
-public class CreateViewNode extends DDLStatementNode
+class CreateViewNode extends DDLStatementNode
 {
     private ResultColumnList resultColumns;
     private ResultSetNode    queryExpression;
@@ -71,9 +61,9 @@ public class CreateViewNode extends DDLStatementNode
     private boolean hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	/**
-	 * Initializer for a CreateViewNode
+     * Constructor for a CreateViewNode
 	 *
-	 * @param newObjectName		The name of the table to be created
+     * @param viewName          The name of the table to be created
 	 * @param resultColumns		The column list from the view definition, 
 	 *							if specified
 	 * @param queryExpression	The query expression for the view
@@ -84,32 +74,32 @@ public class CreateViewNode extends DDLStatementNode
      * @param offset            OFFSET if any, or null
      * @param fetchFirst        FETCH FIRST if any, or null
 	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
-	 *
+     * @param cm                Context manager
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(Object newObjectName,
-				   Object resultColumns,
-				   Object	 queryExpression,
-				   Object checkOption,
-				   Object qeText,
-                   Object orderCols,
-                   Object offset,
-                   Object fetchFirst,
-                   Object hasJDBClimitClause)
+    CreateViewNode(TableName viewName,
+                   ResultColumnList resultColumns,
+                   ResultSetNode queryExpression,
+                   int checkOption,
+                   String qeText,
+                   OrderByList orderCols,
+                   ValueNode offset,
+                   ValueNode fetchFirst,
+                   boolean hasJDBClimitClause,
+                   ContextManager cm)
 		throws StandardException
 	{
-		initAndCheck(newObjectName);
-		this.resultColumns = (ResultColumnList) resultColumns;
-		this.queryExpression = (ResultSetNode) queryExpression;
-		this.checkOption = ((Integer) checkOption).intValue();
-		this.qeText = ((String) qeText).trim();
-		this.orderByList = (OrderByList)orderCols;
-        this.offset = (ValueNode)offset;
-        this.fetchFirst = (ValueNode)fetchFirst;
-        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
-
-		implicitCreateSchema = true;
+        super(viewName, cm);
+        setNodeType(C_NodeTypes.CREATE_VIEW_NODE);
+        this.resultColumns = resultColumns;
+        this.queryExpression = queryExpression;
+        this.checkOption = checkOption;
+        this.qeText = qeText.trim();
+        this.orderByList = orderCols;
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
+        this.implicitCreateSchema = true;
 	}
 
 	/**
@@ -118,7 +108,7 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -133,7 +123,7 @@ public class CreateViewNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "CREATE VIEW";
 	}
@@ -144,8 +134,8 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -173,6 +163,7 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext				cc = getCompilerContext();
@@ -184,7 +175,7 @@ public class CreateViewNode extends DDLStatementNode
 
 		providerInfos = bindViewDefinition
 			( dataDictionary, cc, getLanguageConnectionContext(),
-			  getNodeFactory(), 
+              getOptimizerFactory(),
 			  queryExpression,
 			  getContextManager()
 			);
@@ -240,18 +231,16 @@ public class CreateViewNode extends DDLStatementNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	private ProviderInfo[] bindViewDefinition( DataDictionary 	dataDictionary,
-											 CompilerContext	compilerContext,
-											 LanguageConnectionContext lcc,
-											 NodeFactory		nodeFactory,
-											 ResultSetNode		queryExpr,
-											 ContextManager		cm)
-		throws StandardException
+    private ProviderInfo[] bindViewDefinition(
+        DataDictionary      dataDictionary,
+        CompilerContext     compilerContext,
+        LanguageConnectionContext lcc,
+        OptimizerFactory    optimizerFactory,
+        ResultSetNode       queryExpr,
+        ContextManager      cm) throws StandardException
 	{
-		FromList	fromList = (FromList) nodeFactory.getNode(
-										C_NodeTypes.FROM_LIST,
-										nodeFactory.doJoinOrderOptimization(),
-										cm);
+        FromList fromList =
+                new FromList(optimizerFactory.doJoinOrderOptimization(), cm);
 
 		ProviderList 	prevAPL = compilerContext.getCurrentAuxiliaryProviderList();
 		ProviderList 	apl = new ProviderList();
@@ -312,6 +301,7 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -325,7 +315,8 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		/* RESOLVE - need to build up dependendencies and store them away through
 		 * the constant action.
@@ -401,6 +392,7 @@ public class CreateViewNode extends DDLStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

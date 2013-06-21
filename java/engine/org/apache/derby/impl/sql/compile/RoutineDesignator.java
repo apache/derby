@@ -21,20 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-
+import java.util.List;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 import org.apache.derby.impl.sql.execute.RoutinePrivilegeInfo;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-
-import java.util.List;
 
 /**
  * This node represents a routine signature.
  */
 class RoutineDesignator
 {
-	boolean isSpecific;
 	TableName name; // TableName is a misnomer it is really just a schema qualified name
 	boolean isFunction; // else a procedure
 	/**
@@ -42,15 +39,13 @@ class RoutineDesignator
 	 * if null then the signature is not specified and this designator is ambiguous if there is
 	 * more than one function (procedure) with this name.
 	 */
-	List paramTypeList;
+    List<TypeDescriptor> paramTypeList;
 	AliasDescriptor aliasDescriptor;
 
-	RoutineDesignator( boolean isSpecific,
-							  TableName name,
-							  boolean isFunction,
-							  List paramTypeList)
+    RoutineDesignator( TableName name,
+                       boolean isFunction,
+                       List<TypeDescriptor> paramTypeList)
 	{
-		this.isSpecific = isSpecific;
 		this.name = name;
 		this.isFunction = isFunction;
 		this.paramTypeList = paramTypeList;

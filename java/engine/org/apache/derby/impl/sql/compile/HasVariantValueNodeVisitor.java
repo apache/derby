@@ -21,13 +21,11 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-
 import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Find out if we have a value node with variant type less than what the
@@ -47,7 +45,7 @@ import org.apache.derby.iapi.error.StandardException;
  * @see org.apache.derby.iapi.store.access.Qualifier 
  *
  */
-public class HasVariantValueNodeVisitor implements Visitor
+class HasVariantValueNodeVisitor implements Visitor
 {
 	private boolean hasVariant;
 	private int variantType;
@@ -57,7 +55,7 @@ public class HasVariantValueNodeVisitor implements Visitor
 	/**
 	 * Construct a visitor
 	 */
-	public HasVariantValueNodeVisitor()
+    HasVariantValueNodeVisitor()
 	{
 		this.variantType = Qualifier.VARIANT;
 		this.ignoreParameters = false;
@@ -82,7 +80,7 @@ public class HasVariantValueNodeVisitor implements Visitor
 	 *		variant
 	 * @param ignoreParameters should I ignore parameter nodes?
  	 */
-	public HasVariantValueNodeVisitor(int variantType, boolean ignoreParameters)
+    HasVariantValueNodeVisitor(int variantType, boolean ignoreParameters)
 	{
 		this.variantType = variantType;
 		this.ignoreParameters = ignoreParameters;
@@ -157,7 +155,7 @@ public class HasVariantValueNodeVisitor implements Visitor
 	 *
 	 * @return true/false
 	 */
-	public boolean hasVariant()
+    boolean hasVariant()
 	{
 		return hasVariant;
 	}

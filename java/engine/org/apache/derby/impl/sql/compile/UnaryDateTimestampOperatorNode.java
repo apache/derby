@@ -21,25 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import java.sql.Types;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.sql.Types;
-
-import java.util.List;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.DateTimeDataValue;
 
 /**
  * This class implements the timestamp( x) and date(x) functions.
@@ -47,39 +41,33 @@ import java.util.List;
  * These two functions implement a few special cases of string conversions beyond the normal string to
  * date/timestamp casts.
  */
-public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
+class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 {
     private static final String TIMESTAMP_METHOD_NAME = "getTimestamp";
     private static final String DATE_METHOD_NAME = "getDate";
     
+    enum OperatorType {DATE, TIMESTAMP};
+
     /**
      * @param operand The operand of the function
-     * @param targetType The type of the result. Timestamp or Date.
-     *
-	 * @exception StandardException		Thrown on error
-	 */
-
-	public void init( Object operand, Object targetType)
-		throws StandardException
-	{
-		setType( (DataTypeDescriptor) targetType);
-        switch( getTypeServices().getJDBCTypeId())
-        {
-        case Types.DATE:
-            super.init( operand, "date", DATE_METHOD_NAME);
-            break;
-
-        case Types.TIMESTAMP:
-            super.init( operand, "timestamp", TIMESTAMP_METHOD_NAME);
-            break;
-
-        default:
-            if( SanityManager.DEBUG)
-                SanityManager.NOTREACHED();
-            super.init( operand);
-        }
+     * @param type The type of the result, Date or Timestamp.
+     * @param cm context manager
+     * @throws StandardException
+     */
+    UnaryDateTimestampOperatorNode(
+            ValueNode operand,
+            OperatorType type,
+            ContextManager cm) throws StandardException {
+        super(operand,
+                type == OperatorType.DATE ? "date" : "timestamp",
+                type == OperatorType.DATE ?
+                    DATE_METHOD_NAME : TIMESTAMP_METHOD_NAME,
+                cm);
+        setNodeType(C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE);
+        setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                type == OperatorType.DATE ? Types.DATE : Types.TIMESTAMP));
     }
-    
+
     /**
      * Called by UnaryOperatorNode.bindExpression.
      *
@@ -96,6 +84,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     ValueNode bindExpression (
                     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
@@ -146,7 +135,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
         {
             DataValueFactory dvf = getLanguageConnectionContext().getDataValueFactory();
             DataValueDescriptor sourceValue = ((ConstantNode) operand).getValue();
-            DataValueDescriptor destValue = null;
+            DataValueDescriptor destValue;
             if( sourceValue.isNull())
             {
                 destValue = (TIMESTAMP_METHOD_NAME.equals( methodName))
@@ -158,8 +147,8 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
                 destValue = (TIMESTAMP_METHOD_NAME.equals( methodName))
                   ? dvf.getTimestamp( sourceValue) : dvf.getDate( sourceValue);
             }
-            return (ValueNode) getNodeFactory().getNode( C_NodeTypes.USERTYPE_CONSTANT_NODE,
-                                                         destValue, getContextManager());
+
+            return new UserTypeConstantNode(destValue, getContextManager());
         }
 
         if( isIdentity)
@@ -182,7 +171,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression( ExpressionClassBuilder acb, MethodBuilder mb)
         throws StandardException
 	{

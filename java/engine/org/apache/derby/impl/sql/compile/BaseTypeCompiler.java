@@ -260,7 +260,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 * @param forDataTypeFunction  was this called from a scalarFunction like
 	 *                             CHAR() or DOUBLE()
 	 */
-	public boolean numberConvertible(TypeId otherType, 
+    boolean numberConvertible(TypeId otherType,
 									 boolean forDataTypeFunction)
 	{
         if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
@@ -298,7 +298,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	 * @param cf		A ClassFactory
 	 */
 
-	public boolean numberStorable(TypeId thisType,
+    boolean numberStorable(TypeId thisType,
 									TypeId otherType,
 									ClassFactory cf)
 	{

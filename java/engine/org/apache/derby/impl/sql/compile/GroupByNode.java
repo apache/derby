@@ -22,16 +22,16 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.LanguageFactory;
@@ -50,7 +50,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.impl.sql.execute.AggregatorInfo;
 import org.apache.derby.impl.sql.execute.AggregatorInfoList;
-
 
 /**
  * A GroupByNode represents a result set for a grouping operation
@@ -72,7 +71,7 @@ import org.apache.derby.impl.sql.execute.AggregatorInfoList;
  *
  *
  */
-public class GroupByNode extends SingleChildResultSetNode
+class GroupByNode extends SingleChildResultSetNode
 {
 	/**
 	 * The GROUP BY list
@@ -83,7 +82,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * The list of all aggregates in the query block
 	 * that contains this group by.
 	 */
-    private List aggregates;
+    private List<AggregateNode> aggregates;
 
 	/**
 	 * Information that is used at execution time to
@@ -111,42 +110,42 @@ public class GroupByNode extends SingleChildResultSetNode
 	private SubqueryList havingSubquerys;
 	
 	/**
-	 * Intializer for a GroupByNode.
+     * Constructor for a GroupByNode.
 	 *
-	 * @param bottomPR	The child FromTable
+     * @param bottomPR      The child FromTable
 	 * @param groupingList	The groupingList
      * @param aggregates    The list of aggregates from
 	 *		the query block.  Since aggregation is done
 	 *		at the same time as grouping, we need them
 	 *		here.
-	 * @param havingClause The having clause.
+     * @param havingClause  The having clause.
 	 * @param havingSubquerys subqueries in the having clause.
-	 * @param tableProperties	Properties list associated with the table
-	 * @param nestingLevel nestingLevel of this group by node. This is used for 
+     * @param nestingLevel  NestingLevel of this group by node. This is used for
 	 *     error checking of group by queries with having clause.
+     * @param cm            The context manager
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-						Object bottomPR,
-						Object groupingList,
-                        Object aggregates,
-						Object havingClause,
-						Object havingSubquerys,
-						Object tableProperties,
-						Object nestingLevel)
+    GroupByNode(ResultSetNode  bottomPR,
+                GroupByList    groupingList,
+                List<AggregateNode> aggregates,
+                ValueNode      havingClause,
+                SubqueryList   havingSubquerys,
+                int            nestingLevel,
+                ContextManager cm)
 			throws StandardException
 	{
-		super.init(bottomPR, tableProperties);
-		setLevel(((Integer)nestingLevel).intValue());
-		this.havingClause = (ValueNode)havingClause;
-		this.havingSubquerys = (SubqueryList)havingSubquerys;
+        super(bottomPR, null /* tableProperties */, cm);
+        setNodeType(C_NodeTypes.GROUP_BY_NODE);
+        setLevel(nestingLevel);
+        this.havingClause = havingClause;
+        this.havingSubquerys = havingSubquerys;
 		/* Group by without aggregates gets xformed into distinct */
 		if (SanityManager.DEBUG)
 		{
-//          Aggregates can be null if we have a having clause.
-//          select c1 from t1 group by c1 having c1 > 1;			
-//          SanityManager.ASSERT(((List) aggregates).size() > 0,
-//          "aggregates expected to be non-empty");
+            // Aggregates can be null if we have a having clause.
+            // select c1 from t1 group by c1 having c1 > 1;
+            // SanityManager.ASSERT(((List) aggregates).size() > 0,
+            // "aggregates expected to be non-empty");
 			if (!(childResult instanceof Optimizable))
 			{
 				SanityManager.THROWASSERT("childResult, " + childResult.getClass().getName() +
@@ -160,8 +159,8 @@ public class GroupByNode extends SingleChildResultSetNode
 		}
 
 		ResultColumnList newBottomRCL;
-		this.groupingList = (GroupByList) groupingList;
-        this.aggregates = (List) aggregates;
+        this.groupingList = groupingList;
+        this.aggregates = aggregates;
 		this.parent = this;
 
 		/*
@@ -264,7 +263,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			int count = aggInfo.size();
 			for (int i = 0; i < count; i++)
 			{
-				agg = (AggregatorInfo) aggInfo.elementAt(i);
+                agg = aggInfo.elementAt(i);
 				if (agg.isDistinct())
 				{
 					break;
@@ -293,9 +292,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		/*
 		** Get the new PR, put above the GroupBy.  
 		*/
-		ResultColumnList rclNew = (ResultColumnList)getNodeFactory().getNode(
-				                                                 C_NodeTypes.RESULT_COLUMN_LIST,
-				                                                 getContextManager());
+        ResultColumnList rclNew = new ResultColumnList((getContextManager()));
 		int sz = resultColumns.size();
 		for (int i = 0; i < sz; i++) 
 		{
@@ -310,8 +307,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		// have to be projected out upstream.
 		rclNew.copyOrderBySelect(resultColumns);
 		
-		parent = (FromTable) getNodeFactory().getNode(
-										C_NodeTypes.PROJECT_RESTRICT_NODE,
+        parent = new ProjectRestrictNode(
 										this, 	// child
 										rclNew,
 										null, //havingClause,
@@ -325,17 +321,12 @@ public class GroupByNode extends SingleChildResultSetNode
 		/*
 		** Reset the bottom RCL to be empty.
 		*/
-		childResult.setResultColumns((ResultColumnList)
-											getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager()));
+        childResult.setResultColumns(new ResultColumnList(getContextManager()));
 
 		/*
 		** Set the group by RCL to be empty
 		*/
-		resultColumns = (ResultColumnList) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+        resultColumns = new ResultColumnList((getContextManager()));
 
 	}
 
@@ -363,9 +354,8 @@ public class GroupByNode extends SingleChildResultSetNode
 		for (int i = 0; i < sz; i++) 
 		{
 			GroupByColumn gbc = (GroupByColumn) groupingList.elementAt(i);
-			ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
-					C_NodeTypes.RESULT_COLUMN,
-					"##UnaggColumn",
+            ResultColumn newRC = new ResultColumn(
+                    "##UnaggColumn",
 					gbc.getColumnExpression(),
 					getContextManager());
 
@@ -376,12 +366,12 @@ public class GroupByNode extends SingleChildResultSetNode
 			newRC.setVirtualColumnId(bottomRCL.size());
 			
 			// now add this column to the groupbylist
-			ResultColumn gbRC = (ResultColumn) getNodeFactory().getNode(
-					C_NodeTypes.RESULT_COLUMN,
-					"##UnaggColumn",
+            ResultColumn gbRC = new ResultColumn(
+                    "##UnaggColumn",
 					gbc.getColumnExpression(),
 					getContextManager());
-			groupByRCL.addElement(gbRC);
+
+            groupByRCL.addElement(gbRC);
 			gbRC.markGenerated();
 			gbRC.bindResultColumnToExpression();
 			gbRC.setVirtualColumnId(groupByRCL.size());
@@ -390,11 +380,10 @@ public class GroupByNode extends SingleChildResultSetNode
 			 ** Reset the original node to point to the
 			 ** Group By result set.
 			 */
-			VirtualColumnNode vc = (VirtualColumnNode) getNodeFactory().getNode(
-					C_NodeTypes.VIRTUAL_COLUMN_NODE,
+            VirtualColumnNode vc = new VirtualColumnNode(
 					this, // source result set.
 					gbRC,
-					new Integer(groupByRCL.size()),
+                    groupByRCL.size(),
 					getContextManager());
 
 			// we replace each group by expression 
@@ -561,8 +550,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			// having clause.
 			if (havingRefsToSubstitute != null) {
 				for (int r = 0; r < havingRefsToSubstitute.size(); r++) {
-					havingClause.accept(
-						(SubstituteExpressionVisitor)havingRefsToSubstitute.get(r));
+                    havingClause.accept(havingRefsToSubstitute.get(r));
 				}
 			}
 
@@ -624,9 +612,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		
 		ReplaceAggregatesWithCRVisitor replaceAggsVisitor = 
 			new ReplaceAggregatesWithCRVisitor(
-					(ResultColumnList) getNodeFactory().getNode(
-							C_NodeTypes.RESULT_COLUMN_LIST,
-							getContextManager()),
+                    new ResultColumnList((getContextManager())),
 				((FromTable) childResult).getTableNumber(),
 				ResultSetNode.class);
 		parent.getResultColumns().accept(replaceAggsVisitor);
@@ -636,9 +622,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 			// replace aggregates in the having clause with column references.
 			replaceAggsVisitor = new ReplaceAggregatesWithCRVisitor(
-					(ResultColumnList) getNodeFactory().getNode(
-							C_NodeTypes.RESULT_COLUMN_LIST,
-							getContextManager()),					
+                    new ResultColumnList((getContextManager())),
 					((FromTable)childResult).getTableNumber());
 			havingClause.accept(replaceAggsVisitor);
 			// make having clause a restriction list in the parent 
@@ -654,15 +638,14 @@ public class GroupByNode extends SingleChildResultSetNode
         int alSize = aggregates.size();
 		for (int index = 0; index < alSize; index++)
 		{
-            AggregateNode aggregate = (AggregateNode) aggregates.get(index);
+            AggregateNode aggregate = aggregates.get(index);
 
 			/*
 			** AGG RESULT: Set the aggregate result to null in the
 			** bottom project restrict.
 			*/
-			newRC = (ResultColumn) getNodeFactory().getNode(
-					C_NodeTypes.RESULT_COLUMN,
-					"##aggregate result",
+            newRC = new ResultColumn(
+                    "##aggregate result",
 					aggregate.getNewNullResultExpression(),
 					getContextManager());
 			newRC.markGenerated();
@@ -677,16 +660,13 @@ public class GroupByNode extends SingleChildResultSetNode
 			** was created when we called
 			** ReplaceAggregatesWithCRVisitor()
 			*/
-			newColumnRef = (ColumnReference) getNodeFactory().getNode(
-					C_NodeTypes.COLUMN_REFERENCE,
-					newRC.getName(),
-					null,
-					getContextManager());
+            newColumnRef = new ColumnReference(newRC.getName(),
+                                               null,
+                                               getContextManager());
 			newColumnRef.setSource(newRC);
 			newColumnRef.setNestingLevel(this.getLevel());
 			newColumnRef.setSourceLevel(this.getLevel());
-			tmpRC = (ResultColumn) getNodeFactory().getNode(
-					C_NodeTypes.RESULT_COLUMN,
+           tmpRC = new ResultColumn(
 					newRC.getColumnName(),
 					newColumnRef,
 					getContextManager());
@@ -713,11 +693,10 @@ public class GroupByNode extends SingleChildResultSetNode
 			bottomRCL.addElement(newRC);
 			newRC.setVirtualColumnId(bottomRCL.size());
 			aggInputVColId = newRC.getVirtualColumnId();
-			aggResultRC = (ResultColumn) getNodeFactory().getNode(
-								C_NodeTypes.RESULT_COLUMN,
-								"##aggregate expression",
-								aggregate.getNewNullResultExpression(),
-								getContextManager());
+           aggResultRC = new ResultColumn(
+                    "##aggregate expression",
+                    aggregate.getNewNullResultExpression(),
+                    getContextManager());
 	
 			/*
 			** Add a reference to this column into the
@@ -751,9 +730,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			** to generate a proper result description for input
 			** to this agg if it is a user agg.
 			*/
-			aggRCL = (ResultColumnList) getNodeFactory().getNode(
-					C_NodeTypes.RESULT_COLUMN_LIST,
-					getContextManager());
+            aggRCL = new ResultColumnList((getContextManager()));
 			aggRCL.addElement(aggResultRC);
 
 			/*
@@ -794,6 +771,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(
 							Optimizer optimizer,
 							OptimizablePredicateList predList,
@@ -823,6 +801,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate estimateCost(OptimizablePredicateList predList,
 										ConglomerateDescriptor cd,
 										CostEstimate outerCost,
@@ -840,12 +819,12 @@ public class GroupByNode extends SingleChildResultSetNode
 													optimizer,
 													rowOrdering);
 
-		CostEstimate costEstimate = getCostEstimate(optimizer);
-		costEstimate.setCost(childCost.getEstimatedCost(),
+        CostEstimate costEst = getCostEstimate(optimizer);
+        costEst.setCost(childCost.getEstimatedCost(),
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
 
-		return costEstimate;
+        return costEst;
 	}
 
 	/**
@@ -854,6 +833,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 			throws StandardException
 	{
@@ -866,7 +846,7 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -886,7 +866,8 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-	public void printSubNodes(int depth) {
+    @Override
+    void printSubNodes(int depth) {
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
@@ -894,7 +875,7 @@ public class GroupByNode extends SingleChildResultSetNode
             printLabel(depth, "aggregates:\n");
 
             for (int i = 0; i < aggregates.size(); i++) {
-                AggregateNode agg = (AggregateNode) aggregates.get(i);
+                AggregateNode agg = aggregates.get(i);
                 debugPrint(formatNodeString("[" + i + "]:", depth + 1));
                 agg.treePrint(depth + 1);
             }
@@ -930,7 +911,8 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		/* Can't flatten a GroupByNode */
 		return false;
@@ -948,8 +930,8 @@ public class GroupByNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows)
 					throws StandardException
@@ -957,22 +939,19 @@ public class GroupByNode extends SingleChildResultSetNode
 		/* We need to implement this method since a PRN can appear above a
 		 * SelectNode in a query tree.
 		 */
-		childResult = (ResultSetNode) childResult.optimize(
-											dataDictionary,
-											predicates,
-											outerRows);
-		Optimizer optimizer = getOptimizer(
-						(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-						predicates,
-						dataDictionary,
-						(RequiredRowOrdering) null);
+        childResult = childResult.optimize(dataDictionary,
+                                           predicates,
+                                           outerRows);
+        Optimizer opt = getOptimizer(
+            new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                         getContextManager()),
+            predicates,
+            dataDictionary,
+            (RequiredRowOrdering) null);
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
-		costEstimate = optimizer.newCostEstimate();
+        costEstimate = opt.newCostEstimate();
 
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
@@ -981,6 +960,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		return this;
 	}
 
+    @Override
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    return childResult.makeResultDescriptors();
@@ -995,7 +975,8 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * @return Whether or not the underlying ResultSet tree will return a single row.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isOneRowResultSet()	throws StandardException
+    @Override
+    boolean isOneRowResultSet() throws StandardException
 	{
 		// Only consider scalar aggregates for now
 		return ((groupingList == null) ||  (groupingList.size() == 0));
@@ -1003,16 +984,15 @@ public class GroupByNode extends SingleChildResultSetNode
 
     /**
      * generate the sort result set operating over the source
-	 * resultset.  Adds distinct aggregates to the sort if
+     * result set.  Adds distinct aggregates to the sort if
 	 * necessary.
      *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
-		int					orderingItem = 0;
-		int					aggInfoItem = 0;
 		FormatableArrayHolder	orderingHolder;
 
 		/* Get the next ResultSet#, so we can number this ResultSetNode, its
@@ -1044,7 +1024,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 			if (SanityManager.DEBUG_ON("AggregateTrace"))
 			{
-				StringBuffer s = new StringBuffer();
+                StringBuilder s = new StringBuilder();
 					
 				s.append("Group by column ordering is (");
 				ColumnOrdering[] ordering = 
@@ -1060,7 +1040,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			}
 		}
 
-		orderingItem = acb.addItem(orderingHolder);
+        int orderingItem = acb.addItem(orderingHolder);
 
 		/*
 		** We have aggregates, so save the aggInfo
@@ -1071,7 +1051,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			SanityManager.ASSERT(aggInfo != null,
 					"aggInfo not set up as expected");
 		}
-		aggInfoItem = acb.addItem(aggInfo);
+        int aggInfoItem = acb.addItem(aggInfo);
 
 		acb.pushGetResultSetFactoryExpression(mb);
 
@@ -1181,19 +1161,16 @@ public class GroupByNode extends SingleChildResultSetNode
 		ColumnReference	tmpColumnRef;
 		ResultColumn	newRC;
 	
-		tmpColumnRef = (ColumnReference) getNodeFactory().getNode(
-											C_NodeTypes.COLUMN_REFERENCE,
-											targetRC.getName(),
-											null,
-											getContextManager());
+        tmpColumnRef = new ColumnReference(targetRC.getName(),
+                                           null,
+                                           getContextManager());
 		tmpColumnRef.setSource(targetRC);
 		tmpColumnRef.setNestingLevel(this.getLevel());
 		tmpColumnRef.setSourceLevel(this.getLevel());
-		newRC = (ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									targetRC.getColumnName(),
-									tmpColumnRef,
-									getContextManager());
+       newRC = new ResultColumn(
+                targetRC.getColumnName(),
+                tmpColumnRef,
+                getContextManager());
 		newRC.markGenerated();
 		newRC.bindResultColumnToExpression();
 		return newRC;
@@ -1229,7 +1206,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
             if (aggregates.size() == 1)
 			{
-                AggregateNode an = (AggregateNode) aggregates.get(0);
+                AggregateNode an = aggregates.get(0);
 				AggregateDefinition ad = an.getAggregateDefinition();
 				if (ad instanceof MaxMinAggregateDefinition)
 				{
@@ -1289,8 +1266,7 @@ public class GroupByNode extends SingleChildResultSetNode
 								}
 							}
 
-                            FromBaseTable fbt =
-                                    (FromBaseTable) fbtHolder.get(0);
+                            FromBaseTable fbt = fbtHolder.get(0);
 							MaxMinAggregateDefinition temp = (MaxMinAggregateDefinition)ad;
 
 							/*  MAX   ASC      NULLABLE 
@@ -1351,7 +1327,8 @@ public class GroupByNode extends SingleChildResultSetNode
 	 * we'll process those expressions in the order: a*(a+b),
 	 * a+b+c, a+b, then a.
 	 */
-	private static final class ExpressionSorter implements Comparator<SubstituteExpressionVisitor>
+    private static class ExpressionSorter
+        implements Comparator<SubstituteExpressionVisitor>
 	{
 		public int compare(SubstituteExpressionVisitor o1, SubstituteExpressionVisitor o2)
 		{

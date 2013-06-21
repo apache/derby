@@ -22,86 +22,77 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-
-
 public final class CharConstantNode extends ConstantNode
 {
-	/**
-	 * Initializer for a CharConstantNode.
-	 *
-	 * @param arg1	A String containing the value of the constant OR The TypeId for the type of the node
-	 *
-	 * @exception StandardException
-	 */
-	public void init(
-					Object arg1)
-		throws StandardException
-	{
-		if (arg1 instanceof TypeId)
-		{
-			super.init(
-						arg1,
-						Boolean.TRUE,
-						ReuseFactory.getInteger(0));
-		}
-		else
-		{
-			String val = (String) arg1;
+    CharConstantNode(String value, ContextManager cm)
+            throws StandardException {
+        super(TypeId.CHAR_ID,
+              value == null, // nullable?
+              (value != null) ? value.length() : 0,
+              cm);
 
-			super.init(
-				TypeId.CHAR_ID,
-				(val == null) ? Boolean.TRUE : Boolean.FALSE,
-				(val != null) ?
-					ReuseFactory.getInteger(val.length()) :
-					ReuseFactory.getInteger(0));
+        setValue(getDataValueFactory().getCharDataValue(value));
+        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+    }
 
-			setValue(getDataValueFactory().getCharDataValue(val));
-		}
-	}
+    CharConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, 0, cm);
+        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+    }
 
-	/**
-	 * Initializer for a CharConstantNode of a specific length.
-	 *
-	 * @param newValue	A String containing the value of the constant
-	 * @param newLength The length of the new value of the constant
-	 *
-	 * @exception StandardException
-	 */
-	public void init(
-					Object newValue, 
-					Object newLength)
-		throws StandardException
-	{
-		String val = (String) newValue;
-		int newLen = ((Integer) newLength).intValue();
+    /**
+     * @param type VARCHAR_CONSTANT_NODE or LONGVARCHAR_CONSTANT_NODE
+     * @param t typeId
+     * @param cm context manager
+     * @throws StandardException
+     */
+    CharConstantNode(int type, TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, 0, cm);
+        setNodeType(type);
+    }
 
-		super.init(
-			 TypeId.CHAR_ID,
-			 (val == null) ? Boolean.TRUE : Boolean.FALSE,
-			 newLength);
+    /**
+     * Constructor for a CharConstantNode of a specific length.
+     *
+     * @param newValue A String containing the value of the constant
+     * @param newLength The length of the new value of the constant
+     * @param cm
+     * @throws StandardException
+     */
+    CharConstantNode(String newValue, int newLength, ContextManager cm)
+            throws StandardException {
 
-		if (val.length() > newLen)
-		{
-			throw StandardException.newException(SQLState.LANG_STRING_TRUNCATION, "CHAR", val, String.valueOf(newLen));
+        super(TypeId.CHAR_ID,
+              newValue == null,
+              newLength,
+              cm);
+
+        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+
+        if (newValue.length() > newLength) {
+           throw StandardException.newException(
+                    SQLState.LANG_STRING_TRUNCATION,
+                    "CHAR",
+                    newValue,
+                    String.valueOf(newLength));
 		}
 
-		// Blank pad the string if necessesary
-		while (val.length() < newLen)
-		{
-			val = val + ' ';
+        // Blank pad the string if necessesary
+       while (newValue.length() < newLength) {
+           newValue = newValue + ' ';
 		}
 
-		setValue(getDataValueFactory().getCharDataValue(val));
+       setValue(getDataValueFactory().getCharDataValue(newValue));
 	}
 
 	/**
@@ -112,7 +103,7 @@ public final class CharConstantNode extends ConstantNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public String	getString() throws StandardException
+    String  getString() throws StandardException
 	{
 		return value.getString();
 	}
@@ -142,14 +133,17 @@ public final class CharConstantNode extends ConstantNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	Object getConstantValueAsObject() throws StandardException 
 	{
 		return value.getString();
 	}
 	
+    @Override
     ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
-	throws StandardException
+        FromList fromList,
+        SubqueryList subqueryList,
+        List<AggregateNode> aggregates) throws StandardException
 	{
 		//The DTD for this character constant should get its collation type
 		//from the schema it is getting compiled in.

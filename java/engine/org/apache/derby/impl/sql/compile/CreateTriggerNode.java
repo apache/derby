@@ -27,11 +27,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -50,7 +51,7 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
-public class CreateTriggerNode extends DDLStatementNode
+class CreateTriggerNode extends DDLStatementNode
 {
 	private	TableName			triggerName;
 	private	TableName			tableName;
@@ -59,10 +60,9 @@ public class CreateTriggerNode extends DDLStatementNode
 	private	boolean				isBefore;
 	private	boolean				isRow;
 	private	boolean				isEnabled;
-	private	List				refClause;
+    private List<TriggerReferencingStruct> refClause;
 	private	ValueNode		    whenClause;
 	private	String				whenText;
-	private	int					whenOffset;
 	private	StatementNode		actionNode;
 	private	String				actionText;
 	private	String				originalActionText; // text w/o trim of spaces
@@ -197,7 +197,6 @@ public class CreateTriggerNode extends DDLStatementNode
 	 */
 	private int[]				referencedColsInTriggerAction;
 	private TableDescriptor		triggerTableDescriptor;
-	private	UUID				actionCompSchemaId;
 
 	/*
 	** Names of old and new table.  By default we have
@@ -217,7 +216,7 @@ public class CreateTriggerNode extends DDLStatementNode
 
 
 	/**
-	 * Initializer for a CreateTriggerNode
+     * Constructor for a CreateTriggerNode
 	 *
 	 * @param triggerName			name of the trigger	
 	 * @param tableName				name of the table which the trigger is declared upon	
@@ -234,49 +233,49 @@ public class CreateTriggerNode extends DDLStatementNode
 	 * @param actionNode			the trigger action tree
 	 * @param actionText			the text of the trigger action
 	 * @param actionOffset			offset of start of action clause
+     * @param cm                    context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init 
+    CreateTriggerNode
 	(
-		Object		triggerName,
-		Object		tableName,
-		Object				triggerEventMask,
-		Object triggerCols,
-		Object			isBefore,
-		Object			isRow,
-		Object			isEnabled,
-		Object			refClause,
-		Object	whenClause,
-		Object			whenText,
-		Object				whenOffset,
-		Object	actionNode,
-		Object			actionText,
-		Object				actionOffset
+        TableName       triggerName,
+        TableName       tableName,
+        int             triggerEventMask,
+        ResultColumnList triggerCols,
+        boolean         isBefore,
+        boolean         isRow,
+        boolean         isEnabled,
+        List<TriggerReferencingStruct> refClause,
+        ValueNode       whenClause,
+        String          whenText,
+        int             whenOffset,
+        StatementNode   actionNode,
+        String          actionText,
+        int             actionOffset,
+        ContextManager  cm
 	) throws StandardException
 	{
-		initAndCheck(triggerName);
-		this.triggerName = (TableName) triggerName;
-		this.tableName = (TableName) tableName;
-		this.triggerEventMask = ((Integer) triggerEventMask).intValue();
-		this.triggerCols = (ResultColumnList) triggerCols;
-		this.isBefore = ((Boolean) isBefore).booleanValue();
-		this.isRow = ((Boolean) isRow).booleanValue();
-		this.isEnabled = ((Boolean) isEnabled).booleanValue();
-		this.refClause = (List) refClause;
-		this.whenClause = (ValueNode) whenClause;
-		this.whenText = (whenText == null) ? null : ((String) whenText).trim();
-		this.whenOffset = ((Integer) whenOffset).intValue();
-		this.actionNode = (StatementNode) actionNode;
-		this.originalActionText = (String) actionText;
-		this.actionText =
-					(actionText == null) ? null : ((String) actionText).trim();
-		this.actionOffset = ((Integer) actionOffset).intValue();
-
-		implicitCreateSchema = true;
+        super(triggerName, cm);
+        setNodeType(C_NodeTypes.CREATE_TRIGGER_NODE);
+        this.triggerName = triggerName;
+        this.tableName = tableName;
+        this.triggerEventMask = triggerEventMask;
+        this.triggerCols = triggerCols;
+        this.isBefore = isBefore;
+        this.isRow = isRow;
+        this.isEnabled = isEnabled;
+        this.refClause = refClause;
+        this.whenClause = whenClause;
+        this.whenText = (whenText == null) ? null : whenText.trim();
+        this.actionNode = actionNode;
+        this.originalActionText = actionText;
+        this.actionText = (actionText == null) ? null : actionText.trim();
+        this.actionOffset = actionOffset;
+        this.implicitCreateSchema = true;
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "CREATE TRIGGER";
 	}
@@ -287,8 +286,8 @@ public class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -325,6 +324,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext compilerContext = getCompilerContext();
@@ -446,6 +446,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -593,7 +594,7 @@ public class CreateTriggerNode extends DDLStatementNode
 			//This is a table level trigger	        
 			//Total Number of columns in the trigger table
 			int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
-			StringBuffer newText = new StringBuffer();
+            StringBuilder newText = new StringBuilder();
 			/*
 			** For a statement trigger, we find all FromBaseTable nodes.  If
 			** the from table is NEW or OLD (or user designated alternates
@@ -783,10 +784,8 @@ public class CreateTriggerNode extends DDLStatementNode
 			return;
 		}
 
-		for (Iterator it = refClause.iterator(); it.hasNext(); )
+        for (TriggerReferencingStruct trn : refClause)
 		{
-			TriggerReferencingStruct trn = (TriggerReferencingStruct) it.next();
-
 			/*
 			** 1) Make sure that we don't try to refer
 			** to a table for a row trigger or a row for
@@ -857,6 +856,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+    @Override
 	public ConstantAction makeConstantAction() throws StandardException
 	{
 		String oldReferencingName = (oldTableInReferencingClause) ? oldTableName : null;
@@ -874,9 +874,7 @@ public class CreateTriggerNode extends DDLStatementNode
 											whenText,
 											(UUID)null,			// action SPSid 
 											actionText,
-											(actionCompSchemaId == null) ?
-												compSchemaDescriptor.getUUID() :
-												actionCompSchemaId,
+                                            compSchemaDescriptor.getUUID(),
 											(Timestamp)null,	// creation time
 											referencedColInts,
 											referencedColsInTriggerAction,
@@ -895,6 +893,7 @@ public class CreateTriggerNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -902,12 +901,10 @@ public class CreateTriggerNode extends DDLStatementNode
 			String refString = "null";
 			if (refClause != null)
 			{
-				StringBuffer buf = new StringBuffer();
-				for (Iterator it = refClause.iterator(); it.hasNext(); )
+                StringBuilder buf = new StringBuilder();
+                for (TriggerReferencingStruct trn : refClause)
 				{
 					buf.append("\t");
-					TriggerReferencingStruct trn = 	
-							(TriggerReferencingStruct) it.next();
 					buf.append(trn.toString());
 					buf.append("\n");
 				}

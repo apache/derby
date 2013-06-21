@@ -22,18 +22,17 @@
 package org.apache.derby.iapi.types;
 
 import java.sql.Types;
-
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DecimalTypeIdImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * TypeId describes the static information about a SQL type
@@ -142,7 +141,7 @@ public final class TypeId
         public static final String      TINYINT_NAME = "TINYINT";
         public static final String      SMALLINT_NAME = "SMALLINT";
         public static final String      INTEGER_NAME = "INTEGER";
-        public static final String      LONGINT_NAME = "BIGINT";
+        public static final String      BIGINT_NAME = "BIGINT";
         public static final String      FLOAT_NAME = "FLOAT";
         public static final String      REAL_NAME = "REAL";
         public static final String      DOUBLE_NAME = "DOUBLE";
@@ -217,16 +216,20 @@ public final class TypeId
         ** These are put here because the system needs them init time.
         */
         public static final TypeId BOOLEAN_ID = create(
-            StoredFormatIds.BOOLEAN_TYPE_ID, StoredFormatIds.BOOLEAN_TYPE_ID_IMPL);
+            StoredFormatIds.BOOLEAN_TYPE_ID,
+            StoredFormatIds.BOOLEAN_TYPE_ID_IMPL);
         
         public static final TypeId SMALLINT_ID = create(
-            StoredFormatIds.SMALLINT_TYPE_ID, StoredFormatIds.SMALLINT_TYPE_ID_IMPL);
+            StoredFormatIds.SMALLINT_TYPE_ID,
+            StoredFormatIds.SMALLINT_TYPE_ID_IMPL);
 
         public static final TypeId INTEGER_ID = create(
-            StoredFormatIds.INT_TYPE_ID, StoredFormatIds.INT_TYPE_ID_IMPL);
+            StoredFormatIds.INT_TYPE_ID,
+            StoredFormatIds.INT_TYPE_ID_IMPL);
 
         public static final TypeId CHAR_ID = create(
-            StoredFormatIds.CHAR_TYPE_ID, StoredFormatIds.CHAR_TYPE_ID_IMPL);
+            StoredFormatIds.CHAR_TYPE_ID,
+            StoredFormatIds.CHAR_TYPE_ID_IMPL);
         
         /*
         ** Others are created on demand by the getBuiltInTypeId(int),
@@ -235,41 +238,76 @@ public final class TypeId
         */
 
         private static final TypeId TINYINT_ID = create(
-                StoredFormatIds.TINYINT_TYPE_ID, StoredFormatIds.TINYINT_TYPE_ID_IMPL);;
+            StoredFormatIds.TINYINT_TYPE_ID,
+            StoredFormatIds.TINYINT_TYPE_ID_IMPL);
 
         private static final TypeId BIGINT_ID = create(
-            StoredFormatIds.LONGINT_TYPE_ID, StoredFormatIds.LONGINT_TYPE_ID_IMPL);
+            StoredFormatIds.BIGINT_TYPE_ID,
+            StoredFormatIds.BIGINT_TYPE_ID_IMPL);
+
         private static final TypeId REAL_ID = create(
-                StoredFormatIds.REAL_TYPE_ID, StoredFormatIds.REAL_TYPE_ID_IMPL);
+            StoredFormatIds.REAL_TYPE_ID,
+            StoredFormatIds.REAL_TYPE_ID_IMPL);
+
         private static final TypeId DOUBLE_ID = create(
-                StoredFormatIds.DOUBLE_TYPE_ID, StoredFormatIds.DOUBLE_TYPE_ID_IMPL);
-        private static final TypeId DECIMAL_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(false));
-        private static final TypeId NUMERIC_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(true));
+            StoredFormatIds.DOUBLE_TYPE_ID,
+            StoredFormatIds.DOUBLE_TYPE_ID_IMPL);
+
+        private static final TypeId DECIMAL_ID =  new TypeId(
+            StoredFormatIds.DECIMAL_TYPE_ID,
+            new DecimalTypeIdImpl(false));
+
+        private static final TypeId NUMERIC_ID = new TypeId(
+            StoredFormatIds.DECIMAL_TYPE_ID,
+            new DecimalTypeIdImpl(true));
+
         private static final TypeId VARCHAR_ID = create(
-                StoredFormatIds.VARCHAR_TYPE_ID, StoredFormatIds.VARCHAR_TYPE_ID_IMPL);
+            StoredFormatIds.VARCHAR_TYPE_ID,
+            StoredFormatIds.VARCHAR_TYPE_ID_IMPL);
+
         private static final TypeId DATE_ID = create(
-                StoredFormatIds.DATE_TYPE_ID, StoredFormatIds.DATE_TYPE_ID_IMPL);
+            StoredFormatIds.DATE_TYPE_ID,
+            StoredFormatIds.DATE_TYPE_ID_IMPL);
+
         private static final TypeId TIME_ID = create(
-                StoredFormatIds.TIME_TYPE_ID, StoredFormatIds.TIME_TYPE_ID_IMPL);
+            StoredFormatIds.TIME_TYPE_ID,
+            StoredFormatIds.TIME_TYPE_ID_IMPL);
+
         private static final TypeId TIMESTAMP_ID = create(
-                StoredFormatIds.TIMESTAMP_TYPE_ID, StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL);
+            StoredFormatIds.TIMESTAMP_TYPE_ID,
+            StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL);
+
         private static final TypeId BIT_ID = create(
-                StoredFormatIds.BIT_TYPE_ID, StoredFormatIds.BIT_TYPE_ID_IMPL);
+            StoredFormatIds.BIT_TYPE_ID,
+            StoredFormatIds.BIT_TYPE_ID_IMPL);
+
         private static final TypeId VARBIT_ID = create(
-                StoredFormatIds.VARBIT_TYPE_ID, StoredFormatIds.VARBIT_TYPE_ID_IMPL);
+            StoredFormatIds.VARBIT_TYPE_ID,
+            StoredFormatIds.VARBIT_TYPE_ID_IMPL);
+
         private static final TypeId REF_ID = create(
-                StoredFormatIds.REF_TYPE_ID, StoredFormatIds.REF_TYPE_ID_IMPL);
+            StoredFormatIds.REF_TYPE_ID,
+            StoredFormatIds.REF_TYPE_ID_IMPL);
+
         private static final TypeId LONGVARCHAR_ID = create(
-                StoredFormatIds.LONGVARCHAR_TYPE_ID, StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL);
+            StoredFormatIds.LONGVARCHAR_TYPE_ID,
+            StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL);
+
         private static final TypeId LONGVARBIT_ID = create(
-                StoredFormatIds.LONGVARBIT_TYPE_ID, StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL);
+            StoredFormatIds.LONGVARBIT_TYPE_ID,
+            StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL);
 
         private static final TypeId BLOB_ID = create(
-                StoredFormatIds.BLOB_TYPE_ID, StoredFormatIds.BLOB_TYPE_ID_IMPL);
+            StoredFormatIds.BLOB_TYPE_ID,
+            StoredFormatIds.BLOB_TYPE_ID_IMPL);
+
         private static final TypeId CLOB_ID = create(
-                StoredFormatIds.CLOB_TYPE_ID, StoredFormatIds.CLOB_TYPE_ID_IMPL);
+            StoredFormatIds.CLOB_TYPE_ID,
+            StoredFormatIds.CLOB_TYPE_ID_IMPL);
+
         private static final TypeId XML_ID = create(
-                StoredFormatIds.XML_TYPE_ID, StoredFormatIds.XML_TYPE_ID_IMPL);
+            StoredFormatIds.XML_TYPE_ID,
+            StoredFormatIds.XML_TYPE_ID_IMPL);
 
     private static final TypeId[] ALL_BUILTIN_TYPE_IDS =
     {
@@ -574,7 +612,7 @@ public final class TypeId
         if (SQLTypeName.equals(INTEGER_NAME)) {
             return INTEGER_ID;
         }
-        if (SQLTypeName.equals(LONGINT_NAME)) {
+        if (SQLTypeName.equals(BIGINT_NAME)) {
             return BIGINT_ID;
         }
         if (SQLTypeName.equals(REAL_NAME)) {
@@ -782,7 +820,7 @@ public final class TypeId
                                 isNumericTypeId = true;
                                 break;
 
-                        case StoredFormatIds.LONGINT_TYPE_ID:
+                        case StoredFormatIds.BIGINT_TYPE_ID:
                                 maxPrecision = TypeId.LONGINT_PRECISION;
                                 maxScale = TypeId.LONGINT_SCALE;
                                 typePrecedence = LONGINT_PRECEDENCE;
@@ -1397,7 +1435,7 @@ public final class TypeId
                         case StoredFormatIds.INT_TYPE_ID:
                                 return new SQLInteger();
 
-                        case StoredFormatIds.LONGINT_TYPE_ID:
+                        case StoredFormatIds.BIGINT_TYPE_ID:
                                 return new SQLLongint();
 
                         case StoredFormatIds.LONGVARBIT_TYPE_ID:

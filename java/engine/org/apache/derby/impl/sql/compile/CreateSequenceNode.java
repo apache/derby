@@ -23,11 +23,12 @@ package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
 
 
@@ -36,7 +37,7 @@ import org.apache.derby.iapi.types.TypeId;
  * represents a CREATE SEQUENCE statement.
  */
 
-public class CreateSequenceNode extends DDLStatementNode
+class CreateSequenceNode extends DDLStatementNode
 {
     private TableName _sequenceName;
     private DataTypeDescriptor _dataType;
@@ -44,12 +45,12 @@ public class CreateSequenceNode extends DDLStatementNode
     private Long _stepValue;
     private Long _maxValue;
     private Long _minValue;
-    private Boolean _cycle;
+    private boolean _cycle;
 
     public static final int SEQUENCE_ELEMENT_COUNT = 1;
 
     /**
-     * Initializer for a CreateSequenceNode
+     * Constructor for a CreateSequenceNode
      *
      * @param sequenceName The name of the new sequence
      * @param dataType Exact numeric type of the new sequence
@@ -58,45 +59,51 @@ public class CreateSequenceNode extends DDLStatementNode
      * @param maxValue Largest value returned by the sequence generator
      * @param minValue Smallest value returned by the sequence generator
      * @param cycle True if the generator should wrap around, false otherwise
-     *
+     * @param cm Context manager
      * @throws org.apache.derby.iapi.error.StandardException on error
      */
-    public void init
+    CreateSequenceNode
         (
-         Object sequenceName,
-         Object dataType,
-         Object initialValue,
-         Object stepValue,
-         Object maxValue,
-         Object minValue,
-         Object cycle
+         TableName sequenceName,
+         DataTypeDescriptor dataType,
+         Long initialValue,
+         Long stepValue,
+         Long maxValue,
+         Long minValue,
+         boolean cycle,
+         ContextManager cm
          ) throws StandardException {
 
-        _sequenceName = (TableName) sequenceName;
-        initAndCheck(_sequenceName);
+        super(sequenceName, cm);
+        setNodeType(C_NodeTypes.CREATE_SEQUENCE_NODE);
+        this._sequenceName = sequenceName;
 
         if (dataType != null) {
-            _dataType = (DataTypeDescriptor) dataType;
+            _dataType = dataType;
         } else {
             _dataType = DataTypeDescriptor.INTEGER;
         }
 
-        _stepValue = (stepValue != null ? (Long) stepValue : new Long(1));
+        _stepValue = (stepValue != null ? stepValue : Long.valueOf(1));
 
         if (_dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
-            _minValue = (minValue != null ? (Long) minValue : new Long(Short.MIN_VALUE));
-            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Short.MAX_VALUE));
+            _minValue =
+                (minValue != null ? minValue : Long.valueOf(Short.MIN_VALUE));
+            _maxValue =
+                (maxValue != null ? maxValue : Long.valueOf(Short.MAX_VALUE));
         } else if (_dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
-            _minValue = (minValue != null ? (Long) minValue : new Long(Integer.MIN_VALUE));
-            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Integer.MAX_VALUE));
+            _minValue =
+                (minValue != null ? minValue : Long.valueOf(Integer.MIN_VALUE));
+            _maxValue =
+                (maxValue != null ? maxValue : Long.valueOf(Integer.MAX_VALUE));
         } else {
             // Could only be BIGINT
-            _minValue = (minValue != null ? (Long) minValue : new Long(Long.MIN_VALUE));
-            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Long.MAX_VALUE));
+            _minValue = (minValue != null ? minValue : Long.MIN_VALUE);
+            _maxValue = (maxValue != null ? maxValue : Long.MAX_VALUE);
         }
 
         if (initialValue != null) {
-            _initialValue = (Long) initialValue;
+            _initialValue = initialValue;
         } else {
             if (_stepValue.longValue() > 0L) {
                 _initialValue = _minValue;
@@ -104,7 +111,7 @@ public class CreateSequenceNode extends DDLStatementNode
                 _initialValue = _maxValue;
             }
         }
-        _cycle = (cycle != null ? (Boolean) cycle : Boolean.FALSE);
+        _cycle = cycle;
 
         // automatically create the schema if it doesn't exist
         implicitCreateSchema = true;
@@ -116,7 +123,7 @@ public class CreateSequenceNode extends DDLStatementNode
      *
      * @return This object as a String
      */
-
+    @Override
     public String toString() {
         if (SanityManager.DEBUG) {
             return super.toString() +
@@ -131,9 +138,8 @@ public class CreateSequenceNode extends DDLStatementNode
      * The main objectives of this method are to resolve the schema name, determine privilege checks,
      * and vet the variables in the CREATE SEQUENCE statement.
      */
+    @Override
     public void bindStatement() throws StandardException {
-        CompilerContext cc = getCompilerContext();
-
         // implicitly create the schema if it does not exist.
         // this method also compiles permissions checks
         SchemaDescriptor sd = getSchemaDescriptor();
@@ -231,6 +237,7 @@ public class CreateSequenceNode extends DDLStatementNode
      * @throws org.apache.derby.iapi.error.StandardException
      *          Thrown on failure
      */
+    @Override
     public ConstantAction makeConstantAction() {
              return getGenericConstantActionFactory().
                 getCreateSequenceConstantAction(
@@ -240,7 +247,7 @@ public class CreateSequenceNode extends DDLStatementNode
                         _stepValue.longValue(),
                         _maxValue.longValue(),
                         _minValue.longValue(),
-                        _cycle.booleanValue());
+                        _cycle);
     }
 
 

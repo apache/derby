@@ -26,13 +26,13 @@ package org.apache.derby.impl.sql.compile;
  * a REFERENCING clause for a trigger.
  *
  */
-public class TriggerReferencingStruct 
+class TriggerReferencingStruct
 {
-	public String identifier;
-	public boolean isRow;
-	public boolean isNew;
+    String identifier;
+    boolean isRow;
+    boolean isNew;
 
-	public TriggerReferencingStruct
+    TriggerReferencingStruct
 	(
 		boolean	isRow, 
 		boolean	isNew,
@@ -44,6 +44,7 @@ public class TriggerReferencingStruct
 		this.identifier = identifier;
 	}
 
+    @Override
 	public String toString()
 	{
 		return (isRow ? "ROW " : "TABLE ")+(isNew ? "new: " : "old: ") + identifier;

@@ -21,39 +21,43 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A SavepointNode is the root of a QueryTree that represents a Savepoint (ROLLBACK savepoint, RELASE savepoint and SAVEPOINT)
  * statement.
  */
 
-public class SavepointNode extends DDLStatementNode
+class SavepointNode extends DDLStatementNode
 {
 	private String	savepointName; //name of the savepoint
 	private int	savepointStatementType; //Type of savepoint statement ie rollback, release or set savepoint
 
 	/**
-	 * Initializer for a SavepointNode
+     * Constructor for a SavepointNode
 	 *
-	 * @param objectName		The name of the savepoint
-	 * @param savepointStatementType		Type of savepoint statement ie rollback, release or set savepoint
-	 *
+     * @param objectName              The name of the savepoint
+     * @param savepointStatementType  Type of savepoint statement ie rollback,
+     *                                release or set savepoint
+     * @param cm                      The context manager
+     *
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void init(
-			Object objectName,
-			Object savepointStatementType)
+    SavepointNode(
+            String objectName,
+            int savepointStatementType,
+            ContextManager cm)
 		throws StandardException
 	{
-		initAndCheck(null);	
-		this.savepointName = (String) objectName;
-		this.savepointStatementType = ((Integer) savepointStatementType).intValue();
+        super(cm);
+        setNodeType(C_NodeTypes.SAVEPOINT_NODE);
+        this.savepointName = objectName;
+        this.savepointStatementType = savepointStatementType;
 
 		if (SanityManager.DEBUG)
 		{
@@ -71,7 +75,7 @@ public class SavepointNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -86,7 +90,7 @@ public class SavepointNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		if (savepointStatementType == 1)
 			return "SAVEPOINT";
@@ -104,6 +108,7 @@ public class SavepointNode extends DDLStatementNode
 	 *
 	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
 	 */
+    @Override
 	public boolean needsSavepoint()
 	{
 		return false;
@@ -116,7 +121,8 @@ public class SavepointNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return(
             getGenericConstantActionFactory().getSavepointConstantAction(

@@ -22,28 +22,21 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.store.access.Qualifier;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
 
-
 /**
- * A ColumnReference represents a column in the query tree.  The parser generates a
- * ColumnReference for each column reference.  A column refercence could be a column in
- * a base table, a column in a view (which could expand into a complex
- * expression), or a column in a subquery in the FROM clause.
+ * A ColumnReference represents a column in the query tree.  The parser
+ * generates a ColumnReference for each column reference.  A column reference
+ * could be a column in a base table, a column in a view (which could expand
+ * into a complex expression), or a column in a subquery in the FROM clause.
  *
  */
 
@@ -112,7 +105,7 @@ public class ColumnReference extends ValueNode
 	private java.util.ArrayList<RemapInfo> remaps;
 
 	/**
-	 * Initializer.
+     * Constructor.
 	 * This one is called by the parser where we could
 	 * be dealing with delimited identifiers.
 	 *
@@ -122,33 +115,37 @@ public class ColumnReference extends ValueNode
 	 *					identifier from parser.
 	 * @param tokEndOffset	end position of token for the column name 
 	 *					identifier from parser.
+     * @param cm           The context manager
 	 */
-
-	public void init(Object columnName, 
-					 Object tableName,
-			 		 Object	tokBeginOffset,
-					 Object	tokEndOffset
-					 )
-	{
-		this.columnName = (String) columnName;
-		this.tableName = (TableName) tableName;
-		this.setBeginOffset(((Integer) tokBeginOffset).intValue());
-		this.setEndOffset(((Integer) tokEndOffset).intValue());
+    ColumnReference(String         columnName,
+                    TableName      tableName,
+                    int            tokBeginOffset,
+                    int            tokEndOffset,
+                    ContextManager cm)  {
+        super(cm);
+        setNodeType(C_NodeTypes.COLUMN_REFERENCE);
+        this.columnName = columnName;
+        this.tableName = tableName;
+        this.setBeginOffset(tokBeginOffset);
+        this.setEndOffset(tokEndOffset);
 		tableNumber = -1;
 		remaps = null;
 	}
 
 	/**
-	 * Initializer.
+     * Constructor.
 	 *
 	 * @param columnName	The name of the column being referenced
 	 * @param tableName		The qualification for the column
+     * @param cm           The context manager
 	 */
-
-	public void init(Object columnName, Object tableName)
-	{
-		this.columnName = (String) columnName;
-		this.tableName = (TableName) tableName;
+    ColumnReference(String         columnName,
+                    TableName      tableName,
+                    ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.COLUMN_REFERENCE);
+        this.columnName = columnName;
+        this.tableName = tableName;
 		tableNumber = -1;
 		remaps = null;
 	}
@@ -159,7 +156,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -189,8 +186,8 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -279,7 +276,7 @@ public class ColumnReference extends ValueNode
 	 * column references to the matching aggregate in the 
 	 * user's SELECT.
 	 */
-	public void markGeneratedToReplaceAggregate()
+    void markGeneratedToReplaceAggregate()
 	{
 		replacesAggregate = true;
 	}
@@ -288,7 +285,7 @@ public class ColumnReference extends ValueNode
 	/**
 	 * Mark this node as being generated to replace a window function call.
 	 */
-	public void markGeneratedToReplaceWindowFunctionCall()
+    void markGeneratedToReplaceWindowFunctionCall()
 	{
 		replacesWindowFunctionCall = true;
 	}
@@ -300,7 +297,7 @@ public class ColumnReference extends ValueNode
 	 * @return boolean	Whether or not this node was generated to replace
 	 *					an aggregate in the user's SELECT.
 	 */
-	public boolean getGeneratedToReplaceAggregate()
+    boolean getGeneratedToReplaceAggregate()
 	{
 		return replacesAggregate;
 	}
@@ -313,7 +310,7 @@ public class ColumnReference extends ValueNode
 	 * @return boolean	Whether or not this node was generated to replace
 	 *					a window function call in the user's SELECT.
 	 */
-	public boolean getGeneratedToReplaceWindowFunctionCall()
+    boolean getGeneratedToReplaceWindowFunctionCall()
 	{
 		return replacesWindowFunctionCall;
 	}
@@ -325,14 +322,12 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode getClone()
+    @Override
+    ValueNode getClone()
 		throws StandardException
 	{
-		ColumnReference newCR = (ColumnReference) getNodeFactory().getNode(
-									C_NodeTypes.COLUMN_REFERENCE,
-									columnName,
-									tableName,
-									getContextManager());
+        ColumnReference newCR =
+                new ColumnReference(columnName, tableName, getContextManager());
 
 		newCR.copyFields(this);
 		return newCR;
@@ -345,7 +340,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void copyFields(ColumnReference oldCR)
+    void copyFields(ColumnReference oldCR)
 		throws StandardException
 	{
 		super.copyFields(oldCR);
@@ -379,9 +374,11 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
-				throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
 	{
 		ResultColumn matchingRC;
 
@@ -415,7 +412,7 @@ public class ColumnReference extends ValueNode
 	 * @return	The  column name in the form [[schema.]table.]column
 	 */
 
-	public String getSQLColumnName()
+    String getSQLColumnName()
 	{
 		if (tableName == null)
 			return columnName;
@@ -428,7 +425,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @return	The name of this column
 	 */
-
+    @Override
 	public String getColumnName()
 	{
 		return columnName;
@@ -440,7 +437,7 @@ public class ColumnReference extends ValueNode
 	 * @return	int The table number for this ColumnReference
 	 */
 
-	public int getTableNumber()
+    int getTableNumber()
 	{
 		return tableNumber;
 	}
@@ -451,7 +448,7 @@ public class ColumnReference extends ValueNode
 	 * @param tableNumber	The table number this ColumnReference will refer to
 	 */
 
-	public void setTableNumber(int tableNumber)
+    void setTableNumber(int tableNumber)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -470,8 +467,8 @@ public class ColumnReference extends ValueNode
 	 * @return	The user-supplied name of this column.  Null if no user-
 	 * 		supplied name.
 	 */
-
-	public String getTableName()
+    @Override
+    String getTableName()
 	{
 		return ( ( tableName != null) ? tableName.getTableName() : null );
 	}
@@ -487,7 +484,7 @@ public class ColumnReference extends ValueNode
 	 *			Null if not a ColumnReference.
 	 */
 
-	public String getSourceTableName()
+    String getSourceTableName()
 	{
 		return ((source != null) ? source.getTableName() : null);
 	}
@@ -502,7 +499,7 @@ public class ColumnReference extends ValueNode
 	 * @return	The name of the schema for Column's base table. If the column
 	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
-	public String getSourceSchemaName() throws StandardException
+    String getSourceSchemaName() throws StandardException
 	{
 		return ((source != null) ? source.getSchemaName() : null);
 	}
@@ -513,6 +510,7 @@ public class ColumnReference extends ValueNode
 	 * @return TRUE, if the column is a base column of a table and is 
 	 * writable by cursor.
 	 */
+    @Override
 	public boolean updatableByCursor()
 	{
 		return ((source != null) ? source.updatableByCursor() : false);
@@ -527,7 +525,7 @@ public class ColumnReference extends ValueNode
 		return tableName;
 	}
 
-	public void setTableNameNode(TableName tableName)
+    void setTableNameNode(TableName tableName)
 	{
 		this.tableName = tableName;
 	}
@@ -538,7 +536,7 @@ public class ColumnReference extends ValueNode
 	 * @return	int The column number for this ColumnReference
 	 */
 
-	public int getColumnNumber()
+    int getColumnNumber()
 	{
 		return columnNumber;
 	}
@@ -550,7 +548,7 @@ public class ColumnReference extends ValueNode
 	 * @param colNum The new column number.
 	 */
 
-	public void setColumnNumber(int colNum)
+    void setColumnNumber(int colNum)
 	{
 		this.columnNumber = colNum;
 	}
@@ -561,7 +559,7 @@ public class ColumnReference extends ValueNode
 	 * @return	The source of this columnReference
 	 */
 
-	public ResultColumn getSource()
+    ResultColumn getSource()
 	{
 		return source;
 	}
@@ -572,7 +570,7 @@ public class ColumnReference extends ValueNode
 	 * @param source	The source of this columnReference
 	 */
 
-	public void setSource(ResultColumn source)
+    void setSource(ResultColumn source)
 	{
 		this.source = source;
 	}
@@ -586,33 +584,26 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode putAndsOnTop() 
+    @Override
+    ValueNode putAndsOnTop()
 					throws StandardException
 	{
 		BinaryComparisonOperatorNode		equalsNode;
 		BooleanConstantNode	trueNode;
-		NodeFactory		nodeFactory = getNodeFactory();
-		ValueNode		andNode;
 
-        trueNode = (BooleanConstantNode) nodeFactory.getNode(
-										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-										Boolean.TRUE,
-										getContextManager());
-		equalsNode = (BinaryComparisonOperatorNode) 
-						nodeFactory.getNode(
+        trueNode = new BooleanConstantNode(true, getContextManager());
+        equalsNode = new BinaryRelationalOperatorNode(
 										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 										this,
 										trueNode,
-										Boolean.FALSE,
+                                        false,
 										getContextManager());
 		/* Set type info for the operator node */
 		equalsNode.bindComparisonOperator();
-		andNode = (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.AND_NODE,
-									equalsNode,
-									trueNode,
-									getContextManager());
-		((AndNode) andNode).postBindFixup();
+
+        AndNode andNode =
+                new AndNode(equalsNode, trueNode, getContextManager());
+       andNode.postBindFixup();
 		return andNode;
 	}
 
@@ -650,7 +641,8 @@ public class ColumnReference extends ValueNode
 	 * @return boolean		Whether or not source.expression is a ColumnReference
 	 *						or a VirtualColumnNode or a ConstantNode.
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 	{
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(tableNumber >= 0,
@@ -673,7 +665,7 @@ public class ColumnReference extends ValueNode
 	 * RESOLVE: Once we start pushing join clauses, we will need to walk the
 	 * ResultColumn/VirtualColumnNode chain for them to remap the references.
 	 */
-	public void remapColumnReferences()
+    void remapColumnReferences()
 	{
 		ValueNode expression = source.getExpression();
 
@@ -739,7 +731,7 @@ public class ColumnReference extends ValueNode
 		}
 	}
 
-	public void unRemapColumnReferences()
+    void unRemapColumnReferences()
 	{
 		if (origSource == null)
 			return;
@@ -750,7 +742,7 @@ public class ColumnReference extends ValueNode
 			// 	"Trying to unremap a ColumnReference that was not remapped.");
 		}
 
-		if ((remaps == null) || (remaps.size() == 0))
+        if ((remaps == null) || (remaps.isEmpty()))
 		{
 			source = origSource;
 			origSource = null;
@@ -768,8 +760,7 @@ public class ColumnReference extends ValueNode
 			columnName = rI.getColumnName();
 			tableNumber = rI.getTableNumber();
 			columnNumber = rI.getColumnNumber();
-			rI = null;
-			if (remaps.size() == 0)
+            if (remaps.isEmpty())
 				remaps = null;
 		}
 	}
@@ -789,7 +780,8 @@ public class ColumnReference extends ValueNode
 	 * Get the ResultColumn that the source points to.  This is useful for
 	 * getting what the source will be after this ColumnReference is remapped.
 	 */
-	public ResultColumn getSourceResultColumn()
+    @Override
+    ResultColumn getSourceResultColumn()
 	{
         /* RESOLVE - If expression is a ColumnReference, then we are hitting
          * the top of a query block (derived table or view.)
@@ -812,7 +804,8 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		ResultColumn	rc;
@@ -884,9 +877,6 @@ public class ColumnReference extends ValueNode
 
                 ResultColumnList rcl = ft.getResultColumns();
 
-                ResultColumn ftRC = null;
-
-
                 // Need to save original (tn,cn) in case we have several
                 // flattenings so we can relocate the correct column many
                 // times. After the first flattening, the (tn,cn) pair points
@@ -900,7 +890,7 @@ public class ColumnReference extends ValueNode
                 // inside a join tree, which can have many columns in the rcl
                 // with the same name, so looking up via column name can give
                 // the wrong column. DERBY-4679.
-                ftRC = rcl.getResultColumn(
+                ResultColumn ftRC = rcl.getResultColumn(
                     tableNumberBeforeFlattening,
                     columnNumberBeforeFlattening,
                     columnName);
@@ -971,13 +961,15 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @return boolean	Whether or not this expression tree is cloneable.
 	 */
-	public boolean isCloneable()
+    @Override
+    boolean isCloneable()
 	{
 		return true;
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return whereClause.constantColumn(this);
 	}
@@ -995,6 +987,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	 {
@@ -1051,8 +1044,8 @@ public class ColumnReference extends ValueNode
 	 * @return	The user-supplied schema name of this column.  Null if no user-
 	 * 		supplied name.
 	 */
-
-	public String getSchemaName()
+    @Override
+    String getSchemaName()
 	{
 		return ( ( tableName != null) ? tableName.getSchemaName() : null );
 	}
@@ -1069,6 +1062,7 @@ public class ColumnReference extends ValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		// ColumnReferences are invariant for the life of the scan
@@ -1090,7 +1084,8 @@ public class ColumnReference extends ValueNode
      * source unless the source is null then it is
      * the type that has been set on this node.
 	 */
-	public DataTypeDescriptor getTypeServices()
+    @Override
+    DataTypeDescriptor getTypeServices()
 	{        
         if (source == null)
             return super.getTypeServices();
@@ -1128,13 +1123,12 @@ public class ColumnReference extends ValueNode
 			return null;
 		}
 
-		ValueNode rcExpr = null;
 		ResultColumn rc = getSource();
 
 		// Walk the ResultColumn->ColumnReference chain until we
 		// find a ResultColumn whose expression is a VirtualColumnNode.
 
-		rcExpr = rc.getExpression();
+        ValueNode rcExpr = rc.getExpression();
 		colNum[0] = getColumnNumber();
 
 		/* We have to make sure we enter this loop if rc is redundant,
@@ -1179,7 +1173,6 @@ public class ColumnReference extends ValueNode
 					 * or function.  Break out of both loops and return
 					 * null since there is no source result set.
 					 */
-					rcExpr = null;
 					break;
 				}
 			}
@@ -1232,7 +1225,7 @@ public class ColumnReference extends ValueNode
 	 * is remapped multiple times.  This allows the CR to be UN-
 	 * remapped multiple times, as well.
 	 */
-	private class RemapInfo
+    private static class RemapInfo
 	{
 		int colNum;
 		int tableNum;

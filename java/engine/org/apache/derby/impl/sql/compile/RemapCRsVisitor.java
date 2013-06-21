@@ -22,21 +22,20 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable; 
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Remap/unremap the CRs to the underlying
  * expression.
  *
  */
-public class RemapCRsVisitor implements Visitor
+class RemapCRsVisitor implements Visitor
 {
 	private boolean remap;
 
-	public RemapCRsVisitor(boolean remap)
+    RemapCRsVisitor(boolean remap)
 	{
 		this.remap = remap;
 	}

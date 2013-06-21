@@ -21,28 +21,20 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-
 import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.lang.reflect.Modifier;
 
 /**
  * A StatementNode represents a single statement in the language.  It is
@@ -59,9 +51,12 @@ import java.lang.reflect.Modifier;
 
 public abstract class StatementNode extends QueryTreeNode
 {
-
     /** Cached empty list object. */
     static final TableDescriptor[] EMPTY_TD_LIST = new TableDescriptor[0];
+
+    StatementNode(ContextManager cm) {
+        super(cm);
+    }
 
 	/**
 	 * By default, assume StatementNodes are atomic.
@@ -72,6 +67,7 @@ public abstract class StatementNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */	
+    @Override
 	public boolean isAtomic() throws StandardException
 	{
 		return true;
@@ -149,7 +145,7 @@ public abstract class StatementNode extends QueryTreeNode
 	 * 
 	 * @return This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -163,7 +159,7 @@ public abstract class StatementNode extends QueryTreeNode
 		}
 	}
 
-	public abstract String statementToString();
+    abstract String statementToString();
 	
 	/**
 	 * Perform the binding operation statement.  Binding consists of
@@ -198,7 +194,7 @@ public abstract class StatementNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void  optimizeStatement() throws StandardException
+    public void optimizeStatement() throws StandardException
 	{
 		
 	}

@@ -21,30 +21,27 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.RowLocation;
-
+import java.sql.Types;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.db.Database;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
-import java.sql.Types;
-import java.util.Dictionary;
-import java.util.List;
-import java.util.Hashtable;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.RowLocation;
 
 /**
  * The DataDictionary interface is used with the data dictionary to get
@@ -1686,8 +1683,10 @@ public interface DataDictionary
 	/**
 		Get the list of routines matching the schema and routine name.
 	 */
-	public java.util.List getRoutineList(String schemaID, String routineName, char nameSpace)
-			throws StandardException;	
+    public List<AliasDescriptor> getRoutineList(
+        String schemaID,
+        String routineName,
+        char nameSpace) throws StandardException;
 	
 	/** 
 	 * Drop an AliasDescriptor from the DataDictionary

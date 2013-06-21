@@ -22,66 +22,50 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-
-import org.apache.derby.iapi.sql.depend.ProviderList;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-import org.apache.derby.iapi.sql.compile.Parser;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
-import org.apache.derby.iapi.sql.dictionary.StatementPermission;
-import org.apache.derby.iapi.sql.dictionary.StatementGenericPermission;
-import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
-import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
-import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
-import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
-import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
-
-
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.store.access.StoreCostController;
-import org.apache.derby.iapi.store.access.SortCostController;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.compiler.JavaFactory;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.iapi.error.StandardException;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.context.ContextImpl;
-import org.apache.derby.iapi.transaction.TransactionControl;
-import org.apache.derby.iapi.util.ReuseFactory;
-
 import java.sql.SQLWarning;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.compiler.JavaFactory;
+import org.apache.derby.iapi.services.context.ContextImpl;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Dependent;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.depend.ProviderList;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementGenericPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.store.access.SortCostController;
+import org.apache.derby.iapi.store.access.StoreCostController;
+import org.apache.derby.iapi.transaction.TransactionControl;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  *
@@ -170,12 +154,12 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
-	  *	Get the NodeFactory for this context
+      * Get the OptimizerFactory for this context
 	  *
-	  *	@return	The NodeFactory for this context.
+      * @return The OptimizerFactory for this context.
 	  */
-	public	NodeFactory	getNodeFactory()
-	{	return lcf.getNodeFactory(); }
+    public  OptimizerFactory    getOptimizerFactory()
+    {   return lcf.getOptimizerFactory(); }
 
 
 	public int getNextColumnNumber()
@@ -563,7 +547,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * @see CompilerContext#setParameterList
 	 */
-	public void setParameterList(List parameterList)
+    public void setParameterList(List<ParameterNode> parameterList)
 	{
 		this.parameterList = parameterList;
 
@@ -579,7 +563,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
 	 * @see CompilerContext#getParameterList
 	 */
-	public List getParameterList()
+    public List<ParameterNode> getParameterList()
 	{
 		return parameterList;
 	}
@@ -603,7 +587,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
      * Get an array of type descriptors for all the ? parameters.
 	 */
-    DataTypeDescriptor[] getParameterTypes()
+    public DataTypeDescriptor[] getParameterTypes()
 	{
 		return parameterDescriptors;
 	}
@@ -937,7 +921,10 @@ public class CompilerContextImpl extends ContextImpl
 			{
 				UUID objectID = itr.next();
 				
-				list.add( new StatementGenericPermission( objectID, (String) requiredUsagePrivileges.get( objectID ), PermDescriptor.USAGE_PRIV ) );
+                list.add(new StatementGenericPermission(
+                        objectID,
+                        requiredUsagePrivileges.get(objectID),
+                        PermDescriptor.USAGE_PRIV));
 			}
 		}
 		if( requiredTablePrivileges != null)
@@ -1030,7 +1017,7 @@ public class CompilerContextImpl extends ContextImpl
 
 	private SortCostController	sortCostController;
 
-	private List parameterList;
+    private List<ParameterNode> parameterList;
 
 	/* Type descriptors for the ? parameters */
 	private DataTypeDescriptor[]	parameterDescriptors;

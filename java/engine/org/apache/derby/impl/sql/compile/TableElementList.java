@@ -21,49 +21,39 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.catalog.types.DefaultInfoImpl;
-
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.ProviderInfo;
-import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.sql.execute.ColumnInfo;
-import org.apache.derby.impl.sql.execute.ConstraintInfo;
-import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
-import org.apache.derby.impl.sql.execute.IndexConstantAction;
-
-import	org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-
-import org.apache.derby.catalog.UUID;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.DefaultInfoImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
+import org.apache.derby.iapi.sql.depend.ProviderList;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.impl.sql.execute.ColumnInfo;
+import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
+import org.apache.derby.impl.sql.execute.ConstraintInfo;
+import org.apache.derby.impl.sql.execute.IndexConstantAction;
 
 /**
  * A TableElementList represents the list of columns and other table elements
@@ -71,10 +61,15 @@ import java.util.Set;
  *
  */
 
-public class TableElementList extends QueryTreeNodeVector
+class TableElementList extends QueryTreeNodeVector
 {
 	private int				numColumns;
 	private TableDescriptor td;
+
+    public TableElementList(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.TABLE_ELEMENT_LIST);
+    }
 
 	/**
 	 * Add a TableElementNode to this TableElementList
@@ -82,7 +77,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @param tableElement	The TableElementNode to add to this list
 	 */
 
-	public void addTableElement(TableElementNode tableElement)
+    void addTableElement(TableElementNode tableElement)
 	{
 		addElement(tableElement);
 		if ((tableElement instanceof ColumnDefinitionNode) ||
@@ -101,8 +96,8 @@ public class TableElementList extends QueryTreeNodeVector
         throws StandardException
     {
 		int			size = size();
-		int collationType = sd.getCollationType();
-		for (int index = 0; index < size; index++)
+
+        for (int index = 0; index < size; index++)
 		{
 			TableElementNode tableElement = (TableElementNode) elementAt(index);
 
@@ -133,11 +128,7 @@ public class TableElementList extends QueryTreeNodeVector
         DataTypeDescriptor  dtd = cdn.getType();
         if ( dtd == null )
         {
-            if ( cdn.hasGenerationClause() )
-            {
-                return;
-            }
-            else
+            if ( !cdn.hasGenerationClause() )
             {
                 throw StandardException.newException
                     ( SQLState.LANG_NEEDS_DATATYPE, cdn.getColumnName() );
@@ -402,7 +393,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @return int	The number of constraints of the specified type.
 	 */
-	public int countConstraints(int constraintType)
+    int countConstraints(int constraintType)
 	{
 		int	numConstraints = 0;
 		int size = size();
@@ -431,7 +422,7 @@ public class TableElementList extends QueryTreeNodeVector
     /**
 	 * Count the number of generation clauses.
 	 */
-	public int countGenerationClauses()
+    int countGenerationClauses()
 	{
 		int	numGenerationClauses = 0;
 		int size = size();
@@ -462,7 +453,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @return int	The number of columns.
 	 */
-	public int countNumberOfColumns()
+    int countNumberOfColumns()
 	{
 		return numColumns;
 	}
@@ -474,7 +465,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @return int		The number of constraints in the create table.
 	 */
-	public int genColumnInfos( ColumnInfo[] colInfos)
+    int genColumnInfos( ColumnInfo[] colInfos)
         throws StandardException
 	{
 		int	numConstraints = 0;
@@ -559,7 +550,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void appendNewColumnsToRCL(FromBaseTable table)
+    void appendNewColumnsToRCL(FromBaseTable table)
 		throws StandardException
 	{
 		int				 size = size();
@@ -575,18 +566,13 @@ public class TableElementList extends QueryTreeNodeVector
 				ValueNode		valueNode;
 
 				/* Build a ResultColumn/BaseColumnNode pair for the column */
-				valueNode = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.BASE_COLUMN_NODE,
-											cdn.getColumnName(),
+                valueNode = new BaseColumnNode(cdn.getColumnName(),
 									  		exposedName,
 											cdn.getType(),
 											getContextManager());
 
-				resultColumn = (ResultColumn) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN,
-												cdn.getType(), 
-												valueNode,
-												getContextManager());
+                resultColumn = new ResultColumn(
+                        cdn.getType(), valueNode, getContextManager());
 				resultColumn.setName(cdn.getColumnName());
 				rcl.addElement(resultColumn);
 			}
@@ -685,10 +671,7 @@ public class TableElementList extends QueryTreeNodeVector
 			 */
             ResultColumnList rcl = table.getResultColumns();
             int numReferenced = rcl.countReferencedColumns();
-			ResultColumnList refRCL =
-						(ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+            ResultColumnList refRCL = new ResultColumnList(getContextManager());
 			rcl.copyReferencedColumnsToNewList(refRCL);
 
 			/* A column check constraint can only refer to that column. If this is a
@@ -923,13 +906,14 @@ public class TableElementList extends QueryTreeNodeVector
         int    count = generatedColumns.size();
         for ( int i = 0; i < count; i++ )
         {
-            ColumnDefinitionNode    cdn = (ColumnDefinitionNode) generatedColumns.get( i );
+            ColumnDefinitionNode    cdn = generatedColumns.get( i );
             GenerationClauseNode    generationClauseNode = cdn.getGenerationClauseNode();
-            List                    referencedColumns = generationClauseNode.findReferencedColumns();
+            List<ColumnReference>   referencedColumns =
+                generationClauseNode.findReferencedColumns();
             int                     refCount = referencedColumns.size();
             for ( int j = 0; j < refCount; j++ )
             {
-                String name = ((ColumnReference) referencedColumns.get(j)).getColumnName();
+                String name = referencedColumns.get(j).getColumnName();
 
                 if ( name != null )
                 {
@@ -1148,7 +1132,7 @@ public class TableElementList extends QueryTreeNodeVector
 			{
 				ProviderList apl = constraintDN.getAuxiliaryProviderList();
 				ConstraintInfo refInfo = null;
-				ProviderInfo[]	providerInfos = null;
+                ProviderInfo[]  providerInfos;
 
 				if (constraintDN instanceof FKConstraintDefinitionNode)
 				{
@@ -1193,7 +1177,6 @@ public class TableElementList extends QueryTreeNodeVector
 	private boolean columnsMatch(String[] columnNames1, String[] columnNames2)
 	{
 		int srcCount, srcSize, destCount,destSize;
-		boolean match = true;
 
 		if (columnNames1.length != columnNames2.length)
 			return false;
@@ -1203,7 +1186,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 		for (srcCount = 0; srcCount < srcSize; srcCount++)
 		{
-			match = false;
+            boolean match = false;
 			for (destCount = 0; destCount < destSize; destCount++) {
 				if (columnNames1[srcCount].equals(columnNames2[destCount])) {
 					match = true;
@@ -1592,7 +1575,7 @@ public class TableElementList extends QueryTreeNodeVector
      * 
      * @return boolean Whether or not a match is found.
      */
-	public boolean containsColumnName(String colName)
+    boolean containsColumnName(String colName)
 	{
         return findColumnDefinition(colName) != null;
 	}

@@ -22,21 +22,14 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.reference.ClassName;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a binary arithmetic operator, like + or *.
@@ -46,50 +39,58 @@ import org.apache.derby.iapi.reference.ClassName;
 public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 {
 	/**
-	 * Initializer for a BinaryArithmeticOperatorNode
+     * Constructor for a BinaryArithmeticOperatorNode
 	 *
 	 * @param leftOperand	The left operand
 	 * @param rightOperand	The right operand
+     * @param cm            The context manager
 	 */
 
-	public void init(
-					Object leftOperand,
-					Object rightOperand)
+    BinaryArithmeticOperatorNode(
+            int nodeType,
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            ContextManager cm)
 	{
-		super.init(leftOperand, rightOperand,
-				ClassName.NumberDataValue, ClassName.NumberDataValue);
+        super(leftOperand,
+              rightOperand,
+              ClassName.NumberDataValue,
+              ClassName.NumberDataValue,
+              cm);
+        setNodeType(nodeType);
 	}
 
-	public void setNodeType(int nodeType)
+    @Override
+    void setNodeType(int nodeType)
 	{
-		String operator = null;
-		String methodName = null;
+        String op = null;
+        String mNam = null;
 
 		switch (nodeType)
 		{
 			case C_NodeTypes.BINARY_DIVIDE_OPERATOR_NODE:
-				operator = TypeCompiler.DIVIDE_OP;
-				methodName = "divide";
+                op = TypeCompiler.DIVIDE_OP;
+                mNam = "divide";
 				break;
 
 			case C_NodeTypes.BINARY_MINUS_OPERATOR_NODE:
-				operator = TypeCompiler.MINUS_OP;
-				methodName = "minus";
+                op = TypeCompiler.MINUS_OP;
+                mNam = "minus";
 				break;
 
 			case C_NodeTypes.BINARY_PLUS_OPERATOR_NODE:
-				operator = TypeCompiler.PLUS_OP;
-				methodName = "plus";
+                op = TypeCompiler.PLUS_OP;
+                mNam = "plus";
 				break;
 
 			case C_NodeTypes.BINARY_TIMES_OPERATOR_NODE:
-				operator = TypeCompiler.TIMES_OP;
-				methodName = "times";
+                op = TypeCompiler.TIMES_OP;
+                mNam = "times";
 				break;
 
 			case C_NodeTypes.MOD_OPERATOR_NODE:
-				operator = TypeCompiler.MOD_OP;
-				methodName = "mod";
+                op = TypeCompiler.MOD_OP;
+                mNam = "mod";
 				break;
 
 			default:
@@ -99,8 +100,8 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 						"Unexpected nodeType = " + nodeType);
 				}
 		}
-		setOperator(operator);
-		setMethodName(methodName);
+        setOperator(op);
+        setMethodName(mNam);
 		super.setNodeType(nodeType);
 	}
 
@@ -115,7 +116,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -149,9 +150,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 				maxWidth = precision + 3;
 			}
 
-			leftOperand = (ValueNode)
-					getNodeFactory().getNode(
-						C_NodeTypes.CAST_NODE,
+            leftOperand = new CastNode(
 						leftOperand, 
 						new DataTypeDescriptor(rightType, precision,
 											scale, nullableResult, 
@@ -180,9 +179,7 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 				maxWidth = precision + 3;
 			}
 
-			rightOperand =  (ValueNode)
-					getNodeFactory().getNode(
-						C_NodeTypes.CAST_NODE,
+            rightOperand = new CastNode(
 						rightOperand, 
 						new DataTypeDescriptor(leftType, precision,
 											scale, nullableResult, 

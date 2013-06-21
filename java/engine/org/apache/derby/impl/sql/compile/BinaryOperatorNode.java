@@ -21,25 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
 import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.List;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A BinaryOperatorNode represents a built-in binary operator as defined by
@@ -49,7 +45,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class BinaryOperatorNode extends OperatorNode
+class BinaryOperatorNode extends OperatorNode
 {
 	String	operator;
 	String	methodName;
@@ -58,20 +54,20 @@ public class BinaryOperatorNode extends OperatorNode
 	/*
 	** These identifiers are used in the grammar.
 	*/
-	public final static int PLUS	= 1;
-	public final static int MINUS	= 2;
-	public final static int TIMES	= 3;
-	public final static int DIVIDE	= 4;
-	public final static int CONCATENATE	= 5;
-	public final static int EQ	= 6;
-	public final static int NE	= 7;
-	public final static int GT	= 8;
-	public final static int GE	= 9;
-	public final static int LT	= 10;
-	public final static int LE	= 11;
-	public final static int AND	= 12;
-	public final static int OR	= 13;
-	public final static int LIKE	= 14;
+    final static int PLUS   = 1;
+    final static int MINUS  = 2;
+    final static int TIMES  = 3;
+    final static int DIVIDE = 4;
+    final static int CONCATENATE    = 5;
+    final static int EQ = 6;
+    final static int NE = 7;
+    final static int GT = 8;
+    final static int GE = 9;
+    final static int LT = 10;
+    final static int LE = 11;
+    final static int AND    = 12;
+    final static int OR = 13;
+    final static int LIKE   = 14;
 
 	ValueNode	leftOperand;
 	ValueNode	rightOperand;
@@ -89,8 +85,8 @@ public class BinaryOperatorNode extends OperatorNode
 	// XML-related or not) should follow this example when
 	// possible.
 
-	public final static int XMLEXISTS_OP = 0;
-	public final static int XMLQUERY_OP = 1;
+    final static int XMLEXISTS_OP = 0;
+    final static int XMLQUERY_OP = 1;
 
 	// NOTE: in the following 4 arrays, order
 	// IS important.
@@ -118,64 +114,63 @@ public class BinaryOperatorNode extends OperatorNode
     /** The query expression if the operator is XMLEXISTS or XMLQUERY. */
     private String xmlQuery;
 
-	/**
-	 * Initializer for a BinaryOperatorNode
-	 *
-	 * @param leftOperand	The left operand of the node
-	 * @param rightOperand	The right operand of the node
-	 * @param operator		The name of the operator
-	 * @param methodName	The name of the method to call for this operator
-	 * @param leftInterfaceType	The name of the interface for the left operand
-	 * @param rightInterfaceType	The name of the interface for the right
-	 *								operand
-	 */
+    BinaryOperatorNode(ContextManager cm) {
+        super(cm);
+    }
 
-	public void init(
-			Object leftOperand,
-			Object rightOperand,
-			Object operator,
-			Object methodName,
-			Object leftInterfaceType,
-			Object rightInterfaceType)
-	{
-		this.leftOperand = (ValueNode) leftOperand;
-		this.rightOperand = (ValueNode) rightOperand;
-		this.operator = (String) operator;
-		this.methodName = (String) methodName;
-		this.leftInterfaceType = (String) leftInterfaceType;
-		this.rightInterfaceType = (String) rightInterfaceType;
-		this.operatorType = -1;
-	}
+    BinaryOperatorNode(
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            String operator,
+            String methodName,
+            String leftInterfaceType,
+            String rightInterfaceType,
+            ContextManager cm) {
+        super(cm);
+        this.leftOperand = leftOperand;
+        this.rightOperand = rightOperand;
+        this.operator = operator;
+        this.methodName = methodName;
+        this.leftInterfaceType = leftInterfaceType;
+        this.rightInterfaceType = rightInterfaceType;
+        this.operatorType = -1;
+    }
 
-	public void init(
-			Object leftOperand,
-			Object rightOperand,
-			Object leftInterfaceType,
-			Object rightInterfaceType)
+    BinaryOperatorNode(
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            String leftInterfaceType,
+            String rightInterfaceType,
+            ContextManager cm)
 	{
-		this.leftOperand = (ValueNode) leftOperand;
-		this.rightOperand = (ValueNode) rightOperand;
-		this.leftInterfaceType = (String) leftInterfaceType;
-		this.rightInterfaceType = (String) rightInterfaceType;
+        super(cm);
+        this.leftOperand = leftOperand;
+        this.rightOperand = rightOperand;
+        this.leftInterfaceType = leftInterfaceType;
+        this.rightInterfaceType = rightInterfaceType;
 		this.operatorType = -1;
 	}
 
 	/**
-	 * Initializer for a BinaryOperatorNode
+     * Constructor for a BinaryOperatorNode
 	 *
 	 * @param leftOperand	The left operand of the node
 	 * @param rightOperand	The right operand of the node
 	 * @param opType  An Integer holding the operatorType
 	 *  for this operator.
 	 */
-	public void init(
-			Object leftOperand,
-			Object rightOperand,
-			Object opType)
+    BinaryOperatorNode(
+            int nodeType,
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            int opType,
+            ContextManager cm)
 	{
-		this.leftOperand = (ValueNode)leftOperand;
-		this.rightOperand = (ValueNode)rightOperand;
-		this.operatorType = ((Integer)opType).intValue();
+        super(cm);
+        setNodeType(nodeType);
+        this.leftOperand = leftOperand;
+        this.rightOperand = rightOperand;
+        this.operatorType = opType;
 		this.operator = BinaryOperators[this.operatorType];
 		this.methodName = BinaryMethodNames[this.operatorType];
 		this.leftInterfaceType = BinaryArgTypes[this.operatorType][0];
@@ -189,7 +184,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -231,7 +226,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 * Used when we don't know the interface type until
 	 * later in binding.
 	 */
-	public void setLeftRightInterfaceType(String iType)
+    void setLeftRightInterfaceType(String iType)
 	{
 		leftInterfaceType = iType;
 		rightInterfaceType = iType;
@@ -244,8 +239,8 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -278,7 +273,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -328,7 +323,6 @@ public class BinaryOperatorNode extends OperatorNode
         throws StandardException
     {
         // Check operand types.
-        TypeId leftOperandType = leftOperand.getTypeId();
         TypeId rightOperandType = rightOperand.getTypeId();
 
         // Left operand is query expression and must be a string
@@ -389,7 +383,8 @@ public class BinaryOperatorNode extends OperatorNode
 	 * operand of this Binary Operator Node if needed. Subclasses can override
 	 * the default behavior.
 	 */
-	public ValueNode genSQLJavaSQLTree() throws StandardException
+    @Override
+    ValueNode genSQLJavaSQLTree() throws StandardException
 	{
 		TypeId leftTypeId = leftOperand.getTypeId();
 		
@@ -418,7 +413,8 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -442,7 +438,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
@@ -651,7 +647,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @param newLeftOperand	The new leftOperand
 	 */
-	public void setLeftOperand(ValueNode newLeftOperand)
+    void setLeftOperand(ValueNode newLeftOperand)
 	{
 		leftOperand = newLeftOperand;
 	}
@@ -661,7 +657,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current leftOperand.
 	 */
-	public ValueNode getLeftOperand()
+    ValueNode getLeftOperand()
 	{
 		return leftOperand;
 	}
@@ -671,7 +667,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @param newRightOperand	The new rightOperand
 	 */
-	public void setRightOperand(ValueNode newRightOperand)
+    void setRightOperand(ValueNode newRightOperand)
 	{
 		rightOperand = newRightOperand;
 	}
@@ -681,7 +677,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return The current rightOperand.
 	 */
-	public ValueNode getRightOperand()
+    ValueNode getRightOperand()
 	{
 		return rightOperand;
 	}
@@ -711,7 +707,8 @@ public class BinaryOperatorNode extends OperatorNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		boolean pushable;
@@ -728,7 +725,8 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		leftOperand = leftOperand.remapColumnReferencesToExpressions();
@@ -741,14 +739,16 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return (leftOperand.isConstantExpression() &&
 				rightOperand.isConstantExpression());
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return (leftOperand.constantExpression(whereClause) &&
 				rightOperand.constantExpression(whereClause));
@@ -763,7 +763,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public String getReceiverInterfaceName() throws StandardException {
+    String getReceiverInterfaceName() throws StandardException {
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(receiver!=null,"can't get receiver interface name until receiver is set");
@@ -785,6 +785,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		int leftType = leftOperand.getOrderableVariantType();
@@ -800,6 +801,7 @@ public class BinaryOperatorNode extends OperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

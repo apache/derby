@@ -173,6 +173,7 @@ class ColumnOrdering {
 		return false;
 	}
 
+    @Override
 	public String toString() {
 		String retval = "";
 

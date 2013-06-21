@@ -21,36 +21,35 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-
-import java.util.Iterator;
 import java.util.List;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * This class represents a GRANT role statement.
  */
-public class GrantRoleNode extends DDLStatementNode
+class GrantRoleNode extends DDLStatementNode
 {
-    private List roles;
-    private List grantees;
+    private List<String> roles;
+    private List<String> grantees;
 
     /**
-     * Initialize a GrantRoleNode.
+     * Constructor for GrantRoleNode.
      *
      * @param roles list of strings containing role name to be granted
      * @param grantees list of strings containing grantee names
+     * @param cm context manager
      */
-    public void init(Object roles,
-					 Object grantees)
-        throws StandardException
-    {
-        initAndCheck(null);
-        this.roles = (List) roles;
-        this.grantees = (List) grantees;
+    GrantRoleNode(List<String> roles,
+                  List<String> grantees,
+                  ContextManager cm) throws StandardException {
+        super(null, cm);
+        this.roles = roles;
+        this.grantees = grantees;
+        setNodeType(C_NodeTypes.GRANT_ROLE_NODE);
     }
 
 
@@ -59,6 +58,7 @@ public class GrantRoleNode extends DDLStatementNode
      *
      * @exception StandardException Standard error policy.
      */
+    @Override
     public ConstantAction makeConstantAction() throws StandardException
     {
         return getGenericConstantActionFactory().
@@ -72,24 +72,24 @@ public class GrantRoleNode extends DDLStatementNode
      *
      * @return  This object as a String
      */
-
+    @Override
     public String toString()
     {
         if (SanityManager.DEBUG) {
-                StringBuffer sb1 = new StringBuffer();
-                for( Iterator it = roles.iterator(); it.hasNext();) {
+                StringBuilder sb1 = new StringBuilder();
+                for(String role : roles) {
 					if( sb1.length() > 0) {
 						sb1.append( ", ");
 					}
-					sb1.append( it.next().toString());
+                    sb1.append(role);
 				}
 
-                StringBuffer sb2 = new StringBuffer();
-                for( Iterator it = grantees.iterator(); it.hasNext();) {
+                StringBuilder sb2 = new StringBuilder();
+                for(String grantee : grantees) {
 					if( sb2.length() > 0) {
 						sb2.append( ", ");
 					}
-					sb2.append( it.next().toString());
+                    sb2.append(grantee);
 				}
                 return (super.toString() +
                         sb1.toString() +

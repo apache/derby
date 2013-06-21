@@ -21,24 +21,18 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.impl.sql.execute.ConstraintInfo;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.sql.dictionary.DDUtils;
 
 /**
  * A FKConstraintDefintionNode represents table constraint definitions.
@@ -52,25 +46,31 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	SchemaDescriptor	refTableSd;
 	int                 refActionDeleteRule;  // referential action on  delete
 	int                 refActionUpdateRule;  // referential action on update
-	public void init(
-						Object 			constraintName, 
-						Object 			refTableName, 
-						Object			fkRcl,
-						Object			refRcl,
-						Object          refActions)
-	{
-		super.init(
-				constraintName,
-				ReuseFactory.getInteger(DataDictionary.FOREIGNKEY_CONSTRAINT),
-				fkRcl, 
-				null,
-				null,
-				null);
-		this.refRcl = (ResultColumnList) refRcl;
-		this.refTableName = (TableName) refTableName;
 
-		this.refActionDeleteRule = ((int[]) refActions)[0];
-		this.refActionUpdateRule = ((int[]) refActions)[1];
+    FKConstraintDefinitionNode(
+        TableName           constraintName,
+        TableName           refTableName,
+        ResultColumnList    fkRcl,
+        ResultColumnList    refRcl,
+        int[]               refActions,
+        ContextManager      cm)
+	{
+        super(constraintName,
+              DataDictionary.FOREIGNKEY_CONSTRAINT,
+              fkRcl,
+              null,
+              null,
+              null,
+              StatementType.DROP_DEFAULT,
+              DataDictionary.DROP_CONSTRAINT,
+              cm);
+        setNodeType(C_NodeTypes.FK_CONSTRAINT_DEFINITION_NODE);
+
+        this.refRcl = refRcl;
+        this.refTableName = refTableName;
+
+        this.refActionDeleteRule = refActions[0];
+        this.refActionUpdateRule = refActions[1];
 	}
 
 	/**
@@ -81,6 +81,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	 * 
 	 * @exception StandardException on error
 	 */
+    @Override
     void bind(DDLStatementNode ddlNode, DataDictionary dd) throws StandardException
 	{
 		super.bind(ddlNode, dd);
@@ -145,7 +146,7 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		getCompilerContext().popCurrentPrivType();
 	}
 
-	public ConstraintInfo getReferencedConstraintInfo()
+    ConstraintInfo getReferencedConstraintInfo()
 	{
 		if (SanityManager.DEBUG)
 		{

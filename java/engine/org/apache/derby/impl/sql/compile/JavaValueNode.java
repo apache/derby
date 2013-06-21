@@ -21,35 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-
-import org.apache.derby.iapi.types.TypeId;
-
+import java.lang.reflect.Modifier;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.JSQLType;
-
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassInspector;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import java.lang.reflect.Modifier;
-
-import java.util.List;
 
 /**
  * This abstract node class represents a data value in the Java domain.
@@ -70,6 +56,10 @@ abstract class JavaValueNode extends QueryTreeNode
 
         // * Collation type of schema where method is defined. 
 	private int collationType;
+
+    JavaValueNode(ContextManager cm) {
+        super(cm);
+    }
 
     /**
      * Get the resolved data type of this node. May be overridden by descendants.
@@ -249,6 +239,7 @@ abstract class JavaValueNode extends QueryTreeNode
 	 * @exception StandardException		Thrown on error
 	 */
 
+    @Override
     final   void generate(ActivationClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{

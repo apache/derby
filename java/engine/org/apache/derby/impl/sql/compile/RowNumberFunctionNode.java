@@ -20,30 +20,27 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.TypeId;
-
 import java.sql.Types;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * Class that represents a call to the ROW_NUMBER() window function.
  */
 public final class RowNumberFunctionNode extends WindowFunctionNode
 {
-
     /**
-     * Initializer. QueryTreeNode override.
      *
-     * @param arg1 null (Operand)
-     * @param arg2 The window definition or reference
-     *
-     * @exception StandardException
+     * @param op operand (null for now)
+     * @param w The window definition or reference
      */
-    public void init(Object arg1, Object arg2)
-        throws StandardException
-    {
-        super.init(arg1, "ROW_NUMBER", arg2);
+    RowNumberFunctionNode(ValueNode op, WindowNode w, ContextManager cm)
+            throws StandardException {
+        super(op, "ROW_NUMBER", w, cm);
+        setNodeType(C_NodeTypes.ROW_NUMBER_FUNCTION_NODE);
         setType( TypeId.getBuiltInTypeId( Types.BIGINT ),
                  TypeId.LONGINT_PRECISION,
                  TypeId.LONGINT_SCALE,
@@ -55,6 +52,7 @@ public final class RowNumberFunctionNode extends WindowFunctionNode
      * ValueNode override.
      * @see ValueNode#bindExpression
      */
+    @Override
     ValueNode bindExpression(
                     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException

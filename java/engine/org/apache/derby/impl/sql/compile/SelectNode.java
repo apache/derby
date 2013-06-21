@@ -22,30 +22,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.util.JBitSet;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A SelectNode represents the result set for any of the basic DML
@@ -60,7 +53,7 @@ import java.util.List;
  *
  */
 
-public class SelectNode extends ResultSetNode
+class SelectNode extends ResultSetNode
 {
 	/**
 	 * List of tables in the FROM clause of this SELECT
@@ -142,25 +135,30 @@ public class SelectNode extends ResultSetNode
 	ValueNode havingClause;
 	
 	private int nestingLevel;
-	public void init(Object selectList,
-			  Object fromList,
-			  Object whereClause,
-			  Object groupByList,
-			  Object havingClause,
-			  Object windowDefinitionList)
-			throws StandardException
-	{
+
+    SelectNode(ResultColumnList selectList,
+              FromList fromList,
+              ValueNode whereClause,
+              GroupByList groupByList,
+              ValueNode havingClause,
+              WindowList windowDefinitionList,
+              ContextManager cm) throws StandardException {
+        super(cm);
+        setNodeType(C_NodeTypes.SELECT_NODE);
         /* RESOLVE -
 		 * Consider adding selectAggregates and whereAggregates 
 		 */
-		resultColumns = (ResultColumnList) selectList;
-		if (resultColumns != null)
+        resultColumns = selectList;
+
+        if (resultColumns != null) {
 			resultColumns.markInitialSize();
-		this.fromList = (FromList) fromList;
-		this.whereClause = (ValueNode) whereClause;
-		this.originalWhereClause = (ValueNode) whereClause;
-		this.groupByList = (GroupByList) groupByList;
-		this.havingClause = (ValueNode)havingClause;
+        }
+
+        this.fromList = fromList;
+        this.whereClause = whereClause;
+        this.originalWhereClause = whereClause;
+        this.groupByList = groupByList;
+        this.havingClause = havingClause;
 
 		// This initially represents an explicit <window definition list>, as
 		// opposed to <in-line window specifications>, see 2003, 6.10 and 6.11.
@@ -168,7 +166,7 @@ public class SelectNode extends ResultSetNode
 		// in-line window specifications used in window functions in the SELECT
 		// column list and in genProjectRestrict for such window specifications
 		// used in window functions in ORDER BY.
-		this.windows = (WindowList)windowDefinitionList;
+        this.windows = windowDefinitionList;
 
 		bindTargetListOnly = false;
 		
@@ -225,8 +223,7 @@ public class SelectNode extends ResultSetNode
 
 		if (wl == null) {
 			// This is the first window we see, so initialize list.
-			wl = new WindowList();
-			wl.setContextManager(getContextManager());
+            wl = new WindowList(getContextManager());
 		}
 
 		WindowDefinitionNode equiv = wdn.findEquivalentWindow(wl);
@@ -251,7 +248,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -265,17 +262,17 @@ public class SelectNode extends ResultSetNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "SELECT";
 	}
 
-	public void makeDistinct()
+    void makeDistinct()
 	{
 		isDistinct = true;
 	}
 
-	public void clearDistinct()
+    void clearDistinct()
 	{
 		isDistinct = false;
 	}
@@ -292,7 +289,8 @@ public class SelectNode extends ResultSetNode
 	 * @param depth		The depth of this node in the tree
 	 */
 
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -380,7 +378,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return FromList	The fromList for this SelectNode.
 	 */
-	public FromList getFromList()
+    @Override
+    FromList getFromList()
 	{
 		return fromList;
 	}
@@ -396,7 +395,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return	ColumnReference	ColumnReference to the column, if found
 	 */
-	public ColumnReference findColumnReferenceInResult(String colName)
+    ColumnReference findColumnReferenceInResult(String colName)
 					throws StandardException
 	{
 		if (fromList.size() != 1)
@@ -431,7 +430,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return ValueNode	The whereClause for this SelectNode.
 	 */
-	public ValueNode getWhereClause()
+    ValueNode getWhereClause()
 	{
 		return whereClause;
 	}
@@ -441,7 +440,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return PredicateList	The wherePredicates for this SelectNode.
 	 */
-	public PredicateList getWherePredicates()
+    PredicateList getWherePredicates()
 	{
 		return wherePredicates;
 	}
@@ -451,7 +450,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return SubqueryList	The selectSubquerys for this SelectNode.
 	 */
-	public SubqueryList getSelectSubquerys()
+    SubqueryList getSelectSubquerys()
 	{
 		return selectSubquerys;
 	}
@@ -461,7 +460,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return SubqueryList	The whereSubquerys for this SelectNode.
 	 */
-	public SubqueryList getWhereSubquerys()
+    SubqueryList getWhereSubquerys()
 	{
 		return whereSubquerys;
 	}
@@ -479,21 +478,18 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 					throws StandardException
 	{
 		int fromListSize = fromList.size();
 		
 
-		wherePredicates = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
-		preJoinFL = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+        wherePredicates = new PredicateList(getContextManager());
+        preJoinFL =
+            new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                         getContextManager());
 
 		/* Set the nesting level in the fromList */
 		if (fromListParam.size() == 0)
@@ -534,7 +530,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		int fromListParamSize = fromListParam.size();
@@ -559,9 +556,7 @@ public class SelectNode extends ResultSetNode
 			fromList.bindExpressions( fromListParam );
 		}
 
-		selectSubquerys = (SubqueryList) getNodeFactory().getNode(
-											C_NodeTypes.SUBQUERY_LIST,
-											getContextManager());
+        selectSubquerys = new SubqueryList(getContextManager());
 		selectAggregates = new ArrayList<AggregateNode>();
 
 		/* Splice our FromList on to the beginning of fromListParam, before binding
@@ -601,9 +596,7 @@ public class SelectNode extends ResultSetNode
 		}
 
 		whereAggregates = new ArrayList<AggregateNode>();
-		whereSubquerys = (SubqueryList) getNodeFactory().getNode(
-												C_NodeTypes.SUBQUERY_LIST,
-												getContextManager());
+        whereSubquerys = new SubqueryList(getContextManager());
         
         CompilerContext cc = getCompilerContext();
         
@@ -647,9 +640,7 @@ public class SelectNode extends ResultSetNode
             int previousReliability = orReliability( CompilerContext.HAVING_CLAUSE_RESTRICTION );
 
 			havingAggregates = new ArrayList<AggregateNode>();
-			havingSubquerys = (SubqueryList) getNodeFactory().getNode(
-					C_NodeTypes.SUBQUERY_LIST,
-					getContextManager());
+            havingSubquerys = new SubqueryList(getContextManager());
 			havingClause.bindExpression(
 					fromListParam, havingSubquerys, havingAggregates);
 			havingClause = havingClause.checkIsBoolean();
@@ -738,7 +729,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindExpressionsWithTables(FromList fromListParam)
+    @Override
+    void bindExpressionsWithTables(FromList fromListParam)
 					throws StandardException
 	{
 		/* We have tables, so simply call bindExpressions() */
@@ -754,8 +746,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindTargetExpressions(FromList fromListParam)
+    @Override
+    void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
 		/*
@@ -785,8 +777,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindResultColumns(FromList fromListParam)
+    @Override
+    void bindResultColumns(FromList fromListParam)
 				throws StandardException
 	{
 		/* We first bind the resultColumns for any FromTable which
@@ -837,7 +829,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void bindResultColumns(TableDescriptor targetTableDescriptor,
             FromVTI targetVTI, ResultColumnList targetColumnList,
             DMLStatementNode statement, FromList fromListParam)
@@ -882,7 +874,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
+    @Override
+    void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
         for (int i = 0; i < resultColumns.size(); i++) {
@@ -939,6 +932,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -952,8 +946,8 @@ public class SelectNode extends ResultSetNode
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
-
-	public void rejectParameters() throws StandardException
+    @Override
+    void rejectParameters() throws StandardException
 	{
 		super.rejectParameters();
 		fromList.rejectParameters();
@@ -967,6 +961,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @param orderByList	The order by list
 	 */
+    @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
         if (orderByLists[0] != null) {
@@ -1008,6 +1003,7 @@ public class SelectNode extends ResultSetNode
      * @param fetchFirst the OFFSET FIRST, if any
      * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
+    @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         this.offset = offset;
@@ -1040,8 +1036,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fl)
 								throws StandardException
@@ -1067,9 +1063,9 @@ public class SelectNode extends ResultSetNode
 		boolean anyChange = fromList.LOJ_reorderable(numTables);
 		if (anyChange)
 		{
-			FromList afromList = (FromList) getNodeFactory().getNode(C_NodeTypes.FROM_LIST,
-																	 getNodeFactory().doJoinOrderOptimization(),
-																	 getContextManager());
+            FromList afromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager());
 			bindExpressions(afromList);
             fromList.bindResultColumns(afromList);
 		}
@@ -1433,7 +1429,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode addNewPredicate(Predicate predicate)
+    @Override
+    ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
 		wherePredicates.addPredicate(predicate);
@@ -1455,7 +1452,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		if (isDistinct) 
 		{
@@ -1520,24 +1518,23 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode genProjectRestrict(int origFromListSize)
+    @Override
+    ResultSetNode genProjectRestrict(int origFromListSize)
 				throws StandardException
 	{
         boolean[] eliminateSort = new boolean[orderByLists.length];
 
 		ResultSetNode		prnRSN;
 
-		prnRSN = (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
-								fromList.elementAt(0),	/* Child ResultSet */
-								resultColumns,		/* Projection */
-								whereClause,			/* Restriction */
-								wherePredicates,/* Restriction as PredicateList */
-								selectSubquerys,/* Subquerys in Projection */
-								whereSubquerys,	/* Subquerys in Restriction */
-								null,
-								getContextManager()	 );
+        prnRSN = new ProjectRestrictNode(
+                (ResultSetNode)fromList.elementAt(0),   /* Child ResultSet */
+                resultColumns,      /* Projection */
+                whereClause,            /* Restriction */
+                wherePredicates,/* Restriction as PredicateList */
+                selectSubquerys,/* Subquerys in Projection */
+                whereSubquerys, /* Subquerys in Restriction */
+                null,
+                getContextManager());
 
 		/*
 		** If we have aggregates OR a select list we want
@@ -1555,16 +1552,13 @@ public class SelectNode extends ResultSetNode
 				havingAggregates.addAll(selectAggregates);
 				aggs = havingAggregates;
 			}
-			GroupByNode gbn = (GroupByNode) getNodeFactory().getNode(
-												C_NodeTypes.GROUP_BY_NODE,
-												prnRSN,
-												groupByList,
-												aggs,
-												havingClause,
-												havingSubquerys,
-												null,
-												new Integer(nestingLevel),
-												getContextManager());
+            GroupByNode gbn = new GroupByNode(prnRSN,
+                    groupByList,
+                    aggs,
+                    havingClause,
+                    havingSubquerys,
+                    nestingLevel,
+                    getContextManager());
 			gbn.considerPostOptimizeOptimizations(originalWhereClause != null);
 			gbn.assignCostEstimate(optimizer.getOptimizedCost());
 
@@ -1588,15 +1582,14 @@ public class SelectNode extends ResultSetNode
 					SQLState.LANG_WINDOW_LIMIT_EXCEEDED);
 			}
 
-			WindowNode wn = (WindowNode)windows.elementAt(0);
+            WindowDefinitionNode wn =
+                    (WindowDefinitionNode)windows.elementAt(0);
 
-			WindowResultSetNode wrsn =
-				(WindowResultSetNode)getNodeFactory().getNode(
-					C_NodeTypes.WINDOW_RESULTSET_NODE,
+            WindowResultSetNode wrsn = new WindowResultSetNode(
 					prnRSN,
 					wn,
 					windowFuncCalls,
-					new Integer(nestingLevel),
+                    nestingLevel,
 					getContextManager());
 
 			prnRSN = wrsn.getParent();
@@ -1659,12 +1652,8 @@ public class SelectNode extends ResultSetNode
 				 * duplicates without a sorter. 
 				 */
 				boolean inSortedOrder = isOrderedResult(resultColumns, prnRSN, !(orderByAndDistinctMerged));
-				prnRSN = (ResultSetNode) getNodeFactory().getNode(
-											C_NodeTypes.DISTINCT_NODE,
-											prnRSN,
-											new Boolean(inSortedOrder),
-											null,
-											getContextManager());
+                prnRSN = new DistinctNode(
+                        prnRSN, inSortedOrder, null, getContextManager());
 				prnRSN.costEstimate = costEstimate.cloneMe();
 
                 // Remember whether or not we can eliminate the sort.
@@ -1683,12 +1672,10 @@ public class SelectNode extends ResultSetNode
             {
                 if (orderByLists[i].getSortNeeded())
                 {
-                    prnRSN = (ResultSetNode) getNodeFactory().getNode(
-                            C_NodeTypes.ORDER_BY_NODE,
-                            prnRSN,
-                            orderByLists[i],
-                            null,
-                            getContextManager());
+                    prnRSN = new OrderByNode(prnRSN,
+                                             orderByLists[i],
+                                             null,
+                                             getContextManager());
                     prnRSN.costEstimate = costEstimate.cloneMe();
                 }
 
@@ -1712,8 +1699,7 @@ public class SelectNode extends ResultSetNode
 
                     topList.removeOrderByColumns();
                     topList.genVirtualColumnNodes(prnRSN, newSelectList);
-                    prnRSN = (ResultSetNode) getNodeFactory().getNode(
-                            C_NodeTypes.PROJECT_RESTRICT_NODE,
+                    prnRSN = new ProjectRestrictNode(
                             prnRSN,
                             topList,
                             null,
@@ -1734,13 +1720,12 @@ public class SelectNode extends ResultSetNode
                 ResultColumnList newSelectList = topList.copyListAndObjects();
                 prnRSN.setResultColumns(newSelectList);
                 topList.genVirtualColumnNodes(prnRSN, newSelectList);
-                prnRSN = (ResultSetNode)getNodeFactory().getNode(
-                        C_NodeTypes.ROW_COUNT_NODE,
+                prnRSN = new RowCountNode(
                         prnRSN,
                         topList,
                         offset,
                         fetchFirst,
-                        Boolean.valueOf( hasJDBClimitClause ),
+                        hasJDBClimitClause,
                         getContextManager());
             }
         }
@@ -1773,8 +1758,7 @@ public class SelectNode extends ResultSetNode
 
 			topList.removeGeneratedGroupingColumns();
 			topList.genVirtualColumnNodes(prnRSN, newSelectList);
-			prnRSN = (ResultSetNode) getNodeFactory().getNode(
-						C_NodeTypes.PROJECT_RESTRICT_NODE,
+            prnRSN = new ProjectRestrictNode(
 						prnRSN,
 						topList,
 						null,
@@ -1880,7 +1864,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    @Override
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		return this;
@@ -1898,13 +1883,13 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList	predicateList,
 								  double outerRows) 
 				throws StandardException
 	{
-		Optimizer		 optimizer;
+        Optimizer        opt;
 
 		/* Optimize any subquerys before optimizing the underlying result set */
 
@@ -1973,19 +1958,17 @@ public class SelectNode extends ResultSetNode
 		if (predicateList != null)
 		{
 			if (wherePredicates == null) {
-				wherePredicates = (PredicateList) getNodeFactory().getNode(
-						C_NodeTypes.PREDICATE_LIST,
-						getContextManager());
+                wherePredicates = new PredicateList(getContextManager());
 			}
 
-			Predicate pred = null;
 			int sz = predicateList.size();
-			for (int i = sz - 1; i >= 0; i--)
+
+            for (int i = sz - 1; i >= 0; i--)
 			{
 				// We can tell if a predicate was pushed into this select
 				// node because it will have been "scoped" for this node
 				// or for some result set below this one.
-				pred = (Predicate)predicateList.getOptPredicate(i);
+                Predicate pred = (Predicate)predicateList.getOptPredicate(i);
 				if (pred.isScopedToSourceResultSet())
 				{
 					// If we're pushing the predicate down here, we have to
@@ -1998,18 +1981,18 @@ public class SelectNode extends ResultSetNode
 			}
 		}
 
-		optimizer = getOptimizer(fromList,
+        opt = getOptimizer(fromList,
 								wherePredicates,
 								dataDictionary,
                                 orderByLists[0]); // use first one
-		optimizer.setOuterRows(outerRows);
+        opt.setOuterRows(outerRows);
 
 		/* Optimize this SelectNode */
-		while (optimizer.getNextPermutation())
+        while (opt.getNextPermutation())
 		{
-			while (optimizer.getNextDecoratedPermutation())
+            while (opt.getNextDecoratedPermutation())
 			{
-				optimizer.costPermutation();
+                opt.costPermutation();
 			}
 		}
 
@@ -2021,10 +2004,9 @@ public class SelectNode extends ResultSetNode
 		 */
 		if (wherePredicates != null)
 		{
-			Predicate pred = null;
 			for (int i = wherePredicates.size() - 1; i >= 0; i--)
 			{
-				pred = (Predicate)wherePredicates.getOptPredicate(i);
+                Predicate pred = (Predicate)wherePredicates.getOptPredicate(i);
 				if (pred.isScopedForPush())
 				{
 					predicateList.addOptPredicate(pred);
@@ -2034,7 +2016,7 @@ public class SelectNode extends ResultSetNode
 		}
 
 		/* Get the cost */
-		costEstimate = optimizer.getOptimizedCost();
+        costEstimate = opt.getOptimizedCost();
 
 		/* Update row counts if this is a scalar aggregate */
 		if ((selectAggregates != null) && (selectAggregates.size() > 0)) 
@@ -2067,7 +2049,8 @@ public class SelectNode extends ResultSetNode
 	 * @return The modified query tree
 	 * @exception StandardException        Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths(PredicateList predList)
+    @Override
+    ResultSetNode modifyAccessPaths(PredicateList predList)
 		throws StandardException
 	{
 		// Take the received list of predicates and propagate them to the
@@ -2083,7 +2066,8 @@ public class SelectNode extends ResultSetNode
 				"modifying access paths.");
 		}
 
-		((OptimizerImpl)optimizer).addScopedPredicatesToList(predList);
+        ((OptimizerImpl)optimizer).
+                addScopedPredicatesToList(predList, getContextManager());
 		return modifyAccessPaths();
 	}
 
@@ -2094,7 +2078,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		int				 origFromListSize = fromList.size();
 		ResultColumnList leftRCList;
@@ -2125,10 +2110,10 @@ public class SelectNode extends ResultSetNode
 			// and thus removed from the list.
 			if (wherePredicates != null)
 			{
-				Predicate pred = null;
 				for (int i = wherePredicates.size() - 1; i >= 0; i--)
 				{
-					pred = (Predicate)wherePredicates.getOptPredicate(i);
+                    Predicate pred =
+                            (Predicate)wherePredicates.getOptPredicate(i);
 					if (pred.isScopedForPush())
 					{
 						SanityManager.THROWASSERT("Found scoped predicate " +
@@ -2198,20 +2183,16 @@ public class SelectNode extends ResultSetNode
 			 * replace the 1st 2 entries in the FromList.
 			 */
 			fromList.setElementAt(
-						 (JoinNode) getNodeFactory().getNode(
-												C_NodeTypes.JOIN_NODE,
-												leftResultSet,
-												rightResultSet,
-												null,
-												null,
-												leftRCList,
-												null,
-												//user supplied optimizer overrides
-												fromList.properties,
-												getContextManager()
-												),
-							0
-						);
+                new JoinNode(leftResultSet,
+                             rightResultSet,
+                             null,
+                             null,
+                             leftRCList,
+                             null,
+                             //user supplied optimizer overrides
+                             fromList.properties,
+                             getContextManager()),
+                0);
 
 			fromList.removeElementAt(1);
 		}
@@ -2226,7 +2207,8 @@ public class SelectNode extends ResultSetNode
 	 * 			the final cost estimate for the best join order of
 	 *          this SelectNode's optimizer.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		return optimizer.getFinalCost();
@@ -2235,6 +2217,7 @@ public class SelectNode extends ResultSetNode
 	/**
 		Determine if this select is updatable or not, for a cursor.
 	 */
+    @Override
 	boolean isUpdatableCursor(DataDictionary dd) throws StandardException
 	{
 		TableDescriptor	targetTableDescriptor;
@@ -2327,6 +2310,7 @@ public class SelectNode extends ResultSetNode
 		Assumes that isCursorUpdatable has been called, and that it
 		is only called for updatable cursors.
 	 */
+    @Override
 	FromTable getCursorTargetTable()
 	{
 		if (SanityManager.DEBUG)
@@ -2345,7 +2329,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    @Override
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		if (fromList.referencesTarget(name, baseTable) ||
@@ -2369,6 +2354,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	boolean subqueryReferencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
@@ -2388,7 +2374,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
+    @Override
+    void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
 		fromList.bindUntypedNullsToResultColumns(bindingRCL);
@@ -2471,7 +2458,8 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		/* Do row locking if there is a restriction */
 		return fromList.updateTargetLockMode();
@@ -2485,9 +2473,12 @@ public class SelectNode extends ResultSetNode
 	 * @return Whether or not this ResultSet tree is guaranteed to return
 	 * at most 1 row based on heuristics.
 	 */
+    @Override
 	boolean returnsAtMostOneRow()
 	{
-		return (groupByList == null && selectAggregates != null && selectAggregates.size() != 0);
+        return (groupByList == null &&
+                selectAggregates != null &&
+                !selectAggregates.isEmpty());
 	}
 
 	/**
@@ -2497,6 +2488,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -2515,6 +2507,7 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -2591,7 +2584,7 @@ public class SelectNode extends ResultSetNode
 	/**
 	 * @return true if there are aggregates in the select list.
 	 */
-	public boolean hasAggregatesInSelectList() 
+    boolean hasAggregatesInSelectList()
 	{
 		return !selectAggregates.isEmpty();
 	}
@@ -2605,13 +2598,13 @@ public class SelectNode extends ResultSetNode
 	 *
 	 * @return true if this select node has any windows on it
 	 */
-	public boolean hasWindows()
+    boolean hasWindows()
 	{
 		return windows != null;
 	}
 
 
-	public static void checkNoWindowFunctions(QueryTreeNode clause,
+    static void checkNoWindowFunctions(QueryTreeNode clause,
 											   String clauseName)
 			throws StandardException {
 
@@ -2632,6 +2625,7 @@ public class SelectNode extends ResultSetNode
      *
      * A no-op for SelectNode.
      */
+    @Override
     void replaceOrForbidDefaults(TableDescriptor ttd,
                                  ResultColumnList tcl,
                                  boolean allowDefaults)

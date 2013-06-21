@@ -21,44 +21,42 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.lang.reflect.Modifier;
-import java.util.List;
-
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * This node type converts a value from the Java domain to the SQL domain.
  */
 
-public class JavaToSQLValueNode extends ValueNode
+class JavaToSQLValueNode extends ValueNode
 {
 	JavaValueNode	javaNode;
 
 	/**
-	 * Initializer for a JavaToSQLValueNode
+     * Constructor for a JavaToSQLValueNode
 	 *
 	 * @param value		The Java value to convert to the SQL domain
+     * @param cm        The context manager
 	 */
-	public void init(Object value)
+    JavaToSQLValueNode(JavaValueNode value, ContextManager cm)
 	{
-		this.javaNode = (JavaValueNode) value;
+        super(cm);
+        setNodeType(C_NodeTypes.JAVA_TO_SQL_VALUE_NODE);
+        this.javaNode = value;
 	}
 
 	/**
@@ -76,7 +74,8 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -98,7 +97,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -182,8 +181,8 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -220,6 +219,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -275,7 +275,8 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		javaNode = javaNode.remapColumnReferencesToExpressions();
@@ -307,7 +308,8 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		return javaNode.categorize(referencedTabs, simplePredsOnly);
@@ -326,6 +328,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 * @return	The variant type for the underlying expression.
 	 * @exception StandardException	thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		return javaNode.getOrderableVariantType();
@@ -338,6 +341,7 @@ public class JavaToSQLValueNode extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

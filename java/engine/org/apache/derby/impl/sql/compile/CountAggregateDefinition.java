@@ -21,28 +21,21 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.impl.sql.execute.CountAggregator;
-
-import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.reference.ClassName;
-
-
 /**
- * Defintion for the COUNT()/COUNT(*) aggregates.
+ * Definition for the COUNT()/COUNT(*) aggregates.
  *
  */
-public class CountAggregateDefinition 
+class CountAggregateDefinition
 		implements AggregateDefinition 
 {
 	/**
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-	public CountAggregateDefinition() { super(); }
+    CountAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype. We can run

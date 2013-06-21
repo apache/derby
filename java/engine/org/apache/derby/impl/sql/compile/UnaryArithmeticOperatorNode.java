@@ -21,86 +21,80 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import java.sql.Types;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a unary arithmetic operator
  *
  */
 
-public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
+class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 {
-	private final static int UNARY_PLUS	= 0;
-	private final static int UNARY_MINUS	= 1;
-	private final static int SQRT = 2;
-	private final static int ABSOLUTE = 3;
 	private final static String[] UNARY_OPERATORS = {"+","-","SQRT", "ABS/ABSVAL"};
 	private final static String[] UNARY_METHODS = {"plus","minus","sqrt", "absolute"};
 
-	private int operatorType;
-  
-	/**
-	 * Initializer for a UnaryArithmeticOperatorNode
-	 *
-	 * @param operand		The operand of the node
-	 */
-	public void init(Object operand)
-	{
-		switch(getNodeType())
-		{
-			case C_NodeTypes.UNARY_PLUS_OPERATOR_NODE:
-				operatorType = UNARY_PLUS;
-				break;
-			case C_NodeTypes.UNARY_MINUS_OPERATOR_NODE:
-				operatorType = UNARY_MINUS;
-				break;
-			case C_NodeTypes.SQRT_OPERATOR_NODE:
-				operatorType = SQRT;
-				break;
-			case C_NodeTypes.ABSOLUTE_OPERATOR_NODE:
-				operatorType = ABSOLUTE;
-				break;
-			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT("init for UnaryArithmeticOperator called with wrong nodeType = " + getNodeType());
-				}
-			    break;
-		}
-		init(operand, UNARY_OPERATORS[this.operatorType], 
-				UNARY_METHODS[this.operatorType]);
-	}
+   private final OperatorType operatorType;
+
+    public enum OperatorType {PLUS(0), MINUS(1), SQRT(2), ABS(3);
+
+        private int representation;
+
+        private OperatorType(int repr) {
+            this.representation = repr;
+        }
+
+        public int getVal() { return representation; }
+    }
     
+    /**
+     * @param operand The operand of the node
+     * @param type unary operator identity
+     * @param cm context manager
+     * @throws StandardException
+     */
+    UnaryArithmeticOperatorNode(
+            ValueNode operand,
+            OperatorType type,
+            ContextManager cm) throws StandardException {
+        super(operand,
+              UNARY_OPERATORS[type.getVal()],
+              UNARY_METHODS[type.getVal()],
+              cm);
+        this.operatorType = type;
+    }
     /**
      * Unary + and - require their type to be set if
      * they wrap another node (e.g. a parameter) that
      * requires type from its context.
      * @see ValueNode#requiresTypeFromContext
      */
+    @Override
     public boolean requiresTypeFromContext()
     {
-        if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
+        if (operatorType == OperatorType.PLUS ||
+            operatorType == OperatorType.MINUS) {
             return operand.requiresTypeFromContext(); 
+        }
         return false;
     }
     
     /**
      * A +? or a -? is considered a parameter.
      */
+    @Override
     public boolean isParameterNode()
     {
-        if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
+        if (operatorType == OperatorType.PLUS ||
+            operatorType == OperatorType.MINUS) {
             return operand.isParameterNode(); 
+        }
         return false;
     }
 
@@ -115,10 +109,11 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 *									have a type bound to it yet.
 	 *									? parameter where it isn't allowed.
 	 */
-
+    @Override
 	void bindParameter() throws StandardException
 	{
-		if (operatorType == SQRT || operatorType == ABSOLUTE)
+       if (operatorType == OperatorType.SQRT ||
+            operatorType == OperatorType.ABS)
 		{
 			operand.setType(
 				new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.DOUBLE), true));
@@ -126,7 +121,8 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		}
         
 		//Derby-582 add support for dynamic parameter for unary plus and minus
-		if (operatorType == UNARY_MINUS || operatorType == UNARY_PLUS) 
+       if (operatorType == OperatorType.MINUS ||
+            operatorType == OperatorType.PLUS)
 			return;
         
         // Not expected to get here since only the above types are supported
@@ -146,23 +142,27 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
-		if (operand.requiresTypeFromContext() && ((operatorType == UNARY_PLUS || operatorType == UNARY_MINUS))
+       if (operand.requiresTypeFromContext() &&
+                ((operatorType == OperatorType.PLUS ||
+                  operatorType == OperatorType.MINUS))
 				&& operand.getTypeServices() == null)
 				return this;
 
         bindOperand(fromList, subqueryList, aggregates);
 
-		if (operatorType == SQRT || operatorType == ABSOLUTE)
+       if (operatorType == OperatorType.SQRT ||
+            operatorType == OperatorType.ABS)
 		{
 			bindSQRTABS();
 		}
-		else if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
+       else if (operatorType == OperatorType.PLUS ||
+                 operatorType == OperatorType.MINUS)
 		{
             checkOperandIsNumeric(operand.getTypeId());
 		}
@@ -183,7 +183,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	    {
 	        throw StandardException.newException(
                     SQLState.LANG_UNARY_ARITHMETIC_BAD_TYPE, 
-	                (operatorType == UNARY_PLUS) ? "+" : "-", 
+                   (operatorType == OperatorType.PLUS) ? "+" : "-",
 	                        operandType.getSQLTypeName());
 	    }
 	    
@@ -197,12 +197,12 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
 		/* Unary + doesn't do anything.  Just return the operand */
-		if (operatorType == UNARY_PLUS)
+       if (operatorType == OperatorType.PLUS)
 			operand.generateExpression(acb, mb);
 		else
 			super.generateExpression(acb, mb);
@@ -242,10 +242,10 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 						getOperatorString(), operandType.getSQLTypeName());
 
 		/* For SQRT, if operand is not a DOUBLE, convert it to DOUBLE */
-		if (operatorType == SQRT && jdbcType != Types.DOUBLE)
+       if (operatorType == OperatorType.SQRT &&
+            jdbcType != Types.DOUBLE)
 		{
-			operand = (ValueNode) getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+            operand = new CastNode(
 					operand,
 					new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.DOUBLE), true),
 					getContextManager());
@@ -257,7 +257,8 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	the type of these dynamic parameters and hence we can do the parameter
 	binding. The setType method will call the binding code after setting
 	the type of the parameter*/
-	public void setType(DataTypeDescriptor descriptor) throws StandardException
+    @Override
+    void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
         if (operand.requiresTypeFromContext() && operand.getTypeServices() == null)
         {

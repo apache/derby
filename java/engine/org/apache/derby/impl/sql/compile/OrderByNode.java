@@ -21,10 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * An OrderByNode represents a result set for a sort operation
@@ -33,54 +36,48 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * is required.
  *
  */
-public class OrderByNode extends SingleChildResultSetNode
+class OrderByNode extends SingleChildResultSetNode
 {
 
 	OrderByList		orderByList;
 
 	/**
-	 * Initializer for a OrderByNode.
+     * Constructor for a OrderByNode.
 	 *
-	 * @param childResult	The child ResultSetNode
+     * @param childRes      The child ResultSetNode
 	 * @param orderByList	The order by list.
  	 * @param tableProperties	Properties list associated with the table
-    *
+     * @param cm            The context manager
+     *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-						Object childResult,
-						Object orderByList,
-						Object tableProperties)
-		throws StandardException
-	{
-		ResultSetNode child = (ResultSetNode) childResult;
+    OrderByNode(ResultSetNode childRes,
+                OrderByList orderByList,
+                Properties tableProperties,
+                ContextManager cm) throws StandardException {
+        super(childRes, tableProperties, cm);
+        setNodeType(C_NodeTypes.ORDER_BY_NODE);
 
-		super.init(childResult, tableProperties);
+        this.orderByList = orderByList;
 
-		this.orderByList = (OrderByList) orderByList;
-
-		ResultColumnList prRCList;
-
-		/*
-			We want our own resultColumns, which are virtual columns
-			pointing to the child result's columns.
-
-			We have to have the original object in the distinct node,
-			and give the underlying project the copy.
-		 */
-
-		/* We get a shallow copy of the ResultColumnList and its 
-		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
-		 */
-		prRCList = child.getResultColumns().copyListAndObjects();
-		resultColumns = child.getResultColumns();
-		child.setResultColumns(prRCList);
+        // We want our own resultColumns, which are virtual columns pointing to
+        // the child result's columns.
+        //
+        // We have to have the original object in the distinct node, and give
+        // the underlying project the copy.
+        //
+        // We get a shallow copy of the ResultColumnList and its ResultColumns.
+        // (Copy maintains ResultColumn.expression for now.)
+        final ResultColumnList prRCList =
+            childRes.getResultColumns().copyListAndObjects();
+        this.resultColumns = childRes.getResultColumns();
+        childRes.setResultColumns(prRCList);
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the DistinctNode's RCL.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-		resultColumns.genVirtualColumnNodes(this, prRCList);
+        this.resultColumns.genVirtualColumnNodes(this, prRCList);
 	}
 
 
@@ -90,8 +87,8 @@ public class OrderByNode extends SingleChildResultSetNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -105,7 +102,7 @@ public class OrderByNode extends SingleChildResultSetNode
 		}
 	}
 
-
+    @Override
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{
 	    return childResult.makeResultDescriptors();
@@ -113,10 +110,11 @@ public class OrderByNode extends SingleChildResultSetNode
 
     /**
      * generate the distinct result set operating over the source
-	 * resultset.
+     * result set.
      *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{

@@ -218,7 +218,7 @@ public interface StoredFormatIds {
     /**
         class org.apache.derby.iapi.types.LongintTypeId
      */
-    static public final int LONGINT_TYPE_ID =
+    static public final int BIGINT_TYPE_ID =
             (MIN_ID_2 + 11);
     
     /**
@@ -683,7 +683,7 @@ public interface StoredFormatIds {
     /**
         class org.apache.derby.catalog.types.LongintTypeIdImpl
      */
-    static public final int LONGINT_TYPE_ID_IMPL =
+    static public final int BIGINT_TYPE_ID_IMPL =
             (MIN_ID_2 + 23);
         
     /**

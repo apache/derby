@@ -21,23 +21,14 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import java.sql.Types;
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
-public class TimestampTypeCompiler extends BaseTypeCompiler
+class TimestampTypeCompiler extends BaseTypeCompiler
 {
 	/* TypeCompiler methods */	
 	/**

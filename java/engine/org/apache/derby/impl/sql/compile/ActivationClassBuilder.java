@@ -85,7 +85,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 	 *		protected ResultSet doExecute() throws StandardException {
 	 *			// statements must be added here
 	 *		}
-	 *		public #className() { super(); }
+     *      #className() { super(); }
 	 *    }
 	 * </pre>
 	 *
@@ -314,6 +314,7 @@ class ActivationClassBuilder	extends	ExpressionClassBuilder
 		level support for it. The first half of the logic is in our parent
 		class.
 	 */
+    @Override
 	protected LocalField getCurrentSetup()
 	{
 		if (cdtField != null) return cdtField;

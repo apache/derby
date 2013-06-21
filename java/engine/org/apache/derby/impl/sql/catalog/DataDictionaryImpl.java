@@ -22,125 +22,28 @@
 package org.apache.derby.impl.sql.catalog;
 
 import java.io.File;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.EngineType;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
-
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
-import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SubCheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SubConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
-import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
-import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
-import org.apache.derby.impl.sql.compile.ColumnReference;
-import org.apache.derby.impl.sql.compile.TableName;
-import org.apache.derby.impl.sql.depend.BasicDependencyManager;
-
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ScanQualifier;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.NumberDataValue;
-
-import org.apache.derby.iapi.types.SQLBoolean;
-import org.apache.derby.iapi.types.SQLChar;
-import org.apache.derby.iapi.types.SQLLongint;
-import org.apache.derby.iapi.types.SQLVarchar;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.UserType;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-
-import org.apache.derby.iapi.store.access.AccessFactory;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.types.Orderable;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.monitor.ModuleSupportable;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
-
-// RESOLVE - paulat - remove this import when track 3677 is fixed
-import org.apache.derby.iapi.services.sanity.AssertFailure;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.TupleFilter;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.cache.CacheFactory;
-import org.apache.derby.iapi.services.cache.CacheManager;
-import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.cache.CacheableFactory;
-
-import org.apache.derby.iapi.services.locks.LockFactory;
-import org.apache.derby.iapi.services.locks.C_LockFactory;
-
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
-import org.apache.derby.impl.services.locks.Timeout;
-
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.sql.ParameterMetaData;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.DependableFinder;
@@ -148,41 +51,112 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-
+import org.apache.derby.iapi.db.Database;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.CacheFactory;
+import org.apache.derby.iapi.services.cache.CacheManager;
+import org.apache.derby.iapi.services.cache.Cacheable;
+import org.apache.derby.iapi.services.cache.CacheableFactory;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.locks.C_LockFactory;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
+import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
-import org.apache.derby.iapi.util.IdUtil;
-
-import java.security.SecureRandom;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Dictionary;
-import java.util.GregorianCalendar;
-import java.util.Hashtable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Properties;
-
-import java.util.List;
-import java.util.Iterator;
-import java.util.LinkedList;
-
-import java.util.Enumeration;
-import java.io.InputStream;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import java.sql.ParameterMetaData;
-import java.sql.Types;
-import java.util.Map;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleSupportable;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.AssertFailure;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
+import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
+import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SubCheckConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SubConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.execute.ScanQualifier;
+import org.apache.derby.iapi.sql.execute.TupleFilter;
+import org.apache.derby.iapi.store.access.AccessFactory;
+import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.FileResource;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.store.access.RowUtil;
+import org.apache.derby.iapi.store.access.ScanController;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.Orderable;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLBoolean;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLLongint;
+import org.apache.derby.iapi.types.SQLVarchar;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
+import org.apache.derby.impl.services.locks.Timeout;
+import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
+import org.apache.derby.impl.sql.compile.ColumnReference;
+import org.apache.derby.impl.sql.compile.TableName;
+import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 import org.apache.derby.impl.sql.execute.JarUtil;
 
 /**
@@ -7799,7 +7773,7 @@ public final class	DataDictionaryImpl
 		While we only support a single alias for a given name,namespace just
 		return a list of zero or one item.
 		If the schema is SYSFUN then do not use the system catalogs,
-		but instead look up the routines from the in-meomry table driven
+        but instead look up the routines from the in-memory table driven
 		by the contents of SYSFUN_FUNCTIONS.
 	 */
 	public java.util.List<AliasDescriptor> getRoutineList(String schemaID, String routineName, char nameSpace)

@@ -21,8 +21,8 @@
 
 package org.apache.derby.catalog.types;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 public class TypesImplInstanceGetter extends FormatableInstanceGetter {
 
@@ -33,7 +33,7 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                   case StoredFormatIds.INT_TYPE_ID_IMPL:
                   case StoredFormatIds.SMALLINT_TYPE_ID_IMPL:
                   case StoredFormatIds.TINYINT_TYPE_ID_IMPL:
-                  case StoredFormatIds.LONGINT_TYPE_ID_IMPL:
+                  case StoredFormatIds.BIGINT_TYPE_ID_IMPL:
                   case StoredFormatIds.DOUBLE_TYPE_ID_IMPL:
                   case StoredFormatIds.REAL_TYPE_ID_IMPL:
                   case StoredFormatIds.REF_TYPE_ID_IMPL:

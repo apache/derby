@@ -26,19 +26,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
@@ -50,7 +42,11 @@ import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.JBitSet;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Optimizer tracer which produces output in an xml format.
@@ -496,14 +492,22 @@ class   XMLOptTrace implements  OptTrace
         try {
             if ( isBaseTable( optimizable ) )
             {
-                TableDescriptor td = ((FromBaseTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableDescriptor();
-                return makeTableName( td.getSchemaName(), td.getName() );
+                ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
+                TableDescriptor td = 
+                    ((FromBaseTable) prn.getChildResult()).getTableDescriptor();
+                return makeTableName( td.getSchemaName(),
+                                      td.getName(),
+                                      prn.getContextManager() );
             }
             else if ( isTableFunction( optimizable ) )
             {
+                ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 AliasDescriptor ad =
-                    ((StaticMethodCallNode) ((FromVTI) ((ProjectRestrictNode) optimizable).getChildResult()).getMethodCall() ).ad;
-                return makeTableName( ad.getSchemaName(), ad.getName() );
+                    ((StaticMethodCallNode) ((FromVTI) prn.getChildResult()).
+                        getMethodCall() ).ad;
+                return makeTableName( ad.getSchemaName(), 
+                                      ad.getName(),
+                                      prn.getContextManager() );
             }
             else if ( isFromTable( optimizable ) )
             {
@@ -521,7 +525,7 @@ class   XMLOptTrace implements  OptTrace
         String  nodeClass = optimizable.getClass().getName();
         String  unqualifiedName = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
 
-        return makeTableName( null, unqualifiedName );
+        return makeTableName( null, unqualifiedName, null );
     }
 
     /** Return true if the optimizable is a base table */
@@ -556,10 +560,10 @@ class   XMLOptTrace implements  OptTrace
     }
 
     /** Make a TableName */
-    private TableName   makeTableName( String schemaName, String unqualifiedName )
+    private TableName   makeTableName(
+            String schemaName, String unqualifiedName, ContextManager cm )
     {
-        TableName   result = new TableName();
-        result.init( schemaName, unqualifiedName );
+        TableName result = new TableName(schemaName, unqualifiedName, cm);
 
         return result;
     }

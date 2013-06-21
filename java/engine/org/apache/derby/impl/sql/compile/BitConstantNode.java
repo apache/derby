@@ -21,70 +21,47 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.sql.Types;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.BitDataValue;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.util.StringUtil;
 
-import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.sql.Types;
-
-public class BitConstantNode extends ConstantNode
+class BitConstantNode extends ConstantNode
 {
+    /**
+     * @param t The TypeId for the type of the node
+     * @param cm context manager
+     * @throws StandardException
+     */
+    BitConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, true, 0, cm);
+        setNodeType(C_NodeTypes.BIT_CONSTANT_NODE);
+    }
 
-	private int bitLength;
 
-
-	/**
-	 * Initializer for a BitConstantNode.
-	 *
-	 * @param arg1	A Bit containing the value of the constant OR The TypeId for the type of the node
-	 *
-	 * @exception StandardException
-	 */
-
-	public void init(
-					Object arg1)
-		throws StandardException
-	{
-		super.init(
-					arg1,
-					Boolean.TRUE,
-					ReuseFactory.getInteger(0));
-	}
-
-	public void init(
-					Object arg1, Object arg2)
-		throws StandardException
-	{
-		String a1 = (String) arg1;
-
-		byte[] nv = org.apache.derby.iapi.util.StringUtil.fromHexString(a1, 0, a1.length()); 
-
-		Integer bitLengthO = (Integer) arg2;
-		bitLength = bitLengthO.intValue();
-
-		init(
-			TypeId.getBuiltInTypeId(Types.BINARY),
-			Boolean.FALSE,
-			bitLengthO);
-
-		org.apache.derby.iapi.types.BitDataValue dvd = getDataValueFactory().getBitDataValue(nv);
-
+    /**
+     * @param hexString hexadecimally coded bit string
+     * @param bitLength desired length of the bit string
+     * @param cm context manager
+     * @throws StandardException
+     */
+    BitConstantNode(String hexString, int bitLength, ContextManager cm)
+            throws StandardException {
+        super(TypeId.getBuiltInTypeId(Types.BINARY), false, bitLength, cm);
+        setNodeType(C_NodeTypes.BIT_CONSTANT_NODE);
+        byte[] nv = StringUtil.fromHexString(hexString, 0, hexString.length());
+        BitDataValue dvd = getDataValueFactory().getBitDataValue(nv);
 		dvd.setWidth(bitLength, 0, false);
 
-		setValue(dvd);
-	}
-
+        setValue(dvd);
+    }
 
 	/**
 	 * Return an Object representing the bind time value of this
@@ -98,6 +75,7 @@ public class BitConstantNode extends ConstantNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	Object getConstantValueAsObject()
 		throws StandardException
 	{

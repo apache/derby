@@ -22,7 +22,9 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -33,21 +35,22 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
-public class CreateRoleNode extends DDLStatementNode
+class CreateRoleNode extends DDLStatementNode
 {
     private String name;
 
     /**
-     * Initializer for a CreateRoleNode
+     * Constructor for a CreateRoleNode
      *
      * @param roleName  The name of the new role
      *
      * @exception StandardException         Thrown on error
      */
-    public void init(Object     roleName) throws StandardException
+    CreateRoleNode(String roleName, ContextManager cm) throws StandardException
     {
-        initAndCheck(null);
-        this.name = (String)roleName;
+        super(null, cm);
+        this.name = roleName;
+        setNodeType((C_NodeTypes.CREATE_ROLE_NODE));
     }
 
     /**
@@ -56,7 +59,7 @@ public class CreateRoleNode extends DDLStatementNode
      *
      * @return  This object as a String
      */
-
+    @Override
     public String toString()
     {
         if (SanityManager.DEBUG) {
@@ -71,6 +74,7 @@ public class CreateRoleNode extends DDLStatementNode
      * Bind this createRoleNode. Main work is to create a StatementPermission
      * object to require CREATE_ROLE_PRIV at execution time.
      */
+    @Override
     public void bindStatement() throws StandardException
     {
         CompilerContext cc = getCompilerContext();
@@ -91,6 +95,7 @@ public class CreateRoleNode extends DDLStatementNode
      *
      * @exception StandardException         Thrown on failure
      */
+    @Override
     public ConstantAction   makeConstantAction()
     {
         return  getGenericConstantActionFactory().

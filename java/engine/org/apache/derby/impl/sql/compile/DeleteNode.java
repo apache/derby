@@ -21,52 +21,39 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-
-import org.apache.derby.iapi.sql.StatementType;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.vti.DeferModification;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.impl.sql.execute.FKInfo;
-
 import java.lang.reflect.Modifier;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.io.FormatableProperties;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.vti.DeferModification;
 
 
 /**
@@ -78,8 +65,7 @@ import org.apache.derby.iapi.services.compiler.LocalField;
  * the named cursor.
  *
  */
-
-public class DeleteNode extends DMLModStatementNode
+class DeleteNode extends DMLModStatementNode
 {
 	/* Column name for the RowLocation column in the ResultSet */
 	private static final String COLUMNNAME = "###RowLocationToDelete";
@@ -94,21 +80,24 @@ public class DeleteNode extends DMLModStatementNode
 	private StatementNode[] dependentNodes;
 
 	/**
-	 * Initializer for a DeleteNode.
+     * Constructor for a DeleteNode.
 	 *
 	 * @param targetTableName	The name of the table to delete from
 	 * @param queryExpression	The query expression that will generate
 	 *				the rows to delete from the given table
+     * @param cm                The context manager
 	 */
 
-	public void init(Object targetTableName,
-					  Object queryExpression)
-	{
-		super.init(queryExpression);
-		this.targetTableName = (TableName) targetTableName;
+    DeleteNode(TableName targetTableName,
+               ResultSetNode queryExpression,
+               ContextManager cm) {
+        super(queryExpression, cm);
+        setNodeType(C_NodeTypes.DELETE_NODE);
+        this.targetTableName = targetTableName;
 	}
 
-	public String statementToString()
+    @Override
+    String statementToString()
 	{
 		return "DELETE";
 	}
@@ -128,18 +117,18 @@ public class DeleteNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the where clause tables
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
 		try
 		{
-			FromList	fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
-			ResultColumn				rowLocationColumn = null;
+            FromList fromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager());
+
+            ResultColumn                rowLocationColumn = null;
 			CurrentRowLocationNode		rowLocationNode;
 			TableName					cursorTargetTableName = null;
 			CurrentOfNode       		currentOfNode = null;
@@ -156,8 +145,7 @@ public class DeleteNode extends DMLModStatementNode
 				SanityManager.ASSERT(resultSet != null && resultSet instanceof SelectNode,
 				"Delete must have a select result set");
 
-			SelectNode sel;
-			sel = (SelectNode)resultSet;
+            SelectNode sel = (SelectNode)resultSet;
 			targetTable = (FromTable) sel.fromList.elementAt(0);
 			if (targetTable instanceof CurrentOfNode)
 			{
@@ -226,7 +214,8 @@ public class DeleteNode extends DMLModStatementNode
 				** are needed in the rcl.
 				*/
 
-				resultColumnList = new ResultColumnList();
+                resultColumnList =
+                        new ResultColumnList(getContextManager());
 
 				FromBaseTable fbt = getResultColumnList(resultColumnList);
 
@@ -255,15 +244,12 @@ public class DeleteNode extends DMLModStatementNode
 				}
 
 				/* Generate the RowLocation column */
-				rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
-										C_NodeTypes.CURRENT_ROW_LOCATION_NODE,
-										getContextManager());
-				rowLocationColumn =
-					(ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									COLUMNNAME,
-									rowLocationNode,
-									getContextManager());
+                rowLocationNode =
+                        new CurrentRowLocationNode(getContextManager());
+                rowLocationColumn =
+                        new ResultColumn(COLUMNNAME,
+                                         rowLocationNode,
+                                         getContextManager());
 				rowLocationColumn.markGenerated();
 
 				/* Append to the ResultColumnList */
@@ -289,7 +275,7 @@ public class DeleteNode extends DMLModStatementNode
 				rowLocationColumn.bindResultColumnToExpression();
 
 				bindConstraints(dataDictionary,
-							getNodeFactory(),
+                            getOptimizerFactory(),
 							targetTableDescriptor,
 							null,
 							resultColumnList,
@@ -318,7 +304,6 @@ public class DeleteNode extends DMLModStatementNode
                                                   null,
                                                   sel.getWhereClause());
 			}
-        	sel = null; // done with sel
 
 			/* Verify that all underlying ResultSets reclaimed their FromList */
 			if (SanityManager.DEBUG)
@@ -383,6 +368,7 @@ public class DeleteNode extends DMLModStatementNode
 		}
 	} // end of bind
 
+    @Override
 	int getPrivType()
 	{
 		return Authorizer.DELETE_PRIV;
@@ -395,6 +381,7 @@ public class DeleteNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -407,7 +394,8 @@ public class DeleteNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 
 		/* Different constant actions for base tables and updatable VTIs */
@@ -500,6 +488,7 @@ public class DeleteNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -654,6 +643,7 @@ public class DeleteNode extends DMLModStatementNode
 	 *
 	 * @return the type of statement
 	 */
+    @Override
 	protected final int getStatementType()
 	{
 		return StatementType.DELETE;
@@ -743,18 +733,17 @@ public class DeleteNode extends DMLModStatementNode
 
         ValueNode whereClause = null;
 
-        TableName tableName = new TableName();
-        tableName.init(schemaName , targetTableName);
+        TableName tableName =
+            new TableName(schemaName , targetTableName, getContextManager());
 
-        NodeFactory nodeFactory = getNodeFactory();
-        FromList   fromList = (FromList) nodeFactory.getNode(C_NodeTypes.FROM_LIST, getContextManager());
-        FromTable fromTable = (FromTable) nodeFactory.getNode(
-                                                    C_NodeTypes.FROM_BASE_TABLE,
-                                                    tableName,
-                                                    null,
-                                                    ReuseFactory.getInteger(FromBaseTable.DELETE),
-                                                    null,
-                                                    getContextManager());
+        FromList fromList = new FromList(getContextManager());
+
+        FromTable fromTable = new FromBaseTable(
+                tableName,
+                null,
+                FromBaseTable.DELETE,
+                null,
+                getContextManager());
 
 		//we would like to use references index & table scan instead of 
 		//what optimizer says for the dependent table scan.
@@ -763,21 +752,15 @@ public class DeleteNode extends DMLModStatementNode
 		((FromBaseTable) fromTable).setTableProperties(targetProperties);
 
         fromList.addFromTable(fromTable);
-        SelectNode resultSet = (SelectNode) nodeFactory.getNode(
-                                                     C_NodeTypes.SELECT_NODE,
-                                                     null,
-                                                     fromList, /* FROM list */
-                                                     whereClause, /* WHERE clause */
-                                                     null, /* GROUP BY list */
-                                                     null, /* having clause */
-													 null, /* windows */
-													 getContextManager());
+        SelectNode rs = new SelectNode(null,
+                                       fromList, /* FROM list */
+                                       whereClause, /* WHERE clause */
+                                       null, /* GROUP BY list */
+                                       null, /* having clause */
+                                       null, /* windows */
+                                       getContextManager());
 
-        return (DeleteNode) nodeFactory.getNode(
-                                                    C_NodeTypes.DELETE_NODE,
-                                                    tableName,
-                                                    resultSet,
-                                                    getContextManager());
+        return new DeleteNode(tableName, rs, getContextManager());
 
     }
 
@@ -791,18 +774,17 @@ public class DeleteNode extends DMLModStatementNode
 
         ValueNode whereClause = null;
 
-        TableName tableName = new TableName();
-        tableName.init(schemaName , targetTableName);
+        TableName tableName =
+            new TableName(schemaName , targetTableName, getContextManager());
 
-        NodeFactory nodeFactory = getNodeFactory();
-        FromList   fromList = (FromList) nodeFactory.getNode(C_NodeTypes.FROM_LIST, getContextManager());
-        FromTable fromTable = (FromTable) nodeFactory.getNode(
-                                                    C_NodeTypes.FROM_BASE_TABLE,
-                                                    tableName,
-                                                    null,
-                                                    ReuseFactory.getInteger(FromBaseTable.DELETE),
-                                                    null,
-                                                    getContextManager());
+        FromList fromList = new FromList(getContextManager());
+
+        FromTable fromTable = new FromBaseTable(
+                tableName,
+                null,
+                ReuseFactory.getInteger(FromBaseTable.DELETE),
+                null,
+                getContextManager());
 
 
 		//we would like to use references index & table scan instead of 
@@ -813,52 +795,38 @@ public class DeleteNode extends DMLModStatementNode
 
         fromList.addFromTable(fromTable);
 
-        SelectNode resultSet = (SelectNode) nodeFactory.getNode(
-                                                     C_NodeTypes.SELECT_NODE,
-                                                     getSetClause(tableName, cdl),
-                                                     fromList, /* FROM list */
-                                                     whereClause, /* WHERE clause */
-                                                     null, /* GROUP BY list */
-													 null, /* having clause */
-													 null, /* windows */
-                                                     getContextManager());
+        SelectNode resultSet = new SelectNode(getSetClause(cdl),
+                                              fromList, /* FROM list */
+                                              whereClause, /* WHERE clause */
+                                              null, /* GROUP BY list */
+                                              null, /* having clause */
+                                              null, /* windows */
+                                              getContextManager());
 
-        return (UpdateNode) nodeFactory.getNode(
-                                                    C_NodeTypes.UPDATE_NODE,
-                                                    tableName,
-                                                    resultSet,
-                                                    getContextManager());
+        return new UpdateNode(tableName, resultSet, getContextManager());
 
     }
 
 
  
-	private ResultColumnList getSetClause(TableName tabName,
-										  ColumnDescriptorList cdl)
+    private ResultColumnList getSetClause(ColumnDescriptorList cdl)
 		throws StandardException
 	{
 		ResultColumn resultColumn;
 		ValueNode	 valueNode;
 
-		NodeFactory nodeFactory = getNodeFactory();
-		ResultColumnList	columnList = (ResultColumnList) nodeFactory.getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList columnList = new ResultColumnList(getContextManager());
 
-		valueNode =  (ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
-															 getContextManager());
+        valueNode = new UntypedNullConstantNode(getContextManager());
 		for(int index =0 ; index < cdl.size() ; index++)
 		{
-			ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
+            ColumnDescriptor cd = cdl.elementAt(index);
 			//only columns that are nullable need to be set to 'null' for ON
 			//DELETE SET NULL
 			if((cd.getType()).isNullable())
 			{
-				resultColumn = (ResultColumn) nodeFactory.getNode(
-   									    C_NodeTypes.RESULT_COLUMN,
-										cd,
-										valueNode,
-										getContextManager());
+                resultColumn =
+                        new ResultColumn(cd, valueNode, getContextManager());
 
 				columnList.addResultColumn(resultColumn);
 			}
@@ -866,7 +834,7 @@ public class DeleteNode extends DMLModStatementNode
 		return columnList;
 	}
 
-
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		if(cascadeDelete)

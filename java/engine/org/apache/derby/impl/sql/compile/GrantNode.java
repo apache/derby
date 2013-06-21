@@ -21,23 +21,40 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.impl.sql.execute.PrivilegeInfo;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * This class represents a GRANT statement.
  */
-public class GrantNode extends DDLStatementNode
+class GrantNode extends DDLStatementNode
 {
 	private PrivilegeNode privileges;
-	private List grantees;
+    private List<String> grantees;
+
+    /**
+     * Constructor for a GrantNode.
+     *
+     * @param privileges PrivilegesNode
+     * @param grantees List
+     * @param cm Context manager
+     */
+    GrantNode(PrivilegeNode privileges,
+              List<String> grantees,
+              ContextManager cm)
+    {
+        super(cm);
+        setNodeType(C_NodeTypes.GRANT_NODE);
+        this.privileges = privileges;
+        this.grantees = grantees;
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -45,17 +62,18 @@ public class GrantNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer sb = new StringBuffer();
-			for( Iterator it = grantees.iterator(); it.hasNext();)
+            StringBuilder sb = new StringBuilder();
+
+            for (String grantee : grantees)
 			{
 				if( sb.length() > 0)
 					sb.append( ",");
-				sb.append( it.next().toString());
+                sb.append(grantee);
 			}
 			return super.toString() +
 				   privileges.toString() +
@@ -67,31 +85,19 @@ public class GrantNode extends DDLStatementNode
 		}
 	} // end of toString
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "GRANT";
 	}
 
 	
 	/**
-	 * Initialize a GrantNode.
-	 *
-	 * @param privileges PrivilegesNode
-	 * @param grantees List
-	 */
-	public void init( Object privileges,
-					  Object grantees)
-	{
-		this.privileges = (PrivilegeNode) privileges;
-		this.grantees = (List) grantees;
-	}
-
-	/**
 	 * Bind this GrantNode. Resolve all table, column, and routine references.
 	 *
 	 *
 	 * @exception StandardException	Standard error policy.
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		privileges = (PrivilegeNode) privileges.bind( new HashMap<Provider,Provider>(), grantees, true);
@@ -103,6 +109,7 @@ public class GrantNode extends DDLStatementNode
 	 *
 	 * @exception StandardException	Standard error policy.
 	 */
+    @Override
 	public ConstantAction makeConstantAction() throws StandardException
 	{
 		return getGenericConstantActionFactory().getGrantConstantAction( privileges.makePrivilegeInfo(),

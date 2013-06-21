@@ -21,29 +21,19 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.types.RefDataValue;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This class implements TypeCompiler for the SQL REF datatype.
  *
  */
 
-public class RefTypeCompiler extends BaseTypeCompiler
+class RefTypeCompiler extends BaseTypeCompiler
 {
 	/** @see TypeCompiler#getCorrespondingPrimitiveTypeName */
 	public String getCorrespondingPrimitiveTypeName()

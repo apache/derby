@@ -21,18 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.Visitor;
-
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * A FromSubquery represents a subquery in the FROM list of a DML statement.
@@ -44,7 +42,7 @@ import org.apache.derby.iapi.util.JBitSet;
  * of the insert target table.
  *
  */
-public class FromSubquery extends FromTable
+class FromSubquery extends FromTable
 {
 	ResultSetNode	subquery;
 	private OrderByList orderByList;
@@ -59,34 +57,37 @@ public class FromSubquery extends FromTable
 	private SchemaDescriptor origCompilationSchema = null;
 
 	/**
-	 * Intializer for a table in a FROM list.
+     * Constructor for a table in a FROM list.
 	 *
 	 * @param subquery		The subquery
 	 * @param orderByList   ORDER BY list if any, or null
      * @param offset        OFFSET if any, or null
      * @param fetchFirst    FETCH FIRST if any, or null
-	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
+     * @param hasJDBClimitClause True if the offset/fetchFirst clauses come
+     *                      from JDBC limit/offset escape syntax
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 */
-	public void init(
-					Object subquery,
-					Object orderByList,
-                    Object offset,
-                    Object fetchFirst,
-                    Object hasJDBClimitClause,
-					Object correlationName,
-				 	Object derivedRCL,
-					Object tableProperties)
+    FromSubquery(ResultSetNode subquery,
+                 OrderByList orderByList,
+                 ValueNode offset,
+                 ValueNode fetchFirst,
+                 boolean hasJDBClimitClause,
+                 String correlationName,
+                 ResultColumnList derivedRCL,
+                 Properties tableProperties,
+                 ContextManager cm)
 	{
-		super.init(correlationName, tableProperties);
-		this.subquery = (ResultSetNode) subquery;
-		this.orderByList = (OrderByList)orderByList;
-        this.offset = (ValueNode)offset;
-        this.fetchFirst = (ValueNode)fetchFirst;
-        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
-		resultColumns = (ResultColumnList) derivedRCL;
+        super(correlationName, tableProperties, cm);
+        setNodeType(C_NodeTypes.FROM_SUBQUERY);
+        this.subquery = subquery;
+        this.orderByList = orderByList;
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
+        resultColumns = derivedRCL;
 	}
 
 	/**
@@ -95,8 +96,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG) {
 			super.printSubNodes(depth);
@@ -132,7 +133,7 @@ public class FromSubquery extends FromTable
 	 *
 	 * @return ResultSetNode	The "subquery" from this node.
 	 */
-	public ResultSetNode getSubquery()
+    ResultSetNode getSubquery()
 	{
 		return subquery;
 	}
@@ -150,6 +151,7 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -178,8 +180,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						  FromList fromListParam) 
 							throws StandardException
 	{
@@ -201,8 +203,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode bindVTITables(FromList fromListParam) 
+    @Override
+    ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
 		subquery = subquery.bindVTITables(fromListParam);
@@ -218,8 +220,8 @@ public class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
-
-	public void rejectParameters() throws StandardException
+    @Override
+    void rejectParameters() throws StandardException
 	{
 		subquery.rejectParameters();
 	}
@@ -231,15 +233,13 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
-		FromList			emptyFromList =
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+        FromList            emptyFromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
 		ResultColumnList	derivedRCL = resultColumns;
 		ResultColumnList	subqueryRCL;
 		FromList			nestedFromList;
@@ -332,8 +332,9 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultColumn getMatchingColumn(ColumnReference columnReference) throws StandardException
+    @Override
+    ResultColumn getMatchingColumn(ColumnReference columnReference)
+            throws StandardException
 	{
 		ResultColumn	resultColumn = null;
 		String			columnsTableName;
@@ -385,8 +386,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -465,14 +466,13 @@ public class FromSubquery extends FromTable
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public ResultSetNode extractSubquery(int numTables)
+    ResultSetNode extractSubquery(int numTables)
 		throws StandardException
 	{
 		JBitSet		  newJBS;
 		ResultSetNode newPRN;
 
-		newPRN = (ResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.PROJECT_RESTRICT_NODE,
+        newPRN = new ProjectRestrictNode(
 								subquery,		/* Child ResultSet */
 								resultColumns,	/* Projection */
 								null,			/* Restriction */
@@ -518,7 +518,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromList flatten(ResultColumnList rcl,
+    @Override
+    FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
                             GroupByList gbl,
@@ -585,8 +586,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @return	The exposed name for this table.
 	 */
-
-	public String getExposedName()
+    @Override
+    String getExposedName()
 	{
 		return correlationName;
 	}
@@ -596,10 +597,10 @@ public class FromSubquery extends FromTable
 	 * result columns from the subquery.
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(TableName allTableName)
+    @Override
+    ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
-		ResultColumnList rcList = null;
 		TableName		 exposedName;
         TableName        toCompare;
 
@@ -621,9 +622,7 @@ public class FromSubquery extends FromTable
 		 */
 		exposedName = makeTableName(null, correlationName);
 
-		rcList = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+        ResultColumnList rcList = new ResultColumnList((getContextManager()));
 
 		/* Build a new result column list based off of resultColumns.
 		 * NOTE: This method will capture any column renaming due to 
@@ -656,14 +655,10 @@ public class FromSubquery extends FromTable
 
 			tableName = exposedName;
 
-			valueNode = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.COLUMN_REFERENCE,
-											columnName,
+            valueNode = new ColumnReference(columnName,
 											tableName,
 											getContextManager());
-			resultColumn = (ResultColumn) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											columnName,
+           resultColumn = new ResultColumn(columnName,
 											valueNode,
 											getContextManager());
 
@@ -684,7 +679,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    @Override
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		return subquery.referencesTarget(name, baseTable);
@@ -697,6 +693,7 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -710,7 +707,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
+    @Override
+    void bindUntypedNullsToResultColumns(ResultColumnList bindingRCL)
 				throws StandardException
 	{
 		subquery.bindUntypedNullsToResultColumns(bindingRCL);
@@ -722,6 +720,7 @@ public class FromSubquery extends FromTable
 	 *
 	 * @param decrement	The amount to decrement by.
 	 */
+    @Override
 	void decrementLevel(int decrement)
 	{
 		super.decrementLevel(decrement);
@@ -734,13 +733,14 @@ public class FromSubquery extends FromTable
 	 * @param sd schema descriptor of the original compilation schema of the
 	 * view.
 	 */
-	public void setOrigCompilationSchema(SchemaDescriptor sd) {
+    void setOrigCompilationSchema(SchemaDescriptor sd) {
 		origCompilationSchema = sd;
 	}
 
     /**
      * @see QueryTreeNode#acceptChildren
      */
+    @Override
     void acceptChildren(Visitor v)
         throws StandardException
     {

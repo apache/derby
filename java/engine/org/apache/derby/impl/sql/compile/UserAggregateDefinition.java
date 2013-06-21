@@ -21,34 +21,24 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import java.lang.reflect.Method;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.catalog.types.AggregateAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.catalog.types.AggregateAliasInfo;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.JSQLType;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.JSQLType;
 
 /**
  * Definition for user-defined aggregates.
  *
  */
-public class UserAggregateDefinition implements AggregateDefinition 
+class UserAggregateDefinition implements AggregateDefinition
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -81,7 +71,7 @@ public class UserAggregateDefinition implements AggregateDefinition
 	/**
 	 * Conjure out of thin air.
 	 */
-	public UserAggregateDefinition( AliasDescriptor alias )
+    UserAggregateDefinition( AliasDescriptor alias )
     {
         _alias = alias;
     }
@@ -212,8 +202,8 @@ public class UserAggregateDefinition implements AggregateDefinition
 	 * Wrap the input operand in an implicit CAST node as necessary in order to
      * coerce it the correct type for the aggregator. Return null if no cast is necessary.
 	 */
-	public final ValueNode	castInputValue
-        ( ValueNode inputValue, NodeFactory nodeFactory, ContextManager cm )
+    final ValueNode castInputValue
+        ( ValueNode inputValue, ContextManager cm )
         throws StandardException
 	{
         AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
@@ -224,7 +214,8 @@ public class UserAggregateDefinition implements AggregateDefinition
         if ( expectedInputType.isExactTypeAndLengthMatch( actualInputType ) ) { return null; }
         else
         {
-            return StaticMethodCallNode.makeCast( inputValue, expectedInputType, nodeFactory, cm );
+            return StaticMethodCallNode.makeCast(
+                inputValue, expectedInputType, cm);
         }
     }
     

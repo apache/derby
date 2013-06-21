@@ -21,35 +21,26 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
-
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.store.access.Qualifier;
-
-import java.lang.reflect.Modifier;
-
-import java.util.List;
-import org.apache.derby.impl.sql.execute.OnceResultSet;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.impl.sql.execute.OnceResultSet;
 
 /**
  * A SubqueryNode represents a subquery.  Subqueries return values to their
@@ -81,7 +72,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class SubqueryNode extends ValueNode
+class SubqueryNode extends ValueNode
 {
 	/*
 	** This must be a single-column result set.  If the subquery is
@@ -176,29 +167,29 @@ public class SubqueryNode extends ValueNode
 	 * NotNode above the SubqueryNode in the tree.
 	 *
 	 */
-	public final static int NOTIMPLEMENTED_SUBQUERY		= -1;
-	public final static int FROM_SUBQUERY	    = 0;
-	public final static int IN_SUBQUERY			= 1;
-	public final static int NOT_IN_SUBQUERY		= 2;
-	public final static int EQ_ANY_SUBQUERY		= 3;
-	public final static int EQ_ALL_SUBQUERY		= 4;
-	public final static int NE_ANY_SUBQUERY		= 5;
-	public final static int NE_ALL_SUBQUERY		= 6;
-	public final static int GT_ANY_SUBQUERY		= 7;
-	public final static int GT_ALL_SUBQUERY		= 8;
-	public final static int GE_ANY_SUBQUERY		= 9;
-	public final static int GE_ALL_SUBQUERY		= 10;
-	public final static int LT_ANY_SUBQUERY		= 11;
-	public final static int LT_ALL_SUBQUERY		= 12;
-	public final static int LE_ANY_SUBQUERY		= 13;
-	public final static int LE_ALL_SUBQUERY		= 14;
-	public final static int EXISTS_SUBQUERY		= 15;
-	public final static int NOT_EXISTS_SUBQUERY	= 16;
-	public final static int EXPRESSION_SUBQUERY = 17;
+    final static int NOTIMPLEMENTED_SUBQUERY        = -1;
+    final static int FROM_SUBQUERY      = 0;
+    final static int IN_SUBQUERY            = 1;
+    final static int NOT_IN_SUBQUERY        = 2;
+    final static int EQ_ANY_SUBQUERY        = 3;
+    final static int EQ_ALL_SUBQUERY        = 4;
+    final static int NE_ANY_SUBQUERY        = 5;
+    final static int NE_ALL_SUBQUERY        = 6;
+    final static int GT_ANY_SUBQUERY        = 7;
+    final static int GT_ALL_SUBQUERY        = 8;
+    final static int GE_ANY_SUBQUERY        = 9;
+    final static int GE_ALL_SUBQUERY        = 10;
+    final static int LT_ANY_SUBQUERY        = 11;
+    final static int LT_ALL_SUBQUERY        = 12;
+    final static int LE_ANY_SUBQUERY        = 13;
+    final static int LE_ALL_SUBQUERY        = 14;
+    final static int EXISTS_SUBQUERY        = 15;
+    final static int NOT_EXISTS_SUBQUERY    = 16;
+    final static int EXPRESSION_SUBQUERY = 17;
 
 
 	/**
-	 * Initializer.
+     * Constructor.
 	 *
 	 * @param resultSet		The ResultSetNode for the subquery
 	 * @param subqueryType	The type of the subquery
@@ -207,23 +198,26 @@ public class SubqueryNode extends ValueNode
      * @param offset        OFFSET n ROWS
      * @param fetchFirst    FETCH FIRST n ROWS ONLY
 	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
+     * @param cm            Context Manager
 	 */
 
-	public void init(
-							Object resultSet,
-							Object subqueryType,
-							Object leftOperand,
-                            Object orderCols,
-                            Object offset,
-                            Object fetchFirst,
-                            Object hasJDBClimitClause)
+    SubqueryNode(ResultSetNode resultSet,
+                 int subqueryType,
+                 ValueNode leftOperand,
+                 OrderByList orderCols,
+                 ValueNode offset,
+                 ValueNode fetchFirst,
+                 boolean hasJDBClimitClause,
+                 ContextManager cm)
 	{
-		this.resultSet = (ResultSetNode) resultSet;
-		this.subqueryType = ((Integer) subqueryType).intValue();
-		this.orderByList = (OrderByList)orderCols;
-        this.offset = (ValueNode)offset;
-        this.fetchFirst = (ValueNode)fetchFirst;
-        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
+        super(cm);
+        setNodeType(C_NodeTypes.SUBQUERY_NODE);
+        this.resultSet = resultSet;
+        this.subqueryType = subqueryType;
+        this.orderByList = orderCols;
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
 
 		/* Subqueries are presumed not to be under a top level AndNode by
 		 * default.  This is because expression normalization only recurses
@@ -231,7 +225,7 @@ public class SubqueryNode extends ValueNode
 		 * built-in functions, etc.
 		 */
 		underTopAndNode = false;
-		this.leftOperand = (ValueNode) leftOperand;
+        this.leftOperand = leftOperand;
 	}
 
 	/**
@@ -240,7 +234,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -265,8 +259,8 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -309,7 +303,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return ResultSetNode underlying this SubqueryNode.
 	 */
-	public ResultSetNode getResultSet()
+    ResultSetNode getResultSet()
 	{
 		return resultSet;
 	}
@@ -319,7 +313,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return int	Type of this subquery.
 	 */
-	public int getSubqueryType()
+    int getSubqueryType()
 	{
 		return subqueryType;
 	}
@@ -329,7 +323,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @param subqueryType of this subquery.
 	 */
-	public void setSubqueryType(int subqueryType)
+    void setSubqueryType(int subqueryType)
 	{
 		this.subqueryType = subqueryType;
 	}
@@ -341,7 +335,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public void setPointOfAttachment(int pointOfAttachment)
+    void setPointOfAttachment(int pointOfAttachment)
 		throws StandardException
 	{
 		/* Materialized subqueries always keep their point of
@@ -360,7 +354,7 @@ public class SubqueryNode extends ValueNode
 	 * @return boolean	Whether or not this subquery is immediately under a
 	 *					top level AndNode.
 	 */
-	public boolean getUnderTopAndNode()
+    boolean getUnderTopAndNode()
 	{
 		return underTopAndNode;
 	}
@@ -370,7 +364,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return int		The ResultSet # for the point of attachment
 	 */
-	public int getPointOfAttachment()
+    int getPointOfAttachment()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -411,7 +405,8 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		/* We need to remap both the SELECT and Predicate lists 
@@ -449,6 +444,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
@@ -605,7 +601,8 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -701,7 +698,7 @@ public class SubqueryNode extends ValueNode
 			leftOperand = parentComparisonOperator.getLeftOperand();
 			// Flatten the subquery
 			RowResultSetNode rrsn = (RowResultSetNode) resultSet;
-			FromList   fl = new FromList();
+            FromList fl = new FromList(getContextManager());
 
 			// Remove ourselves from the outer subquery list
 			outerSubqueryList.removeElement(this);
@@ -1109,10 +1106,7 @@ public class SubqueryNode extends ValueNode
 		 */
 		if (leftOperand == null)
 		{
-			return (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.TRUE,
-											getContextManager());
+           return new BooleanConstantNode(true, getContextManager());
 		}
 		else
 		{
@@ -1237,7 +1231,7 @@ public class SubqueryNode extends ValueNode
 	 *	references.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean hasCorrelatedCRs() throws StandardException
+    boolean hasCorrelatedCRs() throws StandardException
 	{
 		if (doneCorrelationCheck)
 		{
@@ -1268,7 +1262,8 @@ public class SubqueryNode extends ValueNode
 			 */
 			if (oldRCL.size() > 1)
 			{
-				ResultColumnList newRCL = new ResultColumnList();
+                ResultColumnList
+                        newRCL = new ResultColumnList(getContextManager());
 				newRCL.addResultColumn(oldRCL.getResultColumn(1));
 				realSubquery.setResultColumns(newRCL);
 			}
@@ -1288,7 +1283,7 @@ public class SubqueryNode extends ValueNode
 				
 	/**
 	 * Transform:
-	 *		expresion QuantifiedOperator (select x from ...)
+     *      expression QuantifiedOperator (select x from ...)
 	 * into
 	 *		(select true from .. where expression <BinaryComparisonOperator> x ...)
 	 *		IS [NOT] NULL
@@ -1329,14 +1324,13 @@ public class SubqueryNode extends ValueNode
 			throws StandardException
 	{
 		AndNode						andNode;
-		BinaryComparisonOperatorNode bcoNode = null;
 		JBitSet						tableMap;
 		Predicate					predicate;
 		ResultColumn				firstRC;
 		ResultColumnList			resultColumns;
 		UnaryComparisonOperatorNode	ucoNode = null;
-		ValueNode					oldWhereClause;
 		ValueNode					rightOperand;
+        ContextManager              cm = getContextManager();
 
 		/* We have to ensure that the resultSet immediately under us has
 		 * a PredicateList, otherwise we can't push the predicate down.
@@ -1355,8 +1349,7 @@ public class SubqueryNode extends ValueNode
 		*/
 		ResultColumnList newRCL = resultColumns.copyListAndObjects();
 		newRCL.genVirtualColumnNodes(resultSet, resultColumns);
-		resultSet = (ResultSetNode) getNodeFactory().getNode(
-										C_NodeTypes.PROJECT_RESTRICT_NODE,
+        resultSet = new ProjectRestrictNode(
 										resultSet,	// child
 										newRCL,			// result columns
 										null,			// restriction
@@ -1364,13 +1357,14 @@ public class SubqueryNode extends ValueNode
 										null,			// project subqueries
 										null,			// restrict subqueries	
 										null,
-										getContextManager());
+                                        cm);
 		resultColumns = newRCL;
 	
 		firstRC = (ResultColumn) resultColumns.elementAt(0);
 		rightOperand = firstRC.getExpression();
 
-		bcoNode = getNewJoinCondition(leftOperand, rightOperand);
+        BinaryComparisonOperatorNode bcoNode =
+                getNewJoinCondition(leftOperand, rightOperand);
 
 		ValueNode andLeft = bcoNode;
 
@@ -1391,47 +1385,33 @@ public class SubqueryNode extends ValueNode
 			{
 				/* Create a normalized structure.
 				 */
-				BooleanConstantNode falseNode = (BooleanConstantNode) getNodeFactory().getNode(
-												C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-												Boolean.FALSE,
-												getContextManager());
-				OrNode newOr = (OrNode) getNodeFactory().getNode(
-												C_NodeTypes.OR_NODE,
-												bcoNode,
-												falseNode,
-												getContextManager());
+                BooleanConstantNode
+                        falseNode = new BooleanConstantNode(false, cm);
+                OrNode newOr =
+                        new OrNode(bcoNode, falseNode, cm);
+
 				newOr.postBindFixup();
 				andLeft = newOr;
 
 				if (leftNullable)
 				{
-					UnaryComparisonOperatorNode leftIsNull = (UnaryComparisonOperatorNode)
-									getNodeFactory().getNode(
-														C_NodeTypes.IS_NULL_NODE,
-														leftOperand,
-														getContextManager());
+                    UnaryComparisonOperatorNode leftIsNull = new IsNullNode(
+                           leftOperand,
+                           IsNullNode.Sign.IS_NULL,
+                           cm);
 					leftIsNull.bindComparisonOperator();
-					newOr = (OrNode) getNodeFactory().getNode(
-													C_NodeTypes.OR_NODE,
-													leftIsNull,
-													andLeft,
-													getContextManager());
+                    newOr = new OrNode(leftIsNull, andLeft, cm);
 					newOr.postBindFixup();
 					andLeft = newOr;
 				}
 				if (rightNullable)
 				{
-					UnaryComparisonOperatorNode rightIsNull = (UnaryComparisonOperatorNode)
-									getNodeFactory().getNode(
-														C_NodeTypes.IS_NULL_NODE,
-														rightOperand,
-														getContextManager());
+                    UnaryComparisonOperatorNode rightIsNull = new IsNullNode(
+                           rightOperand,
+                           IsNullNode.Sign.IS_NULL,
+                           cm);
 					rightIsNull.bindComparisonOperator();
-					newOr = (OrNode) getNodeFactory().getNode(
-													C_NodeTypes.OR_NODE,
-													rightIsNull,
-													andLeft,
-													getContextManager());
+                    newOr = new OrNode(rightIsNull, andLeft, cm);
 					newOr.postBindFixup();
 					andLeft = newOr;
 				}
@@ -1439,22 +1419,14 @@ public class SubqueryNode extends ValueNode
 		}
 
 		/* Place an AndNode above the <BinaryComparisonOperator> */
-		andNode = (AndNode) getNodeFactory().getNode(
-													C_NodeTypes.AND_NODE,
-													andLeft,
-													getTrueNode(),
-													getContextManager());
+        andNode = new AndNode(andLeft, getTrueNode(), cm);
 
 		/* Build the referenced table map for the new predicate */
 		tableMap = new JBitSet(numTables);
 		andNode.postBindFixup();
 
 		/* Put the AndNode under a Predicate */
-		predicate = (Predicate) getNodeFactory().getNode(
-										C_NodeTypes.PREDICATE,
-										andNode,
-										tableMap,
-										getContextManager());
+        predicate = new Predicate(andNode, tableMap, cm);
 		predicate.categorize();
 
 		/* Push the new Predicate to the subquery's list */
@@ -1475,11 +1447,7 @@ public class SubqueryNode extends ValueNode
 			case LT_ANY_SUBQUERY:
 			case GE_ANY_SUBQUERY:
 			case GT_ANY_SUBQUERY:
-				ucoNode = (UnaryComparisonOperatorNode) 
-									getNodeFactory().getNode(
-												C_NodeTypes.IS_NOT_NULL_NODE,
-												this,
-												getContextManager());
+                ucoNode = new IsNullNode(this, IsNullNode.Sign.IS_NOT_NULL, cm);
 				break;
 
 			case NOT_IN_SUBQUERY:
@@ -1489,12 +1457,12 @@ public class SubqueryNode extends ValueNode
 			case LT_ALL_SUBQUERY:
 			case GE_ALL_SUBQUERY:
 			case GT_ALL_SUBQUERY:
-				ucoNode = (UnaryComparisonOperatorNode) 
-									getNodeFactory().getNode(
-													C_NodeTypes.IS_NULL_NODE,
-													this,
-													getContextManager());
+                ucoNode = new IsNullNode(this, IsNullNode.Sign.IS_NULL, cm);
 				break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
 		}
 		ucoNode.bindComparisonOperator();
 		return ucoNode;
@@ -1515,8 +1483,6 @@ public class SubqueryNode extends ValueNode
 				ValueNode rightOperand)
 		throws StandardException
 	{
-		BinaryComparisonOperatorNode bcoNode = null;
-
 		/* NOTE: If we are an expression subquery that's getting
 		 * flattened then our subqueryType is EXPRESSION_SUBQUERY.
 		 * However, we can get the comparison type from the 
@@ -1610,13 +1576,12 @@ public class SubqueryNode extends ValueNode
 					"subqueryType (" + subqueryType + ") is an unexpected type");
 		}
 
-		bcoNode =  (BinaryComparisonOperatorNode) 
-						getNodeFactory().getNode(
-							nodeType,
-							leftOperand,
-							rightOperand,
-							Boolean.FALSE,
-							getContextManager());
+        BinaryComparisonOperatorNode bcoNode = new BinaryRelationalOperatorNode(
+                nodeType,
+                leftOperand,
+                rightOperand,
+                false,
+                getContextManager());
 
 		bcoNode.bindComparisonOperator();
 		return bcoNode;
@@ -1639,6 +1604,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -1754,7 +1720,8 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode changeToCNF(boolean underTopAndNode) 
+    @Override
+    ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
 		/* Remember whether or not we are immediately under a top leve
@@ -1789,7 +1756,8 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -1821,7 +1789,7 @@ public class SubqueryNode extends ValueNode
 	** it is an expression subquery that
 	** has no correlations and is invariant.
 	*/
-	boolean isMaterializable() throws StandardException
+    public boolean isMaterializable() throws StandardException
 	{
 		boolean retval = (subqueryType == EXPRESSION_SUBQUERY) && 
 						  !hasCorrelatedCRs() && 
@@ -1853,7 +1821,7 @@ public class SubqueryNode extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void optimize(DataDictionary dataDictionary, double outerRows) 
+    void optimize(DataDictionary dataDictionary, double outerRows)
 					throws StandardException
 	{
 		/* RESOLVE - is there anything else that we need to do for this
@@ -1869,7 +1837,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void modifyAccessPaths() throws StandardException
+    void modifyAccessPaths() throws StandardException
 	{
 		resultSet = resultSet.modifyAccessPaths();
 	}
@@ -1888,6 +1856,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	protected int getOrderableVariantType() throws StandardException
 	{
 		/* 
@@ -1924,7 +1893,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(
             ExpressionClassBuilder expressionBuilder, MethodBuilder mbex)
 								throws StandardException
@@ -2001,7 +1970,8 @@ public class SubqueryNode extends ValueNode
 				mb.getField(subRS);
 				mb.conditionalIfNull();
 
-				ResultSetNode materialSubNode = new MaterializeSubqueryNode(subRS);
+                ResultSetNode materialSubNode =
+                        new MaterializeSubqueryNode(subRS, getContextManager());
 
 				// Propagate the resultSet's cost estimate to the new node.
 				materialSubNode.costEstimate = resultSet.getFinalCostEstimate();
@@ -2267,10 +2237,7 @@ public class SubqueryNode extends ValueNode
 	{
 		if (trueNode == null)
 		{
-			trueNode = (BooleanConstantNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.TRUE,
-											getContextManager());
+           trueNode = new BooleanConstantNode(true, getContextManager());
 		}
 		return trueNode;
 	}
@@ -2282,6 +2249,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -2369,71 +2337,48 @@ public class SubqueryNode extends ValueNode
 	private void changeToCorrespondingExpressionType()
 		throws StandardException
 	{
-  		BinaryOperatorNode bcon = null;
+        int nodeType = 0;
 
-  		switch (subqueryType)
+        switch (subqueryType)
   		{
   			case EQ_ANY_SUBQUERY:
   			case IN_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  									C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-  									leftOperand,
-  									this,
-  									Boolean.FALSE,
-  									getContextManager());
+                nodeType = C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
   				break;
 
   			case NE_ANY_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  								C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
-  								leftOperand,
-  								this,
-  								Boolean.FALSE,
-  								getContextManager());
+                nodeType = C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
   				break;
 
   			case LE_ANY_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  								C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
-  								leftOperand,
-  								this,
-  								Boolean.FALSE,
-  								getContextManager());
+                nodeType = C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
   				break;
 
   			case LT_ANY_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  							C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
-  							leftOperand,
-  							this,
-  							Boolean.FALSE,
-  							getContextManager());
+                nodeType = C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
   				break;
 
   			case GE_ANY_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
-  							leftOperand,
-  							this,
-  							Boolean.FALSE,
-  							getContextManager());
+                nodeType = C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
   				break;
 
   			case GT_ANY_SUBQUERY:
-  				bcon = (BinaryOperatorNode) getNodeFactory().getNode(
-  								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
-  								leftOperand,
-  								this,
-  								Boolean.FALSE,
-  								getContextManager());
+                nodeType = C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
   				break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
   		}
+
+        BinaryRelationalOperatorNode bcon = new BinaryRelationalOperatorNode(
+                nodeType, leftOperand, this, false, getContextManager());
 
   		// clean up the state of the tree to reflect a bound expression subquery
   		subqueryType = EXPRESSION_SUBQUERY;
   		setDataTypeServices(resultSet.getResultColumns());
 
-  		parentComparisonOperator = (BinaryComparisonOperatorNode) bcon;
+        parentComparisonOperator = bcon;
   		/* Set type info for the operator node */
   		parentComparisonOperator.bindComparisonOperator();
   		leftOperand = null;
@@ -2495,7 +2440,7 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @return true if it is part of a where clause, otherwise false
 	 */
-	public boolean isWhereSubquery() {
+    boolean isWhereSubquery() {
 		return whereSubquery;
 	}
 
@@ -2503,7 +2448,7 @@ public class SubqueryNode extends ValueNode
 	 * Mark this subquery as being part of a where clause.
 	 * @param whereSubquery
 	 */
-	public void setWhereSubquery(boolean whereSubquery) {
+    void setWhereSubquery(boolean whereSubquery) {
 		this.whereSubquery = whereSubquery;
 	}
 
@@ -2519,7 +2464,7 @@ public class SubqueryNode extends ValueNode
 	 * @return true if this subquery is a WHERE EXISTS | ANY | IN subquery with 
 	 *              a subquery in its own WHERE clause
 	 */
-	public boolean isWhereExistsAnyInWithWhereSubquery() 
+    boolean isWhereExistsAnyInWithWhereSubquery()
 			throws StandardException
 	{
 		if ( isWhereSubquery() && (isEXISTS() || isANY() || isIN()) ) {

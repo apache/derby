@@ -25,6 +25,7 @@ import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.types.SqlXmlUtil;
 
 /**
@@ -32,6 +33,10 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  * BinaryOperatorNode and TernarnyOperatorNode.
  */
 abstract class OperatorNode extends ValueNode {
+
+    OperatorNode(ContextManager cm) {
+        super(cm);
+    }
 
     /**
      * <p>

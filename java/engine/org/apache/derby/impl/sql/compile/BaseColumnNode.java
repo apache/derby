@@ -21,20 +21,13 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.Row;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * A BaseColumnNode represents a column in a base table.  The parser generates a
@@ -46,7 +39,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  */
 
-public class BaseColumnNode extends ValueNode
+class BaseColumnNode extends ValueNode
 {
 	private String	columnName;
 
@@ -56,23 +49,24 @@ public class BaseColumnNode extends ValueNode
 	*/
 	private TableName	tableName;
 
-	/**
-	 * Initializer for when you only have the column name.
-	 *
-	 * @param columnName	The name of the column being referenced
-	 * @param tableName		The qualification for the column
-	 * @param dts			DataTypeServices for the column
-	 */
-
-	public void init(
-							Object columnName,
-							Object tableName,
-				   			Object dts) throws StandardException
-	{
-		this.columnName = (String) columnName;
-		this.tableName = (TableName) tableName;
-		setType((DataTypeDescriptor) dts);
-	}
+    /**
+     * Constructor for a referenced column name
+     * @param columnName The name of the column being referenced
+     * @param tableName The qualification for the column
+     * @param dtd Data type descriptor for the column
+     * @param cm Context manager
+     * @throws StandardException
+     */
+    BaseColumnNode(
+            String columnName,
+            TableName tableName,
+            DataTypeDescriptor dtd,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        this.columnName = columnName;
+        this.tableName = tableName;
+        setType(dtd);
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -80,7 +74,7 @@ public class BaseColumnNode extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -103,8 +97,8 @@ public class BaseColumnNode extends ValueNode
 	 *
 	 * @return	The name of this column
 	 */
-
-	public String getColumnName()
+    @Override
+    String getColumnName()
 	{
 		return columnName;
 	}
@@ -118,8 +112,8 @@ public class BaseColumnNode extends ValueNode
 	 * @return	The user-supplied name of this column.  Null if no user-
 	 * 		supplied name.
 	 */
-
-	public String getTableName()
+    @Override
+    String getTableName()
 	{
 		return ( ( tableName != null) ? tableName.getTableName() : null );
 	}
@@ -132,7 +126,8 @@ public class BaseColumnNode extends ValueNode
 	 *
 	 * @return	The schema name for this column's table
 	 */
-	public String getSchemaName() throws StandardException
+    @Override
+    String getSchemaName() throws StandardException
 	{
 		return ( ( tableName != null) ? tableName.getSchemaName() : null );
 	}
@@ -146,7 +141,7 @@ public class BaseColumnNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -166,6 +161,7 @@ public class BaseColumnNode extends ValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		return Qualifier.SCAN_INVARIANT;

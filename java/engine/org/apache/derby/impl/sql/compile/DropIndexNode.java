@@ -23,6 +23,8 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
@@ -37,12 +39,17 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
  *
  */
 
-public class DropIndexNode extends DDLStatementNode
+class DropIndexNode extends DDLStatementNode
 {
 	private ConglomerateDescriptor	cd;
 	private TableDescriptor			td;
 
-	public String statementToString()
+    DropIndexNode(TableName index, ContextManager cm) {
+        super(index, cm);
+        setNodeType(C_NodeTypes.DROP_INDEX_NODE);
+    }
+
+    String statementToString()
 	{
 		return "DROP INDEX";
 	}
@@ -54,6 +61,7 @@ public class DropIndexNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
@@ -105,7 +113,8 @@ public class DropIndexNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getDropIndexConstantAction( getFullName(),
 											 getRelativeName(),

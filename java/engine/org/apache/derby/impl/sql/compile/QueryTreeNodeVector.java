@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
  * QueryTreeNodeVector is the root class for all lists of query tree nodes.
@@ -37,6 +38,10 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 {
 	private final ArrayList<QueryTreeNode> v = new ArrayList<QueryTreeNode>();
 
+    QueryTreeNodeVector(ContextManager cm) {
+        super(cm);
+    }
+
 	public final int size()
 	{
 		return v.size();
@@ -44,7 +49,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 
 	final QueryTreeNode elementAt(int index)
 	{
-		return (QueryTreeNode) v.get(index);
+        return v.get(index);
 	}
 
 	final void addElement(QueryTreeNode qt)
@@ -64,7 +69,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 
 	final Object remove(int index)
 	{
-		return((QueryTreeNode) (v.remove(index)));
+        return v.remove(index);
 	}
 
 	final int indexOf(QueryTreeNode qt)
@@ -104,11 +109,12 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 	 * how tree printing is supposed to work.
 	 * @param depth		The depth to indent the sub-nodes
 	 */
-	public void printSubNodes(int depth) {
+    @Override
+    void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
 			for (int index = 0; index < size(); index++) {
 				debugPrint(formatNodeString("[" + index + "]:", depth));
-				QueryTreeNode elt = (QueryTreeNode)elementAt(index);
+                QueryTreeNode elt = elementAt(index);
 				elt.treePrint(depth);
 			}
 		}
@@ -122,6 +128,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -130,7 +137,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
-			setElementAt((QueryTreeNode)((QueryTreeNode) elementAt(index)).accept(v), index);
+            setElementAt((QueryTreeNode)(elementAt(index)).accept(v), index);
 		}
 	}
 }

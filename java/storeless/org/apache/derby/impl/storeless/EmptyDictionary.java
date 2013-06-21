@@ -675,8 +675,10 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
-	public List getRoutineList(String schemaID, String routineName,
-			char nameSpace) throws StandardException {
+    public List<AliasDescriptor> getRoutineList(String schemaID,
+                                                String routineName,
+                                                char nameSpace)
+            throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}

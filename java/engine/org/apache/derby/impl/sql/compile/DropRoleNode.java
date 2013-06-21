@@ -21,13 +21,13 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * A DropRoleNode is the root of a QueryTree that represents
@@ -35,23 +35,25 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  */
 
-public class DropRoleNode extends DDLStatementNode
+class DropRoleNode extends DDLStatementNode
 {
     private String roleName;
 
     /**
-     * Initializer for a DropRoleNode
+     * Constructor for a DropRoleNode
      *
      * @param roleName      The name of the object being dropped
+     * @param cm            Context manager
      *
      */
-    public void init(Object roleName)
-        throws StandardException
+    DropRoleNode(String roleName, ContextManager cm) throws StandardException
     {
-        initAndCheck(null);
-        this.roleName = (String)roleName;
+        super(null, cm);
+        this.roleName = roleName;
+        setNodeType(C_NodeTypes.DROP_ROLE_NODE);
     }
 
+    @Override
     public void bindStatement() throws StandardException
     {
         CompilerContext cc = getCompilerContext();
@@ -66,7 +68,7 @@ public class DropRoleNode extends DDLStatementNode
      *
      * @return  This object as a String
      */
-
+    @Override
     public String toString()
     {
         if (SanityManager.DEBUG) {
@@ -77,6 +79,7 @@ public class DropRoleNode extends DDLStatementNode
         }
     }
 
+    @Override
     public String statementToString()
     {
         return "DROP ROLE";
@@ -89,6 +92,7 @@ public class DropRoleNode extends DDLStatementNode
      *
      * @exception StandardException         Thrown on failure
      */
+    @Override
     public ConstantAction   makeConstantAction() throws StandardException
     {
         return  getGenericConstantActionFactory().

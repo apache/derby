@@ -22,34 +22,32 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * A ValueNodeList represents a list of ValueNodes within a specific predicate 
- * (eg, IN list, NOT IN list or BETWEEN) in a DML statement.  
- * It extends QueryTreeNodeVector.
- *
+ * e.g. IN list, NOT IN list or BETWEEN in a DML statement.
  */
 
-public class ValueNodeList extends QueryTreeNodeVector
+class ValueNodeList extends QueryTreeNodeVector
 {
+    ValueNodeList(ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.VALUE_NODE_LIST);
+    }
+
 	/**
 	 * Add a ValueNode to the list.
 	 *
@@ -58,7 +56,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void addValueNode(ValueNode valueNode) throws StandardException
+    void addValueNode(ValueNode valueNode) throws StandardException
 	{
 		addElement(valueNode);
 	}
@@ -97,7 +95,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException	Thrown on error
 	 */
-	public void genSQLJavaSQLTrees()
+    void genSQLJavaSQLTrees()
 		throws StandardException
 	{
 		int size = size();
@@ -149,7 +147,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataTypeDescriptor getDominantTypeServices() throws StandardException
+    DataTypeDescriptor getDominantTypeServices() throws StandardException
 	{
 		DataTypeDescriptor	dominantDTS = null;
 		//Following 2 will hold the collation derivation and type of the first 
@@ -230,7 +228,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataTypeDescriptor getTypeServices() throws StandardException
+    DataTypeDescriptor getTypeServices() throws StandardException
 	{
 		int size = size();
 
@@ -290,7 +288,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * @param leftOperand	Check for compatibility against this parameter's type
 	 *
 	 */
-	public void compatible(ValueNode leftOperand) throws StandardException
+    void compatible(ValueNode leftOperand) throws StandardException
 	{
 		int			 size = size();
 		TypeId	leftType;
@@ -329,13 +327,10 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void comparable(ValueNode leftOperand) throws StandardException
+    void comparable(ValueNode leftOperand) throws StandardException
 	{
 		int			 size = size();
-		TypeId	leftType;
 		ValueNode		valueNode;
-
-		leftType = leftOperand.getTypeId();
 
 		for (int index = 0; index < size; index++)
 		{
@@ -363,7 +358,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * @return boolean	Whether or not any of the elements in the list 
 	 *					are nullable.
 	 */
-	public boolean isNullable()
+    boolean isNullable()
 	throws StandardException
 	{
 		int size = size();
@@ -383,7 +378,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not the list contains a ParameterNode
 	 */
-	public boolean containsParameterNode()
+    boolean containsParameterNode()
 	{
 		int size = size();
 
@@ -402,7 +397,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not the list contains all ParameterNodes
 	 */
-	public boolean containsAllParameterNodes()
+    boolean containsAllParameterNodes()
 	{
 		int size = size();
 
@@ -421,7 +416,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @return boolean	Whether or not the list contains all ConstantNodes
 	 */
-	public boolean containsAllConstantNodes()
+    boolean containsAllConstantNodes()
 	{
 		int size = size();
 
@@ -441,7 +436,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * @return boolean	True if every node in this list is either a constant
 	 *  node or parameter node.
 	 */
-	public boolean containsOnlyConstantAndParamNodes()
+    boolean containsOnlyConstantAndParamNodes()
 	{
 		int size = size();
 
@@ -514,7 +509,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void setParameterDescriptor(DataTypeDescriptor descriptor)
+    void setParameterDescriptor(DataTypeDescriptor descriptor)
 						throws StandardException
 	{
 		int size = size();
@@ -540,7 +535,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void preprocess(int numTables,
+    void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
 							PredicateList outerPredicateList) 
@@ -566,7 +561,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNodeList remapColumnReferencesToExpressions()
+    ValueNodeList remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		int size = size();
@@ -613,7 +608,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    boolean isConstantExpression()
 	{
 		int size = size();
 
@@ -632,7 +627,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    boolean constantExpression(PredicateList whereClause)
 	{
 		int size = size();
 
@@ -676,7 +671,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates

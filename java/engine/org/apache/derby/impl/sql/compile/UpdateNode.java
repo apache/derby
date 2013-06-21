@@ -21,50 +21,43 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.catalog.DefaultInfo;
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.impl.sql.execute.FKInfo;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.StatementType;
-
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.vti.DeferModification;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import java.lang.reflect.Modifier;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.vti.DeferModification;
 
 /**
  * An UpdateNode represents an UPDATE statement.  It is the top node of the
@@ -79,32 +72,31 @@ public final class UpdateNode extends DMLModStatementNode
 {
 	//Note: These are public so they will be visible to
 	//the RepUpdateNode.
-	public int[]				changedColumnIds;
-	public boolean				deferred;
-	public ValueNode			checkConstraints;
-	public FKInfo				fkInfo;
+    int[]               changedColumnIds;
+    boolean             deferred;
+    ValueNode           checkConstraints;
 	
 	protected FromTable			targetTable;
 	protected FormatableBitSet 			readColsBitSet;
 	protected boolean 			positionedUpdate;
 
 	/* Column name for the RowLocation in the ResultSet */
-	public static final String COLUMNNAME = "###RowLocationToUpdate";
+    static final String COLUMNNAME = "###RowLocationToUpdate";
 
 	/**
-	 * Initializer for an UpdateNode.
+     * Constructor for an UpdateNode.
 	 *
 	 * @param targetTableName	The name of the table to update
-	 * @param resultSet		The ResultSet that will generate
-	 *				the rows to update from the given table
+     * @param resultSet         The ResultSet that we will generate
+     * @param cm                The context manager
 	 */
-
-	public void init(
-			   Object targetTableName,
-			   Object resultSet)
+    UpdateNode(TableName targetTableName,
+               ResultSetNode resultSet,
+               ContextManager cm)
 	{
-		super.init(resultSet);
-		this.targetTableName = (TableName) targetTableName;
+        super(resultSet, cm);
+        setNodeType(C_NodeTypes.UPDATE_NODE);
+        this.targetTableName = targetTableName;
 	}
 
 	/**
@@ -113,7 +105,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -127,7 +119,8 @@ public final class UpdateNode extends DMLModStatementNode
 		}
 	}
 
-	public String statementToString()
+    @Override
+    String statementToString()
 	{
 		return "UPDATE";
 	}
@@ -138,8 +131,8 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -170,21 +163,17 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
 
-		FromList	fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
-		ResultColumn				rowLocationColumn = null;
-		ValueNode		            rowLocationNode = null;
+        FromList fromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
 		TableName					cursorTargetTableName = null;
 		CurrentOfNode       		currentOfNode = null;
-		FromList					resultFromList;
 		ResultColumnList			afterColumns = null;
 
 		DataDictionary dataDictionary = getDataDictionary();
@@ -335,11 +324,10 @@ public final class UpdateNode extends DMLModStatementNode
 		** Get the result FromTable, which should be the only table in the
 	 	** from list.
 		*/
-		resultFromList = resultSet.getFromList();
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(resultFromList.size() == 1,
-			"More than one table in result from list in an update.");
-
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(resultSet.getFromList().size() == 1,
+                    "More than one table in result from list in an update.");
+        }
 		/* Normalize the SET clause's result column list for synonym */
 		if (synonymTableName != null)
 			normalizeSynonymColumns( resultSet.resultColumns, targetTable );
@@ -469,7 +457,6 @@ public final class UpdateNode extends DMLModStatementNode
 				if (i > size)
 				{
 					readColsBitSet = null;
-					allColumns = true;
 				}	
 			}
 			finally
@@ -477,6 +464,8 @@ public final class UpdateNode extends DMLModStatementNode
 				getCompilerContext().popCurrentPrivType();
 			}
 		}
+
+        ValueNode rowLocationNode;
 
 		if (targetVTI == null)
 		{
@@ -487,24 +476,18 @@ public final class UpdateNode extends DMLModStatementNode
 			resultColumnList.appendResultColumns(afterColumns, false);
 
 			/* Generate the RowLocation column */
-			rowLocationNode = (ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.CURRENT_ROW_LOCATION_NODE,
-										getContextManager());
+            rowLocationNode = new CurrentRowLocationNode(getContextManager());
         }
         else
         {
-			rowLocationNode = (ValueNode) getNodeFactory().getNode(
-										C_NodeTypes.INT_CONSTANT_NODE,
-                                        ReuseFactory.getInteger( 0),
-										getContextManager());
+           rowLocationNode = new NumericConstantNode(
+                   TypeId.getBuiltInTypeId(Types.INTEGER),
+                   ReuseFactory.getInteger( 0),
+                   getContextManager());
         }
             
-        rowLocationColumn =
-          (ResultColumn) getNodeFactory().getNode(
-              C_NodeTypes.RESULT_COLUMN,
-              COLUMNNAME,
-              rowLocationNode,
-              getContextManager());
+        ResultColumn rowLocationColumn = new ResultColumn(
+                COLUMNNAME, rowLocationNode, getContextManager());
         rowLocationColumn.markGenerated();
 
 			/* Append to the ResultColumnList */
@@ -530,11 +513,8 @@ public final class UpdateNode extends DMLModStatementNode
 			getResultColumns().
 				bindUntypedNullsToResultColumns(resultColumnList);
 
-		if (null != rowLocationColumn)
-		{
-			/* Bind the new ResultColumn */
-			rowLocationColumn.bindResultColumnToExpression();
-		}
+        /* Bind the new ResultColumn */
+        rowLocationColumn.bindResultColumnToExpression();
 
 		resultColumnList.checkStorableExpressions();
 
@@ -543,10 +523,8 @@ public final class UpdateNode extends DMLModStatementNode
 		 */
 		if (! resultColumnList.columnTypesAndLengthsMatch())
  		{
-			resultSet = (ResultSetNode) getNodeFactory().getNode(
-			    C_NodeTypes.NORMALIZE_RESULT_SET_NODE, 
-			    resultSet, resultColumnList, null, Boolean.TRUE,
-			    getContextManager());
+            resultSet = new NormalizeResultSetNode(
+                resultSet, resultColumnList, null, true, getContextManager());
 			
 								
  			if (hasCheckConstraints(dataDictionary, targetTableDescriptor) || hasGenerationClauses( targetTableDescriptor ) )
@@ -560,9 +538,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 			 * order to bind the check constraints.
 	 			 */
 	 			int afterColumnsSize = afterColumns.size();
-	 			afterColumns = (ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+                afterColumns = new ResultColumnList(getContextManager());
 	 			ResultColumnList normalizedRCs = resultSet.getResultColumns();
 	 			for (int index = 0; index < afterColumnsSize; index++)
 	 			{
@@ -592,7 +568,7 @@ public final class UpdateNode extends DMLModStatementNode
 
             /* Get and bind all constraints on the columns being updated */
             checkConstraints = bindConstraints( dataDictionary,
-                                                getNodeFactory(),
+                                                getOptimizerFactory(),
                                                 targetTableDescriptor,
                                                 null,
                                                 sourceRCL,
@@ -619,6 +595,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 	} // end of bind()
 
+    @Override
 	int getPrivType()
 	{
 		return Authorizer.UPDATE_PRIV;
@@ -631,7 +608,8 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesSessionSchema()
+    @Override
+    public boolean referencesSessionSchema()
 		throws StandardException
 	{
 		//If this node references a SESSION schema table, then return true. 
@@ -644,7 +622,8 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		/*
 		** Updates are also deferred if they update a column in the index
@@ -682,7 +661,7 @@ public final class UpdateNode extends DMLModStatementNode
 						deferred, changedColumnIds);
 		}
 
-		int lockMode = resultSet.updateTargetLockMode();
+        int lckMode = resultSet.updateTargetLockMode();
 		long heapConglomId = targetTableDescriptor.getHeapConglomerateId();
 		TransactionController tc = 
 			getLanguageConnectionContext().getTransactionCompile();
@@ -700,7 +679,7 @@ public final class UpdateNode extends DMLModStatementNode
 		*/
 		if (targetTableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY)
 		{
-			lockMode = TransactionController.MODE_TABLE;
+            lckMode = TransactionController.MODE_TABLE;
 		}
 
 
@@ -714,7 +693,7 @@ public final class UpdateNode extends DMLModStatementNode
 			  indexNames,
 			  deferred,
 			  targetTableDescriptor.getUUID(),
-			  lockMode,
+              lckMode,
 			  false,
 			  changedColumnIds, null, null, 
 			  getFKInfo(),
@@ -780,6 +759,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -843,6 +823,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @return the type of statement
 	 */
+    @Override
 	protected final int getStatementType()
 	{
 		return StatementType.UPDATE;
@@ -982,7 +963,7 @@ public final class UpdateNode extends DMLModStatementNode
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
-	public static FormatableBitSet getUpdateReadMap
+    static FormatableBitSet getUpdateReadMap
 	(
 		DataDictionary		dd,
 		TableDescriptor				baseTable,
@@ -1224,7 +1205,6 @@ public final class UpdateNode extends DMLModStatementNode
         int                             count = updateColumnList.size();
         ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
         int                                 generatedColumnCount = generatedColumns.size();
-		int		                        columnCount = baseTable.getMaxColumnID();
         HashSet<String>           updatedColumns = new HashSet<String>();
         UUID                            tableID = baseTable.getObjectID();
         
@@ -1265,10 +1245,10 @@ public final class UpdateNode extends DMLModStatementNode
                         addedGeneratedColumns.add( tableID, gc );
                         
                         // we will fill in the real value later on in parseAndBindGenerationClauses();
-                        ValueNode       dummy = (ValueNode) getNodeFactory().getNode
-                            ( C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
-                       ResultColumn    newResultColumn = (ResultColumn) getNodeFactory().getNode
-                            ( C_NodeTypes.RESULT_COLUMN, gc.getType(), dummy, getContextManager());
+                        ValueNode dummy =
+                            new UntypedNullConstantNode(getContextManager());
+                        ResultColumn newResultColumn = new ResultColumn(
+                            gc.getType(), dummy, getContextManager());
                         newResultColumn.setColumnDescriptor( baseTable, gc );
                         newResultColumn.setName( gc.getColumnName() );
 

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -37,9 +36,8 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -59,8 +57,8 @@ import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.impl.sql.execute.TriggerInfo;
 
@@ -81,7 +79,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	protected FKInfo[]			fkInfo;			// array of FKInfo structures
 												// generated during bind
 	protected TriggerInfo		triggerInfo;	// generated during bind
-	public TableDescriptor		targetTableDescriptor;
+    TableDescriptor     targetTableDescriptor;
 
 
 	/* The indexes that could be affected by this statement */
@@ -109,30 +107,26 @@ abstract class DMLModStatementNode extends DMLStatementNode
     /** Set of dependent tables for cascading deletes. */
     Set<String> dependentTables;
 
-	/**
-	 * Initializer for a DMLModStatementNode -- delegate to DMLStatementNode
-	 *
-	 * @param resultSet	A ResultSetNode for the result set of the
-	 *			DML statement
-	 */
-	public void init(Object resultSet)
-	{
-		super.init(resultSet);
-		statementType = getStatementType();
-	}
+    DMLModStatementNode(ResultSetNode resultSet, ContextManager cm) {
+        super(resultSet, cm);
+        statementType = getStatementType();
+    }
 
 	/**
-	 * Initializer for a DMLModStatementNode -- delegate to DMLStatementNode
+     * Constructor for a DMLModStatementNode -- delegate to DMLStatementNode
 	 *
 	 * @param resultSet	A ResultSetNode for the result set of the
 	 *			DML statement
 	 * @param statementType used by nodes that allocate a DMLMod directly
 	 *			(rather than inheriting it).
+     * @param cm        The context manager
 	 */
-	public void init(Object resultSet, Object statementType)
+    DMLModStatementNode(ResultSetNode resultSet,
+                        int statementType,
+                        ContextManager cm)
 	{
-		super.init(resultSet);
-		this.statementType = ((Integer) statementType).intValue();
+        super(resultSet, cm);
+        this.statementType = statementType;
 	}
 
 	void setTarget(QueryTreeNode targetName)
@@ -254,7 +248,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			 * the JDBC2.0 getMetaData() and getResultSetConcurrency()
 			 * methods and return an updatable ResultSet.
 			 */
-			FromList dummyFromList = new FromList();
+            FromList dummyFromList = new FromList(getContextManager());
 			targetVTI = (FromVTI) targetVTI.bindNonVTITables(dataDictionary, dummyFromList);
 			targetVTI = (FromVTI) targetVTI.bindVTITables(dummyFromList);
 		}
@@ -266,6 +260,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return true 
 	 */	
+    @Override
 	public boolean isAtomic()
 	{
 		return true;
@@ -280,7 +275,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
-	public SchemaDescriptor getSchemaDescriptor() throws StandardException
+    SchemaDescriptor getSchemaDescriptor() throws StandardException
 	{
 		SchemaDescriptor		sd;
 
@@ -305,7 +300,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  the language both use 0 base or 1 base offsets for columns. Today
 	  we can't use the store function because we have a 1 based FormatableBitSet.
 	  */
-	public static int[] getReadColMap(int column_map_length,FormatableBitSet readColsBitSet)
+    static int[] getReadColMap(int column_map_length,
+                               FormatableBitSet readColsBitSet)
 	{
 		if (readColsBitSet == null) return null;
 
@@ -357,23 +353,17 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		throws StandardException
 	{
 		/* Get a ResultColumnList representing all the columns in the target */
-		FromBaseTable	fbt =
-			(FromBaseTable)
-				(getNodeFactory().getNode(
-										C_NodeTypes.FROM_BASE_TABLE,
-										synonymTableName != null ? synonymTableName : targetTableName,
-										null,
-										null,
-										null,
-										getContextManager())
-				);
+        FromBaseTable fbt = new FromBaseTable(
+                synonymTableName != null ? synonymTableName : targetTableName,
+                null,
+                null,
+                null,
+                getContextManager());
 
 		fbt.bindNonVTITables(
 			getDataDictionary(),
-			(FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
-								getContextManager()));
+            new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                         getContextManager()));
 
 		getResultColumnList(
 							fbt,
@@ -452,13 +442,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
                 // insert CAST in case column data type is not same as the
                 // resolved type of the generation clause
-                generationClause = (ValueNode) getNodeFactory().getNode
-                    (
-                     C_NodeTypes.CAST_NODE,
-                     generationClause,
-                     dtd,
-                     getContextManager()
-                     );
+                generationClause =
+                    new CastNode(generationClause, dtd, getContextManager());
                 
                 // Assignment semantics of implicit cast here:
                 // Section 9.2 (Store assignment). There, General Rule 
@@ -476,15 +461,22 @@ abstract class DMLModStatementNode extends DMLStatementNode
                 compilerContext.pushCompilationSchema( originalCurrentSchema );
 
 				try {
-                    bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
+                    bindRowScopedExpression(
+                        getOptimizerFactory(),
+                        getContextManager(),
+                        targetTableDescriptor,
+                        sourceRCL,
+                        generationClause );
                 }
                 finally
                 {
                     compilerContext.popCompilationSchema();
                 }
 
-                ResultColumn    newRC =  (ResultColumn) getNodeFactory().getNode
-                    ( C_NodeTypes.RESULT_COLUMN, generationClause.getTypeServices(), generationClause, getContextManager());
+                ResultColumn newRC = new ResultColumn(
+                    generationClause.getTypeServices(),
+                    generationClause,
+                    getContextManager());
 
                 // replace the result column in place
                 newRC.setVirtualColumnId( i + 1 ); // column ids are 1-based
@@ -532,7 +524,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		Parser						p;
 		ValueNode					clauseTree;
 		LanguageConnectionContext	lcc = getLanguageConnectionContext();
-		CompilerContext 			compilerContext = getCompilerContext();
 
 		/* Get a Statement to pass to the parser */
 
@@ -615,7 +606,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	ValueNode bindConstraints
 	(
 		DataDictionary		dataDictionary,
-		NodeFactory			nodeFactory,
+        OptimizerFactory    optimizerFactory,
 		TableDescriptor		targetTableDescriptor,
 		Dependent			dependent,
 		ResultColumnList	sourceRCL,
@@ -665,7 +656,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
                 compilerContext.pushCompilationSchema( originalCurrentSchema );
 
                 try {
-                    bindRowScopedExpression(nodeFactory, getContextManager(),
+                    bindRowScopedExpression(optimizerFactory,
+                                            getContextManager(),
                                             targetTableDescriptor,
                                             sourceRCL,
                                             checkConstraints);
@@ -688,17 +680,19 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * Binds an already parsed expression that only involves columns in a single
 	 * row. E.g., a check constraint or a generation clause.
 	 *
-	 * @param nodeFactory			Where to get query tree nodes.
-	 * @param targetTableDescriptor	The TableDescriptor for the constrained table.
-	 * @param sourceRCL		Result columns.
-	 * @param expression		Parsed query tree for row scoped expression
+     * @param optimizerFactory      The optimizer factory
+     * @param cm                    The context manager
+     * @param targetTableDescriptor The TableDescriptor for the constrained
+     *                              table
+     * @param sourceRCL             Result columns
+     * @param expression            Parsed query tree for row scoped expression
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	static void	bindRowScopedExpression
 	(
-		NodeFactory			nodeFactory,
-        ContextManager    contextManager,
+        OptimizerFactory    optimizerFactory,
+        ContextManager      cm,
 		TableDescriptor		targetTableDescriptor,
 		ResultColumnList	sourceRCL,
 		ValueNode			expression
@@ -706,8 +700,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		throws StandardException
 	{
 
-		TableName	targetTableName = makeTableName
-            (nodeFactory, contextManager, targetTableDescriptor.getSchemaName(), targetTableDescriptor.getName());
+        TableName targetTableName = makeTableName(
+                cm,
+                targetTableDescriptor.getSchemaName(),
+                targetTableDescriptor.getName());
 
 		/* We now have the expression as a query tree.  Now, we prepare
 		 * to bind that query tree to the source's RCL.  That way, the
@@ -727,27 +723,23 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		 * In this case, the caller of bindConstraints (UpdateNode)
 		 * has chosen to pass in the correct RCL to bind against.
 		 */
-		FromList fakeFromList =
-			(FromList) nodeFactory.getNode(
-							C_NodeTypes.FROM_LIST,
-							nodeFactory.doJoinOrderOptimization(),
-							contextManager);
-		FromBaseTable table = (FromBaseTable)
-			nodeFactory.getNode(
-				C_NodeTypes.FROM_BASE_TABLE,
-				targetTableName,
-				null,
-				sourceRCL,
-				null,
-				contextManager);
+        FromList fakeFromList =
+            new FromList(optimizerFactory.doJoinOrderOptimization(), cm);
+
+        FromBaseTable table = new FromBaseTable(
+                targetTableName,
+                null,
+                sourceRCL,
+                null,
+                cm);
 		table.setTableNumber(0);
 		fakeFromList.addFromTable(table);
 
 		// Now we can do the bind.
-		expression = expression.bindExpression(
-										fakeFromList,
-										(SubqueryList) null,
-										(List<AggregateNode>) null);
+        expression.bindExpression(
+                fakeFromList,
+                (SubqueryList) null,
+                (List<AggregateNode>) null);
 	}
 
 	/**
@@ -827,9 +819,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				parseCheckConstraint(constraintText, td);
 
 			// Put a TestConstraintNode above the constraint tree
-			TestConstraintNode tcn =
-				(TestConstraintNode) getNodeFactory().getNode(
-					C_NodeTypes.TEST_CONSTRAINT_NODE,
+           TestConstraintNode tcn = new TestConstraintNode(
 					oneConstraint,
 					SQLState.LANG_CHECK_CONSTRAINT_VIOLATED,
 					td.getQualifiedName(),
@@ -843,11 +833,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			}
 			else
 			{
-				checkTree = (ValueNode) getNodeFactory().getNode(
-					C_NodeTypes.AND_NODE,
-					tcn,
-					checkTree,
-					getContextManager());
+               checkTree = new AndNode(tcn, checkTree, getContextManager());
 			}
 		}
 
@@ -878,15 +864,15 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	{
         ArrayList<FKInfo>         fkList = new ArrayList<FKInfo>();
 		int 								type;
-		UUID[] 								uuids = null;
-		long[] 								conglomNumbers = null;
-		String[]							fkNames = null;
+        UUID[]                              uuids;
+        long[]                              conglomNumbers;
+        String[]                            fkNames;
 		ConstraintDescriptorList			fkcdl;
 		ReferencedKeyConstraintDescriptor	refcd;
 		boolean[]							isSelfReferencingFK;
 		ConstraintDescriptorList			activeList = dd.getActiveConstraintDescriptors(cdl);
 		int[]								rowMap = getRowMap(readColsBitSet, td);
-		int[]                               raRules = null;
+        int[]                               raRules;
 		ArrayList<String>              refTableNames = new ArrayList<String>(1);
 		ArrayList<Long>               refIndexConglomNum = new ArrayList<Long>(1);
 		ArrayList<Integer>            refActions = new ArrayList<Integer>(1);
@@ -943,7 +929,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				conglomNumbers = new long[size];
 				isSelfReferencingFK = new boolean[size];
 				raRules = new int[size];
-				ForeignKeyConstraintDescriptor fkcd = null;
 				TableDescriptor fktd;
 				ColumnDescriptorList coldl;
 				int[] refColumns; 
@@ -951,7 +936,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				int[] colArray = remapReferencedColumns(cd, rowMap);
 				for (int inner = 0; inner < size; inner++)
 				{
-					fkcd = (ForeignKeyConstraintDescriptor) fkcdl.elementAt(inner);
+                    ForeignKeyConstraintDescriptor fkcd =
+                        (ForeignKeyConstraintDescriptor) fkcdl.elementAt(inner);
 					fkSetupArrays(dd, fkcd,
 								inner, uuids, conglomNumbers, fkNames,
 								isSelfReferencingFK, raRules);
@@ -961,18 +947,19 @@ abstract class DMLModStatementNode extends DMLStatementNode
 						//find  the referencing  table Name
 						fktd = fkcd.getTableDescriptor();
 						refTableNames.add(fktd.getSchemaName() + "." + fktd.getName());
-						refActions.add(new Integer(raRules[inner]));
+                        refActions.add(Integer.valueOf(raRules[inner]));
 						//find the referencing column name required for update null.
 						refColumns = fkcd.getReferencedColumns();
 						coldl = fktd.getColumnDescriptorList();
 						ColumnDescriptorList releventColDes = new ColumnDescriptorList();
 						for(int i = 0 ; i < refColumns.length; i++)
 						{
-							cold =(ColumnDescriptor)coldl.elementAt(refColumns[i]-1);
+                            cold = coldl.elementAt(refColumns[i]-1);
 							releventColDes.add(cold);
 						}
 						refColDescriptors.add(releventColDes);
-						refIndexConglomNum.add(new Long(conglomNumbers[inner]));
+                        refIndexConglomNum.add(
+                            Long.valueOf(conglomNumbers[inner]));
 						fkColMap.add(colArray);
 					}
 				}
@@ -1006,7 +993,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		
         // Now convert the list into an array.
         if (!fkList.isEmpty()) {
-            fkInfo = (FKInfo[]) fkList.toArray(new FKInfo[fkList.size()]);
+            fkInfo = fkList.toArray(new FKInfo[fkList.size()]);
         }
 
         // Convert the ref action info lists to arrays.
@@ -1078,7 +1065,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the array of fkinfos
 	 */
-	public FKInfo[] getFKInfo()
+    FKInfo[] getFKInfo()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1095,7 +1082,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the trigger info
 	 */
-	public TriggerInfo getTriggerInfo()
+    TriggerInfo getTriggerInfo()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1110,7 +1097,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return the check constraints, may be null
 	 */
-	public ValueNode getCheckConstraints()
+    ValueNode getCheckConstraints()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1324,7 +1311,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @return true/false 
 	 */
-	public boolean requiresDeferredProcessing()
+    boolean requiresDeferredProcessing()
 	{
 		return requiresDeferredProcessing;
 	}
@@ -1350,7 +1337,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		Parser						p;
 		ValueNode					checkTree;
 		LanguageConnectionContext	lcc = getLanguageConnectionContext();
-		CompilerContext 			compilerContext = getCompilerContext();
 
 		/* Get a Statement to pass to the parser */
 
@@ -1643,6 +1629,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
    *
    * @exception StandardException         Thrown on failure
    */
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		/* First optimize the query */
@@ -1761,7 +1748,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 	protected	void	markAffectedIndexes
 	(
-		List	affectedConglomerates
+        List<ConglomerateDescriptor> affectedConglomerates
     )
 		throws StandardException
 	{
@@ -1775,7 +1762,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		for ( int ictr = 0; ictr < indexCount; ictr++ )
 		{
-			cd = (ConglomerateDescriptor) affectedConglomerates.get( ictr );
+            cd = affectedConglomerates.get( ictr );
 
 			indicesToMaintain[ ictr ] = cd.getIndexDescriptor();
 			indexConglomerateNumbers[ ictr ] = cd.getConglomerateNumber();
@@ -1788,7 +1775,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "DML MOD";
 	}
@@ -1851,6 +1838,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 
+    @Override
     void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
@@ -1870,7 +1858,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void normalizeSynonymColumns( 
+    void normalizeSynonymColumns(
     ResultColumnList    rcl, 
     TableName           targetTableName)
 		throws StandardException
@@ -1913,8 +1901,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1938,6 +1926,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

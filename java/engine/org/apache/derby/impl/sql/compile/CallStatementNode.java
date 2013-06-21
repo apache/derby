@@ -22,18 +22,17 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.lang.reflect.Modifier;
-
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -52,7 +51,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  * A procedure is always represented by a MethodCallNode.
  *
  */
-public class CallStatementNode extends DMLStatementNode
+class CallStatementNode extends DMLStatementNode
 {	
 	/**
 	 * The method call for the Java procedure. Guaranteed to be
@@ -63,20 +62,22 @@ public class CallStatementNode extends DMLStatementNode
 
 
 	/**
-	 * Initializer for a CallStatementNode.
+     * Constructor for a CallStatementNode.
 	 *
 	 * @param methodCall		The expression to "call"
+     * @param cm                The context manager
 	 */
 
-	public void init(Object methodCall)
+    CallStatementNode(JavaToSQLValueNode methodCall, ContextManager cm)
 	{
-		super.init(null);
-		this.methodCall = (JavaToSQLValueNode) methodCall;
+        super(null, cm);
+        setNodeType(C_NodeTypes.CALL_STATEMENT_NODE);
+        this.methodCall = methodCall;
 		this.methodCall.getJavaValueNode().markForCallStatement();
 	}
 
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "CALL";
 	}
@@ -87,8 +88,8 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -114,7 +115,7 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
@@ -122,14 +123,12 @@ public class CallStatementNode extends DMLStatementNode
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
 
-        SubqueryList subqueries = (SubqueryList) getNodeFactory().getNode(
-                C_NodeTypes.SUBQUERY_LIST, getContextManager());
+        SubqueryList subqueries = new SubqueryList(getContextManager());
 
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		methodCall = (JavaToSQLValueNode) methodCall.bindExpression(
-							(FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
+                            new FromList(
+                                getOptimizerFactory().doJoinOrderOptimization(),
 								getContextManager()), 
                             subqueries,
 							null);
@@ -162,7 +161,7 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		DataDictionary dd = getDataDictionary();
@@ -171,14 +170,14 @@ public class CallStatementNode extends DMLStatementNode
 		SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
 
 		/* Preprocess the method call tree */
-		methodCall = (JavaToSQLValueNode) methodCall.preprocess(
-								getCompilerContext().getNumTables(),
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-								(SubqueryList) null,
-								(PredicateList) null);
+        methodCall =
+            (JavaToSQLValueNode) methodCall.preprocess(
+                getCompilerContext().getNumTables(),
+                new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager()),
+                (SubqueryList) null,
+                (PredicateList) null);
 
 	}
 
@@ -192,6 +191,7 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -241,6 +241,7 @@ public class CallStatementNode extends DMLStatementNode
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCallStatementResultSet", ClassName.ResultSet, 2);
 	}
 
+    @Override
 	public ResultDescription makeResultDescription()
 	{
 		return null;
@@ -253,6 +254,7 @@ public class CallStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -267,6 +269,7 @@ public class CallStatementNode extends DMLStatementNode
 	/**
 	 * Set default privilege of EXECUTE for this node. 
 	 */
+    @Override
 	int getPrivType()
 	{
 		return Authorizer.EXECUTE_PRIV;

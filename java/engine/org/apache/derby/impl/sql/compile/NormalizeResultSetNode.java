@@ -21,16 +21,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.ClassName;
-
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  *
@@ -521,7 +520,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class NormalizeResultSetNode extends SingleChildResultSetNode
+class NormalizeResultSetNode extends SingleChildResultSetNode
 {
 	/**
 	 * this indicates if the normalize is being performed for an Update
@@ -532,8 +531,8 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	private boolean forUpdate;
 
 	/**
-	 * Initializer for a NormalizeResultSetNode.
-	 ** ColumnReferences must continue to point to the same ResultColumn, so
+     * Constructor  for a NormalizeResultSetNode.
+     * ColumnReferences must continue to point to the same ResultColumn, so
 	 * that ResultColumn must percolate up to the new PRN.  However,
 	 * that ResultColumn will point to a new expression, a VirtualColumnNode, 
 	 * which points to the FromTable and the ResultColumn that is the source for
@@ -549,28 +548,29 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	 * sort has to agree with what the sort expects.
 	 * (insert into t1 (smallintcol) values 1 union all values 2;
 	 *
-	 * @param childResult	The child ResultSetNode
+     * @param chldRes   The child ResultSetNode
      * @param targetResultColumnList The target resultColumnList from 
      *                          the InsertNode or UpdateNode. These will
      *                          be the types used for the NormalizeResultSetNode.
 	 * @param tableProperties	Properties list associated with the table
 	 * @param forUpdate 	tells us if the normalize operation is being
 	 * performed on behalf of an update statement. 
+     * @param cm                The context manager
 	 * @throws StandardException 
 	 */
 
-	public void init(
-							Object childResult,
-                            Object targetResultColumnList,
-							Object tableProperties,
-							Object forUpdate) throws StandardException
+    NormalizeResultSetNode(ResultSetNode chldRes,
+                           ResultColumnList targetResultColumnList,
+                           Properties tableProperties,
+                           boolean forUpdate,
+                           ContextManager cm) throws StandardException
 	{
-		super.init(childResult, tableProperties);
-		this.forUpdate = ((Boolean)forUpdate).booleanValue();
+        super(chldRes, tableProperties, cm);
+        setNodeType(C_NodeTypes.NORMALIZE_RESULT_SET_NODE);
+        this.forUpdate = forUpdate;
 
-		ResultSetNode rsn  = (ResultSetNode) childResult;
-		ResultColumnList rcl = rsn.getResultColumns();
-		ResultColumnList targetRCL = (ResultColumnList) targetResultColumnList;
+        ResultColumnList rcl = chldRes.getResultColumns();
+        ResultColumnList targetRCL = targetResultColumnList;
         
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
@@ -582,7 +582,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 		 * detailed explanation of how this works.
 		 */
 		ResultColumnList prRCList = rcl;
-		rsn.setResultColumns(rcl.copyListAndObjects());
+        chldRes.setResultColumns(rcl.copyListAndObjects());
 		// Remove any columns that were generated.
 		prRCList.removeGeneratedGroupingColumns();
         // And also columns that were added for ORDER BY (DERBY-6006).
@@ -592,11 +592,11 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, rsn, and source ResultColumn.)
 		 */
-		prRCList.genVirtualColumnNodes(rsn, rsn.getResultColumns());
+        prRCList.genVirtualColumnNodes(chldRes, chldRes.getResultColumns());
         
 		this.resultColumns = prRCList;
 		// Propagate the referenced table map if it's already been created
-		if (rsn.getReferencedTableMap() != null)
+        if (chldRes.getReferencedTableMap() != null)
 		    {
 			setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 		    }
@@ -618,6 +618,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -656,6 +657,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	 * set the Information gathered from the parent table that is 
      * required to perform a referential action on dependent table.
 	 */
+    @Override
     void setRefActionInfo(long fkIndexConglomId,
 								 int[]fkColArray, 
 								 String parentResultSetId,
@@ -674,6 +676,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	 *
 	 * @param orderByList	The order by list
 	 */
+    @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
 		childResult.pushOrderByList(orderByList);
@@ -687,6 +690,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
      * @param fetchFirst the OFFSET FIRST, if any
      * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
+    @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         childResult.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );

@@ -21,18 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.Visitable;
-
-import org.apache.derby.vti.DeferModification;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.vti.DeferModification;
 
 /**
  * This class applies a VTI modification deferral policy to a statement to

@@ -21,51 +21,36 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.reference.SQLState;
+import java.util.Properties;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
 import org.apache.derby.iapi.reference.ClassName;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
-import org.apache.derby.iapi.sql.StatementType;
-
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
+import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.vti.DeferModification;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.util.StringUtil;
-
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.impl.sql.execute.FKInfo;
-
-import java.util.Properties;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.impl.sql.execute.FKInfo;
+import org.apache.derby.vti.DeferModification;
 
 /**
  * An InsertNode is the top node in a query tree for an
@@ -92,7 +77,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
 public final class InsertNode extends DMLModStatementNode
 {
 	public		ResultColumnList	targetColumnList;
-	public 		boolean				deferred;
+            boolean             deferred;
 	public		ValueNode			checkConstraints;
 	public		Properties			targetProperties;
 	public		FKInfo				fkInfo;
@@ -105,49 +90,50 @@ public final class InsertNode extends DMLModStatementNode
 
 	protected   RowLocation[] 		autoincRowLocation;
 	/**
-	 * Initializer for an InsertNode.
+     * Constructor for an InsertNode.
 	 *
-	 * @param targetName	The name of the table/VTI to insert into
-	 * @param insertColumns	A ResultColumnList with the names of the
+     * @param targetName         The name of the table/VTI to insert into
+     * @param insertColumns      A ResultColumnList with the names of the
 	 *			columns to insert into.  May be null if the
 	 *			user did not specify the columns - in this
 	 *			case, the binding phase will have to figure
 	 *			it out.
-	 * @param queryExpression	The query expression that will generate
-	 *				the rows to insert into the given table
-	 * @param targetProperties	The properties specified on the target table
-     * @param orderByList The order by list for the source result set, null if no order by list
-	 * @param offset The value of a <result offset clause> if present
-	 * @param fetchFirst The value of a <fetch first clause> if present
-	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
+     * @param queryExpression    The query expression that will generate
+     *                           the rows to insert into the given table
+     * @param targetProperties   The properties specified on the target table
+     * @param orderByList        The order by list for the source result set,
+     *                           null if no order by list
+     * @param offset             The value of a <result offset clause> if
+     *                           present
+     * @param fetchFirst         The value of a <fetch first clause> if present
+     * @param hasJDBClimitClause True if the offset/fetchFirst clauses come
+     *                           from JDBC limit/offset escape syntax
+     * @param cm                 The context manager
 	 */
-
-	public void init(
-			Object targetName,
-			Object insertColumns,
-			Object queryExpression,
-			Object targetProperties,
-            Object orderByList,
-            Object offset,
-            Object fetchFirst,
-            Object hasJDBClimitClause)
+    InsertNode(
+            QueryTreeNode    targetName,
+            ResultColumnList insertColumns,
+            ResultSetNode    queryExpression,
+            Properties       targetProperties,
+            OrderByList      orderByList,
+            ValueNode        offset,
+            ValueNode        fetchFirst,
+            boolean          hasJDBClimitClause,
+            ContextManager   cm)
 	{
 		/* statementType gets set in super() before we've validated
 		 * any properties, so we've kludged the code to get the
 		 * right statementType for a bulk insert replace.
 		 */
-		super.init(
-				queryExpression,
-				ReuseFactory.getInteger(getStatementType(
-												(Properties) targetProperties))
-				);
-		setTarget((QueryTreeNode) targetName);
-		targetColumnList = (ResultColumnList) insertColumns;
-		this.targetProperties = (Properties) targetProperties;
-		this.orderByList = (OrderByList) orderByList;
-        this.offset = (ValueNode)offset;
-        this.fetchFirst = (ValueNode)fetchFirst;
-        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
+        super(queryExpression, getStatementType(targetProperties), cm);
+        setNodeType(C_NodeTypes.INSERT_NODE);
+        setTarget(targetName);
+        targetColumnList = insertColumns;
+        this.targetProperties = targetProperties;
+        this.orderByList = orderByList;
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
 
 		/* Remember that the query expression is the source to an INSERT */
 		getResultSetNode().setInsertSource();
@@ -180,7 +166,7 @@ public final class InsertNode extends DMLModStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "INSERT";
 	}
@@ -192,7 +178,7 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param depth		The depth of this node in the tree
 	 */
 
-	public void printSubNodes(int depth)
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -248,10 +234,9 @@ public final class InsertNode extends DMLModStatementNode
 		// We just need select privilege on the expressions
 		getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
 
-		FromList	fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+        FromList fromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
 
 		/* If any underlying ResultSetNode is a SelectNode, then we
 		 * need to do a full bind(), including the expressions
@@ -464,11 +449,8 @@ public final class InsertNode extends DMLModStatementNode
 												resultSet.getResultColumns()))
 		{
             
-			resultSet = 
-			(ResultSetNode) getNodeFactory().getNode(
-			C_NodeTypes.NORMALIZE_RESULT_SET_NODE, resultSet,
-			resultColumnList, null, Boolean.FALSE,
-			getContextManager());
+            resultSet = new NormalizeResultSetNode(
+                resultSet, resultColumnList, null, false, getContextManager());
 		}
 
 		if (targetTableDescriptor != null)
@@ -482,7 +464,7 @@ public final class InsertNode extends DMLModStatementNode
             
 			/* Get and bind all constraints on the table */
 			checkConstraints = bindConstraints(dataDictionary,
-												getNodeFactory(),
+                                                getOptimizerFactory(),
 												targetTableDescriptor,
 												null,
 												sourceRCL,
@@ -733,7 +715,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 
 		/* Different constant actions for base tables and updatable VTIs */
@@ -811,7 +793,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public boolean[] getIndexedCols() throws StandardException
+    boolean[] getIndexedCols() throws StandardException
 	{
 		/* Create a boolean[] to track the (0-based) columns which are indexed */
 		boolean[] indexedCols = new boolean[targetTableDescriptor.getNumberOfColumns()];
@@ -939,7 +921,7 @@ public final class InsertNode extends DMLModStatementNode
                 ExecRowBuilder builder =
                         new ExecRowBuilder(cdl.size(), false);
                 for (int i = 0; i < cdl.size(); i++) {
-                    ColumnDescriptor cd = (ColumnDescriptor) cdl.get(i);
+                    ColumnDescriptor cd = cdl.get(i);
                     builder.setColumn(i + 1, cd.getType());
                 }
                 mb.push(acb.addItem(builder));

@@ -21,38 +21,28 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.loader.ClassInspector;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
+import java.util.List;
+import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-
-import org.apache.derby.catalog.AliasInfo;
-
-import java.util.List;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
- * An Aggregate Node is a node that reprsents a set function/aggregate.
+ * An Aggregate Node is a node that represents a set function/aggregate.
  * It used for all system aggregates as well as user defined aggregates.
- *
  */
 
-public class AggregateNode extends UnaryOperatorNode
+class AggregateNode extends UnaryOperatorNode
 {
 	private boolean					distinct;
 
@@ -74,55 +64,86 @@ public class AggregateNode extends UnaryOperatorNode
 	private ResultColumn			generatedRC;
 	private ColumnReference			generatedRef;
 
-	/**
-	 * Intializer.  Used for user defined and internally defined aggregates.
-	 * Called when binding a StaticMethodNode that we realize is an aggregate.
-	 *
-	 * @param operand	the value expression for the aggregate
-	 * @param uadClass	the class name for user aggregate definition for the aggregate
-	 *					or the Class for the internal aggregate type.
-	 * @param distinct	boolean indicating whether this is distinct
+    /**
+     * Constructed when binding a StaticMethodNode that we realize is
+     * an aggregate.
+     *
+     * @param operand the value expression for the aggregate
+     * @param uadClass the class of the user aggregate definition
+     * @param distinct boolean indicating whether this is distinct
 	 *					or not.
-	 * @param aggregateName	the name of the aggregate from the user's perspective,
-	 *					e.g. MAX
-	 *
-	 * @exception StandardException on error
-	 */
-	public void init
-	(
-		Object	operand,
-		Object		uadClass,
-		Object		distinct,
-		Object		aggregateName
-	) throws StandardException
-	{
-		super.init(operand);
-		this.aggregateName = (String) aggregateName;
+     * @param aggregateName the name of the aggregate from the user's
+     *                  perspective, e.g. MAX
+     * @param cm context manager
+     * @throws StandardException
+     */
+     AggregateNode(
+            ValueNode operand,
+            UserAggregateDefinition uadClass,
+            boolean distinct,
+            String aggregateName,
+            ContextManager cm) throws StandardException {
+        super(operand, cm);
+        setNodeType(C_NodeTypes.AGGREGATE_NODE);
+        this.aggregateName = aggregateName;
+        setUserDefinedAggregate(uadClass);
+        this.distinct = distinct;
+    }
 
-		if ( uadClass instanceof UserAggregateDefinition )
-		{
-            setUserDefinedAggregate( (UserAggregateDefinition) uadClass );
-			this.distinct = ((Boolean) distinct).booleanValue();
-		}
-		else if ( uadClass instanceof TableName )
-		{
-			this.userAggregateName = (TableName) uadClass;
-			this.distinct = ((Boolean) distinct).booleanValue();
-		}
-		else
-		{
-			this.aggregateDefinitionClass = (Class) uadClass;
+    /**
+     * @param operand the value expression for the aggregate
+     * @param uadClass the class name for user aggregate definition
+     * for the aggregate
+     * @param distinct boolean indicating whether this is distinct
+     *                  or not.
+     * @param aggregateName the name of the aggregate from the user's
+     *                  perspective, e.g. MAX
+     * @param cm context manager
+     * @throws StandardException
+     */
+    AggregateNode(
+            ValueNode operand,
+            TableName uadClass,
+            boolean distinct,
+            String aggregateName,
+            ContextManager cm) throws StandardException {
+        super(operand, cm);
+        setNodeType(C_NodeTypes.AGGREGATE_NODE);
+        this.aggregateName = aggregateName;
+        this.userAggregateName = uadClass;
+        this.distinct = distinct;
+    }
 
-			// Distinct is meaningless for min and max
-			if (!aggregateDefinitionClass.equals(MaxMinAggregateDefinition.class))
-			{
-				this.distinct = ((Boolean) distinct).booleanValue();
-			}
+    /**
+     * @param operand the value expression for the aggregate
+     * @param uadClass Class for the internal aggregate type
+     * @param distinct boolean indicating whether this is distinct
+     *                  or not.
+     * @param aggregateName the name of the aggregate from the user's
+     *                  perspective, e.g. MAX
+     * @param cm context manager
+     * @throws StandardException
+     */
+    AggregateNode(
+            ValueNode operand,
+            Class uadClass,
+            boolean distinct,
+            String aggregateName,
+            ContextManager cm) throws StandardException {
+        super(operand, cm);
+        setNodeType(C_NodeTypes.AGGREGATE_NODE);
+        this.aggregateName = aggregateName;
+        this.aggregateDefinitionClass = uadClass;
 
-            this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
-		}
-        
-	}
+        // Distinct is meaningless for min and max
+        if (!aggregateDefinitionClass.equals(MaxMinAggregateDefinition.class)) {
+            this.distinct = distinct;
+        }
+
+        this.aggregateDefinitionClassName = aggregateDefinitionClass.getName();
+    }
+
+
     /** initialize fields for user defined aggregate */
     private void setUserDefinedAggregate( UserAggregateDefinition userAgg )
     {
@@ -148,8 +169,8 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode replaceAggregatesWithColumnReferences(ResultColumnList rcl, int tableNumber)
-		throws StandardException
+    ValueNode replaceAggregatesWithColumnReferences(
+        ResultColumnList rcl, int tableNumber) throws StandardException
 	{
 
 		/*
@@ -162,21 +183,16 @@ public class AggregateNode extends UnaryOperatorNode
 			String					generatedColName;
 			CompilerContext 		cc = getCompilerContext();
 			generatedColName ="SQLCol" + cc.getNextColumnNumber();
-			generatedRC = (ResultColumn) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											generatedColName,
-											this,
-											getContextManager());
+            generatedRC =
+                new ResultColumn(generatedColName, this, getContextManager());
 			generatedRC.markGenerated();
 	
 			/*
 			** Parse time.	
 			*/
-			generatedRef = (ColumnReference) getNodeFactory().getNode(
-												C_NodeTypes.COLUMN_REFERENCE,
-												generatedRC.getName(),
-												null,
-												getContextManager());
+            generatedRef = new ColumnReference(generatedRC.getName(),
+                                               null,
+                                               getContextManager());
 
 			// RESOLVE - unknown nesting level, but not correlated, so nesting levels must be 0
             generatedRef.setSource(generatedRC);
@@ -221,7 +237,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the result column
 	 */
-	public ResultColumn getGeneratedRC()
+    ResultColumn getGeneratedRC()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -241,7 +257,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the column reference
 	 */
-	public ColumnReference getGeneratedRef()
+    ColumnReference getGeneratedRef()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -265,6 +281,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -417,7 +434,7 @@ public class AggregateNode extends UnaryOperatorNode
         if ( isUserDefinedAggregate() )
         {
             ValueNode   castNode = ((UserAggregateDefinition) uad).castInputValue
-                ( operand, getNodeFactory(), getContextManager() );
+                ( operand, getContextManager() );
 
             if ( castNode != null )
             {
@@ -435,7 +452,7 @@ public class AggregateNode extends UnaryOperatorNode
 	/**
 	 * Resolve a user-defined aggregate.
 	 */
-	public  static AliasDescriptor resolveAggregate
+     static AliasDescriptor resolveAggregate
         ( DataDictionary dd, SchemaDescriptor sd, String rawName )
         throws StandardException
     {
@@ -443,10 +460,10 @@ public class AggregateNode extends UnaryOperatorNode
         // been created yet. in that case, it doesn't have any aggregates in it.
         if ( sd.getUUID() == null ) { return null; }
         
-		java.util.List list = dd.getRoutineList
+        java.util.List<AliasDescriptor> list = dd.getRoutineList
             ( sd.getUUID().toString(), rawName, AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR );
 
-        if ( list.size() > 0 ) { return (AliasDescriptor) list.get( 0 ); }
+        if ( list.size() > 0 ) { return list.get( 0 ); }
 
         return null;
     }
@@ -539,7 +556,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return 	true/false
 	 */
-	public boolean isDistinct()
+    boolean isDistinct()
 	{
 		return distinct;
 	}
@@ -550,7 +567,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the class name
 	 */
-	public String	getAggregatorClassName()
+    String  getAggregatorClassName()
 	{
 		return aggregatorClassName.toString();
 	}
@@ -561,7 +578,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return the class name
 	 */
-	public String	getAggregateName()
+    String  getAggregateName()
 	{
 		return aggregateName;
 	}
@@ -576,7 +593,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
-	public ResultColumn	getNewAggregatorResultColumn(DataDictionary	dd)
+    ResultColumn    getNewAggregatorResultColumn(DataDictionary dd)
 		throws StandardException
 	{
 		String	className = aggregatorClassName.toString();
@@ -599,11 +616,7 @@ public class AggregateNode extends UnaryOperatorNode
 		** Create a result column with this new node below
 		** it.
 		*/
-		return (ResultColumn) getNodeFactory().getNode(
-									C_NodeTypes.RESULT_COLUMN,
-									aggregateName,
-									nullNode, 
-									getContextManager());
+        return new ResultColumn(aggregateName, nullNode, getContextManager());
 	}
 
 
@@ -617,7 +630,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
-	public ResultColumn	getNewExpressionResultColumn(DataDictionary	dd)
+    ResultColumn    getNewExpressionResultColumn(DataDictionary dd)
 		throws StandardException
 	{
 		ValueNode		node;
@@ -631,12 +644,8 @@ public class AggregateNode extends UnaryOperatorNode
 			this.getNewNullResultExpression() :
 			operand;
 
-
-		return (ResultColumn) getNodeFactory().getNode(
-								C_NodeTypes.RESULT_COLUMN,
-								"##aggregate expression",
-								node,
-								getContextManager());
+        return new ResultColumn(
+            "##aggregate expression", node, getContextManager());
 	}
 
 	/**
@@ -647,7 +656,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
-	public ValueNode	getNewNullResultExpression()
+    ValueNode   getNewNullResultExpression()
 		throws StandardException
 	{
 		/*
@@ -667,6 +676,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
@@ -684,6 +694,7 @@ public class AggregateNode extends UnaryOperatorNode
 	 *
 	 * @return a string representation of this node 
 	 */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -698,12 +709,13 @@ public class AggregateNode extends UnaryOperatorNode
 		}
 	}
 
-	public boolean isConstant()
+    boolean isConstant()
 	{
 		return false;
 	}
 	
-	public boolean constantExpression(PredicateList where)
+    @Override
+    boolean constantExpression(PredicateList where)
 	{
 		return false;
 	}

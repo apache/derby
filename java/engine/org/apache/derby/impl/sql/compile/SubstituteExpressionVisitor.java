@@ -46,7 +46,7 @@ class SubstituteExpressionVisitor implements Visitor
 	/**
 	 * used by GroupByNode to process expressions by complexity level.
 	 */
-	public ValueNode getSource()
+    ValueNode getSource()
 	{
 		return source;
 	}

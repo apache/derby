@@ -21,38 +21,51 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
-
-
 import java.sql.Types;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.TypeId;
 
 public final class VarbitConstantNode extends BitConstantNode
 {
-	/**
-	 * Initializer for a VarbitConstantNode.
-	 *
-	 * @param arg1  The TypeId for the type of the node OR A Bit containing the value of the constant
-	 *
-	 * @exception StandardException
-	 */
+    /**
+     * Construct constant node for one of VARBINARY, LONG VARBINARY and
+     * BLOB types.
+     * @param t the type for which we want a constant node
+     * @param cm context manager
+     * @throws StandardException
+     */
+    VarbitConstantNode(TypeId t, ContextManager cm)
+            throws StandardException {
+        super(t, cm);
 
-	public void init(
-						Object arg1)
-		throws StandardException
-	{
-		init(
-					arg1,
-					Boolean.TRUE,
-					ReuseFactory.getInteger(0));
+        int nodeType = 0;
+        switch (t.getJDBCTypeId()) {
+            case Types.VARBINARY:
+                nodeType = C_NodeTypes.VARBIT_CONSTANT_NODE;
+                break;
+            case Types.LONGVARBINARY:
+                nodeType = C_NodeTypes.LONGVARBIT_CONSTANT_NODE;
+                break;
+            case Types.BLOB:
+                nodeType = C_NodeTypes.BLOB_CONSTANT_NODE;
+                break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+        }
 
-	}
+        setNodeType(nodeType);
+    }
+
+    VarbitConstantNode(
+            String hexValue,
+            int bitLength,
+            ContextManager cm) throws StandardException {
+        super(hexValue, bitLength, cm);
+        setNodeType(C_NodeTypes.VARBIT_CONSTANT_NODE);
+    }
 }

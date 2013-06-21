@@ -22,34 +22,21 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.types.TypeId;
 
 public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 {
-	/**
-	 * Initializer for a UnaryLogicalOperatorNode
-	 *
-	 * @param operand	The operand of the operator
-	 * @param methodName	The name of the method to call in the generated
-	 *						class.  In this case, it's actually an operator
-	 *						name.
-	 */
+    UnaryLogicalOperatorNode(ValueNode operand,
+            String methodName,
+            ContextManager cm) throws StandardException {
+        super(operand, methodName, methodName, cm);
+    }
 
-	public void init(
-				Object	operand,
-				Object		methodName)
-	{
-		/* For logical operators, the operator and method names are the same */
-		super.init(operand, methodName, methodName);
-	}
-
-	/**
+    /**
 	 * Bind this logical operator.  All that has to be done for binding
 	 * a logical operator is to bind the operand, check that the operand
 	 * is SQLBoolean, and set the result type to SQLBoolean.
@@ -62,7 +49,7 @@ public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException

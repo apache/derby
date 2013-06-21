@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -109,18 +109,22 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	protected TableName origTableName;
 	
 	/**
-	 * Initializer for a table in a FROM list.
-	 *
-	 * @param correlationName	The correlation name
-	 * @param tableProperties	Properties list associated with the table
-	 */
-	public void init(Object correlationName, Object tableProperties)
-	{
-		this.correlationName = (String) correlationName;
-		this.tableProperties = (Properties) tableProperties;
-		tableNumber = -1;
-		bestPlanMap = null;
-	}
+     * Constructor for a table in a FROM list.
+     *
+     * @param correlationName   The correlation name
+     * @param tableProperties   Properties list associated with the table
+     * @param cm                The context manager
+     */
+    FromTable(String correlationName,
+              Properties tableProperties,
+              ContextManager cm)
+    {
+        super(cm);
+        this.correlationName = correlationName;
+        this.tableProperties = tableProperties;
+        tableNumber = -1;
+        bestPlanMap = null;
+    }
 
 	/**
 	 * Get this table's correlation name, if any.
@@ -302,22 +306,29 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	/** @see Optimizable#rememberJoinStrategyAsBest */
 	public void rememberJoinStrategyAsBest(AccessPath ap)
 	{
-		Optimizer optimizer = ap.getOptimizer();
+        Optimizer opt = ap.getOptimizer();
 
 		ap.setJoinStrategy(getCurrentAccessPath().getJoinStrategy());
 
-        if ( optimizer.tracingIsOn() )
-        { optimizer.tracer().traceRememberingJoinStrategy( getCurrentAccessPath().getJoinStrategy(), tableNumber ); }
+        if (opt.tracingIsOn()) {
+            opt.tracer().traceRememberingJoinStrategy(
+                getCurrentAccessPath().getJoinStrategy(), tableNumber);
+        }
 
 		if (ap == bestAccessPath)
 		{
-            if ( optimizer.tracingIsOn() )
-            { optimizer.tracer().traceRememberingBestAccessPathSubstring( ap, tableNumber ); }
+            if (opt.tracingIsOn()) {
+                opt.tracer().traceRememberingBestAccessPathSubstring(
+                    ap, tableNumber);
+            }
 		}
 		else if (ap == bestSortAvoidancePath)
 		{
-            if ( optimizer.tracingIsOn() )
-            { optimizer.tracer().traceRememberingBestSortAvoidanceAccessPathSubstring( ap, tableNumber ); }
+            if (opt.tracingIsOn()) {
+                opt.tracer().
+                    traceRememberingBestSortAvoidanceAccessPathSubstring(
+                        ap, tableNumber);
+            }
 		}
 		else
 		{
@@ -330,8 +341,10 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 					"unknown access path type");
 			}
 			 */
-            if ( optimizer.tracingIsOn() )
-            { optimizer.tracer().traceRememberingBestUnknownAccessPathSubstring( ap, tableNumber ); }
+            if (opt.tracingIsOn()) {
+                opt.tracer().traceRememberingBestUnknownAccessPathSubstring(
+                    ap, tableNumber);
+            }
 		}
 	}
 
@@ -370,7 +383,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 				throws StandardException
 	{
 		/* For most types of Optimizable, do nothing */
-		return;
 	}
 
 	/**
@@ -511,8 +523,9 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			if (bestPlanMap != null)
 			{
 				bestPlanMap.remove(planKey);
-				if (bestPlanMap.size() == 0)
+                if (bestPlanMap.isEmpty()) {
 					bestPlanMap = null;
+                }
 			}
 
 			return;
@@ -570,7 +583,6 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		// We found a best plan in our map, so load it into this Optimizable's
 		// trulyTheBestAccessPath field.
 		bestPath.copy(ap);
-		return;
 	}
 
 	/** @see Optimizable#rememberAsBest */
@@ -706,7 +718,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *  If there's no trulyTheBestAccessPath for this node, then
 	 *  we just return the value stored in costEstimate as a default.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.
@@ -906,9 +919,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * 
 	 * @see HalfOuterJoinNode#isJoinColumnForRightOuterJoin
 	 */
-	public void isJoinColumnForRightOuterJoin(ResultColumn rc) 
+    void isJoinColumnForRightOuterJoin(ResultColumn rc)
 	{
-		return;
 	}
 
 	/**
@@ -1063,7 +1075,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -1093,12 +1105,11 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getResultColumnsForList(TableName allTableName,
+    ResultColumnList getResultColumnsForList(TableName allTableName,
 												ResultColumnList inputRcl,
 												TableName tableName)
 			throws StandardException
 	{
-		ResultColumnList rcList = null;
 		ResultColumn	 resultColumn;
 		ValueNode		 valueNode;
 		String			 columnName;
@@ -1137,9 +1148,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			exposedName = makeTableName(null, correlationName);
 		}
 
-		rcList = (ResultColumnList) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN_LIST,
-										getContextManager());
+        ResultColumnList rcList = new ResultColumnList((getContextManager()));
 
 		/* Build a new result column list based off of resultColumns.
 		 * NOTE: This method will capture any column renaming due to 
@@ -1150,17 +1159,11 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		{
 			// Build a ResultColumn/ColumnReference pair for the column //
 			columnName = ((ResultColumn) inputRcl.elementAt(index)).getName();
-			valueNode = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.COLUMN_REFERENCE,
-											columnName,
+            valueNode = new ColumnReference(columnName,
 											exposedName,
 											getContextManager());
-			resultColumn = (ResultColumn) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											columnName,
-											valueNode,
-											getContextManager());
-
+            resultColumn =
+                new ResultColumn(columnName, valueNode, getContextManager());
 			// Build the ResultColumnList to return //
 			rcList.addResultColumn(resultColumn);
 		}
@@ -1196,7 +1199,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public String getExposedName() throws StandardException
+    String getExposedName() throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		SanityManager.THROWASSERT(
@@ -1209,7 +1212,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @param tableNumber	The table # for this table.
 	 */
-	public void setTableNumber(int tableNumber)
+    void setTableNumber(int tableNumber)
 	{
 		/* This should only be called if the tableNumber has not been set yet */
 		if (SanityManager.DEBUG)
@@ -1226,7 +1229,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @return a TableName node representing this FromTable.
 	 * @exception StandardException		Thrown on error
 	 */
-	public TableName getTableName()
+    TableName getTableName()
 		throws StandardException
 	{
 		if (correlationName == null) return null;
@@ -1244,7 +1247,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @param level		The query block level for this FromTable.
 	 */
-	public void setLevel(int level)
+    void setLevel(int level)
 	{
 		this.level = level;
 	}
@@ -1254,7 +1257,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @return int	The query block level for this FromTable.
 	 */
-	public int getLevel()
+    int getLevel()
 	{
 		return level;
 	}
@@ -1298,7 +1301,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
-	public SchemaDescriptor getSchemaDescriptor() throws StandardException
+    SchemaDescriptor getSchemaDescriptor() throws StandardException
 	{
 		return getSchemaDescriptor(corrTableName);
 	}	
@@ -1313,7 +1316,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
-	public SchemaDescriptor getSchemaDescriptor(TableName tableName) throws StandardException
+    SchemaDescriptor getSchemaDescriptor(TableName tableName)
+            throws StandardException
 	{
 		SchemaDescriptor		sd;
 
@@ -1335,6 +1339,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -1357,7 +1362,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @return boolean		Whether or not this FromTable can be flattened.
 	 */
-	public boolean isFlattenableJoinNode()
+    boolean isFlattenableJoinNode()
 	{
 		return false;
 	}
@@ -1365,7 +1370,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	/**
 	 * no LOJ reordering for this FromTable.
 	 */
-	public boolean LOJ_reorderable(int numTables)
+    boolean LOJ_reorderable(int numTables)
 		throws StandardException
 	{
 		return false;
@@ -1393,7 +1398,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @param passedMap	The table map to fill in.
 	 */
-	public void fillInReferencedTableMap(JBitSet passedMap)
+    @Override
+    void fillInReferencedTableMap(JBitSet passedMap)
 	{
 		if (tableNumber != -1)
 		{
@@ -1409,7 +1415,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
      * @param updateColumns     A list representing the columns
 	 *							that can be updated.
 	 */
-	protected void markUpdatableByCursor(List updateColumns)
+    protected void markUpdatableByCursor(List<String> updateColumns)
 	{
 		resultColumns.markUpdatableByCursor(updateColumns);
 	}
@@ -1432,7 +1438,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromList flatten(ResultColumnList rcl,
+    FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
                             GroupByList gbl,
@@ -1495,7 +1501,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		
 	}
 	
-	public boolean needsSpecialRCLBinding()
+    boolean needsSpecialRCLBinding()
 	{
 		return false;
 	}
@@ -1506,7 +1512,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @param tableName the unbound table name
 	 *
 	 */
-	public void setOrigTableName(TableName tableName) 
+    void setOrigTableName(TableName tableName)
 	{
 		this.origTableName = tableName;
 	}
@@ -1519,7 +1525,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 * @return TableName the original or unbound tablename
 	 *
 	 */
-	public TableName getOrigTableName() 
+    TableName getOrigTableName()
 	{
 		return this.origTableName;
 	}

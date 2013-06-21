@@ -23,33 +23,34 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 
 /**
  * A GroupByColumn is a column in the GROUP BY clause.
  *
  */
-public class GroupByColumn extends OrderedColumn 
+class GroupByColumn extends OrderedColumn
 {
 	private ValueNode columnExpression;
 	
 	/**
-	 * Initializer.
+     * Constructor.
 	 *
 	 * @param colRef	The ColumnReference for the grouping column
+     * @param cm        The context manager
 	 */
-	public void init(Object colRef) 
+    GroupByColumn(ValueNode colRef,
+                  ContextManager cm)
 	{
-		this.columnExpression = (ValueNode)colRef;
+        super(cm);
+        setNodeType(C_NodeTypes.GROUP_BY_COLUMN);
+        this.columnExpression = colRef;
 	}
 
 	/**
@@ -58,8 +59,8 @@ public class GroupByColumn extends OrderedColumn
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -78,7 +79,7 @@ public class GroupByColumn extends OrderedColumn
 	 *
 	 * @return	The name of this column
 	 */
-	public String getColumnName() 
+    String getColumnName()
 	{
 		return columnExpression.getColumnName();
 	}
@@ -102,7 +103,7 @@ public class GroupByColumn extends OrderedColumn
 	{
 		/* Bind the ColumnReference to the FromList */
         int previousReliability = orReliability( CompilerContext.GROUP_BY_RESTRICTION );
-		columnExpression = (ValueNode) columnExpression.bindExpression(fromList,
+        columnExpression = columnExpression.bindExpression(fromList,
 							  subqueryList,
                               aggregates);
         getCompilerContext().setReliability( previousReliability );
@@ -128,12 +129,12 @@ public class GroupByColumn extends OrderedColumn
 		}
 	}
 
-	public ValueNode getColumnExpression() 
+    ValueNode getColumnExpression()
 	{
 		return columnExpression;
 	}
 
-	public void setColumnExpression(ValueNode cexpr) 
+    void setColumnExpression(ValueNode cexpr)
 	{
 		this.columnExpression = cexpr;
 		
@@ -146,6 +147,7 @@ public class GroupByColumn extends OrderedColumn
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException {
 

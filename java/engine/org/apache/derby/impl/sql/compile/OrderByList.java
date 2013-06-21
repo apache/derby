@@ -21,30 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
-import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.iapi.store.access.SortCostController;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizableList;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
+import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.store.access.ColumnOrdering;
+import org.apache.derby.iapi.store.access.SortCostController;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * An OrderByList is an ordered list of columns in the ORDER BY clause.
@@ -53,7 +48,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  * and the last column in the list is the least significant.
  *
  */
-public class OrderByList extends OrderedColumnList
+class OrderByList extends OrderedColumnList
 						implements RequiredRowOrdering {
 
 	private boolean allAscending = true;
@@ -74,12 +69,17 @@ public class OrderByList extends OrderedColumnList
     private boolean isTableValueCtorOrdering;
 
     /**
+     * Constructor.
      * Initialize with the type of the result set this {@code OrderByList} is
      * attached to, e.g. {@code SELECT}, {@code VALUES} or a set operation.
-     * @param rs The result set this {@code OrderByList} is ordering.
+     * @param rs The result set this {@code OrderByList} is ordering. May be
+     *           null
+     * @param cm The context manager
     */
-   public void init(Object rs) {
-        this.isTableValueCtorOrdering =
+   OrderByList(ResultSetNode rs, ContextManager cm) {
+       super(cm);
+       setNodeType(C_NodeTypes.ORDER_BY_LIST);
+       this.isTableValueCtorOrdering =
                 (rs instanceof UnionNode &&
                 ((UnionNode)rs).tableConstructor()) ||
                 rs instanceof RowResultSetNode;
@@ -90,7 +90,7 @@ public class OrderByList extends OrderedColumnList
 	
 		@param column	The column to add to the list
 	 */
-	public void addOrderByColumn(OrderByColumn column) 
+    void addOrderByColumn(OrderByColumn column)
 	{
 		addElement(column);
 
@@ -113,7 +113,7 @@ public class OrderByList extends OrderedColumnList
 	
 		@param position	The column to get from the list
 	 */
-	public OrderByColumn getOrderByColumn(int position) {
+    OrderByColumn getOrderByColumn(int position) {
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(position >=0 && position < size());
 		return (OrderByColumn) elementAt(position);
@@ -126,7 +126,7 @@ public class OrderByList extends OrderedColumnList
 	 * 	@param target	The underlying result set
 	 *	@exception StandardException		Thrown on error
 	 */
-	public void bindOrderByColumns(ResultSetNode target)
+    void bindOrderByColumns(ResultSetNode target)
 					throws StandardException {
 
 		/* Remember the target for use in optimization */
@@ -188,7 +188,7 @@ public class OrderByList extends OrderedColumnList
 		@param target	The underlying result set
 	
 	 */
-	public void pullUpOrderByColumns(ResultSetNode target)
+    void pullUpOrderByColumns(ResultSetNode target)
 					throws StandardException {
 
 		/* Remember the target for use in optimization */
@@ -214,12 +214,10 @@ public class OrderByList extends OrderedColumnList
 	 */
 	boolean isInOrderPrefix(ResultColumnList sourceRCL)
 	{
-		boolean inOrderPrefix = true;
-		int rclSize = sourceRCL.size();
-
 		if (SanityManager.DEBUG)
 		{
-			if (size() > sourceRCL.size())
+            int rclSize = sourceRCL.size();
+            if (size() > rclSize)
 			{
 				SanityManager.THROWASSERT(
 					"size() (" + size() + 
@@ -267,9 +265,7 @@ public class OrderByList extends OrderedColumnList
 	ResultColumnList reorderRCL(ResultColumnList resultColumns)
 		throws StandardException
 	{
-		ResultColumnList newRCL = (ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+        ResultColumnList newRCL = new ResultColumnList(getContextManager());
 
 		/* The new RCL starts with the ordering columns */
 		int size = size();
@@ -843,10 +839,10 @@ public class OrderByList extends OrderedColumnList
 		return false;
 	}
 
-
+    @Override
 	public String toString() {
 
-		StringBuffer buff = new StringBuffer();
+        StringBuilder buff = new StringBuilder();
 
 		if (columnOrdering != null) {
 			for (int i = 0; i < columnOrdering.length; i++) {

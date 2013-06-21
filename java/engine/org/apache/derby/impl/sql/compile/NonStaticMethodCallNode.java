@@ -21,32 +21,25 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.Qualifier;
-
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-
 import java.lang.reflect.Modifier;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A NonStaticMethodCallNode is really a node to represent a (static or non-static)
  * method call from an object (as opposed to a static method call from a class.
  */
-public class NonStaticMethodCallNode extends MethodCallNode
+class NonStaticMethodCallNode extends MethodCallNode
 {
 	/*
 	** The receiver for a non-static method call is an object, represented
@@ -58,19 +51,20 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	private boolean isStatic;
 
 	/**
-	 * Initializer for a NonStaticMethodCallNode
+     * Constructor for a NonStaticMethodCallNode
 	 *
 	 * @param methodName	The name of the method to call
 	 * @param receiver		A JavaValueNode representing the receiving object
+     * @param cm            The context manager
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-							Object methodName,
-							Object receiver)
+    NonStaticMethodCallNode(String methodName,
+                            ValueNode receiver,
+                            ContextManager cm)
 			throws StandardException
 	{
-		super.init(methodName);
-
+        super(methodName, cm);
+        setNodeType(C_NodeTypes.NON_STATIC_METHOD_CALL_NODE);
 		/*
 		** If the receiver is a Java value that has been converted to a
 		** SQL value, get rid of the conversion and just use the Java value
@@ -84,11 +78,8 @@ public class NonStaticMethodCallNode extends MethodCallNode
 		}
 		else
 		{
-			this.receiver = (JavaValueNode) getNodeFactory().
-								getNode(
-									C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
-									receiver,
-									getContextManager());
+            this.receiver =
+                new SQLToJavaValueNode(receiver, getContextManager());
 //            System.out.println("NonStaticMethodCallNode.init() receiver = "+receiver);
 // get nulpointer because not .bind?
 //            System.out.println("\ttypecompiler = "+((ValueNode)receiver).getTypeCompiler());
@@ -197,6 +188,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
+    @Override
     boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
@@ -233,6 +225,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
     int getOrderableVariantType() throws StandardException
 	{
 		int receiverVariant = receiver.getOrderableVariantType();
@@ -261,6 +254,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
+    @Override
     JavaValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
@@ -278,8 +272,8 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -307,6 +301,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void preprocess(int numTables,
 							FromList outerFromList,
 							SubqueryList outerSubqueryList,
@@ -428,6 +423,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean generateReceiver(ExpressionClassBuilder acb,
 											MethodBuilder mb)
 									throws StandardException
@@ -451,6 +447,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

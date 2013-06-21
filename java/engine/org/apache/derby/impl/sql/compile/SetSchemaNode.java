@@ -22,17 +22,15 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.StatementType;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A SetSchemaNode is the root of a QueryTree that 
@@ -43,32 +41,36 @@ import org.apache.derby.iapi.sql.StatementType;
  *
  */
 
-public class SetSchemaNode extends MiscellaneousStatementNode
+class SetSchemaNode extends MiscellaneousStatementNode
 {
 	private String 	name;
 	private int 	type;
 	
 	/**
-	 * Initializer for a SetSchemaNode
+     * Constructor for a SetSchemaNode
 	 *
 	 * @param schemaName	The name of the new schema
 	 * @param type			Type of schema name could be USER or dynamic parameter
+     * @param cm            The context manager
 	 *
 	 */
-	public void init(Object schemaName, Object type)
-	{
-		this.name = (String) schemaName;
-		if (type != null)
-			this.type = ((Integer)type).intValue();
+    SetSchemaNode(
+            String schemaName,
+            int type,
+            ContextManager cm) {
+        super(cm);
+        this.name = schemaName;
+        this.type = type;
+        setNodeType(C_NodeTypes.SET_SCHEMA_NODE);
 	}
 
-	/**
+    /**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -84,7 +86,7 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "SET SCHEMA";
 	}
@@ -94,7 +96,8 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return	getGenericConstantActionFactory().getSetSchemaConstantAction(name, type);		
 	}
@@ -106,7 +109,7 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -136,7 +139,8 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	void generateParameterValueSet(ActivationClassBuilder acb)
 		throws StandardException
 	{
-		List parameterList = getCompilerContext().getParameterList();
+        List<ParameterNode>
+            parameterList = getCompilerContext().getParameterList();
 		// parameter list size should be 1
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(parameterList != null && parameterList.size() == 1);
@@ -152,6 +156,7 @@ public class SetSchemaNode extends MiscellaneousStatementNode
 	 *			NEED_NOTHING_ACTIVATION depending on params
 	 *
 	 */
+    @Override
 	int activationKind()
 	{
 		/*

@@ -21,13 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 /**
  * A MaterializeSubqueryNode is used to replace the nodes for a subquery, to facilitate
@@ -39,11 +40,13 @@ class MaterializeSubqueryNode extends ResultSetNode
 
 	private LocalField lf;
 
-	public MaterializeSubqueryNode(LocalField lf)
-	{
+    MaterializeSubqueryNode(LocalField lf, ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.MATERIALIZE_RESULT_SET_NODE);
 		this.lf = lf;
 	}
 
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{

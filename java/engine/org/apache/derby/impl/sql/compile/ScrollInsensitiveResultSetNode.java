@@ -21,14 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A ScrollInsensitiveResultSetNode represents the insensitive scrolling cursor
@@ -37,23 +37,24 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
+class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 {
 	/**
-	 * Initializer for a ScrollInsensitiveResultSetNode.
+     * Constructor for a ScrollInsensitiveResultSetNode.
 	 *
 	 * @param childResult	The child ResultSetNode
 	 * @param rcl			The RCL for the node
 	 * @param tableProperties	Properties list associated with the table
+     * @param cm            The context manager
 	 */
-
-	public void init(
-							Object childResult,
-							Object rcl,
-							Object tableProperties)
-	{
-		init(childResult, tableProperties);
-		resultColumns = (ResultColumnList) rcl;
+    ScrollInsensitiveResultSetNode(
+                            ResultSetNode childResult,
+                            ResultColumnList rcl,
+                            Properties tableProperties,
+                            ContextManager cm) {
+        super(childResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.SCROLL_INSENSITIVE_RESULT_SET_NODE);
+        resultColumns = rcl;
 	}
 
     /**
@@ -61,6 +62,7 @@ public class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{

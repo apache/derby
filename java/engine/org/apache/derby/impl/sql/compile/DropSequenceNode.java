@@ -24,6 +24,8 @@ package org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -32,19 +34,20 @@ import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
  * A DropSequenceNode  represents a DROP SEQUENCE statement.
  */
 
-public class DropSequenceNode extends DDLStatementNode {
+class DropSequenceNode extends DDLStatementNode {
     private TableName dropItem;
 
     /**
-     * Initializer for a DropSequenceNode
+     * Constructor for a DropSequenceNode
      *
      * @param dropSequenceName The name of the sequence being dropped
+     * @param cm               The context manager
      * @throws StandardException
      */
-    public void init(Object dropSequenceName)
-            throws StandardException {
-        dropItem = (TableName) dropSequenceName;
-        initAndCheck(dropItem);
+    DropSequenceNode(TableName dropSequenceName, ContextManager cm) {
+        super(dropSequenceName, cm);
+        setNodeType(C_NodeTypes.DROP_SEQUENCE_NODE);
+        dropItem = dropSequenceName;
     }
 
     public String statementToString() {
@@ -56,6 +59,7 @@ public class DropSequenceNode extends DDLStatementNode {
      *
      * @throws StandardException Thrown on error
      */
+    @Override
     public void bindStatement() throws StandardException {
         DataDictionary dataDictionary = getDataDictionary();
         String sequenceName = getRelativeName();
@@ -83,6 +87,7 @@ public class DropSequenceNode extends DDLStatementNode {
      *
      * @throws StandardException Thrown on failure
      */
+    @Override
     public ConstantAction makeConstantAction() throws StandardException {
         return getGenericConstantActionFactory().getDropSequenceConstantAction(getSchemaDescriptor(), getRelativeName());
 	}

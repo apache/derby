@@ -21,29 +21,25 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import org.apache.derby.iapi.services.context.Context;
-import org.apache.derby.iapi.services.compiler.JavaFactory;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
+import java.sql.SQLWarning;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.StatementPermission;
-
+import org.apache.derby.iapi.services.compiler.JavaFactory;
+import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.store.access.StoreCostController;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.store.access.SortCostController;
-
-import java.util.List;
-import java.sql.SQLWarning;
+import org.apache.derby.iapi.store.access.StoreCostController;
+import org.apache.derby.impl.sql.compile.ParameterNode;
 
 /**
  * CompilerContext stores the parser and type id factory to be used by
@@ -152,13 +148,13 @@ public interface CompilerContext extends Context
 	Parser getParser();
 
 	/**
-	 * Get the NodeFactory from this CompilerContext.
+     * Get the OptimizerFactory from this CompilerContext.
 	 *
-	 * @return	The NodeFactory associated with this CompilerContext
+     * @return  The OptimizerFactory associated with this CompilerContext
 	 *
 	 */
 
-	NodeFactory getNodeFactory();
+    OptimizerFactory getOptimizerFactory();
 
 	/**
 	 * Get the TypeCompilerFactory from this CompilerContext.
@@ -451,14 +447,14 @@ public interface CompilerContext extends Context
 	 *
 	 * @param parameterList	The parameter list.
 	 */
-	public void setParameterList(List parameterList);
+    public void setParameterList(List<ParameterNode> parameterList);
 
 	/**
 	 * Get the parameter list.
 	 *
 	 * @return	The parameter list.
 	 */
-	public List getParameterList();
+    public List<ParameterNode> getParameterList();
 
 	/**
 	 * If callable statement uses ? = form

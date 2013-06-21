@@ -21,21 +21,14 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.iapi.reference.ClassName;
 
 /**
  * This class implements TypeCompiler for the SQL char datatypes.
@@ -87,108 +80,113 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 		
 	}
 
-        /**
-         * Tell whether this type (char) can be stored into from the given type.
-         *
-         * @param otherType     The TypeId of the other type.
-         * @param cf            A ClassFactory
+    /**
+     * Tell whether this type (char) can be stored into from the given type.
+     *
+     * @param otherType     The TypeId of the other type.
+     * @param cf            A ClassFactory
+     */
+
+    public boolean storable(TypeId otherType, ClassFactory cf)
+    {
+        // Same rules as cast except we can't assign from numbers
+        if (convertible(otherType,false) &&
+                !otherType.isBlobTypeId() &&
+                !otherType.isNumericTypeId())
+            return true;
+
+        /*
+         ** If the other type is user-defined, use the java types to determine
+         ** assignability.
          */
+        return userTypeStorable(getTypeId(), otherType, cf);
+    }
 
-        public boolean storable(TypeId otherType, ClassFactory cf)
+    /** @see TypeCompiler#interfaceName */
+    public String interfaceName()
+    {
+        return ClassName.StringDataValue;
+    }
+
+    /**
+     * @see TypeCompiler#getCorrespondingPrimitiveTypeName
+     */
+
+    public String getCorrespondingPrimitiveTypeName()
+    {
+        /* Only numerics and booleans get mapped to Java primitives */
+        return "java.lang.String";
+    }
+
+    /**
+     * @see TypeCompiler#getCastToCharWidth
+     */
+    public int getCastToCharWidth(DataTypeDescriptor dts)
+    {
+        return dts.getMaximumWidth();
+    }
+
+    String nullMethodName()
+    {
+        int formatId = getStoredFormatIdFromTypeId();
+        switch (formatId)
         {
-				// Same rules as cast except we can't assign from numbers
-				if (convertible(otherType,false) && 
-					!otherType.isBlobTypeId() &&
-					!otherType.isNumericTypeId())
-						return true;
+            case StoredFormatIds.CHAR_TYPE_ID:
+                return "getNullChar";
 
-                /*
-                ** If the other type is user-defined, use the java types to determine
-                ** assignability.
-                */
-                return userTypeStorable(getTypeId(), otherType, cf);
-        }
+            case StoredFormatIds.LONGVARCHAR_TYPE_ID:
+                return "getNullLongvarchar";
 
-        /** @see TypeCompiler#interfaceName */
-        public String interfaceName()
-        {
-                return ClassName.StringDataValue;
-        }
+            case StoredFormatIds.VARCHAR_TYPE_ID:
+                return "getNullVarchar";
 
-        /**
-         * @see TypeCompiler#getCorrespondingPrimitiveTypeName
-         */
-
-        public String getCorrespondingPrimitiveTypeName()
-        {
-                /* Only numerics and booleans get mapped to Java primitives */
-                return "java.lang.String";
-        }
-
-        /**
-         * @see TypeCompiler#getCastToCharWidth
-         */
-        public int getCastToCharWidth(DataTypeDescriptor dts)
-        {
-                return dts.getMaximumWidth();
-        }
-
-        String nullMethodName()
-        {
-                int formatId = getStoredFormatIdFromTypeId();
-                switch (formatId)
+            default:
+                if (SanityManager.DEBUG)
                 {
-                        case StoredFormatIds.CHAR_TYPE_ID:
-                                return "getNullChar";
-
-                        case StoredFormatIds.LONGVARCHAR_TYPE_ID:
-                                return "getNullLongvarchar";
-
-                        case StoredFormatIds.VARCHAR_TYPE_ID:
-                                return "getNullVarchar";
-
-                        default:
-                                if (SanityManager.DEBUG)
-                                {
-                                        SanityManager.THROWASSERT(
-                                                "unexpected formatId in nullMethodName() - " + formatId);
-                                }
-                                return null;
+                    SanityManager.THROWASSERT(
+                        "unexpected formatId in nullMethodName() - " +
+                        formatId);
                 }
+                return null;
         }
+    }
 
-        /**
-         * Push the collation type if it is not COLLATION_TYPE_UCS_BASIC.
-         * 
-         * @param collationType Collation type of character values.
-         * @return true collationType will be pushed, false collationType will be ignored.
-         */
-        boolean pushCollationForDataValue(int collationType)
-        {
-            return collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC;
-        }
+    /**
+     * Push the collation type if it is not COLLATION_TYPE_UCS_BASIC.
+     *
+     * @param collationType Collation type of character values.
+     * @return {@code true} collationType will be pushed, {@code
+     *         false} collationType will be ignored.
+     */
+    @Override
+    boolean pushCollationForDataValue(int collationType)
+    {
+        return collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC;
+    }
 
-        String dataValueMethodName()
+    @Override
+    String dataValueMethodName()
+    {
+        int formatId = getStoredFormatIdFromTypeId();
+        switch (formatId)
         {
-                int formatId = getStoredFormatIdFromTypeId();
-                switch (formatId)
+            case StoredFormatIds.CHAR_TYPE_ID:
+                return "getCharDataValue";
+
+            case StoredFormatIds.LONGVARCHAR_TYPE_ID:
+                return "getLongvarcharDataValue";
+
+            case StoredFormatIds.VARCHAR_TYPE_ID:
+                return "getVarcharDataValue";
+
+            default:
+                if (SanityManager.DEBUG)
                 {
-                        case StoredFormatIds.CHAR_TYPE_ID:
-                                return "getCharDataValue";
-
-                        case StoredFormatIds.LONGVARCHAR_TYPE_ID:
-                                return "getLongvarcharDataValue";
-
-                        case StoredFormatIds.VARCHAR_TYPE_ID:
-                                return "getVarcharDataValue";
-
-                        default:
-                                if (SanityManager.DEBUG)
-                                {
-                                        SanityManager.THROWASSERT(
-                                                "unexpected formatId in dataValueMethodName() - " + formatId);
-                                }
-                                return null;
+                    SanityManager.THROWASSERT(
+                        "unexpected formatId in dataValueMethodName() - " +
+                        formatId);
                 }
+                return null;
         }
+    }
 }

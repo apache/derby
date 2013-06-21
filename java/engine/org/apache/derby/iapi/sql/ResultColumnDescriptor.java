@@ -101,7 +101,7 @@ public interface ResultColumnDescriptor
 	/**
 	 * Return true if this result column represents a generated column.
 	 */
-	public boolean hasGenerationClause();
+    boolean hasGenerationClause();
     
 	/*
 	 * NOTE: These interfaces are intended to support JDBC. There are some

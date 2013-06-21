@@ -21,27 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-
-import org.apache.derby.iapi.util.JBitSet;
-
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
-
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A StaticClassFieldReferenceNode represents a Java static field reference from 
@@ -67,16 +59,23 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	private Member			field;
 
 	/**
-	 * Initializer for a StaticClassFieldReferenceNode
+     * Constructor for a StaticClassFieldReferenceNode
 	 *
 	 * @param	javaClassName	The class name
 	 * @param	fieldName		The field name
+     * @param   cm              The context manager
 	 */
-	public void init(Object javaClassName, Object fieldName, Object classNameDelimitedIdentifier)
+    StaticClassFieldReferenceNode(
+            String javaClassName,
+            String fieldName,
+            boolean classNameDelimitedIdentifier,
+            ContextManager cm)
 	{
-		this.fieldName = (String) fieldName;
-		this.javaClassName = (String) javaClassName;
-		this.classNameDelimitedIdentifier = ((Boolean) classNameDelimitedIdentifier).booleanValue();
+        super(cm);
+        setNodeType(C_NodeTypes.STATIC_CLASS_FIELD_REFERENCE_NODE);
+        this.fieldName = fieldName;
+        this.javaClassName = javaClassName;
+        this.classNameDelimitedIdentifier = classNameDelimitedIdentifier;
 	}
 
 	/**
@@ -92,7 +91,9 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    JavaValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List aggregates)
+    JavaValueNode bindExpression(FromList fromList,
+                                 SubqueryList subqueryList,
+                                 List<AggregateNode> aggregates)
 			throws StandardException
 	{
 		ClassInspector classInspector = getClassFactory().getClassInspector();
@@ -195,6 +196,7 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
     int getOrderableVariantType()
 	{
 		if (SanityManager.DEBUG)

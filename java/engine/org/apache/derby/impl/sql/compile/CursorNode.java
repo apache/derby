@@ -24,10 +24,10 @@ package	org.apache.derby.impl.sql.compile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -48,9 +48,9 @@ import org.apache.derby.impl.sql.CursorTableReference;
 
 public class CursorNode extends DMLStatementNode
 {
-	public final static int UNSPECIFIED = 0;
+    final static int UNSPECIFIED = 0;
 	public final static int READ_ONLY = 1;
-	public final static int UPDATE = 2;
+    final static int UPDATE = 2;
 
 	private String		name;
 	private OrderByList	orderByList;
@@ -80,57 +80,64 @@ public class CursorNode extends DMLStatementNode
 	private int indexOfSessionTableNamesInSavedObjects = -1;
 
 	/**
-	 * Initializer for a CursorNode
+     * Constructor for a CursorNode
 	 *
-	 * @param statementType	Type of statement (SELECT, UPDATE, INSERT)
-	 * @param resultSet	A ResultSetNode specifying the result set for
-	 *			the cursor
-	 * @param name		The name of the cursor, null if no name
-	 * @param orderByList	The order by list for the cursor, null if no
-	 *			order by list
-	 * @param offset The value of a <result offset clause> if present
-	 * @param fetchFirst The value of a <fetch first clause> if present
-	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
-	 * @param updateMode	The user-specified update mode for the cursor,
-	 *			for example, CursorNode.READ_ONLY
-     * @param updatableColumns The array of updatable columns specified by
-	 *			the user in the FOR UPDATE clause, null if no
-	 *			updatable columns specified.  May only be
-	 *			provided if the updateMode parameter is
-	 *			CursorNode.UPDATE.
+     * @param statementType      Type of statement (SELECT, UPDATE, INSERT)
+     * @param resultSet          A ResultSetNode specifying the result set for
+     *                           the cursor
+     * @param name               The name of the cursor, null if no name
+     * @param orderByList        The order by list for the cursor, null if no
+     *                           order by list
+     * @param offset             The value of a <result offset clause> if
+     *                           present
+     * @param fetchFirst         The value of a <fetch first clause> if present
+     * @param hasJDBClimitClause True if the offset/fetchFirst clauses come
+     *                           from JDBC limit/offset escape syntax
+     * @param updateMode         The user-specified update mode for the cursor,
+     *                           for example, CursorNode.READ_ONLY
+     * @param updatableColumns   The array of updatable columns specified by
+     *                           the user in the FOR UPDATE clause, null if no
+     *                           updatable columns specified.  May only be
+     *                           provided if the updateMode parameter is
+     *                           CursorNode.UPDATE.
+     * @param cm                 The context manager
 	 */
-	public	void init(
-		Object statementType,
-		Object resultSet,
-		Object name,
-		Object orderByList,
-		Object offset,
-		Object fetchFirst,
-        Object hasJDBClimitClause,
-		Object updateMode,
-		Object updatableColumns)
+    CursorNode(String         statementType,
+               ResultSetNode  resultSet,
+               String         name,
+               OrderByList    orderByList,
+               ValueNode      offset,
+               ValueNode      fetchFirst,
+               boolean        hasJDBClimitClause,
+               int            updateMode,
+               String[]       updatableColumns,
+               ContextManager cm)
 	{
-		init(resultSet);
-		this.name = (String) name;
-		this.statementType = (String) statementType;
-		this.orderByList = (OrderByList) orderByList;
-		this.offset = (ValueNode)offset;
-		this.fetchFirst = (ValueNode)fetchFirst;
-        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
-
-		this.updateMode = ((Integer) updateMode).intValue();
+        super(resultSet, cm);
+        setNodeType(C_NodeTypes.CURSOR_NODE);
+        this.name = name;
+        this.statementType = statementType;
+        this.orderByList = orderByList;
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
+        this.updateMode = updateMode;
         this.updatableColumns =
                 updatableColumns == null ?
-                null : Arrays.asList((String[]) updatableColumns);
+                null : Arrays.asList(updatableColumns);
 
 		/*
 		** This is a sanity check and not an error since the parser
 		** controls setting updatableColumns and updateMode.
 		*/
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(this.updatableColumns == null ||
-			this.updatableColumns.isEmpty() || this.updateMode == UPDATE,
-			"Can only have explicit updatable columns if update mode is UPDATE");
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                    this.updatableColumns == null ||
+                    this.updatableColumns.isEmpty() ||
+                    this.updateMode == UPDATE,
+                    "Can only have explicit updatable columns if " +
+                        "update mode is UPDATE");
+        }
 	}
 
 	/**
@@ -139,7 +146,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -154,7 +161,7 @@ public class CursorNode extends DMLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return statementType;
 	}
@@ -198,8 +205,8 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -232,7 +239,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary				dataDictionary;
@@ -257,9 +264,8 @@ public class CursorNode extends DMLStatementNode
 
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		try {
-			FromList	fromList = (FromList) getNodeFactory().getNode(
-					C_NodeTypes.FROM_LIST,
-					getNodeFactory().doJoinOrderOptimization(),
+            FromList    fromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
 					getContextManager());
 
 			/* Check for ? parameters directly under the ResultColums */
@@ -366,12 +372,10 @@ public class CursorNode extends DMLStatementNode
 			bindUpdateColumns(updateTable);
 
 			// If the target table is a FromBaseTable, mark the updatable
-			// columns.  (I can't think of a way that an updatable table
-			// could be anything but a FromBaseTable at this point, but
-			// it's better to be careful.
-			if (updateTable instanceof FromTable)
+            // columns.
+            if (updateTable != null)
 			{
-				((FromTable) updateTable).markUpdatableByCursor(updatableColumns);
+                updateTable.markUpdatableByCursor(updatableColumns);
 				//make sure that alongwith the FromTable, we keep other ResultSetLists
 				//in correct state too. ResultSetMetaData.isWritable looks at this to
 				//return the correct value.
@@ -438,6 +442,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -572,7 +577,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		// Push the order by list down to the ResultSet
@@ -603,7 +608,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	 
+    @Override
 	int activationKind()
 	{
 		return NEED_CURSOR_ACTIVATION;
@@ -617,7 +622,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb) throws StandardException
 	{
 		if (indexOfSessionTableNamesInSavedObjects != -1 ) //if this cursor references session schema tables, do following
@@ -656,25 +661,25 @@ public class CursorNode extends DMLStatementNode
 
 	// class interface
 
-	public String getUpdateBaseTableName() 
+    String getUpdateBaseTableName()
 	{
 		return (updateTable == null) ? null : updateTable.getBaseTableName();
 	}
 
-	public String getUpdateExposedTableName() 
+    String getUpdateExposedTableName()
 		throws StandardException
 	{
 		return (updateTable == null) ? null : updateTable.getExposedName();
 	}
 
-	public String getUpdateSchemaName() 
+    String getUpdateSchemaName()
 		throws StandardException
 	{
 		//we need to use the base table for the schema name
 		return (updateTable == null) ? null : ((FromBaseTable)updateTable).getTableNameField().getSchemaName();
 	}
 
-	public int getUpdateMode()
+    int getUpdateMode()
 	{
 		return updateMode;
 	}
@@ -687,6 +692,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
 	 */
+    @Override
 	public boolean needsSavepoint()
 	{
 		return false;
@@ -700,6 +706,7 @@ public class CursorNode extends DMLStatementNode
 	 * @return	the cursor info
 	 * @exception StandardException thrown if generation fails
 	 */
+    @Override
 	public Object getCursorInfo()
 		throws StandardException
 	{
@@ -758,7 +765,7 @@ public class CursorNode extends DMLStatementNode
 		}
 	}
 
-	public String getXML()
+    String getXML()
 	{
 		return null;
 	}
@@ -771,6 +778,7 @@ public class CursorNode extends DMLStatementNode
      * @throws StandardException if accessing the index descriptors of a base
      *      table fails
      */
+    @Override
     public TableDescriptor[] updateIndexStatisticsFor()
             throws StandardException {
         if (!checkIndexStats || statsToUpdate == null) {
@@ -802,6 +810,7 @@ public class CursorNode extends DMLStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

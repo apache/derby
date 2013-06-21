@@ -22,12 +22,13 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * An UntypedNullConstantNode represents a SQL NULL before it has
@@ -42,9 +43,10 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 * contain no state (not too surprising).
 	 */
 
-	public UntypedNullConstantNode()
+   UntypedNullConstantNode(ContextManager cm)
 	{
-		super();
+       super(cm);
+        setNodeType(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE);
 	}
 
 	/**
@@ -83,7 +85,8 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 * @param typeDescriptor	A description of the required data type.
 	 *
 	 */
-	public DataValueDescriptor convertDefaultNode(DataTypeDescriptor typeDescriptor)
+   @Override
+    DataValueDescriptor convertDefaultNode(DataTypeDescriptor typeDescriptor)
 	throws StandardException
 	{
 		/*
@@ -97,8 +100,10 @@ public final class UntypedNullConstantNode extends ConstantNode
 	 * This does nothing-- the node is actually bound when
 	 * bindUntypedNullsToResultColumns is called.
 	 */
-    ValueNode bindExpression(
-        FromList fromList, SubqueryList subqueryList, List aggregates)
+   @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
 	{
 		return this;
 	}

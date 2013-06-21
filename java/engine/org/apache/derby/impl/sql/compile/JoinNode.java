@@ -21,42 +21,32 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
-
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.PropertyUtil;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
 
 /**
  * A JoinNode represents a join result set for either of the basic DML
@@ -68,15 +58,15 @@ import java.util.Properties;
  *
  */
 
-public class JoinNode extends TableOperatorNode
+class JoinNode extends TableOperatorNode
 {
 	/* Join semantics */
-	public static final int INNERJOIN = 1;
-	public static final int CROSSJOIN = 2;
-	public static final int LEFTOUTERJOIN = 3;
-	public static final int RIGHTOUTERJOIN = 4;
-	public static final int FULLOUTERJOIN = 5;
-	public static final int UNIONJOIN = 6;
+    static final int INNERJOIN = 1;
+    static final int CROSSJOIN = 2;
+    static final int LEFTOUTERJOIN = 3;
+    static final int RIGHTOUTERJOIN = 4;
+    static final int FULLOUTERJOIN = 5;
+    static final int UNIONJOIN = 6;
 
     /** If this flag is true, this node represents a natural join. */
     private boolean naturalJoin;
@@ -98,7 +88,7 @@ public class JoinNode extends TableOperatorNode
 
 
 	/**
-	 * Initializer for a JoinNode.
+     * Constructor for a JoinNode.
 	 *
 	 * @param leftResult	The ResultSetNode on the left side of this join
 	 * @param rightResult	The ResultSetNode on the right side of this join
@@ -107,30 +97,31 @@ public class JoinNode extends TableOperatorNode
 	 * @param selectList	The result column list for the join
 	 * @param tableProperties	Properties list associated with the table
 	 * @param joinOrderStrategyProperties	User provided optimizer overrides
+     * @param cm            The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-					Object leftResult,
-					Object rightResult,
-					Object onClause,
-					Object usingClause,
-					Object selectList,
-					Object tableProperties,
-					Object joinOrderStrategyProperties)
-			throws StandardException
-	{
-		super.init(leftResult, rightResult, tableProperties);
-		resultColumns = (ResultColumnList) selectList;
-		joinClause = (ValueNode) onClause;
-		joinClauseNormalized = false;
-		this.usingClause = (ResultColumnList) usingClause;
-		this.joinOrderStrategyProperties = (Properties)joinOrderStrategyProperties;
+    JoinNode(ResultSetNode    leftResult,
+             ResultSetNode    rightResult,
+             ValueNode        onClause,
+             ResultColumnList usingClause,
+             ResultColumnList selectList,
+             Properties       tableProperties,
+             Properties       joinOrderStrategyProperties,
+             ContextManager   cm) throws StandardException {
+
+        super(leftResult, rightResult, tableProperties, cm);
+        setNodeType(C_NodeTypes.JOIN_NODE);
+        this.resultColumns = selectList;
+        this.joinClause = onClause;
+        this.joinClauseNormalized = false;
+        this.usingClause = usingClause;
+        this.joinOrderStrategyProperties = joinOrderStrategyProperties;
 
 		/* JoinNodes can be generated in the parser or at the end of optimization.
 		 * Those generated in the parser do not have resultColumns yet.
 		 */
-		if (resultColumns != null)
+        if (this.resultColumns != null)
 		{
 			/* A longer term assertion */
 			if (SanityManager.DEBUG)
@@ -145,13 +136,14 @@ public class JoinNode extends TableOperatorNode
 			/* Build the referenced table map (left || right) */
 			if (leftResultSet.getReferencedTableMap() != null)
 			{
-				referencedTableMap = (JBitSet) leftResultSet.getReferencedTableMap().clone();
-				referencedTableMap.or((JBitSet) rightResultSet.getReferencedTableMap());
+                this.referencedTableMap =
+                        (JBitSet) leftResultSet.getReferencedTableMap().clone();
+                this.referencedTableMap.or(
+                        rightResultSet.getReferencedTableMap());
 			}
 		}
-		joinPredicates = (PredicateList) getNodeFactory().getNode(
-											C_NodeTypes.PREDICATE_LIST,
-											getContextManager());
+
+        this.joinPredicates = new PredicateList(cm);
 	}
 
 	/*
@@ -163,6 +155,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(
 							Optimizer optimizer,
 							OptimizablePredicateList predList,
@@ -293,7 +286,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public boolean pushOptPredicate(OptimizablePredicate optimizablePredicate)
 			throws StandardException
 	{
@@ -323,6 +316,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) throws StandardException
 	{
 		super.modifyAccessPath(outerTables);
@@ -373,7 +367,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultColumnList getAllResultColumns(TableName allTableName)
+    @Override
+    ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
 		/* We need special processing when there is a USING clause.
@@ -508,10 +503,8 @@ public class JoinNode extends TableOperatorNode
 			}
 
 			// Return a spliced copy of the 2 lists
-			ResultColumnList tempList =
-								(ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager());
+            ResultColumnList
+                    tempList = new ResultColumnList((getContextManager()));
 			tempList.nondestructiveAppend(leftRCL);
 			tempList.nondestructiveAppend(rightRCL);
 			return tempList;
@@ -531,8 +524,9 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultColumn getMatchingColumn(ColumnReference columnReference) throws StandardException
+    @Override
+    ResultColumn getMatchingColumn(ColumnReference columnReference)
+            throws StandardException
 	{
 		/* Get the logical left and right sides of the join.
 		 * (For RIGHT OUTER JOIN, the left is the right
@@ -540,12 +534,11 @@ public class JoinNode extends TableOperatorNode
 		 */
 		ResultSetNode	logicalLeftRS = getLogicalLeftResultSet();
 		ResultSetNode	logicalRightRS = getLogicalRightResultSet();
-		ResultColumn	leftRC = null;
 		ResultColumn	resultColumn = null;
 		ResultColumn	rightRC = null;
 		ResultColumn	usingRC = null;
 
-		leftRC = logicalLeftRS.getMatchingColumn(columnReference);
+        ResultColumn leftRC = logicalLeftRS.getMatchingColumn(columnReference);
 
 		if (leftRC != null)
 		{
@@ -633,6 +626,7 @@ public class JoinNode extends TableOperatorNode
     /**
      * Bind the expressions under this node.
      */
+    @Override
     public void bindExpressions(FromList fromListParam)
             throws StandardException
     {
@@ -656,7 +650,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void bindResultColumns(FromList fromListParam)
+    @Override
+    void bindResultColumns(FromList fromListParam)
 					throws StandardException
 	{
 		super.bindResultColumns(fromListParam);
@@ -702,7 +697,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void bindResultColumns(TableDescriptor targetTableDescriptor,
             FromVTI targetVTI, ResultColumnList targetColumnList,
             DMLStatementNode statement, FromList fromListParam)
@@ -802,13 +797,13 @@ public class JoinNode extends TableOperatorNode
 	private void deferredBindExpressions(FromList fromListParam)
 				throws StandardException
 	{
+        ContextManager cm = getContextManager();
+        CompilerContext cc = getCompilerContext();
+
 		/* Bind the expressions in the join clause */
-		subqueryList = (SubqueryList) getNodeFactory().getNode(
-											C_NodeTypes.SUBQUERY_LIST,
-											getContextManager());
+        subqueryList = new SubqueryList(cm);
         aggregates = new ArrayList<AggregateNode>();
 
-        CompilerContext cc = getCompilerContext();
         
 		/* ON clause */
 		if (joinClause != null)
@@ -818,10 +813,9 @@ public class JoinNode extends TableOperatorNode
 			 * are limited to columns from the 2 tables being joined. This
 			 * algorithm enforces that.
 			 */
-			FromList	fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+            FromList fromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(), cm);
+
 			fromList.addElement((FromTable) leftResultSet);
 			fromList.addElement((FromTable) rightResultSet);
 
@@ -858,10 +852,7 @@ public class JoinNode extends TableOperatorNode
 			 * We need to bind the CRs a side at a time to ensure that
 			 * we don't find an bogus ambiguous column reference. (Bug 377)
 			 */
-			joinClause = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.TRUE,
-											getContextManager());
+           joinClause = new BooleanConstantNode(true, cm);
 
 			int usingSize = usingClause.size();
 			for (int index = 0; index < usingSize; index++)
@@ -873,11 +864,10 @@ public class JoinNode extends TableOperatorNode
 
 				/* Create and bind the left CR */
 				fromListParam.insertElementAt(leftResultSet, 0);
-				leftCR = (ColumnReference) getNodeFactory().getNode(
-							C_NodeTypes.COLUMN_REFERENCE,
-							rc.getName(),
-							((FromTable) leftResultSet).getTableName(),
-							getContextManager()); 
+                leftCR = new ColumnReference(
+                        rc.getName(),
+                        ((FromTable) leftResultSet).getTableName(),
+                        cm);
 				leftCR = (ColumnReference) leftCR.bindExpression(
 									  fromListParam, subqueryList,
                                       aggregates);
@@ -885,33 +875,27 @@ public class JoinNode extends TableOperatorNode
 
 				/* Create and bind the right CR */
 				fromListParam.insertElementAt(rightResultSet, 0);
-				rightCR = (ColumnReference) getNodeFactory().getNode(
-							C_NodeTypes.COLUMN_REFERENCE,
-							rc.getName(),
-							((FromTable) rightResultSet).getTableName(),
-							getContextManager()); 
+                rightCR = new ColumnReference(
+                        rc.getName(),
+                        ((FromTable) rightResultSet).getTableName(),
+                        cm);
 				rightCR = (ColumnReference) rightCR.bindExpression(
 									  fromListParam, subqueryList,
                                       aggregates);
 				fromListParam.removeElementAt(0);
 
 				/* Create and insert the new = condition */
-				equalsNode = (BinaryComparisonOperatorNode)
-								getNodeFactory().getNode(
+                equalsNode = new BinaryRelationalOperatorNode(
 										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 										leftCR,
 										rightCR,
-										Boolean.FALSE,
-										getContextManager());
+                                        false,
+                                        cm);
 				equalsNode.bindComparisonOperator();
 
                 // Create a new join clause by ANDing the new = condition and
                 // the old join clause.
-                AndNode newJoinClause = (AndNode) getNodeFactory().getNode(
-                        C_NodeTypes.AND_NODE,
-                        equalsNode,
-                        joinClause,
-                        getContextManager());
+                AndNode newJoinClause = new AndNode(equalsNode, joinClause, cm);
 
                 newJoinClause.postBindFixup();
 
@@ -976,15 +960,11 @@ public class JoinNode extends TableOperatorNode
         List<String> columnNames = extractColumnNames(leftRCL);
         columnNames.retainAll(extractColumnNames(rightRCL));
 
-        ResultColumnList commonColumns =
-                (ResultColumnList) getNodeFactory().getNode(
-                        C_NodeTypes.RESULT_COLUMN_LIST,
-                        getContextManager());
+        ResultColumnList
+                commonColumns = new ResultColumnList((getContextManager()));
 
-        for (Iterator it = columnNames.iterator(); it.hasNext(); ) {
-            String name = (String) it.next();
-            ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
-                    C_NodeTypes.RESULT_COLUMN,
+        for (String name : columnNames) {
+            ResultColumn rc = new ResultColumn(
                     name,
                     null,
                     getContextManager());
@@ -1035,7 +1015,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -1069,17 +1050,12 @@ public class JoinNode extends TableOperatorNode
 				 * flattening will take place. (Bug #1206)
 				 */
 				joinClause.preprocess(
-								numTables,
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-								(SubqueryList) getNodeFactory().getNode(
-													C_NodeTypes.SUBQUERY_LIST,
-													getContextManager()),
-								(PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager()));
+                    numTables,
+                    new FromList(
+                        getOptimizerFactory().doJoinOrderOptimization(),
+                        getContextManager()),
+                    new SubqueryList(getContextManager()),
+                    new PredicateList(getContextManager()));
 			}
 
 			/* Pull apart the expression trees */
@@ -1095,6 +1071,7 @@ public class JoinNode extends TableOperatorNode
      * Find the unreferenced result columns and project them out. This is used in pre-processing joins
      * that are not flattened into the where clause.
      */
+    @Override
     void projectResultColumns() throws StandardException
     {
         leftResultSet.projectResultColumns();
@@ -1107,7 +1084,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void normExpressions()
+    void normExpressions()
 				throws StandardException
 	{
 		if (joinClauseNormalized == true) return;
@@ -1169,7 +1146,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void pushExpressions(PredicateList outerPredicateList)
+    @Override
+    void pushExpressions(PredicateList outerPredicateList)
 					throws StandardException
 	{
 		FromTable		leftFromTable = (FromTable) leftResultSet;
@@ -1422,7 +1400,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public FromList flatten(ResultColumnList rcl,
+    @Override
+    FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
                             GroupByList gbl,
@@ -1449,10 +1428,9 @@ public class JoinNode extends TableOperatorNode
 		 * since there is no exposed name. (And even if there was,
 		 * we could care less about unique exposed name checking here.)
 		 */
-		FromList	fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
+        FromList fromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
 		fromList.addElement((FromTable) leftResultSet);
 		fromList.addElement((FromTable) rightResultSet);
 
@@ -1491,7 +1469,8 @@ public class JoinNode extends TableOperatorNode
 	/**
 	 * Currently we don't reordering any outer join w/ inner joins.
 	 */
-	public boolean LOJ_reorderable(int numTables)
+    @Override
+    boolean LOJ_reorderable(int numTables)
 				throws StandardException
 	{
 		return false;
@@ -1508,6 +1487,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable transformOuterJoins(ValueNode predicateTree, int numTables)
 		throws StandardException
 	{
@@ -1543,6 +1523,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -1735,7 +1716,8 @@ public class JoinNode extends TableOperatorNode
 	 *  the costs for the inner and outer table.  The number of rows,
 	 *  though, is that for the inner table only.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.
@@ -1794,7 +1776,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @return String		The joinType as a String.
 	 */
-	public static String joinTypeToString(int joinType)
+    static String joinTypeToString(int joinType)
 	{
 		switch(joinType)
 		{
@@ -1828,9 +1810,7 @@ public class JoinNode extends TableOperatorNode
 	protected PredicateList getLeftPredicateList() throws StandardException
 	{
 		if (leftPredicateList == null)
-			leftPredicateList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+            leftPredicateList = new PredicateList(getContextManager());
 
 		return leftPredicateList;
 	}
@@ -1838,9 +1818,7 @@ public class JoinNode extends TableOperatorNode
 	protected PredicateList getRightPredicateList() throws StandardException
 	{
 		if (rightPredicateList == null)
-			rightPredicateList = (PredicateList) getNodeFactory().getNode(
-													C_NodeTypes.PREDICATE_LIST,
-													getContextManager());
+            rightPredicateList = new PredicateList(getContextManager());
 
 		return rightPredicateList;
 	}
@@ -1852,7 +1830,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		/* Always use row locking if we have a join node.
 		 * We can only have a join node if there is a subquery that
@@ -1864,6 +1843,7 @@ public class JoinNode extends TableOperatorNode
 	/**
 	 * Mark this node and its children as not being a flattenable join.
 	 */
+    @Override
 	void notFlattenableJoin()
 	{
 		flattenableJoin = false;
@@ -1877,7 +1857,8 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @return boolean		Whether or not this FromTable can be flattened.
 	 */
-	public boolean isFlattenableJoinNode()
+    @Override
+    boolean isFlattenableJoinNode()
 	{
 		return flattenableJoin;
 	}
@@ -1897,6 +1878,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
@@ -1911,7 +1893,8 @@ public class JoinNode extends TableOperatorNode
 	 * @param depth		The depth of this node in the tree
 	 */
 
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -1990,6 +1973,7 @@ public class JoinNode extends TableOperatorNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{
@@ -2021,12 +2005,13 @@ public class JoinNode extends TableOperatorNode
 	//       (T JOIN S) LOJ (X LOJ Y) 
     // The top most LOJ may be a join betw T and X and thus we can reorder the
 	// LOJs.  However, as of 10/2002, we don't reorder LOJ mixed with join.
-	public JBitSet LOJgetReferencedTables(int numTables)
+    @Override
+    JBitSet LOJgetReferencedTables(int numTables)
 				throws StandardException
 	{
-		JBitSet map = (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+        JBitSet map = leftResultSet.LOJgetReferencedTables(numTables);
 		if (map == null) return null;
-		else map.or((JBitSet) rightResultSet.LOJgetReferencedTables(numTables));
+        else map.or(rightResultSet.LOJgetReferencedTables(numTables));
 
 		return map;
 	}

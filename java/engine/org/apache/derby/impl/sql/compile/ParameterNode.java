@@ -23,12 +23,13 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -105,25 +106,20 @@ public class ParameterNode extends ValueNode
 	private ValueNode valToGenerate;
 
 	/**
-	 * Constructor for use by the NodeFactory
-	 */
-	public ParameterNode()
-	{
-	}
-
-	/**
-	 * Initializer for a ParameterNode.
+     * Constructor for a ParameterNode.
 	 *
 	 * @param parameterNumber			The number of this parameter,
 	 *									(unique per query starting at 0)
 	 * @param defaultValue				The default value for this parameter
-	 *
+     * @param cm                        The context manager
 	 */
-
-	public void init(Object parameterNumber, Object defaultValue)
-	{
-		this.defaultValue = (DataValueDescriptor) defaultValue;
-		this.parameterNumber = ((Integer) parameterNumber).intValue();
+    ParameterNode(int parameterNumber,
+                  DataValueDescriptor defaultValue,
+                  ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.PARAMETER_NODE);
+        this.parameterNumber = parameterNumber;
+        this.defaultValue = defaultValue;
 	}
 
 	/**
@@ -154,8 +150,8 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @param descriptor	The DataTypeServices to set for this parameter
 	 */
-
-	public void setType(DataTypeDescriptor descriptor) throws StandardException
+    @Override
+    void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
 		/* Make sure the type is nullable. */
 
@@ -181,7 +177,7 @@ public class ParameterNode extends ValueNode
 	 * Mark this as a return output parameter (e.g.
 	 * ? = CALL myMethod())
 	 */
-	public void setReturnOutputParam(ValueNode valueNode)
+    void setReturnOutputParam(ValueNode valueNode)
 	{
 		returnOutputParameter = valueNode;
 	}
@@ -192,7 +188,7 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @return true if it is a return param
 	 */
-	public boolean isReturnOutputParam()
+    boolean isReturnOutputParam()
 	{
 		return returnOutputParameter != null;
 	}
@@ -213,10 +209,11 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-    ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
-				throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
 	{
 		checkReliability( "?", CompilerContext.UNNAMED_PARAMETER_ILLEGAL );
 
@@ -228,13 +225,15 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return true;
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return true;
 	}
@@ -251,6 +250,7 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		// Parameters are invariant for the life of the query
@@ -322,6 +322,7 @@ public class ParameterNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -378,7 +379,8 @@ public class ParameterNode extends ValueNode
         mb.cast(getTypeCompiler().interfaceName());
 	} // End of generateExpression
 
-	public TypeId getTypeId() throws StandardException
+    @Override
+    TypeId getTypeId() throws StandardException
 	{
 		return (returnOutputParameter != null) ?
 			returnOutputParameter.getTypeId() : super.getTypeId();
@@ -406,7 +408,7 @@ public class ParameterNode extends ValueNode
 	 */
     static void generateParameterValueSet(ExpressionClassBuilder acb,
 								   int		numberOfParameters,
-								   List     parameterList)
+                                   List<ParameterNode>     parameterList)
 		throws StandardException
 	{
 		if (numberOfParameters > 0)
@@ -417,7 +419,8 @@ public class ParameterNode extends ValueNode
 			** Check the first parameter to see if it is a return
 			** parameter.
 			*/
-			boolean hasReturnParam = ((ParameterNode)parameterList.get(0)).isReturnOutputParam();
+            boolean
+                hasReturnParam = (parameterList.get(0)).isReturnOutputParam();
 
 			/*
 			** Generate the following:
@@ -485,7 +488,8 @@ public class ParameterNode extends ValueNode
 	/**
 	 * @see ValueNode#requiresTypeFromContext
 	 */
-	public boolean requiresTypeFromContext()
+    @Override
+    boolean requiresTypeFromContext()
 	{
 		return true;
 	}
@@ -493,7 +497,8 @@ public class ParameterNode extends ValueNode
 	/**
 	 * @see ValueNode#isParameterNode
 	 */
-	public boolean isParameterNode()
+    @Override
+    boolean isParameterNode()
 	{
 		return true;
 	}

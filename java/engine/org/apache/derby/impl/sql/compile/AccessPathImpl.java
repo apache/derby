@@ -21,19 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 class AccessPathImpl implements AccessPath
 {
@@ -44,7 +42,7 @@ class AccessPathImpl implements AccessPath
 	JoinStrategy			joinStrategy = null;
 	int						lockMode;
 	Optimizer				optimizer;
-	private String			accessPathName = "";
+    private String          accessPathName =  "";
 
 	AccessPathImpl(Optimizer optimizer)
 	{
@@ -157,6 +155,7 @@ class AccessPathImpl implements AccessPath
 		return optimizer;
 	}
 
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)

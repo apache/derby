@@ -21,33 +21,19 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-
-import org.apache.derby.iapi.sql.Activation;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.ClassName;
-
 import org.apache.derby.iapi.util.PropertyUtil;
 
 abstract class BaseJoinStrategy implements JoinStrategy {
@@ -214,7 +200,7 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 	 * outermost table of a join.
 	 *
 	 * @return Whether or not this join strategy
-	 * can be used on the outermose table of a join.
+     * can be used on the outermost table of a join.
 	 */
 	protected boolean validForOutermostTable()
 	{

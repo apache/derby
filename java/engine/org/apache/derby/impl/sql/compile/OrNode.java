@@ -22,28 +22,29 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-
-
-public class OrNode extends BinaryLogicalOperatorNode
+class OrNode extends BinaryLogicalOperatorNode
 {
 	/* Is this the 1st OR in the OR chain? */
 	private boolean firstOr;
 
 	/**
-	 * Initializer for an OrNode
+     * Constructor for an OrNode
 	 *
 	 * @param leftOperand	The left operand of the OR
 	 * @param rightOperand	The right operand of the OR
+     * @param cm            The context manager
 	 */
 
-	public void init(Object leftOperand, Object rightOperand)
+    OrNode(ValueNode leftOperand, ValueNode rightOperand, ContextManager cm)
 	{
-		super.init(leftOperand, rightOperand, "or");
+        super(leftOperand, rightOperand, "or", cm);
 		this.shortCircuitValue = true;
+        setNodeType(C_NodeTypes.OR_NODE);
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -95,7 +96,8 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -146,10 +148,10 @@ public class OrNode extends BinaryLogicalOperatorNode
 						 * below.  But if we're running in SANE mode, do a
 						 * quick check to make sure that's still valid.
 					 	 */
-						BinaryRelationalOperatorNode bron = null;
 						if (left instanceof BinaryRelationalOperatorNode)
 						{
- 							bron = (BinaryRelationalOperatorNode)left;
+                            BinaryRelationalOperatorNode bron =
+                                    (BinaryRelationalOperatorNode)left;
 							if (!bron.isInListProbeNode())
 							{
 								SanityManager.THROWASSERT(
@@ -212,9 +214,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 			/* So, can we convert the OR chain? */
 			if (convert)
 			{
-				ValueNodeList vnl = (ValueNodeList) getNodeFactory().getNode(
-													C_NodeTypes.VALUE_NODE_LIST,
-													getContextManager());
+                ValueNodeList vnl = new ValueNodeList(getContextManager());
 				// Build the IN list 
 				for (ValueNode vn = this; vn instanceof OrNode; vn = ((OrNode) vn).getRightOperand())
 				{
@@ -246,12 +246,8 @@ public class OrNode extends BinaryLogicalOperatorNode
 					}
 				}
 
-				InListOperatorNode ilon =
-							(InListOperatorNode) getNodeFactory().getNode(
-											C_NodeTypes.IN_LIST_OPERATOR_NODE,
-											cr,
-											vnl,
-											getContextManager());
+                InListOperatorNode ilon =
+                        new InListOperatorNode(cr, vnl, getContextManager());
 
 				// Transfer the result type info to the IN list
 				ilon.setType(getTypeServices());
@@ -285,6 +281,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -296,13 +293,8 @@ public class OrNode extends BinaryLogicalOperatorNode
 		}
 
 		/* Convert the OrNode to an AndNode */
-		AndNode	andNode;
-
-		andNode = (AndNode) getNodeFactory().getNode(
-													C_NodeTypes.AND_NODE,
-													leftOperand,
-													rightOperand,
-													getContextManager());
+       AndNode andNode =
+                new AndNode(leftOperand, rightOperand, getContextManager());
 		andNode.setType(getTypeServices());
 		return andNode;
 	}
@@ -335,7 +327,8 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode changeToCNF(boolean underTopAndNode) 
+    @Override
+    ValueNode changeToCNF(boolean underTopAndNode)
 					throws StandardException
 	{
 		OrNode curOr = this;
@@ -345,17 +338,10 @@ public class OrNode extends BinaryLogicalOperatorNode
 		 */
 		if (rightOperand instanceof AndNode)
 		{
-			BooleanConstantNode	falseNode;
-
-			falseNode = (BooleanConstantNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.FALSE,
-											getContextManager());
-			rightOperand = (ValueNode) getNodeFactory().getNode(
-												C_NodeTypes.OR_NODE,
-												rightOperand,
-												falseNode,
-												getContextManager());
+           BooleanConstantNode falseNode =
+                    new BooleanConstantNode(false, getContextManager());
+            rightOperand =
+                    new OrNode(rightOperand, falseNode, getContextManager());
 			((OrNode) rightOperand).postBindFixup();
 		}
 
@@ -370,18 +356,10 @@ public class OrNode extends BinaryLogicalOperatorNode
 		/* Add the false BooleanConstantNode if not there yet */
 		if (!(curOr.getRightOperand().isBooleanFalse()))
 		{
-			BooleanConstantNode	falseNode;
-
-			falseNode = (BooleanConstantNode) getNodeFactory().getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.FALSE,
-											getContextManager());
-			curOr.setRightOperand(
-					(ValueNode) getNodeFactory().getNode(
-												C_NodeTypes.OR_NODE,
-												curOr.getRightOperand(),
-												falseNode,
-												getContextManager()));
+           BooleanConstantNode falseNode =
+                    new BooleanConstantNode(false, getContextManager());
+            curOr.setRightOperand(new OrNode(
+                    curOr.getRightOperand(), falseNode, getContextManager()));
 			((OrNode) curOr.getRightOperand()).postBindFixup();
 		}
 
@@ -441,7 +419,8 @@ public class OrNode extends BinaryLogicalOperatorNode
 	 *
 	 * @return		Boolean which reflects validity of the tree.
 	 */
-	public boolean verifyChangeToCNF()
+    @Override
+    boolean verifyChangeToCNF()
 	{
 		boolean isValid = true;
 

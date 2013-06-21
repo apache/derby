@@ -21,26 +21,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.StatementType;
 
 /**
  * A RenameNode is the root of a QueryTree that represents a
@@ -48,7 +45,7 @@ import org.apache.derby.iapi.sql.StatementType;
  *
  */
 
-public class RenameNode extends DDLStatementNode
+class RenameNode extends DDLStatementNode
 {
 	protected TableName newTableName;
 
@@ -73,14 +70,17 @@ public class RenameNode extends DDLStatementNode
 	protected int renamingWhat;
 
 	/**
-	 * Initializer for a RenameNode
+     * Constructor for a RenameNode
 	 *
 	 * @param tableName The name of the table. This is the table which is
 	 *		being renamed in case of rename table. In case of rename
 	 *		column, the column being renamed belongs to this table.
 	 *		In case of rename index, this is null because index name
 	 *		is unique within a schema and doesn't have to be
-	 *		associated with a table name
+     *      associated with a table name.
+     *      Coming from ALTER TABLE path, tableName will
+     *      be TableName object. Mostly a TableName object, but coming from
+     *      RENAME COLUMN path, tableName will be a String.
 	 * @param oldObjectName This is either the name of column/index in case
 	 *		of rename column/index. For rename table, this is null.
 	 * @param newObjectName This is new name for table/column/index
@@ -88,25 +88,28 @@ public class RenameNode extends DDLStatementNode
 	 *		For rename index, this will always be false because
 	 *		there is no alter table command to rename index
 	 * @param renamingWhat Rename a 1 - table, 2 - column, 3 - index
+     * @param cm context manager
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-	public void init(Object tableName,
-				   Object oldObjectName,
-				   Object newObjectName,
-				   Object usedAlterTable,
-				   Object renamingWhat)
-		throws StandardException
+    RenameNode(Object tableName,
+               String oldObjectName,
+               String newObjectName,
+               boolean usedAlterTable,
+               int renamingWhat,
+               ContextManager cm) throws StandardException
 	{
-		this.usedAlterTable = ((Boolean) usedAlterTable).booleanValue();
-		this.renamingWhat = ((Integer) renamingWhat).intValue();
+        super(cm);
+        setNodeType(C_NodeTypes.RENAME_NODE);
+        this.usedAlterTable = usedAlterTable;
+        this.renamingWhat = renamingWhat;
 
 		switch (this.renamingWhat)
 		{
 			case StatementType.RENAME_TABLE:
 				initAndCheck((TableName) tableName);
 				this.newTableName =
-					makeTableName(getObjectName().getSchemaName(),(String)newObjectName);
+                    makeTableName(getObjectName().getSchemaName(), newObjectName);
 				this.oldObjectName = null;
 				this.newObjectName = this.newTableName.getTableName();
 				break;
@@ -125,13 +128,13 @@ public class RenameNode extends DDLStatementNode
 				initAndCheck(actingObjectName);
 
 
-				this.oldObjectName = (String)oldObjectName;
-				this.newObjectName = (String)newObjectName;
+                this.oldObjectName = oldObjectName;
+                this.newObjectName = newObjectName;
 				break;
 
 			case StatementType.RENAME_INDEX:
-				this.oldObjectName = (String)oldObjectName;
-				this.newObjectName = (String)newObjectName;
+                this.oldObjectName = oldObjectName;
+                this.newObjectName = newObjectName;
 				break;
 
 			default:
@@ -147,7 +150,7 @@ public class RenameNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG) {
@@ -180,7 +183,7 @@ public class RenameNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		if (usedAlterTable)
 			return "ALTER TABLE";
@@ -225,7 +228,7 @@ public class RenameNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
@@ -274,9 +277,9 @@ public class RenameNode extends DDLStatementNode
 		{
 			case StatementType.RENAME_TABLE:
 				/* Verify that new table name does not exist in the database */
-				TableDescriptor td = getTableDescriptor(newObjectName, sd);
-  				if (td != null)
-					throw descriptorExistsException(td, sd);
+                TableDescriptor tabDesc = getTableDescriptor(newObjectName, sd);
+                if (tabDesc != null)
+                    throw descriptorExistsException(tabDesc, sd);
 				renameTableBind(dd);
 				break;
 
@@ -314,6 +317,7 @@ public class RenameNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -429,7 +433,8 @@ public class RenameNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction()
+    @Override
+    public ConstantAction   makeConstantAction()
 		throws StandardException
 	{
 		return	getGenericConstantActionFactory().getRenameConstantAction(getFullName(),

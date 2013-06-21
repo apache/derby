@@ -23,9 +23,11 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -38,7 +40,7 @@ import org.apache.derby.iapi.util.ByteArray;
 /**
  * A ExecSPSNode is the root of a QueryTree 
  * that represents an EXECUTE STATEMENT
- * statement.  It is a tad abnormal.  Duringa
+ * statement.  It is a tad abnormal.  During a
  * bind, it locates and retrieves the SPSDescriptor
  * for the particular statement.  At generate time,
  * it generates the prepared statement for the 
@@ -48,24 +50,25 @@ import org.apache.derby.iapi.util.ByteArray;
  *
  */
 
-public class ExecSPSNode extends StatementNode 
+class ExecSPSNode extends StatementNode
 {
 	private TableName			name;
 	private SPSDescriptor		spsd;
 	private ExecPreparedStatement ps;
 
 	/**
-	 * Initializer for a ExecSPSNode
+     * Constructor for a ExecSPSNode
 	 *
 	 * @param newObjectName		The name of the table to be created
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(
-				Object 		newObjectName)
-	{
-		this.name = (TableName) newObjectName;
+    ExecSPSNode(TableName newObjectName,
+                ContextManager cm) {
+        super(cm);
+        setNodeType(C_NodeTypes.EXEC_SPS_NODE);
+        this.name = newObjectName;
 	}
 
 	/**
@@ -76,6 +79,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		/*
@@ -98,7 +102,7 @@ public class ExecSPSNode extends StatementNode
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "STATEMENT", name);
 		}
 
-		if (spsd.getType() == spsd.SPS_TYPE_TRIGGER)
+        if (spsd.getType() == SPSDescriptor.SPS_TYPE_TRIGGER)
 		{
 			throw StandardException.newException(SQLState.LANG_TRIGGER_SPS_CANNOT_BE_EXECED, name);
 		}
@@ -122,6 +126,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @return true if the statement is atomic
 	 */	
+    @Override
 	public boolean isAtomic()
 	{
 
@@ -144,6 +149,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public GeneratedClass generate(ByteArray ignored) throws StandardException
 	{
 		//Bug 4821 - commiting the nested transaction will release any bind time locks
@@ -180,6 +186,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @return	the description
 	 */
+    @Override
 	public ResultDescription makeResultDescription()
 	{
 		return ps.getResultDescription();
@@ -192,6 +199,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @return	the cursor info
 	 */
+    @Override
 	public Object getCursorInfo()
 	{
 		return ps.getCursorInfo();
@@ -208,6 +216,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	public DataTypeDescriptor[]	getParameterTypes() throws StandardException
 	{
 		return spsd.getParams();
@@ -219,7 +228,8 @@ public class ExecSPSNode extends StatementNode
 	 * This is assumed to be the first action on this node.
 	 *
 	 */
-	public ConstantAction	makeConstantAction()
+    @Override
+    public ConstantAction makeConstantAction()
 	{
 		return ps.getConstantAction();
 	}
@@ -236,6 +246,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @return boolean	always true.
 	 */
+    @Override
 	public boolean needsSavepoint()
 	{
 		if (SanityManager.DEBUG)
@@ -248,12 +259,14 @@ public class ExecSPSNode extends StatementNode
 	}
 
 	/** @see StatementNode#executeStatementName */
+    @Override
 	public String executeStatementName()
 	{
 		return name.getTableName();
 	}
 
 	/** @see StatementNode#executeSchemaName */
+    @Override
 	public String executeSchemaName()
 	{
 		return name.getSchemaName();
@@ -266,6 +279,7 @@ public class ExecSPSNode extends StatementNode
 	 *
 	 * @return the name of the underlying sps
 	 */
+    @Override
 	public String getSPSName()
 	{
 		return spsd.getQualifiedName();
@@ -295,7 +309,7 @@ public class ExecSPSNode extends StatementNode
 	// MISC
 	//
 	/////////////////////////////////////////////////////////////////////
-	public String statementToString()
+    String statementToString()
 	{
 		return "EXECUTE STATEMENT";
 	}

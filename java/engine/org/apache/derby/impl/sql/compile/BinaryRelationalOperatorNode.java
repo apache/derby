@@ -21,30 +21,21 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.sql.Types;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
 import org.apache.derby.iapi.store.access.ScanController;
-
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.types.Orderable;
-
-import java.sql.Types;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * This class represents the 6 binary operators: LessThan, LessThanEquals,
@@ -52,7 +43,7 @@ import java.sql.Types;
  *
  */
 
-public class BinaryRelationalOperatorNode
+class BinaryRelationalOperatorNode
 	extends BinaryComparisonOperatorNode
 	implements RelationalOperator
 {
@@ -81,92 +72,178 @@ public class BinaryRelationalOperatorNode
 	 */
 	private InListOperatorNode inListProbeSource = null;
 
-	//DERBY-6185 (Query against view  with "where name LIKE 
-	// 'Col1' ESCAPE '\' " failed)
-	//4th argument forQueryRewrite can be true only if this node has been 
-	//  added by an internal rewrite of the query. This allows binding to 
-	//  be more liberal when checking it against allowed syntax.
-	//  This parameter will be passed FALSE when a new instance of the node
-	//  is being created(which is the majority of the cases). But when an 
-	//  existing node is getting cloned, the value of this parameter should 
-	//  be passed as the originalNode.getForQueryRewrite(). Examples of this
-	//  can be found in Predicate.Java and PredicateList.java
-	public void init(Object leftOperand, Object rightOperand,
-        Object forQueryRewrite)
+    /**
+     *  Constructor.
+     *  DERBY-6185 Query against view  with {@code "where name LIKE
+     *  'Col1' ESCAPE '\' "} failed.
+     *  Argument {@code forQueryRewrite} can be true only if this node has been
+     *  added by an internal rewrite of the query. This allows binding to
+     *  be more liberal when checking it against allowed syntax.
+     *  This parameter will be passed FALSE when a new instance of the node
+     *  is being created(which is the majority of the cases). But when an
+     *  existing node is getting cloned, the value of this parameter should
+     *  be passed as the originalNode.getForQueryRewrite(). Examples of this
+     *  can be found in Predicate.Java and PredicateList.java
+     *
+     * @param leftOperand
+     * @param rightOperand
+     * @param forQueryRewrite
+     */
+    BinaryRelationalOperatorNode(
+            int nodeType,
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            boolean forQueryRewrite,
+            ContextManager cm) throws StandardException
 	{
-		String methodName = "";
-		String operatorName = "";
+        super(leftOperand,
+              rightOperand,
+              getOperatorName(nodeType),
+              getMethodName(nodeType),
+              forQueryRewrite,
+              cm);
+        constructorMinion(nodeType);
+    }
 
-		switch (getNodeType())
-		{
+    /**
+     * Same as constructor above except takes a third argument that is
+     * an InListOperatorNode.  This version is used during IN-list
+     * preprocessing to create a "probe predicate" for the IN-list.
+     * See InListOperatorNode.preprocess() for more.
+     * DERBY-6185 (Query against view  with "where name LIKE
+     *  'Col1' ESCAPE '\' " failed)
+     * 4th argument forQueryRewrite can be true only if this node has been
+     *  added by an internal rewrite of the query. This allows binding to
+     *  be more liberal when checking it against allowed syntax.
+     *  This parameter will be passed FALSE when a new instance of the node
+     *  is being created(which is the majority of the cases). But when an
+     *  existing node is getting cloned, the value of this parameter should
+     *  be passed as the originalNode.getForQueryRewrite(). Examples of this
+     *  can be found in Predicate.Java and PredicateList.java
+     */
+    BinaryRelationalOperatorNode(
+            int nodeType,
+            ValueNode leftOperand,
+            ValueNode rightOperand,
+            InListOperatorNode inListOp,
+            boolean forQueryRewrite,
+            ContextManager cm) throws StandardException
+    {
+        super(leftOperand,
+              rightOperand,
+              getOperatorName(nodeType),
+              getMethodName(nodeType),
+              forQueryRewrite,
+              cm);
+        constructorMinion(nodeType);
+        this.inListProbeSource = inListOp;
+    }
+
+    private void constructorMinion(int nodeType) {
+        this.operatorType = getOperatorType(nodeType);
+        setNodeType(nodeType);
+        btnVis = null;
+    }
+
+    private static String getMethodName(int nodeType) {
+        String methodName = "";
+        switch (nodeType) {
 			case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
 				methodName = "equals";
-				operatorName = "=";
-				operatorType = RelationalOperator.EQUALS_RELOP;
 				break;
 
 			case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
 				methodName = "greaterOrEquals";
-				operatorName = ">=";
-				operatorType = RelationalOperator.GREATER_EQUALS_RELOP;
 				break;
 
 			case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
 				methodName = "greaterThan";
-				operatorName = ">";
-				operatorType = RelationalOperator.GREATER_THAN_RELOP;
 				break;
 
 			case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
 				methodName = "lessOrEquals";
-				operatorName = "<=";
-				operatorType =  RelationalOperator.LESS_EQUALS_RELOP;
 				break;
 
 			case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
 				methodName = "lessThan";
-				operatorName = "<";
-				operatorType = RelationalOperator.LESS_THAN_RELOP;
 				break;
 			case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
 				methodName = "notEquals";
+                break;
+
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                            "Constructor for BinaryRelationalOperatorNode" +
+                            " called with wrong nodeType = " + nodeType);
+                }
+                break;
+        }
+        return methodName;
+    }
+
+    private static String getOperatorName(int nodeType) {
+        String operatorName = "";
+
+        switch (nodeType) {
+            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+                operatorName = "=";
+                break;
+
+            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+                operatorName = ">=";
+                break;
+
+            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+                operatorName = ">";
+                break;
+
+            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+                operatorName = "<=";
+                break;
+
+            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+                operatorName = "<";
+                break;
+            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
 				operatorName = "<>";
-				operatorType = RelationalOperator.NOT_EQUALS_RELOP;
 				break;
 
 			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT("init for BinaryRelationalOperator called with wrong nodeType = " + getNodeType());
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                            "Constructor for BinaryRelationalOperatorNode " +
+                            "called with wrong nodeType = " + nodeType);
 				}
 			    break;
 		}
-		super.init(leftOperand, rightOperand, operatorName, methodName, forQueryRewrite);
-		btnVis = null;
-	}
 
-	/**
-	 * Same as init() above except takes a third argument that is
-	 * an InListOperatorNode.  This version is used during IN-list
-	 * preprocessing to create a "probe predicate" for the IN-list.
-	 * See InListOperatorNode.preprocess() for more.
-	 * DERBY-6185 (Query against view  with "where name LIKE 
-	 *  'Col1' ESCAPE '\' " failed)
-	 * 4th argument forQueryRewrite can be true only if this node has been
-	 *  added by an internal rewrite of the query. This allows binding to
-	 *  be more liberal when checking it against allowed syntax.
-	 *  This parameter will be passed FALSE when a new instance of the node
-	 *  is being created(which is the majority of the cases). But when an 
-	 *  existing node is getting cloned, the value of this parameter should
-	 *  be passed as the originalNode.getForQueryRewrite(). Examples of this
-	 *  can be found in Predicate.Java and PredicateList.java
-	 */
-	public void init(Object leftOperand, Object rightOperand,
-			 Object inListOp, Object forQueryRewrite)
-	{
-		init(leftOperand, rightOperand, forQueryRewrite);
-		this.inListProbeSource = (InListOperatorNode)inListOp;
-	}
+        return operatorName;
+    }
+
+    private int getOperatorType(int nodeType) {
+        switch (nodeType) {
+            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+                return RelationalOperator.EQUALS_RELOP;
+            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+                return RelationalOperator.GREATER_EQUALS_RELOP;
+            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+                return RelationalOperator.GREATER_THAN_RELOP;
+            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+                return RelationalOperator.LESS_EQUALS_RELOP;
+            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+                return RelationalOperator.LESS_THAN_RELOP;
+            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
+                return RelationalOperator.NOT_EQUALS_RELOP;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                            "Constructor for BinaryRelationalOperatorNode " +
+                            "called with wrong nodeType = " + getNodeType());
+                }
+                return 0;
+        }
+    }
 
 	/**
 	 * If this rel op was created for an IN-list probe predicate then return
@@ -840,7 +917,7 @@ public class BinaryRelationalOperatorNode
 		FromTable	ft;
 		ValueNode	otherSide = null;
 		JBitSet		tablesReferenced;
-		ColumnReference	cr = null;
+        ColumnReference cr;
 		boolean	found = false;
 		boolean walkSubtree = true;
 
@@ -917,8 +994,7 @@ public class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#compareWithKnownConstant */
 	public boolean compareWithKnownConstant(Optimizable optTable, boolean considerParameters)
 	{
-		ValueNode	node = null;
-		node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
+        ValueNode node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
 
 		if (considerParameters)
 		{
@@ -940,12 +1016,10 @@ public class BinaryRelationalOperatorNode
 	public DataValueDescriptor getCompareValue(Optimizable optTable) 
         throws StandardException
 	{
-		ValueNode	node = null;
-
 		/* The value being compared to is on the opposite side from
 		** the key column.
 		*/
-		node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
+        ValueNode node = keyColumnOnLeft(optTable) ? rightOperand : leftOperand;
 
 		if (node instanceof ConstantNode) 
 		{
@@ -997,7 +1071,8 @@ public class BinaryRelationalOperatorNode
 	 * Overrides this method
 	 * in BooleanOperatorNode for code generation purposes.
 	 */
-	public String getReceiverInterfaceName() {
+    @Override
+    String getReceiverInterfaceName() {
 	    return ClassName.DataValueDescriptor;
 	}
 
@@ -1008,6 +1083,7 @@ public class BinaryRelationalOperatorNode
      * @return a node representing a Boolean constant if the result of the
      * operator is known; otherwise, this operator node
      */
+    @Override
     ValueNode evaluateConstantExpressions() throws StandardException {
         if (leftOperand instanceof ConstantNode &&
                 rightOperand instanceof ConstantNode) {
@@ -1045,10 +1121,7 @@ public class BinaryRelationalOperatorNode
      * @return a node representing a Boolean constant
      */
     private ValueNode newBool(boolean b) throws StandardException {
-        return (ValueNode) getNodeFactory().getNode(
-                C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-                Boolean.valueOf(b),
-                getContextManager());
+        return new BooleanConstantNode(b, getContextManager());
     }
 	
 	/**
@@ -1063,10 +1136,9 @@ public class BinaryRelationalOperatorNode
 			SanityManager.ASSERT(getTypeServices() != null,
 								 "dataTypeServices is expected to be non-null");
 		/* xxxRESOLVE: look into doing this in place instead of allocating a new node */
-		negation = (BinaryOperatorNode)
-			getNodeFactory().getNode(getNegationNode(),
+        negation = new BinaryRelationalOperatorNode(getNegationNode(),
 									 leftOperand, rightOperand,
-									 Boolean.FALSE,
+                                     false,
 									 getContextManager());
 		negation.setType(getTypeServices());
 		return negation;
@@ -1110,10 +1182,12 @@ public class BinaryRelationalOperatorNode
      * expression.
      */
     BinaryOperatorNode getSwappedEquivalent() throws StandardException {
-        BinaryOperatorNode newNode = (BinaryOperatorNode) getNodeFactory().getNode(getNodeTypeForSwap(),
-                rightOperand, leftOperand,
-                Boolean.FALSE,
-                getContextManager());
+        BinaryOperatorNode newNode = new BinaryRelationalOperatorNode(
+            getNodeTypeForSwap(),
+            rightOperand,
+            leftOperand,
+            false,
+            getContextManager());
         newNode.setType(getTypeServices());
         return newNode;
     }
@@ -1295,8 +1369,6 @@ public class BinaryRelationalOperatorNode
 				mb.push(keyColumnOnLeft(optTable));
 				break;
 		}
-		
-		return;
 	}
 		
 	/** @see RelationalOperator#getOperator */
@@ -1307,6 +1379,7 @@ public class BinaryRelationalOperatorNode
 
 	/** return the selectivity of this predicate.
 	 */
+    @Override
 	public double selectivity(Optimizable optTable)
 	throws StandardException
 	{
@@ -1334,14 +1407,15 @@ public class BinaryRelationalOperatorNode
 	}
 
 	/** @see RelationalOperator#getTransitiveSearchClause */
+    @Override
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
-		return (RelationalOperator)getNodeFactory().getNode(getNodeType(),
-														  otherCR,
-														  rightOperand,
-														  Boolean.FALSE,
-														  getContextManager());
+        return new BinaryRelationalOperatorNode(getNodeType(),
+                                                otherCR,
+                                                rightOperand,
+                                                false,
+                                                getContextManager());
 	}
 	
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
@@ -1366,7 +1440,8 @@ public class BinaryRelationalOperatorNode
 	}
 	
 	/** @see ValueNode#isRelationalOperator */
-	public boolean isRelationalOperator()
+    @Override
+    boolean isRelationalOperator()
 	{
 		/* If this rel op is for a probe predicate then we do not call
 		 * it a "relational operator"; it's actually a disguised IN-list
@@ -1376,7 +1451,8 @@ public class BinaryRelationalOperatorNode
 	}
 	
 	/** @see ValueNode#isBinaryEqualsOperatorNode */
-	public boolean isBinaryEqualsOperatorNode()
+    @Override
+    boolean isBinaryEqualsOperatorNode()
 	{
 		/* If this rel op is for a probe predicate then we do not treat
 		 * it as an "equals operator"; it's actually a disguised IN-list
@@ -1394,13 +1470,15 @@ public class BinaryRelationalOperatorNode
 	 * leftOperand, and a caller of this method cannot gain access to
 	 * inListProbeSource's leftOperand through this method.
 	 */
-	public boolean isInListProbeNode()
+    @Override
+    boolean isInListProbeNode()
 	{
 		return (inListProbeSource != null);
 	}
 
 	/** @see ValueNode#optimizableEqualityNode */
-	public boolean optimizableEqualityNode(Optimizable optTable, 
+    @Override
+    boolean optimizableEqualityNode(Optimizable optTable,
 										   int columnNumber, 
 										   boolean isNullOkay)
 		throws StandardException
@@ -1458,7 +1536,8 @@ public class BinaryRelationalOperatorNode
 	/* @see BinaryOperatorNode#genSQLJavaSQLTree
 	 * @see BinaryComparisonOperatorNode#genSQLJavaSQLTree
 	 */
-	public ValueNode genSQLJavaSQLTree() throws StandardException
+    @Override
+    ValueNode genSQLJavaSQLTree() throws StandardException
 	{
 		if (operatorType == EQUALS_RELOP)
 			return this;
@@ -1517,11 +1596,11 @@ public class BinaryRelationalOperatorNode
 	 *  instance of the column reference, they'll interfere with each other
 	 *  during optimization.
 	 */
-	public ValueNode getScopedOperand(int whichSide,
+    ValueNode getScopedOperand(int whichSide,
 		JBitSet parentRSNsTables, ResultSetNode childRSN,
 		int [] whichRC) throws StandardException
 	{
-		ResultColumn rc = null;
+        ResultColumn rc;
 		ColumnReference cr = 
 			whichSide == LEFT
 				? (ColumnReference)leftOperand
@@ -1546,9 +1625,9 @@ public class BinaryRelationalOperatorNode
 		 * is included in the list of table numbers from the parentRSN.
 		 */
 		JBitSet crTables = new JBitSet(parentRSNsTables.size());
-		BaseTableNumbersVisitor btnVis =
+        BaseTableNumbersVisitor btnVisitor =
 			new BaseTableNumbersVisitor(crTables);
-		cr.accept(btnVis);
+        cr.accept(btnVisitor);
 
 		/* If the column reference in question is not intended for
 		 * the received result set node, just leave the operand as
@@ -1846,7 +1925,6 @@ public class BinaryRelationalOperatorNode
 		// table numbers beneath the target node.
 		btnVis.setTableMap(optBaseTables);
 		ft.accept(btnVis);
-		return;
 	}
 
 }

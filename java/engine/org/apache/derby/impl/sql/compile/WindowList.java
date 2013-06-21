@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.context.ContextManager;
+
 /**
  * A WindowList represents the list of windows (definitions) for a table
  * expression, either defined explicitly in a WINDOW clause, or inline in the
@@ -28,8 +30,12 @@ package org.apache.derby.impl.sql.compile;
  *
  */
 
-public class WindowList extends OrderedColumnList
+class WindowList extends OrderedColumnList
 {
+    WindowList(ContextManager cm) {
+        super(cm);
+    }
+
     /**
      * @param window the window definition to add to the list
      */

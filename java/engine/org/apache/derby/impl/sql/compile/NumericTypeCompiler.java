@@ -21,29 +21,19 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This class implements TypeId for the SQL numeric datatype.
@@ -74,7 +64,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "int";
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 				return "long";
 
 			case StoredFormatIds.REAL_TYPE_ID:
@@ -104,6 +94,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	 * @return String		The method call name for getting the
 	 *						corresponding primitive Java type.
 	 */
+    @Override
 	public String getPrimitiveMethodName()
 	{
 		int formatId = getStoredFormatIdFromTypeId();
@@ -115,7 +106,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "getInt";
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 				return "getLong";
 
 			case StoredFormatIds.REAL_TYPE_ID:
@@ -156,7 +147,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return TypeCompiler.INT_MAXWIDTH_AS_CHAR;
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 				return TypeCompiler.LONGINT_MAXWIDTH_AS_CHAR;
 
 			case StoredFormatIds.REAL_TYPE_ID:
@@ -183,11 +174,11 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataTypeDescriptor
-	resolveArithmeticOperation(DataTypeDescriptor leftType,
-								DataTypeDescriptor rightType,
-								String operator)
-							throws StandardException
+    @Override
+    public DataTypeDescriptor resolveArithmeticOperation(
+            DataTypeDescriptor leftType,
+            DataTypeDescriptor rightType,
+            String operator) throws StandardException
 	{
 		NumericTypeCompiler higherTC;
 		DataTypeDescriptor	higherType;
@@ -330,6 +321,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		Return the method name to get a Derby DataValueDescriptor
 		object of the correct type. This implementation returns "getDataValue".
 	*/
+    @Override
 	String dataValueMethodName()
 	{
 		if (getStoredFormatIdFromTypeId() == StoredFormatIds.DECIMAL_TYPE_ID)
@@ -352,7 +344,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			case StoredFormatIds.INT_TYPE_ID:
 				return "getNullInteger";
 
-			case StoredFormatIds.LONGINT_TYPE_ID:
+            case StoredFormatIds.BIGINT_TYPE_ID:
 				return "getNullLong";
 
 			case StoredFormatIds.REAL_TYPE_ID:
@@ -482,7 +474,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		long lscale = (long)leftType.getScale();
 		long rscale = (long)rightType.getScale();
 		long lprec = (long)leftType.getPrecision();
-		long rprec = (long)rightType.getPrecision();
 
 		/*
 		** Retain greatest scale, take sum of left
@@ -498,11 +489,10 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 			** Take max left scale + right precision - right scale + 1, 
 			** or 4, whichever is biggest 
 			*/
-			LanguageConnectionContext lcc = (LanguageConnectionContext)
-				(ContextService.getContext(LanguageConnectionContext.CONTEXT_ID)); 
-
 			// Scale: 31 - left precision + left scale - right scale
-				val = Math.max(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE - lprec + lscale - rscale, 0);
+            val = Math.max(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE
+                               - lprec + lscale - rscale,
+                           0);
 
 		}
 		else if (TypeCompiler.AVG_OP.equals(operator))
@@ -526,7 +516,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		return (int)val;
 	}
 
-
+    @Override
 	public void generateDataValue(MethodBuilder mb, int collationType,
 			LocalField field)
 	{

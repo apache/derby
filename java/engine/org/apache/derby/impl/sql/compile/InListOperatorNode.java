@@ -21,28 +21,20 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
+import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
-import java.lang.reflect.Modifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * An InListOperatorNode represents an IN list.
@@ -54,25 +46,27 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	private boolean isOrdered;
 	private boolean sortDescending;
 
-	/**
-	 * Initializer for a InListOperatorNode
-	 *
-	 * @param leftOperand		The left operand of the node
-	 * @param rightOperandList	The right operand list of the node
-	 */
+    /**
+     * @param leftOperand The left operand of the node
+     * @param rightOperandList The right operand list of the node
+     * @param cm Context manager
+     * @throws StandardException
+     */
+    InListOperatorNode(
+            ValueNode leftOperand,
+            ValueNodeList rightOperandList,
+            ContextManager cm) throws StandardException {
+        super(leftOperand, rightOperandList, "IN", "in", cm);
+        setNodeType(C_NodeTypes.IN_LIST_OPERATOR_NODE);
+    }
 
-	public void init(Object leftOperand, Object rightOperandList)
-	{
-		init(leftOperand, rightOperandList, "IN", "in");
-	}
-
-	/**
+    /**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -93,9 +87,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 */
 	protected InListOperatorNode shallowCopy() throws StandardException
 	{
-		InListOperatorNode ilon =
-			 (InListOperatorNode)getNodeFactory().getNode(
-				C_NodeTypes.IN_LIST_OPERATOR_NODE,
+        InListOperatorNode ilon = new InListOperatorNode(
 				leftOperand,
 				rightOperandList,
 				getContextManager());
@@ -125,7 +117,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -141,11 +134,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		if (rightOperandList.size() == 1)
 		{
 			BinaryComparisonOperatorNode equal = 
-				(BinaryComparisonOperatorNode) getNodeFactory().getNode(
+                new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 						leftOperand, 
 						(ValueNode) rightOperandList.elementAt(0),
-						Boolean.FALSE,
+                        false,
 						getContextManager());
 			/* Set type info for the operator node */
 			equal.bindComparisonOperator();
@@ -164,11 +157,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
         if ((leftOperand.getTypeServices().getTypeId().typePrecedence() !=
                     targetTypePrecedence) &&
                 !rightOperandList.allSamePrecendence(targetTypePrecedence)) {
-            CastNode cn = (CastNode) getNodeFactory().getNode(
-                    C_NodeTypes.CAST_NODE,
-                    leftOperand,
-                    targetType,
-                    getContextManager());
+            CastNode cn =
+                    new CastNode(leftOperand, targetType, getContextManager());
             cn.bindCastNodeOnly();
             leftOperand = cn;
         }
@@ -284,11 +274,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				if (judgeODV.equals(minODV, maxODV).equals(true))
 				{
 					BinaryComparisonOperatorNode equal = 
-						(BinaryComparisonOperatorNode)getNodeFactory().getNode(
+                        new BinaryRelationalOperatorNode(
 							C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 							leftOperand, 
 							minValue,
-							Boolean.FALSE,
+                            false,
 							getContextManager());
 					/* Set type info for the operator node */
 					equal.bindComparisonOperator();
@@ -316,10 +306,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 * big picture.
 			 */
 			ValueNode srcVal = (ValueNode) rightOperandList.elementAt(0);
-			ParameterNode pNode =
-				(ParameterNode) getNodeFactory().getNode(
-					C_NodeTypes.PARAMETER_NODE,
-					new Integer(0),
+            ParameterNode pNode = new ParameterNode(
+                    0,
 					null, // default value
 					getContextManager());
 
@@ -353,12 +341,12 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 * to "this").
 			 */
 			BinaryComparisonOperatorNode equal = 
-				(BinaryComparisonOperatorNode) getNodeFactory().getNode(
+                new BinaryRelationalOperatorNode(
 					C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 					leftOperand, 
 					pNode,
 					this,
-					Boolean.FALSE,
+                    false,
 					getContextManager());
 
 			/* Set type info for the operator node */
@@ -412,10 +400,10 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
-		AndNode						 newAnd = null;
 		BinaryComparisonOperatorNode leftBCO;
 		BinaryComparisonOperatorNode rightBCO;
 		int							 listSize = rightOperandList.size();
@@ -448,12 +436,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		 * requires each <> node to have a separate object.
 		 */
 		ValueNode leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
-		leftBCO = (BinaryComparisonOperatorNode) 
-					getNodeFactory().getNode(
+        leftBCO = new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
 						leftClone,
-						(ValueNode) rightOperandList.elementAt(0),
-						Boolean.FALSE,
+                        (ValueNode)rightOperandList.elementAt(0),
+                        false,
 						getContextManager());
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
@@ -465,22 +452,18 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 			/* leftO <> rightOList.elementAt(elemsDone) */
 			leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
-			rightBCO = (BinaryComparisonOperatorNode) 
-						getNodeFactory().getNode(
+            rightBCO = new BinaryRelationalOperatorNode(
 							C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
 							leftClone,
 							(ValueNode) rightOperandList.elementAt(elemsDone),
-							Boolean.FALSE,
+                            false,
 							getContextManager());
 			/* Set type info for the operator node */
 			rightBCO.bindComparisonOperator();
 
 			/* Create the AND */
-			newAnd = (AndNode) getNodeFactory().getNode(
-												C_NodeTypes.AND_NODE,
-												leftSide,
-												rightBCO,
-												getContextManager());
+            AndNode newAnd =
+                    new AndNode(leftSide, rightBCO, getContextManager());
 			newAnd.postBindFixup();
 
 			leftSide = newAnd;
@@ -498,7 +481,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean selfReference(ColumnReference cr)
+    boolean selfReference(ColumnReference cr)
 		throws StandardException
 	{
 		int size = rightOperandList.size();
@@ -515,6 +498,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 * The selectivity for an "IN" predicate is generally very small.
 	 * This is an estimate applicable when in list are not all constants.
 	 */
+    @Override
 	public double selectivity(Optimizable optTable)
 	{
 		return 0.3d;
@@ -527,8 +511,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	 * @param mb The MethodBuilder the expression will go into
 	 *
 	 * @exception StandardException		Thrown on error
-	 */
-
+     */
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -562,8 +546,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		** method, which is in the new method's return statement.  We then return a call
 		** to the new method.
 		*/
-
-		receiver = leftOperand;
 
 		/* Figure out the result type name */
 		resultTypeName = getTypeCompiler().interfaceName();
@@ -754,14 +736,18 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 
 			/* decide to get min or max value
 			 */
-			String methodName;
+            String methodNam;
 			if ((isAsc && isStartKey) || (! isAsc && ! isStartKey))
-				methodName = "minValue";
+                methodNam = "minValue";
 			else
-				methodName = "maxValue";
+                methodNam = "maxValue";
 		
-			mb.callMethod(VMOpcode.INVOKESTATIC, ClassName.BaseExpressionActivation, methodName, ClassName.DataValueDescriptor, 6);
-
+            mb.callMethod(
+                VMOpcode.INVOKESTATIC,
+                ClassName.BaseExpressionActivation,
+                methodNam,
+                ClassName.DataValueDescriptor,
+                6);
 		}
 	}
 

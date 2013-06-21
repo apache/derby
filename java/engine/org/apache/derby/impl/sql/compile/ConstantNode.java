@@ -22,19 +22,14 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
 
 /**
  * ConstantNode holds literal constants as well as nulls.
@@ -65,35 +60,18 @@ abstract class ConstantNode extends ValueNode
 	** two fields holding the same constant).
 	*/
 
-	/**
-	 * Initializer for non-numeric types
-	 *
-	 * @param typeId	The Type ID of the datatype
-	 * @param nullable	True means the constant is nullable
-	 * @param maximumWidth	The maximum number of bytes in the data value
-	 *
-	 * @exception StandardException
-	 */
-	public void init(
-			Object typeId,
-			Object nullable,
-			Object maximumWidth)
-		throws StandardException
-	{
-        setType((TypeId) typeId,
-                ((Boolean) nullable).booleanValue(),
-                ((Integer) maximumWidth).intValue());
+    ConstantNode(
+            TypeId typeId,
+            boolean nullable,
+            int maximumWidth,
+            ContextManager cm) throws StandardException {
+        super(cm);
+        setType(typeId, nullable, maximumWidth);
+    }
 
-	}
-
-	/**
-	 * Constructor for untyped nodes, which contain little information
-	 *
-	 */
-	ConstantNode()
-	{
-		super();
-	}
+    ConstantNode(ContextManager cm) {
+        super(cm);
+    }
 
 	/**
 	 * Set the value in this ConstantNode.
@@ -106,7 +84,7 @@ abstract class ConstantNode extends ValueNode
 	/**
 	  * Get the value in this ConstantNode
 	  */
-	public DataValueDescriptor	getValue()
+    DataValueDescriptor getValue()
 	{
 		return	value;
 	}
@@ -117,7 +95,7 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -136,7 +114,8 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @return boolean	Whether or not this expression tree is cloneable.
 	 */
-	public boolean isCloneable()
+    @Override
+    boolean isCloneable()
 	{
 		return true;
 	}
@@ -147,7 +126,8 @@ abstract class ConstantNode extends ValueNode
 	 * @return ValueNode	A clone of this node.
 	 *
 	 */
-	public ValueNode getClone()
+    @Override
+    ValueNode getClone()
 	{
 		/* All constants can simply be reused */
 		return this;
@@ -170,9 +150,11 @@ abstract class ConstantNode extends ValueNode
 	 * doesn't throw this exception, it's subclasses do and hence this method
 	 * signature here needs to have throws StandardException 
 	 */
-    ValueNode bindExpression(
-            FromList fromList, SubqueryList subqueryList, List aggregates)
-	throws StandardException
+    @Override
+    ValueNode bindExpression(FromList fromList,
+                             SubqueryList subqueryList,
+                             List<AggregateNode> aggregates)
+            throws StandardException
 	{
 		/*
 		** This has to be here for binding to work, but it doesn't
@@ -187,13 +169,15 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return true;
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return true;
 	}
@@ -210,6 +194,7 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generateExpression
 	(
         ExpressionClassBuilder acb, MethodBuilder mb) throws StandardException
@@ -263,6 +248,7 @@ abstract class ConstantNode extends ValueNode
 	 *
 	 * @return	The variant type for the underlying expression.
 	 */
+    @Override
 	protected int getOrderableVariantType()
 	{
 		// Constants are constant for the life of the query

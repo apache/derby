@@ -21,40 +21,32 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-import org.apache.derby.iapi.sql.compile.Optimizer;
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
+import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
 import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-
 
 /**
  * The CurrentOf operator is used by positioned DELETE 
@@ -81,10 +73,14 @@ public final class CurrentOfNode extends FromTable {
 	//
 	// initializers
 	//
-	public void init( Object correlationName, Object cursor, Object tableProperties)
+    CurrentOfNode(String correlationName,
+                  String cursor,
+                  Properties tableProperties,
+                  ContextManager cm)
 	{
-		super.init(correlationName, tableProperties);
-		cursorName = (String) cursor;
+        super(correlationName, tableProperties, cm);
+        setNodeType(C_NodeTypes.CURRENT_OF_NODE);
+        cursorName = cursor;
 	}
 
 	/*
@@ -96,6 +92,7 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate estimateCost(OptimizablePredicateList predList,
 									ConglomerateDescriptor cd,
 									CostEstimate outerCost,
@@ -143,7 +140,8 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode bindNonVTITables(DataDictionary dataDictionary, 
+    @Override
+    ResultSetNode bindNonVTITables(DataDictionary dataDictionary,
 						   FromList fromListParam) 
 		throws StandardException {
 
@@ -171,8 +169,8 @@ public final class CurrentOfNode extends FromTable {
 		exposedTableName = makeTableName(null, refTab.getExposedName());
 		baseTableName = makeTableName(schemaName,
 									  refTab.getBaseName());
-		SchemaDescriptor tableSchema = null;
-		tableSchema = getSchemaDescriptor(refTab.getSchemaName());
+        SchemaDescriptor tableSchema =
+                getSchemaDescriptor(refTab.getSchemaName());
 
 		/*
 		** This will only happen when we are binding against a publication
@@ -207,28 +205,22 @@ public final class CurrentOfNode extends FromTable {
 		** the result columns from preparedStatement and
 		** turn them into an RCL that we can run with.
 		*/
-		resultColumns = (ResultColumnList) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN_LIST,
-											getContextManager());
+        resultColumns = new ResultColumnList(getContextManager());
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
 
 		for (int index = 0; index < cdlSize; index++)
 		{
 			/* Build a ResultColumn/BaseColumnNode pair for the column */
-			ColumnDescriptor colDesc = (ColumnDescriptor) cdl.elementAt(index);
+            ColumnDescriptor colDesc = cdl.elementAt(index);
 
-			BaseColumnNode bcn = (BaseColumnNode) getNodeFactory().getNode(
-											C_NodeTypes.BASE_COLUMN_NODE,
-											colDesc.getColumnName(),
+            BaseColumnNode bcn = new BaseColumnNode(
+                                            colDesc.getColumnName(),
 									  		exposedTableName,
 											colDesc.getType(),
 											getContextManager());
-			ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											colDesc,
-											bcn,
-											getContextManager());
+            ResultColumn rc = new ResultColumn(
+                colDesc, bcn, getContextManager());
 
 			/* Build the ResultColumnList to return */
 			resultColumns.addResultColumn(rc);
@@ -248,7 +240,8 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @param fromListParam		FromList to use/append to.
 	 */
-	public void bindExpressions(FromList fromListParam)
+    @Override
+    void bindExpressions(FromList fromListParam)
 	{
 		/* No expressions to bind for a CurrentOfNode.
 		 * NOTE - too involved to optimize so that this method
@@ -269,8 +262,8 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultColumn getMatchingColumn(ColumnReference columnReference) 
+    @Override
+    ResultColumn getMatchingColumn(ColumnReference columnReference)
 						throws StandardException {
 
 		ResultColumn	resultColumn = null;
@@ -316,7 +309,7 @@ public final class CurrentOfNode extends FromTable {
 			   ((correlationName != null) && correlationName.equals( columnsTableName.getTableName()))
 		   )
 		{
-			boolean notfound = false;
+            boolean notfound;
 
 			resultColumn =
 				resultColumns.getResultColumn(columnReference.getColumnName());
@@ -370,8 +363,8 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList)
 								throws StandardException
@@ -394,23 +387,23 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 					     PredicateList predicateList,
 						 double outerRows) 
 						throws StandardException {
 		/* Get an optimizer so we can get a cost */
-		Optimizer optimizer = getOptimizer(
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									this,
-									getContextManager()),
-								predicateList,
-								dataDictionary,
-								(RequiredRowOrdering) null);
+        Optimizer opt =
+            getOptimizer(new FromList(
+                             getOptimizerFactory().doJoinOrderOptimization(),
+                             this,
+                             getContextManager()),
+                         predicateList,
+                         dataDictionary,
+                         (RequiredRowOrdering) null);
 
 		/* Assume there is no cost associated with fetching the current row */
-		bestCostEstimate = optimizer.newCostEstimate();
+        bestCostEstimate = opt.newCostEstimate();
 		bestCostEstimate.setCost(0.0d, outerRows, outerRows);
 
 		return this;
@@ -430,6 +423,7 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException {
 
@@ -497,7 +491,8 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-	public void printSubNodes(int depth) {
+    @Override
+    void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
 			super.printSubNodes(depth);
 
@@ -511,6 +506,7 @@ public final class CurrentOfNode extends FromTable {
 	 *
 	 * @return	This object as a String
 	 */
+    @Override
 	public String toString() {
 		if (SanityManager.DEBUG) {
 			return "preparedStatement: " +
@@ -523,25 +519,42 @@ public final class CurrentOfNode extends FromTable {
 		}
 	}
 
-	//
-	// class interface
-	//
-
-	public String  getExposedName()
+    @Override
+    String  getExposedName()
 	{
 		return exposedTableName.getFullTableName();
 	}
-	public TableName  getExposedTableName()
+
+    /**
+     * Get the lock mode for this table as the target of an update statement
+     * (a delete or update).  This is implemented only for base tables and
+     * CurrentOfNodes.
+     *
+     * @see TransactionController
+     *
+     * @return  The lock mode
+     */
+    @Override
+    public int updateTargetLockMode()
+    {
+        /* Do row locking for positioned update/delete */
+        return TransactionController.MODE_RECORD;
+    }
+
+    //
+    // class interface
+    //
+    TableName  getExposedTableName()
 	{
 		return exposedTableName;
 	}
 
-	public TableName  getBaseCursorTargetTableName()
+    TableName  getBaseCursorTargetTableName()
 	{
 		return baseTableName;
 	}
 
-	public String getCursorName() 
+    String getCursorName()
 	{
 		return cursorName;
 	}
@@ -560,20 +573,5 @@ public final class CurrentOfNode extends FromTable {
 			return null;
 
 		return activation.getPreparedStatement();
-	}
-
-	/**
-	 * Get the lock mode for this table as the target of an update statement
-	 * (a delete or update).  This is implemented only for base tables and
-	 * CurrentOfNodes.
-	 *
-	 * @see TransactionController
-	 *
-	 * @return	The lock mode
-	 */
-	public int updateTargetLockMode()
-	{
-		/* Do row locking for positioned update/delete */
-		return TransactionController.MODE_RECORD;
 	}
 }

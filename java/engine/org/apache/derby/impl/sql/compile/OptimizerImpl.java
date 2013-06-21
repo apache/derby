@@ -21,36 +21,29 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.util.HashMap;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.compile.AccessPath;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.OptTrace;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.AccessPath;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.StringUtil;
-
-import java.util.HashMap;
 
 /**
  * Optimizer uses OptimizableList to keep track of the best join order as it
@@ -128,8 +121,6 @@ class OptimizerImpl implements Optimizer
 
 	private RowOrdering currentRowOrdering = new RowOrderingImpl();
 	private RowOrdering bestRowOrdering = new RowOrderingImpl();
-
-	private boolean	conglomerate_OneRowResultSet;
 
 	// max memory use per table
 	private int maxMemoryPerTable;
@@ -474,8 +465,8 @@ class OptimizerImpl implements Optimizer
 				// proceed with normal timeout logic.
 				if (firstLookOrder == null)
 					firstLookOrder = new int[numOptimizables];
-				for (int i = 0; i < numOptimizables; i++)
-					firstLookOrder[i] = bestJoinOrder[i];
+                System.arraycopy(
+                        bestJoinOrder, 0, firstLookOrder, 0, numOptimizables);
 				permuteState = JUMPING;
 
 				/* If we already assigned at least one position in the
@@ -1150,12 +1141,11 @@ class OptimizerImpl implements Optimizer
 		** cost.
 		*/
 		double newCost = currentCost.getEstimatedCost();
-		double pullCost = 0.0;
 		CostEstimate pullCostEstimate =
 						pullMe.getBestAccessPath().getCostEstimate();
 		if (pullCostEstimate != null)
 		{
-			pullCost = pullCostEstimate.getEstimatedCost();
+            double pullCost = pullCostEstimate.getEstimatedCost();
 
 			newCost -= pullCost;
 
@@ -1219,7 +1209,7 @@ class OptimizerImpl implements Optimizer
 			if (pullMe.considerSortAvoidancePath())
 			{
 				AccessPath ap = pullMe.getBestSortAvoidancePath();
-				double	   prevEstimatedCost = 0.0d;
+                double     prevEstimatedCost;
 
 				/*
 				** Subtract the sort avoidance cost estimate of the
@@ -1379,7 +1369,6 @@ class OptimizerImpl implements Optimizer
 		JBitSet	                predMap         = new JBitSet(numTablesInQuery);
 		JBitSet                 curTableNums    = null;
 		BaseTableNumbersVisitor btnVis          = null;
-		boolean                 pushPredNow     = false;
 		int                     tNum;
 		Predicate               pred;
 
@@ -1446,7 +1435,7 @@ class OptimizerImpl implements Optimizer
 			 * We can check for this condition by seeing if predMap is empty,
 			 * which is what the following line does.
 			 */
-			pushPredNow = (predMap.getFirstSetBit() == -1);
+            boolean pushPredNow = (predMap.getFirstSetBit() == -1);
 
 			/* If the predicate is scoped, there's more work to do. A
 			 * scoped predicate's "referenced map" may not be in sync
@@ -1841,11 +1830,11 @@ class OptimizerImpl implements Optimizer
 		** we use 2 loops.
 		*/
 		bestJoinOrderUsedPredsFromAbove = usingPredsPushedFromAbove;
-		for (int i = 0; i < numOptimizables; i++)
-		{
-			bestJoinOrder[i] = proposedJoinOrder[i];
-		}
-		for (int i = 0; i < numOptimizables; i++)
+
+        System.arraycopy(
+                proposedJoinOrder, 0, bestJoinOrder, 0, numOptimizables);
+
+        for (int i = 0; i < numOptimizables; i++)
 		{
 			optimizableList.getOptimizable(bestJoinOrder[i]).
 				rememberAsBest(planType, this);
@@ -2007,11 +1996,7 @@ class OptimizerImpl implements Optimizer
 				throws StandardException
 	{
 		/* CHOOSE BEST CONGLOMERATE HERE */
-		ConglomerateDescriptor	conglomerateDescriptor = null;
-		ConglomerateDescriptor	bestConglomerateDescriptor = null;
 		AccessPath bestAp = optimizable.getBestAccessPath();
-		int lockMode = optimizable.getCurrentAccessPath().getLockMode();
-
 
 		/*
 		** If the current conglomerate better than the best so far?
@@ -2115,7 +2100,9 @@ class OptimizerImpl implements Optimizer
 		** If all else fails, and no conglomerate has been picked yet,
 		** pick this one.
 		*/
-		bestConglomerateDescriptor = bestAp.getConglomerateDescriptor();
+        ConglomerateDescriptor bestConglomerateDescriptor =
+            bestAp.getConglomerateDescriptor();
+
 		if (bestConglomerateDescriptor == null)
 		{
 			bestAp.setCostEstimate(
@@ -2138,8 +2125,6 @@ class OptimizerImpl implements Optimizer
 
 			optimizable.rememberJoinStrategyAsBest(bestAp);
 		}
-
-		return;
 	}
 
 	/**
@@ -2468,10 +2453,10 @@ class OptimizerImpl implements Optimizer
 		// number of rows is the number of rows returned by the innermost
 		// optimizable.
 		finalCostEstimate = getNewCostEstimate(0.0d, 0.0d, 0.0d);
-		CostEstimate ce = null;
-		for (int i = 0; i < bestJoinOrder.length; i++)
+
+        for (int i = 0; i < bestJoinOrder.length; i++)
 		{
-			ce = optimizableList.getOptimizable(bestJoinOrder[i])
+            CostEstimate ce = optimizableList.getOptimizable(bestJoinOrder[i])
 					.getTrulyTheBestAccessPath().getCostEstimate();
 
 			finalCostEstimate.setCost(
@@ -2615,7 +2600,7 @@ class OptimizerImpl implements Optimizer
 		return 2;
 	}
 
-	public CostEstimateImpl getNewCostEstimate(double theCost,
+    CostEstimateImpl getNewCostEstimate(double theCost,
 							double theRowCount,
 							double theSingleScanRowCount)
 	{
@@ -2654,8 +2639,9 @@ class OptimizerImpl implements Optimizer
 				if (savedJoinOrders != null)
 				{
 					savedJoinOrders.remove(planKey);
-					if (savedJoinOrders.size() == 0)
+                    if (savedJoinOrders.isEmpty()) {
 						savedJoinOrders = null;
+                    }
 				}
 			}
 			else if (action == FromTable.ADD_PLAN)
@@ -2672,9 +2658,8 @@ class OptimizerImpl implements Optimizer
 				if (joinOrder == null)
 					joinOrder = new int[numOptimizables];
 
-				// Now copy current bestJoinOrder and save it.
-				for (int i = 0; i < bestJoinOrder.length; i++)
-					joinOrder[i] = bestJoinOrder[i];
+                System.arraycopy(
+                        bestJoinOrder, 0, joinOrder, 0, bestJoinOrder.length);
 
 				savedJoinOrders.put(planKey, joinOrder);
 			}
@@ -2691,10 +2676,8 @@ class OptimizerImpl implements Optimizer
 					joinOrder = savedJoinOrders.get(planKey);
 					if (joinOrder != null)
 					{
-						// Load the join order we found into our
-						// bestJoinOrder array.
-						for (int i = 0; i < joinOrder.length; i++)
-							bestJoinOrder[i] = joinOrder[i];
+                        System.arraycopy(
+                            joinOrder, 0, bestJoinOrder, 0, joinOrder.length);
 					}
 				}
 			}
@@ -2730,7 +2713,7 @@ class OptimizerImpl implements Optimizer
 	 * @param pList List of predicates to add to this OptimizerImpl's
 	 *  own list for pushing.
 	 */
-	void addScopedPredicatesToList(PredicateList pList)
+    void addScopedPredicatesToList(PredicateList pList, ContextManager cm)
 		throws StandardException
 	{
 		if ((pList == null) || (pList == predicateList))
@@ -2740,7 +2723,7 @@ class OptimizerImpl implements Optimizer
 		if (predicateList == null)
 		// in this case, there is no 'original' predicateList, so we
 		// can just create one.
-			predicateList = new PredicateList();
+            predicateList = new PredicateList(cm);
 
 		// First, we need to go through and remove any predicates in this
 		// optimizer's list that may have been pushed here from outer queries
@@ -2748,7 +2731,7 @@ class OptimizerImpl implements Optimizer
 		// predicate was pushed from an outer query because it will have
 		// been scoped to the node for which this OptimizerImpl was
 		// created.
-		Predicate pred = null;
+        Predicate pred;
 		for (int i = predicateList.size() - 1; i >= 0; i--) {
 			pred = (Predicate)predicateList.getOptPredicate(i);
 			if (pred.isScopedForPush())
@@ -2770,8 +2753,6 @@ class OptimizerImpl implements Optimizer
 				pList.removeOptPredicate(i);
 			}
 		}
-
-		return;
 	}
 
     /** Get the trace machinery */

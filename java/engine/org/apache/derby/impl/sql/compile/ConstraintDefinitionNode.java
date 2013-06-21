@@ -21,21 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.StatementType;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.depend.ProviderList;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.reference.SQLState;
 import java.util.Properties;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.depend.ProviderList;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 /**
  * A ConstraintDefintionNode is a class for all nodes that can represent
@@ -43,7 +39,7 @@ import java.util.Properties;
  *
  */
 
-public class ConstraintDefinitionNode extends TableElementNode
+class ConstraintDefinitionNode extends TableElementNode
 {
 	
 	private TableName constraintName;
@@ -59,75 +55,47 @@ public class ConstraintDefinitionNode extends TableElementNode
 	String			 constraintText;
 	ValueNode		 checkCondition;
 	private int				 behavior;
-    private int verifyType = DataDictionary.DROP_CONSTRAINT; // By default do not check the constraint type
+    private int verifyType;
 
-	public void init(
-					Object constraintName,
-					Object constraintType,
-					Object rcl,
-					Object properties,
-					Object checkCondition,
-					Object constraintText,
-					Object behavior)
+    ConstraintDefinitionNode(
+                    TableName constraintName,
+                    int constraintType,
+                    ResultColumnList rcl,
+                    Properties properties,
+                    ValueNode checkCondition,
+                    String constraintText,
+                    int behavior,
+                    int verifyType,
+                    ContextManager cm)
 	{
-		this.constraintName = (TableName) constraintName;
-
 		/* We need to pass null as name to TableElementNode's constructor 
 		 * since constraintName may be null.
 		 */
-		super.init(null);
+        super(null, cm);
+        setNodeType(C_NodeTypes.CONSTRAINT_DEFINITION_NODE);
+
+        this.constraintName = constraintName;
+
 		if (this.constraintName != null)
 		{
 			this.name = this.constraintName.getTableName();
 		}
-		this.constraintType = ((Integer) constraintType).intValue();
-		this.properties = (Properties) properties;
-		this.columnList = (ResultColumnList) rcl;
-		this.checkCondition = (ValueNode) checkCondition;
-		this.constraintText = (String) constraintText;
-		this.behavior = ((Integer) behavior).intValue();
+        this.constraintType = constraintType;
+        this.properties = properties;
+        this.columnList = rcl;
+        this.checkCondition = checkCondition;
+        this.constraintText = constraintText;
+        this.behavior = behavior;
+        this.verifyType = verifyType;
 	}
 
-	public void init(
-					Object constraintName,
-					Object constraintType,
-					Object rcl,
-					Object properties,
-					Object checkCondition,
-					Object constraintText)
-	{
-		init(
-					constraintName,
-					constraintType,
-					rcl,
-					properties, 
-					checkCondition,
-					constraintText,
-					ReuseFactory.getInteger(StatementType.DROP_DEFAULT)
-					);
-	}
-
-	public void init(
-					Object constraintName,
-					Object constraintType,
-					Object rcl,
-					Object properties,
-					Object checkCondition,
-					Object constraintText,
-					Object behavior,
-                    Object verifyType)
-	{
-        init( constraintName, constraintType, rcl, properties, checkCondition, constraintText, behavior);
-        this.verifyType = ((Integer) verifyType).intValue();
-    }
-    
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -258,7 +226,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return	The auxiliary provider list.
 	 */
-	public ProviderList getAuxiliaryProviderList()
+    ProviderList getAuxiliaryProviderList()
 	{
 		return apl;
 	}
@@ -268,6 +236,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return boolean	Whether or not this is a primary key constraint
 	 */
+    @Override
 	boolean hasPrimaryKeyConstraint()
 	{
 		return constraintType == DataDictionary.PRIMARYKEY_CONSTRAINT;
@@ -278,6 +247,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return boolean	Whether or not this is a unique key constraint
 	 */
+    @Override
 	boolean hasUniqueKeyConstraint()
 	{
 		return constraintType == DataDictionary.UNIQUE_CONSTRAINT;
@@ -288,6 +258,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return boolean	Whether or not this is a unique key constraint
 	 */
+    @Override
 	boolean hasForeignKeyConstraint()
 	{
 		return constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT;
@@ -298,6 +269,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return boolean	Whether or not this element has a check constraint
 	 */
+    @Override
 	boolean hasCheckConstraint()
 	{
 		return constraintType == DataDictionary.CHECK_CONSTRAINT;
@@ -308,6 +280,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return boolean	Whether or not this element has a constraint on it
 	 */
+    @Override
 	boolean hasConstraint()
 	{
 		return true;
@@ -363,7 +336,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param properties	The optional Properties for this constraint.
 	 */
-	public void setProperties(Properties properties)
+    void setProperties(Properties properties)
 	{
 		this.properties = properties;
 	}
@@ -374,7 +347,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The optional properties for the backing index to this constraint
 	 */
-	public Properties getProperties()
+    Properties getProperties()
 	{
 		return properties;
 	}
@@ -385,7 +358,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return true/false
 	 */
-	public boolean isReferenced()
+    boolean isReferenced()
 	{
 		return false;
 	}
@@ -396,7 +369,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return the number
 	 */
-	public int getReferenceCount()
+    int getReferenceCount()
 	{
 		return 0;
 	}
@@ -405,7 +378,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return true/false
 	 */
-	public boolean isEnabled()
+    boolean isEnabled()
 	{
 		return true;
 	}
@@ -415,7 +388,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return ResultColumnList The column list from this table constraint.
 	 */
-	public ResultColumnList getColumnList()
+    ResultColumnList getColumnList()
 	{
 		return columnList;
 	}
@@ -426,7 +399,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param columnList	The new columnList.
 	 */
-	public void setColumnList(ResultColumnList columnList)
+    void setColumnList(ResultColumnList columnList)
 	{
 		this.columnList = columnList;
 	}
@@ -436,7 +409,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The check condition from this node.
 	 */
-	public ValueNode getCheckCondition()
+    ValueNode getCheckCondition()
 	{
 		return checkCondition;
 	}
@@ -446,7 +419,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @param checkCondition	The check condition
 	 */
-	public void setCheckCondition(ValueNode checkCondition)
+    void setCheckCondition(ValueNode checkCondition)
 	{
 		this.checkCondition = checkCondition;
 	}
@@ -456,7 +429,7 @@ public class ConstraintDefinitionNode extends TableElementNode
 	 *
 	 * @return The constraint text.
 	 */
-	public String getConstraintText()
+    String getConstraintText()
 	{
 		return constraintText;
 	}

@@ -22,15 +22,14 @@
 package org.apache.derby.impl.sql.compile;
 
 import java.io.PrintWriter;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
@@ -54,7 +53,7 @@ public  class   DefaultOptTrace implements  OptTrace
     //
     ////////////////////////////////////////////////////////////////////////
 
-    private StringBuffer    _buffer;
+    private StringBuilder _buffer;
     
     ////////////////////////////////////////////////////////////////////////
     //
@@ -65,7 +64,7 @@ public  class   DefaultOptTrace implements  OptTrace
     /** Make a DefaultOptTrace */
     public  DefaultOptTrace()
     {
-        _buffer = new StringBuffer();
+        _buffer = new StringBuilder();
     }
 
     ////////////////////////////////////////////////////////////////////////
@@ -500,7 +499,7 @@ public  class   DefaultOptTrace implements  OptTrace
          JBitSet    assignedTableMap
          )
 	{
-		StringBuffer joinOrderString = new StringBuffer();
+        StringBuilder joinOrderString = new StringBuilder();
         joinOrderString.append(prefix);
 
 		for (int i = 0; i <= joinPosition; i++)
@@ -563,7 +562,8 @@ public  class   DefaultOptTrace implements  OptTrace
     /** Append a string to the optimizer trace */
     private void    appendTraceString( String traceString )
     {
-		_buffer.append( traceString + "\n" );
+        _buffer.append( traceString );
+        _buffer.append( "\n" );
     }
 
 }

@@ -21,24 +21,16 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
-import org.apache.derby.iapi.reference.ClassName;
-
-public class UserDefinedTypeCompiler extends BaseTypeCompiler
+class UserDefinedTypeCompiler extends BaseTypeCompiler
 {
 	/* TypeCompiler methods */
 
@@ -139,6 +131,7 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 		return "getNullObject";
 	}
 
+    @Override
 	public void generateDataValue(MethodBuilder mb, int collationType,
 			LocalField field)
 	{

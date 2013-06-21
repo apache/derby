@@ -21,26 +21,19 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.sql.ResultSet;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.catalog.UUID;
 
 /**
  * A DDLStatementNode represents any type of DDL statement: CREATE TABLE,
@@ -71,7 +64,7 @@ abstract class DDLStatementNode extends StatementNode
 	//
 	/////////////////////////////////////////////////////////////////////////
 
-	private TableName	objectName;
+    private TableName   tableName;
 	private boolean		initOk;
 
 	/**
@@ -87,10 +80,16 @@ abstract class DDLStatementNode extends StatementNode
 	//
 	/////////////////////////////////////////////////////////////////////////
 
-	public void init(Object objectName)
-		throws StandardException {
-		initAndCheck(objectName);
-	}
+    DDLStatementNode(TableName tableName, ContextManager cm) {
+        super(cm);
+        this.tableName = tableName;
+        initOk = true;
+    }
+
+    DDLStatementNode(ContextManager cm) {
+        super(cm);
+    }
+
 
 	/**
 		Initialize the object name we will be performing the DDL
@@ -100,7 +99,7 @@ abstract class DDLStatementNode extends StatementNode
 	protected void initAndCheck(Object objectName)
 		throws StandardException {
 
-		this.objectName = (TableName) objectName;
+        this.tableName = (TableName) objectName;
 
 		initOk = true;
 	}
@@ -110,6 +109,7 @@ abstract class DDLStatementNode extends StatementNode
 	 *
 	 * @return true 
 	 */	
+    @Override
 	public boolean isAtomic()
 	{
 		return true;
@@ -121,9 +121,9 @@ abstract class DDLStatementNode extends StatementNode
 	 *
 	 * @return the relative name
 	 */
-	public String getRelativeName()
+    String getRelativeName()
 	{
-		return objectName.getTableName() ;
+        return tableName.getTableName() ;
 	}
 
 	/**
@@ -132,12 +132,12 @@ abstract class DDLStatementNode extends StatementNode
 	 * 
 	 * @return the full name
 	 */
-	public String getFullName()
+    String getFullName()
 	{
-		return objectName.getFullTableName() ;
+        return tableName.getFullTableName() ;
 	}
 
-    public	final TableName	getObjectName() { return objectName; }
+    public  final TableName getObjectName() { return tableName; }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -145,13 +145,13 @@ abstract class DDLStatementNode extends StatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
-			return ((objectName==null)?"":
-					"name: " + objectName.toString() +"\n") + super.toString();
+            return ((tableName==null)?"":
+                    "name: " + tableName.toString() +"\n") + super.toString();
 		}
 		else
 		{
@@ -172,7 +172,7 @@ abstract class DDLStatementNode extends StatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     final void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -244,7 +244,7 @@ abstract class DDLStatementNode extends StatementNode
 			boolean doSystemSchemaCheck)
 		 throws StandardException
 	{
-		String schemaName = objectName.getSchemaName();
+        String schemaName = tableName.getSchemaName();
 		//boolean needError = !(implicitCreateSchema || (schemaName == null));
 		boolean needError = !implicitCreateSchema;
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName, needError);
@@ -285,7 +285,7 @@ abstract class DDLStatementNode extends StatementNode
 	protected final TableDescriptor getTableDescriptor()
 		throws StandardException
 	{
-		return getTableDescriptor(objectName);
+        return getTableDescriptor(tableName);
 	}
 
 	/**
@@ -306,7 +306,7 @@ abstract class DDLStatementNode extends StatementNode
 	protected final TableDescriptor getTableDescriptor(boolean doSystemTableCheck)
 	throws StandardException
 	{
-		TableDescriptor td = justGetDescriptor(objectName);
+        TableDescriptor td = justGetDescriptor(tableName);
 		td = checkTableDescriptor(td,doSystemTableCheck);
 		return td;
 	}
@@ -428,8 +428,8 @@ abstract class DDLStatementNode extends StatementNode
 	void	bindName( DataDictionary	dataDictionary )
 		                       throws StandardException
 	{
-		if (objectName != null)
-			objectName.bind( dataDictionary );
+        if (tableName != null)
+            tableName.bind( dataDictionary );
 	}
 
 	/**
@@ -452,15 +452,11 @@ abstract class DDLStatementNode extends StatementNode
         if (tableName.getSchemaName() == null)
         { tableName.setSchemaName(getSchemaDescriptor().getSchemaName()); }
         
-        FromList fromList = (FromList) getNodeFactory().getNode
-            (
-             C_NodeTypes.FROM_LIST,
-             getNodeFactory().doJoinOrderOptimization(),
-             getContextManager()
-             );
-        FromBaseTable table = (FromBaseTable) getNodeFactory().getNode
-            (
-             C_NodeTypes.FROM_BASE_TABLE,
+        FromList fromList = new FromList(
+                getOptimizerFactory().doJoinOrderOptimization(),
+                getContextManager());
+
+        FromBaseTable table = new FromBaseTable(
              tableName,
              null,
              null,
@@ -472,27 +468,16 @@ abstract class DDLStatementNode extends StatementNode
         {
             table.setTableNumber(0);
 			fromList.addFromTable(table);
-			table.setResultColumns
-                ((ResultColumnList) getNodeFactory().getNode
-                 (
-                  C_NodeTypes.RESULT_COLUMN_LIST,
-                  getContextManager()
-                  )
-                 );
+            table.setResultColumns(new ResultColumnList(getContextManager()));
         }
         else // ALTER TABLE
         {
             fromList.addFromTable(table);
-            fromList.bindTables
-                (
+            fromList.bindTables(
                  dd,
-                 (FromList) getNodeFactory().getNode
-                 (
-                  C_NodeTypes.FROM_LIST,
-                  getNodeFactory().doJoinOrderOptimization(),
-                  getContextManager()
-                  )
-                 );
+                 new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
+                    getContextManager()));
         }
         
         tableElementList.appendNewColumnsToRCL(table);

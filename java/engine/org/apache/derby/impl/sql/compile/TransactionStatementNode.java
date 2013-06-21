@@ -24,8 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 /**
  * A TransactionStatementNode represents any type of Transaction statement: 
  * SET TRANSACTION, COMMIT, and ROLLBACK.
@@ -34,6 +32,11 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 abstract class TransactionStatementNode extends StatementNode
 {
+
+    TransactionStatementNode(ContextManager cm) {
+        super(cm);
+    }
+
 	int activationKind()
 	{
 		   return StatementNode.NEED_NOTHING_ACTIVATION;
@@ -44,6 +47,7 @@ abstract class TransactionStatementNode extends StatementNode
 	 *
 	 * @return false 
 	 */	
+    @Override
 	public boolean isAtomic() 
 	{
 		return false;
@@ -57,6 +61,7 @@ abstract class TransactionStatementNode extends StatementNode
 	 *
 	 * @return boolean	Whether or not this Statement requires a set/clear savepoint
 	 */
+    @Override
 	public boolean needsSavepoint()
 	{
 		return false;

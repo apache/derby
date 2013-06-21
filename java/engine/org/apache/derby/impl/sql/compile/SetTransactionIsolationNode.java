@@ -21,22 +21,14 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
  * A SetTransactionIsolationNode is the root of a QueryTree that represents a SET
@@ -44,18 +36,21 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class SetTransactionIsolationNode extends TransactionStatementNode
+class SetTransactionIsolationNode extends TransactionStatementNode
 {
 	private int		isolationLevel;
 
 	/**
-	 * Initializer for SetTransactionIsolationNode
+     * Constructor for SetTransactionIsolationNode
 	 *
 	 * @param isolationLevel		The new isolation level
-	 */
-	public void init(Object isolationLevel)
+     * @param cm                    The context manager
+     */
+    SetTransactionIsolationNode(int isolationLevel, ContextManager cm)
 	{
-		this.isolationLevel = ((Integer) isolationLevel).intValue();
+        super(cm);
+        setNodeType(C_NodeTypes.SET_TRANSACTION_ISOLATION_NODE);
+        this.isolationLevel = isolationLevel;
 	}
 
 	/**
@@ -64,7 +59,7 @@ public class SetTransactionIsolationNode extends TransactionStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -78,7 +73,7 @@ public class SetTransactionIsolationNode extends TransactionStatementNode
 		}
 	}
 
-	public String statementToString()
+    String statementToString()
 	{
 		return "SET TRANSACTION ISOLATION";
 	}
@@ -90,6 +85,7 @@ public class SetTransactionIsolationNode extends TransactionStatementNode
 	 * @param mb	The method for the method to be built
 	 * @exception StandardException thrown if generation fails
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -106,7 +102,8 @@ public class SetTransactionIsolationNode extends TransactionStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		return getGenericConstantActionFactory().getSetTransactionIsolationConstantAction(isolationLevel);
 	}

@@ -21,31 +21,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
+import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 /**
  * A UnionNode represents a UNION in a DML statement.  It contains a boolean
@@ -53,7 +45,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class UnionNode extends SetOperatorNode
+class UnionNode extends SetOperatorNode
 {
 	/* Only optimize it once */
 	/* Only call addNewNodes() once */
@@ -67,7 +59,7 @@ public class UnionNode extends SetOperatorNode
 
 
 	/**
-	 * Initializer for a UnionNode.
+     * Constructor for a UnionNode.
 	 *
 	 * @param leftResult		The ResultSetNode on the left side of this union
 	 * @param rightResult		The ResultSetNode on the right side of this union
@@ -78,24 +70,24 @@ public class UnionNode extends SetOperatorNode
 	 * @exception StandardException		Thrown on error
 	 */
 
-	public void init(
-					Object leftResult,
-					Object rightResult,
-					Object all,
-					Object tableConstructor,
-					Object tableProperties)
-			throws StandardException
-	{
-		super.init(leftResult, rightResult, all, tableProperties);
+    UnionNode(ResultSetNode  leftResult,
+              ResultSetNode  rightResult,
+              boolean        all,
+              boolean        tableConstructor,
+              Properties     tableProperties,
+              ContextManager cm) throws StandardException {
 
-		/* Is this a UNION ALL for a table constructor? */
-		this.tableConstructor = ((Boolean) tableConstructor).booleanValue();
-    } // end of init
+        super(leftResult, rightResult, all, tableProperties, cm);
+        setNodeType(C_NodeTypes.UNION_NODE);
+
+        // Is this a UNION ALL for a table constructor?
+        this.tableConstructor = tableConstructor;
+    }
 
 	/**
 	 * Mark this as the top node of a table constructor.
 	 */
-	public void markTopTableConstructor()
+    void markTopTableConstructor()
 	{
 		topTableConstructor = true;
 	}
@@ -119,7 +111,8 @@ public class UnionNode extends SetOperatorNode
 	 * @exception StandardException		Thrown if a ? parameter found
 	 *									directly under a ResultColumn
 	 */
-	public void rejectParameters() throws StandardException
+    @Override
+    void rejectParameters() throws StandardException
 	{
 		if ( ! tableConstructor())
 			super.rejectParameters();
@@ -136,6 +129,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	void setTableConstructorTypes(ResultColumnList typeColumns)
 			throws StandardException
 	{
@@ -197,6 +191,7 @@ public class UnionNode extends SetOperatorNode
 	 * If this node represents a regular UNION, put a ProjectRestrictNode on
 	 * top of this node and enhance the RCL in that node.
 	 */
+    @Override
 	ResultSetNode enhanceRCLForInsert(
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
@@ -227,6 +222,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public CostEstimate optimizeIt(Optimizer optimizer,
 							OptimizablePredicateList predList,
 							CostEstimate outerCost,
@@ -292,15 +288,15 @@ public class UnionNode extends SetOperatorNode
 							getRightOptPredicateList(),
 							outerCost);
 
-		CostEstimate costEstimate = getCostEstimate(optimizer);
+        CostEstimate costEst = getCostEstimate(optimizer);
 
 		/* The cost is the sum of the two child costs */
-		costEstimate.setCost(leftResultSet.getCostEstimate().getEstimatedCost(),
+        costEst.setCost(leftResultSet.getCostEstimate().getEstimatedCost(),
 							 leftResultSet.getCostEstimate().rowCount(),
 							 leftResultSet.getCostEstimate().singleScanRowCount() +
 							 rightResultSet.getCostEstimate().singleScanRowCount());
 
-		costEstimate.add(rightResultSet.costEstimate, costEstimate);
+        costEst.add(rightResultSet.costEstimate, costEst);
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -313,12 +309,12 @@ public class UnionNode extends SetOperatorNode
 							(ConglomerateDescriptor) null,
 							outerCost,
 							optimizer,
-							costEstimate
+                            costEst
 							);
 
-		optimizer.considerCost(this, predList, costEstimate, outerCost);
+        optimizer.considerCost(this, predList, costEst, outerCost);
 
-		return costEstimate;
+        return costEst;
 	}
 
 	/**
@@ -341,7 +337,8 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception	StandardException		Thrown on error
 	 */
-	public void pushExpressions(PredicateList predicateList)
+    @Override
+    void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
 		// If left or right side is a UnionNode, further push the predicate list
@@ -364,6 +361,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public Optimizable modifyAccessPath(JBitSet outerTables) throws StandardException
 	{
 		Optimizable retOptimizable;
@@ -382,7 +380,8 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		ResultSetNode retRSN;
 		retRSN = super.modifyAccessPaths();
@@ -444,19 +443,14 @@ public class UnionNode extends SetOperatorNode
 			 */
 			if (! columnTypesAndLengthsMatch())
 			{
-			    treeTop = 
-				(ResultSetNode) getNodeFactory().getNode(
-				C_NodeTypes.NORMALIZE_RESULT_SET_NODE,
-				treeTop, null, null, Boolean.FALSE,
-				getContextManager());	
+                treeTop = new NormalizeResultSetNode(
+                        treeTop, null, null, false, getContextManager());
 			}
 
-			treeTop = (ResultSetNode) getNodeFactory().getNode(
-							C_NodeTypes.DISTINCT_NODE,
-							treeTop.genProjectRestrict(),
-							Boolean.FALSE,
-							tableProperties,
-							getContextManager());
+            treeTop = new DistinctNode(treeTop.genProjectRestrict(),
+                                       false,
+                                       tableProperties,
+                                       getContextManager());
 			/* HACK - propagate our table number up to the new DistinctNode
 			 * so that arbitrary hash join will work correctly.  (Otherwise it
 			 * could have a problem dividing up the predicate list at the end
@@ -474,12 +468,10 @@ public class UnionNode extends SetOperatorNode
         for (int i=0; i < orderByLists.length; i++) {
             if (orderByLists[i] != null)
             {
-                treeTop = (ResultSetNode) getNodeFactory().getNode(
-                        C_NodeTypes.ORDER_BY_NODE,
-                        treeTop,
-                        orderByLists[i],
-                        tableProperties,
-                        getContextManager());
+                treeTop = new OrderByNode(treeTop,
+                                          orderByLists[i],
+                                          tableProperties,
+                                          getContextManager());
             }
 
             // Do this only after the main ORDER BY; any extra added by
@@ -490,13 +482,12 @@ public class UnionNode extends SetOperatorNode
                 newRcl.genVirtualColumnNodes(treeTop,
                                              treeTop.getResultColumns());
 
-                treeTop = (ResultSetNode)getNodeFactory().getNode(
-                        C_NodeTypes.ROW_COUNT_NODE,
+                treeTop = new RowCountNode(
                         treeTop,
                         newRcl,
                         offset,
                         fetchFirst,
-                        Boolean.valueOf( hasJDBClimitClause ),
+                        hasJDBClimitClause,
                         getContextManager());
             }
         }
@@ -510,7 +501,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -530,7 +521,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindExpressions(FromList fromListParam)
 				throws StandardException
 	{
@@ -617,6 +608,7 @@ public class UnionNode extends SetOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
      */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -696,7 +688,8 @@ public class UnionNode extends SetOperatorNode
 	 * @return	The final CostEstimate for this UnionNode, which is
 	 *  the sum of the two child costs.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		// If we already found it, just return it.

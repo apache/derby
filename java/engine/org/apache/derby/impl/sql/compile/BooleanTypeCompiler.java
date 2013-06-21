@@ -21,29 +21,18 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-
-import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.iapi.reference.ClassName;
-
-import java.sql.Types;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This class implements TypeCompiler for the SQL BOOLEAN datatype.
  *
  */
 
-public class BooleanTypeCompiler extends BaseTypeCompiler
+class BooleanTypeCompiler extends BaseTypeCompiler
 {
 	/**
 	 * Tell whether this type (boolean) can be converted to the given type.
@@ -104,6 +93,7 @@ public class BooleanTypeCompiler extends BaseTypeCompiler
 	 * @return String		The method call name for getting the
 	 *						corresponding primitive Java type.
 	 */
+    @Override
 	public String getPrimitiveMethodName()
 	{
 		return "getBoolean";

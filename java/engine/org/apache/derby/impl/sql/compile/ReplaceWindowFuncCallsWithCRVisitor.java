@@ -21,16 +21,15 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Replace all window function calls with result columns.
  *
  */
-public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
+class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 {
 	private ResultColumnList rcl;
 	private Class skipOverClass;
@@ -45,7 +44,7 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	 * @param tableNumber	The tableNumber for the new CRs
 	 * @param skipOverClass Don't go past this
 	 */
-	public ReplaceWindowFuncCallsWithCRVisitor(ResultColumnList rcl,
+    ReplaceWindowFuncCallsWithCRVisitor(ResultColumnList rcl,
 											int tableNumber,
 											Class skipOverClass)
 	{
@@ -62,7 +61,7 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 
 	/**
 	 * Don't do anything unless we have a window function node
-	 * node. Vistor override.
+     * node. Visitor override.
 	 * @see Visitor#visit
 	 *
 	 */
@@ -82,8 +81,8 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	}
 
 	/**
-	 * Don't visit childen under the skipOverClass
-	 * node, if it isn't null. Vistor override.
+     * Don't visit children under the skipOverClass
+     * node, if it isn't null. Visitor override.
 	 * @see Visitor#skipChildren
 	 */
 	public boolean skipChildren(Visitable node)
@@ -95,7 +94,7 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 
 
 	/**
-	 * Vistor override.
+     * Visitor override.
 	 * @return false
 	 * @see Visitor#visitChildrenFirst
 	 */
@@ -105,7 +104,7 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	}
 
 	/**
-	 * Vistor override.
+     * Visitor override.
 	 * @return false
 	 * @see Visitor#skipChildren
 	 */

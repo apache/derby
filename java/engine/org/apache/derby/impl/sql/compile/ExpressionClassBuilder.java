@@ -91,8 +91,8 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	/**
 	 * By the time this is done, it has constructed the following class:
 	 * <pre>
-	 *    public class #className extends #superClass {
-	 *		public #className() { super(); }
+     *    class #className extends #superClass {
+     *      #className() { super(); }
 	 *    }
 	 * </pre>
 	 *
@@ -195,7 +195,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	//
 	///////////////////////////////////////////////////////////////////////
 
-	private	final void	beginConstructor()
+    private void beginConstructor()
 	{
 		// create a constructor that just calls super.  
 		MethodBuilder realConstructor =

@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -31,7 +32,7 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
  *
  */
 
-public class TableElementNode extends QueryTreeNode
+class TableElementNode extends QueryTreeNode
 {
     /////////////////////////////////////////////////////////////////////////
 	//
@@ -68,26 +69,16 @@ public class TableElementNode extends QueryTreeNode
 	/////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Initializer for a TableElementNode
+     * Constructor for a TableElementNode
 	 *
 	 * @param name	The name of the table element, if any
 	 */
 
-	public void init(Object name)
+    TableElementNode(String name, ContextManager cm)
 	{
-		this.name = (String) name;
-	}
-
-	/**
-	 * Initializer for a TableElementNode
-	 *
-	 * @param name	The name of the table element, if any
-	 */
-
-	public void init(Object name, Object elementType)
-	{
-		this.name = (String) name;
-		this.elementType = ((Integer) elementType).intValue();
+        super(cm);
+        setNodeType(C_NodeTypes.TABLE_ELEMENT_NODE);
+        this.name = name;
 	}
 
 	/**
@@ -96,7 +87,7 @@ public class TableElementNode extends QueryTreeNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -166,7 +157,7 @@ public class TableElementNode extends QueryTreeNode
 	 *
 	 * @return String	The name.
 	 */
-	public String getName()
+    String getName()
 	{
 		return name;
 	}

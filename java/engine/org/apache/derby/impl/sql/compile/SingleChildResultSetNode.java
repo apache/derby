@@ -22,24 +22,19 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.util.JBitSet;
-
 
 /**
  * A SingleChildResultSetNode represents a result set with a single child.
@@ -56,29 +51,23 @@ abstract class SingleChildResultSetNode extends FromTable
 	// Does this node have the truly... for the underlying tree
 	protected boolean hasTrulyTheBestAccessPath;
 
+    SingleChildResultSetNode(
+            ResultSetNode childResult,
+            Properties tableProperties,
+            ContextManager cm) {
 
-	/**
-	 * Initialilzer for a SingleChildResultSetNode.
-	 *
-	 * @param childResult	The child ResultSetNode
-	 * @param tableProperties	Properties list associated with the table
-	 */
+        super(null /* correlationName */, tableProperties, cm);
+        this.childResult = childResult;
 
-	public void init(Object childResult, Object tableProperties)
-	{
-		/* correlationName is always null */
-		super.init(null, tableProperties);
-		this.childResult = (ResultSetNode) childResult;
-
-		/* Propagate the child's referenced table map, if one exists */
-		if (this.childResult.getReferencedTableMap() != null)
-		{
-			referencedTableMap =
-				(JBitSet) this.childResult.getReferencedTableMap().clone();
-		}
-	}
+        /* Propagate the child's referenced table map, if one exists */
+        if (childResult.getReferencedTableMap() != null) {
+            referencedTableMap =
+                (JBitSet)childResult.getReferencedTableMap().clone();
+        }
+    }
 
 	/** @see Optimizable#getTrulyTheBestAccessPath */
+    @Override
 	public AccessPath getTrulyTheBestAccessPath()
 	{
 		if (hasTrulyTheBestAccessPath)
@@ -97,7 +86,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @return ResultSetNode	The childResult from this node.
 	 */
-	public ResultSetNode getChildResult()
+    ResultSetNode getChildResult()
 	{
 		return childResult;
 	}
@@ -117,6 +106,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void pullOptPredicates(
 								OptimizablePredicateList optimizablePredicates)
 			throws StandardException
@@ -128,6 +118,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	}
 
 	/** @see Optimizable#forUpdate */
+    @Override
 	public boolean forUpdate()
 	{
 		if (childResult instanceof Optimizable)
@@ -143,6 +134,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	/**
 	 * @see Optimizable#initAccessPaths
 	 */
+    @Override
 	public void initAccessPaths(Optimizer optimizer)
 	{
 		super.initAccessPaths(optimizer);
@@ -160,6 +152,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * child, in order to ensure that we've handled the full plan
 	 * all the way down this node's subtree.
 	 */
+    @Override
 	public void updateBestPlanMap(short action,
 		Object planKey) throws StandardException
 	{
@@ -189,8 +182,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
-	public void printSubNodes(int depth)
+    @Override
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -214,7 +207,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean referencesTarget(String name, boolean baseTable)
+    @Override
+    boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
 		return childResult.referencesTarget(name, baseTable);
@@ -227,6 +221,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -238,7 +233,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @param level		The query block level for this FromTable.
 	 */
-	public void setLevel(int level)
+    @Override
+    void setLevel(int level)
 	{
 		super.setLevel(level);
 		if (childResult instanceof FromTable)
@@ -258,6 +254,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	boolean subqueryReferencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
@@ -288,8 +285,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode preprocess(int numTables,
+    @Override
+    ResultSetNode preprocess(int numTables,
 									GroupByList gbl,
 									FromList fromList) 
 								throws StandardException
@@ -313,7 +310,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode addNewPredicate(Predicate predicate)
+    @Override
+    ResultSetNode addNewPredicate(Predicate predicate)
 			throws StandardException
 	{
 		childResult = childResult.addNewPredicate(predicate);
@@ -331,7 +329,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void pushExpressions(PredicateList predicateList)
+    @Override
+    void pushExpressions(PredicateList predicateList)
 					throws StandardException
 	{
 		if (childResult instanceof FromTable)
@@ -352,7 +351,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @return boolean	Whether or not the FromSubquery is flattenable.
 	 */
-	public boolean flattenableInFromSubquery(FromList fromList)
+    @Override
+    boolean flattenableInFromSubquery(FromList fromList)
 	{
 		/* Flattening currently involves merging predicates and FromLists.
 		 * We don't have a FromList, so we can't flatten for now.
@@ -369,7 +369,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode ensurePredicateList(int numTables) 
+    @Override
+    ResultSetNode ensurePredicateList(int numTables)
 		throws StandardException
 	{
 		return this;
@@ -387,8 +388,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public ResultSetNode optimize(DataDictionary dataDictionary,
+    @Override
+    ResultSetNode optimize(DataDictionary dataDictionary,
 								  PredicateList predicates,
 								  double outerRows) 
 					throws StandardException
@@ -401,16 +402,14 @@ abstract class SingleChildResultSetNode extends FromTable
 										predicates,
 										outerRows);
 
-		Optimizer optimizer =
-							getOptimizer(
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-							predicates,
-							dataDictionary,
-							(RequiredRowOrdering) null);
-		costEstimate = optimizer.newCostEstimate();
+        Optimizer opt = getOptimizer(
+                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
+                             getContextManager()),
+                predicates,
+                dataDictionary,
+                (RequiredRowOrdering) null);
+
+        costEstimate = opt.newCostEstimate();
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
 							childResult.getCostEstimate().singleScanRowCount());
@@ -423,7 +422,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode modifyAccessPaths() throws StandardException
+    @Override
+    ResultSetNode modifyAccessPaths() throws StandardException
 	{
 		childResult = childResult.modifyAccessPaths();
 
@@ -435,7 +435,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ResultSetNode changeAccessPath() throws StandardException
+    @Override
+    ResultSetNode changeAccessPath() throws StandardException
 	{
 		childResult = childResult.changeAccessPath();
 		return this;
@@ -454,6 +455,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
@@ -466,6 +468,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @param decrement	The amount to decrement by.
 	 */
+    @Override
 	void decrementLevel(int decrement)
 	{
 		super.decrementLevel(decrement);
@@ -479,7 +482,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @return	The lock mode
 	 */
-	public int updateTargetLockMode()
+    @Override
+    int updateTargetLockMode()
 	{
 		return childResult.updateTargetLockMode();
 	}
@@ -499,6 +503,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean isOrderedOn(ColumnReference[] crs, boolean permuteOrdering, List<FromBaseTable> fbtHolder)
 				throws StandardException
 	{
@@ -514,7 +519,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @return Whether or not the underlying ResultSet tree will return a single row.
 	 * @exception StandardException		Thrown on error
 	 */
-	public boolean isOneRowResultSet()	throws StandardException
+    @Override
+    boolean isOneRowResultSet() throws StandardException
 	{
 		// Default is false
 		return childResult.isOneRowResultSet();
@@ -525,7 +531,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @return Whether or not the underlying ResultSet tree is for a NOT EXISTS.
 	 */
-	public boolean isNotExists()
+    @Override
+    boolean isNotExists()
 	{
 		return childResult.isNotExists();
 	}
@@ -546,6 +553,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination()
 	{
 		childResult.adjustForSortElimination();
@@ -554,6 +562,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
+    @Override
 	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
 		throws StandardException
 	{
@@ -566,7 +575,8 @@ abstract class SingleChildResultSetNode extends FromTable
 	 * @return	The final CostEstimate for this node, which is
 	 * 			the final cost estimate for the child node.
 	 */
-	public CostEstimate getFinalCostEstimate()
+    @Override
+    CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
 		/*
@@ -590,6 +600,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

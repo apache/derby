@@ -22,21 +22,10 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A BetweenOperatorNode represents a BETWEEN clause. The between values are
@@ -44,31 +33,35 @@ import org.apache.derby.iapi.services.context.ContextManager;
  *
  */
 
-public class BetweenOperatorNode extends BinaryListOperatorNode
+class BetweenOperatorNode extends BinaryListOperatorNode
 {
-	/**
-	 * Initializer for a BetweenOperatorNode
-	 *
-	 * @param leftOperand		The left operand of the node
-	 * @param betweenValues		The between values in list form
-	 */
+    /**
+     * @param leftOperand The left operand of the node
+     * @param betweenValues The between values in list form
+     * @param cm
+     * @throws StandardException
+     */
+    BetweenOperatorNode(ValueNode leftOperand,
+            ValueNodeList betweenValues,
+            ContextManager cm) throws StandardException {
+        super(leftOperand, vetValues(betweenValues), "BETWEEN", null, cm);
+        setNodeType(C_NodeTypes.BETWEEN_OPERATOR_NODE);
+    }
 
-	public void init(Object leftOperand, Object betweenValues)
-	{
-		if (SanityManager.DEBUG)
+    private static ValueNodeList vetValues(ValueNodeList betweenValues) {
+        if (SanityManager.DEBUG)
 		{
-			ValueNodeList betweenVals = (ValueNodeList) betweenValues;
+            ValueNodeList betweenVals = betweenValues;
 
 			SanityManager.ASSERT(betweenVals.size() == 2,
 				"betweenValues.size() (" +
 				betweenVals.size()	+
 				") is expected to be 2");
 		}
+        return betweenValues;
+    }
 
-		super.init(leftOperand, betweenValues, "BETWEEN", null);
-	}
-
-	/**
+    /**
 	 * Eliminate NotNodes in the current query block.  We traverse the tree, 
 	 * inverting ANDs and ORs and eliminating NOTs as we go.  We stop at 
 	 * ComparisonOperators and boolean expressions.  We invert 
@@ -84,6 +77,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -114,16 +108,14 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 		 * optimizable and there's no benefit for the optimizer to see NOT BETWEEN
 		 */
 
-		NodeFactory nodeFactory = getNodeFactory();
 		ContextManager cm = getContextManager();
 
 		/* leftO < rightOList.elementAt(0) */
-		leftBCO = (BinaryComparisonOperatorNode) 
-					nodeFactory.getNode(
+        leftBCO = new BinaryRelationalOperatorNode(
 									C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
 									leftOperand, 
-								 	rightOperandList.elementAt(0),
-								 	Boolean.FALSE,
+                                    (ValueNode)rightOperandList.elementAt(0),
+                                    false,
 									cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
@@ -135,22 +127,17 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
             leftOperand.getClone() : leftOperand;
 
 		/* leftO > rightOList.elementAt(1) */
-		rightBCO = (BinaryComparisonOperatorNode) 
-					nodeFactory.getNode(
+        rightBCO = new BinaryRelationalOperatorNode(
 								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
 								leftClone,
-								rightOperandList.elementAt(1),
-							 	Boolean.FALSE,
+                                (ValueNode)rightOperandList.elementAt(1),
+                                false,
 								cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();
 
 		/* Create and return the OR */
-		newOr = (OrNode) nodeFactory.getNode(
-												C_NodeTypes.OR_NODE,
-												leftBCO,
-												rightBCO,
-												cm);
+        newOr = new OrNode(leftBCO, rightBCO, cm);
 		newOr.postBindFixup();
 
 		/* Tell optimizer to use the between selectivity instead of >= * <= selectivities */
@@ -175,7 +162,8 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -212,52 +200,40 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 		 *				  <=    TRUE
 		 */
 
-		NodeFactory nodeFactory = getNodeFactory();
 		ContextManager cm = getContextManager();
 
-        QueryTreeNode trueNode = (QueryTreeNode) nodeFactory.getNode(
-											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-											Boolean.TRUE,
-											cm);
+        BooleanConstantNode trueNode = new BooleanConstantNode(true, cm);
 
 		/* Create the AND <= */
 		BinaryComparisonOperatorNode lessEqual = 
-			(BinaryComparisonOperatorNode) nodeFactory.getNode(
+            new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftClone1, 
-						rightOperandList.elementAt(1),
-					 	Boolean.FALSE,
+                        (ValueNode)rightOperandList.elementAt(1),
+                        false,
 						cm);
 
 		/* Set type info for the operator node */
 		lessEqual.bindComparisonOperator();
 
 		/* Create the AND */
-		AndNode newAnd = (AndNode) nodeFactory.getNode(
-												C_NodeTypes.AND_NODE,
-												lessEqual,
-												trueNode,
-												cm);
+       AndNode newAnd = new AndNode(lessEqual, trueNode, cm);
 		newAnd.postBindFixup();
 
 		/* Create the AND >= */
 		BinaryComparisonOperatorNode greaterEqual = 
-			(BinaryComparisonOperatorNode) nodeFactory.getNode(
+            new BinaryRelationalOperatorNode(
 					C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 					leftOperand, 
-					rightOperandList.elementAt(0),
-				 	Boolean.FALSE,
+                    (ValueNode)rightOperandList.elementAt(0),
+                    false,
 					cm);
 
 		/* Set type info for the operator node */
 		greaterEqual.bindComparisonOperator();
 
 		/* Create the AND */
-		newAnd = (AndNode) nodeFactory.getNode(
-												C_NodeTypes.AND_NODE,
-												greaterEqual,
-												newAnd,
-												cm);
+       newAnd = new AndNode(greaterEqual, newAnd, cm);
 		newAnd.postBindFixup();
 
 		/* Tell optimizer to use the between selectivity instead of >= * <= selectivities */
@@ -276,7 +252,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
@@ -296,37 +272,30 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 		 *		leftO >= rightOList.elementAt(0) and leftO <= rightOList.elementAt(1) 
 		 */
 
-		NodeFactory nodeFactory = getNodeFactory();
 		ContextManager cm = getContextManager();
 
 		/* leftO >= rightOList.elementAt(0) */
-		leftBCO = (BinaryComparisonOperatorNode) 
-					nodeFactory.getNode(
+        leftBCO = new BinaryRelationalOperatorNode(
 							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 							leftOperand, 
-							rightOperandList.elementAt(0),
-						 	Boolean.FALSE,
+                            (ValueNode)rightOperandList.elementAt(0),
+                            false,
 							cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
 
 		/* leftO <= rightOList.elementAt(1) */
-		rightBCO = (BinaryComparisonOperatorNode) 
-					nodeFactory.getNode(
+        rightBCO = new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftOperand, 
-						rightOperandList.elementAt(1),
-					 	Boolean.FALSE,
+                        (ValueNode)rightOperandList.elementAt(1),
+                        false,
 						cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();
 
 		/* Create and return the AND */
-		newAnd = (AndNode) nodeFactory.getNode(
-												C_NodeTypes.AND_NODE,
-												leftBCO,
-												rightBCO,
-												cm);
+        newAnd = new AndNode(leftBCO, rightBCO, cm);
 		newAnd.postBindFixup();
 		newAnd.generateExpression(acb, mb);
 	}

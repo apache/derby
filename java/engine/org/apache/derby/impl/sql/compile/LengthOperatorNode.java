@@ -21,19 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.reference.SQLState;
+import java.sql.Types;
+import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
-
-import java.sql.Types;
-
-import java.util.List;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node represents a unary XXX_length operator
@@ -45,15 +42,22 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	private int parameterType;
 	private int parameterWidth;
 
-	public void setNodeType(int nodeType)
+    LengthOperatorNode(ValueNode operator, ContextManager cm)
+            throws StandardException {
+        super(operator, cm);
+        setNodeType(C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE);
+    }
+
+    @Override
+    void setNodeType(int nodeType)
 	{
-		String operator = null;
-		String methodName = null;
+        String op = null;
+        String methodNam = null;
 
 		if (nodeType == C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE)
 		{
-				operator = "char_length";
-				methodName = "charLength";
+                op = "char_length";
+                methodNam = "charLength";
 				parameterType = Types.VARCHAR;
 				parameterWidth = TypeId.VARCHAR_MAXWIDTH;
 		}
@@ -65,8 +69,8 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 						"Unexpected nodeType = " + nodeType);
 				}
 		}
-		setOperator(operator);
-		setMethodName(methodName);
+        setOperator(op);
+        setMethodName(methodNam);
 		super.setNodeType(nodeType);
 	}
 
@@ -81,7 +85,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(
         FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
@@ -129,7 +133,7 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	void bindParameter()
 			throws StandardException
 	{
@@ -150,7 +154,8 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 	 * This is a length operator node.  Overrides this method
 	 * in UnaryOperatorNode for code generation purposes.
 	 */
-	public String getReceiverInterfaceName() {
+    @Override
+    String getReceiverInterfaceName() {
 	    return ClassName.ConcatableDataValue;
 	}
 }

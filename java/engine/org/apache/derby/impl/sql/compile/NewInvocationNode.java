@@ -21,38 +21,27 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-
-
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-
-import org.apache.derby.iapi.util.JBitSet;
-
-import org.apache.derby.catalog.TypeDescriptor;
-
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
-
 import java.util.List;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A NewInvocationNode represents a new object() invocation.
  *
  */
-public class NewInvocationNode extends MethodCallNode
+class NewInvocationNode extends MethodCallNode
 {
 	// Whether or not to do a single instantiation
 	private boolean singleInstantiation = false;
@@ -62,30 +51,32 @@ public class NewInvocationNode extends MethodCallNode
 	private boolean isBuiltinVTI = false;
 
 	/**
-	 * Initializer for a NewInvocationNode. Parameters are:
+     * Constructor for a NewInvocationNode. Parameters are:
 	 *
-	 * <ul>
-	 * <li>javaClassName		The full package.class name of the class</li>
-	 * <li>parameterList		The parameter list for the constructor</li>
-	 * </ul>
+     *
+     * @param javaClassName     The full package.class name of the class
+     * @param params            The parameter list for the constructor
+     * @param delimitedIdentifier
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void init(
-					Object javaClassName,
-					Object params,
-					Object delimitedIdentifier)
+    NewInvocationNode(
+            String javaClassName,
+            List<ValueNode> params,
+            boolean delimitedIdentifier,
+            ContextManager cm)
 		throws StandardException
 	{
-		super.init("<init>");
-		addParms((List) params);
+        super("<init>", cm);
+        setNodeType(C_NodeTypes.NEW_INVOCATION_NODE);
+        addParms(params);
 
-		this.javaClassName = (String) javaClassName;
-		this.delimitedIdentifier =
-				 ((Boolean) delimitedIdentifier).booleanValue();
+        this.javaClassName = javaClassName;
+        this.delimitedIdentifier = delimitedIdentifier;
 	}
 
-	/* This version of the "init" method is used for mapping a table name
+    /* This constructor is used for mapping a table name
 	 * or table function name to a corresponding VTI class name.  The VTI
 	 * is then invoked as a regular NEW invocation node.
 	 *
@@ -116,16 +107,19 @@ public class NewInvocationNode extends MethodCallNode
 	 * @param params Parameter list for the VTI constructor.
 	 * @param delimitedIdentifier Whether or not the target class name
 	 *  is a delimited identifier.
+     * @param cm context manager
 	 */
-	public void init(
-					Object vtiTableFuncName,
-					Object tableDescriptor,
-					Object params,
-					Object delimitedIdentifier)
+    NewInvocationNode(
+                    TableName vtiTableFuncName,
+                    TableDescriptor tableDescriptor,
+                    List<ValueNode> params,
+                    boolean delimitedIdentifier,
+                    ContextManager cm)
 		throws StandardException
 	{
-		super.init("<init>");
-		addParms((List) params);
+        super("<init>", cm);
+        setNodeType(C_NodeTypes.NEW_INVOCATION_NODE);
+        addParms(params);
 
 		if (SanityManager.DEBUG)
 		{
@@ -138,8 +132,8 @@ public class NewInvocationNode extends MethodCallNode
 				"be null, but neither or both of them were null.");
 		}
 
-		TableName vtiName = (TableName)vtiTableFuncName;
-		TableDescriptor td = (TableDescriptor)tableDescriptor;
+        TableName vtiName = vtiTableFuncName;
+        TableDescriptor td = tableDescriptor;
 		boolean isTableFunctionVTI = (vtiTableFuncName != null);
 		if (isTableFunctionVTI)
 		{
@@ -193,7 +187,7 @@ public class NewInvocationNode extends MethodCallNode
 	/**
 	 * Report whether this node represents a builtin VTI.
 	 */
-	public  boolean isBuiltinVTI()  { return isBuiltinVTI; }
+     boolean isBuiltinVTI()  { return isBuiltinVTI; }
 
 	/**
 	 * Mark this node as only needing to
@@ -339,6 +333,7 @@ public class NewInvocationNode extends MethodCallNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{

@@ -21,34 +21,27 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
-
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-import java.util.Properties;
 
 /**
  * A CreateTableNode is the root of a QueryTree that represents a CREATE TABLE or DECLARE GLOBAL TEMPORARY TABLE
@@ -56,7 +49,7 @@ import java.util.Properties;
  *
  */
 
-public class CreateTableNode extends DDLStatementNode
+class CreateTableNode extends DDLStatementNode
 {
 	private char				lockGranularity;
 	private boolean				onCommitDeleteRows; //If true, on commit delete rows else on commit preserve rows of temporary table.
@@ -68,28 +61,30 @@ public class CreateTableNode extends DDLStatementNode
 	private ResultSetNode		queryExpression;
 
 	/**
-	 * Initializer for a CreateTableNode for a base table
+     * Constructor for a CreateTableNode for a base table
 	 *
-	 * @param newObjectName		The name of the new object being created (ie base table)
+     * @param tableName The name of the new object being created (ie base table)
 	 * @param tableElementList	The elements of the table: columns,
 	 *				constraints, etc.
 	 * @param properties		The optional list of properties associated with
 	 *							the table.
 	 * @param lockGranularity	The lock granularity.
+     * @param cm                The context manager
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(
-			Object newObjectName,
-			Object tableElementList,
-			Object properties,
-			Object lockGranularity)
-		throws StandardException
+    CreateTableNode(
+            TableName        tableName,
+            TableElementList tableElementList,
+            Properties       properties,
+            char             lockGranularity,
+            ContextManager   cm) throws StandardException
 	{
-		tableType = TableDescriptor.BASE_TABLE_TYPE;
-		this.lockGranularity = ((Character) lockGranularity).charValue();
-		implicitCreateSchema = true;
+        super(tableName, cm);
+        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
+        this.tableType = TableDescriptor.BASE_TABLE_TYPE;
+        this.lockGranularity = lockGranularity;
+        this.implicitCreateSchema = true;
 
 		if (SanityManager.DEBUG)
 		{
@@ -101,17 +96,17 @@ public class CreateTableNode extends DDLStatementNode
 			}
 		}
 
-		initAndCheck(newObjectName);
-		this.tableElementList = (TableElementList) tableElementList;
-		this.properties = (Properties) properties;
+        this.tableElementList = tableElementList;
+        this.properties = properties;
 	}
 
 	/**
-	 * Initializer for a CreateTableNode for a global temporary table
+     * Constructor for a CreateTableNode for a global temporary table
 	 *
-	 * @param newObjectName		The name of the new object being declared (ie temporary table)
-	 * @param tableElementList	The elements of the table: columns,
-	 *				constraints, etc.
+     * @param tableName The name of the new object being declared (ie
+     *                  temporary table)
+     * @param tableElementList  The elements of the table: columns,
+     *                          constraints, etc.
 	 * @param properties		The optional list of properties associated with
 	 *							the table.
 	 * @param onCommitDeleteRows	If true, on commit delete rows else on commit preserve rows of temporary table.
@@ -119,22 +114,23 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
-	public void init(
-			Object newObjectName,
-			Object tableElementList,
-			Object properties,
-			Object onCommitDeleteRows,
-			Object onRollbackDeleteRows)
+    CreateTableNode(
+            TableName tableName,
+            TableElementList tableElementList,
+            Properties properties,
+            boolean onCommitDeleteRows,
+            boolean onRollbackDeleteRows,
+            ContextManager cm)
 		throws StandardException
 	{
-		tableType = TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE;
-		newObjectName = tempTableSchemaNameCheck(newObjectName);
-		this.onCommitDeleteRows = ((Boolean) onCommitDeleteRows).booleanValue();
-		this.onRollbackDeleteRows = ((Boolean) onRollbackDeleteRows).booleanValue();
-		initAndCheck(newObjectName);
-		this.tableElementList = (TableElementList) tableElementList;
-		this.properties = (Properties) properties;
+        super(tempTableSchemaNameCheck(tableName), cm);
+        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
+
+        this.tableType = TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE;
+        this.onCommitDeleteRows = onCommitDeleteRows;
+        this.onRollbackDeleteRows = onRollbackDeleteRows;
+        this.tableElementList = tableElementList;
+        this.properties = properties;
 
 		if (SanityManager.DEBUG)
 		{
@@ -147,43 +143,51 @@ public class CreateTableNode extends DDLStatementNode
 	}
 	
 	/**
-	 * Initializer for a CreateTableNode for a base table create from a query
+     * Constructor for a CreateTableNode for a base table create from a query
 	 * 
-	 * @param newObjectName		The name of the new object being created
+     * @param tableName         The name of the new object being created
 	 * 	                        (ie base table).
 	 * @param resultColumns		The optional column list.
 	 * @param queryExpression	The query expression for the table.
+     * @param cm                The context manager
 	 */
-	public void init(
-			Object newObjectName,
-			Object resultColumns,
-			Object queryExpression)
-		throws StandardException
+    CreateTableNode(
+            TableName tableName,
+            ResultColumnList resultColumns,
+            ResultSetNode queryExpression,
+            ContextManager cm) throws StandardException
 	{
-		tableType = TableDescriptor.BASE_TABLE_TYPE;
-		lockGranularity = TableDescriptor.DEFAULT_LOCK_GRANULARITY;
-		implicitCreateSchema = true;
-		initAndCheck(newObjectName);
-		this.resultColumns = (ResultColumnList) resultColumns;
-		this.queryExpression = (ResultSetNode) queryExpression;
+        super(tableName, cm);
+        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
+        this.tableType = TableDescriptor.BASE_TABLE_TYPE;
+        this.lockGranularity = TableDescriptor.DEFAULT_LOCK_GRANULARITY;
+        this.implicitCreateSchema = true;
+        this.resultColumns = resultColumns;
+        this.queryExpression = queryExpression;
 	}
 
 	/**
 	 * If no schema name specified for global temporary table, SESSION is the implicit schema.
 	 * Otherwise, make sure the specified schema name for global temporary table is SESSION.
-	 * @param objectName		The name of the new object being declared (ie temporary table)
-	*/
-	private Object tempTableSchemaNameCheck(Object objectName)
+     *
+     * @param tableName The name of the new object being declared (ie
+     *        temporary table)
+     */
+    private static TableName tempTableSchemaNameCheck(TableName tableName)
 		throws StandardException {
-		TableName	tempTableName = (TableName) objectName;
-		if (tempTableName != null)
+        if (tableName != null)
 		{
-			if (tempTableName.getSchemaName() == null)
-				tempTableName.setSchemaName(SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME); //If no schema specified, SESSION is the implicit schema.
-			else if (!(isSessionSchema(tempTableName.getSchemaName())))
-				throw StandardException.newException(SQLState.LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA);
+            if (tableName.getSchemaName() == null) {
+                // If no schema specified, SESSION is the implicit schema.
+                tableName.setSchemaName(SchemaDescriptor.
+                    STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
+
+            } else if (!(isSessionSchema(tableName.getSchemaName()))) {
+                throw StandardException.newException(SQLState.
+                    LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA);
+            }
 		}
-		return(tempTableName);
+        return tableName;
 	}
 
 	/**
@@ -192,7 +196,7 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -221,7 +225,8 @@ public class CreateTableNode extends DDLStatementNode
 	 * how tree printing is supposed to work.
 	 * @param depth		The depth to indent the sub-nodes
 	 */
-	public void printSubNodes(int depth) {
+    @Override
+    void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
 			printLabel(depth, "tableElementList: ");
 			tableElementList.treePrint(depth + 1);
@@ -229,7 +234,7 @@ public class CreateTableNode extends DDLStatementNode
 	}
 
 
-	public String statementToString()
+    String statementToString()
 	{
 		if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			return "DECLARE GLOBAL TEMPORARY TABLE";
@@ -247,24 +252,23 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		DataDictionary	dataDictionary = getDataDictionary();
-		int numPrimaryKeys = 0;
-		int numCheckConstraints = 0;
-		int numReferenceConstraints = 0;
-		int numUniqueConstraints = 0;
-        int numGenerationClauses = 0;
+        int numPrimaryKeys;
+        int numCheckConstraints;
+        int numReferenceConstraints;
+        int numUniqueConstraints;
+        int numGenerationClauses;
 
         SchemaDescriptor sd = getSchemaDescriptor
             ( tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE, true);
 
 		if (queryExpression != null)
 		{
-			FromList fromList = (FromList) getNodeFactory().getNode(
-					C_NodeTypes.FROM_LIST,
-					getNodeFactory().doJoinOrderOptimization(),
+            FromList fromList = new FromList(
+                    getOptimizerFactory().doJoinOrderOptimization(),
 					getContextManager());
 			
 			CompilerContext cc = getCompilerContext();
@@ -317,7 +321,7 @@ public class CreateTableNode extends DDLStatementNode
 			int schemaCollationType = sd.getCollationType();
 	    
 			/* Create table element list from columns in query expression */
-			tableElementList = new TableElementList();
+            tableElementList = new TableElementList(getContextManager());
 			
 			for (int index = 0; index < qeRCL.size(); index++)
 			{
@@ -362,8 +366,12 @@ public class CreateTableNode extends DDLStatementNode
 							DataTypeDescriptor.getCollationName(schemaCollationType));
 				}
 
-				ColumnDefinitionNode column = (ColumnDefinitionNode) getNodeFactory().getNode
-                    ( C_NodeTypes.COLUMN_DEFINITION_NODE, rc.getName(), null, rc.getType(), null, getContextManager() );
+                ColumnDefinitionNode column = new ColumnDefinitionNode(
+                        rc.getName(),
+                        null,
+                        rc.getType(),
+                        null,
+                        getContextManager() );
 				tableElementList.addTableElement(column);
 			}
 		} else {
@@ -467,6 +475,7 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -482,7 +491,8 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public ConstantAction	makeConstantAction() throws StandardException
+    @Override
+    public ConstantAction makeConstantAction() throws StandardException
 	{
 		TableElementList		coldefs = tableElementList;
 
@@ -568,6 +578,7 @@ public class CreateTableNode extends DDLStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

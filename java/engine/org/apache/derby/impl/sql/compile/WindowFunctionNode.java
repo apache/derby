@@ -22,12 +22,10 @@ package org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.reference.SQLState;
-
-
 
 /**
  * Superclass of any window function call.
@@ -47,22 +45,24 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
     private ColumnReference         generatedRef;
 
     /**
-     * Initializer for a WindowFunctionNode
-     * @param arg1 null (operand)
-     * @param arg2 function mame (operator)
-     * @param arg3 window node (definition or reference)
-     * @exception StandardException
+     * @param op operand (null for now)
+     * @param functionName operator
+     * @param w window node (definition or reference)
+     * @param cm context manager
+     * @throws StandardException
      */
-    public void init(Object arg1, Object arg2, Object arg3)
-    {
-        super.init(arg1, arg2, null);
-        this.window = (WindowNode)arg3;
+    WindowFunctionNode(
+            ValueNode op, String functionName, WindowNode w, ContextManager cm)
+            throws StandardException {
+        super(op, functionName, (String)null, cm);
+        this.window = w;
     }
 
     /**
      * ValueNode override.
      * @see ValueNode#isConstantExpression
      */
+    @Override
     public boolean isConstantExpression()
     {
         return false;
@@ -72,6 +72,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * ValueNode override.
      * @see ValueNode#isConstantExpression
      */
+    @Override
     public boolean constantExpression(PredicateList whereClause)
     {
         // Without this, an ORDER by on ROW_NUMBER could get optimised away
@@ -104,6 +105,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * ValueNode override.
      * @see ValueNode#bindExpression
      */
+    @Override
     ValueNode bindExpression(
             FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
@@ -148,7 +150,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * QueryTreeNode override.
      * @see QueryTreeNode#printSubNodes
      */
-
+    @Override
     public void printSubNodes(int depth)
     {
         if (SanityManager.DEBUG)
@@ -186,20 +188,14 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
             String                  generatedColName;
             CompilerContext         cc = getCompilerContext();
             generatedColName ="SQLCol" + cc.getNextColumnNumber();
-            generatedRC = (ResultColumn) getNodeFactory().getNode(
-                                            C_NodeTypes.RESULT_COLUMN,
-                                            generatedColName,
-                                            this,
-                                            getContextManager());
+            generatedRC = new ResultColumn(
+                    generatedColName, this, getContextManager());
             generatedRC.markGenerated();
 
             // Parse time.
             //
-            generatedRef = (ColumnReference) getNodeFactory().getNode(
-                                                C_NodeTypes.COLUMN_REFERENCE,
-                                                generatedRC.getName(),
-                                                null,
-                                                getContextManager());
+            generatedRef = new ColumnReference(
+                    generatedRC.getName(), null, getContextManager());
 
             // RESOLVE - unknown nesting level, but not correlated, so nesting
             // levels must be 0

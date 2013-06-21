@@ -21,31 +21,27 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.error.ErrorStringBuilder;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.ExceptionFactory;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.JVMInfo;
-
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.error.ExceptionSeverity;
-
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.JDBC40Translation;
-
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.io.IOException;
+import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.ExceptionFactory;
+import org.apache.derby.iapi.reference.JDBC40Translation;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
 	This class understands the message protocol and looks up
@@ -432,7 +428,7 @@ public abstract class Util  {
 			case Types.TINYINT 	:  return TypeId.TINYINT_NAME;
 			case Types.SMALLINT	:  return TypeId.SMALLINT_NAME;
 			case Types.INTEGER 	:  return TypeId.INTEGER_NAME;
-			case Types.BIGINT 	:  return TypeId.LONGINT_NAME;
+            case Types.BIGINT   :  return TypeId.BIGINT_NAME;
 
 			case Types.FLOAT 	:  return TypeId.FLOAT_NAME;
 			case Types.REAL 	:  return TypeId.REAL_NAME;

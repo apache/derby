@@ -23,34 +23,34 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
-
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
-
-public class IsNode extends BinaryLogicalOperatorNode
+class IsNode extends BinaryLogicalOperatorNode
 {
 	private boolean		notMe;	// set to true if we're to negate the sense of this node
 
 	/**
-	 * Initializer for an IsNode
+     * Constructor for an IsNode
 	 *
 	 * @param leftOperand	The left operand of the IS
 	 * @param rightOperand	The right operand of the IS
 	 * @param notMe			Whether to reverse the sense of this node.
+     * @param cm            The context manager
 	 */
 
-	public void init(
-							Object leftOperand,
-							Object rightOperand,
-							Object notMe )
+    IsNode(ValueNode leftOperand,
+           ValueNode rightOperand,
+           boolean notMe,
+           ContextManager cm)
 	{
 		// the false for shortCir
-		super.init(leftOperand, rightOperand, "is" );
-		this.notMe = ((Boolean) notMe).booleanValue();
+        super(leftOperand, rightOperand, "is", cm );
+        setNodeType(C_NodeTypes.IS_NODE);
+        this.notMe = notMe;
 	}
 
 	/**

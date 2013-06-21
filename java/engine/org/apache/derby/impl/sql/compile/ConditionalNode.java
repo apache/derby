@@ -22,30 +22,20 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.reference.ClassName;
-
-
-import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A ConditionalNode represents an if/then/else operator with a single
@@ -54,7 +44,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
  *
  */
 
-public class ConditionalNode extends ValueNode
+class ConditionalNode extends ValueNode
 {
 	ValueNode		testCondition;
 	ValueNodeList	thenElseList;
@@ -63,17 +53,22 @@ public class ConditionalNode extends ValueNode
 	boolean	thisIsNullIfNode;
 
 	/**
-	 * Initializer for a ConditionalNode
+     * Constructor for a ConditionalNode
 	 *
 	 * @param testCondition		The boolean test condition
 	 * @param thenElseList		ValueNodeList with then and else expressions
+     * @param cm                The context manager
 	 */
-
-	public void init(Object testCondition, Object thenElseList, Object thisIsNullIfNode)
+    ConditionalNode(ValueNode testCondition,
+                    ValueNodeList thenElseList,
+                    boolean thisIsNullIfNode,
+                    ContextManager cm)
 	{
-		this.testCondition = (ValueNode) testCondition;
-		this.thenElseList = (ValueNodeList) thenElseList;
-		this.thisIsNullIfNode = ((Boolean) thisIsNullIfNode).booleanValue();
+        super(cm);
+        this.testCondition = testCondition;
+        this.thenElseList = thenElseList;
+        this.thisIsNullIfNode = thisIsNullIfNode;
+        setNodeType(C_NodeTypes.CONDITIONAL_NODE);
 	}
 
 	/**
@@ -83,7 +78,7 @@ public class ConditionalNode extends ValueNode
 	 * @param depth		The depth of this node in the tree
 	 */
 
-	public void printSubNodes(int depth)
+    void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -110,10 +105,7 @@ public class ConditionalNode extends ValueNode
 	 * @return 		True if this node is a CastNode, false otherwise.
 	 */
 	private boolean isCastNode(ValueNode node) {
-		if (node.getNodeType() == C_NodeTypes.CAST_NODE)
-			return true;
-		else
-			return false;
+        return node.getNodeType() == C_NodeTypes.CAST_NODE;
 	}
 
 	/**
@@ -154,10 +146,7 @@ public class ConditionalNode extends ValueNode
 	 * @return        True if this node is a CondtionalNode, false otherwise.
 	 */
 	private boolean isConditionalNode(ValueNode node) {
-		if (node.getNodeType() == C_NodeTypes.CONDITIONAL_NODE)
-			return true;
-		else
-			return false;
+        return node.getNodeType() == C_NodeTypes.CONDITIONAL_NODE;
 	}
 
 	/**
@@ -345,8 +334,7 @@ public class ConditionalNode extends ValueNode
 	private QueryTreeNode recastNullNode(ValueNode nodeToCast,
 		DataTypeDescriptor typeToUse) throws StandardException
 	{
-		return (QueryTreeNode) getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
+        return new CastNode(
 					((CastNode)nodeToCast).castOperand,
 					typeToUse,
 					getContextManager());
@@ -365,7 +353,7 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 			throws StandardException
 	{
@@ -391,9 +379,8 @@ public class ConditionalNode extends ValueNode
 			 * The untyped NULL should have a data type descriptor
 			 * that allows its value to be nullable.
 			 */
-			QueryTreeNode cast = (QueryTreeNode) getNodeFactory().getNode(
-						C_NodeTypes.CAST_NODE,
-						thenElseList.elementAt(0), 
+            QueryTreeNode cast = new CastNode(
+                        (ValueNode)thenElseList.elementAt(0),
 						bcon.getLeftOperand().getTypeServices().getNullabilityType(true),
 						getContextManager());
 
@@ -513,9 +500,8 @@ public class ConditionalNode extends ValueNode
 		 */
 		if (thenTypeId.typePrecedence() != condTypeId.typePrecedence())
 		{
-			ValueNode cast = (ValueNode) getNodeFactory().getNode(
-								C_NodeTypes.CAST_NODE,
-								thenElseList.elementAt(0), 
+            ValueNode cast = new CastNode(
+                                (ValueNode)thenElseList.elementAt(0),
                                 getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
@@ -527,9 +513,8 @@ public class ConditionalNode extends ValueNode
 
 		else if (elseTypeId.typePrecedence() != condTypeId.typePrecedence())
 		{
-			ValueNode cast = (ValueNode) getNodeFactory().getNode(
-								C_NodeTypes.CAST_NODE,
-								thenElseList.elementAt(1), 
+            ValueNode cast = new CastNode(
+                                (ValueNode)thenElseList.elementAt(1),
                                 getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
@@ -559,7 +544,8 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public ValueNode preprocess(int numTables,
+    @Override
+    ValueNode preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -599,7 +585,8 @@ public class ConditionalNode extends ValueNode
 	 *						or a VirtualColumnNode.
 	 * @exception StandardException			Thrown on error
 	 */
-	public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+    @Override
+    boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
 		throws StandardException
 	{
 		/* We stop here when only considering simple predicates
@@ -626,7 +613,8 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException			Thrown on error
 	 */
-	public ValueNode remapColumnReferencesToExpressions()
+    @Override
+    ValueNode remapColumnReferencesToExpressions()
 		throws StandardException
 	{
 		testCondition = testCondition.remapColumnReferencesToExpressions();
@@ -639,14 +627,16 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @return	Whether or not this expression tree represents a constant expression.
 	 */
-	public boolean isConstantExpression()
+    @Override
+    boolean isConstantExpression()
 	{
 		return (testCondition.isConstantExpression() &&
 			    thenElseList.isConstantExpression());
 	}
 
 	/** @see ValueNode#constantExpression */
-	public boolean constantExpression(PredicateList whereClause)
+    @Override
+    boolean constantExpression(PredicateList whereClause)
 	{
 		return (testCondition.constantExpression(whereClause) &&
 			    thenElseList.constantExpression(whereClause));
@@ -668,6 +658,7 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
@@ -696,7 +687,7 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
     void generateExpression(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
 	{
@@ -719,6 +710,7 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

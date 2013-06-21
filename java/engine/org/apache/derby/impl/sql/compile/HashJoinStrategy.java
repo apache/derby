@@ -22,40 +22,30 @@
 package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.ClassSize;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.iapi.services.io.FormatableArrayHolder;
+import org.apache.derby.iapi.services.io.FormatableIntHolder;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.io.ArrayUtil;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.cache.ClassSize;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-import org.apache.derby.iapi.services.io.FormatableIntHolder;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-
-public class HashJoinStrategy extends BaseJoinStrategy {
-	public HashJoinStrategy() {
+class HashJoinStrategy extends BaseJoinStrategy {
+    HashJoinStrategy() {
 	}
 
 	/**
@@ -69,8 +59,6 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 							)
 					throws StandardException 
 	{
-		int[] hashKeyColumns = null;
-
 		ConglomerateDescriptor cd = null;
 
 		/* If the innerTable is a VTI, then we
@@ -130,10 +118,10 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 			// Now get a list of all table numbers referenced by the
 			// join predicates that we'll be searching.
 			JBitSet pNums = new JBitSet(tNums.size());
-			Predicate pred = null;
-			for (int i = 0; i < predList.size(); i++)
+
+            for (int i = 0; i < predList.size(); i++)
 			{
-				pred = (Predicate)predList.getOptPredicate(i);
+                Predicate pred = (Predicate)predList.getOptPredicate(i);
 				if (pred.isJoinPredicate())
 					pNums.or(pred.getReferencedSet());
 			}
@@ -155,10 +143,10 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		}
 		
 		/* Look for equijoins in the predicate list */
-		hashKeyColumns = findHashKeyColumns(
-											innerTable,
-											cd,
-											predList);
+        int[] hashKeyColumns = findHashKeyColumns(
+                innerTable,
+                cd,
+                predList);
 
 		if (SanityManager.DEBUG)
 		{
@@ -184,6 +172,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 	}
 
 	/** @see JoinStrategy#ignoreBulkFetch */
+    @Override
 	public boolean ignoreBulkFetch() {
 		return true;
 	}
@@ -357,10 +346,10 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		 */
 		if (SanityManager.DEBUG)
 		{
-			Predicate pred = null;
 			for (int i = storeRestrictionList.size() - 1; i >= 0; i--)
 			{
-				pred = (Predicate)storeRestrictionList.getOptPredicate(i);
+                Predicate pred =
+                        (Predicate)storeRestrictionList.getOptPredicate(i);
 				if (pred.isInListProbePredicate())
 				{
 					SanityManager.THROWASSERT("Found IN-list probing " +
@@ -583,6 +572,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 	/**
 	 * @see JoinStrategy#isHashJoin
 	 */
+    @Override
 	public boolean isHashJoin()
 	{
 		return true;
@@ -623,7 +613,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 		 * an equijoin condition on it.  We do essentially the same
 		 * for heaps.  (From column 1 through column n.)
 		 */
-		int[] columns = null;
+        int[] columns;
 		if (cd == null)
 		{
 			columns = new int[innerTable.getNumColumnsReturned()];
@@ -666,11 +656,12 @@ public class HashJoinStrategy extends BaseJoinStrategy {
         int[] keyCols = new int[hashKeys.size()];
         for (int index = 0; index < keyCols.length; index++)
         {
-            keyCols[index] = ((Integer) hashKeys.get(index)).intValue();
+            keyCols[index] = hashKeys.get(index).intValue();
         }
         return keyCols;
 	}
 
+    @Override
 	public String toString() {
 		return getName();
 	}
