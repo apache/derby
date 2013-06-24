@@ -356,9 +356,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		/* Nothing to do if open was short circuited by false constant expression */
 		if (shortCircuitOpen)
 		{
-			isOpen = false;
 			shortCircuitOpen = false;
 			source.close();
+            super.close();
 			return;
 		}
 
