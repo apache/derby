@@ -2498,6 +2498,27 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that run-time statistics are recorded even if the query has a
+     * predicate that always evaluates to false. Before DERBY-6268, the logic
+     * that saved the statistics would be short-circuited in such queries.
+     */
+    public void testAlwaysEmptyResultSet() throws Exception {
+        // Execute a query with a predicate that is known at compile time to
+        // evaluate to false. The predicate FALSE should do.
+        String sql = "select * from sysibm.sysdummy1 where false -- DERBY-6268";
+        Statement s = createStatement();
+        enableXplainStyle(s);
+        JDBC.assertEmpty(s.executeQuery(sql));
+        disableXplainStyle(s);
+
+        // Now, see if we find the query among the recorded statements.
+        PreparedStatement ps = prepareStatement(
+            "select * from xpltest.sysxplain_statements where stmt_text = ?");
+        ps.setString(1, sql);
+        JDBC.assertDrainResults(ps.executeQuery(), 1);
+    }
+
+    /**
       * A simple test of table with the wrong 'shape'.
       */
     public void testTableNotValid()
