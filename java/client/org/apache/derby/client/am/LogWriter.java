@@ -301,337 +301,49 @@ public class LogWriter {
         traceExit(instance, methodName, "0x" + Integer.toHexString(returnValue & 0xff));
     }
 
-    public void traceExit(Object instance, String methodName, int returnValue) {
-        traceExit(instance, methodName, String.valueOf(returnValue));
-    }
-
-    public void traceExit(Object instance, String methodName, boolean returnValue) {
-        traceExit(instance, methodName, String.valueOf(returnValue));
-    }
-
-    void traceExit(Object instance, String methodName, long returnValue) {
-        traceExit(instance, methodName, String.valueOf(returnValue));
-    }
-
-    void traceExit(Object instance, String methodName, float returnValue) {
-        traceExit(instance, methodName, String.valueOf(returnValue));
-    }
-
-    void traceExit(Object instance, String methodName, double returnValue) {
-        traceExit(instance, methodName, String.valueOf(returnValue));
-    }
-
     // --------------------------- method entry tracing --------------------------
 
-    private void traceEntryAllArgs(Object instance, String methodName, String argList) {
+    public void traceEntry(Object instance, String methodName, Object... args) {
+        traceEntryAllArgs(instance, methodName, false, args);
+    }
+
+    public void traceDeprecatedEntry(
+            Object instance, String methodName, Object... args) {
+        traceEntryAllArgs(instance, methodName, true, args);
+    }
+
+    private void traceEntryAllArgs(Object instance, String methodName,
+                                   boolean deprecated, Object[] args) {
         String className = getClassNameOfInstanceIfTraced(instance);
         if (className == null) {
             return;
         }
         synchronized (printWriter_) {
-            traceExternalMethod(instance, className, methodName);
-            printWriter_.println(" " + argList + " called");
+            if (deprecated) {
+                traceExternalDeprecatedMethod(instance, className, methodName);
+            } else {
+                traceExternalMethod(instance, className, methodName);
+            }
+            printWriter_.print(" (");
+            for (int i = 0; i < args.length; i++) {
+                if (i > 0) {
+                    printWriter_.print(", ");
+                }
+                printWriter_.print(toPrintableString(args[i]));
+            }
+            printWriter_.println(") called");
             printWriter_.flush();
         }
     }
 
-    private void traceDeprecatedEntryAllArgs(Object instance, String methodName, String argList) {
-        String className = getClassNameOfInstanceIfTraced(instance);
-        if (className == null) {
-            return;
+    private static String toPrintableString(Object o) {
+        if (o instanceof byte[]) {
+            return Utils.getStringFromBytes((byte[]) o);
+        } else if (o instanceof Byte) {
+            return "0x" + Integer.toHexString(((Byte) o) & 0xff);
         }
-        synchronized (printWriter_) {
-            traceExternalDeprecatedMethod(instance, className, methodName);
-            printWriter_.println(" " + argList + " called");
-            printWriter_.flush();
-        }
-    }
 
-    // ---------------------- trace entry of methods w/ no args ------------------
-
-    public void traceEntry(Object instance, String methodName) {
-        traceEntryAllArgs(instance, methodName, "()");
-    }
-
-    // ---------------------- trace entry of methods w/ 1 arg --------------------
-
-    public void traceEntry(Object instance, String methodName, Object argument) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + argument + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, boolean argument) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + argument + ")");
-    }
-
-    public void traceEntry(Object instance, String methodName, int argument) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + argument + ")");
-    }
-
-    void traceDeprecatedEntry(
-            Object instance,
-            String methodName,
-            int argument) {
-
-        traceDeprecatedEntryAllArgs(instance, methodName,
-                "(" + argument + ")");
-    }
-
-    void traceDeprecatedEntry(
-            Object instance,
-            String methodName,
-            Object argument) {
-
-        traceDeprecatedEntryAllArgs(instance, methodName,
-                "(" + argument + ")");
-    }
-
-    // ---------------------- trace entry of methods w/ 2 args -------------------
-
-    public void traceEntry(Object instance, String methodName, Object arg1, Object arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, Object arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, byte[] arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + Utils.getStringFromBytes(arg2) + ")");
-    }
-
-    void traceDeprecatedEntry(
-            Object instance,
-            String methodName,
-            int arg1,
-            int arg2) {
-
-        traceDeprecatedEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceDeprecatedEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            int arg2) {
-
-        traceDeprecatedEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            int arg1,
-            boolean arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, byte arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, short arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, int arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, long arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, float arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName, int arg1, double arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    public void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            boolean arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            byte arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", 0x" + Integer.toHexString(arg2 & 0xff) + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            short arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    public void traceEntry(Object instance, String methodName, Object arg1, int arg2) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            long arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            float arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    void traceEntry(
-            Object instance,
-            String methodName,
-            Object arg1,
-            double arg2) {
-
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ")");
-    }
-
-    // ---------------------- trace entry of methods w/ 3 args -------------------
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, Object arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           int arg1, Object arg2, Object arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, int arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           int arg1, Object arg2, int arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceDeprecatedEntry(Object instance, String methodName,
-                                     int arg1, Object arg2, int arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           int arg1, int arg2, Object arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           int arg1, int arg2, int arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, int arg2, int arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, int arg2, Object arg3) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ")");
-    }
-
-    // ---------------------- trace entry of methods w/ 4 args -------------------
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, Object arg3, Object arg4) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           int arg1, Object arg2, int arg3, int arg4) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, int arg2, int arg3, int arg4) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, int arg3, int arg4) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ")");
-    }
-
-    // ---------------------- trace entry of methods w/ 5 args -------------------
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, Object arg3, int arg4, boolean arg5) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
-    }
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, Object arg3, boolean arg4, boolean arg5) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ")");
-    }
-
-    // ---------------------- trace entry of methods w/ 6 args -------------------
-
-    void traceEntry(Object instance, String methodName,
-                           Object arg1, Object arg2, Object arg3, Object arg4, Object arg5, Object arg6) {
-        traceEntryAllArgs(instance, methodName,
-                "(" + arg1 + ", " + arg2 + ", " + arg3 + ", " + arg4 + ", " + arg5 + ", " + arg6 + ")");
+        return String.valueOf(o);
     }
 
     // ---------------------------tracing exceptions and warnings-----------------
