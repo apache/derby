@@ -145,15 +145,9 @@ abstract class ConnectionChild {
 		return cal;
 	}
 
-	SQLException newSQLException(String messageId) {
-		return localConn.newSQLException(messageId);
-	}
-	SQLException newSQLException(String messageId, Object arg1) {
-		return localConn.newSQLException(messageId, arg1);
-	}
-	SQLException newSQLException(String messageId, Object arg1, Object arg2) {
-		return localConn.newSQLException(messageId, arg1, arg2);
-	}
+    static SQLException newSQLException(String messageId, Object... args) {
+        return EmbedConnection.newSQLException(messageId, args);
+    }
 
     protected static void restoreIntrFlagIfSeen(
         boolean pushStack, EmbedConnection ec) {

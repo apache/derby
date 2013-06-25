@@ -137,7 +137,7 @@ public class EmbedConnection implements EngineConnection
      * like the VM dying could occur. Simpler just to throw a static.
      */
     public static final SQLException NO_MEM =
-        Util.generateCsSQLException(SQLState.LOGIN_FAILED, "java.lang.OutOfMemoryError");
+        newSQLException(SQLState.LOGIN_FAILED, "java.lang.OutOfMemoryError");
     
     /**
      * Low memory state object for connection requests.
@@ -2311,8 +2311,8 @@ public class EmbedConnection implements EngineConnection
     public final void setTypeMap(java.util.Map map) throws SQLException {
         checkIfClosed();
         if( map == null)
-            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,map,"map",
-                                              "java.sql.Connection.setTypeMap");
+            throw newSQLException(SQLState.INVALID_API_PARAMETER, map, "map",
+                                  "java.sql.Connection.setTypeMap");
         if(!(map.isEmpty()))
             throw Util.notImplemented();
     }
@@ -2704,15 +2704,15 @@ public class EmbedConnection implements EngineConnection
             
             factory.checkSystemPrivileges(user, dp);
         } catch (AccessControlException ace) {
-            throw Util.generateCsSQLException(
+            throw newSQLException(
                     SQLState.AUTH_DATABASE_CREATE_MISSING_PERMISSION,
                     user, dbname, ace);
         } catch (IOException ioe) {
-            throw Util.generateCsSQLException(
+            throw newSQLException(
                     SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
                     dbname, (Object)ioe); // overloaded method
         } catch (Exception e) {
-            throw Util.generateCsSQLException(
+            throw newSQLException(
                     SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
                     dbname, (Object)e); // overloaded method
         }
@@ -3150,8 +3150,8 @@ public class EmbedConnection implements EngineConnection
 			case TransactionControl.UNSPECIFIED_ISOLATION_LEVEL:
 				break;
 			default:
-				throw Util.generateCsSQLException(
-															   SQLState.UNIMPLEMENTED_ISOLATION_LEVEL, new Integer(level));
+                throw newSQLException(
+                        SQLState.UNIMPLEMENTED_ISOLATION_LEVEL, level);
 		}
 		
 		synchronized(getConnectionSynchronization())
@@ -3183,18 +3183,9 @@ public class EmbedConnection implements EngineConnection
 		}
 	}
 
-	protected static SQLException newSQLException(String messageId) {
-		return Util.generateCsSQLException(messageId);
-	}
-	protected static SQLException newSQLException(String messageId, Object arg1) {
-		return Util.generateCsSQLException(messageId, arg1);
-	}
-	protected static SQLException newSQLException(String messageId, Object arg1, Object arg2) {
-		return Util.generateCsSQLException(messageId, arg1, arg2);
-	}
-	protected static SQLException newSQLException(String messageId, Object arg1, Object arg2, Object arg3) {
-		return Util.generateCsSQLException(messageId, arg1, arg2, arg3);
-	}
+    static SQLException newSQLException(String messageId, Object... args) {
+        return Util.generateCsSQLException(messageId, args);
+    }
 
 	/////////////////////////////////////////////////////////////////////////
 	//
@@ -3616,7 +3607,7 @@ public class EmbedConnection implements EngineConnection
         EmbedSavepoint lsv = (EmbedSavepoint) savepoint;
         // bug 4451 need to throw error for null Savepoint
         if (lsv == null) {
-            throw Util.generateCsSQLException(
+            throw newSQLException(
                 SQLState.XACT_SAVEPOINT_NOT_FOUND, "null");
         }
 
@@ -3740,9 +3731,8 @@ public class EmbedConnection implements EngineConnection
     public boolean isValid(int timeout) throws SQLException {
         // Validate that the timeout has a legal value
         if (timeout < 0) {
-            throw Util.generateCsSQLException(SQLState.INVALID_API_PARAMETER,
-                                              new Integer(timeout), "timeout",
-                                              "java.sql.Connection.isValid");
+            throw newSQLException(SQLState.INVALID_API_PARAMETER, timeout,
+                                  "timeout", "java.sql.Connection.isValid");
         }
 
         // Use the closed status for the connection to determine if the
