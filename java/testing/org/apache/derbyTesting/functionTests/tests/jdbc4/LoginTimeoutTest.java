@@ -38,7 +38,7 @@ import org.apache.derby.authentication.UserAuthenticator;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCClient;
@@ -219,12 +219,18 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         embedded = TestConfiguration.singleUseDatabaseDecorator( embedded );
         embedded = new SystemPropertyTestSetup( embedded, systemProperties() );
         suite.addTest( embedded );
-        
-        Test    clientServer = new TestSuite( LoginTimeoutTest.class, "client/server LoginTimeoutTest" );
-        clientServer = TestConfiguration.singleUseDatabaseDecorator( clientServer );
-        clientServer = new JDBCClientSetup( clientServer, JDBCClient.DERBYNETCLIENT );
-        clientServer = new NetworkServerTestSetup( clientServer, systemPropertiesArray(), new String[]{}, true );
-        suite.addTest( clientServer );
+
+        if (Derby.hasServer() && Derby.hasClient()) {
+            Test clientServer = new TestSuite(
+                    LoginTimeoutTest.class, "client/server LoginTimeoutTest");
+            clientServer =
+                    TestConfiguration.singleUseDatabaseDecorator(clientServer);
+            clientServer = new JDBCClientSetup(
+                    clientServer, JDBCClient.DERBYNETCLIENT);
+            clientServer = new NetworkServerTestSetup(clientServer,
+                    systemPropertiesArray(), new String[]{}, true);
+            suite.addTest(clientServer);
+        }
 
         return suite;
     }
