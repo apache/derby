@@ -143,32 +143,8 @@ public class WwdEmbedded
             /*       Catch all exceptions and pass them to 
             **       the exception reporting method             */
             System.out.println(" . . . exception thrown:");
-            errorPrint(e);
+            e.printStackTrace(System.out);
          }
          System.out.println("Getting Started With Derby JDBC program ending.");
       }
-     //   ## DERBY EXCEPTION REPORTING CLASSES  ## 
-    /***     Exception reporting methods
-    **      with special handling of SQLExceptions
-    ***/
-      static void errorPrint(Throwable e) {
-         if (e instanceof SQLException) 
-            SQLExceptionPrint((SQLException)e);
-         else {
-            System.out.println("A non SQL error occured.");
-            e.printStackTrace();
-         }   
-      }  // END errorPrint 
-
-    //  Iterates through a stack of SQLExceptions 
-      static void SQLExceptionPrint(SQLException sqle) {
-         while (sqle != null) {
-            System.out.println("\n---SQLException Caught---\n");
-            System.out.println("SQLState:   " + (sqle).getSQLState());
-            System.out.println("Severity: " + (sqle).getErrorCode());
-            System.out.println("Message:  " + (sqle).getMessage()); 
-            sqle.printStackTrace();  
-            sqle = sqle.getNextException();
-         }
-   }  //  END SQLExceptionPrint   	
 }
