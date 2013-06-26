@@ -1067,6 +1067,48 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "where coalesce(a2, 0) <> 1"));
     }
 
+    /**
+     * If more than one of the arguments passed to COALESCE are untyped
+     * parameter markers, compilation used to fail with a NullPointerException.
+     * Fixed in DERBY-6273.
+     */
+    public void testMultipleUntypedParameters() throws SQLException {
+        // All parameters cannot be untyped. This should still fail.
+        assertCompileError("42610", "values coalesce(?,?,?)");
+
+        // But as long as we know the type of one parameter, it should be
+        // possible to have multiple parameters whose types are determined
+        // from the context. These queries used to raise NullPointerException
+        // before DERBY-6273.
+        vetThreeArgCoalesce("values coalesce(cast(? as char(1)), ?, ?)");
+        vetThreeArgCoalesce("values coalesce(?, cast(? as char(1)), ?)");
+        vetThreeArgCoalesce("values coalesce(?, ?, cast(? as char(1)))");
+    }
+
+    private void vetThreeArgCoalesce(String sql) throws SQLException {
+        // First three values in each row are arguments to COALESCE. The
+        // last value is the expected return value.
+        String[][] data = {
+            {"a",  "b",  "c",  "a"},
+            {null, "b",  "c",  "b"},
+            {"a",  null, "c",  "a"},
+            {"a",  "b",  null, "a"},
+            {null, null, "c",  "c"},
+            {"a",  null, null, "a"},
+            {null, "b",  null, "b"},
+            {null, null, null, null},
+        };
+
+        PreparedStatement ps = prepareStatement(sql);
+
+        for (int i = 0; i < data.length; i++) {
+            ps.setString(1, data[i][0]);
+            ps.setString(2, data[i][1]);
+            ps.setString(3, data[i][2]);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), data[i][3]);
+        }
+    }
+
     /**************supporting methods *******************/
     private void dumpRS(ResultSet rs, String expectedValue) throws SQLException
     {

@@ -179,7 +179,6 @@ class CoalesceFunctionNode extends ValueNode
 			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext())
 			{
 				((ValueNode)argumentsList.elementAt(index)).setType(getTypeServices());
-				break;
 			}
 		}
 		return this;
