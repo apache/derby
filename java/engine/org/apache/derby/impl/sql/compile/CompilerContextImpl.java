@@ -587,7 +587,7 @@ public class CompilerContextImpl extends ContextImpl
 	/**
      * Get an array of type descriptors for all the ? parameters.
 	 */
-    public DataTypeDescriptor[] getParameterTypes()
+    DataTypeDescriptor[] getParameterTypes()
 	{
 		return parameterDescriptors;
 	}
