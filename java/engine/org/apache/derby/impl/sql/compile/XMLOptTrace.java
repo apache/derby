@@ -489,15 +489,15 @@ class   XMLOptTrace implements  OptTrace
     /** Get the name of an optimizable */
     private TableName    getOptimizableName( Optimizable optimizable )
     {
+        ContextManager  cm = ((QueryTreeNode) optimizable).getContextManager();
+        
         try {
             if ( isBaseTable( optimizable ) )
             {
                 ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 TableDescriptor td = 
                     ((FromBaseTable) prn.getChildResult()).getTableDescriptor();
-                return makeTableName( td.getSchemaName(),
-                                      td.getName(),
-                                      prn.getContextManager() );
+                return makeTableName( td.getSchemaName(), td.getName(), cm );
             }
             else if ( isTableFunction( optimizable ) )
             {
@@ -505,9 +505,7 @@ class   XMLOptTrace implements  OptTrace
                 AliasDescriptor ad =
                     ((StaticMethodCallNode) ((FromVTI) prn.getChildResult()).
                         getMethodCall() ).ad;
-                return makeTableName( ad.getSchemaName(), 
-                                      ad.getName(),
-                                      prn.getContextManager() );
+                return makeTableName( ad.getSchemaName(), ad.getName(), cm );
             }
             else if ( isFromTable( optimizable ) )
             {
@@ -525,7 +523,7 @@ class   XMLOptTrace implements  OptTrace
         String  nodeClass = optimizable.getClass().getName();
         String  unqualifiedName = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
 
-        return makeTableName( null, unqualifiedName, null );
+        return makeTableName( null, unqualifiedName, cm );
     }
 
     /** Return true if the optimizable is a base table */
