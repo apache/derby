@@ -30,10 +30,12 @@ import org.apache.derby.impl.sql.execute.IndexColumnOrder;
  * List of OrderedColumns
  *
  */
-public abstract class OrderedColumnList extends QueryTreeNodeVector
+public abstract class OrderedColumnList<E extends OrderedColumn>
+    extends QueryTreeNodeVector<E>
 {
-    public OrderedColumnList(ContextManager cm) {
-        super(cm);
+    public OrderedColumnList(Class<E> eltClass,
+            ContextManager cm) {
+        super(eltClass, cm);
     }
 
 	/**
@@ -61,7 +63,7 @@ public abstract class OrderedColumnList extends QueryTreeNodeVector
 
 		for (int i = 0; i < numCols; i++)
 		{
-			OrderedColumn oc = (OrderedColumn) elementAt(i);
+            OrderedColumn oc = elementAt(i);
 
 			// order by (lang) positions are 1-based,
 			// order items (store) are 0-based.

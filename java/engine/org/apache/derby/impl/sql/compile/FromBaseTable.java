@@ -613,11 +613,8 @@ class FromBaseTable extends FromTable
 		baseCols = irg.baseColumnPositions();
 
 		/* First we check to see if this is a covering index */
-		int rclSize = resultColumns.size();
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : resultColumns)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
-
 			/* Ignore unreferenced columns */
 			if (! rc.isReferenced())
 			{
@@ -680,7 +677,7 @@ class FromBaseTable extends FromTable
 		boolean indexSpecified = false;
 		boolean constraintSpecified = false;
 		ConstraintDescriptor consDesc = null;
-		Enumeration e = tableProperties.keys();
+        Enumeration<?> e = tableProperties.keys();
 
         StringUtil.SQLEqualsIgnoreCase(tableDescriptor.getSchemaName(), "SYS");
 		while (e.hasMoreElements())
@@ -1354,10 +1351,9 @@ class FromBaseTable extends FromTable
                     // when the index is being considered by the optimizer.
                     IndexRowGenerator irg = cd.getIndexDescriptor();
                     if (irg.isUnique() 
-                        && irg.numberOfOrderedColumns() == 1 
-                        && startStopPredCount == 1) {
-                            statStartStopSelectivity = 
-                                (double)(1/(double)baseRowCount());
+                            && irg.numberOfOrderedColumns() == 1
+                            && startStopPredCount == 1) {
+                        statStartStopSelectivity = (1/(double)baseRowCount());
                     }
                 }
             }
@@ -2384,10 +2380,10 @@ class FromBaseTable extends FromTable
 				//sql accessing a view, we only need to look for select privilege
 				//on the actual view and that is what the following code is
 				//checking.
-				for (int i = 0; i < resultColumns.size(); i++) {
-					ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
-					if (rc.isPrivilegeCollectionRequired())
+                for (ResultColumn rc : resultColumns) {
+                    if (rc.isPrivilegeCollectionRequired()) {
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
+                    }
 				}
 
                 fsq = new FromSubquery(
@@ -3020,9 +3016,8 @@ class FromBaseTable extends FromTable
 		 * really need to completely disable bulk fetching here,
 		 * or can we do something else?
 		 */
-		for (int i = 0; i < restrictionList.size(); i++)
+        for (Predicate pred : restrictionList)
 		{
-			Predicate pred = (Predicate)restrictionList.elementAt(i);
 			if (pred.isInListProbePredicate() && pred.isStartKey())
 			{
 				disableBulkFetch();
@@ -4400,8 +4395,8 @@ class FromBaseTable extends FromTable
 		}
 
 		HashSet<ValueNode> columns = new HashSet<ValueNode>();
-		for (int i = 0; i < resultColumns.size(); i++) {
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+
+        for (ResultColumn rc : resultColumns) {
 			columns.add(rc.getExpression());
 		}
 

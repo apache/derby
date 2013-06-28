@@ -103,7 +103,7 @@ class GroupByNode extends SingleChildResultSetNode
 	private int		addDistinctAggregateColumnNum;
 
 	// Is the source in sorted order
-	private boolean isInSortedOrder;
+    final private boolean isInSortedOrder;
 
 	private ValueNode havingClause;
 	
@@ -201,23 +201,23 @@ class GroupByNode extends SingleChildResultSetNode
 			int index;
 			for (index = 0; index < glSize; index++)
 			{
-				GroupByColumn gc =
-						(GroupByColumn) this.groupingList.elementAt(index);
+                GroupByColumn gc = this.groupingList.elementAt(index);
 				if (gc.getColumnExpression() instanceof ColumnReference) 
 				{
 					crs[index] = (ColumnReference)gc.getColumnExpression();
 				} 
 				else 
 				{
-					isInSortedOrder = false;
 					break;
 				}
 				
 			}
-			if (index == glSize) {
-				isInSortedOrder = childResult.isOrderedOn(crs, true, (List<FromBaseTable>)null);
-			}
-		}
+
+            isInSortedOrder = (index == glSize) &&
+                childResult.isOrderedOn(crs, true, (List<FromBaseTable>)null);
+        } else {
+            isInSortedOrder = false;
+        }
 	}
 
 	/**
@@ -293,10 +293,9 @@ class GroupByNode extends SingleChildResultSetNode
 		** Get the new PR, put above the GroupBy.  
 		*/
         ResultColumnList rclNew = new ResultColumnList((getContextManager()));
-		int sz = resultColumns.size();
-		for (int i = 0; i < sz; i++) 
+
+        for (ResultColumn rc : resultColumns)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
 			if (!rc.isGenerated()) {
 				rclNew.addElement(rc);
 			}
@@ -350,10 +349,9 @@ class GroupByNode extends SingleChildResultSetNode
 		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
 		if (havingClause != null)
 			havingRefsToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
-		int sz = groupingList.size();
-		for (int i = 0; i < sz; i++) 
+
+        for (GroupByColumn gbc : groupingList)
 		{
-			GroupByColumn gbc = (GroupByColumn) groupingList.elementAt(i);
             ResultColumn newRC = new ResultColumn(
                     "##UnaggColumn",
 					gbc.getColumnExpression(),
@@ -780,14 +778,12 @@ class GroupByNode extends SingleChildResultSetNode
 			throws StandardException
 	{
 		// RESOLVE: NEED TO FACTOR IN THE COST OF GROUPING (SORTING) HERE
-		CostEstimate childCost = ((Optimizable) childResult).optimizeIt(
-													optimizer,
-													predList,
-													outerCost,
-													rowOrdering);
+        ((Optimizable) childResult).optimizeIt( optimizer,
+                                                predList,
+                                                outerCost,
+                                                rowOrdering);
 
-		CostEstimate retval = super.optimizeIt(
-												optimizer,
+        CostEstimate retval = super.optimizeIt( optimizer,
 												predList,
 												outerCost,
 												rowOrdering

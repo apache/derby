@@ -209,18 +209,15 @@ class JoinNode extends TableOperatorNode
 		 * implement full outer join.
 		 */
 		// Walk joinPredicates backwards due to possible deletes
-		for (int index = joinPredicates.size() - 1; index >= 0; index --)
+        for (int i = joinPredicates.size() - 1; i >= 0; i --)
 		{
-			JBitSet	  curBitSet;
-			Predicate predicate;
+            Predicate p = joinPredicates.elementAt(i);
 
-			predicate = (Predicate) joinPredicates.elementAt(index);
-			if (! predicate.getPushable())
+            if (joinPredicates.elementAt(i).getPushable())
 			{
-				continue;
-			}
-			joinPredicates.removeElementAt(index);
-			getRightPredicateList().addElement(predicate);
+                joinPredicates.removeElementAt(i);
+                getRightPredicateList().addElement(p);
+            }
 		}
 
 		rightResultSet = optimizeSource(
@@ -607,10 +604,8 @@ class JoinNode extends TableOperatorNode
 		 */
 		if (resultColumns != null)
 		{
-			int rclSize = resultColumns.size();
-			for (int index = 0; index < rclSize; index++)
+            for (ResultColumn rc : resultColumns)
 			{
-				ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
 				VirtualColumnNode vcn = (VirtualColumnNode) rc.getExpression();
 				if (resultColumn == vcn.getSourceColumn())
 				{
@@ -852,15 +847,13 @@ class JoinNode extends TableOperatorNode
 			 * We need to bind the CRs a side at a time to ensure that
 			 * we don't find an bogus ambiguous column reference. (Bug 377)
 			 */
-           joinClause = new BooleanConstantNode(true, cm);
+            joinClause = new BooleanConstantNode(true, cm);
 
-			int usingSize = usingClause.size();
-			for (int index = 0; index < usingSize; index++)
+            for (ResultColumn rc : usingClause)
 			{
 				BinaryComparisonOperatorNode equalsNode;
 				ColumnReference leftCR;
 				ColumnReference rightCR;
-				ResultColumn	rc = (ResultColumn) usingClause.elementAt(index);
 
 				/* Create and bind the left CR */
 				fromListParam.insertElementAt(leftResultSet, 0);
@@ -983,8 +976,7 @@ class JoinNode extends TableOperatorNode
     private static List<String> extractColumnNames(ResultColumnList rcl) {
         ArrayList<String> names = new ArrayList<String>();
 
-        for (int i = 0; i < rcl.size(); i++) {
-            ResultColumn rc = (ResultColumn) rcl.elementAt(i);
+        for (ResultColumn rc : rcl) {
             names.add(rc.getName());
         }
 
@@ -1221,16 +1213,14 @@ class JoinNode extends TableOperatorNode
 		// Walk outerPredicateList backwards due to possible deletes
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
-			JBitSet	  curBitSet;
-			Predicate predicate;
+            Predicate predicate = outerPredicateList.elementAt(index);
 
-			predicate = (Predicate) outerPredicateList.elementAt(index);
 			if (! predicate.getPushable())
 			{
 				continue;
 			}
 
-			curBitSet = predicate.getReferencedSet();
+            JBitSet curBitSet = predicate.getReferencedSet();
 			
 			/* Do we have a match? */
 			if (leftReferencedTableMap.contains(curBitSet))
@@ -1278,16 +1268,14 @@ class JoinNode extends TableOperatorNode
 		// Walk outerPredicateList backwards due to possible deletes
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
-			JBitSet	  curBitSet;
-			Predicate predicate;
+            Predicate predicate = outerPredicateList.elementAt(index);
 
-			predicate = (Predicate) outerPredicateList.elementAt(index);
-			if (! predicate.getPushable())
+            if (! predicate.getPushable())
 			{
 				continue;
 			}
 
-			curBitSet = predicate.getReferencedSet();
+            JBitSet curBitSet = predicate.getReferencedSet();
 			
 			/* Do we have a match? */
 			if (rightReferencedTableMap.contains(curBitSet))
@@ -1335,16 +1323,14 @@ class JoinNode extends TableOperatorNode
 		// Walk outerPredicateList backwards due to possible deletes
 		for (int index = outerPredicateList.size() - 1; index >= 0; index --)
 		{
-			JBitSet	  curBitSet;
-			Predicate predicate;
+            Predicate predicate = outerPredicateList.elementAt(index);
 
-			predicate = (Predicate) outerPredicateList.elementAt(index);
 			if (! predicate.getPushable())
 			{
 				continue;
 			}
 
-			curBitSet = predicate.getReferencedSet();
+            JBitSet curBitSet = predicate.getReferencedSet();
 			
 			/* Do we have a match? */
 			JBitSet innerBitSet = (JBitSet) rightReferencedTableMap.clone();

@@ -25,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -89,11 +88,9 @@ class VTIDeferModPolicy implements Visitor
             if( statementType == DeferModification.UPDATE_STATEMENT)
             {
                 // Apply the columnRequiresDefer method to updated columns not in the where clause.
-                Iterator columns = deferralSearch.columns.iterator();
-                while (columns.hasNext())
-                {
+                for (String s : deferralSearch.columns) {
                     if (deferralControl.columnRequiresDefer(
-                            statementType, (String) columns.next(), false)) {
+                            statementType, s, false)) {
                         return true;
                     }
                 }

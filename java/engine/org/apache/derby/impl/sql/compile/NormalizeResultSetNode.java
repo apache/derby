@@ -604,10 +604,11 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
         
 		if (targetResultColumnList != null) {
 		    int size = Math.min(targetRCL.size(), resultColumns.size());
-		    for (int index = 0; index < size; index++) {
-			ResultColumn sourceRC = (ResultColumn) resultColumns.elementAt(index);
-			ResultColumn resultColumn = (ResultColumn) targetRCL.elementAt(index);
-			sourceRC.setType(resultColumn.getTypeServices());
+
+            for (int index = 0; index < size; index++) {
+                ResultColumn sourceRC = resultColumns.elementAt(index);
+                ResultColumn resultColumn = targetRCL.elementAt(index);
+                sourceRC.setType(resultColumn.getTypeServices());
 		    }
 		}
 	}

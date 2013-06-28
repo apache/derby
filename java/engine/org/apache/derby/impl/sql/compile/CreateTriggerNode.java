@@ -412,10 +412,9 @@ class CreateTriggerNode extends DDLStatementNode
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
             HashSet<String> columnNames = new HashSet<String>();
-			int tcSize = triggerCols.size();
-			for (int i = 0; i < tcSize; i++)
+
+            for (ResultColumn rc : triggerCols)
 			{
-				ResultColumn rc  = (ResultColumn) triggerCols.elementAt(i);
 				if (!columnNames.add(rc.getName()))
 				{
 					throw StandardException.newException(SQLState.LANG_DUPLICATE_COLUMN_IN_TRIGGER_UPDATE, 
@@ -526,8 +525,7 @@ class CreateTriggerNode extends DDLStatementNode
 			//their column positions and ensure that those columns do
 			//indeed exist in the trigger table.
 			referencedColInts = new int[triggerCols.size()];
-			ResultColumn rc;
-			ColumnDescriptor cd;
+
 			//This is the most interesting case for us. If we are here, 
 			//then it means that the trigger is defined at the row level
 			//and a set of trigger columns are specified in the CREATE
@@ -539,8 +537,9 @@ class CreateTriggerNode extends DDLStatementNode
 			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
 			
 			for (int i=0; i < triggerCols.size(); i++){
-				rc = (ResultColumn)triggerCols.elementAt(i);
-				cd = triggerTableDescriptor.getColumnDescriptor(rc.getName());
+                ResultColumn rc = triggerCols.elementAt(i);
+                ColumnDescriptor cd =
+                    triggerTableDescriptor.getColumnDescriptor(rc.getName());
 				//Following will catch the case where an invalid trigger column
 				//has been specified in CREATE TRIGGER statement.
 				//CREATE TRIGGER tr1 AFTER UPDATE OF c1678 ON table1 

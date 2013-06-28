@@ -36,15 +36,15 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 class HasNodeVisitor implements Visitor
 {
 	protected boolean hasNode;
-	private Class 	nodeClass;
-	private Class	skipOverClass;
+    private Class<?> nodeClass;
+    private Class<?> skipOverClass;
 	/**
 	 * Construct a visitor
 	 *
 	 * @param nodeClass the class of the node that 
 	 * 	we are looking for.
 	 */
-    HasNodeVisitor(Class nodeClass)
+    HasNodeVisitor(Class<?> nodeClass)
 	{
 		this.nodeClass = nodeClass;
 	}
@@ -57,7 +57,7 @@ class HasNodeVisitor implements Visitor
 	 * @param skipOverClass do not go below this
 	 * node when searching for nodeClass.
 	 */
-    HasNodeVisitor(Class nodeClass, Class skipOverClass)
+    HasNodeVisitor(Class<?> nodeClass, Class<?> skipOverClass)
 	{
 		this.nodeClass = nodeClass;
 		this.skipOverClass = skipOverClass;

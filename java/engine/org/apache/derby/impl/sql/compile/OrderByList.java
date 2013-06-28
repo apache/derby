@@ -48,7 +48,7 @@ import org.apache.derby.iapi.util.JBitSet;
  * and the last column in the list is the least significant.
  *
  */
-class OrderByList extends OrderedColumnList
+class OrderByList extends OrderedColumnList<OrderByColumn>
 						implements RequiredRowOrdering {
 
 	private boolean allAscending = true;
@@ -77,7 +77,7 @@ class OrderByList extends OrderedColumnList
      * @param cm The context manager
     */
    OrderByList(ResultSetNode rs, ContextManager cm) {
-       super(cm);
+       super(OrderByColumn.class, cm);
        setNodeType(C_NodeTypes.ORDER_BY_LIST);
        this.isTableValueCtorOrdering =
                 (rs instanceof UnionNode &&
@@ -114,9 +114,11 @@ class OrderByList extends OrderedColumnList
 		@param position	The column to get from the list
 	 */
     OrderByColumn getOrderByColumn(int position) {
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(position >=0 && position < size());
-		return (OrderByColumn) elementAt(position);
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(position >=0 && position < size());
+        }
+
+        return elementAt(position);
 	}
 
 	/**
@@ -132,17 +134,14 @@ class OrderByList extends OrderedColumnList
 		/* Remember the target for use in optimization */
 		resultToSort = target;
 
-		int size = size();
-
 		/* Only 1012 columns allowed in ORDER BY clause */
-		if (size > Limits.DB2_MAX_ELEMENTS_IN_ORDER_BY)
+        if (size() > Limits.DB2_MAX_ELEMENTS_IN_ORDER_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
 
-		for (int index = 0; index < size; index++)
+        for (OrderByColumn obc : this)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(index);
 			obc.bindOrderByColumn(target, this);
 
 			/*
@@ -174,9 +173,8 @@ class OrderByList extends OrderedColumnList
 	 */
 	void closeGap(int gap)
 	{
-		for (int index = 0; index < size(); index++)
+        for (OrderByColumn obc : this)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(index);
 			obc.collapseAddedColumnGap(gap);
 		}
 	}
@@ -194,10 +192,8 @@ class OrderByList extends OrderedColumnList
 		/* Remember the target for use in optimization */
 		resultToSort = target;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (OrderByColumn obc : this)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(index);
 			obc.pullUpOrderByColumn(target);
 		}
 
@@ -229,8 +225,8 @@ class OrderByList extends OrderedColumnList
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
-			if (((OrderByColumn) elementAt(index)).getResultColumn() !=
-				(ResultColumn) sourceRCL.elementAt(index))
+            if (elementAt(index).getResultColumn() !=
+                sourceRCL.elementAt(index))
 			{
 				return false;
 			}
@@ -246,10 +242,8 @@ class OrderByList extends OrderedColumnList
 	 */
 	void resetToSourceRCs()
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (OrderByColumn obc : this)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(index);
 			obc.resetToSourceRC();
 		}
 	}
@@ -268,10 +262,8 @@ class OrderByList extends OrderedColumnList
         ResultColumnList newRCL = new ResultColumnList(getContextManager());
 
 		/* The new RCL starts with the ordering columns */
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (OrderByColumn obc : this)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(index);
 			newRCL.addElement(obc.getResultColumn());
 			resultColumns.removeElement(obc.getResultColumn());
 		}
@@ -296,9 +288,7 @@ class OrderByList extends OrderedColumnList
 			 loc >= 0;
 			 loc--)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(loc);
-
-			if (obc.constantColumn(whereClause))
+            if (elementAt(loc).constantColumn(whereClause))
 			{
 				removeElementAt(loc);
 			}
@@ -316,12 +306,12 @@ class OrderByList extends OrderedColumnList
 		/* Walk the list backwards so we can remove elements safely */
 		for (int loc = size() - 1; loc > 0; loc--)
 		{
-			OrderByColumn obc = (OrderByColumn) elementAt(loc);
+            OrderByColumn obc = elementAt(loc);
 			int           colPosition = obc.getColumnPosition();
 
 			for (int inner = 0; inner < loc; inner++)
 			{
-				OrderByColumn prev_obc = (OrderByColumn) elementAt(inner);
+                OrderByColumn prev_obc = elementAt(inner);
 				if (colPosition == prev_obc.getColumnPosition())
 				{
 					removeElementAt(loc);

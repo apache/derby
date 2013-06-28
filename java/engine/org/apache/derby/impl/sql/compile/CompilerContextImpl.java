@@ -634,16 +634,16 @@ public class CompilerContextImpl extends ContextImpl
 		return warnings;
 	}
 
-	/////////////////////////////////////////////////////////////////////////////////////
-	//
-	// class interface
-	//
-	// this constructor is called with the parser
-	// to be saved when the context
-	// is created (when the first statement comes in, likely).
-	//
-	/////////////////////////////////////////////////////////////////////////////////////
+    /*
+     * class interface
+     */
 
+    /**
+     * This constructor creates and saves the parser using the language
+     * connection factory when the context is created (when the first statement
+     * comes in, likely).
+     */
+    @SuppressWarnings("LeakingThisInConstructor")
 	public CompilerContextImpl(ContextManager cm,
 			LanguageConnectionContext lcc,
 		TypeCompilerFactory typeCompilerFactory )
@@ -671,9 +671,8 @@ public class CompilerContextImpl extends ContextImpl
 		requiredRoutinePrivileges = null;
 		requiredUsagePrivileges = null;
 		requiredRolePrivileges = null;
-		LanguageConnectionContext lcc = (LanguageConnectionContext)
-		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
-		if( lcc.usesSqlAuthorization())
+
+        if( lcc.usesSqlAuthorization())
 		{
 			requiredColumnPrivileges = new HashMap<StatementTablePermission,StatementColumnPermission>();
 			requiredTablePrivileges = new HashMap<StatementTablePermission,StatementTablePermission>();

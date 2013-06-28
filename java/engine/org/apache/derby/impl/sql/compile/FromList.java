@@ -44,7 +44,8 @@ import org.apache.derby.iapi.util.StringUtil;
  *
  */
 
-class FromList extends QueryTreeNodeVector implements OptimizableList
+class FromList extends    QueryTreeNodeVector<ResultSetNode>
+               implements OptimizableList
 {
 	Properties	properties;
 	// RESOLVE: The default should be false
@@ -79,7 +80,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
      * @param cm context manager
      */
     FromList(ContextManager cm) {
-        super(cm);
+        super(ResultSetNode.class, cm);
         this.isTransparent = false;
         setNodeType(C_NodeTypes.FROM_LIST);
     }
@@ -94,7 +95,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 
     FromList(boolean optimizeJoinOrder, ContextManager cm)
 	{
-        super(cm);
+        super(ResultSetNode.class, cm);
         constructorMinion(optimizeJoinOrder);
 	}
 
@@ -111,7 +112,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
              FromTable fromTable,
              ContextManager cm) throws StandardException
 	{
-        super(cm);
+        super(ResultSetNode.class, cm);
         constructorMinion(optimizeJoinOrder);
         addFromTable(fromTable);
 	}
@@ -199,7 +200,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 			}
 		}
 
-		addElement(fromTable);
+        addElement(fromTable);
 	}
 
 	/**
@@ -931,7 +932,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 		** there is nothing in this properties list that relies on binding
 		** or optimization to validate.
 		*/
-		Enumeration e = properties.keys();
+        Enumeration<?> e = properties.keys();
 		while (e.hasMoreElements())
 		{
 			String key = (String) e.nextElement();
@@ -1012,15 +1013,17 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 			*/
 			if (sum != ( ( joinOrder.length * (joinOrder.length - 1) ) / 2) )
 			{
-				String arrayVals = "";
-				for (int i = 0; i < joinOrder.length; i++)
-					arrayVals = arrayVals + joinOrder[i] + " ";
+                StringBuilder arrayVals = new StringBuilder();
+                for (int i : joinOrder) {
+                    arrayVals.append(i);
+                    arrayVals.append(' ');
+                }
 				SanityManager.THROWASSERT("joinOrder array has some duplicate value: " + arrayVals);
 			}
 		}
 
 		/* Form a list that's in the order we want */
-		QueryTreeNode[] orderedFL = new FromTable[joinOrder.length];
+        ResultSetNode[] orderedFL = new FromTable[joinOrder.length];
 		for (posn = 0; posn < joinOrder.length; posn++)
 		{
 			/*
@@ -1217,9 +1220,10 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 
 		PredicateList predicatesTemp;
         predicatesTemp = new PredicateList(getContextManager());
-		int wherePredicatesSize = wherePredicates.size();
-		for (int index = 0; index < wherePredicatesSize; index++)
-			predicatesTemp.addPredicate((Predicate)wherePredicates.elementAt(index));
+
+        for (Predicate p : wherePredicates) {
+            predicatesTemp.addPredicate(p);
+        }
 
 		/* When considering subquery flattening, we are interested
 		 * in the 1st (and only) entry in the RCL.  (The RCL will be
@@ -1229,7 +1233,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 		 */
 		if (rcl != null)
 		{
-			ResultColumn rc = (ResultColumn) rcl.elementAt(0);
+            ResultColumn rc = rcl.elementAt(0);
 			if (rc.getExpression() instanceof ColumnReference)
 			{
 				additionalCR = (ColumnReference) rc.getExpression();
@@ -1294,12 +1298,11 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 			if (fbt.getExistsBaseTable())
 			{
 				int existsTableNumber = fbt.getTableNumber();
-				int predicatesTempSize = predicatesTemp.size();
-				for (int predicatesTempIndex = predicatesTempSize-1;
-					predicatesTempIndex >= 0; predicatesTempIndex--)
+
+                for (int i = predicatesTemp.size() - 1; i >= 0; i--)
 				{
                     AndNode topAndNode =
-						((Predicate) predicatesTemp.elementAt(predicatesTempIndex)).getAndNode();
+                            predicatesTemp.elementAt(i).getAndNode();
 
 					for (ValueNode whereWalker = topAndNode; whereWalker instanceof AndNode;
 						whereWalker = ((AndNode) whereWalker).getRightOperand())
@@ -1319,7 +1322,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 						JBitSet referencedTables = and.getLeftOperand().getTablesReferenced();
 						if (referencedTables.get(existsTableNumber))
 						{
-							predicatesTemp.removeElementAt(predicatesTempIndex);
+                            predicatesTemp.removeElementAt(i);
 							break;
 						}
 					}
@@ -1593,7 +1596,7 @@ class FromList extends QueryTreeNodeVector implements OptimizableList
 					"size() expected to be 1");
 			}
 		}
-		return ((ResultSetNode) elementAt(0)).updateTargetLockMode();
+        return elementAt(0).updateTargetLockMode();
 	}
 
 	/**

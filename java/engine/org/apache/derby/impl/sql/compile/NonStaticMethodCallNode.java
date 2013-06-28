@@ -373,7 +373,7 @@ class NonStaticMethodCallNode extends MethodCallNode
 		** Refer to the field holding the receiver, if there is any.
 		*/
 
-		Class declaringClass = method.getDeclaringClass();
+        Class<?> declaringClass = method.getDeclaringClass();
 		
 		/*
 		** If it's an interface, generate an interface method call, if it's a static,

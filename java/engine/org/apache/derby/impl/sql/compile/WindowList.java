@@ -30,10 +30,10 @@ import org.apache.derby.iapi.services.context.ContextManager;
  *
  */
 
-class WindowList extends OrderedColumnList
+class WindowList extends QueryTreeNodeVector<WindowDefinitionNode>
 {
     WindowList(ContextManager cm) {
-        super(cm);
+        super(WindowDefinitionNode.class, cm);
     }
 
     /**

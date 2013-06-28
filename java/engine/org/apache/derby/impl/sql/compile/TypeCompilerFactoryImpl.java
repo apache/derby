@@ -242,7 +242,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                 if (anInstance == null)
                 {
                         Exception exc = null;
-                        Class typeCompilerClass = null;
+                        Class<?> typeCompilerClass = null;
 
                         try
                         {

@@ -114,7 +114,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
         leftBCO = new BinaryRelationalOperatorNode(
 									C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
 									leftOperand, 
-                                    (ValueNode)rightOperandList.elementAt(0),
+                                    rightOperandList.elementAt(0),
                                     false,
 									cm);
 		/* Set type info for the operator node */
@@ -130,7 +130,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
         rightBCO = new BinaryRelationalOperatorNode(
 								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
 								leftClone,
-                                (ValueNode)rightOperandList.elementAt(1),
+                                rightOperandList.elementAt(1),
                                 false,
 								cm);
 		/* Set type info for the operator node */
@@ -209,7 +209,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
             new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftClone1, 
-                        (ValueNode)rightOperandList.elementAt(1),
+                        rightOperandList.elementAt(1),
                         false,
 						cm);
 
@@ -225,7 +225,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
             new BinaryRelationalOperatorNode(
 					C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 					leftOperand, 
-                    (ValueNode)rightOperandList.elementAt(0),
+                    rightOperandList.elementAt(0),
                     false,
 					cm);
 
@@ -278,7 +278,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
         leftBCO = new BinaryRelationalOperatorNode(
 							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
 							leftOperand, 
-                            (ValueNode)rightOperandList.elementAt(0),
+                            rightOperandList.elementAt(0),
                             false,
 							cm);
 		/* Set type info for the operator node */
@@ -288,7 +288,7 @@ class BetweenOperatorNode extends BinaryListOperatorNode
         rightBCO = new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
 						leftOperand, 
-                        (ValueNode)rightOperandList.elementAt(1),
+                        rightOperandList.elementAt(1),
                         false,
 						cm);
 		/* Set type info for the operator node */

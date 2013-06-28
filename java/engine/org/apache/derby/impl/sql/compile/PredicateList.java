@@ -55,7 +55,7 @@ import org.apache.derby.iapi.util.JBitSet;
  *
  */
 
-class PredicateList extends QueryTreeNodeVector
+class PredicateList extends QueryTreeNodeVector<Predicate>
                     implements OptimizablePredicateList
 {
 	private int	numberOfStartPredicates;
@@ -64,7 +64,7 @@ class PredicateList extends QueryTreeNodeVector
 
     PredicateList(ContextManager cm)
 	{
-        super(cm);
+        super(Predicate.class, cm);
         setNodeType(C_NodeTypes.PREDICATE_LIST);
 	}
 
@@ -88,7 +88,7 @@ class PredicateList extends QueryTreeNodeVector
 	 */
 	public final void removeOptPredicate(int predCtr) throws StandardException
 	{
-		Predicate predicate = (Predicate) remove(predCtr);
+        Predicate predicate = removeElementAt(predCtr);
 
         if (predicate.isStartKey())
             numberOfStartPredicates--;
@@ -170,10 +170,8 @@ class PredicateList extends QueryTreeNodeVector
 		** in the index to an expression that does not contain a reference
 		** to the table in question.  Let's look for that.
 		*/
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate pred : this)
 		{
-			Predicate	pred = (Predicate) elementAt(index);
 			RelationalOperator relop = pred.getRelop();
 
 			/* InListOperatorNodes, while not relational operators, may still
@@ -293,13 +291,12 @@ class PredicateList extends QueryTreeNodeVector
 	/** @see OptimizablePredicateList#markAllPredicatesQualifiers */
 	public void markAllPredicatesQualifiers()
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			((Predicate) elementAt(index)).markQualifier();
+            p.markQualifier();
 		}
 
-		numberOfQualifiers = size;
+        numberOfQualifiers = size();
 	}
 
 	/**
@@ -318,7 +315,7 @@ class PredicateList extends QueryTreeNodeVector
 		{
 			AndNode			andNode;
 			Predicate		predicate;
-			predicate = (Predicate) elementAt(index);
+            predicate = elementAt(index);
 			//We are not looking at constant comparison predicate.
 			if (predicate.getReferencedMap().hasSingleBitSet())
 			{
@@ -351,14 +348,9 @@ class PredicateList extends QueryTreeNodeVector
 													  boolean isNullOkay)
 							throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
-			AndNode			andNode;
-			Predicate		predicate;
-			predicate = (Predicate) elementAt(index);
-
-            andNode = predicate.getAndNode();
+            AndNode andNode = predicate.getAndNode();
 
 			// skip non-equality predicates
 			ValueNode opNode = andNode.getLeftOperand();
@@ -383,13 +375,8 @@ class PredicateList extends QueryTreeNodeVector
 										  int columnNumber)
 					throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
-			AndNode			andNode;
-			Predicate		predicate;
-			predicate = (Predicate) elementAt(index);
-
 			// This method is used by HashJoinStrategy to determine if
 			// there are any equality predicates that can be used to
 			// perform a hash join (see the findHashKeyColumns()
@@ -404,7 +391,7 @@ class PredicateList extends QueryTreeNodeVector
 				continue;
 			}
 
-            andNode = predicate.getAndNode();
+            AndNode andNode = predicate.getAndNode();
 
 			ValueNode opNode = andNode.getLeftOperand();
 
@@ -451,10 +438,8 @@ class PredicateList extends QueryTreeNodeVector
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
-			Predicate		predicate = (Predicate) elementAt(index);
-			AndNode			andNode;
-
-            andNode = predicate.getAndNode();
+            Predicate predicate = elementAt(index);
+            AndNode andNode = predicate.getAndNode();
 
 			// skip non-equality predicates
 			ValueNode opNode = andNode.getLeftOperand();
@@ -490,24 +475,19 @@ class PredicateList extends QueryTreeNodeVector
 										boolean coveringIndexScan)
 						throws StandardException
 	{
-		boolean[]	deletes;
 		int[]		baseColumnPositions;
 		boolean[]	isAscending;
 		int			size = size();
 		Predicate[]	usefulPredicates = new Predicate[size];
 		int			usefulCount = 0;
-		Predicate	predicate;
-
 
 		/*
 		** Clear all the scan flags for this predicate list, so that the
 		** flags that get set are only for the given conglomerate.
 		*/
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			predicate = (Predicate) elementAt(index);
-
-			predicate.clearScanFlags();
+            p.clearScanFlags();
 		}
 
 		/*
@@ -541,7 +521,7 @@ class PredicateList extends QueryTreeNodeVector
 
 			for (int index = 0; index < size; index++)
 			{
-				Predicate	pred = (Predicate) elementAt(index);
+                Predicate pred = elementAt(index);
 
 				/*
 				** Skip over it if it's not a relational operator (this includes
@@ -647,9 +627,8 @@ class PredicateList extends QueryTreeNodeVector
 		** Create an array of useful predicates.  Also, count how many
 		** useful predicates there are.
 		*/
-		for (int index = 0; index < size; index++)
+        for (Predicate pred : this)
 		{
-			Predicate pred = (Predicate) elementAt(index);
 			ColumnReference indexCol = null;
 			int			indexPosition;
 			RelationalOperator relop = pred.getRelop();
@@ -1037,7 +1016,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			Predicate	pred = (Predicate) elementAt(index);
+            Predicate pred = elementAt(index);
 
 			// Transfer each non-qualifier
 			if (!pred.isRelationalOpPredicate() ||
@@ -1062,11 +1041,9 @@ class PredicateList extends QueryTreeNodeVector
     void categorize()
 		throws StandardException
 	{
-		int size = size();
-
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			((Predicate) elementAt(index)).categorize();
+            p.categorize();
 		}
 	}
 
@@ -1089,7 +1066,7 @@ class PredicateList extends QueryTreeNodeVector
 		{
 			AndNode			nextAnd;
 			/* Look at the current predicate from the predicate list */
-			nextAnd = ((Predicate) elementAt(index)).getAndNode();
+            nextAnd = elementAt(index).getAndNode();
 
 			if ((nextAnd.getLeftOperand().isBooleanTrue()) &&
 				(nextAnd.getRightOperand().isBooleanTrue()))
@@ -1139,7 +1116,7 @@ class PredicateList extends QueryTreeNodeVector
 		for (int index = size() - 1; index >= 0; index--)
 		{
 			/* Look at the current predicate from the predicate list */
-			nextAnd = ((Predicate) elementAt(index)).getAndNode();
+            nextAnd = elementAt(index).getAndNode();
 
 			// Skip over the predicate if it is not a constant expression
 			if (! nextAnd.isConstantExpression())
@@ -1233,7 +1210,7 @@ class PredicateList extends QueryTreeNodeVector
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
-			nextAnd = ((Predicate) elementAt(index)).getAndNode();
+            nextAnd = elementAt(index).getAndNode();
 
 			/* We can skip over TRUE AND TRUE */
 			if ((nextAnd.getLeftOperand().isBooleanTrue()) &&
@@ -1293,15 +1270,10 @@ class PredicateList extends QueryTreeNodeVector
 	 */
     void remapColumnReferencesToExpressions() throws StandardException
 	{
-		Predicate		pred;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			pred = (Predicate) elementAt(index);
-
-			pred.setAndNode((AndNode) 
-						pred.getAndNode().remapColumnReferencesToExpressions());
+            p.setAndNode(
+                (AndNode)p.getAndNode().remapColumnReferencesToExpressions());
 		}
 	}
 
@@ -1367,39 +1339,30 @@ class PredicateList extends QueryTreeNodeVector
 	 */
     void xorReferencedSet(JBitSet fromMap)
 	{
-		Predicate		predicate;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			predicate = (Predicate) elementAt(index);
-
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.ASSERT(
-					fromMap.size() == predicate.getReferencedSet().size(),
+                    fromMap.size() == p.getReferencedSet().size(),
 					"fromMap.size() (" + fromMap.size() + 
 					") does not equal predicate.getReferencedSet().size() (" +
-					predicate.getReferencedSet().size());
+                    p.getReferencedSet().size());
 			}
 			
-			predicate.getReferencedSet().xor(fromMap);
+            p.getReferencedSet().xor(fromMap);
 		}
 	}
 
 	private void countScanFlags()
 	{
-		Predicate		predicate;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			predicate = (Predicate) elementAt(index);
-			if (predicate.isStartKey())
+            if (p.isStartKey())
 				numberOfStartPredicates++;
-			if (predicate.isStopKey())
+            if (p.isStopKey())
 				numberOfStopPredicates++;
-			if (predicate.isQualifier())
+            if (p.isQualifier())
 				numberOfQualifiers++;
 		}
 	}
@@ -1437,8 +1400,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			Predicate	predicate;
-			predicate = (Predicate) elementAt(index);
+            Predicate predicate = elementAt(index);
 
             CollectNodesVisitor<ColumnReference> getCRs =
                 new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
@@ -1614,11 +1576,9 @@ class PredicateList extends QueryTreeNodeVector
         CollectNodesVisitor<ColumnReference> collectCRs =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			Predicate predicate = (Predicate) elementAt(index);
-			predicate.getAndNode().accept(collectCRs);
+            p.getAndNode().accept(collectCRs);
 		}
 
         for (ColumnReference ref : collectCRs.getList())
@@ -1660,11 +1620,9 @@ class PredicateList extends QueryTreeNodeVector
     boolean     resultColTable)
 		throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-            AndNode and = ((Predicate) elementAt(index)).getAndNode();
-			and.checkTopPredicatesForEqualsConditions(
+            p.getAndNode().checkTopPredicatesForEqualsConditions(
 				tableNumber, eqOuterCols, tableNumbers, tableColMap,
 				resultColTable);
 		}
@@ -1677,11 +1635,9 @@ class PredicateList extends QueryTreeNodeVector
 	 */
 	 boolean allPushable()
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate p : this)
 		{
-			Predicate		predicate = (Predicate) elementAt(index);
-			if (! predicate.getPushable())
+            if (! p.getPushable())
 			{
 				return false;
 			}
@@ -1699,8 +1655,7 @@ class PredicateList extends QueryTreeNodeVector
      boolean allReference(FromBaseTable fbt) {
          int tableNumber = fbt.getTableNumber();
 
-         for (int i = 0; i < size(); i++) {
-             Predicate p = (Predicate) elementAt(i);
+         for (Predicate p : this) {
              if (!p.getReferencedSet().get(tableNumber)) {
                  return false;
              }
@@ -1728,7 +1683,7 @@ class PredicateList extends QueryTreeNodeVector
 		// Walk the list backwards because of possible deletes
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			Predicate predicate = (Predicate) elementAt(index);
+            Predicate predicate = elementAt(index);
 			if (! predicate.getPushable())
 			{
 				continue;
@@ -1774,12 +1729,10 @@ class PredicateList extends QueryTreeNodeVector
 		 * CRs from the subquery and decrement their 
 		 * nesting level.
 		 */
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
 			ColumnReference cr1 = null;
 			ColumnReference cr2 = null;
-			Predicate predicate = (Predicate) elementAt(index);
 			ValueNode vn = predicate.getAndNode().getLeftOperand();
 
   			if (vn instanceof BinaryOperatorNode)
@@ -1882,10 +1835,8 @@ class PredicateList extends QueryTreeNodeVector
 		/* Pull the equijoin clauses, putting each one in the list for
 		 * each of the tables being joined.
 		 */
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
-			Predicate predicate = (Predicate) elementAt(index);
 			ValueNode vn = predicate.getAndNode().getLeftOperand();
 
 			if (! (vn.isBinaryEqualsOperatorNode()))
@@ -1936,7 +1887,7 @@ class PredicateList extends QueryTreeNodeVector
 			ArrayList<Predicate> movePreds = new ArrayList<Predicate>();
 			for (int jcIndex = outerJCL.size() - 1; jcIndex >= 0; jcIndex--)
 			{
-				Predicate predicate = (Predicate) outerJCL.elementAt(jcIndex);
+                Predicate predicate = outerJCL.elementAt(jcIndex);
 				if (predicate.getEquivalenceClass() != -1)
 				{
 					outerJCL.removeElementAt(jcIndex);
@@ -1962,7 +1913,8 @@ class PredicateList extends QueryTreeNodeVector
 				/* Assign an equivalence class to those Predicates 
 				 * that have not already been assigned an equivalence class.
 				 */
-				Predicate outerP = (Predicate) outerJCL.elementAt(outerIndex);
+                Predicate outerP = outerJCL.elementAt(outerIndex);
+
 				if (outerP.getEquivalenceClass() == -1)
 				{
 					outerP.setEquivalenceClass(cc.getNextEquivalenceClass());
@@ -1994,12 +1946,11 @@ class PredicateList extends QueryTreeNodeVector
 				 * in the chain/equivalence class
 				 */
 				PredicateList middleJCL = joinClauses[middleTableNumber];
-				for (int middleIndex = 0; middleIndex < middleJCL.size(); middleIndex++)
+                for (Predicate middleP : middleJCL)
 				{
 					/* Skip those Predicates that have already been
 					 * assigned a different equivalence class.
 					 */
-					Predicate middleP = (Predicate) middleJCL.elementAt(middleIndex);
 					if (middleP.getEquivalenceClass() != -1 &&
 						middleP.getEquivalenceClass() != outerEC)
 					{
@@ -2061,7 +2012,7 @@ class PredicateList extends QueryTreeNodeVector
 					int innerIndex = 0;
 					for ( ; innerIndex < innerJCL.size(); innerIndex++)
 					{
-						innerP = (Predicate) innerJCL.elementAt(innerIndex);
+                        innerP = innerJCL.elementAt(innerIndex);
 
 						// Skip over predicates with other equivalence classes
 						if (innerP.getEquivalenceClass() != -1 &&
@@ -2204,10 +2155,8 @@ class PredicateList extends QueryTreeNodeVector
         PredicateList searchClauses = new PredicateList(getContextManager());
 		RelationalOperator	equalsNode = null;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
-			Predicate		predicate = (Predicate) elementAt(index);
 			AndNode			andNode = predicate.getAndNode();
 
 			// Skip anything that's not a RelationalOperator
@@ -2281,13 +2230,12 @@ class PredicateList extends QueryTreeNodeVector
 		 * NOTE: We can append to the searchClauses while walking
 		 * them, thus we cannot cache the value of size().
 		 */
-		for (int scIndex = 0; scIndex < searchClauses.size(); scIndex++)
+        for (Predicate searchClause : searchClauses)
 		{
 			ColumnReference searchCR;
 			DataValueDescriptor searchODV = null;
-			RelationalOperator ro = (RelationalOperator)
-                    (((Predicate) searchClauses.elementAt(scIndex)).
-                    getAndNode()).getLeftOperand();
+            RelationalOperator ro =
+               (RelationalOperator)(searchClause.getAndNode()).getLeftOperand();
 
 			// Find the ColumnReference and constant value, if any, in the search clause
 			if (ro instanceof UnaryComparisonOperatorNode)
@@ -2311,8 +2259,7 @@ class PredicateList extends QueryTreeNodeVector
 			int colNumber = searchCR.getColumnNumber();
 
 			// Look for any equijoin clauses of interest
-			int ejcSize = equijoinClauses.size();
-			for (int ejcIndex = 0; ejcIndex < ejcSize; ejcIndex++)
+            for (Predicate predicate : equijoinClauses)
 			{
 				/* Skip the current equijoin clause if it has already been used
 				 * when adding a new search clause of the same type
@@ -2321,7 +2268,6 @@ class PredicateList extends QueryTreeNodeVector
 				 * fact that a search clause was added because multiple search clauses
 				 * can get added when preprocessing LIKE and BETWEEN.
 				 */
-				Predicate predicate = (Predicate) equijoinClauses.elementAt(ejcIndex);
 				if (predicate.transitiveSearchClauseAdded(ro))
 				{
 					continue;
@@ -2361,12 +2307,11 @@ class PredicateList extends QueryTreeNodeVector
 				boolean match = false;
                 ColumnReference searchCR2;
                 RelationalOperator ro2;
-				int scSize = searchClauses.size();
-				for (int scIndex2 = 0; scIndex2 < scSize; scIndex2++)
+
+                for (Predicate sc : searchClauses)
 				{
 					DataValueDescriptor currODV = null;
-                    ro2 = (RelationalOperator)(((Predicate) searchClauses.
-                            elementAt(scIndex2)).getAndNode()).getLeftOperand();
+                    ro2 = (RelationalOperator)sc.getAndNode().getLeftOperand();
 
 					// Find the ColumnReference in the search clause
 					if (ro2 instanceof UnaryComparisonOperatorNode)
@@ -2423,7 +2368,7 @@ class PredicateList extends QueryTreeNodeVector
                     //             /   \
                     //       roClone    true
                     //
-                   ValueNode trueNode =
+                    ValueNode trueNode =
                             new BooleanConstantNode(true, getContextManager());
                     AndNode newAnd =
                             new AndNode(roClone, trueNode, getContextManager());
@@ -2454,7 +2399,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			Predicate predicate = (Predicate) elementAt(index);
+            Predicate predicate = elementAt(index);
 
 			if (predicate.transitiveSearchClauseAdded(equalsNode))
 			{
@@ -2477,7 +2422,7 @@ class PredicateList extends QueryTreeNodeVector
 		int outer = size() - 1;
 		while (outer >= 0)
 		{
-			Predicate predicate = (Predicate) elementAt(outer);
+            Predicate predicate = elementAt(outer);
 			int equivalenceClass = predicate.getEquivalenceClass();
 
 			if (equivalenceClass == -1)
@@ -2489,7 +2434,7 @@ class PredicateList extends QueryTreeNodeVector
 			// Walk the rest of the list backwards.
 			for (int inner = outer - 1; inner >= 0; inner--)
 			{
-				Predicate innerPredicate = (Predicate) elementAt(inner);
+                Predicate innerPredicate = elementAt(inner);
 				if (innerPredicate.getEquivalenceClass() == equivalenceClass)
 				{
 					/* Only 1 predicate per column can be marked as a start
@@ -2564,7 +2509,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			predicate = (Predicate) elementAt(index);
+            predicate = elementAt(index);
 
 			if (SanityManager.DEBUG)
 			{
@@ -2620,11 +2565,8 @@ class PredicateList extends QueryTreeNodeVector
 	{
 		PredicateList	theOtherList = (PredicateList) otherList;
 
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate predicate : this)
 		{
-			Predicate predicate = (Predicate) elementAt(index);
-
 			/*
 			** Clear all of the scan flags since they may be different
 			** when the new list is re-classified
@@ -2666,14 +2608,15 @@ class PredicateList extends QueryTreeNodeVector
 	 */
 	public boolean isRedundantPredicate(int predNum)
 	{
-		Predicate pred = (Predicate) elementAt(predNum);
+        Predicate pred = elementAt(predNum);
 		if (pred.getEquivalenceClass() == -1)
 		{
 			return false;
 		}
 		for (int index = 0; index < predNum; index++)
 		{
-			if ( ((Predicate) elementAt(index)).getEquivalenceClass() == pred.getEquivalenceClass())
+            if (elementAt(index).getEquivalenceClass() ==
+                pred.getEquivalenceClass())
 			{
 				return true;
 			}
@@ -2721,7 +2664,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size - 1; index >= 0; index--)
 		{
-			Predicate pred = ((Predicate) elementAt(index));
+            Predicate pred = elementAt(index);
 
 			if ( ! pred.isStartKey() )
 				continue;
@@ -2772,11 +2715,9 @@ class PredicateList extends QueryTreeNodeVector
                 generateIndexableRow(acb, numberOfStopPredicates);
 
 			int	colNum = 0;
-			int size = size();
-			for (int index = 0; index < size; index++)
-			{
-				Predicate pred = ((Predicate) elementAt(index));
 
+            for (Predicate pred : this)
+            {
 				if ( ! pred.isStopKey() )
 					continue;
 
@@ -2817,7 +2758,7 @@ class PredicateList extends QueryTreeNodeVector
 		 */
 		for (int index = size - 1; index >= 0; index--)
 		{
-			Predicate pred = ((Predicate) elementAt(index));
+            Predicate pred = elementAt(index);
 
 			if ( ! pred.isStopKey() )
 				continue;
@@ -2919,7 +2860,7 @@ class PredicateList extends QueryTreeNodeVector
 	{
 		for (int index = size() - 1; index >= 0; index--)
 		{
-			Predicate pred = (Predicate)elementAt(index);
+            Predicate pred = elementAt(index);
 
 			// Don't do anything if it's not an IN-list probe predicate.
 			if (!pred.isInListProbePredicate())
@@ -2942,7 +2883,7 @@ class PredicateList extends QueryTreeNodeVector
 			{
 				for (int i = 0; i < index; i++)
 				{
-					if (((Predicate)elementAt(i)).isInListProbePredicate())
+                    if (elementAt(i).isInListProbePredicate())
 					{
 						SanityManager.THROWASSERT("Found multiple probe " +
 							"predicates for IN-list when only one was " +
@@ -3061,7 +3002,7 @@ class PredicateList extends QueryTreeNodeVector
         int num_of_or_conjunctions = 0;
         for (int i = 0; i < numberOfQualifiers; i++)
         {
-            if (((Predicate) elementAt(i)).isOrList())
+            if (elementAt(i).isOrList())
             {
                 num_of_or_conjunctions++;
             }
@@ -3077,8 +3018,8 @@ class PredicateList extends QueryTreeNodeVector
         // AND clauses.
 
         consMB.getField(qualField);             // 1st arg allocateQualArray
-        consMB.push((int) 0);                   // 2nd arg allocateQualArray
-        consMB.push((int) numberOfQualifiers - num_of_or_conjunctions);  // 3rd arg allocateQualArray
+        consMB.push(0);                   // 2nd arg allocateQualArray
+        consMB.push(numberOfQualifiers - num_of_or_conjunctions);  // 3rd arg allocateQualArray
 
         consMB.callMethod(
             VMOpcode.INVOKESTATIC,
@@ -3109,7 +3050,7 @@ class PredicateList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 
-			Predicate pred = ((Predicate) elementAt(index));
+            Predicate pred = elementAt(index);
 
 			if (!pred.isQualifier())
             {
@@ -3160,7 +3101,7 @@ class PredicateList extends QueryTreeNodeVector
             for (int index = qualNum; index < size; index++, and_idx++)
             {
 
-                Predicate pred = ((Predicate) elementAt(index));
+                Predicate pred = elementAt(index);
 
                 if (SanityManager.DEBUG)
                 {
@@ -3194,8 +3135,8 @@ class PredicateList extends QueryTreeNodeVector
                 // clause.  ie. (a = 1 or b = 2), will allocate a 2 entry array.
 
                 consMB.getField(qualField);        // 1st arg allocateQualArray
-                consMB.push((int) and_idx);        // 2nd arg allocateQualArray
-                consMB.push((int) a_list.size());  // 3rd arg allocateQualArray
+                consMB.push(and_idx);        // 2nd arg allocateQualArray
+                consMB.push(a_list.size());  // 3rd arg allocateQualArray
 
                 consMB.callMethod(
                     VMOpcode.INVOKESTATIC, 
@@ -3272,11 +3213,9 @@ class PredicateList extends QueryTreeNodeVector
             sortList[i] = new PredicateList(getContextManager());
 
 		int predIndex;
-		int size = size();
-		for (predIndex = 0; predIndex < size; predIndex++)
-		{
-			Predicate pred = (Predicate) elementAt(predIndex);
 
+        for (Predicate pred : this)
+        {
 			if (! pred.isQualifier())
 			{
 				sortList[QUALIFIER_ORDER_NON_QUAL].addElement(pred);
@@ -3365,11 +3304,9 @@ class PredicateList extends QueryTreeNodeVector
 			LocalField rowField = generateIndexableRow(acb, numberOfStartPredicates);
 
 			int	colNum = 0;
-			int size = size();
-			for (int index = 0; index < size; index++)
-			{
-				Predicate pred = ((Predicate) elementAt(index));
 
+            for (Predicate pred : this)
+            {
 				if ( ! pred.isStartKey() )
 					continue;
 
@@ -3413,11 +3350,9 @@ class PredicateList extends QueryTreeNodeVector
 		 * start and stop positions when a predicate is
 		 * a start key iff it is a stop key.
 		 */
-		int size = size();
-		for (int index = 0; index < size; index++)
-		{
-			Predicate pred = ((Predicate) elementAt(index));
 
+        for (Predicate pred : this)
+        {
 			if ( (pred.isStartKey() && (! pred.isStopKey())) ||
 				 (pred.isStopKey() && (! pred.isStartKey())))
 			{
@@ -3631,10 +3566,8 @@ class PredicateList extends QueryTreeNodeVector
 		/*
 		** Walk this list
 		*/
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (Predicate pred : this)
 		{
-			Predicate	pred = (Predicate) elementAt(index);
 			RelationalOperator relop = pred.getRelop();
 
 			if (pred.isRelationalOpPredicate())
@@ -3699,11 +3632,9 @@ class PredicateList extends QueryTreeNodeVector
 		 * the probe predicate are sorted in DESCENDING order
 		 * at execution time.
 		 */
-		int size = size();
 		OrderByList orderBy = (OrderByList)ordering;
-		for (int index = 0; index < size; index++)
+        for (Predicate pred : this)
 		{
-			Predicate pred = (Predicate) elementAt(index);
 			if (!pred.isInListProbePredicate())
 				continue;
 
@@ -3752,7 +3683,7 @@ class PredicateList extends QueryTreeNodeVector
 				continue;
 
 			/* to workingPredicates only add useful predicates... */
-			workingPredicates.addOptPredicate((Predicate)elementAt(i));
+            workingPredicates.addOptPredicate(elementAt(i));
 		}
 
 		int numWorkingPredicates = workingPredicates.size();
@@ -3802,7 +3733,7 @@ class PredicateList extends QueryTreeNodeVector
 
 			for (int j = 0; j < numWorkingPredicates; j++)
 			{
-				Predicate pred = (Predicate)workingPredicates.elementAt(j);
+                Predicate pred = workingPredicates.elementAt(j);
 
 				int ip = pred.hasEqualOnColumnList(baseColumnList, 
 												   optTable);

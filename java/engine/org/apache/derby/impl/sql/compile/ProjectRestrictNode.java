@@ -822,10 +822,13 @@ class ProjectRestrictNode extends SingleChildResultSetNode
         restrictionList = new PredicateList(getContextManager());
         /* For non-base table, we remove first 2 lists from requal list to avoid adding duplicates.
          */
-		for (int i = 0; i < searchRestrictionList.size(); i++)
-			requalificationRestrictionList.removeOptPredicate((Predicate) searchRestrictionList.elementAt(i));
-		for (int i = 0; i < joinQualifierList.size(); i++)
-			requalificationRestrictionList.removeOptPredicate((Predicate) joinQualifierList.elementAt(i));
+        for (Predicate p : searchRestrictionList) {
+            requalificationRestrictionList.removeOptPredicate(p);
+        }
+
+        for (Predicate p : joinQualifierList) {
+            requalificationRestrictionList.removeOptPredicate(p);
+        }
 
 		joinQualifierList.transferNonQualifiers(this, restrictionList); //purify joinQual list
 		requalificationRestrictionList.copyPredicatesToOtherList(restrictionList); //any residual
@@ -1787,8 +1790,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		}
 
 		HashSet<BaseColumnNode> columns = new HashSet<BaseColumnNode>();
-		for (int i = 0; i < resultColumns.size(); i++) {
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+
+        for (ResultColumn rc : resultColumns) {
 			BaseColumnNode bc = rc.getBaseColumnNode();
 			if (bc == null) return false;
 			columns.add(bc);

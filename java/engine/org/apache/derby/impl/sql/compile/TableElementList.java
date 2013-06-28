@@ -61,13 +61,13 @@ import org.apache.derby.impl.sql.execute.IndexConstantAction;
  *
  */
 
-class TableElementList extends QueryTreeNodeVector
+class TableElementList extends QueryTreeNodeVector<TableElementNode>
 {
 	private int				numColumns;
 	private TableDescriptor td;
 
     public TableElementList(ContextManager cm) {
-        super(cm);
+        super(TableElementNode.class, cm);
         setNodeType(C_NodeTypes.TABLE_ELEMENT_LIST);
     }
 
@@ -95,17 +95,12 @@ class TableElementList extends QueryTreeNodeVector
 	void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd)
         throws StandardException
     {
-		int			size = size();
-
-        for (int index = 0; index < size; index++)
+        for (TableElementNode te : this)
 		{
-			TableElementNode tableElement = (TableElementNode) elementAt(index);
-
-			if (tableElement instanceof ColumnDefinitionNode)
+            if (te instanceof ColumnDefinitionNode)
 			{
-				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
-
-                setCollationTypeOnCharacterStringColumn( sd, cdn );
+                setCollationTypeOnCharacterStringColumn(
+                        sd, (ColumnDefinitionNode)te );
 			}
 		}
 	}
@@ -192,13 +187,11 @@ class TableElementList extends QueryTreeNodeVector
 		if (ddlStmt instanceof CreateTableNode)
 			tableType = ((CreateTableNode)ddlStmt).tableType;
 
-		for (int index = 0; index < size; index++)
+        for (TableElementNode tableElement : this)
 		{
-			TableElementNode tableElement = (TableElementNode) elementAt(index);
-
 			if (tableElement instanceof ColumnDefinitionNode)
 			{
-				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
+                ColumnDefinitionNode cdn = (ColumnDefinitionNode)tableElement;
 				if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE &&
 					(cdn.getType().getTypeId().isLongConcatableTypeId() ||
 					cdn.getType().getTypeId().isUserDefinedTypeId()))
@@ -358,11 +351,8 @@ class TableElementList extends QueryTreeNodeVector
     public  void    validatePrimaryKeyNullability()
         throws StandardException
     {
-		int			size = size();
-		for (int index = 0; index < size; index++)
+        for (TableElementNode tableElement : this)
 		{
-			TableElementNode tableElement = (TableElementNode) elementAt(index);
-
 			if (! (tableElement.hasConstraint()))
 			{
 				continue;
@@ -396,24 +386,14 @@ class TableElementList extends QueryTreeNodeVector
     int countConstraints(int constraintType)
 	{
 		int	numConstraints = 0;
-		int size = size();
 
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
-			ConstraintDefinitionNode cdn;
-			TableElementNode element = (TableElementNode) elementAt(index);
-
-			if (! (element instanceof ConstraintDefinitionNode))
-			{
-				continue;
-			}
-
-			cdn = (ConstraintDefinitionNode) element;
-
-			if (constraintType == cdn.getConstraintType())
-			{
-				numConstraints++;
-			}
+            if (element instanceof ConstraintDefinitionNode &&
+                ((ConstraintDefinitionNode)element).getConstraintType() ==
+                    constraintType) {
+                numConstraints++;
+            }
 		}
 
 		return numConstraints;
@@ -425,24 +405,13 @@ class TableElementList extends QueryTreeNodeVector
     int countGenerationClauses()
 	{
 		int	numGenerationClauses = 0;
-		int size = size();
 
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
-			ColumnDefinitionNode cdn;
-			TableElementNode element = (TableElementNode) elementAt(index);
-
-			if (! (element instanceof ColumnDefinitionNode))
-			{
-				continue;
-			}
-
-			cdn = (ColumnDefinitionNode) element;
-
-			if ( cdn.hasGenerationClause() )
-			{
-				numGenerationClauses++;
-			}
+            if (element instanceof ColumnDefinitionNode &&
+                    ((ColumnDefinitionNode)element).hasGenerationClause()) {
+                numGenerationClauses++;
+            }
 		}
 
 		return numGenerationClauses;
@@ -473,9 +442,9 @@ class TableElementList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (((TableElementNode) elementAt(index)).getElementType() == TableElementNode.AT_DROP_COLUMN)
+            if (elementAt(index).getElementType() == TableElementNode.AT_DROP_COLUMN)
 			{
-                String columnName = ((TableElementNode) elementAt(index)).getName();
+                String columnName = elementAt(index).getName();
 
 				colInfos[index] = new ColumnInfo(
 								columnName,
@@ -590,18 +559,14 @@ class TableElementList extends QueryTreeNodeVector
 	void bindAndValidateCheckConstraints(FromList fromList)
 		throws StandardException
 	{
-		CompilerContext cc;
-		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
-		int						  size = size();
-
-		cc = getCompilerContext();
+        FromBaseTable table = (FromBaseTable) fromList.elementAt(0);
+        CompilerContext cc = getCompilerContext();
 
         ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
 
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
 			ConstraintDefinitionNode cdn;
-			TableElementNode element = (TableElementNode) elementAt(index);
 			ValueNode	checkTree;
 
 			if (! (element instanceof ConstraintDefinitionNode))
@@ -679,9 +644,9 @@ class TableElementList extends QueryTreeNodeVector
 			 */
 			if (cdn.getColumnList() != null)
 			{
-				String colName = ((ResultColumn)(cdn.getColumnList().elementAt(0))).getName();
+                String colName = cdn.getColumnList().elementAt(0).getName();
 				if (numReferenced > 1 ||
-					!colName.equals(((ResultColumn)(refRCL.elementAt(0))).getName()))
+                    !colName.equals(refRCL.elementAt(0).getName()))
 					throw StandardException.newException(SQLState.LANG_DB2_INVALID_CHECK_CONSTRAINT, colName);
 				
 			}
@@ -708,25 +673,22 @@ class TableElementList extends QueryTreeNodeVector
 	void bindAndValidateGenerationClauses( SchemaDescriptor sd, FromList fromList, FormatableBitSet generatedColumns, TableDescriptor baseTable )
 		throws StandardException
 	{
-		CompilerContext cc;
-		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
-        ResultColumnList            tableColumns = table.getResultColumns();
-        int                                 columnCount = table.getResultColumns().size();
-		int						  size = size();
+        FromBaseTable    table = (FromBaseTable) fromList.elementAt(0);
+        ResultColumnList tableColumns = table.getResultColumns();
+        int              columnCount = table.getResultColumns().size();
 
         // complain if a generation clause references another generated column
         findIllegalGenerationReferences( fromList, baseTable );
 
         generatedColumns.grow( columnCount + 1 );
         
-		cc = getCompilerContext();
+        CompilerContext cc = getCompilerContext();
 
         ArrayList<AggregateNode> aggregates = new ArrayList<AggregateNode>();
 
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
 			ColumnDefinitionNode cdn;
-			TableElementNode element = (TableElementNode) elementAt(index);
             GenerationClauseNode    generationClauseNode;
 			ValueNode	generationTree;
 
@@ -842,7 +804,9 @@ class TableElementList extends QueryTreeNodeVector
 
             for ( int i = 0; i < numReferenced; i++ )
             {
-                referencedColumnNames[ i ] = ((ResultColumn)rcl.elementAt( generationClauseColumnReferences[ i ] - 1 )).getName();
+                referencedColumnNames[i] =
+                    rcl.elementAt(generationClauseColumnReferences[i] - 1).
+                        getName();
             }
 
             String              currentSchemaName = getLanguageConnectionContext().getCurrentSchemaName();
@@ -872,7 +836,6 @@ class TableElementList extends QueryTreeNodeVector
 	{
         ArrayList<ColumnDefinitionNode>   generatedColumns = new ArrayList<ColumnDefinitionNode>();
         HashSet<String>     names = new HashSet<String>();
-		int         size = size();
 
         // add in existing generated columns if this is an ALTER TABLE statement
         if ( baseTable != null )
@@ -886,10 +849,9 @@ class TableElementList extends QueryTreeNodeVector
         }
         
         // find all of the generated columns
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
 			ColumnDefinitionNode cdn;
-			TableElementNode     element = (TableElementNode) elementAt(index);
 
 			if (! (element instanceof ColumnDefinitionNode)) { continue; }
 
@@ -946,14 +908,11 @@ class TableElementList extends QueryTreeNodeVector
         
 		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
         ResultColumnList        tableColumns = table.getResultColumns();
-		int						  size = size();
 
         // loop through the foreign keys, looking for keys which violate the
         // rulse we're enforcing
-		for (int index = 0; index < size; index++)
+        for (TableElementNode element : this)
 		{
-			TableElementNode element = (TableElementNode) elementAt(index);
-
 			if (! (element instanceof FKConstraintDefinitionNode))
 			{
 				continue;
@@ -988,14 +947,10 @@ class TableElementList extends QueryTreeNodeVector
             // SET DEFAULT or whose update rule is ON UPDATE CASCADE.
             // See if any of the key columns are generated columns.
             //
-            ResultColumnList                keyCols = fk.getColumnList();
-            int                                     keyCount = keyCols.size();
-
-            for ( int i = 0; i < keyCount; i++ )
+            for (ResultColumn keyCol : fk.getColumnList())
             {
-                ResultColumn    keyCol = (ResultColumn) keyCols.elementAt( i );
-                String                  keyColName = keyCol.getName();
-                int     position = tableColumns.getPosition( keyColName, 1 );
+                String keyColName = keyCol.getName();
+                int position = tableColumns.getPosition( keyColName, 1 );
 
                 if ( generatedColumns.isSet(  position ) )
                 {
@@ -1024,20 +979,15 @@ class TableElementList extends QueryTreeNodeVector
 				DataDictionary dd)
 		throws StandardException
 	{
-		int size = size();
 		int conActionIndex = 0;
-		for (int index = 0; index < size; index++)
+
+        for (TableElementNode ten : this)
 		{
 			String[]	columnNames = null;
-			TableElementNode ten = (TableElementNode) elementAt(index);
 			IndexConstantAction indexAction = null;
 
-			if (! ten.hasConstraint())
-			{
-				continue;
-			}
-
-			if (ten instanceof ColumnDefinitionNode)
+            if (! ten.hasConstraint() ||
+                ten instanceof ColumnDefinitionNode)
 			{
 				continue;
 			}
@@ -1314,11 +1264,12 @@ class TableElementList extends QueryTreeNodeVector
             // is set for the whole database or just set on this statement.
             return result;
         }
-        ResultColumnList rcl = cdn.getColumnList();
+
         int approxLength = 0;
-        for (int index = 0; index < rcl.size(); index++)
+
+        for (ResultColumn rc : cdn.getColumnList())
         {
-            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
+            String colName = rc.getName();
             DataTypeDescriptor dtd;
             if (td == null)
                 dtd = getColumnDataTypeDescriptor(colName);
@@ -1447,13 +1398,9 @@ class TableElementList extends QueryTreeNodeVector
 	 */
 	private void setColumnListToNotNull(ConstraintDefinitionNode cdn)
 	{
-		ResultColumnList rcl = cdn.getColumnList();
-		int rclSize = rcl.size();
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : cdn.getColumnList())
 		{
-			String colName = ((ResultColumn) rcl.elementAt(index)).getName();
-            
-            findColumnDefinition(colName).setNullability(false);
+            findColumnDefinition(rc.getName()).setNullability(false);
         }
 	}
 
@@ -1469,20 +1416,14 @@ class TableElementList extends QueryTreeNodeVector
     ConstraintDefinitionNode    cdn, 
     TableDescriptor             td) 
     {
-        ResultColumnList rcl = cdn.getColumnList();
-        int rclSize = rcl.size();
-        for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : cdn.getColumnList())
         {
-            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
-            DataTypeDescriptor dtd;
-            if (td == null)
-            {
-                dtd = getColumnDataTypeDescriptor(colName);
-            }
-            else
-            {
-                dtd = getColumnDataTypeDescriptor(colName, td);
-            }
+            String colName = rc.getName();
+
+            DataTypeDescriptor dtd = (td == null) ?
+                getColumnDataTypeDescriptor(colName) :
+                getColumnDataTypeDescriptor(colName, td);
+
             // todo dtd may be null if the column does not exist, we should check that first
             if (dtd != null && dtd.isNullable())
             {
@@ -1494,20 +1435,12 @@ class TableElementList extends QueryTreeNodeVector
 
     private void checkForNullColumns(ConstraintDefinitionNode cdn, TableDescriptor td) throws StandardException
     {
-        ResultColumnList rcl = cdn.getColumnList();
-        int rclSize = rcl.size();
-        for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : cdn.getColumnList())
         {
-            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
-            DataTypeDescriptor dtd;
-            if (td == null)
-            {
-                dtd = getColumnDataTypeDescriptor(colName);
-            }
-            else
-            {
-                dtd = getColumnDataTypeDescriptor(colName, td);
-            }
+            DataTypeDescriptor dtd = (td == null) ?
+                    getColumnDataTypeDescriptor(rc.getName()) :
+                    getColumnDataTypeDescriptor(rc.getName(), td);
+
             // todo dtd may be null if the column does not exist, we should check that first
             if (dtd != null && dtd.isNullable())
             {
@@ -1517,7 +1450,7 @@ class TableElementList extends QueryTreeNodeVector
                     ? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
                     : SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
 
-                throw StandardException.newException(errorState, colName);
+                throw StandardException.newException(errorState, rc.getName());
             }
         }
     }
@@ -1551,12 +1484,9 @@ class TableElementList extends QueryTreeNodeVector
      * not in the list.
      */
     private ColumnDefinitionNode findColumnDefinition(String colName) {
-        int size = size();
-        for (int index = 0; index < size; index++) {
-            TableElementNode tableElement = (TableElementNode) elementAt(index);
-
-            if (tableElement instanceof ColumnDefinitionNode) {
-                ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
+        for (TableElementNode te : this) {
+            if (te instanceof ColumnDefinitionNode) {
+                ColumnDefinitionNode cdn = (ColumnDefinitionNode) te;
                 if (colName.equals(cdn.getName())) {
                     return cdn;
                 }

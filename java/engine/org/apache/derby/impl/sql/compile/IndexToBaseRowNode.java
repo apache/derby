@@ -401,7 +401,8 @@ class IndexToBaseRowNode extends FromTable
 
 		for (int index = 0; index < rclSize; index++)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
+            ResultColumn rc = resultColumns.elementAt(index);
+
 			if (indexReferencedCols != null && rc.getExpression() instanceof VirtualColumnNode)
 			{
 				// Column is coming from index

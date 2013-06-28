@@ -35,13 +35,13 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
  *
  */
 
-class GroupByList extends OrderedColumnList
+class GroupByList extends OrderedColumnList<GroupByColumn>
 {
 	int		numGroupingColsAdded = 0;
 	boolean         rollup = false;
 
     public GroupByList(ContextManager cm) {
-        super(cm);
+        super(GroupByColumn.class, cm);
         setNodeType(C_NodeTypes.GROUP_BY_LIST);
     }
 
@@ -69,7 +69,7 @@ class GroupByList extends OrderedColumnList
 					"position (" + position +
 					") expected to be between 0 and " + size());
 		}
-		return (GroupByColumn) elementAt(position);
+        return elementAt(position);
 	}
 
 
@@ -114,35 +114,32 @@ class GroupByList extends OrderedColumnList
 		ResultColumnList selectRCL = select.getResultColumns();
         SubqueryList dummySubqueryList = new SubqueryList(getContextManager());
 		int				 numColsAddedHere = 0;
-		int				 size = size();
 
 		/* Only 32677 columns allowed in GROUP BY clause */
-		if (size > Limits.DB2_MAX_ELEMENTS_IN_GROUP_BY)
+        if (size() > Limits.DB2_MAX_ELEMENTS_IN_GROUP_BY)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
 
 		/* Bind the grouping column */
-		for (int index = 0; index < size; index++)
+        for (GroupByColumn groupByCol : this)
 		{
-			GroupByColumn groupByCol = (GroupByColumn) elementAt(index);
 			groupByCol.bindExpression(fromList,
                                       dummySubqueryList, aggregates);
 		}
 
 		
 		int				rclSize = selectRCL.size();
-		for (int index = 0; index < size; index++)
+        for (GroupByColumn groupingCol : this)
 		{
 			boolean				matchFound = false;
-			GroupByColumn		groupingCol = (GroupByColumn) elementAt(index);
 
 			/* Verify that this entry in the GROUP BY list matches a
 			 * grouping column in the select list.
 			 */
 			for (int inner = 0; inner < rclSize; inner++)
 			{
-				ResultColumn selectListRC = (ResultColumn) selectRCL.elementAt(inner);
+                ResultColumn selectListRC = selectRCL.elementAt(inner);
 				if (!(selectListRC.getExpression() instanceof ColumnReference)) {
 					continue;
 				}
@@ -242,10 +239,8 @@ class GroupByList extends OrderedColumnList
     GroupByColumn findGroupingColumn(ValueNode node)
 	        throws StandardException
 	{
-		int sz = size();
-		for (int i = 0; i < sz; i++) 
+        for (GroupByColumn gbc : this)
 		{
-			GroupByColumn gbc = (GroupByColumn)elementAt(i);
 			if (gbc.getColumnExpression().isEquivalent(node))
 			{
 				return gbc;
@@ -262,20 +257,15 @@ class GroupByList extends OrderedColumnList
 	 */
     void remapColumnReferencesToExpressions() throws StandardException
 	{
-		GroupByColumn	gbc;
-		int				size = size();
-
 		/* This method is called when flattening a FromTable.  We should
 		 * not be flattening a FromTable if the underlying expression that
 		 * will get returned out, after chopping out the redundant ResultColumns,
 		 * is not a ColumnReference.  (See ASSERT below.)
 		 */
-		for (int index = 0; index < size; index++)
+        for (GroupByColumn gbc : this)
 		{
-			ValueNode	retVN;
-			gbc = (GroupByColumn) elementAt(index);
-
-			retVN = gbc.getColumnExpression().remapColumnReferencesToExpressions();
+            ValueNode retVN =
+                gbc.getColumnExpression().remapColumnReferencesToExpressions();
 
 			if (SanityManager.DEBUG)
 			{
@@ -307,15 +297,15 @@ class GroupByList extends OrderedColumnList
 	}
 
 
-    void preprocess(
-			int numTables, FromList fromList, SubqueryList whereSubquerys, 
-			PredicateList wherePredicates) throws StandardException 
+    void preprocess(int numTables,
+                    FromList fromList,
+                    SubqueryList whereSubquerys,
+                    PredicateList wherePredicates) throws StandardException
 	{
-		for (int index = 0; index < size(); index++)
+        for (GroupByColumn gbc : this)
 		{
-			GroupByColumn	groupingCol = (GroupByColumn) elementAt(index);
-			groupingCol.setColumnExpression(
-					groupingCol.getColumnExpression().preprocess(
+            gbc.setColumnExpression(
+                    gbc.getColumnExpression().preprocess(
 							numTables, fromList, whereSubquerys, wherePredicates));
 		}		
 	}

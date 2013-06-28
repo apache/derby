@@ -730,8 +730,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		{
 			if (types[i] == null)
 			{
-				ResultColumn rc =
-					(ResultColumn) rrsn.getResultColumns().elementAt(i);
+                ResultColumn rc = rrsn.getResultColumns().elementAt(i);
 				if ( ! (rc.getExpression().requiresTypeFromContext()))
 				{
 					types[i] = rc.getExpression().getTypeServices();
@@ -763,9 +762,10 @@ abstract class SetOperatorNode extends TableOperatorNode
 		*/
 		ResultColumnList rrcl = rrsn.getResultColumns();
 		int rrclSize = rrcl.size();
+
 		for (int index = 0; index < rrclSize; index++)
 		{
-			ResultColumn	rc = (ResultColumn) rrcl.elementAt(index);
+            ResultColumn rc = rrcl.elementAt(index);
 
 			if (rc.getExpression().requiresTypeFromContext())
 			{
@@ -825,7 +825,7 @@ abstract class SetOperatorNode extends TableOperatorNode
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
                     orderByList.size() == resultColumns.visibleSize());
-                OrderByColumn obc = (OrderByColumn)orderByList.elementAt(0);
+                OrderByColumn obc = orderByList.elementAt(0);
                 SanityManager.ASSERT(
                     obc.getExpression() instanceof NumericConstantNode);
                 try {

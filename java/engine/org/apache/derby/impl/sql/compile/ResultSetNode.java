@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
@@ -114,7 +113,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
+    @Override
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -299,10 +298,11 @@ public abstract class ResultSetNode extends QueryTreeNode
         // sub-class. For all other nodes, just go through the result columns
         // and set the type for dynamic parameters.
         for (int i = 0; i < resultColumns.size(); i++) {
-            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+            ResultColumn rc = resultColumns.elementAt(i);
             ValueNode re = rc.getExpression();
+
             if (re != null && re.requiresTypeFromContext()) {
-                ResultColumn typeCol = (ResultColumn) typeColumns.elementAt(i);
+                ResultColumn typeCol = typeColumns.elementAt(i);
                 re.setType(typeCol.getTypeServices());
             }
         }
@@ -413,7 +413,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 		else
 		{
-			resultColumn = (ResultColumn) resultColumns.elementAt(0);
+            resultColumn = resultColumns.elementAt(0);
 	
 			/* Nothing to do if query is already select TRUE ... */
             if (resultColumn.getExpression().isBooleanTrue() &&
@@ -859,7 +859,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	{
 		for (int i=0; i<resultColumns.size(); i++)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+            ResultColumn rc = resultColumns.elementAt(i);
 			if (rc.isNameGenerated())
 				rc.setName(Integer.toString(i+1));
 		}
@@ -1212,9 +1212,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 		}
 
-		defaultTree = ((ResultColumn) 
-							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
-									getExpression();
+        defaultTree = ((CursorNode) qt).getResultSetNode().getResultColumns().
+                elementAt(0).getExpression();
 
 		lcc.popCompilerContext(newCC);
 

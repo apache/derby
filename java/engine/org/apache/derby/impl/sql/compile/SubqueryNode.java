@@ -572,8 +572,7 @@ class SubqueryNode extends ValueNode
 		 */
 		if (leftOperand != null && leftOperand.requiresTypeFromContext())
 		{
-			leftOperand.setType(
-				((ResultColumn) resultColumns.elementAt(0)).getTypeServices());
+            leftOperand.setType(resultColumns.elementAt(0).getTypeServices());
 		}
 
 		// Set the DataTypeServices
@@ -1194,8 +1193,7 @@ class SubqueryNode extends ValueNode
      * @return the right operand
      */
     private ValueNode getRightOperand() {
-        ResultColumn firstRC =
-                (ResultColumn) resultSet.getResultColumns().elementAt(0);
+        ResultColumn firstRC = resultSet.getResultColumns().elementAt(0);
         return firstRC.getExpression();
     }
 
@@ -1360,7 +1358,7 @@ class SubqueryNode extends ValueNode
                                         cm);
 		resultColumns = newRCL;
 	
-		firstRC = (ResultColumn) resultColumns.elementAt(0);
+        firstRC = resultColumns.elementAt(0);
 		rightOperand = firstRC.getExpression();
 
         BinaryComparisonOperatorNode bcoNode =
@@ -2399,7 +2397,7 @@ class SubqueryNode extends ValueNode
 		 */
 		if (subqueryType == EXPRESSION_SUBQUERY)
 		{
-			dts = ((ResultColumn) resultColumns.elementAt(0)).getTypeServices();
+            dts = resultColumns.elementAt(0).getTypeServices();
 		}
 		else
 		{

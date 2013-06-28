@@ -22,10 +22,12 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitable;
 
 /**
  * QueryTreeNodeVector is the root class for all lists of query tree nodes.
@@ -34,12 +36,15 @@ import org.apache.derby.iapi.services.context.ContextManager;
  *
  */
 
-abstract class QueryTreeNodeVector extends QueryTreeNode
+class QueryTreeNodeVector<E extends QueryTreeNode> extends QueryTreeNode
+                                                   implements Iterable<E>
 {
-	private final ArrayList<QueryTreeNode> v = new ArrayList<QueryTreeNode>();
+    private final ArrayList<E> v = new ArrayList<E>();
+    final Class<E> eltClass; // needed for cast in #acceptChildren
 
-    QueryTreeNodeVector(ContextManager cm) {
+    QueryTreeNodeVector(Class<E> eltClass, ContextManager cm) {
         super(cm);
+        this.eltClass = eltClass;
     }
 
 	public final int size()
@@ -47,48 +52,43 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		return v.size();
 	}
 
-	final QueryTreeNode elementAt(int index)
+    final E elementAt(int index)
 	{
         return v.get(index);
 	}
 
-	final void addElement(QueryTreeNode qt)
+    void addElement(E qt)
 	{
 		v.add(qt);
 	}
 
-	final void removeElementAt(int index)
-	{
-		v.remove(index);
-	}
-
-	final void removeElement(QueryTreeNode qt)
-	{
-		v.remove(qt);
-	}
-
-	final Object remove(int index)
+    final E removeElementAt(int index)
 	{
         return v.remove(index);
 	}
 
-	final int indexOf(QueryTreeNode qt)
+    final void removeElement(E qt)
+	{
+		v.remove(qt);
+	}
+
+    final int indexOf(E qt)
 	{
 		return v.indexOf(qt);
 	}
 
-	final void setElementAt(QueryTreeNode qt, int index)
+    final void setElementAt(E qt, int index)
 	{
 		v.set(index, qt);
 	}
 
-	void destructiveAppend(QueryTreeNodeVector qtnv)
+    final void destructiveAppend(QueryTreeNodeVector<E> qtnv)
 	{
 		nondestructiveAppend(qtnv);
 		qtnv.removeAllElements();
 	}
 
-	void nondestructiveAppend(QueryTreeNodeVector qtnv)
+    final void nondestructiveAppend(QueryTreeNodeVector<E> qtnv)
 	{
         v.addAll(qtnv.v);
 	}
@@ -98,7 +98,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		v.clear();
 	}
 
-	final void insertElementAt(QueryTreeNode qt, int index)
+    final void insertElementAt(E qt, int index)
 	{
 		v.add(index, qt);
 	}
@@ -114,7 +114,7 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		if (SanityManager.DEBUG) {
 			for (int index = 0; index < size(); index++) {
 				debugPrint(formatNodeString("[" + index + "]:", depth));
-                QueryTreeNode elt = elementAt(index);
+                E elt = elementAt(index);
 				elt.treePrint(depth);
 			}
 		}
@@ -137,7 +137,13 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
-            setElementAt((QueryTreeNode)(elementAt(index)).accept(v), index);
+            Visitable vbl = elementAt(index).accept(v);
+            setElementAt(eltClass.cast(vbl), index);
 		}
 	}
+
+    /* Iterable interface */
+    public final Iterator<E> iterator() {
+        return v.iterator();
+    }
 }

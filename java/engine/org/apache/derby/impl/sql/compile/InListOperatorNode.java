@@ -137,7 +137,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
                 new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
 						leftOperand, 
-						(ValueNode) rightOperandList.elementAt(0),
+                        rightOperandList.elementAt(0),
                         false,
 						getContextManager());
 			/* Set type info for the operator node */
@@ -257,9 +257,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				rightOperandList.sortInAscendingOrder(judgeODV);
 				isOrdered = true;
 
-				ValueNode minValue = (ValueNode)rightOperandList.elementAt(0);
-				ValueNode maxValue =
-					(ValueNode)rightOperandList.elementAt(
+                ValueNode minValue = rightOperandList.elementAt(0);
+                ValueNode maxValue = rightOperandList.elementAt(
 						rightOperandList.size() - 1);
 
 				/* Handle the degenerate case where the min and the max
@@ -305,7 +304,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 * the list.  This is arbitrary and should not matter in the
 			 * big picture.
 			 */
-			ValueNode srcVal = (ValueNode) rightOperandList.elementAt(0);
+            ValueNode srcVal = rightOperandList.elementAt(0);
             ParameterNode pNode = new ParameterNode(
                     0,
 					null, // default value
@@ -373,9 +372,8 @@ public final class InListOperatorNode extends BinaryListOperatorNode
             // Iterate through the entire list of values to find out
             // what the dominant type is.
             ClassFactory cf = getClassFactory();
-            int sz = rightOperandList.size();
-            for (int i = 0; i < sz; i++) {
-                ValueNode vn = (ValueNode) rightOperandList.elementAt(i);
+
+            for (ValueNode vn : rightOperandList) {
                 targetType = targetType.getDominantType(
                         vn.getTypeServices(), cf);
             }
@@ -439,7 +437,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
         leftBCO = new BinaryRelationalOperatorNode(
 						C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
 						leftClone,
-                        (ValueNode)rightOperandList.elementAt(0),
+                        rightOperandList.elementAt(0),
                         false,
 						getContextManager());
 		/* Set type info for the operator node */
@@ -455,7 +453,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
             rightBCO = new BinaryRelationalOperatorNode(
 							C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
 							leftClone,
-							(ValueNode) rightOperandList.elementAt(elemsDone),
+                            rightOperandList.elementAt(elemsDone),
                             false,
 							getContextManager());
 			/* Set type info for the operator node */
@@ -484,12 +482,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
     boolean selfReference(ColumnReference cr)
 		throws StandardException
 	{
-		int size = rightOperandList.size();
-		for (int i = 0; i < size; i++)
+        for (ValueNode vn : rightOperandList)
 		{
-			ValueNode vn = (ValueNode) rightOperandList.elementAt(i);
-			if (vn.getTablesReferenced().get(cr.getTableNumber()))
+            if (vn.getTablesReferenced().get(cr.getTableNumber())) {
 				return true;
+            }
 		}
 		return false;
 	}
@@ -642,7 +639,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			}
 
 			setArrayMethod.getField(arrayField); // first arg
-			((ValueNode) rightOperandList.elementAt(index)).generateExpression(acb, setArrayMethod);
+            rightOperandList.elementAt(index).generateExpression(acb, setArrayMethod);
 			setArrayMethod.upCast(ClassName.DataValueDescriptor); // second arg
 			setArrayMethod.setArrayElement(index);
 		}
@@ -716,7 +713,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 							  ((i == 0) ? 4 : 3);
 			for (int j = 0; j < numVals; j++)
 			{
-				ValueNode vn = (ValueNode) rightOperandList.elementAt(currentOpnd++);
+                ValueNode vn = rightOperandList.elementAt(currentOpnd++);
 				vn.generateExpression(acb, mb);
 				mb.upCast(ClassName.DataValueDescriptor);
 			}

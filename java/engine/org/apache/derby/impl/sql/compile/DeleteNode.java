@@ -402,7 +402,7 @@ class DeleteNode extends DMLModStatementNode
 		if (targetTableDescriptor != null)
 		{
 			// Base table
-			int lockMode = resultSet.updateTargetLockMode();
+            int lckMode = resultSet.updateTargetLockMode();
 			long heapConglomId = targetTableDescriptor.getHeapConglomerateId();
 			TransactionController tc = getLanguageConnectionContext().getTransactionCompile();
 			StaticCompiledOpenConglomInfo[] indexSCOCIs = 
@@ -419,7 +419,7 @@ class DeleteNode extends DMLModStatementNode
 			*/
 			if (targetTableDescriptor.getLockGranularity() == TableDescriptor.TABLE_LOCK_GRANULARITY)
 			{
-				lockMode = TransactionController.MODE_TABLE;
+                lckMode = TransactionController.MODE_TABLE;
 			}
 
 			ResultDescription resultDescription = null;
@@ -442,7 +442,7 @@ class DeleteNode extends DMLModStatementNode
 				  deferred,
 				  false,
 				  targetTableDescriptor.getUUID(),
-				  lockMode,
+                  lckMode,
 				  null, null, null, 0, null, null, 
 				  resultDescription,
 				  getFKInfo(), 
@@ -795,7 +795,7 @@ class DeleteNode extends DMLModStatementNode
 
         fromList.addFromTable(fromTable);
 
-        SelectNode resultSet = new SelectNode(getSetClause(cdl),
+        SelectNode sn = new SelectNode(getSetClause(cdl),
                                               fromList, /* FROM list */
                                               whereClause, /* WHERE clause */
                                               null, /* GROUP BY list */
@@ -803,7 +803,7 @@ class DeleteNode extends DMLModStatementNode
                                               null, /* windows */
                                               getContextManager());
 
-        return new UpdateNode(tableName, resultSet, getContextManager());
+        return new UpdateNode(tableName, sn, getContextManager());
 
     }
 
@@ -927,7 +927,7 @@ class DeleteNode extends DMLModStatementNode
 			needsDeferredProcessing[0] = true;
 			
 			boolean needToIncludeAllColumns = false;
-            for (Iterator descIter = relevantTriggers.iterator();
+            for (Iterator<?> descIter = relevantTriggers.iterator();
                     descIter.hasNext(); ) {
                 TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
 				//Does this trigger have REFERENCING clause defined on it.
@@ -964,12 +964,9 @@ class DeleteNode extends DMLModStatementNode
 		if ( correlationName == null ) { return; }
 
 		TableName	correlationNameNode = makeTableName( null, correlationName );
-		int			count = rcl.size();
 
-		for ( int i = 0; i < count; i++ )
+        for (ResultColumn column : rcl)
 		{
-			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
-
 			ValueNode		expression = column.getExpression();
 
 			if ( (expression != null) && (expression instanceof ColumnReference) )

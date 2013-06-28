@@ -41,10 +41,10 @@ import org.apache.derby.iapi.util.JBitSet;
  * e.g. IN list, NOT IN list or BETWEEN in a DML statement.
  */
 
-class ValueNodeList extends QueryTreeNodeVector
+class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 {
     ValueNodeList(ContextManager cm) {
-        super(cm);
+        super(ValueNode.class, cm);
         setNodeType(C_NodeTypes.VALUE_NODE_LIST);
     }
 
@@ -79,7 +79,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode vn = (ValueNode) elementAt(index);
+            ValueNode vn = elementAt(index);
             vn = vn.bindExpression(fromList, subqueryList, aggregates);
 
 			setElementAt(vn, index);
@@ -102,7 +102,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode valueNode = (ValueNode) elementAt(index);
+            ValueNode valueNode = elementAt(index);
 			
 			if (valueNode.getTypeId().userType())
 			{
@@ -167,7 +167,7 @@ class ValueNodeList extends QueryTreeNodeVector
 		{
 			ValueNode			valueNode;
 
-			valueNode = (ValueNode) elementAt(index);
+            valueNode = elementAt(index);
 			if (valueNode.requiresTypeFromContext())
 				continue;
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
@@ -234,7 +234,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode valueNode = (ValueNode) elementAt(index);
+            ValueNode valueNode = elementAt(index);
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
 			if (valueNodeDTS != null)
@@ -264,7 +264,7 @@ class ValueNodeList extends QueryTreeNodeVector
 		{
 			ValueNode			valueNode;
 
-			valueNode = (ValueNode) elementAt(index);
+            valueNode = elementAt(index);
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
 			if (valueNodeDTS == null)
@@ -290,20 +290,14 @@ class ValueNodeList extends QueryTreeNodeVector
 	 */
     void compatible(ValueNode leftOperand) throws StandardException
 	{
-		int			 size = size();
-		TypeId	leftType;
-		ValueNode		valueNode;
-		TypeCompiler leftTC;
+        TypeId leftType = leftOperand.getTypeId();
+        TypeCompiler leftTC = leftOperand.getTypeCompiler();
 
-		leftType = leftOperand.getTypeId();
-		leftTC = leftOperand.getTypeCompiler();
-
-		for (int index = 0; index < size; index++)
+        for (ValueNode valueNode : this)
 		{
-			valueNode = (ValueNode) elementAt(index);
-			if (valueNode.requiresTypeFromContext())
+            if (valueNode.requiresTypeFromContext()) {
 				continue;
-
+            }
 
 			/*
 			** Are the types compatible to each other?  If not, throw an exception.
@@ -334,7 +328,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			valueNode = (ValueNode) elementAt(index);
+            valueNode = elementAt(index);
 
 			/*
 			** Can the types be compared to each other?  If not, throw an
@@ -365,7 +359,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (((ValueNode) elementAt(index)).getTypeServices().isNullable())
+            if (elementAt(index).getTypeServices().isNullable())
 			{
 				return true;
 			}
@@ -384,7 +378,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (((ValueNode) elementAt(index)).requiresTypeFromContext())
+            if (elementAt(index).requiresTypeFromContext())
 			{
 				return true;
 			}
@@ -403,7 +397,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (! (((ValueNode) elementAt(index)).requiresTypeFromContext()))
+            if (! (elementAt(index).requiresTypeFromContext()))
 			{
 				return false;
 			}
@@ -422,7 +416,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			if (! ((ValueNode) elementAt(index) instanceof ConstantNode))
+            if (! (elementAt(index) instanceof ConstantNode))
 			{
 				return false;
 			}
@@ -442,7 +436,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode vNode = (ValueNode)elementAt(index);
+            ValueNode vNode = elementAt(index);
 			if (!vNode.requiresTypeFromContext() &&
 			    !(vNode instanceof ConstantNode))
 			{
@@ -516,7 +510,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode valueNode = (ValueNode) elementAt(index);
+            ValueNode valueNode = elementAt(index);
 			if (valueNode.requiresTypeFromContext())
 			{
 				valueNode.setType(descriptor);
@@ -546,7 +540,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			valueNode = (ValueNode) elementAt(index);
+            valueNode = elementAt(index);
 			valueNode.preprocess(numTables,
 								 outerFromList, outerSubqueryList,
 								 outerPredicateList);
@@ -568,9 +562,8 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			setElementAt(
-				((ValueNode) elementAt(index)).remapColumnReferencesToExpressions(),
-				index);
+            setElementAt(elementAt(index).remapColumnReferencesToExpressions(),
+                         index);
 		}
 		return this;
 	}
@@ -593,8 +586,8 @@ class ValueNodeList extends QueryTreeNodeVector
         }
 
         for (int i = 0; i < size(); i++) {
-            ValueNode vn1 = (ValueNode) elementAt(i);
-            ValueNode vn2 = (ValueNode) other.elementAt(i);
+            ValueNode vn1 = elementAt(i);
+            ValueNode vn2 = other.elementAt(i);
             if (!vn1.isEquivalent(vn2)) {
                 return false;
             }
@@ -616,7 +609,7 @@ class ValueNodeList extends QueryTreeNodeVector
 		{
 			boolean retcode;
 
-			retcode = ((ValueNode) elementAt(index)).isConstantExpression();
+            retcode = elementAt(index).isConstantExpression();
 			if (! retcode)
 			{
 				return retcode;
@@ -635,8 +628,7 @@ class ValueNodeList extends QueryTreeNodeVector
 		{
 			boolean retcode;
 
-			retcode =
-				((ValueNode) elementAt(index)).constantExpression(whereClause);
+            retcode = elementAt(index).constantExpression(whereClause);
 			if (! retcode)
 			{
 				return retcode;
@@ -683,7 +675,7 @@ class ValueNodeList extends QueryTreeNodeVector
 
 		for (int index = 0; index < size; index++)
 		{
-			pushable = ((ValueNode) elementAt(index)).categorize(referencedTabs, simplePredsOnly) &&
+            pushable = elementAt(index).categorize(referencedTabs, simplePredsOnly) &&
 					   pushable;
 		}
 
@@ -715,7 +707,7 @@ class ValueNodeList extends QueryTreeNodeVector
 		 */
 		for (int index = 0; index < size; index++)
 		{
-			int curType = ((ValueNode) elementAt(index)).getOrderableVariantType();
+            int curType = elementAt(index).getOrderableVariantType();
 			listType = Math.min(listType, curType);
 		}
 

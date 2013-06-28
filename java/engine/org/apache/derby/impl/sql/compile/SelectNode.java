@@ -409,10 +409,8 @@ class SelectNode extends ResultSetNode
 			return null;
 
 		// Loop through the result columns looking for a match
-		int rclSize = resultColumns.size();
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : resultColumns)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
 			if (! (rc.getExpression() instanceof ColumnReference))
 				return null;
 
@@ -878,9 +876,8 @@ class SelectNode extends ResultSetNode
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
-        for (int i = 0; i < resultColumns.size(); i++) {
-            if (!((ResultColumn)resultColumns.elementAt(i)
-                     instanceof AllResultColumn) ) {
+        for (ResultColumn rc : resultColumns) {
+            if (!(rc instanceof AllResultColumn)) {
                 continue;
             }
 
@@ -896,9 +893,7 @@ class SelectNode extends ResultSetNode
              * the qualification is a valid exposed name.  NOTE: The exposed
              * name can come from an outer query block.
              */
-            String fullTableName =
-                ((AllResultColumn)resultColumns.elementAt(i)).
-                getFullTableName();
+            String fullTableName = ((AllResultColumn)rc).getFullTableName();
 
             if (fullTableName != null) {
                 if (fromList.getFromTableByName
@@ -971,7 +966,7 @@ class SelectNode extends ResultSetNode
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
                     orderByList.size() == resultColumns.visibleSize());
-                OrderByColumn obc = (OrderByColumn)orderByList.elementAt(0);
+                OrderByColumn obc = orderByList.elementAt(0);
                 SanityManager.ASSERT(
                     obc.getExpression() instanceof NumericConstantNode);
                 try {
@@ -1527,7 +1522,7 @@ class SelectNode extends ResultSetNode
 		ResultSetNode		prnRSN;
 
         prnRSN = new ProjectRestrictNode(
-                (ResultSetNode)fromList.elementAt(0),   /* Child ResultSet */
+                fromList.elementAt(0),   /* Child ResultSet */
                 resultColumns,      /* Projection */
                 whereClause,            /* Restriction */
                 wherePredicates,/* Restriction as PredicateList */
@@ -1582,8 +1577,7 @@ class SelectNode extends ResultSetNode
 					SQLState.LANG_WINDOW_LIMIT_EXCEEDED);
 			}
 
-            WindowDefinitionNode wn =
-                    (WindowDefinitionNode)windows.elementAt(0);
+            WindowDefinitionNode wn = windows.elementAt(0);
 
             WindowResultSetNode wrsn = new WindowResultSetNode(
 					prnRSN,
@@ -1815,15 +1809,12 @@ class SelectNode extends ResultSetNode
 										  boolean permuteOrdering)
 		throws StandardException
 	{
-		int rclSize = resultColumns.size();
-
 		/* Not ordered if RCL contains anything other than a ColumnReference
 		 * or a ConstantNode.
 		 */
 		int numCRs = 0;
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : resultColumns)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
 			if (rc.getExpression() instanceof ColumnReference)
 			{
 				numCRs++;
@@ -1844,9 +1835,8 @@ class SelectNode extends ResultSetNode
 
 		// Now populate the CR array and see if ordered
 		int crsIndex = 0;
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : resultColumns)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
 			if (rc.getExpression() instanceof ColumnReference)
 			{
 				crs[crsIndex++] = (ColumnReference) rc.getExpression();
@@ -1923,8 +1913,10 @@ class SelectNode extends ResultSetNode
 			// Iterate backwards because we might be deleting entries.
 			for (int i = wherePredicates.size() - 1; i >= 0; i--)
 			{
-				if (((Predicate)wherePredicates.elementAt(i)).isScopedForPush())
+                if (wherePredicates.elementAt(i).isScopedForPush())
+                {
 					wherePredicates.removeOptPredicate(i);
+                }
 			}
 		}
 
@@ -2160,7 +2152,7 @@ class SelectNode extends ResultSetNode
 			 * and create new VirtualColumnNodes for the original's 
 			 * ResultColumn.expressions.
 			 */
-			leftResultSet = (ResultSetNode) fromList.elementAt(0);
+            leftResultSet = fromList.elementAt(0);
 			leftRCList = leftResultSet.getResultColumns();
 			leftResultSet.setResultColumns(leftRCList.copyListAndObjects());
 			leftRCList.genVirtualColumnNodes(leftResultSet, leftResultSet.resultColumns);
@@ -2170,7 +2162,7 @@ class SelectNode extends ResultSetNode
 			 * ResultColumn.expressions and increment the virtualColumnIds.
 			 * (Right gets appended to left, so only right's ids need updating.)
 			 */
-			rightResultSet = (ResultSetNode) fromList.elementAt(1);
+            rightResultSet = fromList.elementAt(1);
 			rightRCList = rightResultSet.getResultColumns();
 			rightResultSet.setResultColumns(rightRCList.copyListAndObjects());
 			rightRCList.genVirtualColumnNodes(rightResultSet, rightResultSet.resultColumns);
@@ -2425,7 +2417,7 @@ class SelectNode extends ResultSetNode
 		throws StandardException
 	{
 		ColumnReference additionalCR = null;
-		ResultColumn	rc = (ResultColumn) getResultColumns().elementAt(0);
+        ResultColumn rc = getResultColumns().elementAt(0);
 
 		/* Figure out if we have an additional ColumnReference
 		 * in an equality comparison.

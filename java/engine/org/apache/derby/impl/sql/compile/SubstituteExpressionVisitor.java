@@ -33,10 +33,10 @@ class SubstituteExpressionVisitor implements Visitor
 {
 	private ValueNode source;
 	private ValueNode target;
-	private Class     skipOverClass;
+    private Class<?>  skipOverClass;
 	
 	SubstituteExpressionVisitor(
-			ValueNode s, ValueNode t, Class skipThisClass)  
+            ValueNode s, ValueNode t, Class<?> skipThisClass)
 	{
 		source = s;
 		target = t;

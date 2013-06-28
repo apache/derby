@@ -554,7 +554,8 @@ public class ClassInspector
      * the actual types of the interface type variables.
      * May return null or an array of nulls if type resolution fails.
 	 */
-    public Class[] getGenericParameterTypes( Class parameterizedType, Class implementation )
+    public Class<?>[] getGenericParameterTypes(
+            Class parameterizedType, Class implementation )
         throws StandardException
 	{
         // construct the inheritance chain stretching from the parameterized
@@ -577,7 +578,7 @@ public class ClassInspector
             return null;
         }
 
-        return parameterTypes.toArray(new Class[parameterTypes.size()]);
+        return parameterTypes.toArray(new Class<?>[parameterTypes.size()]);
     }
 
 	/**

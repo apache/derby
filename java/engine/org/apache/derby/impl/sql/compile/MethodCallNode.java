@@ -169,11 +169,12 @@ abstract class MethodCallNode extends JavaValueNode
 	  *
 	  *	@return	the Classes of our parameters
 	  */
-	public	Class[]	getMethodParameterClasses() 
+    public  Class<?>[]  getMethodParameterClasses()
 	{ 
 		ClassInspector ci = getClassFactory().getClassInspector();
 
-		Class[]	parmTypeClasses = new Class[methodParms.length];
+        Class<?>[]  parmTypeClasses = new Class<?>[methodParms.length];
+
 		for (int i = 0; i < methodParms.length; i++)
 		{
 			String className = methodParameterTypes[i];
@@ -911,7 +912,7 @@ abstract class MethodCallNode extends JavaValueNode
             {
                 // allow subtypes of ResultSet too
                 try {
-                    Class actualType = classInspector.getClass( typeName );
+                    Class<?> actualType = classInspector.getClass( typeName );
 
                     foundCorrectType = ResultSet.class.isAssignableFrom( actualType );
                 }
@@ -1229,6 +1230,7 @@ abstract class MethodCallNode extends JavaValueNode
 		return isParam;
 	}
 
+    @SuppressWarnings("fallthrough")
 	static  String	getObjectTypeName( JSQLType jsqlType, TypeCompilerFactory tcf )
 		throws StandardException
 	{

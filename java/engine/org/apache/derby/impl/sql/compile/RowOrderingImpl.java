@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.ListIterator;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -299,12 +300,13 @@ class RowOrderingImpl implements RowOrdering {
 	 * Remove all optimizables with the given table number from the
      * given list of optimizables.
 	 */
-    private void removeOptimizable(int tableNumber, ArrayList list)
+    private void removeOptimizable(int tableNumber, ArrayList<Optimizable> list)
 	{
-        Iterator it = list.iterator();
+        ListIterator<Optimizable> it = list.listIterator();
+
         while (it.hasNext())
 		{
-            Optimizable optTable = (Optimizable) it.next();
+            Optimizable optTable = it.next();
 
             if (optTable.hasTableNumber()
                     && (optTable.getTableNumber() == tableNumber)) {

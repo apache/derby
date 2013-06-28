@@ -222,7 +222,7 @@ class HalfOuterJoinNode extends JoinNode
 		{
 			Predicate predicate;
 
-			predicate = (Predicate) joinPredicates.elementAt(index);
+            predicate = joinPredicates.elementAt(index);
 			if (! predicate.getPushable())
 			{
 				continue;

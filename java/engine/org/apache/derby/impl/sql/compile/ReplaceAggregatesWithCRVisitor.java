@@ -33,7 +33,7 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 class ReplaceAggregatesWithCRVisitor implements Visitor
 {
 	private ResultColumnList rcl;
-	private Class skipOverClass;
+    private Class<?> skipOverClass;
 	private int tableNumber;
 
 	/**
@@ -50,7 +50,7 @@ class ReplaceAggregatesWithCRVisitor implements Visitor
 	}
 
     ReplaceAggregatesWithCRVisitor(
-        ResultColumnList rcl, int tableNumber, Class skipOverClass)
+        ResultColumnList rcl, int tableNumber, Class<?> skipOverClass)
 	{
 		this.rcl = rcl;
 		this.tableNumber = tableNumber;
@@ -66,7 +66,7 @@ class ReplaceAggregatesWithCRVisitor implements Visitor
 	 * @param rcl the result column list
 	 * @param nodeToSkip don't examine anything below nodeToSkip
 	 */
-    ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, Class nodeToSkip)
+    ReplaceAggregatesWithCRVisitor(ResultColumnList rcl, Class<?> nodeToSkip)
 	{
 		this.rcl = rcl;
 		this.skipOverClass = nodeToSkip;

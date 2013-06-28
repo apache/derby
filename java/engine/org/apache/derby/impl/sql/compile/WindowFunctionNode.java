@@ -73,7 +73,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * @see ValueNode#isConstantExpression
      */
     @Override
-    public boolean constantExpression(PredicateList whereClause)
+    boolean constantExpression(PredicateList whereClause)
     {
         // Without this, an ORDER by on ROW_NUMBER could get optimised away
         // if there is a restriction, e.g.
@@ -87,7 +87,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
     /**
      * @return window associated with this window function
      */
-    public WindowNode getWindow() {
+    WindowNode getWindow() {
         return window;
     }
 
@@ -96,7 +96,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      * Set window associated with this window function call.
      * @param wdn window definition
      */
-    public void setWindow(WindowDefinitionNode wdn) {
+    void setWindow(WindowDefinitionNode wdn) {
         this.window = wdn;
     }
 
@@ -134,10 +134,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      */
     private WindowDefinitionNode definedWindow(WindowList windows,
                                                String name) {
-        for (int i=0; i < windows.size(); i++) {
-            WindowDefinitionNode wdn =
-                (WindowDefinitionNode)windows.elementAt(i);
-
+        for (WindowDefinitionNode wdn : windows) {
             if (wdn.getName().equals(name)) {
                 return wdn;
             }
@@ -175,7 +172,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @exception StandardException         Thrown on error
      */
-    public ValueNode replaceCallsWithColumnReferences(ResultColumnList rcl,
+    ValueNode replaceCallsWithColumnReferences(ResultColumnList rcl,
                                                       int tableNumber)
         throws StandardException
     {
@@ -242,7 +239,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @return the column reference
      */
-    public ColumnReference getGeneratedRef()
+    ColumnReference getGeneratedRef()
     {
         return generatedRef;
     }
@@ -255,7 +252,7 @@ public abstract class WindowFunctionNode extends UnaryOperatorNode
      *
      * @exception StandardException on error
      */
-    public ValueNode    getNewNullResultExpression()
+    ValueNode getNewNullResultExpression()
         throws StandardException
     {
         //

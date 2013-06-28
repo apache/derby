@@ -126,9 +126,13 @@ class UserAggregateDefinition implements AggregateDefinition
                      );
             }
 
-            Class[]   genericParameterTypes = classFactory.getClassInspector().getGenericParameterTypes
-                ( derbyAggregatorInterface, userAggregatorClass );
-            if ( genericParameterTypes == null ) { genericParameterTypes = new Class[ AGGREGATOR_PARAM_COUNT ]; }
+            Class<?>[] genericParameterTypes =
+                classFactory.getClassInspector().getGenericParameterTypes(
+                    derbyAggregatorInterface, userAggregatorClass);
+
+            if ( genericParameterTypes == null ) {
+                genericParameterTypes = new Class<?>[ AGGREGATOR_PARAM_COUNT ];
+            }
 
             AggregateAliasInfo  aai = (AggregateAliasInfo) _alias.getAliasInfo();
             DataTypeDescriptor  expectedInputType = DataTypeDescriptor.getType( aai.getForType() );
@@ -222,7 +226,7 @@ class UserAggregateDefinition implements AggregateDefinition
     /**
      * Get the Java class corresponding to a Derby datatype.
      */
-    private Class   getJavaClass( ClassFactory classFactory, DataTypeDescriptor dtd )
+    private Class<?> getJavaClass( ClassFactory classFactory, DataTypeDescriptor dtd )
         throws StandardException, ClassNotFoundException
     {
         JSQLType    jsqlType = new JSQLType( dtd );

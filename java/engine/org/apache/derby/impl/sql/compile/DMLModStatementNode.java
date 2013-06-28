@@ -413,7 +413,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		TableDescriptor		targetTableDescriptor,
 		ResultColumnList	sourceRCL,
 		ResultColumnList	targetRCL,
-        boolean                 forUpdate,
+        boolean             forUpdate,
         ResultSetNode       updateResultSet
     )
 		throws StandardException
@@ -423,7 +423,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
         for ( int i = 0; i < count; i++ )
         {
-            ResultColumn    rc = (ResultColumn) targetRCL.elementAt( i );
+            ResultColumn rc = targetRCL.elementAt( i );
 
             //
             // For updates, there are two copies of the column in the row: a
@@ -562,9 +562,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			}
 		}
 
-		clauseTree = ((ResultColumn) 
-							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
-									getExpression();
+        clauseTree = ((CursorNode) qt).getResultSetNode().getResultColumns().
+                elementAt(0).getExpression();
 
 		lcc.popCompilerContext(newCC);
 
@@ -1125,7 +1124,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	{
 		CompilerContext 			compilerContext = getCompilerContext();
 
-        for (Iterator descIter = tdl.iterator(); descIter.hasNext() ; ) {
+        for (Iterator<?> descIter = tdl.iterator(); descIter.hasNext() ; ) {
             TriggerDescriptor td = (TriggerDescriptor)descIter.next();
             /*
             ** The dependent now depends on this trigger.
@@ -1487,23 +1486,18 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  */
 	public	void	generateGenerationClauses
 	(
-        ResultColumnList            rcl,
-        int                                 resultSetNumber,
-        boolean                         isUpdate,
+        ResultColumnList        rcl,
+        int                     resultSetNumber,
+        boolean                 isUpdate,
 		ExpressionClassBuilder	ecb,
 		MethodBuilder			mb
     )
-							throws StandardException
+        throws StandardException
 	{
-		ResultColumn rc; 
-		int size = rcl.size();
         boolean hasGenerationClauses = false;
 
-		for (int index = 0; index < size; index++)
+        for (ResultColumn rc : rcl)
 		{
-			rc = (ResultColumn) rcl.elementAt(index);
-
-            //
             // Generated columns should be populated after the base row because
             // the generation clauses may refer to base columns that have to be filled
             // in first.
@@ -1589,7 +1583,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
         }
         for ( int i = startColumn; i < size; i++ )
         {
-            ResultColumn    rc = (ResultColumn) rcl.elementAt( i );
+            ResultColumn rc = rcl.elementAt( i );
 
             if ( !rc.hasGenerationClause() ) { continue; }
 
@@ -1867,11 +1861,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		
 		String synTableName = synonymTableName.getTableName();
 		
-		int	count = rcl.size();
-		for (int i = 0; i < count; i++)
+        for (ResultColumn rc : rcl)
 		{
-			ResultColumn    column    = (ResultColumn) rcl.elementAt(i);
-			ColumnReference	reference = column.getReference();
+            ColumnReference reference = rc.getReference();
 
 			if ( reference != null )
 			{

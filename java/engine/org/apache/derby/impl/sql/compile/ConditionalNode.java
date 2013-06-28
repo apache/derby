@@ -77,7 +77,7 @@ class ConditionalNode extends ValueNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
+    @Override
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -192,13 +192,11 @@ class ConditionalNode extends ValueNode
 		 * dummy SubqueryList and AggreateList (we don't care)
 		 */
 
-		ValueNode thenNode =
-			((ValueNode)thenElseList.elementAt(0)).bindExpression(
+        ValueNode thenNode = thenElseList.elementAt(0).bindExpression(
                 fromList, subqueryList, aggregates);
         thenElseList.setElementAt( thenNode, 0 );
 
-		ValueNode elseNode =
-			((ValueNode)thenElseList.elementAt(1)).bindExpression(
+        ValueNode elseNode = thenElseList.elementAt(1).bindExpression(
                 fromList, subqueryList, aggregates);
         thenElseList.setElementAt( elseNode, 1 );
 
@@ -279,8 +277,8 @@ class ConditionalNode extends ValueNode
 		
 		// need to have nullNodes nullable
 		castType = castType.getNullabilityType(true);
-		ValueNode thenNode = (ValueNode)thenElseList.elementAt(0);
-		ValueNode elseNode = (ValueNode)thenElseList.elementAt(1);
+        ValueNode thenNode = thenElseList.elementAt(0);
+        ValueNode elseNode = thenElseList.elementAt(1);
 
 		// first check if the "then" node is NULL
 		if (isNullNode(thenNode) &&
@@ -289,7 +287,8 @@ class ConditionalNode extends ValueNode
 			// recast and rebind. findTypes would have bound as SQL CHAR.
 			// need to rebind here. (DERBY-3032)
 			thenElseList.setElementAt(recastNullNode(thenNode, castType), 0);
-            ((ValueNode) thenElseList.elementAt(0)).bindExpression(fromList, subqueryList, aggregates);
+            thenElseList.elementAt(0).bindExpression(
+                    fromList, subqueryList, aggregates);
 			
 		// otherwise recurse on thenNode, but only if it's a conditional
 		} else if (isConditionalNode(thenNode)) {
@@ -304,7 +303,8 @@ class ConditionalNode extends ValueNode
 			// recast and rebind. findTypes would have bound as SQL CHAR.
 			// need to rebind here. (DERBY-3032)
 			thenElseList.setElementAt(recastNullNode(elseNode, castType), 1);
-            ((ValueNode) thenElseList.elementAt(1)).bindExpression(fromList, subqueryList, aggregates);
+            thenElseList.elementAt(1).bindExpression(
+                    fromList, subqueryList, aggregates);
 		// otherwise recurse on elseNode, but only if it's a conditional
 		} else if (isConditionalNode(elseNode)) {
 			recastNullNodes(((ConditionalNode)elseNode).thenElseList,
@@ -331,7 +331,7 @@ class ConditionalNode extends ValueNode
 	 *
 	 * @exception StandardException Thrown on error.
 	 */
-	private QueryTreeNode recastNullNode(ValueNode nodeToCast,
+    private CastNode recastNullNode(ValueNode nodeToCast,
 		DataTypeDescriptor typeToUse) throws StandardException
 	{
         return new CastNode(
@@ -379,8 +379,8 @@ class ConditionalNode extends ValueNode
 			 * The untyped NULL should have a data type descriptor
 			 * that allows its value to be nullable.
 			 */
-            QueryTreeNode cast = new CastNode(
-                        (ValueNode)thenElseList.elementAt(0),
+            CastNode cast = new CastNode(
+                        thenElseList.elementAt(0),
 						bcon.getLeftOperand().getTypeServices().getNullabilityType(true),
 						getContextManager());
 
@@ -405,8 +405,8 @@ class ConditionalNode extends ValueNode
 		
 		// Can't get the then and else expressions until after they've been bound
 		// expressions have been bound by findType and rebound by recastNullNodes if needed.
-		ValueNode thenExpression = (ValueNode) thenElseList.elementAt(0);
-		ValueNode elseExpression = (ValueNode) thenElseList.elementAt(1);
+        ValueNode thenExpression = thenElseList.elementAt(0);
+        ValueNode elseExpression = thenElseList.elementAt(1);
 
 		/* testCondition must be a boolean expression.
 		 * If it is a ? parameter on the left, then set type to boolean,
@@ -492,8 +492,8 @@ class ConditionalNode extends ValueNode
 		** stick it over the original expression
 		*/
 		TypeId condTypeId = getTypeId();
-		TypeId thenTypeId = ((ValueNode) thenElseList.elementAt(0)).getTypeId();
-		TypeId elseTypeId = ((ValueNode) thenElseList.elementAt(1)).getTypeId();
+        TypeId thenTypeId = thenElseList.elementAt(0).getTypeId();
+        TypeId elseTypeId = thenElseList.elementAt(1).getTypeId();
 
 		/* Need to generate conversion if thenExpr or elseExpr is not of 
 		 * dominant type.  (At least 1 of them must be of the dominant type.)
@@ -501,7 +501,7 @@ class ConditionalNode extends ValueNode
 		if (thenTypeId.typePrecedence() != condTypeId.typePrecedence())
 		{
             ValueNode cast = new CastNode(
-                                (ValueNode)thenElseList.elementAt(0),
+                                thenElseList.elementAt(0),
                                 getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
@@ -514,7 +514,7 @@ class ConditionalNode extends ValueNode
 		else if (elseTypeId.typePrecedence() != condTypeId.typePrecedence())
 		{
             ValueNode cast = new CastNode(
-                                (ValueNode)thenElseList.elementAt(1),
+                                thenElseList.elementAt(1),
                                 getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
@@ -671,8 +671,8 @@ class ConditionalNode extends ValueNode
 		}
 
 		/* Simply swap the then and else expressions */
-		thenExpression = (ValueNode) thenElseList.elementAt(0);
-		elseExpression = (ValueNode) thenElseList.elementAt(1);
+        thenExpression = thenElseList.elementAt(0);
+        elseExpression = thenElseList.elementAt(1);
 		thenElseList.setElementAt(elseExpression, 0);
 		thenElseList.setElementAt(thenExpression, 1);
 
@@ -697,9 +697,9 @@ class ConditionalNode extends ValueNode
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "equals", "boolean", 1);
 
 		mb.conditionalIf();
-		  ((ValueNode) thenElseList.elementAt(0)).generateExpression(acb, mb);
+         thenElseList.elementAt(0).generateExpression(acb, mb);
 		mb.startElseCode();
-		  ((ValueNode) thenElseList.elementAt(1)).generateExpression(acb, mb);
+         thenElseList.elementAt(1).generateExpression(acb, mb);
 		mb.completeConditional();
 	}
 

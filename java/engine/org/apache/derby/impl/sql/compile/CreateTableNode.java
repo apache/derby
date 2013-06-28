@@ -323,9 +323,8 @@ class CreateTableNode extends DDLStatementNode
 			/* Create table element list from columns in query expression */
             tableElementList = new TableElementList(getContextManager());
 			
-			for (int index = 0; index < qeRCL.size(); index++)
+            for (ResultColumn rc : qeRCL)
 			{
-				ResultColumn rc = (ResultColumn) qeRCL.elementAt(index);
 				if (rc.isGenerated()) 
 				{
 					continue;

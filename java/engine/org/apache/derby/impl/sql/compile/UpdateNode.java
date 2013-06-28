@@ -855,7 +855,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public	FormatableBitSet	getReadMap
+    FormatableBitSet getReadMap
 	(
 		DataDictionary		dd,
 		TableDescriptor		baseTable,
@@ -1070,7 +1070,8 @@ public final class UpdateNode extends DMLModStatementNode
 			// go back to the older release if that's what the user chooses
 			// after the soft-upgrade.
 			boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
-            for (Iterator descIter = relevantTriggers.iterator();
+
+            for (Iterator<?> descIter = relevantTriggers.iterator();
                     descIter.hasNext(); ) {
                 TriggerDescriptor trd = (TriggerDescriptor) descIter.next();
 				if (in10_9_orHigherVersion) {
@@ -1201,26 +1202,22 @@ public final class UpdateNode extends DMLModStatementNode
 	)
 		throws StandardException
 	{
-        ResultColumnList        updateColumnList = updateSet.getResultColumns();
-        int                             count = updateColumnList.size();
-        ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
-        int                                 generatedColumnCount = generatedColumns.size();
-        HashSet<String>           updatedColumns = new HashSet<String>();
-        UUID                            tableID = baseTable.getObjectID();
+        ResultColumnList     updateColumnList = updateSet.getResultColumns();
+        ColumnDescriptorList generatedColumns = baseTable.getGeneratedColumns();
+        HashSet<String>      updatedColumns = new HashSet<String>();
+        UUID                 tableID = baseTable.getObjectID();
         
-		for (int ix = 0; ix < count; ix++)
+        for (ResultColumn rc : updateColumnList)
 		{
-			String      name = ((ResultColumn)updateColumnList.elementAt( ix )).getName();
-
-            updatedColumns.add( name );
+            updatedColumns.add( rc.getName() );
 		}
 
-        for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
+        for (ColumnDescriptor gc : generatedColumns)
         {
-            ColumnDescriptor    gc = generatedColumns.elementAt( gcIdx );
-            DefaultInfo             defaultInfo = gc.getDefaultInfo();
-            String[]                       mentionedColumnNames = defaultInfo.getReferencedColumnNames();
-            int                         mentionedColumnCount = mentionedColumnNames.length;
+            DefaultInfo defaultInfo = gc.getDefaultInfo();
+            String[] mentionedColumnNames =
+                    defaultInfo.getReferencedColumnNames();
+            int mentionedColumnCount = mentionedColumnNames.length;
 
             // handle the case of setting a generated column to the DEFAULT
             // literal
@@ -1228,11 +1225,9 @@ public final class UpdateNode extends DMLModStatementNode
 
             // figure out if this generated column is affected by the
             // update
-            for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
+            for (String mcn : mentionedColumnNames)
             {
-                String                      mentionedColumnName = mentionedColumnNames[ mcIdx ];
-
-                if ( updatedColumns.contains( mentionedColumnName ) )
+                if ( updatedColumns.contains( mcn ) )
                 {
                     // Yes, we are updating one of the columns mentioned in
                     // this generation clause.
@@ -1281,11 +1276,8 @@ public final class UpdateNode extends DMLModStatementNode
 		{ tableNameNode = ((CurrentOfNode) fromTable).getBaseCursorTargetTableName(); }
 		else { tableNameNode = makeTableName( null, fromTable.getBaseTableName() ); }
 		
-		int			count = rcl.size();
-
-		for ( int i = 0; i < count; i++ )
+        for (ResultColumn column : rcl)
 		{
-			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
 			ColumnReference	reference = column.getReference();
 
 			if ( (reference != null) && correlationName.equals( reference.getTableName() ) )
@@ -1304,18 +1296,14 @@ public final class UpdateNode extends DMLModStatementNode
 	private void checkTableNameAndScrubResultColumns(ResultColumnList rcl) 
 			throws StandardException
 	{
-		int columnCount = rcl.size();
-		int tableCount = ((SelectNode)resultSet).fromList.size();
-
-		for ( int i = 0; i < columnCount; i++ )
+        for (ResultColumn column : rcl)
 		{
 			boolean foundMatchingTable = false;			
-			ResultColumn	column = (ResultColumn) rcl.elementAt( i );
 
 			if (column.getTableName() != null) {
-				for (int j = 0; j < tableCount; j++) {
-					FromTable fromTable = (FromTable) ((SelectNode)resultSet).
-							fromList.elementAt(j);
+                for (ResultSetNode rsn : ((SelectNode)resultSet).fromList) {
+                    FromTable fromTable = (FromTable)rsn;
+
 					final String tableName;
 					if ( fromTable instanceof CurrentOfNode ) { 
 						tableName = ((CurrentOfNode)fromTable).
@@ -1405,12 +1393,12 @@ public final class UpdateNode extends DMLModStatementNode
 
         for ( int i = 0; i < count; i++ )
         {
-            ResultColumn    rc = (ResultColumn) targetRCL.elementAt( i );
+            ResultColumn rc = targetRCL.elementAt( i );
 
             if ( rc.hasGenerationClause() )
             {
                 ValueNode   resultExpression =
-                    ((ResultColumn) resultRCL.elementAt( i )).getExpression();
+                    resultRCL.elementAt( i ).getExpression();
 
                 if ( !( resultExpression instanceof DefaultNode) )
                 {

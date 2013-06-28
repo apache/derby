@@ -112,10 +112,8 @@ public final class WindowDefinitionNode extends WindowNode
      * @return an existing window definition from wl, if 'this' is equivalent
      * to a window in wl.
      */
-    public WindowDefinitionNode findEquivalentWindow(WindowList wl) {
-        for (int i = 0; i < wl.size(); i++) {
-            WindowDefinitionNode old = (WindowDefinitionNode)wl.elementAt(i);
-
+    WindowDefinitionNode findEquivalentWindow(WindowList wl) {
+        for (WindowDefinitionNode old : wl) {
             if (isEquivalent(old)) {
                 return old;
             }
@@ -147,7 +145,7 @@ public final class WindowDefinitionNode extends WindowNode
     /**
      * @return the order by list of this window definition if any, else null.
      */
-    public OrderByList getOrderByList() {
+    OrderByList getOrderByList() {
         return orderByList;
     }
 }

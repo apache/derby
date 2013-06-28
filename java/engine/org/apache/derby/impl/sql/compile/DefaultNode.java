@@ -275,9 +275,8 @@ public  class DefaultNode extends ValueNode
 			}
 		}
 
-		defaultTree = ((ResultColumn) 
-							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
-									getExpression();
+        defaultTree = ((CursorNode) qt).getResultSetNode().getResultColumns().
+                elementAt(0).getExpression();
 
 		lcc.popCompilerContext(newCC);
 

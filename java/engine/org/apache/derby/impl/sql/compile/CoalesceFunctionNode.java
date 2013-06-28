@@ -155,37 +155,41 @@ class CoalesceFunctionNode extends ValueNode
 		//find the first non-param argument. The generated method will generate code to call coalesce on this argument
 		for (int index = 0; index < argumentsListSize; index++)
 		{
-			if (!(((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext()))
+            if (!argumentsList.elementAt(index).requiresTypeFromContext())
 			{
 				firstNonParameterNodeIdx = index;
 				break;
 			}
 		}
 
-		//make sure these arguments are compatible to each other before coalesce can be allowed
-		for (int index = 0; index < argumentsListSize; index++)
-		{
-			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext()) //since we don't know the type of param, can't check for compatibility
+        // Make sure these arguments are compatible to each other before
+        // coalesce can be allowed.
+        for (ValueNode vn : argumentsList) {
+            if (vn.requiresTypeFromContext()) {
+                // Since we don't know the type of param, can't check for
+                // compatibility.
 				continue;
-				argumentsList.compatible((ValueNode) argumentsList.elementAt(index));
+            }
+            argumentsList.compatible(vn);
 		}
 
-		//set the result type to the most dominant datatype in the arguments list and based on the table listed above
+        // Set the result type to the most dominant datatype in the arguments
+        // list and based on the table listed above.
 		setType(argumentsList.getDominantTypeServices());
 
-		//set all the parameter types to the type of the result type
-		for (int index = 0; index < argumentsListSize; index++)
+        // Set all the parameter types to the type of the result type.
+        for (ValueNode vn : argumentsList)
 		{
-			if (((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext())
+            if (vn.requiresTypeFromContext())
 			{
-				((ValueNode)argumentsList.elementAt(index)).setType(getTypeServices());
+                vn.setType(getTypeServices());
 			}
 		}
 		return this;
 	}
 
 	/**
-	 * Do code generation for coalese/value
+     * Do code generation for coalesce/value
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method the expression will go into
@@ -257,7 +261,7 @@ class CoalesceFunctionNode extends ValueNode
 			}
 
 			setArrayMethod.getField(arrayField); 
-			((ValueNode) argumentsList.elementAt(index)).generateExpression(acb, setArrayMethod);
+            argumentsList.elementAt(index).generateExpression(acb, setArrayMethod);
 			setArrayMethod.upCast(receiverType);
 			setArrayMethod.setArrayElement(index);
 		}
@@ -283,7 +287,7 @@ class CoalesceFunctionNode extends ValueNode
 		*/
 
 		// coalesce will be called on this non-parameter argument
-		((ValueNode) argumentsList.elementAt(firstNonParameterNodeIdx)).
+        argumentsList.elementAt(firstNonParameterNodeIdx).
 			generateExpression(acb, mb);
 
 		mb.upCast(ClassName.DataValueDescriptor);

@@ -310,7 +310,7 @@ public interface CompilerContext extends Context
 	 * @exception StandardException thrown on failure.
 	 *
 	 */
-	public	void createDependency(Dependent d, Provider p) throws StandardException;
+    void createDependency(Dependent d, Provider p) throws StandardException;
 
 	/**
 	 * Add an object to the pool that is created at compile time
@@ -346,25 +346,25 @@ public interface CompilerContext extends Context
 	 *
 	 * @param inUse	 The new inUse state for the compiler context.
 	 */
-	public void setInUse(boolean inUse);
+    void setInUse(boolean inUse);
 
 	/**
 	 * Return the in use state for the compiler context.
 	 *
 	 * @return boolean	The in use state for the compiler context.
 	 */
-	public boolean getInUse();
+    boolean getInUse();
 
 	/**
 	 * Mark this CompilerContext as the first on the stack, so we can avoid
 	 * continually popping and pushing a CompilerContext.
 	 */
-	public void firstOnStack();
+    void firstOnStack();
 
 	/**
 	 * Is this the first CompilerContext on the stack?
 	 */
-	public boolean isFirstOnStack();
+    boolean isFirstOnStack();
 
 	/**
 	 * Sets which kind of query fragments are NOT allowed. Basically,
@@ -375,7 +375,7 @@ public interface CompilerContext extends Context
 	 *						see the reliability bitmasks above
 	 *
 	 */
-	public void	setReliability(int reliability);
+    void    setReliability(int reliability);
 
 	/**
 	 * Return the reliability requirements of this clause. See setReliability()
@@ -383,7 +383,7 @@ public interface CompilerContext extends Context
 	 *
 	 * @return a bitmask of which types of query fragments are to be forbidden
 	 */
-	public int getReliability();
+    int getReliability();
 
 	/**
 	 * Get the compilation schema descriptor for this compilation context.
@@ -392,7 +392,7 @@ public interface CompilerContext extends Context
 	 * 
 	 * @return the compilation schema descirptor
 	 */
-	public SchemaDescriptor getCompilationSchema();
+    SchemaDescriptor getCompilationSchema();
 
 	/**
 	 * Set the compilation schema descriptor for this compilation context.
@@ -401,7 +401,7 @@ public interface CompilerContext extends Context
 	 * 
 	 * @return the previous compilation schema descirptor
 	 */
-	public SchemaDescriptor setCompilationSchema(SchemaDescriptor newDefault);
+    SchemaDescriptor setCompilationSchema(SchemaDescriptor newDefault);
 
 	/**
 	 * Push a default schema to use when compiling.
@@ -414,13 +414,13 @@ public interface CompilerContext extends Context
 	 * </p>
 	 * @param sd schema to use
 	 */
-	public void pushCompilationSchema(SchemaDescriptor sd);
+    void pushCompilationSchema(SchemaDescriptor sd);
 
 
 	/**
 	 * Pop the default schema to use when compiling.
 	 */
-	public void popCompilationSchema();
+    void popCompilationSchema();
 
 	/**
 	 * Get a StoreCostController for the given conglomerate.
@@ -432,7 +432,7 @@ public interface CompilerContext extends Context
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public StoreCostController getStoreCostController(long conglomerateNumber)
+    StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException;
 
 	/**
@@ -440,78 +440,78 @@ public interface CompilerContext extends Context
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public SortCostController getSortCostController() throws StandardException;
+    SortCostController getSortCostController() throws StandardException;
 
 	/**
 	 * Set the parameter list.
 	 *
 	 * @param parameterList	The parameter list.
 	 */
-    public void setParameterList(List<ParameterNode> parameterList);
+    void setParameterList(List<ParameterNode> parameterList);
 
 	/**
 	 * Get the parameter list.
 	 *
 	 * @return	The parameter list.
 	 */
-    public List<ParameterNode> getParameterList();
+    List<ParameterNode> getParameterList();
 
 	/**
 	 * If callable statement uses ? = form
 	 */
-	public void setReturnParameterFlag();
+    void setReturnParameterFlag();
 
 	/**
 	 * Is the callable statement uses ? for return parameter.
 	 *
 	 * @return	true if ? = call else false
 	 */
-	public boolean getReturnParameterFlag();
+    boolean getReturnParameterFlag();
 
 	/**
 	 * Get the cursor info stored in the context.
 	 *
 	 * @return the cursor info
 	 */
-	public Object getCursorInfo();
+    Object getCursorInfo();
 	
 	/**
 	 * Set params
 	 *
 	 * @param cursorInfo the cursor info
 	 */
-	public void setCursorInfo(Object cursorInfo);
+    void setCursorInfo(Object cursorInfo);
 
 	/**
 	 * Set the isolation level for the scans in this query.
 	 *
 	 * @param isolationLevel	The isolation level to use.
 	 */
-	public void setScanIsolationLevel(int isolationLevel);
+    void setScanIsolationLevel(int isolationLevel);
 
 	/**
 	 * Get the isolation level for the scans in this query.
 	 *
 	 * @return	The isolation level for the scans in this query.
 	 */
-	public int getScanIsolationLevel();
+    int getScanIsolationLevel();
 
 	/**
 	 * Get the next equivalence class for equijoin clauses.
 	 *
 	 * @return The next equivalence class for equijoin clauses.
 	 */
-	public int getNextEquivalenceClass();
+    int getNextEquivalenceClass();
 
 	/**
 		Add a compile time warning.
 	*/
-	public void addWarning(SQLWarning warning);
+    void addWarning(SQLWarning warning);
 
 	/**
 		Get the chain of compile time warnings.
 	*/
-	public SQLWarning getWarnings();
+    SQLWarning getWarnings();
 
 	/**
 	 * Sets the current privilege type context and pushes the previous on onto a stack.
@@ -522,23 +522,23 @@ public interface CompilerContext extends Context
 	 * @param privType One of the privilege types in 
 	 *						org.apache.derby.iapi.sql.conn.Authorizer.
 	 */
-	public void pushCurrentPrivType( int privType);
+    void pushCurrentPrivType( int privType);
 	
-	public void popCurrentPrivType();
+    void popCurrentPrivType();
     
 	/**
 	 * Add a column privilege to the list of used column privileges.
 	 *
 	 * @param column
 	 */
-	public void addRequiredColumnPriv( ColumnDescriptor column);
+    void addRequiredColumnPriv( ColumnDescriptor column);
 
 	/**
 	 * Add a table or view privilege to the list of used table privileges.
 	 *
 	 * @param table
 	 */
-	public void addRequiredTablePriv( TableDescriptor table);
+    void addRequiredTablePriv( TableDescriptor table);
 
 	/**
 	 * Add a schema privilege to the list of used privileges.
@@ -547,42 +547,42 @@ public interface CompilerContext extends Context
 	 * @param aid		Requested authorizationId for new schema
 	 * @param privType	CREATE_SCHEMA_PRIV, MODIFY_SCHEMA_PRIV or DROP_SCHEMA_PRIV
 	 */
-	public void addRequiredSchemaPriv(String schema, String aid, int privType);
+    void addRequiredSchemaPriv(String schema, String aid, int privType);
 
 	/**
 	 * Add a routine execute privilege to the list of used routine privileges.
 	 *
 	 * @param routine
 	 */
-	public void addRequiredRoutinePriv( AliasDescriptor routine);
+    void addRequiredRoutinePriv( AliasDescriptor routine);
 
 	/**
 	 * Add a usage privilege to the list of required privileges.
 	 *
 	 * @param usableObject
 	 */
-	public void addRequiredUsagePriv( PrivilegedSQLObject usableObject );
+    void addRequiredUsagePriv( PrivilegedSQLObject usableObject );
 
 	/**
 	 * Add a required role privilege to the list of privileges.
 	 *
 	 * @see CompilerContext#addRequiredRolePriv
 	 */
-	public void addRequiredRolePriv(String roleName, int privType);
+    void addRequiredRolePriv(String roleName, int privType);
 
 	/**
 	 * @return The list of required privileges.
 	 */
-	public List<StatementPermission>getRequiredPermissionsList();
+    List<StatementPermission>getRequiredPermissionsList();
     
 	/**
 	 * Add a sequence descriptor to the list of referenced sequences.
 	 */
-	public void addReferencedSequence( SequenceDescriptor sd );
+    void addReferencedSequence( SequenceDescriptor sd );
 
 	/**
 	 * Report whether the given sequence has been referenced already.
 	 */
-    public boolean isReferenced( SequenceDescriptor sd );
+    boolean isReferenced( SequenceDescriptor sd );
 
 }

@@ -129,9 +129,8 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 		}
 		else
 		{
-			for (int i=0; i<refRcl.size(); i++)
+            for (ResultColumn rc : refRcl)
 			{
-				ResultColumn rc = (ResultColumn) refRcl.elementAt(i);
 				ColumnDescriptor cd = td.getColumnDescriptor(rc.getName());
 				if (cd != null)
 				{

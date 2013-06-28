@@ -104,10 +104,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
         */
         ResultColumnList rclNew = new ResultColumnList(getContextManager());
 
-        int sz = resultColumns.size();
-        for (int i = 0; i < sz; i++)
+        for (ResultColumn rc : resultColumns)
         {
-            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
             if (!rc.isGenerated()) {
                 rclNew.addElement(rc);
             }
@@ -338,7 +336,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
          */
 
         for (int index = rclSize-1; index >= 0; index--) {
-            ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
+            ResultColumn rc = resultColumns.elementAt(index);
             ValueNode expr = rc.getExpression();
 
             if (rc.isGenerated() &&

@@ -631,11 +631,8 @@ class FromSubquery extends FromTable
 
 		// Use visibleSize, because we don't want to propagate any order by
 		// columns not selected.
-		int rclSize = resultColumns.visibleSize();
-
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn resultColumn : resultColumns)
 		{
-			ResultColumn resultColumn = (ResultColumn) resultColumns.elementAt(index);
 			ValueNode		 valueNode;
 			String			 columnName;
 

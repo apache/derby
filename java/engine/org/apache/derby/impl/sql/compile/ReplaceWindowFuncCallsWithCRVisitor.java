@@ -32,7 +32,7 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 {
 	private ResultColumnList rcl;
-	private Class skipOverClass;
+    private Class<?> skipOverClass;
 	private int tableNumber;
 
 	/**
@@ -46,7 +46,7 @@ class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	 */
     ReplaceWindowFuncCallsWithCRVisitor(ResultColumnList rcl,
 											int tableNumber,
-											Class skipOverClass)
+                                            Class<?> skipOverClass)
 	{
 		this.rcl = rcl;
 		this.tableNumber = tableNumber;

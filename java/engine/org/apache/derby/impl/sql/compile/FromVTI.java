@@ -765,7 +765,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         throws StandardException
     {
 		NewInvocationNode   constructor = (NewInvocationNode) methodCall;
-		Class[]  paramTypeClasses = constructor.getMethodParameterClasses();
+        Class<?>[]  paramTypeClasses = constructor.getMethodParameterClasses();
         Object[] paramObjects;
 
 		if (paramTypeClasses != null)
@@ -774,7 +774,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 			for (int index = 0; index < paramTypeClasses.length; index++)
 			{
-				Class paramClass = paramTypeClasses[index];
+                Class<?> paramClass = paramTypeClasses[index];
 
 				paramObjects[index] = methodParms[index].getConstantValueAsObject();
 
@@ -801,15 +801,15 @@ class FromVTI extends FromTable implements VTIEnvironment
 				{
 					if (paramClass.equals(Integer.TYPE))
 					{
-						paramObjects[index] = new Integer(0);
+                        paramObjects[index] = Integer.valueOf(0);
 					}
 					else if (paramClass.equals(Short.TYPE))
 					{
-						paramObjects[index] = new Short((short) 0);
+                        paramObjects[index] = Short.valueOf((short) 0);
 					}
 					else if (paramClass.equals(Byte.TYPE))
 					{
-						paramObjects[index] = new Byte((byte) 0);
+                        paramObjects[index] = Byte.valueOf((byte)0);
 					}
 					else if (paramClass.equals(Long.TYPE))
 					{
@@ -837,7 +837,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		}
 		else
 		{
-			paramTypeClasses = new Class[0];
+            paramTypeClasses = new Class<?>[0];
 			paramObjects = new Object[0];
 		}
 
@@ -845,7 +845,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         {
             ClassInspector classInspector = getClassFactory().getClassInspector();
             String javaClassName = methodCall.getJavaClassName();
-            Constructor constr = classInspector.getClass(javaClassName).getConstructor(paramTypeClasses);
+            Constructor<?> constr = classInspector.getClass(javaClassName).getConstructor(paramTypeClasses);
 
             return constr.newInstance(paramObjects);
         }
@@ -1037,9 +1037,6 @@ class FromVTI extends FromTable implements VTIEnvironment
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
-		ResultColumn	 resultColumn;
-		ValueNode		 valueNode;
-		String			 columnName;
         TableName        toCompare;
 
 		if(allTableName != null)
@@ -1053,32 +1050,25 @@ class FromVTI extends FromTable implements VTIEnvironment
             return null;
         }
 
-        ResultColumnList rcList = new ResultColumnList((getContextManager()));
+        final ContextManager cm = getContextManager();
+        final ResultColumnList rcList = new ResultColumnList(cm);
 
 		/* Build a new result column list based off of resultColumns.
 		 * NOTE: This method will capture any column renaming due to 
 		 * a derived column list.
 		 */
-		int rclSize = resultColumns.size();
-		for (int index = 0; index < rclSize; index++)
+        for (ResultColumn rc : resultColumns)
 		{
-			resultColumn = (ResultColumn) resultColumns.elementAt(index);
+            if (!rc.isGenerated()) {
+                // Build a ResultColumn/ColumnReference pair for the column //
+                ResultColumn newRc = new ResultColumn(
+                        rc.getName(),
+                        new ColumnReference(rc.getName(), exposedName, cm),
+                        cm);
 
-			if (resultColumn.isGenerated())
-			{
-				continue;
-			}
-
-			// Build a ResultColumn/ColumnReference pair for the column //
-			columnName = resultColumn.getName();
-            valueNode = new ColumnReference(columnName,
-											exposedName,
-											getContextManager());
-            resultColumn =
-                new ResultColumn(columnName, valueNode, getContextManager());
-
-			// Build the ResultColumnList to return //
-			rcList.addResultColumn(resultColumn);
+                // Build the ResultColumnList to return //
+                rcList.addResultColumn(newRc);
+            }
 		}
 		return rcList;
 	}
@@ -1345,18 +1335,15 @@ class FromVTI extends FromTable implements VTIEnvironment
     {
         if ( parentPredicates == null )  { return; }
 
-        int predicateCount = parentPredicates.size();
-
         // walk the list, looking for qualifiers, that is, WHERE clause
         // fragments (conjuncts)  which can be pushed into the table function
-        for ( int i = 0; i < predicateCount; i++ )
+        for (Predicate pp : parentPredicates)
         {
-            Predicate predicate = (Predicate) parentPredicates.elementAt( i );
-
-            if ( canBePushedDown( predicate ) )
+            if ( canBePushedDown( pp ) )
             {
                 // A Predicate has a top level AND node
-                Restriction newRestriction = makeRestriction( predicate.getAndNode(), columnNameMap );
+                Restriction newRestriction =
+                        makeRestriction( pp.getAndNode(), columnNameMap );
 
                 // If newRestriction is null, then we are confused. Don't push
                 // the restriction into the table function
@@ -1395,7 +1382,9 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param clause The clause which should be turned into a Restriction.
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
-    private Restriction makeRestriction( ValueNode clause, HashMap columnNameMap )
+    private Restriction makeRestriction(
+            ValueNode clause,
+            HashMap<String, String> columnNameMap )
         throws StandardException
     {
         if ( clause instanceof AndNode )
@@ -1441,8 +1430,9 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param clause The clause which should be turned into a Restriction.
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
-    private Restriction makeLeafRestriction( BinaryRelationalOperatorNode clause, HashMap columnNameMap )
-        throws StandardException
+    private Restriction makeLeafRestriction(
+            BinaryRelationalOperatorNode clause,
+            HashMap<String, String> columnNameMap) throws StandardException
     {
         int rawOperator = clause.getOperator();
         ColumnReference rawColumn;
@@ -1464,7 +1454,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         int comparisonOperator = mapOperator( rawOperator );
         if ( comparisonOperator < 0 ) { return iAmConfused( clause ); }
 
-        String columnName = (String) columnNameMap.get( rawColumn.getColumnName() );
+        String columnName = columnNameMap.get( rawColumn.getColumnName() );
         Object constantOperand = squeezeConstantValue( rawValue );
         if ( (columnName == null) || (constantOperand == null) ) { return iAmConfused( clause ); }
 
@@ -1477,8 +1467,9 @@ class FromVTI extends FromTable implements VTIEnvironment
      * @param clause The IS NULL (or IS NOT NULL) node
      * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
      */
-    private Restriction makeIsNullRestriction( IsNullNode clause, HashMap columnNameMap )
-        throws StandardException
+    private Restriction makeIsNullRestriction(
+            IsNullNode clause,
+            HashMap<String, String> columnNameMap) throws StandardException
     {
         ColumnReference rawColumn = (ColumnReference) clause.getOperand();
 
@@ -1489,7 +1480,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             (comparisonOperator != Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL)
             ) { return iAmConfused( clause ); }
 
-        String columnName = (String) columnNameMap.get( rawColumn.getColumnName() );
+        String columnName = columnNameMap.get( rawColumn.getColumnName() );
         if ( columnName == null ) { return iAmConfused( clause ); }
 
         return new Restriction.ColumnQualifier( columnName, comparisonOperator, null );
@@ -1646,7 +1637,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 		for (int index = 0; index < rclSize; index++)
 		{
-			ResultColumn rc = (ResultColumn) resultColumns.elementAt(index);
+            ResultColumn rc = resultColumns.elementAt(index);
 			if (rc.isReferenced())
 			{
 				referencedCols.set(index);
@@ -2014,7 +2005,7 @@ class FromVTI extends FromTable implements VTIEnvironment
     private boolean implementsDerbyStyleVTICosting( String className )
         throws StandardException
     {
-        Constructor     constructor = null;
+        Constructor<?>     constructor = null;
         Class<?>           vtiClass = lookupClass( className );
         Class<?>           vtiCostingClass = lookupClass( VTICosting.class.getName() );
 
@@ -2027,7 +2018,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         }
 
         try {
-            constructor = vtiClass.getConstructor( new Class[] {} );
+            constructor = vtiClass.getConstructor( new Class<?>[] {} );
         }
         catch (Throwable t)
         {
@@ -2055,7 +2046,8 @@ class FromVTI extends FromTable implements VTIEnvironment
         Class<?>               vtiClass = lookupClass( className );
         
         try {
-            Constructor         constructor = vtiClass.getConstructor( new Class[] {} );
+            Constructor<?> constructor =
+                    vtiClass.getConstructor( new Class<?>[] {} );
             VTICosting          result =
                     (VTICosting) constructor.newInstance( (Object[])null );
 
@@ -2070,7 +2062,7 @@ class FromVTI extends FromTable implements VTIEnvironment
     /**
      * Lookup the class that holds the VTI.
      */
-    private Class lookupClass( String className )
+    private Class<?> lookupClass( String className )
         throws StandardException
     {
         try {

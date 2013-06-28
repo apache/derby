@@ -187,7 +187,7 @@ class CastNode extends ValueNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    @Override
+    @Override @SuppressWarnings("fallthrough")
     ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{

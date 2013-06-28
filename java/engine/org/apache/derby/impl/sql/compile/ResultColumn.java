@@ -703,7 +703,7 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
-    ValueNode bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
+    ResultColumn bindExpression(FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
 				throws StandardException
 	{
 		/*
@@ -980,7 +980,7 @@ class ResultColumn extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
-    ValueNode preprocess(int numTables,
+    ResultColumn preprocess(int numTables,
 								FromList outerFromList,
 								SubqueryList outerSubqueryList,
 								PredicateList outerPredicateList) 
@@ -1724,6 +1724,7 @@ class ResultColumn extends ValueNode
 	/**
 	 * @exception StandardException		Thrown on error
 	 */
+    @SuppressWarnings("fallthrough")
 	private DataValueDescriptor convertConstant(TypeId toTypeId, int maxWidth,
 			DataValueDescriptor constantValue)
 		throws StandardException

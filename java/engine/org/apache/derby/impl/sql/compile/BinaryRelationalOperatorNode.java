@@ -1379,7 +1379,7 @@ class BinaryRelationalOperatorNode
 
 	/** return the selectivity of this predicate.
 	 */
-    @Override
+    @Override @SuppressWarnings("fallthrough")
 	public double selectivity(Optimizable optTable)
 	throws StandardException
 	{

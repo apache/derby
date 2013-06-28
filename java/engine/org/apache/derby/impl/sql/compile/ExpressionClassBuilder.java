@@ -567,7 +567,7 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 	}	
 
 
-	FormatableArrayHolder getColumnOrdering(OrderedColumnList  oclist) {
+    FormatableArrayHolder getColumnOrdering(OrderedColumnList<?>  oclist) {
 		int numCols = (oclist == null) ? 0 : oclist.size();
 
 		if (numCols == 0)

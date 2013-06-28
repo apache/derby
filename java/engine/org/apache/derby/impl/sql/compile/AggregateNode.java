@@ -50,7 +50,7 @@ class AggregateNode extends UnaryOperatorNode
     private TableName           userAggregateName;
 	private StringBuffer			aggregatorClassName;
 	private String					aggregateDefinitionClassName;
-	private Class					aggregateDefinitionClass;
+    private Class<?>                aggregateDefinitionClass;
 	private ClassInspector			classInspector;
 	private String					aggregateName;
 
@@ -126,7 +126,7 @@ class AggregateNode extends UnaryOperatorNode
      */
     AggregateNode(
             ValueNode operand,
-            Class uadClass,
+            Class<?> uadClass,
             boolean distinct,
             String aggregateName,
             ContextManager cm) throws StandardException {
@@ -492,7 +492,7 @@ class AggregateNode extends UnaryOperatorNode
 	{
         if ( uad == null )
         {
-            Class theClass = aggregateDefinitionClass;
+            Class<?> theClass = aggregateDefinitionClass;
 
             // get the class
             if (theClass == null)

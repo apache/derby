@@ -47,7 +47,6 @@ import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.vti.DeferModification;
@@ -76,8 +75,8 @@ import org.apache.derby.vti.DeferModification;
  */
 public final class InsertNode extends DMLModStatementNode
 {
-	public		ResultColumnList	targetColumnList;
-            boolean             deferred;
+    private     ResultColumnList    targetColumnList;
+    private     boolean             deferred;
 	public		ValueNode			checkConstraints;
 	public		Properties			targetProperties;
 	public		FKInfo				fkInfo;
@@ -145,7 +144,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @return	This object as a String
 	 */
-
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -166,6 +165,7 @@ public final class InsertNode extends DMLModStatementNode
 		}
 	}
 
+    @Override
     String statementToString()
 	{
 		return "INSERT";
@@ -177,7 +177,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @param depth		The depth of this node in the tree
 	 */
-
+    @Override
     void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
@@ -228,7 +228,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-
+    @Override
 	public void bindStatement() throws StandardException
 	{
 		// We just need select privilege on the expressions
@@ -397,8 +397,7 @@ public final class InsertNode extends DMLModStatementNode
 			int targetSize = targetColumnList.size();
 			for (int index = 0; index < targetSize; index++)
 			{
-				int position =
-					((ResultColumn) (targetColumnList.elementAt(index))).
+                int position = targetColumnList.elementAt(index).
 												columnDescriptor.getPosition();
 
 				if (index != position-1)
@@ -602,6 +601,7 @@ public final class InsertNode extends DMLModStatementNode
 		return resultSet;
 	}
 
+    @Override
 	int getPrivType()
 	{
 		return Authorizer.INSERT_PRIV;
@@ -614,6 +614,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
@@ -715,6 +716,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+    @Override
     public ConstantAction makeConstantAction() throws StandardException
 	{
 
@@ -817,7 +819,7 @@ public final class InsertNode extends DMLModStatementNode
      * down to the source result set, before calling super.optimizeStatement.
      * </p>
 	 */
-
+    @Override
 	public void optimizeStatement() throws StandardException
 	{
 		// Push the order by list down to the ResultSet
@@ -883,6 +885,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
@@ -964,6 +967,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @return the type of statement
 	 */
+    @Override
 	protected final int getStatementType()
 	{
 		return StatementType.INSERT;
@@ -976,7 +980,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @return the type of statement
 	 */
-	static final int getStatementType(Properties targetProperties)
+    static int getStatementType(Properties targetProperties)
 	{
 		int retval = StatementType.INSERT;
 
@@ -1032,6 +1036,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @exception StandardException on error
 	 */
+    @Override
 	void acceptChildren(Visitor v)
 		throws StandardException
 	{

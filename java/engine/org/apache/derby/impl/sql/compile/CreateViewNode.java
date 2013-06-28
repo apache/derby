@@ -278,7 +278,7 @@ class CreateViewNode extends DDLStatementNode
 		}
 
 		DependencyManager 		dm = dataDictionary.getDependencyManager();
-		ProviderInfo[]			providerInfos = dm.getPersistentProviderInfos(apl);
+        ProviderInfo[]          provInfo = dm.getPersistentProviderInfos(apl);
 		// need to clear the column info in case the same table descriptor
 		// is reused, eg., in multiple target only view definition
 		dm.clearColumnInfoInProviders(apl);
@@ -291,7 +291,7 @@ class CreateViewNode extends DDLStatementNode
 				" on return from RS.bindExpressions()");
 		}
 
-		return providerInfos;
+        return provInfo;
 	}
 
 	/**
@@ -343,7 +343,7 @@ class CreateViewNode extends DDLStatementNode
 
 		for (int index = 0; index < colInfos.length; index++)
 		{
-			ResultColumn rc = (ResultColumn) rcl.elementAt(index);
+            ResultColumn rc = rcl.elementAt(index);
 			// The colInfo array has been initialized to be of length 
 			// visibleSize() (DERBY-4230).  This code assumes that all the visible
 			// columns are at the beginning of the rcl. Throw an assertion 

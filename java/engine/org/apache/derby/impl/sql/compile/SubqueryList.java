@@ -32,10 +32,10 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  *
  */
 
-class SubqueryList extends QueryTreeNodeVector
+class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 {
     SubqueryList(ContextManager cm) {
-        super(cm);
+        super(SubqueryNode.class, cm);
         setNodeType(C_NodeTypes.SUBQUERY_LIST);
     }
 
@@ -68,13 +68,9 @@ class SubqueryList extends QueryTreeNodeVector
 							PredicateList outerPredicateList) 
 				throws StandardException
 	{
-		SubqueryNode	subqueryNode;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.preprocess(numTables, outerFromList,
+            sqn.preprocess(numTables, outerFromList,
 									outerSubqueryList,
 									outerPredicateList);
 		}
@@ -93,12 +89,9 @@ class SubqueryList extends QueryTreeNodeVector
     void optimize(DataDictionary dataDictionary, double outerRows)
 			throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode	subqueryNode;
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.optimize(dataDictionary, outerRows);
+            sqn.optimize(dataDictionary, outerRows);
 		}
 	}
 
@@ -112,12 +105,9 @@ class SubqueryList extends QueryTreeNodeVector
     void modifyAccessPaths()
 			throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode	subqueryNode;
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.modifyAccessPaths();
+            sqn.modifyAccessPaths();
 		}
 	}
 
@@ -134,18 +124,14 @@ class SubqueryList extends QueryTreeNodeVector
     boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode	subqueryNode;
-
-			subqueryNode = (SubqueryNode) elementAt(index);
-			if (subqueryNode.isMaterializable())
+            if (sqn.isMaterializable())
 			{
 				continue;
 			}
 
-			if (subqueryNode.getResultSet().referencesTarget(name, baseTable))
+            if (sqn.getResultSet().referencesTarget(name, baseTable))
 			{
 				return true;
 			}
@@ -165,14 +151,9 @@ class SubqueryList extends QueryTreeNodeVector
 	public boolean referencesSessionSchema()
 		throws StandardException
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode	subqueryNode;
-
-			subqueryNode = (SubqueryNode) elementAt(index);
-
-			if (subqueryNode.getResultSet().referencesSessionSchema())
+            if (sqn.getResultSet().referencesSessionSchema())
 			{
 				return true;
 			}
@@ -191,14 +172,9 @@ class SubqueryList extends QueryTreeNodeVector
     void setPointOfAttachment(int pointOfAttachment)
 		throws StandardException
 	{
-		int size = size();
-
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode	subqueryNode;
-
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.setPointOfAttachment(pointOfAttachment);
+            sqn.setPointOfAttachment(pointOfAttachment);
 		}
 	}
 
@@ -211,29 +187,22 @@ class SubqueryList extends QueryTreeNodeVector
 	 */
 	void decrementLevel(int decrement)
 	{
-		int size = size();
-
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			((SubqueryNode) elementAt(index)).getResultSet().decrementLevel(decrement);
+            sqn.getResultSet().decrementLevel(decrement);
 		}
 	}
 
 	/**
      * Mark all of the subqueries in this 
      * list as being part of a having clause,
-     * so we can avoid flattenning later.
+     * so we can avoid flattening later.
 	 * 
 	 */
     void markHavingSubqueries() {
-	    int size = size();
-	    
-	    for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 	    {
-	        SubqueryNode    subqueryNode;
-
-	        subqueryNode = (SubqueryNode) elementAt(index);
-	        subqueryNode.setHavingSubquery(true);
+            sqn.setHavingSubquery(true);
 	    }
 	}
 
@@ -242,13 +211,9 @@ class SubqueryList extends QueryTreeNodeVector
 	 * so we can avoid flattening later if needed.
 	 */
     void markWhereSubqueries() {
-		int size = size();
-		for (int index = 0; index < size; index++)
+        for (SubqueryNode sqn : this)
 		{
-			SubqueryNode    subqueryNode;
-
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.setWhereSubquery(true);
+            sqn.setWhereSubquery(true);
 		}
 	}
 }

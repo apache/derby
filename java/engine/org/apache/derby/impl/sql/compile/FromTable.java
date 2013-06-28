@@ -434,7 +434,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		 *		invalid value for hashLoadFactor
 		 *		invalid value for hashMaxCapacity
 		 */
-		Enumeration e = tableProperties.keys();
+        Enumeration<?> e = tableProperties.keys();
+
 		while (e.hasMoreElements())
 		{
 			String key = (String) e.nextElement();
@@ -748,8 +749,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
      * {@code false} otherwise
      */
     public boolean hasLargeObjectColumns() {
-        for (int i = 0; i < resultColumns.size(); i++) {
-            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+        for (ResultColumn rc : resultColumns) {
             if (rc.isReferenced()) {
                 DataTypeDescriptor type = rc.getType();
                 if (type != null && type.getTypeId().isLOBTypeId()) {
@@ -841,7 +841,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
             {
                 if (refCols.isSet(i))
                 {
-                    ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+                    ResultColumn rc = resultColumns.elementAt(i);
                     DataTypeDescriptor expressionType = rc.getExpression().getTypeServices();
                     if( expressionType != null)
                         perRowUsage += expressionType.estimatedMemoryUsage();
@@ -1110,12 +1110,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 												TableName tableName)
 			throws StandardException
 	{
-		ResultColumn	 resultColumn;
-		ValueNode		 valueNode;
-		String			 columnName;
 		TableName		 exposedName;
         TableName        toCompare;
-
 		/* If allTableName is non-null, then we must check to see if it matches
 		 * our exposed name.
 		 */
@@ -1148,24 +1144,21 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			exposedName = makeTableName(null, correlationName);
 		}
 
-        ResultColumnList rcList = new ResultColumnList((getContextManager()));
+        final ContextManager cm = getContextManager();
+        ResultColumnList rcList = new ResultColumnList(cm);
 
 		/* Build a new result column list based off of resultColumns.
 		 * NOTE: This method will capture any column renaming due to 
 		 * a derived column list.
 		 */
-		int inputSize = inputRcl.size();
-		for (int index = 0; index < inputSize; index++)
+        for (ResultColumn rc : inputRcl)
 		{
-			// Build a ResultColumn/ColumnReference pair for the column //
-			columnName = ((ResultColumn) inputRcl.elementAt(index)).getName();
-            valueNode = new ColumnReference(columnName,
-											exposedName,
-											getContextManager());
-            resultColumn =
-                new ResultColumn(columnName, valueNode, getContextManager());
-			// Build the ResultColumnList to return //
-			rcList.addResultColumn(resultColumn);
+            ResultColumn newRc = new ResultColumn(
+                    rc.getName(),
+                    new ColumnReference(rc.getName(), exposedName, cm),
+                    cm);
+
+            rcList.addResultColumn(newRc);
 		}
 		return rcList;
 	}

@@ -727,15 +727,12 @@ class RowResultSetNode extends FromTable
 		int rclSize = resultColumns.size();
 		for (int index = 0; index < rclSize; index++)
 		{
-			ResultColumn	rc = (ResultColumn) resultColumns.elementAt(index);
-
+            ResultColumn rc = resultColumns.elementAt(index);
 			ValueNode re = rc.getExpression();
 
 			if (re.requiresTypeFromContext())
 			{
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
-
+                ResultColumn typeCol = typeColumns.elementAt(index);
 				/*
 				** We found a ? - set its type to the type of the
 				** corresponding column of the target table.
@@ -780,8 +777,7 @@ class RowResultSetNode extends FromTable
 				// still a normailzation step when the value is inserted into the table.
 				// That will set the correct length and perform truncation checks etc.
 
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
+                ResultColumn typeCol = typeColumns.elementAt(index);
 
 				TypeId colTypeId = typeCol.getTypeId();
 
@@ -817,10 +813,8 @@ class RowResultSetNode extends FromTable
 			}
 			else if (re instanceof BitConstantNode)
 			{
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
-
-				TypeId colTypeId = typeCol.getTypeId();
+                ResultColumn typeCol   = typeColumns.elementAt(index);
+                TypeId       colTypeId = typeCol.getTypeId();
 
 				if (colTypeId.isBitTypeId()) {
 

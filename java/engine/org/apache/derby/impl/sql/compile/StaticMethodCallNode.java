@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.ParameterMetaData;
 import java.util.List;
@@ -1374,9 +1375,13 @@ class StaticMethodCallNode extends MethodCallNode
 
 						// is the underlying type for the OUT/INOUT parameter primitive.
                         // if this is a varargs arg then we have to strip off another array level
-                        Class   cellType = ((java.lang.reflect.Method) method).getParameterTypes()[ getRoutineArgIdx( i ) ].
-                            getComponentType();
-                        if ( isVararg( i ) ) { cellType = cellType.getComponentType(); }
+                        Class<?> cellType = ((Method) method).
+                                getParameterTypes()[ getRoutineArgIdx( i ) ].
+                                getComponentType();
+
+                        if ( isVararg( i ) ) {
+                            cellType = cellType.getComponentType();
+                        }
 						boolean isPrimitive = cellType.isPrimitive();
 
 						if (isNumericType) {
