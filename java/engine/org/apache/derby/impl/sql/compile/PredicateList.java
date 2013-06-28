@@ -2155,9 +2155,15 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
         PredicateList searchClauses = new PredicateList(getContextManager());
 		RelationalOperator	equalsNode = null;
 
-        for (Predicate predicate : this)
+		int size = size();
+		for (int index = 0; index < size; index++)
 		{
-			AndNode			andNode = predicate.getAndNode();
+			AndNode			andNode;
+			Predicate		predicate;
+			predicate = elementAt(index);
+
+            andNode = predicate.getAndNode();
+
 
 			// Skip anything that's not a RelationalOperator
 			if (!predicate.isRelationalOpPredicate())
@@ -2230,12 +2236,13 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 		 * NOTE: We can append to the searchClauses while walking
 		 * them, thus we cannot cache the value of size().
 		 */
-        for (Predicate searchClause : searchClauses)
+		for (int scIndex = 0; scIndex < searchClauses.size(); scIndex++)
 		{
 			ColumnReference searchCR;
 			DataValueDescriptor searchODV = null;
-            RelationalOperator ro =
-               (RelationalOperator)(searchClause.getAndNode()).getLeftOperand();
+			RelationalOperator ro = (RelationalOperator)
+                    (searchClauses.elementAt(scIndex).
+                    getAndNode()).getLeftOperand();
 
 			// Find the ColumnReference and constant value, if any, in the search clause
 			if (ro instanceof UnaryComparisonOperatorNode)
