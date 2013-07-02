@@ -400,7 +400,8 @@ public final class CurrentOfNode extends FromTable {
                              getContextManager()),
                          predicateList,
                          dataDictionary,
-                         (RequiredRowOrdering) null);
+                         (RequiredRowOrdering) null,
+                         null );
 
 		/* Assume there is no cost associated with fetching the current row */
         bestCostEstimate = opt.newCostEstimate();

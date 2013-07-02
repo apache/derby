@@ -1139,7 +1139,12 @@ public interface SQLState {
 	String LANG_VARARGS_PARAMETER_STYLE                      = "42ZC9";
 	String LANG_DERBY_PARAMETER_STYLE                      = "42ZCA";
 	String LANG_VARARGS_RETURN_RESULT_SETS                  = "42ZCB";
-    
+
+    // bad optimizer overrides
+    String LANG_BAD_ROW_SOURCE_COUNT                  = "42ZCC";
+    String LANG_NOT_LEFT_DEEP                                 = "42ZCD";
+    String LANG_UNRESOLVED_ROW_SOURCE                    = "42ZCE";
+
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";
 	String LANG_NOT_ALLOWED_FOR_DECLARED_GLOBAL_TEMP_TABLE = "42995";

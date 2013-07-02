@@ -499,7 +499,7 @@ class   XMLOptTrace implements  OptTrace
                     ((FromBaseTable) prn.getChildResult()).getTableDescriptor();
                 return makeTableName( td.getSchemaName(), td.getName(), cm );
             }
-            else if ( isTableFunction( optimizable ) )
+            else if ( OptimizerImpl.isTableFunction( optimizable ) )
             {
                 ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 AliasDescriptor ad =
@@ -544,17 +544,6 @@ class   XMLOptTrace implements  OptTrace
         ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
 
         return ( rsn instanceof FromTable );
-    }
-
-    /** Return true if the optimizable is a table function */
-    private boolean isTableFunction( Optimizable optimizable )
-    {
-        if ( !( optimizable instanceof ProjectRestrictNode ) ) { return false; }
-
-        ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
-        if ( !( rsn instanceof FromVTI ) ) { return false; }
-
-        return ( ((FromVTI) rsn).getMethodCall() instanceof StaticMethodCallNode );
     }
 
     /** Make a TableName */
@@ -743,7 +732,7 @@ class   XMLOptTrace implements  OptTrace
             return IdUtil.mkQualifiedName( schemaName, conglomerateName );
         }
 
-        boolean isTableFunction = isTableFunction( optimizable );
+        boolean isTableFunction = OptimizerImpl.isTableFunction( optimizable );
         StringBuilder   buffer = new StringBuilder();
         buffer.append( getOptimizableName( optimizable ).getFullSQLName() );
         if ( isTableFunction ) { buffer.append( TABLE_FUNCTION_FLAG ); }

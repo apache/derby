@@ -694,7 +694,8 @@ abstract class TableOperatorNode extends FromTable
                              getContextManager()),
                 predicateList,
                 dataDictionary,
-                (RequiredRowOrdering) null);
+                (RequiredRowOrdering) null,
+                null );
 
         costEstimate = opt.newCostEstimate();
 
@@ -863,6 +864,7 @@ abstract class TableOperatorNode extends FromTable
 													getDataDictionary(),
 													(RequiredRowOrdering) null,
 													getCompilerContext().getNumTables(),
+													null,
 													  lcc);
 			optimizer.prepForNextRound();
 

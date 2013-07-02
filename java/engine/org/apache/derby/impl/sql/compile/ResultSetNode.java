@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -1483,7 +1484,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 							OptimizableList optList,
 							OptimizablePredicateList predList,
 							DataDictionary dataDictionary,
-							RequiredRowOrdering requiredRowOrdering)
+							RequiredRowOrdering requiredRowOrdering,
+							OptimizerPlan overridingPlan)
 			throws StandardException
 	{
 		if (optimizer == null)
@@ -1497,6 +1499,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 											dataDictionary,
 											requiredRowOrdering,
 											getCompilerContext().getNumTables(),
+											overridingPlan,
 								getLanguageConnectionContext());
 		}
 

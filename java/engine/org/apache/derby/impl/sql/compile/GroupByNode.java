@@ -943,7 +943,8 @@ class GroupByNode extends SingleChildResultSetNode
                          getContextManager()),
             predicates,
             dataDictionary,
-            (RequiredRowOrdering) null);
+            (RequiredRowOrdering) null,
+            null );
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.

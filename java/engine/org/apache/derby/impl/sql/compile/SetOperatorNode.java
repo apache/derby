@@ -1111,6 +1111,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 				null,     // GROUP BY list
 				null,     // having clause
 				null, /* window list */
+				null, /* optimizer override plan */
 				getContextManager());
 
 		/* And finally, transform the "*" in the new SELECT node

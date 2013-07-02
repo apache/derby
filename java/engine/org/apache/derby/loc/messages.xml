@@ -2587,7 +2587,7 @@ Guide.
 
             <msg>
                 <name>42Y69</name>
-                <text>No valid execution plan was found for this statement. This may have one of two causes: either you specified a hash join strategy when hash join is not allowed (no optimizable equijoin) or you are attempting to join two external virtual tables, each of which references the other, and so the statement cannot be evaluated.  </text>
+                <text>No valid execution plan was found for this statement. This may have many causes: 1) you specified a hash join strategy when hash join is not allowed (no optimizable equijoin), 2) you are attempting to join two external virtual tables, each of which references the other, and so the statement cannot be evaluated, 3) you have specified a plan shape which the optimizer would never consider.</text>
             </msg>
 
             <msg>
@@ -3046,6 +3046,23 @@ Guide.
             <msg>
                 <name>42ZCB</name>
                 <text>A varargs procedure may not return result sets.</text>
+            </msg>
+
+            <msg>
+                <name>42ZCC</name>
+                <text>Bad optimizer override. There are {0} row sources in the plan but there should be {1}.</text>
+                <arg>rowSourceCountInPlan</arg>
+                <arg>actualRowSourceCount</arg>
+            </msg>
+
+            <msg>
+                <name>42ZCD</name>
+                <text>Bad optimizer override. The plan is not a left-deep tree.</text>
+            </msg>
+
+            <msg>
+                <name>42ZCE</name>
+                <text>Bad optimizer override. Row sources have not been resolved.</text>
             </msg>
 
         </family>

@@ -31,6 +31,7 @@ import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -141,6 +142,7 @@ public class OptimizerFactoryImpl
 								  DataDictionary dDictionary,
 								  RequiredRowOrdering requiredRowOrdering,
 								  int numTablesInQuery,
+								  OptimizerPlan overridingPlan,
 								  LanguageConnectionContext lcc)
 				throws StandardException
 	{
@@ -166,6 +168,7 @@ public class OptimizerFactoryImpl
 							dDictionary,
 							requiredRowOrdering,
 							numTablesInQuery,
+							overridingPlan,
 							lcc);
 	}
 
@@ -199,6 +202,7 @@ public class OptimizerFactoryImpl
 								  DataDictionary dDictionary,
 								  RequiredRowOrdering requiredRowOrdering,
 								  int numTablesInQuery,
+								  OptimizerPlan overridingPlan,
 								  LanguageConnectionContext lcc)
 				throws StandardException
 	{
@@ -215,6 +219,7 @@ public class OptimizerFactoryImpl
 							lcc.getLockEscalationThreshold(),
 							requiredRowOrdering,
 							numTablesInQuery,
+							overridingPlan,
                             lcc);
 	}
 

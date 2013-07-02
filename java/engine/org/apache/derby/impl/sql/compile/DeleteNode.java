@@ -758,6 +758,7 @@ class DeleteNode extends DMLModStatementNode
                                        null, /* GROUP BY list */
                                        null, /* having clause */
                                        null, /* windows */
+                                       null, /* optimizer override plan */
                                        getContextManager());
 
         return new DeleteNode(tableName, rs, getContextManager());
@@ -801,6 +802,7 @@ class DeleteNode extends DMLModStatementNode
                                               null, /* GROUP BY list */
                                               null, /* having clause */
                                               null, /* windows */
+                                              null, /* optimizer override plan */
                                               getContextManager());
 
         return new UpdateNode(tableName, sn, getContextManager());

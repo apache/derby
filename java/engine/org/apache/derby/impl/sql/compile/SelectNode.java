@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -86,6 +87,9 @@ class SelectNode extends ResultSetNode
 	 * List of windows.
 	 */
 	WindowList windows;
+
+    /** Full plan for this SELECT as specified in an optimizer override */
+    OptimizerPlan   overridingPlan;
 
 	/**
 	 * List of window function calls (e.g. ROW_NUMBER, AVG(i), DENSE_RANK).
@@ -142,6 +146,7 @@ class SelectNode extends ResultSetNode
               GroupByList groupByList,
               ValueNode havingClause,
               WindowList windowDefinitionList,
+              OptimizerPlan overridingPlan,
               ContextManager cm) throws StandardException {
         super(cm);
         setNodeType(C_NodeTypes.SELECT_NODE);
@@ -168,6 +173,8 @@ class SelectNode extends ResultSetNode
 		// used in window functions in ORDER BY.
         this.windows = windowDefinitionList;
 
+        this.overridingPlan = overridingPlan;
+        
 		bindTargetListOnly = false;
 		
 		this.originalWhereClauseHadSubqueries = false;
@@ -516,6 +523,13 @@ class SelectNode extends ResultSetNode
 		{
 			fromListParam.removeElementAt(0);
 		}
+
+        // if an explicit join plan is requested, bind it
+        if ( overridingPlan != null )
+        {
+            overridingPlan.bind( dataDictionary, getLanguageConnectionContext(), getCompilerContext(), fromList.size() );
+        }
+        
 		return this;
 	}
 
@@ -1976,7 +1990,8 @@ class SelectNode extends ResultSetNode
         opt = getOptimizer(fromList,
 								wherePredicates,
 								dataDictionary,
-                                orderByLists[0]); // use first one
+                                orderByLists[0], // use first one
+                                overridingPlan);
         opt.setOuterRows(outerRows);
 
 		/* Optimize this SelectNode */

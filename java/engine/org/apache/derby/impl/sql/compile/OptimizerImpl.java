@@ -36,12 +36,14 @@ import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 
@@ -74,6 +76,8 @@ class OptimizerImpl implements Optimizer
      */
 	private JBitSet		 assignedTableMap;
 	private OptimizableList optimizableList;
+    private OptimizerPlan   overridingPlan;
+    private OptimizerPlan   currentPlan;
 	private OptimizablePredicateList predicateList;
 	private JBitSet					 nonCorrelatedTableMap;
 
@@ -196,6 +200,7 @@ class OptimizerImpl implements Optimizer
 				  int tableLockThreshold,
 				  RequiredRowOrdering requiredRowOrdering,
                   int numTablesInQuery,
+                  OptimizerPlan overridingPlan,
                   LanguageConnectionContext lcc )
 		throws StandardException
 	{
@@ -233,6 +238,7 @@ class OptimizerImpl implements Optimizer
 		bestJoinOrder = new int[numOptimizables];
 		joinPosition = -1;
 		this.optimizableList = optimizableList;
+		this.overridingPlan = overridingPlan;
 		this.predicateList = predicateList;
 		this.dDictionary = dDictionary;
 		this.ruleBasedOptimization = ruleBasedOptimization;
@@ -271,6 +277,15 @@ class OptimizerImpl implements Optimizer
 
 		// Optimization started
 		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode(), optimizableList ); }
+
+        // make sure that optimizer overrides are bound and left-deep
+        if ( overridingPlan != null )
+        {
+            if ( !overridingPlan.isBound() )
+            {
+                throw StandardException.newException( SQLState.LANG_UNRESOLVED_ROW_SOURCE );
+            }
+        }
 	}
 
 	/**
@@ -1540,10 +1555,52 @@ class OptimizerImpl implements Optimizer
 		
 		// RESOLVE: Should we step through the different join strategies here?
 
-		/* Returns true until all access paths are exhausted */
-		retval =  curOpt.nextAccessPath(this,
-										(OptimizablePredicateList) null,
-										currentRowOrdering);
+        while ( true )
+        {
+            /* Returns true until all access paths are exhausted */
+            retval =  curOpt.nextAccessPath(this, (OptimizablePredicateList) null, currentRowOrdering);
+
+            // if the user didn't specify an explicit plan, we're ok
+            if ( overridingPlan == null ) { break; }
+            if ( !retval ) { break; }
+
+            // if we've already found the right access path for this location in
+            // the join order, then we move on to the next position
+            if ( currentPlan != null )
+            {
+                if ( currentPlan.countLeafNodes() == (joinPosition+1) )
+                {
+                    retval = false;
+                    break;
+                }
+            }
+
+            // at this point, figure out if the plan so far is a prefix of the desired plan
+            OptimizerPlan   candidate = OptimizerPlan.makeRowSource( getTupleDescriptor( curOpt ), dDictionary );
+            if ( candidate == null )
+            {
+                retval = false;
+                break;
+            }
+            if ( currentPlan != null )
+            {
+                candidate = new OptimizerPlan.Join
+                    (
+                     curOpt.getCurrentAccessPath().getJoinStrategy(),
+                     currentPlan,
+                     candidate
+                     );
+            }
+
+            if ( candidate.isLeftPrefixOf( overridingPlan ) )
+            {
+                currentPlan = candidate;
+                break;
+            }
+
+            // well, that decoration didn't match up with the user-specified plan.
+            // try again
+        }
 
 		// If the previous path that we considered for curOpt was _not_ the best
 		// path for this round, then we need to revert back to whatever the
@@ -1793,6 +1850,34 @@ class OptimizerImpl implements Optimizer
 
 		return retval;
 	}
+
+    /**
+     * Get the unique tuple descriptor of the current access path for an Optimizable.
+     */
+    private UniqueTupleDescriptor   getTupleDescriptor( Optimizable optimizable )
+        throws StandardException
+    {
+        if ( isTableFunction( optimizable ) )
+        {
+            ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
+            return ((StaticMethodCallNode) ((FromVTI) prn.getChildResult()).getMethodCall() ).ad;
+        }
+        else
+        {
+            return optimizable.getCurrentAccessPath().getConglomerateDescriptor();
+        }
+    }
+
+    /** Return true if the optimizable is a table function */
+    static  boolean isTableFunction( Optimizable optimizable )
+    {
+        if ( !( optimizable instanceof ProjectRestrictNode ) ) { return false; }
+
+        ResultSetNode   rsn = ((ProjectRestrictNode) optimizable).getChildResult();
+        if ( !( rsn instanceof FromVTI ) ) { return false; }
+
+        return ( ((FromVTI) rsn).getMethodCall() instanceof StaticMethodCallNode );
+    }
 
 	/**
 	 * Is the cost of this join order lower than the best one we've

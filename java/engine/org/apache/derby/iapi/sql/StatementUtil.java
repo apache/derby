@@ -24,6 +24,10 @@ package org.apache.derby.iapi.sql;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
  * Utilities for dealing with statements.
@@ -66,4 +70,98 @@ public class StatementUtil
 					"ENABLED",
 					"DISABLED"
 				};
+
+    /**
+     * Get the descriptor for the named schema. If the schemaName
+     * parameter is NULL, it gets the descriptor for the current
+     * compilation schema.
+     * 
+     * @param schemaName The name of the schema we're interested in.
+     * If the name is NULL, get the descriptor for the current compilation schema.
+     * @param raiseError True to raise an error if the schema does not exist,
+     * false to return null if the schema does not exist.
+     * @return Valid SchemaDescriptor or null if raiseError is false and the
+     * schema does not exist. 
+     * @throws StandardException Schema does not exist and raiseError is true.
+     */
+	public static SchemaDescriptor	getSchemaDescriptor
+        (
+         String schemaName,
+         boolean raiseError,
+         DataDictionary dataDictionary,
+         LanguageConnectionContext lcc,
+         CompilerContext cc
+         )
+		throws StandardException
+	{
+		/*
+		** Check for a compilation context.  Sometimes
+		** there is a special compilation context in
+	 	** place to recompile something that may have
+		** been compiled against a different schema than
+		** the current schema (e.g views):
+	 	**
+	 	** 	CREATE SCHEMA x
+	 	** 	CREATE TABLE t
+		** 	CREATE VIEW vt as SEELCT * FROM t
+		** 	SET SCHEMA app
+		** 	SELECT * FROM X.vt 
+		**
+		** In the above view vt must be compiled against
+		** the X schema.
+		*/
+
+
+		SchemaDescriptor sd = null;
+		boolean isCurrent = false;
+		boolean isCompilation = false;
+		if (schemaName == null) {
+
+			sd = cc.getCompilationSchema();
+
+			if (sd == null) {
+				// Set the compilation schema to be the default,
+				// notes that this query has schema dependencies.
+				sd = lcc.getDefaultSchema();
+
+				isCurrent = true;
+
+				cc.setCompilationSchema(sd);
+			}
+			else
+			{
+				isCompilation = true;
+			}
+			schemaName = sd.getSchemaName();
+		}
+
+		SchemaDescriptor sdCatalog = dataDictionary.getSchemaDescriptor(schemaName,
+			lcc.getTransactionCompile(), raiseError);
+
+		if (isCurrent || isCompilation) {
+			//if we are dealing with a SESSION schema and it is not physically
+			//created yet, then it's uuid is going to be null. DERBY-1706
+			//Without the getUUID null check below, following will give NPE
+			//set schema session; -- session schema has not been created yet
+			//create table t1(c11 int);
+			if (sdCatalog != null && sdCatalog.getUUID() != null)
+			{
+				// different UUID for default (current) schema than in catalog,
+				// so reset default schema.
+				if (!sdCatalog.getUUID().equals(sd.getUUID()))
+				{
+					if (isCurrent) { lcc.setDefaultSchema(sdCatalog); }
+					cc.setCompilationSchema(sdCatalog);
+				}
+			}
+			else
+			{
+				// this schema does not exist, so ensure its UUID is null.
+				sd.setUUID(null);
+				sdCatalog = sd;
+			}
+		}
+		return sdCatalog;
+	}
+
 }

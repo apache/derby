@@ -630,7 +630,8 @@ class RowResultSetNode extends FromTable
                              getContextManager()),
                 predicateList,
                 dataDictionary,
-                (RequiredRowOrdering) null);
+                (RequiredRowOrdering) null,
+                null );
 
         costEstimate = opt.newCostEstimate();
 

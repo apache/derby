@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.StatementUtil;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
@@ -1062,77 +1063,14 @@ public abstract class QueryTreeNode implements Visitable
 	final SchemaDescriptor	getSchemaDescriptor(String schemaName, boolean raiseError)
 		throws StandardException
 	{
-		/*
-		** Check for a compilation context.  Sometimes
-		** there is a special compilation context in
-	 	** place to recompile something that may have
-		** been compiled against a different schema than
-		** the current schema (e.g views):
-	 	**
-	 	** 	CREATE SCHEMA x
-	 	** 	CREATE TABLE t
-		** 	CREATE VIEW vt as SEELCT * FROM t
-		** 	SET SCHEMA app
-		** 	SELECT * FROM X.vt 
-		**
-		** In the above view vt must be compiled against
-		** the X schema.
-		*/
-
-
-		SchemaDescriptor sd = null;
-		boolean isCurrent = false;
-		boolean isCompilation = false;
-		if (schemaName == null) {
-
-			CompilerContext cc = getCompilerContext();
-			sd = cc.getCompilationSchema();
-
-			if (sd == null) {
-				// Set the compilation schema to be the default,
-				// notes that this query has schema dependencies.
-				sd = getLanguageConnectionContext().getDefaultSchema();
-
-				isCurrent = true;
-
-				cc.setCompilationSchema(sd);
-			}
-			else
-			{
-				isCompilation = true;
-			}
-			schemaName = sd.getSchemaName();
-		}
-
-		DataDictionary dataDictionary = getDataDictionary();
-		SchemaDescriptor sdCatalog = dataDictionary.getSchemaDescriptor(schemaName,
-			getLanguageConnectionContext().getTransactionCompile(), raiseError);
-
-		if (isCurrent || isCompilation) {
-			//if we are dealing with a SESSION schema and it is not physically
-			//created yet, then it's uuid is going to be null. DERBY-1706
-			//Without the getUUID null check below, following will give NPE
-			//set schema session; -- session schema has not been created yet
-			//create table t1(c11 int);
-			if (sdCatalog != null && sdCatalog.getUUID() != null)
-			{
-				// different UUID for default (current) schema than in catalog,
-				// so reset default schema.
-				if (!sdCatalog.getUUID().equals(sd.getUUID()))
-				{
-					if (isCurrent)
-						getLanguageConnectionContext().setDefaultSchema(sdCatalog);
-					getCompilerContext().setCompilationSchema(sdCatalog);
-				}
-			}
-			else
-			{
-				// this schema does not exist, so ensure its UUID is null.
-				sd.setUUID(null);
-				sdCatalog = sd;
-			}
-		}
-		return sdCatalog;
+        return StatementUtil.getSchemaDescriptor
+            (
+             schemaName,
+             raiseError,
+             getDataDictionary(),
+             getLanguageConnectionContext(),
+             getCompilerContext()
+             );
 	}
 
 	/**

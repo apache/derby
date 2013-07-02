@@ -68,6 +68,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  FOREIGN_KEY_VIOLATION = "23503";
     protected static  final   String  ILLEGAL_DUPLICATE = "23505";
     protected static  final   String  SYNTAX_ERROR = "42X01";
+    protected static  final   String  LEXICAL_ERROR = "42X02";
     protected static  final   String  COLUMN_OUT_OF_SCOPE = "42X04";
     protected static  final   String  OPERATION_FORBIDDEN = "X0Y25";
 

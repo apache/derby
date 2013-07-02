@@ -58,7 +58,9 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -719,6 +721,7 @@ public class SQLParser
                                               null, /* GROUP BY list */
                                               null, /* having clause */
                                               null, /* window list */
+                                              null, /* optimizer plan override */
                                               getContextManager());
 
         StatementNode retval =
@@ -751,6 +754,7 @@ public class SQLParser
                                               null, /* GROUP BY list */
                                               null, /* having clause */
                                               null, /* window list */
+                                              null, /* optimizer plan override */
                                               getContextManager());
 
         StatementNode retval =
@@ -2393,6 +2397,7 @@ TOKEN [IGNORE_CASE] :
 |	<UNCOMMITTED: "uncommitted">
 |	<USAGE: "usage">
 |	<WHEN: "when">
+|	<DERBYPLAN: "--derbyplan">
 }
 
 /*
@@ -2523,6 +2528,7 @@ TOKEN :
 |	<LEFT_PAREN: "(">
 |	<RIGHT_PAREN: ")">
 |	<ASTERISK: "*">
+|	<HASH: "#">
 |	<PLUS_SIGN: "+">
 |	<COMMA: ",">
 |	<MINUS_SIGN: "-">
@@ -8747,6 +8753,7 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 	ValueNode	havingClause = null;
 	Token		whereToken;
 	WindowList  windows = null;
+    OptimizerPlan       optimizerOverridePlan = null;
 }
 {
 	fromList = fromClause()
@@ -8754,6 +8761,7 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 	[ groupByList = groupByClause() ]
 	[ havingClause = havingClause() ]
 	[ windows = windowClause() ]
+	[ optimizerOverridePlan = optimizerOverridePlan() ]
 	{
  
 		// fix for HAVING without GROUP BY, makes sure we get one
@@ -8774,6 +8782,7 @@ tableExpression(ResultColumnList selectList) throws StandardException :
                                     groupByList,
                                     havingClause,
                                     windows,
+                                    optimizerOverridePlan,
                                     getContextManager());
 
 		return selectNode;
@@ -9782,6 +9791,104 @@ windowDefinition(WindowList wl) throws StandardException :
                          windowName, orderCols, getContextManager()));
 
 		return wl;
+	}
+}
+
+/*
+ * <A NAME="optimizerOverridePlan">optimizerOverridePlan</A>
+ */
+OptimizerPlan
+optimizerOverridePlan() throws StandardException :
+{
+    OptimizerPlan       optimizerOverridePlan;
+}
+{
+    <DERBYPLAN> optimizerOverridePlan = optimizerPlan()
+	{
+        return  optimizerOverridePlan;
+	}
+}
+
+/*
+ * <A NAME="optimizerPlan">optimizerPlan</A>
+ */
+OptimizerPlan
+optimizerPlan() throws StandardException :
+{
+    OptimizerPlan       plan;
+}
+{
+	LOOKAHEAD ( { getToken(1).kind == LEFT_PAREN } )
+    plan = optimizerJoin()
+	{
+        return  plan;
+	}
+|
+    plan = optimizerRowSource()
+	{
+        return plan;
+	}
+}
+
+/*
+ * <A NAME="optimizerJoin">optimizerJoin</A>
+ */
+OptimizerPlan
+optimizerJoin() throws StandardException :
+{
+    JoinStrategy        strategy;
+    OptimizerPlan       leftPlan;
+    OptimizerPlan       rightPlan;
+}
+{
+    <LEFT_PAREN>
+        leftPlan = optimizerPlan() strategy = joinStrategy() rightPlan = optimizerPlan()
+    <RIGHT_PAREN>
+	{
+        return new OptimizerPlan.Join( strategy, leftPlan, rightPlan );
+	}
+}
+
+/*
+ * <A NAME="joinStrategy">joinStrategy</A>
+ */
+JoinStrategy
+joinStrategy() throws StandardException :
+{
+}
+{
+    <ASTERISK>
+	{
+        return new NestedLoopJoinStrategy();
+	}
+|
+    <HASH>
+	{
+        return new HashJoinStrategy();
+	}
+}
+
+/*
+ * <A NAME="optimizerRowSource">optimizerRowSource</A>
+ */
+OptimizerPlan
+optimizerRowSource() throws StandardException :
+{
+    TableName       sourceName = null;
+	Token	           leftParenToken = null;
+}
+{
+    sourceName = qualifiedName( Limits.MAX_IDENTIFIER_LENGTH )
+    [ leftParenToken = <LEFT_PAREN> <RIGHT_PAREN> ]
+	{
+        if ( leftParenToken != null )
+        {
+            return new OptimizerPlan.TableFunctionRS( sourceName.getSchemaName(), sourceName.getTableName() );
+        }
+        else
+        {
+            return new OptimizerPlan.ConglomerateRS( sourceName.getSchemaName(), sourceName.getTableName() );
+        }
 	}
 }
 

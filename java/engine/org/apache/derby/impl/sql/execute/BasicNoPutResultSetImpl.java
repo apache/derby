@@ -22,6 +22,8 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLWarning;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -1107,12 +1109,21 @@ implements NoPutResultSet
      * Find all fields of type ResultSet.
      * </p>
      */
-    private static  void    findResultSetFields( ArrayList<Field> fieldList, Class<?> klass )
+    private static  void    findResultSetFields( ArrayList<Field> fieldList, final Class<?> klass )
         throws Exception
     {
         if ( klass == null ) { return; }
         
-        Field[] fields = klass.getDeclaredFields();
+        Field[] fields = AccessController.doPrivileged
+            (
+             new PrivilegedAction<Field[]>()
+             {
+                 public Field[] run()
+                 {
+                     return klass.getDeclaredFields();
+                 }
+             }
+             );
 
         for ( Field field : fields )
         {

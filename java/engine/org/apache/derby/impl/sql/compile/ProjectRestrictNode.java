@@ -1218,7 +1218,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
                 getContextManager()),
             predicates,
             dataDictionary,
-            (RequiredRowOrdering) null);
+            (RequiredRowOrdering) null,
+            null );
 
 		// RESOLVE: SHOULD FACTOR IN THE NON-OPTIMIZABLE PREDICATES THAT
 		// WERE NOT PUSHED DOWN

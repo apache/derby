@@ -407,7 +407,8 @@ abstract class SingleChildResultSetNode extends FromTable
                              getContextManager()),
                 predicates,
                 dataDictionary,
-                (RequiredRowOrdering) null);
+                (RequiredRowOrdering) null,
+                null );
 
         costEstimate = opt.newCostEstimate();
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),

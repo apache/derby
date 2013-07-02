@@ -62,7 +62,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.ResultSetMetaData;
-
+import org.w3c.dom.Element;
 
 /**
  */
@@ -833,4 +833,11 @@ class VTIResultSet extends NoPutResultSetImpl
         vsdv.setWidth( dtd.getPrecision(), dtd.getScale(), false );
     }
     
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        Element myNode = super.toXML( parentNode, tag );
+        myNode.setAttribute( "javaClassName", javaClassName );
+        
+        return myNode;
+    }
 }

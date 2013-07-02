@@ -48,6 +48,7 @@ public interface OptimizerFactory {
 	 * @param requiredRowOrdering	The required ordering of the rows to
 	 *								come out of the optimized result set
 	 * @param numTablesInQuery	The number of tables in the current query
+	 * @param overridingPlan    (Optional) A complete plan specified by optimizer overrides. Must have been bound already.
 	 * @param lcc			The LanguageConnectionContext
 	 *
 	 * RESOLVE - We probably want to pass a subquery list, once we define a
@@ -61,6 +62,7 @@ public interface OptimizerFactory {
 								  DataDictionary dDictionary,
 								  RequiredRowOrdering requiredRowOrdering,
 								  int numTablesInQuery,
+								  OptimizerPlan overridingPlan,
 								  LanguageConnectionContext lcc)
 			throws StandardException;
 
