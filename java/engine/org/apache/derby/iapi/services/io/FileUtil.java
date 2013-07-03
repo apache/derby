@@ -594,13 +594,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static final Object region = new Object();
     private static boolean initialized = false;
 
-    // Reflection helper objects for calling into Java >= 6
-    private static Method setWrite = null;
-    private static Method setRead = null;
-    private static Method setExec = null;
-
     // Reflection helper objects for calling into Java >= 7
-    private static Class<File> fileClz = File.class;
     private static Class<?> filesClz;
     private static Class<?> pathClz;
     private static Class<?> pathsClz;
@@ -621,10 +615,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Method supportsFileAttributeView;
     private static Method getFileStore;
     private static Method getOwner;
-    private static Method getAcl;
     private static Method setAcl;
-    private static Method principal;
-    private static Method getName;
     private static Method build;
     private static Method newBuilder;
     private static Method setPrincipal;
@@ -633,8 +624,9 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Method setPermissions;
     
     private static Field allow;
+
     /**
-     * Use when creating new files. If running with Java 6 or higher on Unix,
+     * Use when creating new files. If running on Unix,
      * limit read and write permissions on {@code file} to owner if {@code
      * derby.storage.useDefaultFilePermissions == false}.
      * <p/>
@@ -678,20 +670,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
         synchronized (region) {
             if (!initialized) {
                 initialized = true;
-                // >= Java 6
-                try {
-                    setWrite = fileClz.getMethod(
-                        "setWritable",
-                        new Class[]{Boolean.TYPE, Boolean.TYPE});
-                    setRead = fileClz.getMethod(
-                        "setReadable",
-                        new Class[]{Boolean.TYPE, Boolean.TYPE});
-                    setExec = fileClz.getMethod(
-                        "setExecutable",
-                        new Class[]{Boolean.TYPE, Boolean.TYPE});
-                } catch (NoSuchMethodException e) {
-                    // not Java 6 or higher
-                }
 
                 // >= Java 7
                 try {
@@ -738,14 +716,8 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                     getOwner = filesClz.
                         getMethod("getOwner",
                                   new Class[]{pathClz, linkOptionArrayClz});
-                    getAcl = aclFileAttributeViewClz.
-                        getMethod("getAcl", new Class[]{});
                     setAcl = aclFileAttributeViewClz.
                         getMethod("setAcl", new Class[]{List.class});
-                    principal = aclEntryClz.
-                        getMethod("principal", new Class[]{});
-                    getName = userPrincipalClz.
-                        getMethod("getName", new Class[]{});
                     build = aclEntryBuilderClz.
                         getMethod("build", new Class[]{});
                     newBuilder = aclEntryClz.
@@ -772,88 +744,50 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             }
         }
 
-        if (setWrite == null) {
-            // JVM level too low
-            return;
-        }
-
         if (limitAccessToOwnerViaACLs(file)) {
             return;
         }
 
-        try {
-            //
-            // First switch off all write access
-            //
-            Object r;
+        //
+        // First switch off all write access
+        //
+        assertTrue(file.setWritable(false, false));
 
-            r = setWrite.invoke(
-                file,
-                new Object[]{Boolean.FALSE, Boolean.FALSE});
-            assertTrue(r);
+        //
+        // Next, switch on write again, but for owner only
+        //
+        assertTrue(file.setWritable(true, true));
+
+        //
+        // First switch off all read access
+        //
+        assertTrue(file.setReadable(false, false));
+
+        //
+        // Next, switch on read access again, but for owner only
+        //
+        assertTrue(file.setReadable(true, true));
+
+        if (file.isDirectory()) {
+            //
+            // First switch off all exec access
+            //
+            assertTrue(file.setExecutable(false, false));
 
             //
-            // Next, switch on write again, but for owner only
+            // Next, switch on exec again, but for owner only
             //
-            r = setWrite.invoke(
-                file,
-                new Object[]{Boolean.TRUE, Boolean.TRUE});
-            assertTrue(r);
-
-            //
-            // First switch off all read access
-            //
-            r = setRead.invoke(
-                file,
-                new Object[]{Boolean.FALSE, Boolean.FALSE});
-            assertTrue(r);
-
-            //
-            // Next, switch on read access again, but for owner only
-            //
-            r = setRead.invoke(
-                file,
-                new Object[]{Boolean.TRUE, Boolean.TRUE});
-            assertTrue(r);
-
-
-            if (file.isDirectory()) {
-                //
-                // First switch off all exec access
-                //
-                r = setExec.invoke(
-                    file,
-                    new Object[]{Boolean.FALSE, Boolean.FALSE});
-                assertTrue(r);
-
-                //
-                // Next, switch on read exec again, but for owner only
-                //
-                r = setExec.invoke(
-                    file,
-                    new Object[]{Boolean.TRUE, Boolean.TRUE});
-                assertTrue(r);
-            }
-        } catch (InvocationTargetException e) {
-            // setWritable/setReadable can throw SecurityException
-            throw (SecurityException)e.getCause();
-        } catch (IllegalAccessException e) {
-            // coding error
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT(e);
-            }
+            assertTrue(file.setExecutable(true, true));
         }
     }
 
-    private static void assertTrue(Object r){
+    private static void assertTrue(boolean b) {
         // We should always have the permission to modify the access since have
         // just created the file. On some file systems, some operations will
         // not work, though, notably FAT/FAT32, as well as NTFS on java < 7, so
         // we ignore it the failure.
         if (SanityManager.DEBUG) {
-            Boolean b = (Boolean)r;
-
-            if (!b.booleanValue()) {
+            if (!b) {
                 String os =
                     PropertyUtil.getSystemProperty("os.name").toLowerCase();
 
