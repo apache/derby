@@ -27,7 +27,7 @@
 
   <property file="${user.home}/ant.properties"/>
   <!-- Set property lib dir -->
-  <property name="properties.dir" value="tools/ant/properties"/>
+  <property name="properties.dir" value="${basedir}/tools/ant/properties"/>
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
   <!-- Compiler settings -->
@@ -2218,7 +2218,7 @@
     <tstamp prefix="derby.junit">
       <format property="standardtime" pattern="yyyy-MM-dd hh:mm aa zzz"/>
     </tstamp>
-    <property name="derby.junit.jvm" value="java"/>
+    <property name="derby.junit.jvm" value="${java.home}/bin/java"/>
     <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
     <mkdir dir="junit_${derby.junit.timestamp}/testout"/>
 
