@@ -324,8 +324,8 @@ public class SecureServerTest extends BaseJDBCTestCase
         throws Exception
     {	
         String      myName = toString();
-        String      serverOutput = getServerOutput();
         boolean     serverCameUp = serverCameUp();
+        String      serverOutput = getServerOutput();
         boolean     outputOK = ( serverOutput.indexOf( _outcome.expectedServerOutput() ) >= 0 );
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
