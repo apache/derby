@@ -48,6 +48,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class LangProcedureTest extends BaseJDBCTestCase {
 
     private final static String LANG_STRING_TRUNCATION = "22001";
+    private final static String LANG_INVALID_CALL_STATEMENT = "42X74";
     private final String thisClassName = getClass().getName();
 
     public LangProcedureTest(String name) {
@@ -201,6 +202,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertStatementError(
             "42X15", s,
             "call syscs_util.syscs_set_database_property(\"foo\", \"bar\")");
+
+        // Not so long ago (DERBY-6212) this caused a NullPointerException.
+        assertCompileError(LANG_INVALID_CALL_STATEMENT,
+          "call syscs_util.syscs_set_database_property('foo', (values 'bar'))");
 
         s.close();
     }

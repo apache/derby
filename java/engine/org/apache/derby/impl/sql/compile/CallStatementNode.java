@@ -122,14 +122,23 @@ public class CallStatementNode extends DMLStatementNode
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT((dd != null), "Failed to get data dictionary");
 
+        SubqueryList subqueries = (SubqueryList) getNodeFactory().getNode(
+                C_NodeTypes.SUBQUERY_LIST, getContextManager());
+
 		getCompilerContext().pushCurrentPrivType(getPrivType());
 		methodCall = (JavaToSQLValueNode) methodCall.bindExpression(
 							(FromList) getNodeFactory().getNode(
 								C_NodeTypes.FROM_LIST,
 								getNodeFactory().doJoinOrderOptimization(),
 								getContextManager()), 
-							null,
+                            subqueries,
 							null);
+
+        // Don't allow sub-queries in CALL statements.
+        if (subqueries.size() != 0) {
+            throw StandardException.newException(
+                    SQLState.LANG_INVALID_CALL_STATEMENT);
+        }
 
 		// Disallow creation of BEFORE triggers which contain calls to 
 		// procedures that modify SQL data. 
