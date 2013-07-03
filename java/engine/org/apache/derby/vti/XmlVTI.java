@@ -21,8 +21,8 @@ limitations under the License.
 
 package org.apache.derby.vti;
 
-import java.io.InputStream;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -43,7 +43,7 @@ import org.w3c.dom.NodeList;
  * </p>
  *
  * <ul>
- * <li>xmlResourceName - An URL identifying an xml resource.</li>
+ * <li>xmlResourceName - The name of an xml file.</li>
  * <li>rowTag - The tag of the element which contains the row-structured content.</li>
  * <li>childTags - The attributes and descendant elements inside the row element which should be treated as columns.</li>
  * </ul>
@@ -74,7 +74,7 @@ import org.w3c.dom.NodeList;
  * (
  *      findbugs
  *      (
- *          'file:///Users/me/static-analysis/findbugs.xml',
+ *          'findbugs.xml',
  *          'ClassStats',
  *          'class', 'bugs'
  *      )
@@ -90,7 +90,7 @@ import org.w3c.dom.NodeList;
  * </p>
  *
  * <ul>
- * <li>xmlResourceName - An URL identifying an xml resource.</li>
+ * <li>xmlResourceName - The name of an xml file.</li>
  * <li>rowTag - The tag of the element which contains the row-structured content.</li>
  * <li>parentTags - Attributes and elements (to be treated as columns) from outer elements in which the rowTag is nested.</li>
  * <li>childTags - Attributes and elements (to be treated as columns) inside the row element.</li>
@@ -135,7 +135,7 @@ import org.w3c.dom.NodeList;
  *        (
  *             optTrace
  *             (
- *                 'file:///Users/me/derby/mainline/z.xml',
+ *                 '/Users/me/derby/mainline/z.xml',
  *                 'planCost',
  *                 asList( 'stmtID', 'queryID', 'complete' ),
  *                 asList( 'summary', 'type', 'estimatedCost', 'estimatedRowCount' )
@@ -308,8 +308,8 @@ public  class   XmlVTI  extends StringColumnVTI
         
         _builder = factory.newDocumentBuilder();
 
-        URL                 url = new URL( _xmlResourceName );
-        InputStream     is = url.openStream();
+        File                file = new File( _xmlResourceName );
+        FileInputStream     is = new FileInputStream( file );
         Document        doc = _builder.parse( is );
         Element             root = doc.getDocumentElement();
 
