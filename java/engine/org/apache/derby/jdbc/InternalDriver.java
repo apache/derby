@@ -38,10 +38,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
@@ -94,12 +94,8 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     private static boolean deregister = true;
 
-    private static final ThreadPoolExecutor _executorPool =
-            new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS,
-                                   new SynchronousQueue<Runnable>());
-    static {
-        _executorPool.setThreadFactory(new DaemonThreadFactory());
-    }
+    private static final ExecutorService _executorPool =
+            Executors.newCachedThreadPool(new DaemonThreadFactory());
 
 	public static final InternalDriver activeDriver()
 	{
