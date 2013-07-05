@@ -21,7 +21,10 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import org.apache.derby.iapi.db.OptimizerTrace;
 import org.apache.derby.iapi.reference.SQLState;
@@ -132,31 +135,45 @@ public	class   OptimizerTracer  implements OptionalTool
      * <li><b>fileName</b> - Where to write the optimizer trace. If omitted, the trace is written to System.out.</li>
      * </ul>
      */
-    public  void    unloadTool( String... configurationParameters )
+    public  void    unloadTool( final String... configurationParameters )
         throws SQLException
     {
         try {
-            OptTrace    tracer = OptimizerTrace.getOptimizerTracer();
-            boolean     needsClosing = false;
+            final   OptTrace    tracer = OptimizerTrace.getOptimizerTracer();
 
-            PrintWriter pw;
-            if (
-                (configurationParameters != null) &&
-                (configurationParameters.length > 0)
-                )
-            {
-                pw = new PrintWriter( configurationParameters[ 0 ] );
-                needsClosing = true;
-            }
-            else { pw = new PrintWriter( System.out ); }
+            AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Object>()
+                 {
+                     public Object run()
+                     {
+                         try {
+                             boolean     needsClosing = false;
+
+                             PrintWriter pw;
+                             if (
+                                 (configurationParameters != null) &&
+                                 (configurationParameters.length > 0)
+                                 )
+                             {
+                                 pw = new PrintWriter( configurationParameters[ 0 ] );
+                                 needsClosing = true;
+                             }
+                             else { pw = new PrintWriter( System.out ); }
         
-            if ( tracer != null )
-            {
-                tracer.printToWriter( pw );
-                pw.flush();
-            }
+                             if ( tracer != null )
+                             {
+                                 tracer.printToWriter( pw );
+                                 pw.flush();
+                             }
 
-            if ( needsClosing ) { pw.close(); }
+                             if ( needsClosing ) { pw.close(); }
+                         
+                             return null;
+                         } catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                     }  
+                 }
+                 );
         }
         catch (Exception e) { throw wrap( e ); }
         finally

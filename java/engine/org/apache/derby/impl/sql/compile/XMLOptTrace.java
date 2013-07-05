@@ -39,10 +39,13 @@ import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.JBitSet;
 import org.w3c.dom.Document;
@@ -106,7 +109,6 @@ class   XMLOptTrace implements  OptTrace
     private static  final   String  PC_COMPLETE = "pcComplete";
     private static  final   String  PC_AVOID_SORT= "pcAvoidSort";
     private static  final   String  PC_SUMMARY= "pcSummary";
-    private static  final   String  PC_VERBOSE= "pcVerbose";
 
     // CostEstimate tags
     private static  final   String  CE_ESTIMATED_COST = "ceEstimatedCost";
@@ -140,7 +142,6 @@ class   XMLOptTrace implements  OptTrace
         "    qbID   int,\n" +
         "    complete  boolean,\n" +
         "    summary   varchar( 32672 ),\n" +
-        "    verbose   varchar( 32672 ),\n" +
         "    type        varchar( 50 ),\n" +
         "    estimatedCost        double,\n" +
         "    estimatedRowCount    bigint\n" +
@@ -158,7 +159,7 @@ class   XMLOptTrace implements  OptTrace
         "        'FILE_URL',\n" +
         "        'planCost',\n" +
         "        asList( '" + STMT_TEXT + "', '" + STMT_ID + "', '" + QBLOCK_ID + "' ),\n" +
-        "        asList( '" + PC_COMPLETE + "', '" + PC_SUMMARY + "', '" + PC_VERBOSE + "', '" + PC_TYPE + "', '" +
+        "        asList( '" + PC_COMPLETE + "', '" + PC_SUMMARY + "', '" + PC_TYPE + "', '" +
         CE_ESTIMATED_COST + "', '" + CE_ROW_COUNT + "' )\n" +
         "     )\n" +
         ") v\n";
@@ -185,6 +186,10 @@ class   XMLOptTrace implements  OptTrace
     // reset per join order
     private JoinStrategy    _currentDecorationStrategy;
     private Element         _currentDecoration;
+
+    // context
+    private ContextManager  _cm;
+    private LanguageConnectionContext   _lcc;
 
     ////////////////////////////////////////////////////////////////////////
     //
@@ -248,6 +253,13 @@ class   XMLOptTrace implements  OptTrace
             for ( int i = 0; i < _currentOptimizableList.size(); i++ )
             {
                 Optimizable opt = _currentOptimizableList.getOptimizable( i );
+
+                if ( i == 0 )
+                {
+                    _cm = ((QueryTreeNode) opt).getContextManager();
+                    _lcc = (LanguageConnectionContext) _cm.getContext( LanguageConnectionContext.CONTEXT_ID );
+                }
+                
                 Element optElement = createElement
                     ( _currentQuery, QBLOCK_OPTIMIZABLE, getOptimizableName( opt ).getFullSQLName() );
                 optElement.setAttribute( QBLOCK_OPT_TABLE_NUMBER, Integer.toString( opt.getTableNumber() ) );
@@ -489,15 +501,13 @@ class   XMLOptTrace implements  OptTrace
     /** Get the name of an optimizable */
     private TableName    getOptimizableName( Optimizable optimizable )
     {
-        ContextManager  cm = ((QueryTreeNode) optimizable).getContextManager();
-        
         try {
             if ( isBaseTable( optimizable ) )
             {
                 ProjectRestrictNode prn = (ProjectRestrictNode) optimizable;
                 TableDescriptor td = 
                     ((FromBaseTable) prn.getChildResult()).getTableDescriptor();
-                return makeTableName( td.getSchemaName(), td.getName(), cm );
+                return makeTableName( td.getSchemaName(), td.getName(), _cm );
             }
             else if ( OptimizerImpl.isTableFunction( optimizable ) )
             {
@@ -505,7 +515,7 @@ class   XMLOptTrace implements  OptTrace
                 AliasDescriptor ad =
                     ((StaticMethodCallNode) ((FromVTI) prn.getChildResult()).
                         getMethodCall() ).ad;
-                return makeTableName( ad.getSchemaName(), ad.getName(), cm );
+                return makeTableName( ad.getSchemaName(), ad.getName(), _cm );
             }
             else if ( isFromTable( optimizable ) )
             {
@@ -523,7 +533,7 @@ class   XMLOptTrace implements  OptTrace
         String  nodeClass = optimizable.getClass().getName();
         String  unqualifiedName = nodeClass.substring( nodeClass.lastIndexOf( "." ) + 1 );
 
-        return makeTableName( null, unqualifiedName, cm );
+        return makeTableName( null, unqualifiedName, _cm );
     }
 
     /** Return true if the optimizable is a base table */
@@ -597,8 +607,7 @@ class   XMLOptTrace implements  OptTrace
         if ( isComplete( planOrder ) ) { cost.setAttribute( PC_COMPLETE, "true" ); }
         if ( planType == Optimizer.SORT_AVOIDANCE_PLAN ) { cost.setAttribute( PC_AVOID_SORT, "true" ); }
 
-        createElement( cost, PC_SUMMARY, formatPlanSummary( planOrder, planType, false ) );
-        createElement( cost, PC_VERBOSE, formatPlanSummary( planOrder, planType, true ) );
+        createElement( cost, PC_SUMMARY, formatPlanSummary( planOrder, planType ) );
         formatCost( cost, raw );
 
         return cost;
@@ -666,96 +675,57 @@ class   XMLOptTrace implements  OptTrace
      * factor :== factor | conglomerateName
      * </pre>
      */
-    private String  formatPlanSummary( int[] planOrder, int planType, boolean verbose )
+    private String  formatPlanSummary( int[] planOrder, int planType )
     {
-        StringBuilder   buffer = new StringBuilder();
-        boolean     avoidSort = (planType == Optimizer.SORT_AVOIDANCE_PLAN);
-
-        // a negative optimizable number indicates the end of the plan
-        int planLength = 0;
-        for ( ; planLength < planOrder.length; planLength++ )
-        {
-            if ( planOrder[ planLength ] < 0 ) { break; }
-        }
-
-        // only add parentheses if there are more than 2 slots in the join order
-        int     dontNeedParentheses = 2;
-        int     lastParenthesizedIndex = planLength - dontNeedParentheses;
-        for ( int i = 0; i < lastParenthesizedIndex; i++ ) { buffer.append( "(" ); }
+        try {
+            OptimizerPlan   plan = null;
         
-        for ( int i = 0; i < planLength; i++ )
-        {
-            int     listIndex = planOrder[ i ];
+            StringBuilder   buffer = new StringBuilder();
+            boolean     avoidSort = (planType == Optimizer.SORT_AVOIDANCE_PLAN);
 
-            if ( listIndex >= _currentOptimizableList.size() )
+            // a negative optimizable number indicates the end of the plan
+            int planLength = 0;
+            for ( ; planLength < planOrder.length; planLength++ )
             {
-                // should never happen!
-                buffer.append( "{ UNKNOWN LIST INDEX " + listIndex + " } " );
-                continue;
+                if ( planOrder[ planLength ] < 0 ) { break; }
             }
 
-            Optimizable optimizable = _currentOptimizableList.getOptimizable( listIndex );
-            
-            AccessPath  ap = avoidSort ?
-                optimizable.getBestSortAvoidancePath() : optimizable.getBestAccessPath();
-            ConglomerateDescriptor  cd = ap.getConglomerateDescriptor();
-            String  conglomerateName = getSQLName( optimizable, cd, verbose );
-            JoinStrategy    js = ap.getJoinStrategy();
-
-            //
-            // The very first optimizable in the join order obiously doesn't join
-            // to anything before it. For that reason, its join strategy is always
-            // NESTED_LOOP. We can just assume that and not clutter up the
-            // representation with vacuous information.
-            //
-            if ( i > 0 ) { buffer.append( " " + js.getOperatorSymbol() + " " ); }
-            
-            buffer.append( conglomerateName );
-            if ( (i > 0) && (i <= lastParenthesizedIndex) ) { buffer.append( ")" ); }
-        }
-
-        return buffer.toString();
-    }
-
-    /**
-     * <p>
-     * Get a human-readable name for a conglomerate.
-     * </p>
-     */
-    private String  getSQLName( Optimizable optimizable, ConglomerateDescriptor cd, boolean verbose )
-    {
-        if ( !verbose && (cd != null) )
-        {
-            String  schemaName = getOptimizableName( optimizable ).getSchemaName();
-            String  conglomerateName = cd.getConglomerateName();
-
-            return IdUtil.mkQualifiedName( schemaName, conglomerateName );
-        }
-
-        boolean isTableFunction = OptimizerImpl.isTableFunction( optimizable );
-        StringBuilder   buffer = new StringBuilder();
-        buffer.append( getOptimizableName( optimizable ).getFullSQLName() );
-        if ( isTableFunction ) { buffer.append( TABLE_FUNCTION_FLAG ); }
-        
-        if ( (cd != null) && cd.isIndex() )
-        {
-            buffer.append( "{" );
-            String[]	columnNames = cd.getColumnNames();
-            
-            if ( columnNames != null )
+            for ( int i = 0; i < planLength; i++ )
             {
-                int[]   keyColumns = cd.getIndexDescriptor().baseColumnPositions();
-                
-                for ( int i = 0; i < keyColumns.length; i++ )
+                int     listIndex = planOrder[ i ];
+
+                if ( listIndex >= _currentOptimizableList.size() )
                 {
-                    if ( i > 0 ) { buffer.append( "," ); }
-                    buffer.append( columnNames[ keyColumns[ i ] - 1 ] );
+                    // should never happen!
+                    buffer.append( "{ UNKNOWN LIST INDEX " + listIndex + " } " );
+                    continue;
                 }
-            }
-            buffer.append( "}" );
-        }
 
-        return buffer.toString();
+                Optimizable optimizable = _currentOptimizableList.getOptimizable( listIndex );
+            
+                AccessPath  ap = avoidSort ?
+                    optimizable.getBestSortAvoidancePath() : optimizable.getBestAccessPath();
+                JoinStrategy    js = ap.getJoinStrategy();
+                UniqueTupleDescriptor   utd = OptimizerImpl.isTableFunction( optimizable ) ?
+                    ((StaticMethodCallNode) ((FromVTI) ((ProjectRestrictNode) optimizable).getChildResult()).getMethodCall()).ad :
+                    ap.getConglomerateDescriptor();
+
+                OptimizerPlan   current = OptimizerPlan.makeRowSource( utd, _lcc.getDataDictionary() );
+
+                if ( plan != null )
+                {
+                    current = new OptimizerPlan.Join( js, plan, current );
+                }
+
+                plan = current;
+            }
+
+            return plan.toString();
+        }
+        catch (Exception e)
+        {
+            return e.getMessage();
+        }
     }
-    
+
 }

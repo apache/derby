@@ -23,6 +23,9 @@ package org.apache.derby.vti;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -34,6 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * <p>
@@ -308,15 +312,30 @@ public  class   XmlVTI  extends StringColumnVTI
         
         _builder = factory.newDocumentBuilder();
 
-        File                file = new File( _xmlResourceName );
-        FileInputStream     is = new FileInputStream( file );
-        Document        doc = _builder.parse( is );
-        Element             root = doc.getDocumentElement();
-
-        _rawRows = root.getElementsByTagName( _rowTag );
-        _rowCount = _rawRows.getLength();
-
-        is.close();
+        AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     try {
+                         File                file = new File( _xmlResourceName );
+                         FileInputStream     is = new FileInputStream( file );
+                         Document        doc = _builder.parse( is );
+                         Element             root = doc.getDocumentElement();
+                         
+                         _rawRows = root.getElementsByTagName( _rowTag );
+                         _rowCount = _rawRows.getLength();
+                         
+                         is.close();
+                         
+                         return null;
+                     }
+                     catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                     catch (SAXException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                 }  
+             }
+           );
     }
     
     /**
