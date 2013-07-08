@@ -23,7 +23,9 @@ package org.apache.derby.vti;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.ResultSetMetaData;
@@ -166,7 +168,7 @@ public  class   XmlVTI  extends StringColumnVTI
     ///////////////////////////////////////////////////////////////////////////////////
 
     private String      _rowTag;
-    private String      _xmlResourceName;
+    private InputStream _xmlResource;
 
     private int             _rowIdx = -1;
     private int             _rowCount = -1;
@@ -190,15 +192,15 @@ public  class   XmlVTI  extends StringColumnVTI
 
     /**
      * <p>
-     * Build a XmlVTI given the name of an xml resource, the  tag of the row
+     * Build a XmlVTI given an xml resource stream, the  tag of the row
      * element, and an array of attribute-names/element-tags underneath the row element
      * </p>
      */
-    public  XmlVTI( String xmlResourceName, String rowTag, int firstChildTagIdx, String... columnTags )
+    public  XmlVTI( InputStream xmlResource, String rowTag, int firstChildTagIdx, String... columnTags )
     {
         super( columnTags );
 
-        _xmlResourceName = xmlResourceName;
+        _xmlResource = xmlResource;
         _rowTag = rowTag;
         _firstChildTagIdx = firstChildTagIdx;
     }
@@ -209,22 +211,76 @@ public  class   XmlVTI  extends StringColumnVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** This is the static method for creating functions with only child tags */
-    public  static  XmlVTI  xmlVTI( String xmlResourceName, String rowTag, String... childTags )
+    /** This is the static method for creating functions from a file name and child tags */
+    public  static  XmlVTI  xmlVTI( String fileName, String rowTag, String... childTags )
+        throws Exception
     {
-        return new XmlVTI( xmlResourceName, rowTag, 0, childTags );
+        return xmlVTI( fileName, rowTag, null, asList( childTags ) );
     }
     
-    /** This is the static method for creating functions with both parent and child tags */
-    public  static  XmlVTI  xmlVTI
-        ( String xmlResourceName, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
+    /** This is the static method for creating functions from an url and child tags */
+    public  static  XmlVTI  xmlVTIFromURL( String urlString, String rowTag, String... childTags )
+        throws Exception
     {
+        return xmlVTIFromURL( urlString, rowTag, null, asList( childTags ) );
+    }
+    
+    /** This is the static method for creating functions from a file name and both parent and child tags */
+    public  static  XmlVTI  xmlVTI
+        ( final String fileName, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
+        throws Exception
+    {
+        FileInputStream fis = AccessController.doPrivileged
+            (
+             new PrivilegedAction<FileInputStream>()
+             {
+                 public FileInputStream run()
+                 {
+                     try {
+                         return new FileInputStream( new File( fileName ) );
+                     }
+                     catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                 }  
+             }
+           );
+        return xmlVTI( fis, rowTag, parentTags, childTags );
+    }
+
+    /** This is the static method for creating functions from an URL and both parent and child tags */
+    public  static  XmlVTI  xmlVTIFromURL
+        ( final String urlString, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
+        throws Exception
+    {
+        InputStream is = AccessController.doPrivileged
+            (
+             new PrivilegedAction<InputStream>()
+             {
+                 public InputStream run()
+                 {
+                     try {
+                         return (new URL( urlString )).openStream();
+                     }
+                     catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                 }  
+             }
+           );
+        return xmlVTI( is, rowTag, parentTags, childTags );
+    }
+
+    /** This is the static method for creating functions from an URL and both parent and child tags */
+    private  static  XmlVTI  xmlVTI
+        ( InputStream xmlResource, String rowTag, ArrayList<String> parentTags, ArrayList<String> childTags )
+        throws Exception
+    {
+        if ( parentTags == null ) { parentTags = new ArrayList<String>(); }
+        if ( childTags == null ) { childTags = new ArrayList<String>(); }
+        
         String[]    allTags = new String[ parentTags.size() + childTags.size() ];
         int     idx = 0;
         for ( String tag : parentTags ) { allTags[ idx++ ] = tag; }
         for ( String tag : childTags ) { allTags[ idx++ ] = tag; }
         
-        return new XmlVTI( xmlResourceName, rowTag, parentTags.size(), allTags );
+        return new XmlVTI( xmlResource, rowTag, parentTags.size(), allTags );
     }
 
     /** Factory method to create an ArrayList<String> */
@@ -312,30 +368,13 @@ public  class   XmlVTI  extends StringColumnVTI
         
         _builder = factory.newDocumentBuilder();
 
-        AccessController.doPrivileged
-            (
-             new PrivilegedAction<Object>()
-             {
-                 public Object run()
-                 {
-                     try {
-                         File                file = new File( _xmlResourceName );
-                         FileInputStream     is = new FileInputStream( file );
-                         Document        doc = _builder.parse( is );
-                         Element             root = doc.getDocumentElement();
+        Document        doc = _builder.parse( _xmlResource );
+        Element             root = doc.getDocumentElement();
                          
-                         _rawRows = root.getElementsByTagName( _rowTag );
-                         _rowCount = _rawRows.getLength();
+        _rawRows = root.getElementsByTagName( _rowTag );
+        _rowCount = _rawRows.getLength();
                          
-                         is.close();
-                         
-                         return null;
-                     }
-                     catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
-                     catch (SAXException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
-                 }  
-             }
-           );
+        _xmlResource.close();
     }
     
     /**

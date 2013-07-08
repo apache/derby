@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
+import java.net.URL;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -49,6 +50,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     private static  final   String  TRACE_FILE_NAME = "xott.xml";
+    private static  final   String  SAVED_TRACE_NAME = "xmlOptimizer.trace";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -83,11 +85,13 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+        String[]    testFiles = new String[] { "functionTests/tests/lang/" + SAVED_TRACE_NAME };
+
         TestSuite       suite = new TestSuite( "XMLOptimizerTraceTest" );
 
         suite.addTest( TestConfiguration.defaultSuite( XMLOptimizerTraceTest.class ) );
-
-        return new SupportFilesSetup( TestConfiguration.singleUseDatabaseDecorator( suite ) );
+ 
+        return new SupportFilesSetup( TestConfiguration.singleUseDatabaseDecorator( suite ), testFiles );
     }
 
     protected void    setUp()
@@ -289,6 +293,253 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
              conn,
              "call syscs_util.syscs_register_tool( 'optimizerTracingViews', false )"
              );
+    }
+
+    /**
+     * <p>
+     * Some general tests for XmlVTI.
+     * </p>
+     */
+    public void test_02_xmlVTI() throws Exception
+    {
+        Connection conn = getConnection();
+        File    traceFile = SupportFilesSetup.getReadOnly( SAVED_TRACE_NAME );
+        URL     traceURL = SupportFilesSetup.getReadOnlyURL( SAVED_TRACE_NAME );
+        String[][]  resultsParentAndChild = new String[][]
+            {
+                { "1", "R_A", "HASH", "20.1395", "6" },
+                { "1", "R_A", "NESTEDLOOP", "20.039500000000004", "6" },
+                { "1",  "S_A", "HASH", "20.1395", "6" },
+                { "1", "S_A", "NESTEDLOOP", "20.039500000000004", "6" },
+                { "1", "T_A", "HASH", "20.1395", "6" },
+                { "1", "T_A", "NESTEDLOOP", "20.039500000000004", "6" },
+            };
+        String[][]  resultsChildOnly = new String[][]
+            {
+                { "R_A", "HASH", "20.1395", "6" },
+                { "R_A", "NESTEDLOOP", "20.039500000000004", "6" },
+                { "S_A", "HASH", "20.1395", "6" },
+                { "S_A", "NESTEDLOOP", "20.039500000000004", "6" },
+                { "T_A", "HASH", "20.1395", "6" },
+                { "T_A", "NESTEDLOOP", "20.039500000000004", "6" },
+            };
+
+        // create the type and factory function needed by the XmlVTI
+        goodStatement
+            (
+             conn,
+             "create type ArrayList external name 'java.util.ArrayList' language java"
+             );
+        goodStatement
+            (
+             conn,
+             "create function asList( cell varchar( 32672 ) ... ) returns ArrayList\n" +
+             "language java parameter style derby no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.asList'\n"
+             );
+
+        // create an XmlVTI which reads from a file and incorporates parent tags
+        goodStatement
+            (
+             conn,
+             "create function decorationWithParentInfo\n" +
+             "(\n" +
+             "    fileName varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    parentTags ArrayList,\n" +
+             "    childTags ArrayList\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        qbID int,\n" +
+             "        conglomerateName varchar( 36 ),\n" +
+             "        joinStrategy varchar( 20 ),\n" +
+             "        estimatedCost double,\n" +
+             "        estimatedRowCount int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTI'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create view decorationWithParentInfo as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    decorationWithParentInfo\n" +
+             "    (\n" +
+             "        '" + traceFile.getPath() + "',\n" +
+             "        'decoration',\n" +
+             "        asList( 'qbID' ),\n" +
+             "        asList( 'decConglomerateName', 'decJoinStrategy', 'ceEstimatedCost', 'ceEstimatedRowCount' )\n" +
+             "    )\n" +
+             ") v\n"
+             );
+
+        // create an XmlVTI which reads from a file and only used child tags
+        goodStatement
+            (
+             conn,
+             "create function decorationChildOnly\n" +
+             "(\n" +
+             "    fileName varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    childTags varchar( 32672 )...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        conglomerateName varchar( 36 ),\n" +
+             "        joinStrategy varchar( 20 ),\n" +
+             "        estimatedCost double,\n" +
+             "        estimatedRowCount int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTI'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create view decorationChildOnly as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    decorationChildOnly\n" +
+             "    (\n" +
+             "        '" + traceFile.getPath() + "',\n" +
+             "        'decoration',\n" +
+             "        'decConglomerateName', 'decJoinStrategy', 'ceEstimatedCost', 'ceEstimatedRowCount'\n" +
+             "    )\n" +
+             ") v\n"
+             );
+
+        // create an XmlVTI which reads from an url file and uses parent tags
+        goodStatement
+            (
+             conn,
+             "create function decorationURLParentInfo\n" +
+             "(\n" +
+             "    urlString varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    parentTags ArrayList,\n" +
+             "    childTags ArrayList\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        qbID int,\n" +
+             "        conglomerateName varchar( 36 ),\n" +
+             "        joinStrategy varchar( 20 ),\n" +
+             "        estimatedCost double,\n" +
+             "        estimatedRowCount int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTIFromURL'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create view decorationURLParentInfo as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    decorationURLParentInfo\n" +
+             "    (\n" +
+             "        '" + traceURL.toString() + "',\n" +
+             "        'decoration',\n" +
+             "        asList( 'qbID' ),\n" +
+             "        asList( 'decConglomerateName', 'decJoinStrategy', 'ceEstimatedCost', 'ceEstimatedRowCount' )\n" +
+             "    )\n" +
+             ") v\n"
+             );
+
+        // create an XmlVTI which reads from an url file and uses only child tags
+        goodStatement
+            (
+             conn,
+             "create function decorationURLChildOnly\n" +
+             "(\n" +
+             "    urlString varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    childTags varchar( 32672 )...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        conglomerateName varchar( 36 ),\n" +
+             "        joinStrategy varchar( 20 ),\n" +
+             "        estimatedCost double,\n" +
+             "        estimatedRowCount int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTIFromURL'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create view decorationURLChildOnly as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    decorationURLChildOnly\n" +
+             "    (\n" +
+             "        '" + traceURL.toString() + "',\n" +
+             "        'decoration',\n" +
+             "        'decConglomerateName', 'decJoinStrategy', 'ceEstimatedCost', 'ceEstimatedRowCount'\n" +
+             "    )\n" +
+             ") v\n"
+             );
+
+        // verify that the XmlVTIs work
+        assertResults
+            (
+             conn,
+             "select distinct qbID, conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n" +
+             "from decorationWithParentInfo\n" +
+             "where conglomerateName like '%_A' and estimatedCost is not null\n" +
+             "order by qbID, conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n",
+             resultsParentAndChild,
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select distinct conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n" +
+             "from decorationChildOnly\n" +
+             "where conglomerateName like '%_A' and estimatedCost is not null\n" +
+             "order by conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n",
+             resultsChildOnly,
+             false
+             );
+        
+        assertResults
+            (
+             conn,
+             "select distinct qbID, conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n" +
+             "from decorationURLParentInfo\n" +
+             "where conglomerateName like '%_A' and estimatedCost is not null\n" +
+             "order by qbID, conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n",
+             resultsParentAndChild,
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "select distinct conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n" +
+             "from decorationURLChildOnly\n" +
+             "where conglomerateName like '%_A' and estimatedCost is not null\n" +
+             "order by conglomerateName, joinStrategy, estimatedCost, estimatedRowCount\n",
+             resultsChildOnly,
+             false
+             );
+        
+        // clean up after ourselves
+        goodStatement( conn, "drop view decorationURLChildOnly" );
+        goodStatement( conn, "drop function decorationURLChildOnly" );
+        goodStatement( conn, "drop view decorationURLParentInfo" );
+        goodStatement( conn, "drop function decorationURLParentInfo" );
+        goodStatement( conn, "drop view decorationChildOnly" );
+        goodStatement( conn, "drop function decorationChildOnly" );
+        goodStatement( conn, "drop view decorationWithParentInfo" );
+        goodStatement( conn, "drop function decorationWithParentInfo" );
+        goodStatement( conn, "drop function asList" );
+        goodStatement( conn, "drop type ArrayList restrict" );
     }
 
    ///////////////////////////////////////////////////////////////////////////////////

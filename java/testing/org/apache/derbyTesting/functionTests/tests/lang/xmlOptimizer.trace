@@ -1,0 +1,1217 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<optimizerTrace>
+    <statement stmtID="1">
+        <stmtText>select s.a from t, s where t.a = s.a</stmtText>
+        <queryBlock qbID="1" qbOptimizerID="1141500277" qbStartTime="Fri Jul 05 06:42:09 PDT 2013">
+            <qbOptimizable qboTableNumber="0">"APP"."T"</qbOptimizable>
+            <qbOptimizable qboTableNumber="1">"APP"."S"</qbOptimizable>
+            <joinOrder>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."T_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."T_A" # "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <planCost pcComplete="true" pcType="bestPlan">
+                <pcSummary>( "APP"."T_A" # "APP"."S_A" )</pcSummary>
+                <ceEstimatedCost>40.179</ceEstimatedCost>
+                <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+            </planCost>
+            <joinOrder>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."S_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."S_A" # "APP"."T_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+        </queryBlock>
+    </statement>
+    <statement stmtID="2">
+        <stmtText>select s.a from t, s, r where t.a = s.a and s.a = r.a</stmtText>
+        <queryBlock qbID="1" qbOptimizerID="172794870" qbStartTime="Fri Jul 05 06:42:09 PDT 2013">
+            <qbOptimizable qboTableNumber="0">"APP"."T"</qbOptimizable>
+            <qbOptimizable qboTableNumber="1">"APP"."S"</qbOptimizable>
+            <qbOptimizable qboTableNumber="2">"APP"."R"</qbOptimizable>
+            <joinOrder>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."T_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."T_A" # "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."T_A" # "APP"."S_A" ) * "APP"."R_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <planCost pcComplete="true" pcType="bestPlan">
+                <pcSummary>( ( "APP"."T_A" # "APP"."S_A" ) * "APP"."R_A" )</pcSummary>
+                <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+            </planCost>
+            <joinOrder>
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."T_A" # "APP"."R_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."T_A" # "APP"."R_A" ) * "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."S_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."S_A" # "APP"."T_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."S_A" # "APP"."T_A" ) * "APP"."R_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."S_A" # "APP"."R_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."S_A" # "APP"."R_A" ) * "APP"."T_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."R"</joSlot>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decConglomerateCost name="30fbc0bb-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="30fbc0bb-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="R_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="R_A" decJoinStrategy="HASH" decTableName="APP.R">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."R_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."R_A" # "APP"."T_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."R_A" # "APP"."T_A" ) * "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder>
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."R_A" # "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."R"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."T"</joSlot>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="ce8780ad-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decConglomerateCost name="ce8780ad-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="T_A" decJoinStrategy="HASH" decTableName="APP.T">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="T_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( ( "APP"."R_A" # "APP"."S_A" ) * "APP"."T_A" )</pcSummary>
+                    <ceEstimatedCost>52.484880000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>2</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+        </queryBlock>
+    </statement>
+    <statement stmtID="3">
+        <stmtText>select s.a from s, table( integerList() ) i where s.a = i.a</stmtText>
+        <queryBlock qbID="1" qbOptimizerID="180316302" qbStartTime="Fri Jul 05 06:42:09 PDT 2013">
+            <qbOptimizable qboTableNumber="0">"APP"."S"</qbOptimizable>
+            <qbOptimizable qboTableNumber="1">"APP"."INTEGERLIST"</qbOptimizable>
+            <joinOrder>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decSkip skipReason="No hash keys"/>
+                </decoration>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."S_A"</pcSummary>
+                    <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                    <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."S"</joSlot>
+                <joSlot>"APP"."INTEGERLIST"</joSlot>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."S_A" # "APP"."INTEGERLIST"() )</pcSummary>
+                    <ceEstimatedCost>100020.0395</ceEstimatedCost>
+                    <ceEstimatedRowCount>10000</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>10000.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <planCost pcComplete="true" pcType="bestPlan">
+                <pcSummary>( "APP"."S_A" # "APP"."INTEGERLIST"() )</pcSummary>
+                <ceEstimatedCost>100020.0395</ceEstimatedCost>
+                <ceEstimatedRowCount>10000</ceEstimatedRowCount>
+                <ceSingleScanRowCount>10000.0</ceSingleScanRowCount>
+            </planCost>
+            <joinOrder>
+                <joSlot>"APP"."INTEGERLIST"</joSlot>
+                <planCost pcType="withoutSortAvoidance">
+                    <pcSummary>"APP"."INTEGERLIST"()</pcSummary>
+                    <ceEstimatedCost>100000.0</ceEstimatedCost>
+                    <ceEstimatedRowCount>10000</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>10000.0</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."INTEGERLIST"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.404</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="1" selSelectivity="0.1"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="67bb80b4-013f-af11-83e5-00000384a5d0" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decConglomerateCost name="67bb80b4-013f-af11-83e5-00000384a5d0">
+                        <ceEstimatedCost>100.504</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="NESTEDLOOP" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.039500000000004</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="0.1"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="1" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="1.0"/>
+                    </decConglomerateCost>
+                </decoration>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>6</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."INTEGERLIST"() # "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>100020.1395</ceEstimatedCost>
+                    <ceEstimatedRowCount>6000</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+        </queryBlock>
+    </statement>
+    <statement stmtID="4">
+        <stmtText>call syscs_util.syscs_register_tool( 'optimizerTracing', false, 'z.xml' )</stmtText>
+    </statement>
+</optimizerTrace>

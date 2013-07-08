@@ -141,39 +141,38 @@ public	class   OptimizerTracer  implements OptionalTool
         try {
             final   OptTrace    tracer = OptimizerTrace.getOptimizerTracer();
 
-            AccessController.doPrivileged
-                (
-                 new PrivilegedAction<Object>()
-                 {
-                     public Object run()
+            boolean     needsClosing = false;
+            PrintWriter pw;
+            
+            if (
+                (configurationParameters != null) &&
+                (configurationParameters.length > 0)
+                )
+            {
+                pw = AccessController.doPrivileged
+                    (
+                     new PrivilegedAction<PrintWriter>()
                      {
-                         try {
-                             boolean     needsClosing = false;
-
-                             PrintWriter pw;
-                             if (
-                                 (configurationParameters != null) &&
-                                 (configurationParameters.length > 0)
-                                 )
-                             {
-                                 pw = new PrintWriter( configurationParameters[ 0 ] );
-                                 needsClosing = true;
-                             }
-                             else { pw = new PrintWriter( System.out ); }
+                         public PrintWriter run()
+                         {
+                             try {
+                                 return new PrintWriter( configurationParameters[ 0 ] );
+                             } catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
+                         }  
+                     }
+                     );
+                needsClosing = true;
+            }
+            else { pw = new PrintWriter( System.out ); }
         
-                             if ( tracer != null )
-                             {
-                                 tracer.printToWriter( pw );
-                                 pw.flush();
-                             }
+            if ( tracer != null )
+            {
+                tracer.printToWriter( pw );
+                pw.flush();
+            }
 
-                             if ( needsClosing ) { pw.close(); }
-                         
-                             return null;
-                         } catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
-                     }  
-                 }
-                 );
+            if ( needsClosing ) { pw.close(); }
+            
         }
         catch (Exception e) { throw wrap( e ); }
         finally
