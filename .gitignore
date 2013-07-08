@@ -3,6 +3,7 @@
 /jars/
 /generated/
 /tools/java/emma*.jar
+/tools/java/jacoco*.jar
 /tools/java/junit.jar
 /changenumber.properties
 /tools/ide/netbeans/derby.log
