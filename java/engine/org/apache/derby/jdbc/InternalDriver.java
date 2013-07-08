@@ -305,23 +305,22 @@ public class InternalDriver implements ModuleControl, Driver {
     /**
      * Enforce the login timeout.
      */
-    EmbedConnection timeLogin(
+    private EmbedConnection timeLogin(
             String url, Properties info, int loginTimeoutSeconds)
         throws SQLException
     {
         try {
             LoginCallable callable = new LoginCallable(this, url, info);
             Future<EmbedConnection> task = _executorPool.submit(callable);
-            long startTime = System.currentTimeMillis();
-            long interruptedTime = startTime;
+            long now = System.currentTimeMillis();
+            long giveUp = now + loginTimeoutSeconds * 1000L;
 
-            while ((startTime - interruptedTime) / 1000.0
-                        < loginTimeoutSeconds) {
+            while (now < giveUp) {
                 try {
-                    return task.get(loginTimeoutSeconds, TimeUnit.SECONDS);
+                    return task.get(giveUp - now, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException ie) {
-                    interruptedTime = System.currentTimeMillis();
                     InterruptStatus.setInterrupted();
+                    now = System.currentTimeMillis();
                     continue;
                 } catch (ExecutionException ee) {
                     throw processException(ee);
