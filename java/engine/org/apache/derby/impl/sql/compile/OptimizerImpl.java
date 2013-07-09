@@ -285,6 +285,14 @@ class OptimizerImpl implements Optimizer
             {
                 throw StandardException.newException( SQLState.LANG_UNRESOLVED_ROW_SOURCE );
             }
+            
+            int     actualRowSourceCount = optimizableList.size();
+            int     overriddenRowSourceCount = overridingPlan.countLeafNodes();
+            if ( actualRowSourceCount != overriddenRowSourceCount )
+            {
+                throw StandardException.newException
+                    ( SQLState.LANG_BAD_ROW_SOURCE_COUNT, overriddenRowSourceCount, actualRowSourceCount );
+            }
         }
 	}
 

@@ -193,19 +193,19 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
             ( WRONG_ROW_SOURCE_COUNT,
               "select tablename from v, sys.syscolumns\n" +
               "where tablename = columnname\n" +
-              "--derbyplan A\n"
+              "--derbyplan sys.syscolumns_heap\n"
               );
         expectCompilationError
             ( WRONG_ROW_SOURCE_COUNT,
               "select tablename from v, sys.syscolumns\n" +
               "where tablename = columnname\n" +
-              "--derbyplan A.B\n"
+              "--derbyplan sys.syscolumns_heap\n"
               );
         expectCompilationError
             ( WRONG_ROW_SOURCE_COUNT,
               "select tablename from v, sys.syscolumns\n" +
               "where tablename = columnname\n" +
-              "--derbyplan ( ( A.B # C.D ) * E )\n"
+              "--derbyplan ( ( sys.syscolumns_heap # sys.syscolumns_heap ) * sys.syscolumns_heap )\n"
               );
 
         // unknown conglomerates
@@ -323,6 +323,54 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
               select + "\n--derbyplan ( ((SYS.SYSSEQUENCES_INDEX2 # SYS.SYSCOLUMNS_HEAP) # SYS.SYSCOLUMNS_HEAP) # SYS.SYSTABLES_INDEX1 )"
               );
 
+        //
+        // Union query with a separate override clause per branch.
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tablename from sys.systables t, sys.syscolumns c, sys.sysaliases a\n" +
+             "where tablename = columnname and tablename = alias\n" +
+             "--derbyplan ( ( sys.systables_index1 # sys.syscolumns_heap ) # sys.sysaliases_index1 )\n" +
+             "union all\n" +
+             "select columnname from sys.systables t, sys.syscolumns c, sys.syssequences s\n" +
+             "where tablename = columnname and tablename = sequencename\n" +
+             "--derbyplan ( ( sys.systables_index1 # sys.syssequences_index2 ) # sys.syscolumns_heap )\n",
+             
+             "( ( ( SYSTABLES_INDEX1 # SYSCOLUMNS ) # SYSALIASES_INDEX1 ) ) union ( ( ( SYSTABLES_INDEX1 # SYSSEQUENCES_INDEX2 ) # SYSCOLUMNS ) )"
+             );
+
+        //
+        // Subquery in the WHERE clause (flattened into the main query).
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid, c.referenceid\n" +
+             "from sys.systables, ( select referenceid from sys.syscolumns ) c\n" +
+             "where 1=2\n" +
+             "--derbyplan ( sys.systables_heap * sys.syscolumns_heap )\n",
+             
+             "( SYSTABLES * SYSCOLUMNS )"
+             );
+
+        //
+        // NOT IN subquery (flattened into outer query block).
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid\n" +
+             "from sys.systables\n" +
+             "where tableid not in ( select referenceid from sys.syscolumns )\n" +
+             "--derbyplan ( sys.systables_heap # sys.syscolumns_index1 )\n",
+             
+             "( SYSTABLES # SYSCOLUMNS_INDEX1 )"
+             );
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -412,6 +460,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         if ( "HashJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "#" ); }
         else if ( "NestedLoopJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "*" ); }
         else if ( "ProjectRestrictResultSet".equals( type ) ) { summarize( buffer, getFirstElement( element, "source" ) ); }
+        else if ( "UnionResultSet".equals( type ) ) { summarizeUnion( buffer, element ); }
         else
         {
             String  indexName = element.getAttribute( "indexName" );
@@ -433,6 +482,21 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         buffer.append( " " + joinSymbol + " " );
         summarize( buffer, getFirstElement( element, "rightResultSet" ) );
         buffer.append( " )" );
+    }
+
+    private static  void    summarizeUnion( StringBuilder buffer, Element union )
+        throws Exception
+    {
+        NodeList    list = union.getChildNodes();
+
+        for ( int i = 0; i < list.getLength(); i++ )
+        {
+            Element    child = (Element) list.item( i );
+            if ( i > 0 ) { buffer.append( " union " ); }
+            buffer.append( "( " );
+            summarize( buffer, child );
+            buffer.append( " )" );
+        }
     }
 
     /** Get first element by the give tag name */

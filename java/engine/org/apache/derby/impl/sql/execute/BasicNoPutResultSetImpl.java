@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -1064,13 +1065,17 @@ implements NoPutResultSet
      */
     public  static  Element    toXML( Element parentNode, String childTag, ResultSet rs ) throws Exception
     {
-        String  childClassName = rs.getClass().getName();
-        String  typeAttribute = childClassName.substring( childClassName.lastIndexOf( "." ) + 1 );
         Element result = parentNode.getOwnerDocument().createElement( childTag );
-        result.setAttribute( "type", typeAttribute );
+        result.setAttribute( "type", stripPackage( rs.getClass().getName() ) );
 
         parentNode.appendChild( result );
         return result;
+    }
+
+    /** Strip the package location from a class name */
+    private static  String  stripPackage( String className )
+    {
+        return className.substring( className.lastIndexOf( "." ) + 1 );
     }
 
     /**
@@ -1096,10 +1101,38 @@ implements NoPutResultSet
         // Add those fields as children of the outer element.
         for ( Field field : fields )
         {
-            ResultSet   innerRS = (ResultSet) field.get( outerRS );
+            Object  fieldContents = field.get( outerRS );
 
-            if ( innerRS != null) { innerRS.toXML( outerNode, field.getName() ); }
-        }
+            if ( fieldContents != null )
+            {
+                if ( field.getType().isArray() )
+                {
+                    Element arrayNode = outerNode.getOwnerDocument().createElement( "array" );
+                    arrayNode.setAttribute( "arrayName", field.getName() );
+                    String  typeName = stripPackage( field.getType().getComponentType().getName() ) + "[]";
+                    arrayNode.setAttribute( "type", typeName );
+                    outerNode.appendChild( arrayNode );
+
+                    int arrayLength = Array.getLength( fieldContents );
+                    for ( int i = 0; i < arrayLength; i++ )
+                    {
+                        ResultSet   cellRS = (ResultSet) Array.get( fieldContents, i );
+
+                        if ( cellRS != null )
+                        {
+                            Element cellNode = cellRS.toXML( arrayNode, "cell" );
+                            cellNode.setAttribute( "cellNumber", Integer.toString( i ) );
+                        }
+                    }
+                }
+                else
+                {
+                    ResultSet   innerRS = (ResultSet) fieldContents;
+
+                    innerRS.toXML( outerNode, field.getName() );
+                }
+            }   // end if fieldContents is not null
+        }   // end loop through fields
 
         return outerNode;
     }
@@ -1128,6 +1161,13 @@ implements NoPutResultSet
         for ( Field field : fields )
         {
             if ( ResultSet.class.isAssignableFrom( field.getType() ) ) { fieldList.add( field ); }
+            else if ( field.getType().isArray() )
+            {
+                if ( ResultSet.class.isAssignableFrom( field.getType().getComponentType() ) )
+                {
+                    fieldList.add( field );
+                }
+            }
         }
 
         findResultSetFields( fieldList, klass.getSuperclass() );

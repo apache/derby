@@ -527,7 +527,7 @@ class SelectNode extends ResultSetNode
         // if an explicit join plan is requested, bind it
         if ( overridingPlan != null )
         {
-            overridingPlan.bind( dataDictionary, getLanguageConnectionContext(), getCompilerContext(), fromList.size() );
+            overridingPlan.bind( dataDictionary, getLanguageConnectionContext(), getCompilerContext() );
         }
         
 		return this;

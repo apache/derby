@@ -22,6 +22,9 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Vector;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
@@ -200,4 +203,18 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		super.finish();
 	}
 
+    public Element toXML( Element parentNode, String tag ) throws Exception
+    {
+        // don't report the redundant originalSource node
+        
+        Element result = super.toXML( parentNode, tag );
+        NodeList    children = result.getChildNodes();
+        for ( int i = 0; i < children.getLength(); i++ )
+        {
+            Node child = children.item( 0 );
+            if ( "originalSource".equals( child.getNodeName() ) ) { result.removeChild( child ); }
+        }
+
+        return result;
+    }
 }

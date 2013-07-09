@@ -94,8 +94,7 @@ public abstract class OptimizerPlan
         (
          DataDictionary dataDictionary,
          LanguageConnectionContext lcc,
-         CompilerContext cc,
-         int fromListSize
+         CompilerContext cc
          )
         throws StandardException;
 
@@ -157,29 +156,18 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
-             CompilerContext cc,
-             int fromListSize
+             CompilerContext cc
              )
             throws StandardException
         {
-            if ( fromListSize > 0 )
-            {
-                int     leafNodeCount = countLeafNodes();
-                if ( fromListSize != leafNodeCount )
-                {
-                    throw StandardException.newException
-                        ( SQLState.LANG_BAD_ROW_SOURCE_COUNT, leafNodeCount, fromListSize );
-                }
-            }
-
             // only left-deep trees allowed at this time
             if ( !( rightChild instanceof RowSource ) )
             {
                 throw StandardException.newException( SQLState.LANG_NOT_LEFT_DEEP );
             }
 
-            leftChild.bind( dataDictionary, lcc, cc, (leftChild instanceof RowSource) ? 1 : -1 );
-            rightChild.bind( dataDictionary, lcc, cc, (rightChild instanceof RowSource) ? 1 : -1 );
+            leftChild.bind( dataDictionary, lcc, cc );
+            rightChild.bind( dataDictionary, lcc, cc );
 
             _isBound = true;
         }
@@ -252,17 +240,10 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
-             CompilerContext cc,
-             int fromListSize
+             CompilerContext cc
              )
             throws StandardException
         {
-            if ( fromListSize != 1 )
-            {
-                throw StandardException.newException
-                    ( SQLState.LANG_BAD_ROW_SOURCE_COUNT, 1, fromListSize );
-            }
-
             // bind the schema name
             if ( _schema == null )
             {
@@ -317,12 +298,11 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
-             CompilerContext cc,
-             int fromListSize
+             CompilerContext cc
              )
             throws StandardException
         {
-            super.bind( dataDictionary, lcc, cc, fromListSize );
+            super.bind( dataDictionary, lcc, cc );
 
             if ( _descriptor == null )
             {
@@ -351,12 +331,11 @@ public abstract class OptimizerPlan
             (
              DataDictionary dataDictionary,
              LanguageConnectionContext lcc,
-             CompilerContext cc,
-             int fromListSize
+             CompilerContext cc
              )
             throws StandardException
         {
-            super.bind( dataDictionary, lcc, cc, fromListSize );
+            super.bind( dataDictionary, lcc, cc );
 
             if ( _descriptor == null )
             {
