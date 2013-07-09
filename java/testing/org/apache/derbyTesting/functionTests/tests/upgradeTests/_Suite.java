@@ -132,6 +132,15 @@ public class _Suite extends BaseTestCase {
         old = OldVersions.getSupportedVersions();
         
         for (int i = 0; i < old.length; i++) {
+
+            // DERBY-6288: One of the class files in 10.0.2.1 is not
+            // well-formed and causes some noise when running with JaCoCo.
+            if (runsWithJaCoCo() &&
+                    Arrays.equals(old[i], new int[]{10, 0, 2, 1})) {
+                println("Skipped version 10.0.2.1 with JaCoCo");
+                continue;
+            }
+
             // DERBY-4913. Test upgrade and create together for 10.3.3.0 since
             // that combination seems to trigger a different code path.
             if (Arrays.equals(old[i],OldVersions.VERSION_10_3_3_0))
