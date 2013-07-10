@@ -371,6 +371,62 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
              "( SYSTABLES # SYSCOLUMNS_INDEX1 )"
              );
 
+        //
+        // EXISTS subquery (flattened into outer query block).
+        //
+        expectCompilationError
+            ( UNSUPPORTED_PLAN_SHAPE,
+              "select tableid\n" +
+              "from sys.systables\n" +
+              "where exists ( select referenceid from sys.syscolumns where 1= 2 )\n" +
+              "--derbyplan ( sys.syscolumns_index1 * sys.systables_heap )\n"
+              );
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid\n" +
+             "from sys.systables\n" +
+             "where exists ( select referenceid from sys.syscolumns where 1= 2 )\n" +
+             "--derbyplan ( sys.systables_heap * sys.syscolumns_index1 )\n",
+             
+             "( SYSTABLES * SYSCOLUMNS_INDEX1 )"
+             );
+
+        //
+        // IN subquery (flattened into outer query block).
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid\n" +
+             "from sys.systables\n" +
+             "where tableid in ( select referenceid || 'foo' from sys.syscolumns )\n" +
+             "--derbyplan ( sys.systables_heap * sys.syscolumns_index1 )\n",
+             
+             "( SYSTABLES * SYSCOLUMNS_INDEX1 )"
+             );
+
+        //
+        // Correlated subquery (materialized).
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid\n" +
+             "from sys.systables t\n" +
+             "where tableid =\n" +
+             "(\n" +
+             "    select referenceid from sys.syscolumns where referenceid = t.tableid and 1=2\n" +
+             "    --derbyplan sys.syscolumns_index1\n" +
+             ")\n" +
+             "--derbyplan sys.systables_heap\n",
+             
+             "SYSCOLUMNS_INDEX1\n" +
+             "SYSTABLES"
+             );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -418,8 +474,13 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         throws Exception
     {
         ResultSet   rs = conn.prepareStatement( query ).executeQuery();
-        String      actualPlanShape = summarize( getLastQueryPlan( conn, rs ) );
+
+        // we need to drain the result set and close it in order to fill in all
+        // of the structures needed by the toXML() machinery. i don't know why.
+        while ( rs.next() ) {}
         rs.close();
+
+        String      actualPlanShape = summarize( getLastQueryPlan( conn, rs ) );
 
         println( "Expected plan shape = " + expectedPlanShape );
         println( "Actual plan shape = " + actualPlanShape );
@@ -428,7 +489,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     }
 
     /** Get an xml-based picture of the plan chosen for the last query. The query is identified by its JDBC ResultSet */
-    static  Document    getLastQueryPlan( Connection conn, ResultSet rs ) throws Exception
+    public  static  Document    getLastQueryPlan( Connection conn, ResultSet rs ) throws Exception
     {
         ContextManager      contextManager = ((EmbedConnection) conn).getContextManager();
         LanguageConnectionContext   lcc = (LanguageConnectionContext) contextManager.getContext( "LanguageConnectionContext" );
@@ -459,7 +520,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
 
         if ( "HashJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "#" ); }
         else if ( "NestedLoopJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "*" ); }
-        else if ( "ProjectRestrictResultSet".equals( type ) ) { summarize( buffer, getFirstElement( element, "source" ) ); }
+        else if ( "ProjectRestrictResultSet".equals( type ) ) { summarizeProjectRestrict( buffer, element ); }
         else if ( "UnionResultSet".equals( type ) ) { summarizeUnion( buffer, element ); }
         else
         {
@@ -471,6 +532,35 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
             else if ( tableName.length() != 0 ) { buffer.append( tableName ); }
             else if ( javaClassName.length() != 0 ) { buffer.append( javaClassName ); }
             else { buffer.append( type ); }
+        }
+    }
+
+    private static  void    summarizeProjectRestrict( StringBuilder buffer, Element projectRestrict )
+        throws Exception
+    {
+        // look for subqueries attached to this ProjectRestrict node
+        Element subqueryArray = getFirstElement( projectRestrict, "array" );
+        if ( subqueryArray != null ) { summarizeSubqueries( buffer, subqueryArray ); }
+
+        // now step into the node underneath us, which represents the tuple stream
+        // feeding the ProjectRestrict node
+        summarize( buffer, getFirstElement( projectRestrict, "source" ) );
+    }
+
+    private static  void    summarizeSubqueries( StringBuilder buffer, Element subqueryArray )
+        throws Exception
+    {
+        NodeList    children = subqueryArray.getChildNodes();
+
+        for ( int i = 0; i < children.getLength(); i++ )
+        {
+            Node    child = children.item( i );
+            if ( "cell".equals( child.getNodeName() ) )
+            {
+                Element     source = getFirstElement( (Element) child, "source" );
+                summarize( buffer, source );
+                buffer.append( "\n" );
+            }
         }
     }
 
