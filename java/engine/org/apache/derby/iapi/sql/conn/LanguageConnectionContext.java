@@ -1009,7 +1009,6 @@ public interface LanguageConnectionContext extends Context {
 	 *
 	 * @see LanguageConnectionContext#lastAutoincrementValue
 	 * @see org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#lastAutoincrementValue
-	 * @see org.apache.derby.iapi.db.ConnectionInfo#lastAutoincrementValue
 	 */
 	public void autoincrementFlushCache(UUID tableUUID)
 		throws StandardException;

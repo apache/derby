@@ -45,33 +45,6 @@ public abstract class ConnectionInfo
 	/** no requirement for a constructor */
 	private ConnectionInfo() {}
 
-	/**
-	 * Get the last autoincrement value inserted into the column by 
-	 * a statement in this connection.
-
-	 <BR><B> In JDBC 3.0 an application should use the standard methods provided by
-	 JDBC 3.0 to obtain generated key values. See java.sql.Statement.getGeneratedKeys().</B>
-	 * 
-	 * @param 	schemaName		Name of the schema.
-	 * @param	tableName		Name of the table.
-	 * @param 	columnName		Name of the column.
-	 * 
-	 * @return  the last value to be inserted into the named autoincrement
-	 * column by this connection. Returns null if this connection has never
-	 * inserted into this column.
-	 *
-	 * @exception SQLException if the current connection could not be
-	 * 			  established properly.
-	 */
-	public static Long lastAutoincrementValue(String schemaName, 
-											  String tableName,
-											  String columnName)
-			throws SQLException								  
-	{
-		// a static method can manipulate lcc?
-		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-		return lcc.lastAutoincrementValue(schemaName, tableName, columnName);
-	}	
 	
 	/**
 	 * <B>INTERNAL USE ONLY</B>

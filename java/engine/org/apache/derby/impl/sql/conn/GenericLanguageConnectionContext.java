@@ -3299,7 +3299,6 @@ public class GenericLanguageConnectionContext
     }
 
     /**
-     * Implements ConnectionInfo.lastAutoincrementValue.
      * lastAutoincrementValue searches for the last autoincrement value inserted
      * into a column specified by the user. The search for the "last" value
      * supports nesting levels caused by triggers (Only triggers cause nesting,
@@ -3314,7 +3313,6 @@ public class GenericLanguageConnectionContext
      * see values inserted by t2.
      *
      * @see LanguageConnectionContext#lastAutoincrementValue
-     * @see org.apache.derby.iapi.db.ConnectionInfo#lastAutoincrementValue
      */
     public Long lastAutoincrementValue(String schemaName, String tableName,
                                        String columnName)
@@ -3428,7 +3426,6 @@ public class GenericLanguageConnectionContext
      * @exception StandardException thrown on error.
      * @see LanguageConnectionContext#lastAutoincrementValue
      * @see GenericLanguageConnectionContext#lastAutoincrementValue
-     * @see org.apache.derby.iapi.db.ConnectionInfo#lastAutoincrementValue
      */
     public void autoincrementFlushCache(UUID tableUUID)
         throws StandardException
