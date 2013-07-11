@@ -88,7 +88,6 @@ public abstract class OptimizerPlan
      * </p>
      *
      * @param   dataDictionary  DataDictionary to bind against.
-     * @param   fromListSize    If > 0, then this is the top node in the plan and fromListSize should be the number of leaf nodes
      */
     public abstract    void    bind
         (
