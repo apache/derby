@@ -153,7 +153,8 @@ public class DisposableIndexStatistics {
 
         // Several valid states here, use a relaxed range check.
         int max = getNumTotalPossibleStats();
-        int min = max - getNumDisposableStats();
+        int min = max - (getNumNotNeededDisposableStats() + 
+                         getNumOrphanedDisposableStats());
         int cur = getAllRelevantStats(null);
         Assert.assertTrue("cur=" + cur + ", min=" + min, cur >= min);
         Assert.assertTrue("cur=" + cur + ", max=" + max, cur <= max);
@@ -207,22 +208,38 @@ public class DisposableIndexStatistics {
     /**
      * Asserts the number of statistics entries for all relevant tables.
      *
-     * @param disposedOf tells if the disposable statistics entries are
-     *      expected to have been removed at this point
+     * @param orphaned_disposedOf tells if the orphaned disposable statistics 
+     *      entries are expected to have been removed at this point
+     * @param notneeded_disposedOf tells if the unneeded statistics (like 
+     *      single column unique key indexes) are expected to have been 
+     *      removed at this point
      */
-    public void assertStatsCount(boolean disposedOf)
+    public void assertStatsCount(
+    boolean orphaned_disposedOf,
+    boolean notneeded_disposedOf)
             throws SQLException {
+
         int expected = getNumTotalPossibleStats();
-        // Adjust expected count if the disposable stats should be gone.
-        if (disposedOf) {
-            expected -= getNumDisposableStats();
-        } else if (!hasDerby5681Bug(oldVersion)) {
+
+        if (!hasDerby5681Bug(oldVersion)) {
             // Here we correct for the orphaned statistics entry, but not for
             // entries that are considered extraneous by newer releases (for
             // instance statistics for single column unique indexes).
-            expected--;
+            expected -= getNumOrphanedDisposableStats();
+
+        } else if (orphaned_disposedOf) {
+            // if the bug exists and we got rid of the orphaned stat.
+            expected -= getNumOrphanedDisposableStats();
         }
-        ArrayList entries = new ArrayList(); // used for reporting only
+
+        // Adjust expected count if the disposable stats should be gone.
+        if (notneeded_disposedOf) {
+            expected -= getNumNotNeededDisposableStats();
+        }
+
+        // used for reporting only
+        ArrayList entries = new ArrayList();
+
         int found = getAllRelevantStats(entries);
         if (found != expected) {
             Assert.assertEquals(
@@ -279,8 +296,12 @@ public class DisposableIndexStatistics {
     }
 
     /** Number of disposable statistics entries. */
-    public static int getNumDisposableStats() {
-        return 3;
+    public static int getNumNotNeededDisposableStats() {
+        return 2;
+    }
+
+    public static int getNumOrphanedDisposableStats() {
+        return 1;
     }
 
     /**

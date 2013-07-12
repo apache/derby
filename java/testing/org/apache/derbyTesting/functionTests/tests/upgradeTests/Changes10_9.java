@@ -1003,7 +1003,9 @@ public class Changes10_9 extends UpgradeChange
                 // version of Derby used to create the database. Some older
                 // versions of Derby contained a bug and lacked optimizations,
                 // causing the number of statistics entries to increase.
-                dis.assertStatsCount(false);
+                // Just after creation and before any update statistics expect
+                // all stats to exist.
+                dis.assertStatsCount(false, false);
                 break;
             }
             // boot with new version and soft-upgrade
@@ -1016,19 +1018,28 @@ public class Changes10_9 extends UpgradeChange
                     ps.setString(1, tables[i]);
                     ps.executeUpdate();
                 }
-                dis.assertStatsCount(false);
+
+                // After soft upgrade and update statistics expect the 
+                // orphaned index entry to be deleted, but the "unneeded
+                // disposable entries" are only deleted after hard upgrade.
+                dis.assertStatsCount(true, false);
                 break;
             }
             // soft-downgrade: boot with old version after soft-upgrade
             case PH_POST_SOFT_UPGRADE:
             {
-                dis.assertStatsCount(false);
+
+                // expect no change in entries on downgrade, should be same
+                // as they were in soft upgrade.
+                dis.assertStatsCount(true, false);
                 break;
             }
             // boot with new version and hard-upgrade
             case PH_HARD_UPGRADE:
             {
-                dis.assertStatsCount(false);
+                // expect no change in entries on upgrade before update
+                // statistics.
+                dis.assertStatsCount(true, false);
                 PreparedStatement ps = prepareStatement(updateStatsSQL);
                 String[] tables = dis.getTableNames();
                 for (int i=0; i < tables.length; i++) {
@@ -1038,7 +1049,7 @@ public class Changes10_9 extends UpgradeChange
                 // Confirm that we disposed of the statistics that were added
                 // due to a bug or simply not needed by Derby.
                 try {
-                    dis.assertStatsCount(true);
+                    dis.assertStatsCount(true, true);
                 } finally {
                     for (int i=0; i < tables.length; i++) {
                         dropTable(tables[i]);
@@ -1049,5 +1060,4 @@ public class Changes10_9 extends UpgradeChange
             }
         }
     }
-
 }

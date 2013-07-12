@@ -414,16 +414,20 @@ public class IndexStatisticsDaemonImpl
                                         ConglomerateDescriptor[] cds,
                                         boolean asBackgroundTask)
             throws StandardException {
-        final boolean identifyDisposableStats =
-                (cds == null && skipDisposableStats);
+
+        // can only properly identify disposable stats if cds == null, 
+        // which means we are processing all indexes on the conglomerate.
+        final boolean identifyDisposableStats = (cds == null);
+
         // Fetch descriptors if we're updating statistics for all indexes.
         if (cds == null) {
             cds = td.getConglomerateDescriptors();
         }
+
         // Extract/derive information from the table descriptor
-        long[] conglomerateNumber = new long[cds.length];
-        ExecIndexRow[] indexRow = new ExecIndexRow[cds.length];
-        UUID[] objectUUID = new UUID[cds.length];
+        long[]          conglomerateNumber      = new long[cds.length];
+        ExecIndexRow[]  indexRow                = new ExecIndexRow[cds.length];
+
 
         TransactionController tc = lcc.getTransactionExecute();
         ConglomerateController heapCC =
@@ -434,6 +438,14 @@ public class IndexStatisticsDaemonImpl
                         ? TransactionController.ISOLATION_READ_UNCOMMITTED
                         : TransactionController.ISOLATION_REPEATABLE_READ
                 );
+
+
+        // create a list of indexes that should have statistics, by looking
+        // at all indexes on the conglomerate, and conditionally skipping
+        // unique single column indexes.  This set is the "non disposable
+        // stat list".
+        UUID[] non_disposable_objectUUID    = new UUID[cds.length];
+
         try
         {
             for (int i = 0; i < cds.length; i++)
@@ -444,7 +456,9 @@ public class IndexStatisticsDaemonImpl
                     conglomerateNumber[i] = -1;
                     continue;
                 }
+
                 IndexRowGenerator irg = cds[i].getIndexDescriptor();
+
                 // Skip single-column unique indexes unless we're told not to,
                 // or we are running in soft-upgrade-mode on a pre 10.9 db.
                 if (skipDisposableStats) {
@@ -454,9 +468,11 @@ public class IndexStatisticsDaemonImpl
                     }
                 }
            
-                conglomerateNumber[i] = cds[i].getConglomerateNumber();
-
-                objectUUID[i] = cds[i].getUUID();
+                // at this point have found a stat for an existing
+                // index which is not a single column unique index, add it
+                // to the list of "non disposable stats"
+                conglomerateNumber[i]        = cds[i].getConglomerateNumber();
+                non_disposable_objectUUID[i] = cds[i].getUUID();
 
                 indexRow[i] = irg.getNullIndexRow(
                         td.getColumnDescriptorList(),
@@ -468,23 +484,39 @@ public class IndexStatisticsDaemonImpl
             heapCC.close();
         }
 
-        // Check for disposable statistics if we have the required information.
+        // Check for and drop disposable statistics if we have the required 
+        // information.
+        //
         // Note that the algorithm would drop valid statistics entries if
         // working on a subset of the table conglomerates/indexes.
+        // The above loop has populated "cds" with only existing indexes that
+        // are not single column unique.
+
         if (identifyDisposableStats) {
+
+            // Note this loop is not controlled by the skipDisposableStats 
+            // flag.  The above loop controls if we drop single column unique
+            // index stats or not.  In all cases we are going to drop 
+            // stats with no associated index (orphaned stats).
+
             List existingStats = td.getStatistics();
+            
             StatisticsDescriptor[] stats = (StatisticsDescriptor[])
                     existingStats.toArray(
                         new StatisticsDescriptor[existingStats.size()]);
+
             // For now we know that disposable stats only exist in two cases,
             // and that we'll only get one match for both of them per table:
             //  a) orphaned statistics entries (i.e. DERBY-5681)
             //  b) single-column primary keys
+            //
+            //  This loop looks for statistic entries to delete.  It deletes
+            //  those entries that don't have a matching conglomerate in the
             for (int si=0; si < stats.length; si++) {
                 UUID referencedIndex = stats[si].getReferenceID();
                 boolean isValid = false;
                 for (int ci=0; ci < conglomerateNumber.length; ci++) {
-                    if (referencedIndex.equals(objectUUID[ci])) {
+                    if (referencedIndex.equals(non_disposable_objectUUID[ci])) {
                         isValid = true;
                         break;
                     }
@@ -518,7 +550,7 @@ public class IndexStatisticsDaemonImpl
 
         // [x][0] = conglomerate number, [x][1] = start time, [x][2] = stop time
         long[][] scanTimes = new long[conglomerateNumber.length][3];
-        int sci = 0;
+        int      sci       = 0;
         for (int indexNumber = 0;
              indexNumber < conglomerateNumber.length;
              indexNumber++)
@@ -535,10 +567,11 @@ public class IndexStatisticsDaemonImpl
 
             scanTimes[sci][0] = conglomerateNumber[indexNumber];
             scanTimes[sci][1] = System.currentTimeMillis();
+
             // Subtract one for the RowLocation added for indexes.
-            int numCols = indexRow[indexNumber].nColumns() - 1;
-            long[] cardinality = new long[numCols];
-            KeyComparator cmp = new KeyComparator(indexRow[indexNumber]);
+            int           numCols     = indexRow[indexNumber].nColumns() - 1;
+            long[]        cardinality = new long[numCols];
+            KeyComparator cmp         = new KeyComparator(indexRow[indexNumber]);
 
             /* Read uncommitted, with record locking. Actually CS store may
                not hold record locks */
@@ -605,7 +638,8 @@ public class IndexStatisticsDaemonImpl
             int retries = 0;
             while (true) {
                 try {
-                    writeUpdatedStats(lcc, td, objectUUID[indexNumber],
+                    writeUpdatedStats(lcc, td, 
+                            non_disposable_objectUUID[indexNumber],
                             cmp.getRowCount(), cardinality, asBackgroundTask);
                     break;
                 } catch (StandardException se) {
