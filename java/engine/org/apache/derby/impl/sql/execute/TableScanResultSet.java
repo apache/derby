@@ -453,6 +453,9 @@ class TableScanResultSet extends ScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
         checkCancellationFlag();
             
 		if (currentRow == null || scanRepositioned)

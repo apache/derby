@@ -115,6 +115,9 @@ class UnionResultSet extends NoPutResultSetImpl
  	 *	@exception StandardException thrown on failure
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow result = null;
 
 		beginTime = getCurrentTimeMillis();

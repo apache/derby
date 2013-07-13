@@ -286,6 +286,9 @@ class BulkTableScanResultSet extends TableScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow result = null;
             
         checkCancellationFlag();

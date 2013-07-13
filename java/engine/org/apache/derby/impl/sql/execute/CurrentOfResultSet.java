@@ -100,6 +100,9 @@ class CurrentOfResultSet extends NoPutResultSetImpl
      */
 	public ExecRow	getNextRowCore() throws StandardException {
 
+		if( isXplainOnlyMode() )
+			return null;
+
 		if ( isOpen ) {
 	        if ( ! next ) {
 	            next = true;

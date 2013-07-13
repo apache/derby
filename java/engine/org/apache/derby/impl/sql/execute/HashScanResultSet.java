@@ -360,6 +360,9 @@ public class HashScanResultSet extends ScanResultSet
 	 */
 	public ExecRow getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow result = null;
 		DataValueDescriptor[] columns = null;
 

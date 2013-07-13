@@ -242,6 +242,8 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	 * @return the next row in the result
 	 */
 	public ExecRow	getNextRowCore() throws StandardException {
+		if( isXplainOnlyMode() )
+			return null;
 
 	    ExecRow candidateRow = null;
 	    ExecRow result = null;

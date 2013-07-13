@@ -131,6 +131,8 @@ class RowResultSet extends NoPutResultSetImpl
 	 * @exception StandardException thrown on failure.
      */
 	public ExecRow	getNextRowCore() throws StandardException {
+		if( isXplainOnlyMode() )
+			return null;
 
 		currentRow = null;
 		beginTime = getCurrentTimeMillis();

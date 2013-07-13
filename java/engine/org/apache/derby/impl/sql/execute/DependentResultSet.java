@@ -337,6 +337,9 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
 		
+		if( isXplainOnlyMode() )
+			return null;
+
 		beginTime = getCurrentTimeMillis();
 		if (searchRow == null)
 		{

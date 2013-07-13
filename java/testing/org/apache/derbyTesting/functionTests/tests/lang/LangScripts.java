@@ -92,6 +92,7 @@ public final class LangScripts extends ScriptTestCase {
         "union",
         "update",
         "valuesclause",
+        "xplain",
         };
     
     /**

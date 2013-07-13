@@ -116,6 +116,9 @@ class MergeJoinResultSet extends JoinResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 		beginTime = getCurrentTimeMillis();
 		if (! isOpen)
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");

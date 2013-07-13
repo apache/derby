@@ -155,6 +155,9 @@ public class AnyResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow candidateRow = null;
 		ExecRow secondRow = null;
 	    ExecRow result = null;
