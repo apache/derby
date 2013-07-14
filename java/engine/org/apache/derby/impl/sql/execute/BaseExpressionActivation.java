@@ -79,10 +79,13 @@ public abstract class BaseExpressionActivation
 										throws StandardException
 	{
 		DataValueDescriptor judge;
-		if (judgeUserJDBCTypeId == -1)
-			judge = (DataValueDescriptor) new TypeId(judgeTypeFormatId, null).getNull();
-		else
-			judge = (DataValueDescriptor) new TypeId(judgeTypeFormatId, new UserDefinedTypeIdImpl()).getNull();
+
+        if (judgeUserJDBCTypeId == -1) {
+            judge = new TypeId(judgeTypeFormatId, null).getNull();
+        } else {
+            judge = new TypeId(judgeTypeFormatId,
+                               new UserDefinedTypeIdImpl()).getNull();
+        }
 			
 		DataValueDescriptor minVal = v1;
 		if (v2 != null &&

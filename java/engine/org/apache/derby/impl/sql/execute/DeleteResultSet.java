@@ -85,6 +85,7 @@ class DeleteResultSet extends DMLWriteResultSet
      * Returns the description of the deleted rows.
      * REVISIT: Do we want this to return NULL instead?
 	 */
+    @Override
 	public ResultDescription getResultDescription()
 	{
 	    return resultDescription;
@@ -182,6 +183,7 @@ class DeleteResultSet extends DMLWriteResultSet
 	
 
 	//this routine open the source and find the dependent rows 
+    @Override
 	void  setup() throws StandardException
 	{
 		super.setup();
@@ -487,14 +489,16 @@ class DeleteResultSet extends DMLWriteResultSet
 		
 		DataValueDescriptor		rlColumn;
  		RowLocation	baseRowLocation;
-		ExecRow		deferredRLRow = null;
+        ExecRow     defRLRow;
 
-		deferredBaseCC = tc.openCompiledConglomerate(false,
-													 tc.OPENMODE_FORUPDATE|tc.OPENMODE_SECONDARY_LOCKED,
-													 lockMode,
-													 TransactionController.ISOLATION_SERIALIZABLE,
-													 constants.heapSCOCI,
-													 heapDCOCI);
+        deferredBaseCC = tc.openCompiledConglomerate(
+                false,
+                (TransactionController.OPENMODE_FORUPDATE|
+                 TransactionController.OPENMODE_SECONDARY_LOCKED),
+                lockMode,
+                TransactionController.ISOLATION_SERIALIZABLE,
+                constants.heapSCOCI,
+                heapDCOCI);
 			
 		CursorResultSet rs = rowHolder.getResultSet();
 		try
@@ -508,9 +512,9 @@ class DeleteResultSet extends DMLWriteResultSet
 			FormatableBitSet readBitSet = RowUtil.shift(baseRowReadList, 1);
 
 			rs.open();
-			while ((deferredRLRow = rs.getNextRow()) != null)
+            while ((defRLRow = rs.getNextRow()) != null)
 			{
-				rlColumn = deferredRLRow.getColumn(rlColumnNumber);
+                rlColumn = defRLRow.getColumn(rlColumnNumber);
 				baseRowLocation = 
 					(RowLocation) (rlColumn).getObject();
 	
@@ -547,7 +551,6 @@ class DeleteResultSet extends DMLWriteResultSet
     void runFkChecker(boolean restrictCheckOnly) throws StandardException
 	{
 
-		ExecRow		deferredRLRow = null;
 		if (fkChecker != null)
 		{
 			/*
@@ -560,9 +563,11 @@ class DeleteResultSet extends DMLWriteResultSet
 			try
 			{
 				rs.open();
-				while ((deferredRLRow = rs.getNextRow()) != null)
+
+                ExecRow defRLRow;
+                while ((defRLRow = rs.getNextRow()) != null)
 				{
-					fkChecker.doPKCheck(deferredRLRow, restrictCheckOnly);
+                    fkChecker.doPKCheck(defRLRow, restrictCheckOnly);
 				}
 			} finally
 			{
@@ -628,6 +633,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		super.close();
 	}
 
+    @Override
 	public void finish() throws StandardException {
 		if (source != null)
 			source.finish();

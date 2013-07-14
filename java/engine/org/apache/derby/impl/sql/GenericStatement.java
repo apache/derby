@@ -41,7 +41,6 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
 import org.apache.derby.iapi.transaction.TransactionControl;
@@ -203,7 +202,7 @@ public class GenericStatement
 			beginTimestamp = new Timestamp(beginTime);
 		}
 
-		/** set the prepare Isolaton from the LanguageConnectionContext now as 
+        /** set the prepare isolation from the LanguageConnectionContext now as
 		 * we need to consider it in caching decisions
 		 */
 		prepareIsolationLevel = lcc.getPrepareIsolationLevel();
@@ -722,7 +721,7 @@ public class GenericStatement
 	/*
 	** Identity
 	*/
-
+    @Override
 	public boolean equals(Object other) {
 
 		if (other instanceof GenericStatement) {
@@ -737,6 +736,7 @@ public class GenericStatement
 		return false;
 	}
 
+    @Override
 	public int hashCode() {
 
 		return statementText.hashCode();

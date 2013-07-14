@@ -99,7 +99,7 @@ import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
@@ -163,6 +163,7 @@ import org.apache.derby.impl.sql.execute.JarUtil;
  * Standard database implementation of the data dictionary
  * that stores the information in the system catalogs.
  */
+@SuppressWarnings("UseOfObsoleteCollectionType")
 public final class	DataDictionaryImpl
 	implements DataDictionary, CacheableFactory, ModuleControl, ModuleSupportable,java.security.PrivilegedAction<Properties>
 {
@@ -1444,7 +1445,7 @@ public final class	DataDictionaryImpl
     }
 
     // returns null if database is at rev level 10.5 or earlier
-    public  PasswordHasher  makePasswordHasher( Dictionary props )
+    public  PasswordHasher  makePasswordHasher( Dictionary<?,?> props )
         throws StandardException
     {
         // Support for configurable hash algorithm was added in Derby 10.6, so
@@ -1470,7 +1471,7 @@ public final class	DataDictionaryImpl
             byte[] salt = null;
             int iterations = 1;
             
-            if (algorithm != null && algorithm.length() > 0) {
+            if (algorithm.length() > 0) {
 
                 if (supportKeyStretching) {
                     salt = generateRandomSalt(props);
@@ -1877,8 +1878,6 @@ public final class	DataDictionaryImpl
 		int isolationLevel,
 		TransactionController tc) throws StandardException
 	{
-		SchemaDescriptor		sd = null;
-		
 		if ( tc == null )
 		{
 		    tc = getTransactionCompile();
@@ -1912,7 +1911,7 @@ public final class	DataDictionaryImpl
 
 			if (lcc != null)
 			{
-				sd = lcc.getDefaultSchema();
+                SchemaDescriptor sd = lcc.getDefaultSchema();
 
 				if ((sd != null) &&
 						((schemaId == null) ||
@@ -2085,10 +2084,8 @@ public final class	DataDictionaryImpl
 		granteeOrderable = new SQLVarchar(grantee);
 		grantorOrderable = new SQLVarchar(grantor);
 
-		ExecIndexRow keyRow = null;
-
 		/* Set up the start/stop position for the scan */
-		keyRow = exFactory.getIndexableRow(3);
+        ExecIndexRow keyRow = exFactory.getIndexableRow(3);
 		keyRow.setColumn(1, roleNameOrderable);
 		keyRow.setColumn(2, granteeOrderable);
 		keyRow.setColumn(3, grantorOrderable);
@@ -2489,7 +2486,6 @@ public final class	DataDictionaryImpl
 		ScanController			scanController = null;
 		boolean					foundRow;
 		FormatableBitSet					colToCheck = new FormatableBitSet(indexCol);
-		CatalogRowFactory		rf = ti.getCatalogRowFactory();	
 
 		if (SanityManager.DEBUG)
 		{
@@ -2595,7 +2591,6 @@ public final class	DataDictionaryImpl
 									  char lockGranularity, TransactionController tc)
 		throws StandardException
 	{
-		ExecIndexRow			keyRow1 = null;
 		ExecRow    				row;
 		DataValueDescriptor		schemaIDOrderable;
 		DataValueDescriptor		tableNameOrderable;
@@ -2609,7 +2604,7 @@ public final class	DataDictionaryImpl
 		schemaIDOrderable = getIDValueAsCHAR(schema.getUUID());
 
 		/* Set up the start/stop position for the scan */
-		keyRow1 = (ExecIndexRow) exFactory.getIndexableRow(2);
+        ExecIndexRow keyRow1 = exFactory.getIndexableRow(2);
 		keyRow1.setColumn(1, tableNameOrderable);
 		keyRow1.setColumn(2, schemaIDOrderable);
 
@@ -2638,7 +2633,8 @@ public final class	DataDictionaryImpl
     {
 		TabInfoImpl          ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
 		ExecIndexRow         keyRow = exFactory.getIndexableRow(3);
-		DataValueDescriptor  aliasNameOrderable = new SQLVarchar( "CLOBGETSUBSTRING" );;
+        DataValueDescriptor
+                aliasNameOrderable = new SQLVarchar( "CLOBGETSUBSTRING" );
 		DataValueDescriptor	 nameSpaceOrderable = new SQLChar
             ( new String( new char[] { AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR } ) );
         
@@ -4577,9 +4573,8 @@ public final class	DataDictionaryImpl
 	{
 		startWriting(lcc);
 
-		for (java.util.Iterator li = getAllSPSDescriptors().iterator(); li.hasNext(); )
+        for (SPSDescriptor spsd : getAllSPSDescriptors())
 		{ 
-			SPSDescriptor spsd = (SPSDescriptor) li.next();
 			spsd.makeInvalid(DependencyManager.USER_RECOMPILE_REQUEST, lcc);
 		} 
 	}
@@ -4763,12 +4758,12 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	private GenericDescriptorList getAllTriggerDescriptors()
+    private TriggerDescriptorList getAllTriggerDescriptors()
 		throws StandardException
 	{
 		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
-		GenericDescriptorList list = new GenericDescriptorList();
+        TriggerDescriptorList list = new TriggerDescriptorList();
 
 		getDescriptorViaHeap(
                         null,
@@ -4776,7 +4771,7 @@ public final class	DataDictionaryImpl
 						ti,
 						(TupleDescriptor) null,
                         list,
-                        UniqueTupleDescriptor.class);
+                        TriggerDescriptor.class);
 		return list;
 	}
 
@@ -5457,10 +5452,10 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public GenericDescriptorList getTriggerDescriptors(TableDescriptor td)
+    public TriggerDescriptorList getTriggerDescriptors(TableDescriptor td)
 		throws StandardException
 	{
-		GenericDescriptorList	gdl;
+        TriggerDescriptorList   gdl;
 
 		if (td == null)
 		{
@@ -5487,7 +5482,7 @@ public final class	DataDictionaryImpl
 	}
 
 	/** 
-	 * Populate the GenericDescriptorList for the specified TableDescriptor.
+     * Populate the TriggerDescriptorList for the specified TableDescriptor.
 	 *
 	 * MT synchronization: it is assumed that the caller has synchronized
 	 * on the CDL in the given TD.
@@ -5500,7 +5495,7 @@ public final class	DataDictionaryImpl
 	 private void getTriggerDescriptorsScan(TableDescriptor td, boolean forUpdate)
 			throws StandardException
 	{
-		GenericDescriptorList  	gdl = (td).getTriggerDescriptorList();
+        TriggerDescriptorList   gdl = (td).getTriggerDescriptorList();
 		DataValueDescriptor		tableIDOrderable = null;
 		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
 
@@ -5519,7 +5514,7 @@ public final class	DataDictionaryImpl
 					ti,
 					(TupleDescriptor) null,
 					gdl,
-                    UniqueTupleDescriptor.class,
+                    TriggerDescriptor.class,
 					forUpdate);
 		gdl.setScanned(true);
 	}
@@ -6961,6 +6956,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	public Hashtable<UUID,TableDescriptor> hashAllTableDescriptorsByTableId(TransactionController tc)
 		throws StandardException
 	{
@@ -14113,9 +14109,8 @@ public final class	DataDictionaryImpl
 	 */
 	private void dropJDBCMetadataSPSes(TransactionController tc) throws StandardException
 	{
-		for (java.util.Iterator it = getAllSPSDescriptors().iterator(); it.hasNext(); )
-		{
-			SPSDescriptor spsd = (SPSDescriptor) it.next();
+        for (SPSDescriptor spsd : getAllSPSDescriptors())
+        {
 			SchemaDescriptor sd = spsd.getSchemaDescriptor();
 
 			// don't drop statements in non-system schemas

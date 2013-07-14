@@ -400,7 +400,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			 */
 			ExecIndexRow currSortedRow =
 				    resultRows[resultRows.length-1];
-                        ExecRow origRow = (ExecRow)nextRow.getClone();;
+                        ExecRow origRow = nextRow.getClone();
                         initializeVectorAggregation(nextRow);
 			int distinguisherCol = 
 				    sameGroupingValues(currSortedRow, nextRow);
@@ -504,6 +504,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception StandardException thrown on error
 	 */
+    @Override
 	public void	close() throws StandardException
 	{
 		beginTime = getCurrentTimeMillis();
@@ -759,8 +760,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		for (int i = 0; i < aggregates.length; i++)
 		{
 			GenericAggregator currAggregate = aggregates[i];
-			AggregatorInfo aInfo = (AggregatorInfo)
-					aggInfoList.elementAt(i);
+            AggregatorInfo aInfo = aggInfoList.elementAt(i);
 			if (aInfo.isDistinct())
 			{
 				DataValueDescriptor newValue = currAggregate.getInputColumnValue(newRow);
@@ -786,8 +786,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	{
 		for (int a = 0; a < aggregates.length; a++)
 		{
-			AggregatorInfo aInfo = (AggregatorInfo)
-						aggInfoList.elementAt(a);
+            AggregatorInfo aInfo = aggInfoList.elementAt(a);
 
             if (allocate) {
                 // Allocate an empty set if the aggregate is distinct.
@@ -820,7 +819,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	{
             if (r == null)
                 return "<NULL ROW>";
-	    StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 	    int nCols = r.nColumns();
 	    for (int d = 0; d < nCols; d++)
 	    {

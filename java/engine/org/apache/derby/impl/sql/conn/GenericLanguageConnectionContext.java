@@ -64,7 +64,6 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageFactory;
@@ -90,6 +89,8 @@ import java.util.IdentityHashMap;
 import java.util.WeakHashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.derby.iapi.reference.ContextId;
+import org.apache.derby.iapi.services.context.Context;
 
 /**
  * LanguageConnectionContext keeps the pool of prepared statements,
@@ -418,7 +419,7 @@ public class GenericLanguageConnectionContext
         */
         if (cachedInitialDefaultSchemaDescr == null) {
             DataDictionary dd = getDataDictionary();
-            String authorizationId = getSessionUserId();
+
             SchemaDescriptor sd =
                 dd.getSchemaDescriptor(
                     getSessionUserId(), getTransactionCompile(), false);
@@ -615,8 +616,9 @@ public class GenericLanguageConnectionContext
                 allDeclaredGlobalTempTables.remove(
                         allDeclaredGlobalTempTables.indexOf(tempTableInfo));
 
-                if (allDeclaredGlobalTempTables.size() == 0)
+                if (allDeclaredGlobalTempTables.isEmpty()) {
                     allDeclaredGlobalTempTables = null;
+                }
             }
             else
             {
@@ -1010,7 +1012,7 @@ public class GenericLanguageConnectionContext
             // unit/transaction and not modified
         }
     
-        if (allDeclaredGlobalTempTables.size() == 0)
+        if (allDeclaredGlobalTempTables.isEmpty())
         {
             allDeclaredGlobalTempTables = null;
         }
@@ -1787,12 +1789,11 @@ public class GenericLanguageConnectionContext
     private void resetSavepoints() throws StandardException 
     {
         final ContextManager cm = getContextManager();
-        final List stmts = cm.getContextStack(org.apache.derby.
-                                              iapi.reference.
-                                              ContextId.LANG_STATEMENT);
-        final int end = stmts.size();
-        for (int i = 0; i < end; ++i) {
-            ((StatementContext)stmts.get(i)).resetSavePoint();
+        final List<Context>
+                stmts = cm.getContextStack(ContextId.LANG_STATEMENT);
+
+        for (Context c : stmts) {
+            ((StatementContext)c).resetSavePoint();
         }
     }
 
@@ -1923,7 +1924,7 @@ public class GenericLanguageConnectionContext
      * connection context. If a NUT is active then return NUT else return parent
      * transaction.
      */
-    public TransactionController getTransactionCompile()
+    public final TransactionController getTransactionCompile()
     {
         return (readOnlyNestedTransaction != null) ? readOnlyNestedTransaction : tran;
     }
@@ -2297,7 +2298,7 @@ public class GenericLanguageConnectionContext
      */
     public Long getIdentityValue()
     {
-        return identityNotNull ? new Long(identityVal) : null;
+        return identityNotNull ? Long.valueOf(identityVal) : null;
     }
 
     /**
@@ -2710,8 +2711,8 @@ public class GenericLanguageConnectionContext
      */
     public TriggerExecutionContext getTriggerExecutionContext()
     {
-        return triggerExecutionContexts.size() == 0 ? 
-                (TriggerExecutionContext)null :
+        return triggerExecutionContexts.isEmpty() ?
+                null :
                 triggerExecutionContexts.get( triggerExecutionContexts.size() - 1 );   
     }
 
@@ -2782,7 +2783,7 @@ public class GenericLanguageConnectionContext
      */
     public TableDescriptor getTriggerTable()
     {
-        return triggerTables.size() == 0 ? 
+        return triggerTables.isEmpty() ?
             (TableDescriptor)null :
             triggerTables.get(triggerTables.size() - 1);
     }
@@ -2837,7 +2838,7 @@ public class GenericLanguageConnectionContext
     }
 
     /** @see LanguageConnectionContext#setRunTimeStatisticsMode */
-    public void setRunTimeStatisticsMode(boolean onOrOff)
+    public final void setRunTimeStatisticsMode(boolean onOrOff)
     {
         runTimeStatisticsSetting = onOrOff;
     }
@@ -3115,6 +3116,7 @@ public class GenericLanguageConnectionContext
     /**
      * @see org.apache.derby.iapi.services.context.Context#isLastHandler
      */
+    @Override
     public boolean isLastHandler(int severity)
     {
         return false;
@@ -3174,8 +3176,9 @@ public class GenericLanguageConnectionContext
             //actions during commit and rollback as explained in the comments
             //below.
             ResultSet activationResultSet = a.getResultSet();
-            boolean resultsetReturnsRows =  
-                (activationResultSet != null) && activationResultSet.returnsRows(); ;
+            boolean resultsetReturnsRows =
+                    activationResultSet != null &&
+                    activationResultSet.returnsRows();
 
             if (forRollback) { 
                 if (resultsetReturnsRows)
@@ -3333,7 +3336,7 @@ public class GenericLanguageConnectionContext
         }
         if (autoincrementHT == null)
             return null;
-        return (Long)autoincrementHT.get(aiKey);
+        return autoincrementHT.get(aiKey);
     }   
 
     /**
@@ -3508,6 +3511,7 @@ public class GenericLanguageConnectionContext
         return acts.get(acts.size() - 1);
     }
 
+    @Override
     public StringBuffer appendErrorInfo() {
 
         TransactionController tc = getTransactionExecute();
@@ -3599,7 +3603,7 @@ public class GenericLanguageConnectionContext
         DataDictionary dd = getDataDictionary();
         String dbo = dd.getAuthorizationDatabaseOwner();
 
-        RoleGrantDescriptor grantDesc = null;
+        RoleGrantDescriptor grantDesc;
         String currentUser = getCurrentUserId(a);
 
         if (currentUser.equals(dbo)) {
@@ -3848,7 +3852,7 @@ public class GenericLanguageConnectionContext
     }
 
     public FormatableBitSet getReferencedColumnMap(TableDescriptor td) {
-        return (FormatableBitSet)referencedColumnMap.get(td);
+        return referencedColumnMap.get(td);
     }
 
     public void setReferencedColumnMap(TableDescriptor td,

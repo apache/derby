@@ -34,7 +34,6 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
@@ -116,6 +115,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	 * 
 	 * @exception StandardException on error
 	 */	
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	protected final GenericAggregator[] getSortAggregators
 	(
 		AggregatorInfoList 			list,
@@ -125,13 +125,12 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 	) throws StandardException
 	{
 		GenericAggregator 	aggregators[]; 
-		Vector<GenericAggregator> tmpAggregators = new Vector<GenericAggregator>();
+        Vector<GenericAggregator>
+                tmpAggregators = new Vector<GenericAggregator>();
 		ClassFactory		cf = lcc.getLanguageConnectionFactory().getClassFactory();
 
-		int count = list.size();
-		for (int i = 0; i < count; i++)
+        for (AggregatorInfo aggInfo : list)
 		{
-			AggregatorInfo aggInfo = (AggregatorInfo) list.elementAt(i);
 			if (! (eliminateDistincts && aggInfo.isDistinct()))
 			// if (eliminateDistincts == aggInfo.isDistinct())
 			{
@@ -198,6 +197,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		return row;
 	}
 
+    @Override
 	public void finish() throws StandardException {
 		source.finish();
 		super.finish();

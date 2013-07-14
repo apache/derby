@@ -25,7 +25,8 @@ import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
 
-public class GenericDescriptorList extends ArrayList<UniqueTupleDescriptor>
+public class GenericDescriptorList<E extends UniqueTupleDescriptor>
+       extends ArrayList<E>
 {
 	private boolean scanned;
 
@@ -61,9 +62,9 @@ public class GenericDescriptorList extends ArrayList<UniqueTupleDescriptor>
 	 *
 	 * @return The matching UniqueTupleDescriptor.
 	 */
-	public UniqueTupleDescriptor getUniqueTupleDescriptor(UUID uuid)
+    public E getUniqueTupleDescriptor(UUID uuid)
 	{
-        for (UniqueTupleDescriptor ud : this)
+        for (E ud : this)
 		{
 			if (ud.getUUID().equals(uuid))
 			{

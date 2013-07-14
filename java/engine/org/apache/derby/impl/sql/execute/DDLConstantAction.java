@@ -23,7 +23,6 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.derby.catalog.AliasInfo;
@@ -34,7 +33,6 @@ import org.apache.derby.catalog.types.AggregateAliasInfo;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -161,7 +159,7 @@ abstract class DDLConstantAction implements ConstantAction
 		 TransactionController tc,
 		 Activation activation) throws StandardException {
 
-		TransactionController useTc    = null;
+        TransactionController useTc;
 		TransactionController nestedTc = null;
 
 		try {
@@ -328,7 +326,6 @@ abstract class DDLConstantAction implements ConstantAction
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
-		String dbo = dd.getAuthorizationDatabaseOwner();
         String currentUser = lcc.getCurrentUserId(activation);
 		SettableBoolean roleDepAdded = new SettableBoolean();
 
@@ -343,13 +340,13 @@ abstract class DDLConstantAction implements ConstantAction
 			// CHECK constraint, any EXECUTE or USAGE privileges. If the REFERENCES is
 			// revoked from the constraint owner, the constraint will get
 			// dropped automatically.
-			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+            List<StatementPermission> requiredPermissionsList =
+                activation.getPreparedStatement().getRequiredPermissionsList();
 
 			if (requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
 			{
-				for(Iterator iter = requiredPermissionsList.iterator();iter.hasNext();)
+                for (StatementPermission statPerm : requiredPermissionsList)
 				{
-					StatementPermission statPerm = (StatementPermission) iter.next();
 					//First check if we are dealing with a Table or 
 					//Column level privilege. All the other privileges
 					//are not required for a foreign key constraint.
@@ -517,27 +514,13 @@ abstract class DDLConstantAction implements ConstantAction
 		LanguageConnectionContext lcc =
 			activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		RoleGrantDescriptor rootGrant = null;
 		String role = lcc.getCurrentRoleId(activation);
-		String dbo = dd.getAuthorizationDatabaseOwner();
-        String currentUser = lcc.getCurrentUserId(activation);
 		PermissionsDescriptor permDesc = null;
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(
 				role != null,
 				"Unexpected: current role is not set");
-		}
-
-		// determine how we got to be able use this role
-		rootGrant =
-            dd.getRoleGrantDescriptor(role, currentUser, dbo);
-
-		if (rootGrant == null) {
-			rootGrant = dd.getRoleGrantDescriptor(
-				role,
-				Authorizer.PUBLIC_AUTHORIZATION_ID,
-				dbo);
 		}
 
 		// If not found in current role, get transitive
@@ -577,8 +560,8 @@ abstract class DDLConstantAction implements ConstantAction
 	 * @param activation the current activation
 	 * @param dependent the view, constraint or trigger that is dependent on the
 	 *        current role for some privilege.
-	 * @param roleDepAdded keeps track of whether a dependeny on the
-	 *        current role has aleady been registered.
+     * @param roleDepAdded keeps track of whether a dependency on the
+     *        current role has already been registered.
 	 */
 	private static void trackRoleDependency(Activation activation,
 											Dependent dependent,
@@ -657,12 +640,14 @@ abstract class DDLConstantAction implements ConstantAction
         if (! currentUser.equals(dbo))
 		{
 			PermissionsDescriptor permDesc;
-			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
-			if (requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
+            List<StatementPermission> requiredPermissionsList =
+                activation.getPreparedStatement().getRequiredPermissionsList();
+
+            if (requiredPermissionsList != null &&
+                ! requiredPermissionsList.isEmpty())
 			{
-				for(Iterator iter = requiredPermissionsList.iterator();iter.hasNext();)
+                for (StatementPermission statPerm : requiredPermissionsList)
 				{
-					StatementPermission statPerm = (StatementPermission) iter.next();
 					//The schema ownership permission just needs to be checked 
 					//at object creation time, to see if the object creator has 
 					//permissions to create the object in the specified schema. 
@@ -885,7 +870,9 @@ abstract class DDLConstantAction implements ConstantAction
 
         // nothing to do if there are no changed columns of udt type
         // and this is not a DROP TABLE command
-        if ( (!dropWholeTable) && (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
+        if ( !dropWholeTable && addUdtMap.isEmpty() && dropUdtMap.isEmpty() ) {
+            return;
+        }
 
         //
         // Now prune from the add list all udt descriptors for which we already have dependencies.
@@ -939,36 +926,30 @@ abstract class DDLConstantAction implements ConstantAction
          LanguageConnectionContext  lcc,
          DataDictionary             dd,
          Dependent                  dependent,
-         HashMap                    addUdtMap,
-         HashMap                    dropUdtMap
+         HashMap<String, AliasDescriptor> addUdtMap,
+         HashMap<String, AliasDescriptor> dropUdtMap
          )
         throws StandardException
     {
         // again, nothing to do if there are no columns of udt type
-        if ( (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
+        if ( (addUdtMap.isEmpty()) && (dropUdtMap.isEmpty()) ) {
+            return;
+        }
 
 		TransactionController tc = lcc.getTransactionExecute();
         DependencyManager     dm = dd.getDependencyManager();
         ContextManager        cm = lcc.getContextManager();
 
         // add new dependencies
-        Iterator            addIterator = addUdtMap.values().iterator();
-        while( addIterator.hasNext() )
+        for (AliasDescriptor ad : addUdtMap.values())
         {
-            AliasDescriptor ad = (AliasDescriptor) addIterator.next();
-
             dm.addDependency( dependent, ad, cm );
         }
 
         // drop dependencies that are orphaned
-        Iterator            dropIterator = dropUdtMap.values().iterator();
-        while( dropIterator.hasNext() )
-        {
-            AliasDescriptor ad = (AliasDescriptor) dropIterator.next();
-
-            DependencyDescriptor dependency = new DependencyDescriptor( dependent, ad );
-
-            dd.dropStoredDependency( dependency, tc );
+        for (AliasDescriptor ad : dropUdtMap.values()) {
+            DependencyDescriptor dep = new DependencyDescriptor(dependent, ad);
+            dd.dropStoredDependency( dep, tc );
         }
     }
 
@@ -1008,9 +989,16 @@ abstract class DDLConstantAction implements ConstantAction
         }
         
 		TransactionController tc = lcc.getTransactionExecute();
-        HashMap<String,AliasDescriptor>               addUdtMap = new HashMap<String,AliasDescriptor>();
-        HashMap<String,AliasDescriptor>               dropUdtMap = new HashMap<String,AliasDescriptor>();
-        HashMap<String,AliasDescriptor>               udtMap = adding ? addUdtMap : dropUdtMap;
+
+        HashMap<String,AliasDescriptor> addUdtMap =
+                new HashMap<String,AliasDescriptor>();
+
+        HashMap<String,AliasDescriptor> dropUdtMap =
+                new HashMap<String,AliasDescriptor>();
+
+        HashMap<String,AliasDescriptor> udtMap =
+                adding ? addUdtMap : dropUdtMap;
+
         TypeDescriptor        rawReturnType = aggInfo != null ?
             aggInfo.getReturnType() : routineInfo.getReturnType();
 
@@ -1057,7 +1045,7 @@ abstract class DDLConstantAction implements ConstantAction
 	/**
 	 * Mutable Boolean wrapper, initially false
 	 */
-	private class SettableBoolean {
+    private static class SettableBoolean {
 		boolean value;
 
 		SettableBoolean() {

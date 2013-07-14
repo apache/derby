@@ -119,7 +119,7 @@ class ValueRow implements ExecRow
 			if (clonedCols != null && !(clonedCols.get(colCtr + 1)))
 			{
 				/* Rows are 1-based, column[] is 0-based */
-				rowClone.setColumn(colCtr + 1, (DataValueDescriptor) column[colCtr]);
+                rowClone.setColumn(colCtr + 1, column[colCtr]);
 				continue;
 			}
 

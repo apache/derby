@@ -21,63 +21,48 @@
 
 package org.apache.derby.impl.sql;
 
-import	org.apache.derby.catalog.Dependable;
-import	org.apache.derby.catalog.DependableFinder;
-
-import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.cache.Cacheable;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.util.ReuseFactory;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
-
-import org.apache.derby.iapi.sql.ParameterValueSet;
-import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.Statement;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataTypeUtilities;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
-import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Provider;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.StatementContext;
-
-import org.apache.derby.impl.sql.compile.CursorNode;
-import org.apache.derby.impl.sql.compile.StatementNode;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-
-import java.sql.Timestamp;
 import java.sql.SQLWarning;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.Cacheable;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.PreparedStatement;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.Statement;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.util.ByteArray;
+import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.impl.sql.compile.CursorNode;
+import org.apache.derby.impl.sql.compile.StatementNode;
 
 /**
  * Basic implementation of prepared statement.
@@ -133,7 +118,7 @@ public class GenericPreparedStatement
 
 	protected ConstantAction	executionConstants;
 	protected Object[]	savedObjects;
-	protected List requiredPermissionsList;
+    protected List<StatementPermission> requiredPermissionsList;
 
 	// fields for dependency tracking
 	protected String UUIDString;
@@ -445,7 +430,7 @@ recompileOutOfDatePlan:
 				lccToUse.validateStmtExecution(executionConstants);
 			}
 
-			ResultSet resultSet = null;
+            ResultSet resultSet;
 			try {
 	
 				resultSet = activation.execute();
@@ -1244,6 +1229,7 @@ recompileOutOfDatePlan:
 		}
 	}
 
+    @Override
 	public String toString() {
 		return getObjectName();
 	}
@@ -1252,12 +1238,13 @@ recompileOutOfDatePlan:
 		return false;
 	}
 
-	public void setRequiredPermissionsList( List requiredPermissionsList)
+    public void setRequiredPermissionsList(
+            List<StatementPermission> requiredPermissionsList)
 	{
 		this.requiredPermissionsList = requiredPermissionsList;
 	}
 
-	public List getRequiredPermissionsList()
+    public List<StatementPermission> getRequiredPermissionsList()
 	{
 		return requiredPermissionsList;
 	}

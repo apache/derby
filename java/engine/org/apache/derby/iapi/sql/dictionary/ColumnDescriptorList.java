@@ -24,7 +24,6 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.catalog.UUID;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * This represents a list of column descriptors. 

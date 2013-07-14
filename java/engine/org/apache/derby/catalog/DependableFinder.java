@@ -21,8 +21,6 @@
 
 package org.apache.derby.catalog;
 
-import java.sql.SQLException;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 

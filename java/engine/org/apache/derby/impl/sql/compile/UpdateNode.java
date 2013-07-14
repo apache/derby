@@ -48,7 +48,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -869,7 +869,7 @@ public final class UpdateNode extends DMLModStatementNode
 
         ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
 		relevantCdl = new ConstraintDescriptorList();
-		relevantTriggers =  new GenericDescriptorList();
+        relevantTriggers =  new TriggerDescriptorList();
 
 		FormatableBitSet	columnMap = getUpdateReadMap
             (
@@ -970,7 +970,7 @@ public final class UpdateNode extends DMLModStatementNode
 		ResultColumnList			updateColumnList,
         List<ConglomerateDescriptor>     conglomerates,
 		ConstraintDescriptorList	relevantConstraints,
-		GenericDescriptorList		relevantTriggers,
+        TriggerDescriptorList       relevantTriggers,
 		boolean[]					needsDeferredProcessing,
         ColumnDescriptorList    affectedGeneratedColumns
 	)
@@ -1071,9 +1071,7 @@ public final class UpdateNode extends DMLModStatementNode
 			// after the soft-upgrade.
 			boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
 
-            for (Iterator<?> descIter = relevantTriggers.iterator();
-                    descIter.hasNext(); ) {
-                TriggerDescriptor trd = (TriggerDescriptor) descIter.next();
+            for (TriggerDescriptor trd : relevantTriggers) {
 				if (in10_9_orHigherVersion) {
 					// See if we can avoid reading all the columns from the
 					// trigger table.

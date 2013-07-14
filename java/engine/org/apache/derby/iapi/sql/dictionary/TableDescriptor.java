@@ -21,8 +21,6 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.derby.catalog.Dependable;
@@ -165,7 +163,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     ColumnDescriptorList            columnDescriptorList;
 	ConglomerateDescriptorList		conglomerateDescriptorList;
 	ConstraintDescriptorList		constraintDescriptorList;
-	private	GenericDescriptorList	triggerDescriptorList;
+    private TriggerDescriptorList   triggerDescriptorList;
 	ViewDescriptor					viewDescriptor;
 
 	private FormatableBitSet referencedColumnMapGet() {
@@ -263,7 +261,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		this.conglomerateDescriptorList = new ConglomerateDescriptorList();
 		this.columnDescriptorList = new ColumnDescriptorList();
 		this.constraintDescriptorList = new ConstraintDescriptorList();
-		this.triggerDescriptorList = new GenericDescriptorList();
+        this.triggerDescriptorList = new TriggerDescriptorList();
 	}
 
 	//
@@ -461,10 +459,9 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		throws StandardException
 	{
 		int					maxColumnID = 1;
-		int cdlSize = getColumnDescriptorList().size();
-		for (int index = 0; index < cdlSize; index++)
+
+        for (ColumnDescriptor cd : columnDescriptorList)
 		{
-			ColumnDescriptor cd = (ColumnDescriptor) columnDescriptorList.elementAt(index);
 			maxColumnID = Math.max( maxColumnID, cd.getPosition() );
 		}
 
@@ -554,7 +551,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 
 		for (int index = 0; index < columnCount; index++)
 		{
-			ColumnDescriptor cd = (ColumnDescriptor) columnDescriptorList.elementAt(index);
+            ColumnDescriptor cd = columnDescriptorList.elementAt(index);
 			//String name = column.getColumnName();
 			DataValueDescriptor dataValue = cd.getType().getNull();
 			result.setColumn(index + 1, dataValue);
@@ -581,8 +578,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 
 		for (int index = 0; index < collation_ids.length; index++)
 		{
-			ColumnDescriptor cd = 
-                (ColumnDescriptor) columnDescriptorList.elementAt(index);
+            ColumnDescriptor cd = columnDescriptorList.elementAt(index);
 
             collation_ids[index] = cd.getType().getCollationType();
 
@@ -635,6 +631,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 * @return boolean              Whether or not this provider is persistent.
 	 */
+    @Override
 	public boolean isPersistent()
 	{
 		if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
@@ -681,9 +678,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     public int getQualifiedNumberOfIndexes(int minColCount,
                                            boolean nonUniqeTrumpsColCount) {
         int matches = 0;
-        for (Iterator congIter = conglomerateDescriptorList.iterator();
-                congIter.hasNext(); ) {
-            ConglomerateDescriptor cd = (ConglomerateDescriptor)congIter.next();
+        for (ConglomerateDescriptor cd : conglomerateDescriptorList) {
             if (cd.isIndex()) {
                 IndexRowGenerator irg = cd.getIndexDescriptor();
                 if (irg.numberOfOrderedColumns() >= minColCount ||
@@ -709,7 +704,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	(
 		int						statementType,
 		int[]					changedColumnIds,
-		GenericDescriptorList	relevantTriggers
+        TriggerDescriptorList   relevantTriggers
     )
 		throws StandardException
 	{
@@ -723,9 +718,8 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		}
 
 		DataDictionary				dd = getDataDictionary();
-        for (Iterator descIter = dd.getTriggerDescriptors(this).iterator() ;
-                descIter.hasNext() ; ) {
-            TriggerDescriptor tgr = (TriggerDescriptor)descIter.next();
+
+        for (TriggerDescriptor tgr : dd.getTriggerDescriptors(this)) {
             if (tgr.needsToFire(statementType, changedColumnIds)) {
                 relevantTriggers.add(tgr);
             }
@@ -854,13 +848,12 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 			return tableName;
 		else
 		{
-			StringBuffer name = new StringBuffer();
+            StringBuilder name = new StringBuilder();
             name.append(tableName);
 			boolean first = true;
 
-			for (int i = 0; i < columnDescriptorList.size(); i++)
+            for (ColumnDescriptor cd: columnDescriptorList)
 			{
-				ColumnDescriptor cd = (ColumnDescriptor) columnDescriptorList.elementAt(i);
 				if (referencedColumnMapGet().isSet(cd.getPosition()))
 				{
 					if (first)
@@ -907,6 +900,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 * @return The contents as a String
 	 */
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -1037,7 +1031,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public GenericDescriptorList getTriggerDescriptorList()
+    public TriggerDescriptorList getTriggerDescriptorList()
 		throws StandardException
 	{
 		return triggerDescriptorList;
@@ -1048,7 +1042,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 * @param newCDL	The new trigger descriptor list for this table descriptor
 	 */
-	public void setTriggerDescriptorList(GenericDescriptorList newCDL)
+    public void setTriggerDescriptorList(TriggerDescriptorList newCDL)
 	{
 		triggerDescriptorList = newCDL;
 	}
@@ -1062,7 +1056,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		throws StandardException
 	{
 		// Easier just to get a new CDL then to clean out the current one
-		this.triggerDescriptorList = new GenericDescriptorList();
+        this.triggerDescriptorList = new TriggerDescriptorList();
 	}
 
 	
@@ -1251,18 +1245,15 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	}
 
 	/**
-	 * Does the table have an autoincrement column or not?
+     * Does the table have an auto-increment column or not?
 	 * 
-	 * @return TRUE if the table has atleast one autoincrement column, false
+     * @return TRUE if the table has at least one auto-increment column, false
 	 * otherwise 
 	 */
 	public boolean tableHasAutoincrement()
 	{
-		int cdlSize = getColumnDescriptorList().size();
-		for (int index = 0; index < cdlSize; index++)
+        for (ColumnDescriptor cd : columnDescriptorList)
 		{
-			ColumnDescriptor cd = 
-				(ColumnDescriptor) columnDescriptorList.elementAt(index);
 			if (cd.isAutoincrement())
 				return true;
 		}
@@ -1337,7 +1328,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
      */
     public void markForIndexStatsUpdate(long tableRowCountEstimate)
             throws StandardException {
-        List sdl = getStatistics();
+        List<StatisticsDescriptor> sdl = getStatistics();
         if (sdl.isEmpty() && tableRowCountEstimate >= ISTATS_CREATE_THRESHOLD) {
             // No statistics exists, create them.
             indexStatsUpToDate = false;
@@ -1347,9 +1338,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
         }
 
         // Check the state of the existing indexes (if any).
-        Iterator statIter = sdl.iterator();
-        while (statIter.hasNext()) {
-            StatisticsDescriptor sd = (StatisticsDescriptor)statIter.next();
+        for (StatisticsDescriptor sd : sdl) {
             long indexRowCountEstimate = sd.getStatistic().getRowEstimate();
             long diff = Math.abs(tableRowCountEstimate - indexRowCountEstimate);
             // TODO: Set a proper limit here to avoid too frequent updates.
@@ -1405,19 +1394,17 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	public boolean statisticsExist(ConglomerateDescriptor cd)
 		throws StandardException
 	{
-		List sdl = getStatistics();
+        List<StatisticsDescriptor> sdl = getStatistics();
 
 		if (cd == null)
 			return (sdl.size() > 0);
 
 		UUID cdUUID = cd.getUUID();
 
-		for (Iterator li = sdl.iterator(); li.hasNext(); )
-		{
-			StatisticsDescriptor statDesc = (StatisticsDescriptor) li.next();
-			if (cdUUID.equals(statDesc.getReferenceID()))
+        for (StatisticsDescriptor statDesc : sdl) {
+            if (cdUUID.equals(statDesc.getReferenceID())) {
 				return true;
-
+            }
 		}
 
 		return false;
@@ -1444,11 +1431,8 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	{
 		UUID referenceUUID = cd.getUUID();
 
-		List sdl = getStatistics();
-		for (Iterator li = sdl.iterator(); li.hasNext(); )
+        for (StatisticsDescriptor statDesc : getStatistics())
 		{
-			StatisticsDescriptor statDesc = (StatisticsDescriptor) li.next();
-
 			if (!referenceUUID.equals(statDesc.getReferenceID()))
 				continue;
 			
@@ -1464,9 +1448,11 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	}
 
 	/** @see TupleDescriptor#getDescriptorName */
+    @Override
 	public String getDescriptorName() { return tableName; }
 
 	/** @see TupleDescriptor#getDescriptorType */
+    @Override
 	public String getDescriptorType() 
 	{
 		return (tableType == TableDescriptor.SYNONYM_TYPE) ? "Synonym" : "Table/View";

@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 import java.util.Locale;
+import org.apache.derby.iapi.reference.ContextId;
 
 /**
  *
@@ -88,7 +89,7 @@ public class ContextManager
 		void pop() {
 			stack_.remove(stack_.size()-1);
 			top_ = stack_.isEmpty() ? 
-				null : (Context) stack_.get(stack_.size()-1); 
+                null : stack_.get(stack_.size()-1);
 		}
 		void remove(Context context) {
 			if (context == top_) {
@@ -101,7 +102,8 @@ public class ContextManager
 			return top_; 
 		}
 		boolean isEmpty() { return stack_.isEmpty(); }
-		List getUnmodifiableList() { 
+
+        List<Context> getUnmodifiableList() {
 			return view_;
 		}
 	}
@@ -233,9 +235,10 @@ public class ContextManager
 	 * @see org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext#resetSavepoints()
 	 * @see org.apache.derby.iapi.sql.conn.StatementContext#resetSavePoint()
 	 */
-	public final List getContextStack(String contextId) {
+    public final List<Context> getContextStack(String contextId) {
 		final CtxStack cs = ctxTable.get(contextId);
-		return (cs==null?Collections.EMPTY_LIST:cs.getUnmodifiableList());
+        final List<Context> el = Collections.emptyList();
+        return cs==null ? el : cs.getUnmodifiableList();
 	}
     
     /**
@@ -271,12 +274,12 @@ public class ContextManager
 
 		if (reportError) 
 		{
-			ContextImpl lcc = null;
 			StringBuffer sb = null;
 			if (! shutdown)
 			{
 				// report an id for the message if possible
-				lcc = (ContextImpl) getContext(org.apache.derby.iapi.reference.ContextId.LANG_CONNECTION);
+                ContextImpl lcc =
+                        (ContextImpl)getContext(ContextId.LANG_CONNECTION);
 				if (lcc != null) {
 					sb = lcc.appendErrorInfo();
 				}

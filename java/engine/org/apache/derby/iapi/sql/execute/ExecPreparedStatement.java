@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.PreparedStatement;
 
 import java.util.List;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 
 /**
  * Execution extends prepared statement to add methods it needs
@@ -173,7 +174,7 @@ public interface ExecPreparedStatement
 	 * @return the list of permissions required to execute this statement. May be null if
 	 *         the database does not use SQL standard authorization
 	 */
-	List getRequiredPermissionsList();
+    List<StatementPermission> getRequiredPermissionsList();
 
     // Methods for stale plan checking.
 

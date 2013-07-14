@@ -47,7 +47,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
@@ -461,7 +461,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
-	public List getAllSPSDescriptors() throws StandardException {
+    public List<SPSDescriptor> getAllSPSDescriptors() throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}
@@ -536,7 +536,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
-	public GenericDescriptorList getTriggerDescriptors(TableDescriptor td)
+    public TriggerDescriptorList getTriggerDescriptors(TableDescriptor td)
 			throws StandardException {
 		// Auto-generated method stub
 		return null;
@@ -555,14 +555,18 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
-	public Hashtable hashAllConglomerateDescriptorsByNumber(
-			TransactionController tc) throws StandardException {
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Hashtable<Long, ConglomerateDescriptor>
+        hashAllConglomerateDescriptorsByNumber(TransactionController tc)
+            throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}
 
-	public Hashtable hashAllTableDescriptorsByTableId(TransactionController tc)
-			throws StandardException {
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Hashtable<UUID, TableDescriptor>
+        hashAllTableDescriptorsByTableId(TransactionController tc)
+            throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}
@@ -635,7 +639,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
-	public List getAllDependencyDescriptorsList() throws StandardException {
+    public List<TupleDescriptor> getAllDependencyDescriptorsList()
+            throws StandardException {
 		// Auto-generated method stub
 		return null;
 	}

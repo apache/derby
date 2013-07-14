@@ -52,7 +52,6 @@ import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
-import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -241,7 +240,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 	// OBJECT SHADOWS
 	//
 	///////////////////////////////////////////////
-
+    @Override
 	public	String	toString()
 	{
 		// Do not put this under SanityManager.DEBUG - it is needed for
@@ -711,7 +710,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					continue;
 				}
 				numSet++;
-				ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
+                ColumnDescriptor cd = cdl.elementAt(index);
 				DataTypeDescriptor dts = cd.getType();
 
 
@@ -752,7 +751,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 * sort.
 			 */
 			int             numColumnOrderings;
-			SortObserver    sortObserver   = null;
+            SortObserver    sortObserver;
             Properties      sortProperties = null;
 			if (unique || uniqueWithDuplicateNulls)
 			{
@@ -827,7 +826,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 
 			// create the sorter
-			sortId = tc.createSort((Properties)sortProperties, 
+            sortId = tc.createSort(sortProperties,
 					indexTemplateRow.getRowArrayClone(),
 					order,
 					sortObserver,
@@ -1072,7 +1071,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			// beneath the surface.  Fetching the base row and row location
 			// from the table scan will automagically set up the indexRow
 			// fetchNextGroup will return how many rows are actually fetched.
-			int bulkFetched = 0;
+            int bulkFetched;
 
 			while ((bulkFetched = scan.fetchNextGroup(baseRowArray, rl)) > 0)
 			{

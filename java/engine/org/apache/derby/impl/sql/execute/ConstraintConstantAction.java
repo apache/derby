@@ -151,9 +151,9 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                 fk.getIndexConglomerateDescriptor(dd).getConglomerateNumber(),
                 false,                       			// hold 
                 0, 										// read only
-                tc.MODE_TABLE,							// already locked
-                tc.ISOLATION_READ_COMMITTED,			// whatever
-                (FormatableBitSet)null, 							// retrieve all fields
+                TransactionController.MODE_TABLE,       // already locked
+                TransactionController.ISOLATION_READ_COMMITTED,
+                (FormatableBitSet)null,                 // retrieve all fields
                 (DataValueDescriptor[])null,    	    // startKeyValue
                 ScanController.GE,            			// startSearchOp
                 null,                         			// qualifier
@@ -201,9 +201,10 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 					refcd.getIndexConglomerateDescriptor(dd).getConglomerateNumber(),
                         false,                       	// hold 
                         0, 								// read only
-                        tc.MODE_RECORD,
-                        tc.ISOLATION_READ_COMMITTED,	// read committed is good enough
-                        (FormatableBitSet)null, 					// retrieve all fields
+                        TransactionController.MODE_RECORD,
+                        TransactionController.ISOLATION_READ_COMMITTED,
+                                              // read committed is good enough
+                        (FormatableBitSet)null,         // retrieve all fields
                         (DataValueDescriptor[])null,    // startKeyValue
                         ScanController.GE,            	// startSearchOp
                         null,                         	// qualifier
@@ -269,7 +270,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	)
 		throws StandardException
 	{
-		StringBuffer checkStmt = new StringBuffer();
+        StringBuilder checkStmt = new StringBuilder();
 		/* should not use select sum(not(<check-predicate>) ? 1: 0) because
 		 * that would generate much more complicated code and may exceed Java
 		 * limits if we have a large number of check constraints, beetle 4347
@@ -298,7 +299,6 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 				}
 			}
 
-			DataValueDescriptor[] rowArray = row.getRowArray();
 			Number value = ((Number)((NumberDataValue)row.getRowArray()[0]).getObject());
 			/*
 			** Value may be null if there are no rows in the

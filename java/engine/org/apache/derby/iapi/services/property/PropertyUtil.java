@@ -126,7 +126,7 @@ public class PropertyUtil {
 		String value = (String) set.get(Property.DATABASE_PROPERTIES_ONLY);
 
 		boolean dbOnly = Boolean.valueOf(
-                    (value != null ? value.trim() : value)).booleanValue();
+                    (value != null ? value.trim() : null)).booleanValue();
 
 		return dbOnly;
 	}

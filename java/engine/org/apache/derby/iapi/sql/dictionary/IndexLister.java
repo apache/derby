@@ -22,12 +22,8 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.services.io.ArrayUtil;
 
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 
 
 /**
@@ -230,8 +226,7 @@ public class IndexLister
 			if ( ! cd.isIndex())
 				continue;
 
-			indexRowGenerators[++j] = 
-				(IndexRowGenerator)cd.getIndexDescriptor();
+            indexRowGenerators[++j] = cd.getIndexDescriptor();
 			indexConglomerateNumbers[j] = cd.getConglomerateNumber();
 			if (!(cd.isConstraint()))
 			{

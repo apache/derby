@@ -573,7 +573,7 @@ public interface CompilerContext extends Context
 	/**
 	 * @return The list of required privileges.
 	 */
-    List<StatementPermission>getRequiredPermissionsList();
+    List<StatementPermission> getRequiredPermissionsList();
     
 	/**
 	 * Add a sequence descriptor to the list of referenced sequences.

@@ -33,14 +33,21 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import java.util.Hashtable;
+import org.apache.derby.catalog.UUID;
 
+@SuppressWarnings("UseOfObsoleteCollectionType")
 public class TableNameInfo {
 
 	// things to look up table name etc
 	private DataDictionary dd;
-	private Hashtable ddCache;			// conglomId -> conglomerateDescriptor
-	private Hashtable tdCache;			// tableID UUID -> table descriptor
-	private Hashtable<Long,TableDescriptor> tableCache;		// conglomId -> table descriptor
+
+    // conglomId -> conglomerateDescriptor
+    private Hashtable<Long, ConglomerateDescriptor> ddCache;
+
+    // tableID UUID -> table descriptor
+    private Hashtable<UUID, TableDescriptor> tdCache;
+
+    private Hashtable<Long,TableDescriptor> tableCache;     // conglomId -> table descriptor
 	private Hashtable<Long,String> indexCache;		// conglomId -> indexname
 
 	public TableNameInfo(LanguageConnectionContext lcc, boolean andIndex)
@@ -68,15 +75,14 @@ public class TableNameInfo {
 		{
 			// first time we see this conglomerate, get it from the
 			// ddCache 
-			ConglomerateDescriptor cd =
-				(ConglomerateDescriptor)ddCache.get(conglomId);
+            ConglomerateDescriptor cd = ddCache.get(conglomId);
 
             if (cd != null)
             {
                 // conglomerateDescriptor is not null, this table is known
                 // to the data dictionary
 
-                td = (TableDescriptor) tdCache.get(cd.getTableID());
+                td = tdCache.get(cd.getTableID());
             }
 
 			if ((cd == null) || (td == null))

@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.Dependable;
@@ -57,7 +56,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
@@ -85,9 +83,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
-import org.apache.derby.impl.sql.compile.ColumnReference;
 import org.apache.derby.impl.sql.compile.StatementNode;
 
 /**
@@ -757,8 +753,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
           }
         }
-
-        return;
     }
 
     /**
@@ -808,23 +802,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
 
 			/* Get a row template for the base table */
-			ExecRow baseRow = 
+            ExecRow br =
                 lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(
                     td.getNumberOfColumns());
 
-
 			/* Fill the row with nulls of the correct type */
-			ColumnDescriptorList cdl = td.getColumnDescriptorList();
-			int					 cdlSize = cdl.size();
-
-			for (int index = 0; index < cdlSize; index++)
+            for (ColumnDescriptor cd : td.getColumnDescriptorList())
 			{
-				ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
-				baseRow.setColumn(cd.getPosition(), cd.getType().getNull());
+                br.setColumn(cd.getPosition(), cd.getType().getNull());
 			}
 
             DataValueDescriptor[][] row_array = new DataValueDescriptor[100][];
-            row_array[0] = baseRow.getRowArray();
+            row_array[0] = br.getRowArray();
             RowLocation[] old_row_location_array = new RowLocation[100];
             RowLocation[] new_row_location_array = new RowLocation[100];
 
@@ -875,7 +864,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				    TransactionController.MODE_TABLE,
 					TransactionController.ISOLATION_SERIALIZABLE);
 
-            int num_rows_fetched = 0;
+            int num_rows_fetched;
+
             while ((num_rows_fetched = 
                         base_group_fetch_cc.fetchNextGroup(
                             row_array, 
@@ -943,8 +933,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 }
 
 		}
-
-		return;
 	}
 
     private static void setup_indexes(
@@ -1026,8 +1014,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
             index_idx++;
         }
-
-        return;
     }
 
 
@@ -1105,8 +1091,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         index_row[index_row.length - 1] = new_row_loc;
 
         index_cc.insert(index_row);
-
-        return;
     }
 
     /**
@@ -1145,8 +1129,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
           }
         }
-
-        return;
     }
 
 	/**
@@ -1422,9 +1404,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//Now go through each trigger on this table and see if the column 
 		//being dropped is part of it's trigger columns or trigger action 
 		//columns which are used through REFERENCING clause
-		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-        for (Iterator descIter = tdl.iterator(); descIter.hasNext() ; ) {
-            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
+        for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
 			//If we find that the trigger is dependent on the column being 
 			//dropped because column is part of trigger columns list, then
 			//we will give a warning or drop the trigger based on whether
@@ -1643,11 +1623,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			if (cascade)
 			{
 				ConstraintDescriptorList fkcdl = dd.getForeignKeys(cd.getUUID());
-				for (int j = 0; j < fkcdl.size(); j++)
-				{
-					ConstraintDescriptor fkcd = 
-                        (ConstraintDescriptor) fkcdl.elementAt(j);
 
+                for (ConstraintDescriptor fkcd : fkcdl)
+                {
 					dm.invalidateFor(fkcd,
 									DependencyManager.DROP_CONSTRAINT,
 									lcc);
@@ -1707,7 +1685,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//
 		for (int i = columnDescriptor.getPosition(), j = 0; i < size; i++, j++)
 		{
-			ColumnDescriptor cd = (ColumnDescriptor) tab_cdl.elementAt(i);
+            ColumnDescriptor cd = tab_cdl.elementAt(i);
 			dd.dropColumnDescriptor(td.getUUID(), cd.getColumnName(), tc);
 			cd.setPosition(i);
 			if (cd.isAutoincrement())
@@ -1763,27 +1741,26 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// able to get to the triggers dependent on the table being altered
 		//Following will get all the dependent objects that are using
 		// ALTER TABLE table as provider
-		List depsOnAlterTableList = dd.getProvidersDescriptorList(td.getObjectID().toString());
-		for (Iterator depsOnAlterTableIterator = depsOnAlterTableList.listIterator(); 
-			depsOnAlterTableIterator.hasNext();)
-		{
-			//Go through all the dependent objects on the table being altered 
-			DependencyDescriptor depOnAlterTableDesc = 
-				(DependencyDescriptor) depsOnAlterTableIterator.next();
-			DependableFinder dependent = depOnAlterTableDesc.getDependentFinder();
-			//For the given dependent, we are only interested in it if it is a
+        List<DependencyDescriptor> depsOnAlterTableList =
+                dd.getProvidersDescriptorList(td.getObjectID().toString());
+
+        for (DependencyDescriptor depOnAT : depsOnAlterTableList)
+        {
+            // Go through all the dependent objects on the table being altered
+            DependableFinder dependent = depOnAT.getDependentFinder();
+
+            // For the given dependent, we are only interested in it if it is a
 			// stored prepared statement.
 			if (dependent.getSQLObjectType().equals(Dependable.STORED_PREPARED_STATEMENT))
 			{
-				//Look for all the dependent objects that are using this 
+                // Look for all the dependent objects that are using this
 				// stored prepared statement as provider. We are only 
 				// interested in dependents that are triggers.
-				List depsTrigger = dd.getProvidersDescriptorList(depOnAlterTableDesc.getUUID().toString());
-				for (Iterator depsTriggerIterator = depsTrigger.listIterator();
-					depsTriggerIterator.hasNext();)
+                List<DependencyDescriptor> depsTrigger =
+                    dd.getProvidersDescriptorList(depOnAT.getUUID().toString());
+
+                for (DependencyDescriptor depsTriggerDesc : depsTrigger)
 				{
-					DependencyDescriptor depsTriggerDesc = 
-						(DependencyDescriptor) depsTriggerIterator.next();
 					DependableFinder providerIsTrigger = depsTriggerDesc.getDependentFinder();
 					//For the given dependent, we are only interested in it if
 					// it is a trigger
@@ -1972,10 +1949,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     private void modifyColumnType(int ix)
             throws StandardException {
 		ColumnDescriptor columnDescriptor = 
-			td.getColumnDescriptor(columnInfo[ix].name),
-			newColumnDescriptor = null;
+            td.getColumnDescriptor(columnInfo[ix].name);
 
-		newColumnDescriptor = 
+        ColumnDescriptor newColumnDescriptor =
 			new ColumnDescriptor(columnInfo[ix].name,
 									columnDescriptor.getPosition(),
 									columnInfo[ix].dataType,
@@ -2003,8 +1979,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     private void modifyColumnConstraint(String colName, boolean nullability)
             throws StandardException {
 		ColumnDescriptor columnDescriptor = 
-			td.getColumnDescriptor(colName),
-			newColumnDescriptor = null;
+            td.getColumnDescriptor(colName);
         
         // Get the type and change the nullability
 		DataTypeDescriptor dataType =
@@ -2040,7 +2015,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             }
         }
 
-		newColumnDescriptor = 
+        ColumnDescriptor newColumnDescriptor =
 			 new ColumnDescriptor(colName,
 									columnDescriptor.getPosition(),
 									dataType,
@@ -2068,7 +2043,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	{
 		ColumnDescriptor columnDescriptor = 
 			td.getColumnDescriptor(columnInfo[ix].name);
-		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 		int columnPosition = columnDescriptor.getPosition();
 
 		// Clean up after the old default, if non-null
@@ -2361,9 +2335,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 		//truncate is not allowed when there are enabled DELETE triggers
-		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-        for (Iterator descIter = tdl.iterator(); descIter.hasNext(); ) {
-            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
+        for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
 			if (trd.listensForEvent(TriggerDescriptor.TRIGGER_EVENT_DELETE) &&
 				trd.isEnabled())
 			{
@@ -2577,7 +2549,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// We can finally drain the sorter and rebuild the index
 		// Populate the index.
 		
-		RowLocationRetRowSource cCount           = null;
+        RowLocationRetRowSource cCount;
 		boolean                 statisticsExist  = false;
 
 		if (!truncateTable)
@@ -3036,9 +3008,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if ((! doneScan) &&
 			(currentCompressRow == bulkFetchSize || !validRow[currentCompressRow]))
 		{
-			int bulkFetched = 0;
-
-			bulkFetched = compressHeapGSC.fetchNextGroup(baseRowArray, compressRL);
+            int bulkFetched =
+                    compressHeapGSC.fetchNextGroup(baseRowArray, compressRL);
 
 			doneScan = (bulkFetched != bulkFetchSize);
 			currentCompressRow = 0;
@@ -3171,7 +3142,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			if (currentRow.getRowArray()[i] instanceof StreamStorable)
 			{
-				((DataValueDescriptor) currentRow.getRowArray()[i]).getObject();
+                currentRow.getRowArray()[i].getObject();
 			}
 		}
 	}
@@ -3391,7 +3362,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		lcc.autoincrementCreateCounter(td.getSchemaName(),
 									   td.getName(),
-									   columnName, new Long(initial),
+                                       columnName, Long.valueOf(initial),
 									   increment, 0);
 		// the sql query is.
 		// UPDATE table 
@@ -3458,7 +3429,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		throws StandardException
 	{
 		boolean foundNullable = false;
-		StringBuffer constraintText = new StringBuffer();
+        StringBuilder constraintText = new StringBuilder();
 
 		/* 
 		 * Check for nullable columns and create a constraint string which can
@@ -3487,8 +3458,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					// column name uses lower case characters, spaces, or
 					// other unusual characters.
 					constraintText.append(
-						IdUtil.normalToDelimited(columnNames[colCtr]) +
-						" IS NOT NULL ");
+                        IdUtil.normalToDelimited(columnNames[colCtr]));
+                    constraintText.append(" IS NOT NULL ");
 				}
 				foundNullable = true;
 				nullCols[colCtr] = true;

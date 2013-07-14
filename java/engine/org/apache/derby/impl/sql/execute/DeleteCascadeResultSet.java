@@ -21,18 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
 
@@ -108,6 +102,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	/**
 		@exception StandardException Standard Derby error policy
 	*/
+    @Override
+    @SuppressWarnings({"UseOfObsoleteCollectionType", "empty-statement"})
 	public void open() throws StandardException
 	{
 
@@ -118,7 +114,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			{
 				setRowHoldersTypeToUniqueStream();
 				//collect until there are no more rows to found
-				while(collectAffectedRows(false));
+                while(collectAffectedRows(false)) {};
 			}else
 			{
 				collectAffectedRows(false);
@@ -156,6 +152,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	 *and creates a temporary resulsets that will be passed
 	 *as source to its  dependent result sets.
 	 */
+    @Override @SuppressWarnings("UseOfObsoleteCollectionType")
 	void  setup() throws StandardException
 	{
 
@@ -168,7 +165,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 		super.setup();
 		activation.setParentResultSet(rowHolder, resultSetId);
-		Vector sVector = (Vector) activation.getParentResultSet(resultSetId);
+        Vector<TemporaryRowHolder> sVector =
+                activation.getParentResultSet(resultSetId);
 		tempRowHolderId = sVector.size() -1;
 		for(int i =0 ; i < noDependents; i++)
 		{
@@ -209,7 +207,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 		return rowsFound;
 	}
 
-
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	void fireBeforeTriggers(Hashtable<String,String> msht) throws StandardException
 	{
 		if(!mainNodeForTable) 
@@ -247,6 +245,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			super.fireBeforeTriggers();
 	}
 
+    @Override
     void fireAfterTriggers() throws StandardException
 	{
 		//fire the After Triggers on the dependent tables, if any rows changed
@@ -267,6 +266,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			super.fireAfterTriggers();
 	}
 
+    @Override
 	void deleteDeferredRows() throws StandardException
 	{
 		
@@ -290,6 +290,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	}
 
 	
+    @Override
 	void runFkChecker(boolean restrictCheckOnly) throws StandardException
 	{
 
@@ -312,6 +313,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	}
 
 
+    @Override
 	public void cleanUp() throws StandardException
 	{
 
@@ -351,6 +353,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	//if there is more than one node for the same table, copy the rows
 	// into one node , so that we don't fire trigger more than once.
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private void mergeRowHolders(Hashtable<String,String> msht) throws StandardException
 	{
 		if(msht.containsKey(resultSetId) || rowCount ==0)
@@ -381,15 +384,17 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 
 
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private void mergeResultSets() throws StandardException
 	{
-		Vector sVector = (Vector) activation.getParentResultSet(resultSetId);
-		int size = sVector.size();
+        Vector<TemporaryRowHolder>
+                sVector = activation.getParentResultSet(resultSetId);
+        int size = sVector.size();
 		// if there is more than one source, we need to merge them into onc
 		// temporary result set.
 		if(size > 1)
 		{
-			ExecRow		row = null;
+            ExecRow row;
 			int rowHolderId = 0 ;
 			//copy all the vallues in the result set to the current resultset row holder
 			while(rowHolderId <  size)
@@ -400,7 +405,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 					rowHolderId++;
 					continue;
 				}
-				TemporaryRowHolder currentRowHolder = (TemporaryRowHolder)sVector.elementAt(rowHolderId);	
+                TemporaryRowHolder
+                        currentRowHolder = sVector.elementAt(rowHolderId);
 				CursorResultSet rs = currentRowHolder.getResultSet();
 				rs.open();
 				while ((row = rs.getNextRow()) != null)
@@ -415,6 +421,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	}
 
 
+    @Override
 	public void finish() throws StandardException {
 		super.finish();
 		
@@ -428,14 +435,17 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	** find any retun true.	Multiple delete paths exist if we find more than
 	** one parent source resultset for a table involved in the delete cascade
 	**/
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private boolean isMultipleDeletePathsExist()
 	{
-		for (Enumeration e = activation.getParentResultSetKeys() ; e.hasMoreElements() ;) 
+        for (Enumeration<String> e = activation.getParentResultSetKeys() ;
+             e.hasMoreElements() ;)
 		{
-			String rsId  = (String) e.nextElement();
-			Vector sVector = (Vector) activation.getParentResultSet(rsId);
-			int size = sVector.size();
-			if(size > 1)
+            String rsId  = e.nextElement();
+            Vector<TemporaryRowHolder>
+                    sVector = activation.getParentResultSet(rsId);
+
+            if(sVector.size() > 1)
 			{
 				return true;
 			}
@@ -450,17 +460,21 @@ class DeleteCascadeResultSet extends DeleteResultSet
 	**multiple iterations. To handle these case we set the temporary row holders
 	** to be  'uniqStream' type.
 	**/
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private void setRowHoldersTypeToUniqueStream()
 	{
-		for (Enumeration e = activation.getParentResultSetKeys() ; e.hasMoreElements() ;) 
+        for (Enumeration<String> e = activation.getParentResultSetKeys() ;
+             e.hasMoreElements() ;)
 		{
-			String rsId  = (String) e.nextElement();
-			Vector sVector = (Vector) activation.getParentResultSet(rsId);
+            String rsId  = e.nextElement();
+            Vector<TemporaryRowHolder>
+                    sVector = activation.getParentResultSet(rsId);
 			int size = sVector.size();
 			int rowHolderId = 0 ;
 			while(rowHolderId <  size)
 			{
-				TemporaryRowHolder currentRowHolder = (TemporaryRowHolder)sVector.elementAt(rowHolderId);	
+                TemporaryRowHolder
+                        currentRowHolder = sVector.elementAt(rowHolderId);
 				currentRowHolder.setRowHolderTypeToUniqueStream();
 				rowHolderId++;
 			}

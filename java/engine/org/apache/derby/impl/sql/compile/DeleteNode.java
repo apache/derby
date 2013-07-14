@@ -46,7 +46,7 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -680,7 +680,7 @@ class DeleteNode extends DMLModStatementNode
 		needsDeferredProcessing[0] = requiresDeferredProcessing();
 
         ArrayList<ConglomerateDescriptor> conglomerates = new ArrayList<ConglomerateDescriptor>();
-		relevantTriggers = new GenericDescriptorList();
+        relevantTriggers = new TriggerDescriptorList();
 
         FormatableBitSet columnMap = DeleteNode.getDeleteReadMap(baseTable,
                 conglomerates, relevantTriggers, needsDeferredProcessing);
@@ -886,7 +886,7 @@ class DeleteNode extends DMLModStatementNode
 	(
 		TableDescriptor				baseTable,
         List<ConglomerateDescriptor>  conglomerates,
-		GenericDescriptorList		relevantTriggers,
+        TriggerDescriptorList       relevantTriggers,
 		boolean[]					needsDeferredProcessing
 	)
 		throws StandardException
@@ -929,9 +929,8 @@ class DeleteNode extends DMLModStatementNode
 			needsDeferredProcessing[0] = true;
 			
 			boolean needToIncludeAllColumns = false;
-            for (Iterator<?> descIter = relevantTriggers.iterator();
-                    descIter.hasNext(); ) {
-                TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
+
+            for (TriggerDescriptor trd : relevantTriggers) {
 				//Does this trigger have REFERENCING clause defined on it.
 				//If yes, then read all the columns from the trigger table.
 				if (!trd.getReferencingNew() && !trd.getReferencingOld())

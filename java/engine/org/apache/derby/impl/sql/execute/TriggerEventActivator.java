@@ -54,7 +54,6 @@ public class TriggerEventActivator
 	private int								dmlType;
 	private UUID							tableId;
 	private String							tableName;
-	private Vector							aiCounters;
 
 	/**
 	 * Basic constructor
@@ -67,6 +66,7 @@ public class TriggerEventActivator
 	 *
 	 * @exception StandardException on error
 	 */
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	public TriggerEventActivator
 	(
 		LanguageConnectionContext	lcc, 
@@ -74,7 +74,7 @@ public class TriggerEventActivator
 		TriggerInfo 				triggerInfo,
 		int							dmlType,
 		Activation					activation,
-		Vector						aiCounters
+        Vector<AutoincrementCounter> aiCounters
 	) throws StandardException
 	{
 		if (triggerInfo == null)
@@ -126,8 +126,8 @@ public class TriggerEventActivator
 								statementText,
 								dmlType,
 								tableId,	
-								tableName, aiCounters
-								);
+                                tableName,
+                                null);
 		setupExecutors(triggerInfo);
 	}
     

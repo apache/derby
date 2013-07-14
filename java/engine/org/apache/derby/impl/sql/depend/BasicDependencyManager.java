@@ -170,10 +170,10 @@ public class BasicDependencyManager implements DependencyManager {
         // If we find that the dependency we are trying to add in
         // one list is a duplicate, then it should be a duplicate in the
         // other list.
-        boolean addedToDeps = false;
         boolean addedToProvs = false;
+        boolean addedToDeps =
+                addDependencyToTable(dependents, d.getObjectID(), dy);
 
-        addedToDeps = addDependencyToTable(dependents, d.getObjectID(), dy);
         if (addedToDeps) {
             addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
         } else if (SanityManager.DEBUG) {
@@ -567,16 +567,15 @@ public class BasicDependencyManager implements DependencyManager {
 	 */
     public ProviderInfo[] getPersistentProviderInfos(Dependent dependent)
             throws StandardException {
-		List list = getProviders(dependent);
-        if (list.isEmpty()) {
+        List<Provider> provs = getProviders(dependent);
+
+        if (provs.isEmpty()) {
 			return EMPTY_PROVIDER_INFO;
 		}
 
-        Iterator provIter = list.iterator();
         List<ProviderInfo> pih = new ArrayList<ProviderInfo>();
-        while (provIter.hasNext()) {
-            Provider p = (Provider)provIter.next();
 
+        for (Provider p : provs) {
             if (p.isPersistent()) {
 				pih.add(new BasicProviderInfo(
                                         p.getObjectID(),
@@ -860,19 +859,19 @@ public class BasicDependencyManager implements DependencyManager {
 		throws StandardException
 	{
         // Add the stored dependencies.
-        List storedDeps = dd.getAllDependencyDescriptorsList();
+        List<?> storedDeps = dd.getAllDependencyDescriptorsList();
         int numDependencies = storedDeps.size();
         synchronized(this) {
-            Iterator deps = dependents.values().iterator();
-            Iterator provs = providers.values().iterator();
+            Iterator<List<Dependency>> deps = dependents.values().iterator();
+            Iterator<List<Dependency>> provs = providers.values().iterator();
 
             // Count the in memory dependencies.
             while (deps.hasNext()) {
-                numDependencies += ((List) deps.next()).size();
+                numDependencies += deps.next().size();
             }
 
             while (provs.hasNext()) {
-                numDependencies += ((List) provs.next()).size();
+                numDependencies += provs.next().size();
             }
         }
         return numDependencies;
@@ -895,9 +894,11 @@ public class BasicDependencyManager implements DependencyManager {
 	 *
 	 * @return boolean		Whether or not the dependency get added.
 	 */
-    private boolean addDependencyToTable(Map<UUID,List<Dependency>> table, UUID key, Dependency dy) {
+    private boolean addDependencyToTable(
+            Map<UUID, List<Dependency>> table, UUID key, Dependency dy) {
 
-		List<Dependency> deps = (List<Dependency>) table.get(key);
+        List<Dependency> deps = table.get(key);
+
 		if (deps == null) {
             deps = new ArrayList<Dependency>();
 			deps.add(dy);
@@ -942,15 +943,16 @@ public class BasicDependencyManager implements DependencyManager {
 	 */
     //@GuardedBy("this")
     private void clearProviderDependency(UUID p, Dependency d) {
-		List deps = (List) providers.get(p);
+        List<?> deps = providers.get(p);
 
 		if (deps == null)
 			return;
 
 		deps.remove(d);
 
-		if (deps.size() == 0)
+        if (deps.isEmpty()) {
 			providers.remove(p);
+        }
 	}
 
 	/**
@@ -985,30 +987,28 @@ public class BasicDependencyManager implements DependencyManager {
 			{
 				Dependent 			tempD;
 				Provider  			tempP;
-				DependableFinder	finder = null;
+                DependableFinder    finder = depDesc.getDependentFinder();
+                tempD = (Dependent) finder.getDependable(dd, depDesc.getUUID());
 
-					finder = depDesc.getDependentFinder();
-					tempD = (Dependent) finder.getDependable(dd, depDesc.getUUID() );
+                if (providerForList != null)
+                {
+                    // Use the provider being passed in.
+                    tempP = providerForList;
 
-					if (providerForList != null)
-					{
-						// Use the provider being passed in.
-						tempP = providerForList;
-						
-						// Sanity check the object identifiers match.
-						if (SanityManager.DEBUG) {
-							if (!tempP.getObjectID().equals(depDesc.getProviderID()))
-							{
-								SanityManager.THROWASSERT("mismatch providers");
-							}
-						}
-					}
-					else
-					{
-						finder = depDesc.getProviderFinder();
-						tempP = (Provider) finder.getDependable(dd, depDesc.getProviderID() );
-						
-					}
+                    // Sanity check the object identifiers match.
+                    if (SanityManager.DEBUG) {
+                        if (!tempP.getObjectID().equals(depDesc.getProviderID()))
+                        {
+                            SanityManager.THROWASSERT("mismatch providers");
+                        }
+                    }
+                }
+                else
+                {
+                    finder = depDesc.getProviderFinder();
+                    tempP = (Provider) finder.getDependable(dd, depDesc.getProviderID() );
+
+                }
 
 				retval.add( new BasicDependency( tempD, tempP ) );
 			}

@@ -801,6 +801,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 * @return The contents as a String
 	 */
+    @Override
 	public final String toString()
 	{
 		if (SanityManager.DEBUG)
@@ -1019,7 +1020,8 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
                     preparedStatement = null;
 					updateSYSSTATEMENTS(lcc, INVALIDATE, null);
 				}
-				dm.invalidateFor(this, dm.USER_RECOMPILE_REQUEST, lcc);
+                dm.invalidateFor(
+                        this, DependencyManager.USER_RECOMPILE_REQUEST, lcc);
 				break;
 			case DependencyManager.DROP_SPS:
 				//System.out.println("SPSD " + preparedStatement);
@@ -1161,12 +1163,14 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	}
 
 	/** @see TupleDescriptor#getDescriptorType */
+    @Override
 	public String getDescriptorType() { return "Statement"; }
 
 	/** @see TupleDescriptor#getDescriptorName */
 	// RESOLVE: some descriptors have getName.  some descriptors have
 	// getTableName, getColumnName whatever! try and unify all of this to one
 	// getDescriptorName! 
+    @Override
 	public String getDescriptorName() { return name; }
 	
 }

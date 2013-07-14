@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 
 import java.io.ObjectOutput;
@@ -36,6 +35,7 @@ import java.util.Vector;
  * @see java.util.Vector
  *
  */
+@SuppressWarnings("UseOfObsoleteCollectionType")
 public class AggregatorInfoList extends Vector<AggregatorInfo> implements Formatable 
 {
 	/********************************************************
@@ -67,10 +67,8 @@ public class AggregatorInfoList extends Vector<AggregatorInfo> implements Format
 	 */
 	public boolean hasDistinct()
 	{
-		int count = size();
-		for (int i = 0; i < count; i++)
+        for (AggregatorInfo aggInfo : this)
 		{
-			AggregatorInfo aggInfo = (AggregatorInfo) elementAt(i);
 			if (aggInfo.isDistinct())
 			{
 				return true;

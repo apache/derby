@@ -324,7 +324,6 @@ public abstract class ConstraintDescriptor
 	{
 		if (colDL == null)
 		{
-			DataDictionary dd = getDataDictionary();
 			colDL = new ColumnDescriptorList();
 	
 			int[]	refCols = getReferencedColumns();
@@ -369,8 +368,8 @@ public abstract class ConstraintDescriptor
 		int index;
 		for (index = 0; index < mySize && index < otherSize; index++)
 		{
-			myColumn = (ColumnDescriptor) myColDl.elementAt(index);	
-			otherColumn = (ColumnDescriptor) otherColumns.elementAt(index);	
+            myColumn = myColDl.elementAt(index);
+            otherColumn = otherColumns.elementAt(index);
 
 			/*
 			** Just compare the types.  Note that this will
@@ -442,7 +441,8 @@ public abstract class ConstraintDescriptor
 	 * @return	A String representation of this ColumnDescriptor
 	 */
 
-	public String	toString()
+    @Override
+    public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -750,7 +750,9 @@ public abstract class ConstraintDescriptor
     }
 	
 	/** @see TupleDescriptor#getDescriptorName */
+    @Override
 	public String getDescriptorName() { return constraintName; }
 	
+    @Override
 	public String getDescriptorType() { return "Constraint"; }
 }

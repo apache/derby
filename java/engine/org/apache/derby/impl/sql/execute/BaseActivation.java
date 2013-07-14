@@ -464,8 +464,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 			closed = true;
 
-			LanguageConnectionContext lcc = getLanguageConnectionContext();
-
             // Remove all the dependencies this activation has. It won't need
             // them after it's closed, so let's free up the memory in the
             // dependency manager. (DERBY-4571)
@@ -1492,8 +1490,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		if (ps == null)
 			return;
 			
-		LanguageConnectionContext lcc = getLanguageConnectionContext();
-
 		CursorActivation cursorActivation = lcc.lookupCursorActivation(cursorName);
 
 		if (cursorActivation != null)
@@ -1531,6 +1527,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 *	@param	rs	input result set
 	 *	@return	materialized resultset, or original rs if it can't be materialized
 	 */
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	public NoPutResultSet materializeResultSetIfPossible(NoPutResultSet rs)
 		throws StandardException
 	{
@@ -1581,7 +1578,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			{
 				rrs[i] = new RowResultSet(
 										this,
-										(ExecRow) rowCache.elementAt(i),
+                                        rowCache.elementAt(i),
 										true,
 										rsNum,
 										1,
@@ -1616,13 +1613,17 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 	// maintain hash table of parent result set vector
 	// a table can have more than one parent source.
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	protected Hashtable<String,Vector<TemporaryRowHolder>> parentResultSets;
-	public void setParentResultSet(TemporaryRowHolder rs, String resultSetId)
+
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public void setParentResultSet(TemporaryRowHolder rs, String resultSetId)
 	{
 		Vector<TemporaryRowHolder>  rsVector;
 		if(parentResultSets == null)
 			parentResultSets = new Hashtable<String,Vector<TemporaryRowHolder>>();
-		rsVector = (Vector<TemporaryRowHolder>) parentResultSets.get(resultSetId);
+        rsVector = parentResultSets.get(resultSetId);
+
 		if(rsVector == null)
 		{
 			rsVector = new Vector<TemporaryRowHolder>();
@@ -1638,9 +1639,10 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * get the reference to parent table ResultSets, that will be needed by the 
 	 * referential action dependent table scans.
 	 */
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	public Vector<TemporaryRowHolder> getParentResultSet(String resultSetId)
 	{
-		return (Vector<TemporaryRowHolder>) parentResultSets.get(resultSetId);
+        return parentResultSets.get(resultSetId);
 	}
 
 	public Enumeration<String> getParentResultSetKeys()

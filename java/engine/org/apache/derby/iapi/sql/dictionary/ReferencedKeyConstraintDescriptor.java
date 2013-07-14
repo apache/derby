@@ -21,13 +21,10 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.catalog.UUID;
 /**
  * A ReferencedConstraintDeescriptor is a primary key or a unique
  * key that is referenced by a foreign key.
@@ -125,7 +122,6 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			return hasSelfReferencing;
 		}
 	
-		ConstraintDescriptor cd;
 		ForeignKeyConstraintDescriptor fkcd;
 		/* Get a full list of referencing keys, if caller
 		 * passed in null CDL.
@@ -134,11 +130,9 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		{
 			cdl = getForeignKeyConstraints(type);
 		}
-		int cdlSize = cdl.size();
 
-		for (int index = 0; index < cdlSize; index++)
+        for (ConstraintDescriptor cd : cdl)
 		{
-			cd = (ConstraintDescriptor) cdl.elementAt(index);
 			if (! (cd instanceof ForeignKeyConstraintDescriptor))
 			{
 				continue;
@@ -172,15 +166,12 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			checkType(type);
 		}
 	
-		ConstraintDescriptor cd;
 		ForeignKeyConstraintDescriptor fkcd;
 		// Get a full list of referencing keys,
 		ConstraintDescriptorList cdl = getForeignKeyConstraints(type);
- 		int cdlSize = cdl.size();
 
-		for (int index = 0; index < cdlSize; index++)
+        for (ConstraintDescriptor cd : cdl)
 		{
-			cd = (ConstraintDescriptor) cdl.elementAt(index);
 			if (! (cd instanceof ForeignKeyConstraintDescriptor))
 			{
 				continue;
@@ -262,6 +253,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 *
 	 * @return false
 	 */
+    @Override
 	public boolean isReferenced()
 	{
 		return referenceCount != 0;
@@ -273,6 +265,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 *
 	 * @return the number of fks
 	 */
+    @Override
 	public int getReferenceCount()
 	{
 		return referenceCount;

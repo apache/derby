@@ -21,28 +21,23 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.property.PersistentSet;
+import java.util.List;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.property.PersistentSet;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
-import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.StringUtil;
 
-import java.util.Properties;
-import java.util.List;
-import java.util.Iterator;
-
-class GenericAuthorizer
-implements Authorizer
+class GenericAuthorizer implements Authorizer
 {
 	//
 	//Enumerations for user access levels.
@@ -137,7 +132,8 @@ implements Authorizer
 		}
         if( activation != null)
         {
-            List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+            List<StatementPermission> requiredPermissionsList =
+                activation.getPreparedStatement().getRequiredPermissionsList();
             DataDictionary dd = lcc.getDataDictionary();
 
             // Database Owner can access any object. Ignore 
@@ -177,11 +173,9 @@ implements Authorizer
                     try 
                     {
                     	// perform the permission checking
-                        for (Iterator iter = requiredPermissionsList.iterator(); 
-                            iter.hasNext();) 
+                        for (StatementPermission rp : requiredPermissionsList)
                         {
-                            ((StatementPermission) iter.next()).check
-                                (lcc, false, activation);
+                            rp.check(lcc, false, activation);
                         }
                     } 
                     finally 
@@ -244,8 +238,7 @@ implements Authorizer
 	{
 		PersistentSet tc = lcc.getTransactionExecute();
 
-		String modeS = (String)
-			PropertyUtil.getServiceProperty(
+        String modeS = PropertyUtil.getServiceProperty(
 									tc,
 									Property.DEFAULT_CONNECTION_MODE_PROPERTY);
 		if (modeS == null)
@@ -270,8 +263,7 @@ implements Authorizer
 	private boolean userOnAccessList(String listName) throws StandardException
 	{
 		PersistentSet tc = lcc.getTransactionExecute();
-		String listS = (String)
-			PropertyUtil.getServiceProperty(tc, listName);
+        String listS = PropertyUtil.getServiceProperty(tc, listName);
         return IdUtil.idOnList(lcc.getSessionUserId(),listS);
 	}
 
@@ -301,7 +293,7 @@ implements Authorizer
 	  @see Authorizer#refresh
 	  @exception StandardException Thrown if the operation is not allowed
 	  */
-	public void refresh() throws StandardException
+    public final void refresh() throws StandardException
 	{
 		getUserAccessLevel();
 		if (!readOnlyConnection)

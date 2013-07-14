@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -74,7 +74,7 @@ public final class TriggerInfo implements Formatable
 	 */
 	public TriggerInfo
 	(
-		GenericDescriptorList	triggers
+        TriggerDescriptorList   triggers
 	)
 	{
 		if (SanityManager.DEBUG)
@@ -86,8 +86,7 @@ public final class TriggerInfo implements Formatable
 		/*
 		** Copy the trigger descriptors into an array of the right type
 		*/
-        triggerArray = (TriggerDescriptor[])
-                triggers.toArray(new TriggerDescriptor[triggers.size()]);
+        triggerArray = triggers.toArray(new TriggerDescriptor[triggers.size()]);
 	}
 
 	/**
@@ -177,15 +176,17 @@ public final class TriggerInfo implements Formatable
 	// Misc
 	//
 	//////////////////////////////////////////////////////////////
+    @Override
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer str = new StringBuffer();
+            StringBuilder str = new StringBuilder();
 			str.append("\nTriggers:");
 			for (int i = 0; i < triggerArray.length; i++)
 			{
-				str.append("\n"+triggerArray[i]);
+                str.append('\n');
+                str.append(triggerArray[i]);
 			}
 			return str.toString();
 		}

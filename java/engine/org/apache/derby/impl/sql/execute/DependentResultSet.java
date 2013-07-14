@@ -23,7 +23,6 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.Properties;
 import java.util.Vector;
-import org.w3c.dom.Element;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -50,10 +49,12 @@ import org.apache.derby.iapi.types.RowLocation;
  * DependentResultSet should be used by only ON DELETE CASCADE/ON DELETE SET NULL ref
  * actions implementation to gather the rows from the dependent tables.  
  * Idea is to scan the foreign key index for the rows in 
- * the source table matelized temporary result set. Scanning of foreign key index gives us the 
+ * the source table materialized temporary result set.
+ * Scanning of foreign key index gives us the
  * rows that needs to be deleted on dependent tables. Using the row location 
  * we got from the index , base row is fetched.
 */
+@SuppressWarnings("UseOfObsoleteCollectionType")
 class DependentResultSet extends ScanResultSet implements CursorResultSet
 {
 
@@ -67,7 +68,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	DynamicCompiledOpenConglomInfo indexDcoci;
 	int numFkColumns;
 	boolean isOpen; // source result set is opened or not
-	boolean deferred;
 	TemporaryRowHolderResultSet source; // Current parent table result set
 	TransactionController tc;
 	String parentResultSetId;
@@ -77,7 +77,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	TemporaryRowHolderResultSet[] sourceResultSets;
 	int[] sourceOpened;
 	int    sArrayIndex;
-	Vector sVector;
+    Vector<TemporaryRowHolder> sVector;
 
 
     protected ScanController scanController;
@@ -162,8 +162,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
         heapDcoci = activation.getTransactionController().getDynamicCompiledConglomInfo(conglomId);
 
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT( activation!=null, "table scan must get activation context");
-
             // This ResultSet doesn't use start or stop keys, so expect them
             // to be null.
             SanityManager.ASSERT(startKeyGetter == null, "start key not null");
@@ -181,8 +179,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		this.rowsPerRead = rowsPerRead;
 		this.oneRowScan = oneRowScan;
 		
-		runTimeStatisticsOn = (activation != null &&
-							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
+        runTimeStatisticsOn = (activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
 
 		tc = activation.getTransactionController();
 		//values required to scan the forein key index.
@@ -255,6 +252,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	*/
 	private void setupQualifierRow(ExecRow searchRow)
 	{
+        @SuppressWarnings("MismatchedReadAndWriteOfArray")
 		Object[] indexColArray = indexQualifierRow.getRowArray();
 		Object[] baseColArray = searchRow.getRowArray();
 
@@ -468,10 +466,11 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	/**
 	  Close the all the opens we did in this result set.
 	  */
+    @Override
 	public void close()
         throws StandardException
 	{
-		//save the information for the runtime stastics
+        // save the information for the runtime statistics
 		// This is where we get the scan properties for the reference index scans
 		if (runTimeStatisticsOn)
 		{
@@ -499,6 +498,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		closeTime += getElapsedMillis(beginTime);
 	}
 
+    @Override
 	public void	finish() throws StandardException
 	{
 		if (source != null)
@@ -516,7 +516,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		sourceResultSets = new TemporaryRowHolderResultSet[size];
 		for(int i = 0 ; i < size ; i++)
 		{
-			sourceRowHolders[i] = (TemporaryRowHolder)sVector.elementAt(i);
+            sourceRowHolders[i] = sVector.elementAt(i);
 			sourceOpened[i] = 0;
 		}
 
@@ -542,7 +542,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		//copy the new sources
 		for(int i = sourceRowHolders.length; i < size ; i++)
 		{
-			tsourceRowHolders[i] = (TemporaryRowHolder)sVector.elementAt(i);
+            tsourceRowHolders[i] = sVector.elementAt(i);
 			tsourceOpened[i] = 0;
 		}
 
@@ -627,10 +627,9 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	 */
 	private String printPosition(int searchOperator, ExecIndexRow positioner)
 	{
-		String idt = "";
 		String output = "";
 
-		String searchOp = null;
+        String searchOp;
 		switch (searchOperator)
 		{
 			case ScanController.GE:

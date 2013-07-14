@@ -21,14 +21,12 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.StatementType;
-import java.util.Hashtable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.i18n.MessageService;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.sql.StatementType;
 
 /**
  *	Static Data dictionary utilities.
@@ -63,7 +61,7 @@ public	class	DDUtils
 		}
 
 
-		ReferencedKeyConstraintDescriptor refCd = null;
+        ReferencedKeyConstraintDescriptor refCd;
 
 		/*
 		** There were no column names specified, just find
@@ -168,10 +166,9 @@ public	class	DDUtils
 			return false;
 		}
 		
-		String name;
 		for (int index = 0; index < columnNames.length; index++)
 		{
-			name = ((ColumnDescriptor) cdl.elementAt(index)).getColumnName();
+            String name = cdl.elementAt(index).getColumnName();
 			if (!name.equals(columnNames[index]))
 			{
 				return false;
@@ -186,6 +183,7 @@ public	class	DDUtils
 	**checks whether the foreign key relation ships referential action
 	**is violating the restrictions we have in the current system.
 	**/
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	public static void validateReferentialActions
     (
 		DataDictionary	dd,
@@ -258,7 +256,7 @@ public	class	DDUtils
 	** connected to, referential action that will occur if there is a delete on
 	** the table this table connected to[CASACDE, SETNULL , RESTRICT ...etc).)
 	**/
-
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private	static int  getCurrentDeleteConnections
 	(
 	 DataDictionary	dd,
@@ -305,7 +303,8 @@ public	class	DDUtils
 				   
 					String refTableName = refTd.getSchemaName() + "." + refTd.getName();
 					//check with  the existing references.
-					Integer rAction = ((Integer)dch.get(refTableName));
+                    Integer rAction = dch.get(refTableName);
+
 					if(rAction != null) // we already looked at this table
 					{
 						prevNotCascade = passedInPrevNotCascade;
@@ -332,7 +331,7 @@ public	class	DDUtils
 					//not specified on the current link. It is actually the 
 					//value of what happens to the table whose delete
 					// connections we are finding.
-					dch.put(refTableName, (new Integer(childRefAction)));
+                    dch.put(refTableName, Integer.valueOf(childRefAction));
 					
 					//find the next delete conectiions on this path for non
 					//self referencig delete connections.
@@ -360,7 +359,7 @@ public	class	DDUtils
 	** Our implementation just follows what is did in DB2 and throws error
 	** messaged similar to DB2 (sql0632N, sql0633N, sql0634N)
 	*/
-
+    @SuppressWarnings("UseOfObsoleteCollectionType")
 	private	static void validateDeleteConnection
 	(
 		DataDictionary	dd,
@@ -391,7 +390,7 @@ public	class	DDUtils
 		if(checkImmediateRefTable)
 		{
 		    String refTableName = refTd.getSchemaName() + "." + refTd.getName();
-			rAction = ((Integer)dch.get(refTableName));
+            rAction = dch.get(refTableName);
 			
 			// check possible invalide cases incase of self referencing foreign key
 			if(isSelfReferencingFk)
@@ -442,8 +441,9 @@ public	class	DDUtils
 				** CASCADE, otherwise we should throw error.
 				*/
 
-				if(isSelfReferencingFk && dch.contains(new Integer(StatementType.RA_CASCADE)) && 
-				   refActionType!=  StatementType.RA_CASCADE)
+                if( isSelfReferencingFk &&
+                    dch.contains(Integer.valueOf(StatementType.RA_CASCADE)) &&
+                    refActionType !=  StatementType.RA_CASCADE)
 				{
 					throw
 						generateError(SQLState.LANG_DELETE_RULE_MUSTBE_ECASCADE,
@@ -588,7 +588,7 @@ public	class	DDUtils
 				
 
 				String nextRefTableName =  nextRefTd.getSchemaName() + "." + nextRefTd.getName();
-				rAction = ((Integer)ech.get(nextRefTableName));
+                rAction = ech.get(nextRefTableName);
 				if(rAction != null)
 				{
 					/*
@@ -606,11 +606,14 @@ public	class	DDUtils
 
 				}else
 				{
-					rAction = ((Integer)dch.get(nextRefTableName));
+                    rAction = dch.get(nextRefTableName);
 					if(rAction == null)
 					{
-						if(multiPathCheck)
-							dch.put(nextRefTableName, (new Integer(refActionType)));
+                        if (multiPathCheck) {
+                            dch.put(nextRefTableName,
+                                    Integer.valueOf(refActionType));
+                        }
+
 						if(!isSelfRefLink)
 						{
 							validateDeleteConnection(dd, actualTd,  nextRefTd,
@@ -751,7 +754,8 @@ public	class	DDUtils
 	**/
 
 
-	private static void checkForAnyExistingDeleteConnectionViolations
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    private static void checkForAnyExistingDeleteConnectionViolations
 	(
 	 DataDictionary	dd,
 	 TableDescriptor td,
@@ -770,12 +774,9 @@ public	class	DDUtils
 		//find the tables that are referring to the table we 
 		//are adding the foreign key and check whether we violate their existing rules.
 		String addTableName = td.getSchemaName() + "." + td.getName();;
-		ConstraintDescriptorList refCDL = dd.getConstraintDescriptors(td);
-		int refCDLSize = refCDL.size();
-		for (int index = 0; index < refCDLSize; index++)
-		{
-			ConstraintDescriptor cd = refCDL.elementAt(index);
 
+        for (ConstraintDescriptor cd : dd.getConstraintDescriptors(td))
+        {
 			if ((cd instanceof ReferencedKeyConstraintDescriptor))
 			{
 				ConstraintDescriptorList fkcdl = dd.getActiveConstraintDescriptors

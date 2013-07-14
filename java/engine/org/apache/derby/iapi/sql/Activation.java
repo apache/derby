@@ -21,36 +21,27 @@
 
 package org.apache.derby.iapi.sql;
 
+import java.sql.SQLWarning;
+import java.util.Enumeration;
+import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.depend.Dependent;
-
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-
-import java.sql.SQLWarning;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.RowLocation;
 
 
 /**
@@ -562,12 +553,13 @@ public interface Activation extends Dependent
 	 * get the reference to parent table ResultSets, that will be needed by the 
 	 * referential action dependent table scans.
 	 */
-	public Vector getParentResultSet(String resultSetId);
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Vector<TemporaryRowHolder> getParentResultSet(String resultSetId);
 	
 	//clear the parent resultset hash table;
 	public void clearParentResultSets();
 
-	public Enumeration getParentResultSetKeys();
+    public Enumeration<String> getParentResultSetKeys();
 
 	/**
 	 * beetle 3865: updateable cursor using index.  A way of communication

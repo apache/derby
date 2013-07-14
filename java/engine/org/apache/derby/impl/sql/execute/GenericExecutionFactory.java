@@ -315,7 +315,7 @@ public class GenericExecutionFactory
 		int 						dmlType,
 		UUID						targetTableId,
 		String						targetTableName,
-		Vector						aiCounters
+        Vector<AutoincrementCounter> aiCounters
 	) throws StandardException
 	{
 		return new InternalTriggerExecutionContext(lcc, cc,

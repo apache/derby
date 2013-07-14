@@ -51,7 +51,7 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -87,7 +87,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	public	long[]						indexConglomerateNumbers;
 	public	String[]					indexNames;
 	protected ConstraintDescriptorList relevantCdl;
-	protected GenericDescriptorList relevantTriggers;
+    protected TriggerDescriptorList relevantTriggers;
 
 	// PRIVATE
 	private boolean			requiresDeferredProcessing;
@@ -1048,7 +1048,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @param triggerList				The trigger descriptor list
 	 */
-    private void generateTriggerInfo(GenericDescriptorList triggerList)
+    private void generateTriggerInfo(TriggerDescriptorList triggerList)
 	{	
         if ((triggerList != null) && (!triggerList.isEmpty()))
 		{
@@ -1117,15 +1117,14 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 */
 	private void createTriggerDependencies
 	(
-		GenericDescriptorList 		tdl,
+        TriggerDescriptorList       tdl,
 		Dependent					dependent
 	)
 		throws StandardException
 	{
 		CompilerContext 			compilerContext = getCompilerContext();
 
-        for (Iterator<?> descIter = tdl.iterator(); descIter.hasNext() ; ) {
-            TriggerDescriptor td = (TriggerDescriptor)descIter.next();
+        for (TriggerDescriptor td : tdl) {
             /*
             ** The dependent now depends on this trigger.
             ** The default dependent is the statement being compiled.
@@ -1152,7 +1151,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	protected GenericDescriptorList getAllRelevantTriggers
+    protected TriggerDescriptorList getAllRelevantTriggers
 	(
 		DataDictionary		dd,
 		TableDescriptor		td,
@@ -1163,7 +1162,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	{
 		if ( relevantTriggers !=  null ) { return relevantTriggers; }
 
-		relevantTriggers =  new GenericDescriptorList();
+        relevantTriggers =  new TriggerDescriptorList();
 
 		if(!includeTriggers)
 			return relevantTriggers;

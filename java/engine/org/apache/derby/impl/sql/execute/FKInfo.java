@@ -236,7 +236,7 @@ public class FKInfo implements Formatable
 			newfks = new FKInfo[size];
 			for (int i = 0; i < size; i++)
 			{
-				newfks[i] = (FKInfo)newfksVector.elementAt(i);
+                newfks[i] = newfksVector.elementAt(i);
 			}
 		}
 		return newfks;

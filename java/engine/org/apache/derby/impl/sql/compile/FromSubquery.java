@@ -658,7 +658,7 @@ class FromSubquery extends FromTable
             valueNode = new ColumnReference(columnName,
 											tableName,
 											getContextManager());
-           resultColumn = new ResultColumn(columnName,
+            resultColumn = new ResultColumn(columnName,
 											valueNode,
 											getContextManager());
 

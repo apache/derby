@@ -120,8 +120,9 @@ class CardinalityCounter implements RowLocationRetRowSource
 		int i;
 		for (i = 0; i < numKeys; i++)
 		{
-			if (((DataValueDescriptor)prevKey[i]).isNull())
+            if (prevKey[i].isNull()) {
 				break;
+            }
 
 			if ((prevKey[i]).compare(currentKey[i]) != 0)
 			{

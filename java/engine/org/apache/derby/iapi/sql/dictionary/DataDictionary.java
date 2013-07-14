@@ -419,7 +419,7 @@ public interface DataDictionary
 	 *
 	 * @param props   The persistent properties used to configure password hashing.
 	 */
-    public  PasswordHasher  makePasswordHasher( Dictionary props )
+    public  PasswordHasher  makePasswordHasher( Dictionary<?,?> props )
         throws StandardException;
     
 	/**
@@ -1083,8 +1083,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getAllSPSDescriptors()
-		throws StandardException;
+    public List<SPSDescriptor> getAllSPSDescriptors() throws StandardException;
 
 	/**
 	 * Get all the parameter descriptors for an SPS.
@@ -1344,7 +1343,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public GenericDescriptorList getTriggerDescriptors(TableDescriptor td)
+    public TriggerDescriptorList getTriggerDescriptors(TableDescriptor td)
 		throws StandardException;
 
 	/**
@@ -1399,8 +1398,10 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public Hashtable hashAllConglomerateDescriptorsByNumber(TransactionController tc)
-		throws StandardException;
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Hashtable<Long, ConglomerateDescriptor>
+        hashAllConglomerateDescriptorsByNumber(TransactionController tc)
+            throws StandardException;
 
 	/**
 	 * Get all of the TableDescriptors in the database and hash them by TableId
@@ -1417,7 +1418,8 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public Hashtable hashAllTableDescriptorsByTableId(TransactionController tc)
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Hashtable<UUID, TableDescriptor> hashAllTableDescriptorsByTableId(TransactionController tc)
 		throws StandardException;
 
 	/**
@@ -1607,7 +1609,7 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public List getAllDependencyDescriptorsList()
+    public List<TupleDescriptor> getAllDependencyDescriptorsList()
 				throws StandardException;
 
 	/** 

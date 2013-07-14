@@ -21,58 +21,39 @@
 
 package org.apache.derby.impl.sql;
 
-import	org.apache.derby.catalog.Dependable;
-import	org.apache.derby.catalog.DependableFinder;
+import java.sql.SQLWarning;
+import java.util.Enumeration;
+import java.util.Vector;
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
-
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
-import org.apache.derby.impl.sql.execute.BaseActivation;
-
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Provider;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ParameterValueSet;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.Row;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
-
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.context.Context;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
-
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import java.sql.SQLWarning;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Hashtable;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.impl.sql.execute.BaseActivation;
 
 /**
  * This class holds an Activation, and passes through most of the calls
@@ -801,7 +782,8 @@ final public class GenericActivationHolder implements Activation
 	}
 
 
-	public Vector getParentResultSet(String resultSetId)
+    @SuppressWarnings("UseOfObsoleteCollectionType")
+    public Vector<TemporaryRowHolder> getParentResultSet(String resultSetId)
 	{
 		return ac.getParentResultSet(resultSetId);
 	}
@@ -811,7 +793,7 @@ final public class GenericActivationHolder implements Activation
 		ac.clearParentResultSets();
 	}
 
-	public Enumeration getParentResultSetKeys()
+    public Enumeration<String> getParentResultSetKeys()
 	{
 		return ac.getParentResultSetKeys();
 	}

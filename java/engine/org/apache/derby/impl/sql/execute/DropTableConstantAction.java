@@ -35,7 +35,7 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -187,20 +187,15 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		lockTableForDDL(tc, heapId, true);
 
 		/* Drop the triggers */
-		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
-        for (Iterator descIter = tdl.iterator(); descIter.hasNext(); ) {
-            TriggerDescriptor trd = (TriggerDescriptor)descIter.next();
+        for (TriggerDescriptor trd : dd.getTriggerDescriptors(td)) {
             trd.drop(lcc);
 		}
 
 		/* Drop all defaults */
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
-		int					 cdlSize = cdl.size();
 		
-		for (int index = 0; index < cdlSize; index++)
+        for (ColumnDescriptor cd : cdl)
 		{
-			ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
-
 			// If column has a default we drop the default and
 			// any dependencies
 			if (cd.getDefaultInfo() != null)
