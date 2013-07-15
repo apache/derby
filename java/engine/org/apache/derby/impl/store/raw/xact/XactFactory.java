@@ -61,6 +61,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class XactFactory implements TransactionFactory, ModuleControl, ModuleSupportable
 {
@@ -87,7 +88,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	protected RawStoreFactory       rawStoreFactory;
 
 	public TransactionTable ttab;
-	private long	tranId;
+    /** The id of the next transaction to be started. */
+    private final AtomicLong tranId = new AtomicLong();
 	private LockingPolicy[][] lockingPolicies = new LockingPolicy[3][6];
 
 	private boolean inCreateNoLog = false;	// creating database, no logging
@@ -692,16 +694,12 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public void setNewTransactionId(TransactionId oldxid, Xact t)
 	{
-		XactId xid;
 		boolean excludeMe = true; // by default
 
 		if (oldxid != null)
 			excludeMe = remove(oldxid);
 
-		synchronized(this)
-		{
-			xid = new XactId(tranId++);
-		}
+        XactId xid = new XactId(tranId.getAndIncrement());
 
 		t.setTransactionId(t.getGlobalId(), xid);
 
@@ -725,10 +723,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	public void resetTranId()
 	{
 		XactId xid = (XactId)ttab.largestUpdateXactId();
-		if (xid != null)
-			tranId = xid.getId() + 1;
-		else
-			tranId = 1;
+        long highestId = (xid == null) ? 0L : xid.getId();
+        tranId.set(highestId + 1);
 	}
 
 
