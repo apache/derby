@@ -235,7 +235,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * Test that you don't get a NullPointerException when the listeners are
      * triggered and one of them is null. DERBY-3695
      */
-    public void testAddNullEvent() throws SQLException {
+    public void testAddNullListener() throws SQLException {
         pooledConnection.addStatementEventListener(null);
         PreparedStatement ps = prepare("VALUES (1)");
         ps.close(); // trigger close event
@@ -256,8 +256,37 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * Test that you can call {@code removeStatementEventListener()} with a
      * {@code null} argument.
      */
-    public void testRemoveNullEvent() throws SQLException {
+    public void testRemoveNullListener() throws SQLException {
         pooledConnection.removeStatementEventListener(null);
+    }
+
+    /**
+     * Test how the listener behaves if it is added twice.
+     */
+    public void testDoubleAddListener() throws SQLException {
+        SimpleListener listener = new SimpleListener();
+        pooledConnection.addStatementEventListener(listener);
+        pooledConnection.addStatementEventListener(listener);
+
+        // Generate a close event.
+        prepare("VALUES (1)").close();
+
+        // The listener will have been invoked twice.
+        assertEquals(2, listener.getCloseCount());
+        assertEquals(0, listener.getErrorCount());
+
+        listener.resetCounts();
+
+        // Generate an error event.
+        PreparedStatement ps = prepare("VALUES (1)");
+        connection.close();
+        assertStatementError("08003", ps);
+
+        // The listener will have been invoked twice with an error event.
+        // On the client, it will also have been invoked twice with a close
+        // event - see DERBY-3851.
+        assertEquals(2, listener.getErrorCount());
+        assertEquals(usingDerbyNetClient() ? 2 : 0, listener.getCloseCount());
     }
 
     /**
@@ -520,4 +549,67 @@ public class StatementEventsTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test how {@code addStatementEventListener()} and
+     * {@code removeStatementEventListener()} behave when they are called
+     * on a closed {@code PooledConnection} or {@code XAConnection}.
+     */
+    public void testAddRemoveListenerOnClosedObject() throws SQLException {
+        // Add a listener that we can try to remove later after closing.
+        SimpleListener listener = new SimpleListener();
+        pooledConnection.addStatementEventListener(listener);
+
+        // Close the PooledConnection or XAConnection.
+        pooledConnection.close();
+
+        // Remove the listener and add a new one. No exception is thrown.
+        pooledConnection.removeStatementEventListener(listener);
+        pooledConnection.addStatementEventListener(new SimpleListener());
+    }
+
+    /**
+     * Test that removing a listener that hasn't been added first, doesn't
+     * cause any errors.
+     */
+    public void testRemoveListenerNotAddedFirst() throws SQLException {
+        pooledConnection.removeStatementEventListener(new SimpleListener());
+
+        // Verify that the listener that was there (added in setUp()) is
+        // still there.
+        prepare("VALUES (1)").close();
+        assertEquals(1, closedCount);
+        assertEquals(0, errorCount);
+    }
+
+    /**
+     * A simple {@code StatementEventListener} that counts the number of
+     * times it has been triggered.
+     */
+    private static class SimpleListener implements StatementEventListener {
+        private int closeCount;
+        private int errorCount;
+
+        @Override
+        public void statementClosed(StatementEvent event) {
+            closeCount++;
+        }
+
+        @Override
+        public void statementErrorOccurred(StatementEvent event) {
+            errorCount++;
+        }
+
+        private int getCloseCount() {
+            return closeCount;
+        }
+
+        private int getErrorCount() {
+            return errorCount;
+        }
+
+        private void resetCounts() {
+            closeCount = 0;
+            errorCount = 0;
+        }
+    }
 }
