@@ -1024,8 +1024,8 @@ class GroupByNode extends SingleChildResultSetNode
                 StringBuilder s = new StringBuilder();
 					
 				s.append("Group by column ordering is (");
-				ColumnOrdering[] ordering = 
-						(ColumnOrdering[])orderingHolder.getArray(ColumnOrdering.class);
+                ColumnOrdering[] ordering =
+                        orderingHolder.getArray(ColumnOrdering[].class);
 
 				for (int i = 0; i < ordering.length; i++)	
 				{

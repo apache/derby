@@ -133,7 +133,7 @@ class HashTableResultSet extends NoPutResultSetImpl
         projection = p;
 		projectMapping = ((ReferencedColumnsDescriptorImpl) a.getPreparedStatement().getSavedObject(mapRefItem)).getReferencedColumnPositions();
 		FormatableArrayHolder fah = (FormatableArrayHolder) a.getPreparedStatement().getSavedObject(keyColItem);
-		FormatableIntHolder[] fihArray = (FormatableIntHolder[]) fah.getArray(FormatableIntHolder.class);
+        FormatableIntHolder[] fihArray = fah.getArray(FormatableIntHolder[].class);
 		keyColumns = new int[fihArray.length];
 		for (int index = 0; index < fihArray.length; index++)
 		{

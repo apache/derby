@@ -97,10 +97,9 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 			  optimizerEstimatedRowCount,
 			  optimizerEstimatedCost);
 
-		order = (ColumnOrdering[])
-					((FormatableArrayHolder)
-						(a.getPreparedStatement().getSavedObject(orderingItem)))
-					.getArray(ColumnOrdering.class);
+        order = ((FormatableArrayHolder)
+                    (a.getPreparedStatement().getSavedObject(orderingItem)))
+                        .getArray(ColumnOrdering[].class);
 
 		this.maxRowSize = maxRowSize;
 

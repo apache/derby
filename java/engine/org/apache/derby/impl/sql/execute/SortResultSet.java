@@ -180,9 +180,8 @@ class SortResultSet extends NoPutResultSetImpl
 		sortTemplateRow = ((ExecRowBuilder) ps.getSavedObject(ra))
                                 .build(a.getExecutionFactory());
 
-		order = (ColumnOrdering[])
-					((FormatableArrayHolder) ps.getSavedObject(orderingItem))
-					.getArray(ColumnOrdering.class);
+        order = ((FormatableArrayHolder) ps.getSavedObject(orderingItem))
+                .getArray(ColumnOrdering[].class);
 
 		/* NOTE: We need to save order to another variable
 		 * in the constructor and reset it on every open.

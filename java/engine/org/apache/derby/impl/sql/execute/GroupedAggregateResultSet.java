@@ -166,10 +166,9 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		this.isInSortedOrder = isInSortedOrder;
 		rollup = isRollup;
 		finishedResults = new ArrayList<ExecRow>();
-		order = (ColumnOrdering[])
-					((FormatableArrayHolder)
-						(a.getPreparedStatement().getSavedObject(orderingItem)))
-					.getArray(ColumnOrdering.class);
+        order = ((FormatableArrayHolder)
+                    (a.getPreparedStatement().getSavedObject(orderingItem)))
+                        .getArray(ColumnOrdering[].class);
 
 		if (SanityManager.DEBUG)
 		{

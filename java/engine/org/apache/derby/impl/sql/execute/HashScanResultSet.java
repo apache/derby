@@ -176,7 +176,8 @@ public class HashScanResultSet extends ScanResultSet
 		FormatableArrayHolder fah = (FormatableArrayHolder)
 										(activation.getPreparedStatement().
 											getSavedObject(hashKeyItem));
-		FormatableIntHolder[] fihArray = (FormatableIntHolder[]) fah.getArray(FormatableIntHolder.class);
+        FormatableIntHolder[] fihArray =
+                fah.getArray(FormatableIntHolder[].class);
 		keyColumns = new int[fihArray.length];
 		for (int index = 0; index < fihArray.length; index++)
 		{

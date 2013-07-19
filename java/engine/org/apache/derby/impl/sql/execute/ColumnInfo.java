@@ -179,7 +179,7 @@ public class ColumnInfo implements Formatable
         FormatableArrayHolder   fah = (FormatableArrayHolder) fh.get( "providers" );
         if ( fah != null )
         {
-            providers = (ProviderInfo[]) fah.getArray( ProviderInfo.class );
+            providers = fah.getArray(ProviderInfo[].class);
         }
 	}
 

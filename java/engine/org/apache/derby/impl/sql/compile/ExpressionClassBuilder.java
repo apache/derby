@@ -546,8 +546,8 @@ abstract	class ExpressionClassBuilder implements ExpressionClassBuilderInterface
 		** We don't expect a lot of order by columns, so
 		** linear search.
 		*/
-		ColumnOrdering[] ordering = (ColumnOrdering[])orderingHolder.
-										getArray(ColumnOrdering.class);
+        ColumnOrdering[] ordering =
+                orderingHolder.getArray(ColumnOrdering[].class);
 		int length = ordering.length;
 		for (int i = 0; i < length; i++)
 		{

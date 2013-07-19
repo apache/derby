@@ -21,14 +21,13 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
-import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * A formatable holder for an array of formatables.
@@ -95,30 +94,15 @@ public class FormatableArrayHolder implements Formatable
 
 	/**
 	 * Get the held array of formatables, and return
-	 * it in an array of type inputClass.
+     * it in an array that is an instance of {@code arrayClass}.
 	 *
-	 * @param inputClass	the class to use for the returned array
+     * @param arrayClass the type of array to return
 	 *
 	 * @return an array of formatables
 	 */
-	public Object[] getArray(Class inputClass)
+    public <E> E[] getArray(Class<E[]> arrayClass)
 	{
-		Object[] outArray = (Object[])Array.newInstance(inputClass, array.length);
-		
-		/*
-		** HACK: on as400 the following arraycopy() throws an
-		** ArrayStoreException because the output array isn't
-		** assignment compatible with the input array.  This
-		** is a bug on as400, but to get around it we are
-		** going to do an element by element copy.
-		*/
-		//System.arraycopy(array, 0, outArray, 0, outArray.length);
-		for (int i = 0; i < outArray.length; i++)
-		{
-			outArray[i] = array[i];
-		}
-
-		return outArray;
+        return Arrays.copyOf(array, array.length, arrayClass);
 	}
 
 	//////////////////////////////////////////////
