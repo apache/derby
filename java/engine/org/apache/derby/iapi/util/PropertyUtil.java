@@ -22,9 +22,11 @@
 package org.apache.derby.iapi.util;
 
 import java.util.Properties;
-import java.util.Enumeration;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 public class PropertyUtil {
 	
@@ -68,56 +70,33 @@ public class PropertyUtil {
 	 */
 	public	static	String	sortProperties( Properties list, String indent )
 	{
-		int				size = list == null ? 0 : list.size();
-		int				count = 0;
-		String[]		array = new String[size];
-		String			key;
-		String			value;
-		StringBuffer	buffer;
+        // Get all property names, including any defaults.
+        Set<String> names = (list == null)
+                ? Collections.<String>emptySet()
+                : list.stringPropertyNames();
+        String[] array = names.toArray(new String[names.size()]);
 
-		// Calculate the number of properties in the property list and
-		// build an array of all the property names.
-		// We need to go thru the enumeration because Properties has a
-		// recursive list of defaults.
-		if (list != null)
-		{
-			for (Enumeration propertyNames = list.propertyNames();
-				 propertyNames.hasMoreElements(); )
-			{
-				if (count == size)
-				{
-					// need to expand the array
-					size = size*2;
-					String[] expandedArray = new String[size];
-					System.arraycopy(array, 0, expandedArray, 0, count);
-					array = expandedArray;
-				}
-				key = (String) propertyNames.nextElement();
-				array[ count++ ] = key;
-			}
-
-			// now sort the array
-			java.util.Arrays.sort(array, 0, count);
-		}
+        // now sort the array
+        Arrays.sort(array);
 
 		// now stringify the array
-		buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 		if (indent == null)
 			buffer.append( "{ " );
 
-		for ( int ictr = 0; ictr < count; ictr++ )
+        for ( int ictr = 0; ictr < array.length; ictr++ )
 		{
 			if ( ictr > 0 && indent == null)
 				buffer.append( ", " );
 
-			key = array[ ictr ];
+            String key = array[ ictr ];
 
 			if (indent != null)
 				buffer.append( indent );
 
 			buffer.append( key ); buffer.append( "=" );
 
-			value = list.getProperty( key, "MISSING_VALUE" );
+            String value = list.getProperty( key, "MISSING_VALUE" );
 			buffer.append( value );
 
 			if (indent != null)
@@ -140,10 +119,8 @@ public class PropertyUtil {
      **/
     public static void copyProperties(Properties src_prop, Properties dest_prop)
     {
-        for (Enumeration propertyNames = src_prop.propertyNames();
-             propertyNames.hasMoreElements(); )
+        for (String key : src_prop.stringPropertyNames())
         {
-            Object key = propertyNames.nextElement();
             dest_prop.put(key, src_prop.get(key));
         }
     }
@@ -189,17 +166,13 @@ public class PropertyUtil {
 		// Now, trim off any excess whitespace, if any, and then
 		// add the properties from file to the received Properties
 		// set.
-		for (Enumeration propKeys = p.propertyNames();
-		  propKeys.hasMoreElements();) {
+        for (String tmpKey : p.stringPropertyNames()) {
 		// get the value, trim off the whitespace, then store it
 		// in the received properties object.
-			String tmpKey = (String)propKeys.nextElement();
 			String tmpValue = p.getProperty(tmpKey);
 			tmpValue = tmpValue.trim();
 			prop.put(tmpKey, tmpValue);
 		}
-
-		return;
 
 	}
 }
