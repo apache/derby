@@ -429,6 +429,51 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Verify plan overrides with FETCH/OFFSET clauses. The override must
+     * be placed after the query expression and before the offset/fetch clause.
+     * </p>
+     */
+    public void test_03_offsetFetch() throws Exception
+    {
+        Connection conn = getConnection();
+        
+        // with an override the join order is syssequences, syscolumns, sysaliases, systables
+        assertPlanShape
+            (
+             conn,
+
+            "select tablename from sys.systables t, sys.syscolumns c, sys.sysaliases a, sys.syssequences s\n" +
+            "where t.tablename = c.columnname and c.columnname = a.alias and a.alias = s.sequencename\n" +
+             "--derbyplan ( ((SYS.SYSSEQUENCES_INDEX2 # SYS.SYSCOLUMNS_HEAP) # SYS.SYSALIASES_INDEX1) # SYS.SYSTABLES_INDEX1 )\n" +
+             "fetch first 1 rows only",
+             
+             "( ( ( SYSSEQUENCES_INDEX2 # SYSCOLUMNS ) # SYSALIASES_INDEX1 ) # SYSTABLES_INDEX1 )"
+             );
+
+        //
+        // Correlated subquery (materialized) with a FETCH clause.
+        //
+        assertPlanShape
+            (
+             conn,
+             
+             "select tableid\n" +
+             "from sys.systables t\n" +
+             "where tableid =\n" +
+             "(\n" +
+             "    select referenceid from sys.syscolumns where referenceid = t.tableid and 1=2\n" +
+             "    --derbyplan sys.syscolumns_index1\n" +
+             "    fetch first 1 rows only\n" +
+             ")\n" +
+             "--derbyplan sys.systables_heap\n",
+             
+             "SYSCOLUMNS_INDEX1\n" +
+             "SYSTABLES"
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -521,6 +566,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
         if ( "HashJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "#" ); }
         else if ( "NestedLoopJoinResultSet".equals( type ) ) { summarizeJoin( buffer, element, "*" ); }
         else if ( "ProjectRestrictResultSet".equals( type ) ) { summarizeProjectRestrict( buffer, element ); }
+        else if ( "RowCountResultSet".equals( type ) ) { summarizeProjectRestrict( buffer, getFirstElement( element, "source" ) ); }
         else if ( "UnionResultSet".equals( type ) ) { summarizeUnion( buffer, element ); }
         else
         {
