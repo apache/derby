@@ -41,7 +41,6 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.net.ClientJDBCObjectFactoryImpl;
 import org.apache.derby.client.net.NetConnection;
-import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
@@ -167,7 +166,7 @@ public class ClientDriver implements Driver {
             
             
             conn = (NetConnection)getFactory().
-                    newNetConnection((NetLogWriter)dncLogWriter,
+                    newNetConnection(dncLogWriter,
                     DriverManager.getLoginTimeout(),
                     server,
                     port,

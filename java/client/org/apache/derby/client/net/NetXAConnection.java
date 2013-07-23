@@ -28,6 +28,7 @@ import org.apache.derby.client.am.ClientStatement;
 
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -46,7 +47,7 @@ public class NetXAConnection {
      * used to raise StatementEvents from any PreparedStatement that
      * would be created from that NetConnection.
      *
-     * @param netLogWriter NetLogWriter object associated with this connection
+     * @param logWriter    LogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
      * @param dataSource   The DataSource object passed from the ClientXAConnection 
@@ -61,7 +62,7 @@ public class NetXAConnection {
      * 
      */
     public NetXAConnection(
-            NetLogWriter netLogWriter,
+            LogWriter logWriter,
             String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
@@ -69,7 +70,7 @@ public class NetXAConnection {
             boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 
-        netCon = createNetConnection (netLogWriter, user, password, 
+        netCon = createNetConnection(logWriter, user, password,
                 dataSource, rmId, isXAConn,cpc);
         checkPlatformVersion();
     }
@@ -210,7 +211,7 @@ public class NetXAConnection {
      * Creates NetConnection for the supported version of jdbc.
      * This method can be overwritten to return NetConnection
      * of the supported jdbc version.
-     * @param netLogWriter NetLogWriter object associated with this connection
+     * @param logWriter    LogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
      * @param dataSource   The DataSource object passed from the ClientXAConnection 
@@ -225,7 +226,7 @@ public class NetXAConnection {
      *
      */
     private NetConnection createNetConnection (
-            NetLogWriter netLogWriter,
+            LogWriter logWriter,
             String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
@@ -234,6 +235,6 @@ public class NetXAConnection {
             ClientPooledConnection cpc) throws SqlException {
 
         return (NetConnection)ClientDriver.getFactory().newNetConnection
-            (netLogWriter, user, password,dataSource, rmId, isXAConn,cpc);
+            (logWriter, user, password,dataSource, rmId, isXAConn,cpc);
     }
 }

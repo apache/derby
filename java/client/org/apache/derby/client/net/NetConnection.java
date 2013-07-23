@@ -188,34 +188,15 @@ public class NetConnection extends ClientConnection {
 
     //---------------------constructors/finalizer---------------------------------
 
-    NetConnection(NetLogWriter netLogWriter,
-                         String databaseName,
-                         Properties properties) throws SqlException {
-        super(netLogWriter, 0, "", -1, databaseName, properties);
-        this.pooledConnection_ = null;
-        this.closeStatementsOnClose = true;
-    }
-
-    NetConnection(
-            NetLogWriter netLogWriter,
-            ClientBaseDataSourceRoot dataSource,
-            String user,
-            String password) throws SqlException {
-
-        super(netLogWriter, user, password, dataSource);
-        this.pooledConnection_ = null;
-        this.closeStatementsOnClose = true;
-        setDeferredResetPassword(password);
-    }
-
     // For jdbc 1 connections
-    NetConnection(NetLogWriter netLogWriter,
+    NetConnection(LogWriter logWriter,
                          int driverManagerLoginTimeout,
                          String serverName,
                          int portNumber,
                          String databaseName,
                          Properties properties) throws SqlException {
-        super(netLogWriter, driverManagerLoginTimeout, serverName, portNumber, databaseName, properties);
+        super(logWriter, driverManagerLoginTimeout, serverName, portNumber,
+              databaseName, properties);
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
@@ -234,13 +215,13 @@ public class NetConnection extends ClientConnection {
     }
 
     // For JDBC 2 Connections
-    NetConnection(NetLogWriter netLogWriter,
+    NetConnection(LogWriter logWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException {
-        super(netLogWriter, user, password, isXAConn, dataSource);
+        super(logWriter, user, password, isXAConn, dataSource);
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
@@ -253,7 +234,7 @@ public class NetConnection extends ClientConnection {
      * to enable the NetConnection to pass <code>this</code> on to the associated 
      * prepared statement object thus enabling the prepared statement object 
      * to in turn raise the statement events to the ClientPooledConnection object
-     * @param netLogWriter NetLogWriter object associated with this connection
+     * @param logWriter    LogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
      * @param dataSource   The DataSource object passed from the PooledConnection 
@@ -267,14 +248,14 @@ public class NetConnection extends ClientConnection {
      * @throws             SqlException
      */
     
-    NetConnection(NetLogWriter netLogWriter,
+    NetConnection(LogWriter logWriter,
                          String user,
                          String password,
                          ClientBaseDataSourceRoot dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException {
-        super(netLogWriter, user, password, isXAConn, dataSource);
+        super(logWriter, user, password, isXAConn, dataSource);
         netAgent_ = (NetAgent) super.agent_;
         initialize(password, dataSource, isXAConn);
         this.pooledConnection_=cpc;
@@ -989,7 +970,7 @@ public class NetConnection extends ClientConnection {
             int clientSSLMode) throws SqlException {
 
         return new NetAgent(this,
-                (NetLogWriter) logWriter,
+                logWriter,
                 loginTimeout,
                 serverName,
                 portNumber,

@@ -156,9 +156,6 @@ public abstract class Agent {
         return (logWriter_ == null) ? null : logWriter_.printWriter_;
     }
 
-    abstract public LogWriter newLogWriter_(
-        PrintWriter printWriter, int traceLevel);
-
     //----------------------------------------------------------------------------
 
 

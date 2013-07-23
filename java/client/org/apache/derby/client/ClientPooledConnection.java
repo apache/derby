@@ -37,7 +37,6 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.LogicalConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
-import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
@@ -131,7 +130,7 @@ public class ClientPooledConnection implements PooledConnection {
             
             physicalConnection_ =
             ClientDriver.getFactory().newNetConnection(
-                    (NetLogWriter) logWriter_,
+                    logWriter_,
                     user,
                     password,
                     ds,
@@ -175,7 +174,7 @@ public class ClientPooledConnection implements PooledConnection {
 
         try {
             netXAPhysicalConnection_ = new NetXAConnection(
-                    (NetLogWriter)logWriter,
+                    logWriter,
                     user,
                     password,
                     ds,

@@ -1201,7 +1201,7 @@ public abstract class ClientBaseDataSourceRoot implements
                                       String user, String password)
             throws SqlException {
         return ClientDriver.getFactory().newNetConnection(
-                (NetLogWriter)dncLogWriter, user, password, this, -1, false);
+                dncLogWriter, user, password, this, -1, false);
 
     }
 
@@ -1329,12 +1329,11 @@ public abstract class ClientBaseDataSourceRoot implements
     }
 
     protected final XAConnection getXAConnectionMinion() throws SQLException {
-        NetLogWriter dncLogWriter = null;
+        LogWriter dncLogWriter = null;
         try {
             updateDataSourceValues(
                     tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = (NetLogWriter)
-                    computeDncLogWriterForNewConnection("_xads");
+            dncLogWriter = computeDncLogWriterForNewConnection("_xads");
             return getXAConnectionX(
                     dncLogWriter, this, getUser(), getPassword());
         } catch (SqlException se) {
@@ -1348,13 +1347,12 @@ public abstract class ClientBaseDataSourceRoot implements
     protected final XAConnection getXAConnectionMinion(
             String user, String password) throws SQLException {
 
-        NetLogWriter dncLogWriter = null;
+        LogWriter dncLogWriter = null;
         try
         {
             updateDataSourceValues(
                     tokenizeAttributes(getConnectionAttributes(), null));
-            dncLogWriter = (NetLogWriter)
-                    computeDncLogWriterForNewConnection("_xads");
+            dncLogWriter = computeDncLogWriterForNewConnection("_xads");
             return getXAConnectionX(dncLogWriter, this, user, password);
         }
         catch ( SqlException se )

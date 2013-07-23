@@ -24,7 +24,6 @@ package org.apache.derby.client.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.AccessController;
@@ -436,11 +435,6 @@ public class NetAgent extends Agent {
     }
         
     // ----------------------- call-down methods ---------------------------------
-
-    public LogWriter newLogWriter_(PrintWriter printWriter,
-                                                              int traceLevel) {
-        return new NetLogWriter(printWriter, traceLevel);
-    }
 
     protected void markChainBreakingException_() {
         setSvrcod(CodePoint.SVRCOD_ERROR);

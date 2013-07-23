@@ -212,7 +212,7 @@ public interface ClientJDBCObjectFactory {
      * this implements the java.sql.Connection interface
      */
     ClientConnection newNetConnection(
-            LogWriter netLogWriter,
+            LogWriter logWriter,
             int driverManagerLoginTimeout,String serverName,
             int portNumber,String databaseName, Properties properties)
             throws SqlException;
@@ -223,7 +223,7 @@ public interface ClientJDBCObjectFactory {
      * implements the {@code java.sql.Connection} interface.
      */
     ClientConnection newNetConnection(
-            LogWriter netLogWriter,
+            LogWriter logWriter,
             String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
@@ -238,7 +238,7 @@ public interface ClientJDBCObjectFactory {
      * object to the NetConnection object which can then be used to pass the 
      * statement events back to the user
      *
-     * @param netLogWriter placeholder for NetLogWriter object associated with this connection
+     * @param logWriter    LogWriter object associated with this connection
      * @param user         user id for this connection
      * @param password     password for this connection
      * @param dataSource   The DataSource object passed from the PooledConnection 
@@ -252,7 +252,7 @@ public interface ClientJDBCObjectFactory {
      * @throws             SqlException
      */
     ClientConnection newNetConnection(
-            LogWriter netLogWriter,
+            LogWriter logWriter,
             String user,String password,
             ClientBaseDataSourceRoot dataSource,int rmId,
             boolean isXAConn,ClientPooledConnection cpc) throws SqlException;

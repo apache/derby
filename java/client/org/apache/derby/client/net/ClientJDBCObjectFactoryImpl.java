@@ -90,8 +90,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     public ClientXAConnection newClientXAConnection(ClientBaseDataSourceRoot ds,
         LogWriter logWriter,String user, String password) throws SQLException
     {
-        return new ClientXAConnection(ds,
-            (NetLogWriter)logWriter,user,password);
+        return new ClientXAConnection(ds, logWriter, user, password);
     }
     /**
      * Returns an instance of ClientCallableStatement.
@@ -269,7 +268,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return an instance of {@link org.apache.derby.client.net.NetConnection}
      */
     public ClientConnection newNetConnection(
-            LogWriter netLogWriter,
+            LogWriter logWriter,
             int driverManagerLoginTimeout,
             String serverName,
             int portNumber,
@@ -277,7 +276,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
             Properties properties) throws SqlException {
 
         return new NetConnection(
-                (NetLogWriter)netLogWriter,
+                logWriter,
                 driverManagerLoginTimeout,
                 serverName,
                 portNumber,
@@ -288,14 +287,13 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @return an instance of {@link org.apache.derby.client.net.NetConnection}
      */
     public ClientConnection newNetConnection(
-            LogWriter netLogWriter,String user,
-            String password,
+            LogWriter logWriter, String user, String password,
             ClientBaseDataSourceRoot dataSource,
             int rmId,
             boolean isXAConn) throws SqlException {
 
         return new NetConnection(
-                (NetLogWriter)netLogWriter,
+                logWriter,
                 user,
                 password,
                 dataSource,
@@ -305,8 +303,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
 
     /**
      * Returns an instance of NetConnection.
-     * @param netLogWriter Placeholder for NetLogWriter object associated
-     *                     with this connection.
+     * @param logWriter    LogWriter object associated with this connection.
      * @param user         user id for this connection.
      * @param password     password for this connection.
      * @param dataSource   The DataSource object passed from the PooledConnection
@@ -321,14 +318,14 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * @throws             SqlException
      */
     public ClientConnection newNetConnection(
-            LogWriter netLogWriter,String user,
+            LogWriter logWriter,String user,
             String password,
             ClientBaseDataSourceRoot dataSource,
             int rmId,boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 
         return new NetConnection(
-            (NetLogWriter)netLogWriter,
+            logWriter,
             user,
             password,
             dataSource,

@@ -26,8 +26,8 @@ import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
@@ -47,7 +47,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     private NetXAConnection controlCon_ = null;
 
     public ClientXAConnection(ClientBaseDataSourceRoot ds,
-                              NetLogWriter logWtr,
+                              LogWriter logWtr,
                               String userId,
                               String password) throws SQLException {
         super(ds, logWtr, userId, password, getUnigueRmId());
