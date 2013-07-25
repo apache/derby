@@ -1306,7 +1306,7 @@ public abstract class ValueNode extends QueryTreeNode
      * cannot always just use {@code instanceof} to check if the other node
      * represents the same kind. Hence this method needs to be
      * implemented by all node classes that represent several kinds.
-     * It is only called from implementations of {@code #isEquivalent}.
+     * It is only called from implementations of {@code isEquivalent}.
      *
      * @param other The other value node whose kind we want to compare with.
      * @return {@code true} if {@code this} and {@code o} represent the same
