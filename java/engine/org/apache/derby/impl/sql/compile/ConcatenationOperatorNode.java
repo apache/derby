@@ -29,7 +29,6 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -62,7 +61,6 @@ class ConcatenationOperatorNode extends BinaryOperatorNode {
               ClassName.ConcatableDataValue,
               ClassName.ConcatableDataValue,
               cm);
-        setNodeType(C_NodeTypes.CONCATENATION_OPERATOR_NODE);
 	}
 
     /**

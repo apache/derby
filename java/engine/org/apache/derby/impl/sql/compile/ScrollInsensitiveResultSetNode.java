@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A ScrollInsensitiveResultSetNode represents the insensitive scrolling cursor
@@ -53,7 +52,6 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
                             Properties tableProperties,
                             ContextManager cm) {
         super(childResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.SCROLL_INSENSITIVE_RESULT_SET_NODE);
         resultColumns = rcl;
 	}
 

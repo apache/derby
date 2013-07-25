@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -55,7 +54,6 @@ class JavaToSQLValueNode extends ValueNode
     JavaToSQLValueNode(JavaValueNode value, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.JAVA_TO_SQL_VALUE_NODE);
         this.javaNode = value;
 	}
 
@@ -356,9 +354,9 @@ class JavaToSQLValueNode extends ValueNode
 	/**
 	 * {@inheritDoc}
 	 */
-    protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
     {
-    	// anything in the java domain is not equiavlent.
+        // anything in the java domain is not equivalent.
     	return false;
     }
 }

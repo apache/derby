@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -81,7 +80,6 @@ class CreateTableNode extends DDLStatementNode
             ContextManager   cm) throws StandardException
 	{
         super(tableName, cm);
-        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
         this.tableType = TableDescriptor.BASE_TABLE_TYPE;
         this.lockGranularity = lockGranularity;
         this.implicitCreateSchema = true;
@@ -124,7 +122,6 @@ class CreateTableNode extends DDLStatementNode
 		throws StandardException
 	{
         super(tempTableSchemaNameCheck(tableName), cm);
-        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
 
         this.tableType = TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE;
         this.onCommitDeleteRows = onCommitDeleteRows;
@@ -158,7 +155,6 @@ class CreateTableNode extends DDLStatementNode
             ContextManager cm) throws StandardException
 	{
         super(tableName, cm);
-        setNodeType(C_NodeTypes.CREATE_TABLE_NODE);
         this.tableType = TableDescriptor.BASE_TABLE_TYPE;
         this.lockGranularity = TableDescriptor.DEFAULT_LOCK_GRANULARITY;
         this.implicitCreateSchema = true;

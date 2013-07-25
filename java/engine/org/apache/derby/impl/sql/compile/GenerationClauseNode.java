@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
 /**
@@ -66,7 +65,6 @@ class GenerationClauseNode extends ValueNode
                           ContextManager cm)
     {
         super(cm);
-        setNodeType(C_NodeTypes.GENERATION_CLAUSE_NODE);
         _generationExpression = generationExpression;
         _expressionText = expressionText;
 	}
@@ -120,10 +118,12 @@ class GenerationClauseNode extends ValueNode
         throw StandardException.newException( SQLState.HEAP_UNIMPLEMENTED_FEATURE );
 	}
 
-	protected boolean isEquivalent(ValueNode other)
+    boolean isEquivalent(ValueNode other)
 		throws StandardException
     {
-        if ( !( other instanceof GenerationClauseNode) ) { return false; }
+        if (! isSameNodeKind(other)) {
+            return false;
+        }
 
         GenerationClauseNode    that = (GenerationClauseNode) other;
 

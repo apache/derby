@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -68,7 +67,6 @@ class ConditionalNode extends ValueNode
         this.testCondition = testCondition;
         this.thenElseList = thenElseList;
         this.thisIsNullIfNode = thisIsNullIfNode;
-        setNodeType(C_NodeTypes.CONDITIONAL_NODE);
 	}
 
 	/**
@@ -105,7 +103,7 @@ class ConditionalNode extends ValueNode
 	 * @return 		True if this node is a CastNode, false otherwise.
 	 */
 	private boolean isCastNode(ValueNode node) {
-        return node.getNodeType() == C_NodeTypes.CAST_NODE;
+        return node instanceof CastNode;
 	}
 
 	/**
@@ -146,7 +144,7 @@ class ConditionalNode extends ValueNode
 	 * @return        True if this node is a CondtionalNode, false otherwise.
 	 */
 	private boolean isConditionalNode(ValueNode node) {
-        return node.getNodeType() == C_NodeTypes.CONDITIONAL_NODE;
+        return node instanceof ConditionalNode;
 	}
 
 	/**
@@ -730,14 +728,14 @@ class ConditionalNode extends ValueNode
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (isSameNodeType(o)) 
-		{
+        if (isSameNodeKind(o)) {
 			ConditionalNode other = (ConditionalNode)o;
             return testCondition.isEquivalent(other.testCondition) &&
                     thenElseList.isEquivalent(other.thenElseList);
 		}
+
 		return false;
 	}
 }

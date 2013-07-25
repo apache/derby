@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 class OrNode extends BinaryLogicalOperatorNode
 {
@@ -44,7 +43,6 @@ class OrNode extends BinaryLogicalOperatorNode
 	{
         super(leftOperand, rightOperand, "or", cm);
 		this.shortCircuitValue = true;
-        setNodeType(C_NodeTypes.OR_NODE);
 	}
 
 	/**

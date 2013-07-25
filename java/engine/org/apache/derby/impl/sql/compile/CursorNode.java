@@ -29,7 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -114,7 +113,6 @@ public class CursorNode extends DMLStatementNode
                ContextManager cm)
 	{
         super(resultSet, cm);
-        setNodeType(C_NodeTypes.CURSOR_NODE);
         this.name = name;
         this.statementType = statementType;
         this.orderByList = orderByList;

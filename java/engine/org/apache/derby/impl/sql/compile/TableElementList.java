@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
@@ -68,7 +67,6 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 
     public TableElementList(ContextManager cm) {
         super(TableElementNode.class, cm);
-        setNodeType(C_NodeTypes.TABLE_ELEMENT_LIST);
     }
 
 	/**

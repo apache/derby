@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -65,7 +64,6 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
     PredicateList(ContextManager cm)
 	{
         super(Predicate.class, cm);
-        setNodeType(C_NodeTypes.PREDICATE_LIST);
 	}
 
 
@@ -1505,7 +1503,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 
                     BinaryRelationalOperatorNode newRelop =
                             new BinaryRelationalOperatorNode(
-										opNode.getNodeType(),
+                                        opNode.kind,
 										newCRNode,
 										opNode.getRightOperand(),
 										inNode,
@@ -2073,12 +2071,12 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 					// No match, add new equijoin
 					// Build a new predicate
                     BinaryRelationalOperatorNode newEquals =
-                            new BinaryRelationalOperatorNode(
-										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-										outerCR.getClone(),
-										innerCR.getClone(),
-                                        false,
-										getContextManager());
+                        new BinaryRelationalOperatorNode(
+                            BinaryRelationalOperatorNode.K_EQUALS,
+                            outerCR.getClone(),
+                            innerCR.getClone(),
+                            false,
+                            getContextManager());
 					newEquals.bindComparisonOperator();
 
                    // Create new predicate into CNF:

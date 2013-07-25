@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -45,7 +44,6 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 {
     ValueNodeList(ContextManager cm) {
         super(ValueNode.class, cm);
-        setNodeType(C_NodeTypes.VALUE_NODE_LIST);
     }
 
 	/**

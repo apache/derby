@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
@@ -49,15 +48,30 @@ class ModifyColumnNode extends ColumnDefinitionNode
 	int		columnPosition = -1;
 	UUID	oldDefaultUUID;
 
-    ModifyColumnNode(int type,
+    // Allowed kinds
+    final static int K_MODIFY_COLUMN_TYPE = 0;
+    final static int K_MODIFY_COLUMN_DEFAULT = 1;
+    final static int K_MODIFY_COLUMN_CONSTRAINT = 2;
+    final static int K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL = 3;
+    final static int K_DROP_COLUMN = 4;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
+    ModifyColumnNode(int kind,
             String name,
             ValueNode defaultNode,
             DataTypeDescriptor dataTypeServices,
             long[] autoIncrementInfo,
             ContextManager cm) throws StandardException {
         super(name, defaultNode, dataTypeServices, autoIncrementInfo, cm);
-        setNodeType(type);
+        this.kind = kind;
     }
+
 	/**
 	 * Get the UUID of the old column default.
 	 *
@@ -96,8 +110,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
     void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
-		if (getNodeType() != C_NodeTypes.MODIFY_COLUMN_TYPE_NODE)
-			return;				// nothing to do if user not changing length
+        if (kind != K_MODIFY_COLUMN_TYPE) {
+            return; // nothing to do if user not changing length
+        }
 
         ColumnDescriptor cd = td.getColumnDescriptor(name);
 		if (cd == null)
@@ -157,9 +172,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
     void checkExistingConstraints(TableDescriptor td)
 	             throws StandardException
 	{
-		if ((getNodeType() != C_NodeTypes.MODIFY_COLUMN_TYPE_NODE) &&
-			(getNodeType() != C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
-			(getNodeType() != C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE))
+        if ((kind != K_MODIFY_COLUMN_TYPE) &&
+            (kind != K_MODIFY_COLUMN_CONSTRAINT) &&
+            (kind != K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL))
 			return;
 
 		DataDictionary           dd          = getDataDictionary();
@@ -185,7 +200,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 			// and fkey columns.
 			if ((constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT) 
 				&&
-				(getNodeType() == C_NodeTypes.MODIFY_COLUMN_TYPE_NODE))
+                (kind == K_MODIFY_COLUMN_TYPE))
 			{
 				throw StandardException.newException(
 					 SQLState.LANG_MODIFY_COLUMN_FKEY_CONSTRAINT, 
@@ -196,10 +211,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
 				if (!dd.checkVersion(
 					DataDictionary.DD_VERSION_DERBY_10_4, null)) 
 				{
-					//if a column is part of unique constraint it can't be
-					//made nullable in soft upgrade mode from a pre-10.4 db.
-					if ((getNodeType() == 
-						C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
+                    // If a column is part of unique constraint it can't be
+                    // made nullable in soft upgrade mode from a pre-10.4 db.
+                    if (kind == K_MODIFY_COLUMN_CONSTRAINT &&
 						(existingConstraint.getConstraintType() == 
 							DataDictionary.UNIQUE_CONSTRAINT)) 
 					{
@@ -209,10 +223,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
 					}
 				}
 
-				// a column that is part of a primary key
+                // A column that is part of a primary key
                 // is being made nullable; can't be done.
-				if ((getNodeType() == 
-					 C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
+                if ((kind == K_MODIFY_COLUMN_CONSTRAINT) &&
 					((existingConstraint.getConstraintType() == 
 					 DataDictionary.PRIMARYKEY_CONSTRAINT)))
 				{
@@ -270,6 +283,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 			}
 		}
     }
+
 	/**
 	 * Get the action associated with this node.
 	 *
@@ -278,32 +292,37 @@ class ModifyColumnNode extends ColumnDefinitionNode
     @Override
 	int getAction()
 	{
-		switch (getNodeType())
-		{
-		case C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE:
-			if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
-				return ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART;
-			else if (autoinc_create_or_modify_Start_Increment ==
-				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
-				return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
-			else
-				return ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE;
-		case C_NodeTypes.MODIFY_COLUMN_TYPE_NODE:
-			return ColumnInfo.MODIFY_COLUMN_TYPE;
-		case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE:
-			return ColumnInfo.MODIFY_COLUMN_CONSTRAINT;
-		case C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE:
-			return ColumnInfo.MODIFY_COLUMN_CONSTRAINT_NOT_NULL;
-		case C_NodeTypes.DROP_COLUMN_NODE:
-			return ColumnInfo.DROP;
-		default:
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT("Unexpected nodeType = " + 
-										  getNodeType());
-			}
-			return 0;
-		}
+        switch (kind) {
+            case K_MODIFY_COLUMN_DEFAULT:
+                if (autoinc_create_or_modify_Start_Increment ==
+                        ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE) {
+                    return ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART;
+
+                } else if (autoinc_create_or_modify_Start_Increment ==
+                        ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE) {
+                    return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
+
+                } else {
+                    return ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE;
+                }
+            case K_MODIFY_COLUMN_TYPE:
+                return ColumnInfo.MODIFY_COLUMN_TYPE;
+
+            case K_MODIFY_COLUMN_CONSTRAINT:
+                return ColumnInfo.MODIFY_COLUMN_CONSTRAINT;
+
+            case K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL:
+                return ColumnInfo.MODIFY_COLUMN_CONSTRAINT_NOT_NULL;
+
+            case K_DROP_COLUMN:
+                return ColumnInfo.DROP;
+
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Unexpected type = " + kind);
+                }
+                return 0;
+        }
 	}
 
 	/**
@@ -337,8 +356,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 		columnPosition = cd.getPosition();
 
 		// No other work to do if no user specified default
-		if (getNodeType() != C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE)
-		{
+        if (kind != K_MODIFY_COLUMN_DEFAULT) {
 			return;
 		}
 
@@ -401,7 +419,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
 		ColumnDescriptor cd;
 
 		// a column that has an autoincrement default can't be made nullable
-		if (getNodeType() == C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE)
+        if (kind == K_MODIFY_COLUMN_CONSTRAINT)
 		{
 			cd = getLocalColumnDescriptor(name, td);
 			if (cd.isAutoincrement())

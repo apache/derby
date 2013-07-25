@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 /**
@@ -60,7 +59,6 @@ class OrderByColumn extends OrderedColumn {
     OrderByColumn(ValueNode expression, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.ORDER_BY_COLUMN);
         this.expression = expression;
 	}
 	

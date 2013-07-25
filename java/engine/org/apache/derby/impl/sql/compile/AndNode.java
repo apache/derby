@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 class AndNode extends BinaryLogicalOperatorNode
 {
@@ -40,7 +39,6 @@ class AndNode extends BinaryLogicalOperatorNode
             ValueNode rightOperand,
             ContextManager cm) throws StandardException {
         super(leftOperand, rightOperand, "and", cm);
-        setNodeType(C_NodeTypes.AND_NODE);
         this.shortCircuitValue = false;
     }
 

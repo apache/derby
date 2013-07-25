@@ -48,7 +48,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
@@ -182,7 +181,6 @@ class FromVTI extends FromTable implements VTIEnvironment
             ResultColumnList derivedRCL,
             TableName exposedTableName) {
 
-        setNodeType(C_NodeTypes.FROM_VTI);
         this.methodCall = invocation;
         this.resultColumns = derivedRCL;
         this.subqueryList = new SubqueryList(getContextManager());

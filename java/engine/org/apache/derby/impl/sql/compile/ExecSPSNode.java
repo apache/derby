@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -67,7 +66,6 @@ class ExecSPSNode extends StatementNode
     ExecSPSNode(TableName newObjectName,
                 ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.EXEC_SPS_NODE);
         this.name = newObjectName;
 	}
 

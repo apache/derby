@@ -75,7 +75,6 @@ class BinaryOperatorNode extends OperatorNode
 	String		leftInterfaceType;
 	String		rightInterfaceType;
 	String		resultInterfaceType;
-	int			operatorType;
 
 	// At the time of adding XML support, it was decided that
 	// we should avoid creating new OperatorNodes where possible.
@@ -85,8 +84,17 @@ class BinaryOperatorNode extends OperatorNode
 	// XML-related or not) should follow this example when
 	// possible.
 
-    final static int XMLEXISTS_OP = 0;
-    final static int XMLQUERY_OP = 1;
+    // Allowed kinds
+    final static int K_XMLEXISTS = 0;
+    final static int K_XMLQUERY = 1;
+    final static int K_BASE = 2; // when BinaryOperatorNode is used
+                                 // as a base class
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
 
 	// NOTE: in the following 4 arrays, order
 	// IS important.
@@ -116,6 +124,7 @@ class BinaryOperatorNode extends OperatorNode
 
     BinaryOperatorNode(ContextManager cm) {
         super(cm);
+        kind = K_BASE;
     }
 
     BinaryOperatorNode(
@@ -133,7 +142,7 @@ class BinaryOperatorNode extends OperatorNode
         this.methodName = methodName;
         this.leftInterfaceType = leftInterfaceType;
         this.rightInterfaceType = rightInterfaceType;
-        this.operatorType = -1;
+        this.kind = K_BASE;
     }
 
     BinaryOperatorNode(
@@ -148,37 +157,34 @@ class BinaryOperatorNode extends OperatorNode
         this.rightOperand = rightOperand;
         this.leftInterfaceType = leftInterfaceType;
         this.rightInterfaceType = rightInterfaceType;
-		this.operatorType = -1;
+        this.kind = K_BASE;
 	}
 
 	/**
-     * Constructor for a BinaryOperatorNode
+     * Constructor for a concrete BinaryOperatorNode
 	 *
 	 * @param leftOperand	The left operand of the node
 	 * @param rightOperand	The right operand of the node
-	 * @param opType  An Integer holding the operatorType
-	 *  for this operator.
+     * @param kind          The kind of operator.
 	 */
     BinaryOperatorNode(
-            int nodeType,
             ValueNode leftOperand,
             ValueNode rightOperand,
-            int opType,
+            int kind,
             ContextManager cm)
 	{
         super(cm);
-        setNodeType(nodeType);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
-        this.operatorType = opType;
-		this.operator = BinaryOperators[this.operatorType];
-		this.methodName = BinaryMethodNames[this.operatorType];
-		this.leftInterfaceType = BinaryArgTypes[this.operatorType][0];
-		this.rightInterfaceType = BinaryArgTypes[this.operatorType][1];
-		this.resultInterfaceType = BinaryResultTypes[this.operatorType];
+        this.kind = kind;
+        this.operator = BinaryOperators[this.kind];
+        this.methodName = BinaryMethodNames[this.kind];
+        this.leftInterfaceType = BinaryArgTypes[this.kind][0];
+        this.rightInterfaceType = BinaryArgTypes[this.kind][1];
+        this.resultInterfaceType = BinaryResultTypes[this.kind];
 	}
 
-	/**
+    /**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *
@@ -207,7 +213,6 @@ class BinaryOperatorNode extends OperatorNode
 	void setOperator(String operator)
 	{
 		this.operator = operator;
-		this.operatorType = -1;
 	}
 
 	/**
@@ -218,7 +223,6 @@ class BinaryOperatorNode extends OperatorNode
 	void setMethodName(String methodName)
 	{
 		this.methodName = methodName;
-		this.operatorType = -1;
 	}
 
 	/**
@@ -230,7 +234,6 @@ class BinaryOperatorNode extends OperatorNode
 	{
 		leftInterfaceType = iType;
 		rightInterfaceType = iType;
-		this.operatorType = -1;
 	}
 
 	/**
@@ -283,8 +286,10 @@ class BinaryOperatorNode extends OperatorNode
 		rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
             aggregates);
 
-		if ((operatorType == XMLEXISTS_OP) || (operatorType == XMLQUERY_OP))
+        if ((kind == K_XMLEXISTS) ||
+            (kind == K_XMLQUERY)) {
 			return bindXMLQuery();
+        }
 
 		/* Is there a ? parameter on the left? */
 		if (leftOperand.requiresTypeFromContext())
@@ -360,18 +365,18 @@ class BinaryOperatorNode extends OperatorNode
         }
 
         // Set the result type of this operator.
-        if (operatorType == XMLEXISTS_OP) {
-        // For XMLEXISTS, the result type is always SQLBoolean.
-        // The "true" in the next line says that the result
-        // can be nullable--which it can be if evaluation of
-        // the expression returns a null (this is per SQL/XML
-        // spec, 8.4)
+        if (kind == K_XMLEXISTS) {
+            // For XMLEXISTS, the result type is always SQLBoolean.
+            // The "true" in the next line says that the result
+            // can be nullable--which it can be if evaluation of
+            // the expression returns a null (this is per SQL/XML
+            // spec, 8.4)
             setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
         }
         else {
-        // The result of an XMLQUERY operator is always another
-        // XML data value, per SQL/XML spec 6.17: "...yielding a value
-        // X1 of an XML type."
+            // The result of an XMLQUERY operator is always another
+            // XML data value, per SQL/XML spec 6.17: "...yielding a value
+            // X1 of an XML type."
             setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.SQLXML));
         }
@@ -484,7 +489,7 @@ class BinaryOperatorNode extends OperatorNode
 		// If we're dealing with XMLEXISTS or XMLQUERY, there is some
 		// additional work to be done.
 		boolean xmlGen =
-			(operatorType == XMLQUERY_OP) || (operatorType == XMLEXISTS_OP);
+           (kind == K_XMLQUERY) || (kind == K_XMLEXISTS);
 
 		/*
 		** The receiver is the operand with the higher type precedence.
@@ -502,7 +507,7 @@ class BinaryOperatorNode extends OperatorNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
-		    receiverType = (operatorType == -1)
+            receiverType = (kind == K_BASE)
 				? getReceiverInterfaceName()
 				: leftInterfaceType;
 
@@ -537,7 +542,7 @@ class BinaryOperatorNode extends OperatorNode
 			** a class, they can note that in the implementation
 			** of the node that uses the method.
 			*/
-		    receiverType = (operatorType == -1)
+            receiverType = (kind == K_BASE)
 				? getReceiverInterfaceName()
 				: rightInterfaceType;
 
@@ -579,7 +584,7 @@ class BinaryOperatorNode extends OperatorNode
 		}
 
 		/* Figure out the result type name */
-		resultTypeName = (operatorType == -1)
+        resultTypeName = (kind == K_BASE)
 			? getTypeCompiler().interfaceName()
 			: resultInterfaceType;
 
@@ -818,18 +823,24 @@ class BinaryOperatorNode extends OperatorNode
 		}
 	}
 
-        /**
-         * @inheritDoc
-         */
-        protected boolean isEquivalent(ValueNode o) throws StandardException
-        {
-        	if (!isSameNodeType(o))
-        	{
-        		return false;
-        	}
-        	BinaryOperatorNode other = (BinaryOperatorNode)o;
-        	return methodName.equals(other.methodName)
-        	       && leftOperand.isEquivalent(other.leftOperand)
-        	       && rightOperand.isEquivalent(other.rightOperand);
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((BinaryOperatorNode)o).kind == this.kind;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    boolean isEquivalent(ValueNode o) throws StandardException
+    {
+        if (isSameNodeKind(o)) {
+            BinaryOperatorNode other = (BinaryOperatorNode)o;
+            return methodName.equals(other.methodName)
+                    && leftOperand.isEquivalent(other.leftOperand)
+                    && rightOperand.isEquivalent(other.rightOperand);
+        } else {
+            return false;
         }
+    }
 }

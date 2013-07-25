@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -43,7 +42,6 @@ class DropTriggerNode extends DDLStatementNode
 
     DropTriggerNode(TableName trigger, ContextManager cm) {
         super(trigger, cm);
-        setNodeType(C_NodeTypes.DROP_TRIGGER_NODE);
     }
 
     String statementToString()

@@ -393,12 +393,12 @@ public abstract class BinaryListOperatorNode extends ValueNode
         /**
          * @inheritDoc
          */
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (!isSameNodeType(o))
-		{
+        if (! isSameNodeKind(o)) {
 			return false;
 		}
+
 		BinaryListOperatorNode other = (BinaryListOperatorNode)o;
 		if (!operator.equals(other.operator)
 				|| !leftOperand.isEquivalent(other.getLeftOperand())) 

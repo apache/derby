@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -211,7 +210,6 @@ class SubqueryNode extends ValueNode
                  ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.SUBQUERY_NODE);
         this.resultSet = resultSet;
         this.subqueryType = subqueryType;
         this.orderByList = orderCols;
@@ -1395,7 +1393,7 @@ class SubqueryNode extends ValueNode
 				{
                     UnaryComparisonOperatorNode leftIsNull = new IsNullNode(
                            leftOperand,
-                           IsNullNode.Sign.IS_NULL,
+                           false,
                            cm);
 					leftIsNull.bindComparisonOperator();
                     newOr = new OrNode(leftIsNull, andLeft, cm);
@@ -1406,7 +1404,7 @@ class SubqueryNode extends ValueNode
 				{
                     UnaryComparisonOperatorNode rightIsNull = new IsNullNode(
                            rightOperand,
-                           IsNullNode.Sign.IS_NULL,
+                           false,
                            cm);
 					rightIsNull.bindComparisonOperator();
                     newOr = new OrNode(rightIsNull, andLeft, cm);
@@ -1445,7 +1443,7 @@ class SubqueryNode extends ValueNode
 			case LT_ANY_SUBQUERY:
 			case GE_ANY_SUBQUERY:
 			case GT_ANY_SUBQUERY:
-                ucoNode = new IsNullNode(this, IsNullNode.Sign.IS_NOT_NULL, cm);
+                ucoNode = new IsNullNode(this, true, cm);
 				break;
 
 			case NOT_IN_SUBQUERY:
@@ -1455,7 +1453,7 @@ class SubqueryNode extends ValueNode
 			case LT_ALL_SUBQUERY:
 			case GE_ALL_SUBQUERY:
 			case GT_ALL_SUBQUERY:
-                ucoNode = new IsNullNode(this, IsNullNode.Sign.IS_NULL, cm);
+                ucoNode = new IsNullNode(this, false, cm);
 				break;
             default:
                 if (SanityManager.DEBUG) {
@@ -1531,7 +1529,7 @@ class SubqueryNode extends ValueNode
 		}
 
 		int bcoType = 0;
-		int nodeType = 0;
+        int kind = -1;
 
 		/* Build the <BinaryComparisonOperator> */
 		switch (operatorType)
@@ -1540,32 +1538,32 @@ class SubqueryNode extends ValueNode
 			case EQ_ANY_SUBQUERY:
 			case NOT_IN_SUBQUERY:
 			case NE_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_EQUALS;
 				break;
 
 			case NE_ANY_SUBQUERY:
 			case EQ_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_NOT_EQUALS;
 				break;
 
 			case LE_ANY_SUBQUERY:
 			case GT_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_LESS_EQUALS;
 				break;
 
 			case LT_ANY_SUBQUERY:
 			case GE_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_LESS_THAN;
 				break;
 
 			case GE_ANY_SUBQUERY:
 			case LT_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_GREATER_EQUALS;
 				break;
 
 			case GT_ANY_SUBQUERY:
 			case LE_ALL_SUBQUERY:
-				nodeType = C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
+                kind = BinaryRelationalOperatorNode.K_GREATER_THAN;
 				break;
 
 			default:
@@ -1575,7 +1573,7 @@ class SubqueryNode extends ValueNode
 		}
 
         BinaryComparisonOperatorNode bcoNode = new BinaryRelationalOperatorNode(
-                nodeType,
+                kind,
                 leftOperand,
                 rightOperand,
                 false,
@@ -2335,33 +2333,33 @@ class SubqueryNode extends ValueNode
 	private void changeToCorrespondingExpressionType()
 		throws StandardException
 	{
-        int nodeType = 0;
+        int nodeType = -1;
 
         switch (subqueryType)
   		{
   			case EQ_ANY_SUBQUERY:
   			case IN_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_EQUALS;
   				break;
 
   			case NE_ANY_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_NOT_EQUALS;
   				break;
 
   			case LE_ANY_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_LESS_EQUALS;
   				break;
 
   			case LT_ANY_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_LESS_THAN;
   				break;
 
   			case GE_ANY_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_GREATER_EQUALS;
   				break;
 
   			case GT_ANY_SUBQUERY:
-                nodeType = C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
+                nodeType = BinaryRelationalOperatorNode.K_GREATER_THAN;
   				break;
             default:
                 if (SanityManager.DEBUG) {
@@ -2410,7 +2408,7 @@ class SubqueryNode extends ValueNode
     /**
      * {@inheritDoc}
      */    
-    protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
     {
     	return false;
     }

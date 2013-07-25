@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
@@ -69,7 +68,6 @@ class VirtualColumnNode extends ValueNode
                       ContextManager cm) throws StandardException
 	{
         super(cm);
-        setNodeType(C_NodeTypes.VIRTUAL_COLUMN_NODE);
         this.sourceResultSet = sourceResultSet;
         this.sourceColumn = sourceColumn;
         this.columnId = columnId;
@@ -291,12 +289,13 @@ class VirtualColumnNode extends ValueNode
         sourceColumn.setType(dtd);
     }
     
-    protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
     {
-    	if (isSameNodeType(o)) {
+        if (isSameNodeKind(o)) {
     		VirtualColumnNode other = (VirtualColumnNode)o;
     		return sourceColumn.isEquivalent(other.sourceColumn);
     	}
+
     	return false;
     }
 }

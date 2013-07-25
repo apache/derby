@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * An OrderByNode represents a result set for a sort operation
@@ -56,7 +55,6 @@ class OrderByNode extends SingleChildResultSetNode
                 Properties tableProperties,
                 ContextManager cm) throws StandardException {
         super(childRes, tableProperties, cm);
-        setNodeType(C_NodeTypes.ORDER_BY_NODE);
 
         this.orderByList = orderByList;
 

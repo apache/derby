@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -201,11 +200,10 @@ class ResultColumn extends ValueNode
     }
 
     private void setTypeExpressionAndDefault(ValueNode expression) {
-        setNodeType(C_NodeTypes.RESULT_COLUMN);
         setExpression(expression);
 
         if (expression != null &&
-           expression.isInstanceOf(C_NodeTypes.DEFAULT_NODE)) {
+                expression instanceof DefaultNode) {
             // This result column represents a <default> keyword in an insert or
             // update statement
             defaultColumn = true;
@@ -1860,13 +1858,13 @@ class ResultColumn extends ValueNode
 	
     boolean isEquivalent(ValueNode o) throws StandardException
 	{
-        if (o.getNodeType() == getNodeType()) 
-        {                
+        if (isSameNodeKind(o)) {
         	ResultColumn other = (ResultColumn)o;
         	if (expression != null) {
         		return expression.isEquivalent(other.expression);
         	}
         }
+
         return false;
 	}
 

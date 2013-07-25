@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
@@ -52,7 +51,6 @@ class TablePrivilegesNode extends QueryTreeNode
 
     TablePrivilegesNode(ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.TABLE_PRIVILEGES_NODE);
     }
 
 	/**

@@ -255,9 +255,9 @@ abstract class ConstantNode extends ValueNode
 		return Qualifier.CONSTANT;
 	}
         
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (isSameNodeType(o)) {
+        if (isSameNodeKind(o)) {
 			ConstantNode other = (ConstantNode)o;
 			
 			// value can be null which represents a SQL NULL value.
@@ -265,6 +265,7 @@ abstract class ConstantNode extends ValueNode
 					 (other.getValue() != null && 
 							 other.getValue().compare(getValue()) == 0) );
 		}
+
 		return false;
 	}
 }

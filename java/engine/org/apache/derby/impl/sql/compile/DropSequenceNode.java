@@ -25,7 +25,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -46,7 +45,6 @@ class DropSequenceNode extends DDLStatementNode {
      */
     DropSequenceNode(TableName dropSequenceName, ContextManager cm) {
         super(dropSequenceName, cm);
-        setNodeType(C_NodeTypes.DROP_SEQUENCE_NODE);
         dropItem = dropSequenceName;
     }
 

@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -45,7 +44,6 @@ class CurrentRowLocationNode extends ValueNode
 
     CurrentRowLocationNode(ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.CURRENT_ROW_LOCATION_NODE);
     }
 
 	/**
@@ -157,7 +155,7 @@ class CurrentRowLocationNode extends ValueNode
 		mbex.callMethod(VMOpcode.INVOKEVIRTUAL, (String) null, mb.getName(), ClassName.DataValueDescriptor, 0);
 	}
 	
-	protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
 	{
 		return false;
 	}

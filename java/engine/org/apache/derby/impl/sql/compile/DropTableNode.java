@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -55,7 +54,6 @@ class DropTableNode extends DDLStatementNode
 	{
         super(dropObjectName, cm);
         this.dropBehavior = dropBehavior;
-        setNodeType(C_NodeTypes.DROP_TABLE_NODE);
 	}
 
 	/**

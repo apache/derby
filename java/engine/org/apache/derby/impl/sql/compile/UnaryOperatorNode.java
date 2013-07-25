@@ -51,11 +51,6 @@ class UnaryOperatorNode extends OperatorNode
 	String	operator;
 	String	methodName;
     
-    /**
-     * Operator type, only valid for XMLPARSE and XMLSERIALIZE.
-     */
-	private int operatorType;
-
 	String		resultInterfaceType;
 	String		receiverInterfaceType;
 
@@ -78,8 +73,18 @@ class UnaryOperatorNode extends OperatorNode
     // node implementations, in its other mode it is a concrete
     // class for XMLPARSE and XMLSERIALIZE.
 
-    final static int XMLPARSE_OP = 0;
-    final static int XMLSERIALIZE_OP = 1;
+    // Allowed kinds
+    final static int K_XMLPARSE = 0;
+    final static int K_XMLSERIALIZE = 1;
+    final static int K_BASE = 2; // when UnaryOperatorNode is used as
+                                 // a base class
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
 
 	// NOTE: in the following 4 arrays, order
 	// IS important.
@@ -110,6 +115,10 @@ class UnaryOperatorNode extends OperatorNode
     /** Whether or not an XMLParse operator should preserve whitespace. */
     private boolean preserveWhitespace;
 
+    /**
+     * When UnaryOperatorNode is used as an base class, this
+     * constructor is used as {@code super}.
+     */
     UnaryOperatorNode(ValueNode operand,
             String operator,
             String methodNameOrAddedArgs,
@@ -118,47 +127,50 @@ class UnaryOperatorNode extends OperatorNode
         this.operand = operand;
         this.operator = operator;
         this.methodName = methodNameOrAddedArgs;
-        this.operatorType = -1;
+        this.kind = K_BASE;
     }
 
+    /**
+     * When UnaryOperatorNode is used as an base class, this
+     * constructor is used as {@code super}.
+     */
     UnaryOperatorNode(ValueNode operand, ContextManager cm) {
         super(cm);
         this.operand = operand;
-        this.operatorType = -1;
+        this.kind = K_BASE;
     }
 
 	/**
-     * Constructor for a UnaryOperatorNode.
+     * Constructor for a UnaryOperatorNode when used as a concrete class.
 	 *
      * @param operand       The operand of the node
-     * @param operatorType  Either 1) the name of the operator,
-     *                      OR 2) an Integer holding the operatorType
-     *                      for this operator.
+     * @param kind          The kind of operator
+     * @param targetType    The DTD of the target type
+     * @param preserveWhiteSpace {@code true} if white space is to be preserved
+     *                      (relevant for kind == XMLPARSE only)
      * @param cm            The context manager
 	 */
-    UnaryOperatorNode(int                nodeType,
-                      ValueNode          operand,
-                      int                operatorType,
+    UnaryOperatorNode(ValueNode          operand,
+                      int                kind,
                       DataTypeDescriptor targetType,
                       boolean            preserveWhiteSpace,
                       ContextManager     cm)
 	{
         super(cm);
-        setNodeType(nodeType);
         this.operand = operand;
-        this.operatorType = operatorType;
-        this.operator = UnaryOperators[this.operatorType];
-        this.methodName = UnaryMethodNames[this.operatorType];
-        this.resultInterfaceType = UnaryResultTypes[this.operatorType];
-        this.receiverInterfaceType = UnaryArgTypes[this.operatorType];
+        this.kind = kind;
+        this.operator = UnaryOperators[this.kind];
+        this.methodName = UnaryMethodNames[this.kind];
+        this.resultInterfaceType = UnaryResultTypes[this.kind];
+        this.receiverInterfaceType = UnaryArgTypes[this.kind];
 
-        if (operatorType == XMLSERIALIZE_OP) {
+        if (kind == K_XMLSERIALIZE) {
             this.targetType = targetType;
-        } else if (operatorType == XMLPARSE_OP) {
+        } else if (kind == K_XMLPARSE) {
             this.preserveWhitespace = preserveWhiteSpace;
         } else if (SanityManager.DEBUG) {
             SanityManager.THROWASSERT(
-                    "Don't know how to handle operator type " + operatorType);
+                    "Don't know how to handle operator type " + kind);
         }
 	}
 
@@ -170,7 +182,6 @@ class UnaryOperatorNode extends OperatorNode
 	void setOperator(String operator)
 	{
 		this.operator = operator;
-		this.operatorType = -1;
 	}
 
 	/**
@@ -191,7 +202,6 @@ class UnaryOperatorNode extends OperatorNode
 	void setMethodName(String methodName)
 	{
 		this.methodName = methodName;
-		this.operatorType = -1;
 	}
 
 	/**
@@ -291,10 +301,13 @@ class UnaryOperatorNode extends OperatorNode
 				throws StandardException
 	{
         bindOperand(fromList, subqueryList, aggregates);
-        if (operatorType == XMLPARSE_OP)
+
+        if (kind == K_XMLPARSE) {
             bindXMLParse();
-        else if (operatorType == XMLSERIALIZE_OP)
+        } else if (kind == K_XMLSERIALIZE) {
             bindXMLSerialize();
+        }
+
         return this;
 	}
 
@@ -539,7 +552,7 @@ class UnaryOperatorNode extends OperatorNode
 
 	void bindParameter() throws StandardException
 	{
-		if (operatorType == XMLPARSE_OP)
+        if (kind == K_XMLPARSE)
 		{
 			/* SQL/XML[2006] allows both binary and character strings for
 			 * the XMLParse parameter (section 10.16:Function).  The spec
@@ -571,7 +584,7 @@ class UnaryOperatorNode extends OperatorNode
 			throw StandardException.newException(
 				SQLState.LANG_XMLPARSE_UNKNOWN_PARAM_TYPE);
 		}
-		else if (operatorType == XMLSERIALIZE_OP) {
+        else if (kind == K_XMLSERIALIZE) {
         // For now, since JDBC has no type defined for XML, we
         // don't allow binding to an XML parameter.
 	        throw StandardException.newException(
@@ -597,7 +610,7 @@ class UnaryOperatorNode extends OperatorNode
 									throws StandardException
 	{
 		String resultTypeName = 
-			(operatorType == -1)
+            (kind == K_BASE)
 				? getTypeCompiler().interfaceName()
 				: resultInterfaceType;
 			
@@ -651,7 +664,7 @@ class UnaryOperatorNode extends OperatorNode
 								"cannot get interface without operand");
 		}
 
-		if (operatorType != -1)
+        if (kind != K_BASE)
 			return receiverInterfaceType;
 		
 		return operand.getTypeCompiler().interfaceName();
@@ -714,11 +727,13 @@ class UnaryOperatorNode extends OperatorNode
     int addXmlOpMethodParams(ExpressionClassBuilder acb,
 		MethodBuilder mb, LocalField resultField) throws StandardException
     {
-        if ((operatorType != XMLPARSE_OP) && (operatorType != XMLSERIALIZE_OP))
-        // nothing to do.
+        if ((kind != K_XMLPARSE) &&
+                (kind != K_XMLSERIALIZE)) {
+            // nothing to do.
             return 0;
+        }
 
-        if (operatorType == XMLSERIALIZE_OP) {
+        if (kind == K_XMLSERIALIZE) {
         // We push the target type's JDBC type id as well as
         // the maximum width, since both are required when
         // we actually perform the operation, and both are
@@ -767,17 +782,19 @@ class UnaryOperatorNode extends OperatorNode
      * @throws StandardException 
      * {@inheritDoc}
      */
-    protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
     {
-    	if (isSameNodeType(o)) 
-    	{
-		// the first condition in the || covers the case when 
-	    	// both operands are null.
+        if (isSameNodeKind(o)) {
     		UnaryOperatorNode other = (UnaryOperatorNode)o;
     		return (operator.equals(other.operator) && 
-			((operand == other.operand)|| 
-			 ((operand != null) && operand.isEquivalent(other.operand))));
+                   ((operand == other.operand)||
+                   ((operand != null) && operand.isEquivalent(other.operand))));
     	}
     	return false;
+    }
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) && ((UnaryOperatorNode)o).kind == kind;
     }
 }

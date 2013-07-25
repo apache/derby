@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
@@ -46,7 +45,6 @@ class DropIndexNode extends DDLStatementNode
 
     DropIndexNode(TableName index, ContextManager cm) {
         super(index, cm);
-        setNodeType(C_NodeTypes.DROP_INDEX_NODE);
     }
 
     String statementToString()

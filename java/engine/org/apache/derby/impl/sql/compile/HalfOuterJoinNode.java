@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
@@ -75,7 +74,6 @@ class HalfOuterJoinNode extends JoinNode
 				tableProperties,
                 null,
                 cm);
-        setNodeType(C_NodeTypes.HALF_OUTER_JOIN_NODE);
         this.rightOuterJoin = rightOuterJoin;
 
 		/* We can only flatten an outer join
@@ -690,7 +688,8 @@ private boolean isNullRejecting (
 			ValueNode left = and.getLeftOperand();
 
 			/* Skip IS NULL predicates as they are not null intolerant */
-			if (left.isInstanceOf(C_NodeTypes.IS_NULL_NODE))
+            if (left.getClass().equals(IsNullNode.class) &&
+                ((IsNullNode)left).isNullNode())
 			{
 				vn = and.getRightOperand();
 				continue;

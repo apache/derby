@@ -237,8 +237,9 @@ public class ContextManager
 	 */
     public final List<Context> getContextStack(String contextId) {
 		final CtxStack cs = ctxTable.get(contextId);
-        final List<Context> el = Collections.emptyList();
-        return cs==null ? el : cs.getUnmodifiableList();
+        return cs == null ?
+               Collections.<Context>emptyList() :
+               cs.getUnmodifiableList();
 	}
     
     /**

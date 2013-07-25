@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 class IsNode extends BinaryLogicalOperatorNode
 {
@@ -49,7 +48,6 @@ class IsNode extends BinaryLogicalOperatorNode
 	{
 		// the false for shortCir
         super(leftOperand, rightOperand, "is", cm );
-        setNodeType(C_NodeTypes.IS_NODE);
         this.notMe = notMe;
 	}
 

@@ -29,7 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -46,26 +45,34 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
     private static final String TIMESTAMP_METHOD_NAME = "getTimestamp";
     private static final String DATE_METHOD_NAME = "getDate";
     
-    enum OperatorType {DATE, TIMESTAMP};
+    // Allowed kinds
+    final static int K_DATE = 0;
+    final static int K_TIMESTAMP = 1;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
 
     /**
      * @param operand The operand of the function
-     * @param type The type of the result, Date or Timestamp.
+     * @param kind The kind of the result, Date or Timestamp.
      * @param cm context manager
      * @throws StandardException
      */
     UnaryDateTimestampOperatorNode(
             ValueNode operand,
-            OperatorType type,
+            int kind,
             ContextManager cm) throws StandardException {
         super(operand,
-                type == OperatorType.DATE ? "date" : "timestamp",
-                type == OperatorType.DATE ?
-                    DATE_METHOD_NAME : TIMESTAMP_METHOD_NAME,
+                kind == K_DATE ? "date" : "timestamp",
+                kind == K_DATE ? DATE_METHOD_NAME : TIMESTAMP_METHOD_NAME,
                 cm);
-        setNodeType(C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE);
+        this.kind = kind;
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                type == OperatorType.DATE ? Types.DATE : Types.TIMESTAMP));
+                kind == K_DATE ? Types.DATE : Types.TIMESTAMP));
     }
 
     /**
@@ -180,4 +187,10 @@ class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
         mb.cast( ClassName.DataValueDescriptor);
         mb.callMethod( VMOpcode.INVOKEINTERFACE, (String) null, methodName, getTypeCompiler().interfaceName(), 1);
     } // end of generateExpression
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((UnaryDateTimestampOperatorNode)o).kind == kind;
+    }
 }

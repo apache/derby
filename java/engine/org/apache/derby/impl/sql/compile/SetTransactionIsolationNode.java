@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
@@ -49,7 +48,6 @@ class SetTransactionIsolationNode extends TransactionStatementNode
     SetTransactionIsolationNode(int isolationLevel, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.SET_TRANSACTION_ISOLATION_NODE);
         this.isolationLevel = isolationLevel;
 	}
 

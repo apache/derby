@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
@@ -55,7 +54,6 @@ class SavepointNode extends DDLStatementNode
 		throws StandardException
 	{
         super(cm);
-        setNodeType(C_NodeTypes.SAVEPOINT_NODE);
         this.savepointName = objectName;
         this.savepointStatementType = savepointStatementType;
 

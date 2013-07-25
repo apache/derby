@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -69,7 +68,6 @@ class NewInvocationNode extends MethodCallNode
 		throws StandardException
 	{
         super("<init>", cm);
-        setNodeType(C_NodeTypes.NEW_INVOCATION_NODE);
         addParms(params);
 
         this.javaClassName = javaClassName;
@@ -118,7 +116,6 @@ class NewInvocationNode extends MethodCallNode
 		throws StandardException
 	{
         super("<init>", cm);
-        setNodeType(C_NodeTypes.NEW_INVOCATION_NODE);
         addParms(params);
 
 		if (SanityManager.DEBUG)

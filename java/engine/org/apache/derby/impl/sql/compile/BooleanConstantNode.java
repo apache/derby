@@ -28,7 +28,6 @@ import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 public final class BooleanConstantNode extends ConstantNode
 {
@@ -49,14 +48,12 @@ public final class BooleanConstantNode extends ConstantNode
 		*/
         // Fill in the type information in the parent ValueNode
         super(TypeId.BOOLEAN_ID, true, 1, cm);
-        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
         setValue( null );
     }
 
     BooleanConstantNode(boolean value, ContextManager cm)
             throws StandardException {
         super(TypeId.BOOLEAN_ID, false, 1, cm);
-        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
         super.setValue(new SQLBoolean(value));
         this.booleanValue = value;
     }
@@ -64,7 +61,6 @@ public final class BooleanConstantNode extends ConstantNode
     BooleanConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, 0, cm);
-        setNodeType(C_NodeTypes.BOOLEAN_CONSTANT_NODE);
         this.unknownValue = true;
     }
 

@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
@@ -117,7 +116,6 @@ class AlterTableNode extends DDLStatementNode
         super(tableName, cm);
 		truncateTable = true;
 		schemaDescriptor = getSchemaDescriptor();
-        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 	
 	/**
@@ -137,7 +135,6 @@ class AlterTableNode extends DDLStatementNode
         this.sequential = sequential;
 		compressTable = true;
 		schemaDescriptor = getSchemaDescriptor();
-        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 
 	/**
@@ -162,7 +159,6 @@ class AlterTableNode extends DDLStatementNode
         this.truncateEndOfTable = truncateEndOfTable;
 		compressTable = true;
 		schemaDescriptor = getSchemaDescriptor(true, false);
-        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
 	}
 
     /**
@@ -205,7 +201,6 @@ class AlterTableNode extends DDLStatementNode
         }
 
         schemaDescriptor = getSchemaDescriptor();
-        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
     }
 
     /**
@@ -243,7 +238,6 @@ class AlterTableNode extends DDLStatementNode
                 }
         }
         schemaDescriptor = getSchemaDescriptor();
-        setNodeType(C_NodeTypes.ALTER_TABLE_NODE);
     }
 
     /**

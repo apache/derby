@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -125,7 +124,6 @@ public final class InsertNode extends DMLModStatementNode
 		 * right statementType for a bulk insert replace.
 		 */
         super(queryExpression, getStatementType(targetProperties), cm);
-        setNodeType(C_NodeTypes.INSERT_NODE);
         setTarget(targetName);
         targetColumnList = insertColumns;
         this.targetProperties = targetProperties;

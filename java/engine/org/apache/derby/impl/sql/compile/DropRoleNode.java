@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
@@ -50,7 +49,6 @@ class DropRoleNode extends DDLStatementNode
     {
         super(null, cm);
         this.roleName = roleName;
-        setNodeType(C_NodeTypes.DROP_ROLE_NODE);
     }
 
     @Override

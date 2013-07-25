@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
@@ -49,7 +48,6 @@ class GrantRoleNode extends DDLStatementNode
         super(null, cm);
         this.roles = roles;
         this.grantees = grantees;
-        setNodeType(C_NodeTypes.GRANT_ROLE_NODE);
     }
 
 

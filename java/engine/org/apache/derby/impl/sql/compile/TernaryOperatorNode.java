@@ -50,9 +50,25 @@ import org.apache.derby.iapi.util.ReuseFactory;
 
 class TernaryOperatorNode extends OperatorNode
 {
+
+    // Allowed kinds
+    final static int K_TRIM = 0;
+    final static int K_LOCATE = 1;
+    final static int K_SUBSTRING = 2;
+    final static int K_LIKE = 3;
+    final static int K_TIMESTAMPADD = 4;
+    final static int K_TIMESTAMPDIFF = 5;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
+
 	String		operator;
 	String		methodName;
-	int			operatorType;
 	ValueNode	receiver; 
 
 	ValueNode	leftOperand;
@@ -64,12 +80,6 @@ class TernaryOperatorNode extends OperatorNode
 	String		rightInterfaceType;
 	int			trimType;
 
-    static final int TRIM = 0;
-    static final int LOCATE = 1;
-    static final int SUBSTRING = 2;
-    static final int LIKE = 3;
-    static final int TIMESTAMPADD = 4;
-    static final int TIMESTAMPDIFF = 5;
 	static final String[] TernaryOperators = {"trim", "LOCATE", "substring", "like", "TIMESTAMPADD", "TIMESTAMPDIFF"};
 	static final String[] TernaryMethodNames = {"ansiTrim", "locate", "substring", "like", "timestampAdd", "timestampDiff"};
 	static final String[] TernaryResultType = {ClassName.StringDataValue, 
@@ -94,62 +104,59 @@ class TernaryOperatorNode extends OperatorNode
      *                      {@code substr()})
 	 * @param leftOperand	The left operand of the node
 	 * @param rightOperand	The right operand of the node
-	 * @param operatorType	The type of the operand
+     * @param kind          The kind of the operand
      * @param cm            The context manager
      */
     TernaryOperatorNode(
                     ValueNode receiver,
                     ValueNode leftOperand,
                     ValueNode rightOperand,
-                    int operatorType,
-                    int trimType,
+                    int kind,
                     ContextManager cm)
     {
         super(cm);
+        this.kind = kind;
         constructorMinion(
-                receiver, leftOperand, rightOperand, operatorType, trimType);
+                receiver, leftOperand, rightOperand, -1);
     }
 
     /**
      * Constructor for a TernaryOperatorNode
      *
-     * @param nodeType      The node type
      * @param receiver      The receiver (e.g., string being operated on in
      *                      {@code substr()})
      * @param leftOperand   The left operand of the node
      * @param rightOperand  The right operand of the node
-     * @param operatorType  The type of the operand
+     * @param kind          The kind of the operand
+     * @param trimType      The trim type
      * @param cm            The context manager
      */
-    TernaryOperatorNode(int nodeType,
-                        ValueNode receiver,
+    TernaryOperatorNode(ValueNode receiver,
                         ValueNode leftOperand,
                         ValueNode rightOperand,
-                        int operatorType,
+                        int kind,
                         int trimType,
                         ContextManager cm)
     {
         super(cm);
-        setNodeType(nodeType);
+        this.kind = kind;
         constructorMinion(
-                receiver, leftOperand, rightOperand, operatorType, trimType);
+                receiver, leftOperand, rightOperand, trimType);
     }
 
     private void constructorMinion(ValueNode receiver,
                                    ValueNode leftOperand,
                                    ValueNode rightOperand,
-                                   int operatorType,
                                    int trimType) {
         this.receiver = receiver;
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
-        this.operatorType = operatorType;
-        this.operator = TernaryOperators[this.operatorType];
-        this.methodName = TernaryMethodNames[this.operatorType];
-        this.resultInterfaceType = TernaryResultType[this.operatorType];
-        this.receiverInterfaceType = TernaryArgType[this.operatorType][0];
-        this.leftInterfaceType = TernaryArgType[this.operatorType][1];
-        this.rightInterfaceType = TernaryArgType[this.operatorType][2];
+        this.operator = TernaryOperators[this.kind];
+        this.methodName = TernaryMethodNames[this.kind];
+        this.resultInterfaceType = TernaryResultType[this.kind];
+        this.receiverInterfaceType = TernaryArgType[this.kind][0];
+        this.leftInterfaceType = TernaryArgType[this.kind][1];
+        this.rightInterfaceType = TernaryArgType[this.kind][2];
 
         if (trimType != -1) {
             this.trimType = trimType;
@@ -243,16 +250,18 @@ class TernaryOperatorNode extends OperatorNode
 			rightOperand = rightOperand.bindExpression(fromList, subqueryList, 
                 aggregates);
 		}
-		if (operatorType == TRIM)
+
+        if (kind == K_TRIM) {
 			trimBind();
-		else if (operatorType == LOCATE)
+        } else if (kind == K_LOCATE) {
 			locateBind();
-		else if (operatorType == SUBSTRING)
+        } else if (kind == K_SUBSTRING) {
 			substrBind();
-		else if (operatorType == TIMESTAMPADD)
+        } else if (kind == K_TIMESTAMPADD) {
             timestampAddBind();
-		else if (operatorType == TIMESTAMPDIFF)
+        } else if (kind == K_TIMESTAMPDIFF) {
             timestampDiffBind();
+        }
 
 		return this;
 	}
@@ -314,7 +323,7 @@ class TernaryOperatorNode extends OperatorNode
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, resultInterfaceType);
 
 		receiver.generateExpression(acb, mb);
-		if (operatorType == TRIM)
+        if (kind == K_TRIM)
 		{
 			mb.push(trimType);
 			leftOperand.generateExpression(acb, mb);
@@ -324,7 +333,7 @@ class TernaryOperatorNode extends OperatorNode
 			nargs = 3;
 			receiverType = receiverInterfaceType;
 		}
-		else if (operatorType == LOCATE)
+        else if (kind == K_LOCATE)
 		{
 			leftOperand.generateExpression(acb, mb); 
 			mb.upCast(leftInterfaceType);
@@ -334,7 +343,7 @@ class TernaryOperatorNode extends OperatorNode
 			nargs = 3;
 		
 		}
-		else if (operatorType == SUBSTRING)
+        else if (kind == K_SUBSTRING)
 		{
 			leftOperand.generateExpression(acb, mb); 
 			mb.upCast(leftInterfaceType);
@@ -353,7 +362,7 @@ class TernaryOperatorNode extends OperatorNode
 			nargs = 4;
 			receiverType = receiverInterfaceType;
 		}
-		else if (operatorType == TIMESTAMPADD || operatorType == TIMESTAMPDIFF)
+        else if (kind == K_TIMESTAMPADD || kind == K_TIMESTAMPDIFF)
         {
             Object intervalType = leftOperand.getConstantValueAsObject();
             if( SanityManager.DEBUG)
@@ -361,7 +370,7 @@ class TernaryOperatorNode extends OperatorNode
                                       "Invalid interval type used for " + operator);
             mb.push( ((Integer) intervalType).intValue());
             rightOperand.generateExpression( acb, mb);
-            mb.upCast( TernaryArgType[ operatorType][2]);
+            mb.upCast(TernaryArgType[kind][2]);
             acb.getCurrentDateExpression( mb);
 			mb.getField(field);
 			nargs = 4;
@@ -995,11 +1004,16 @@ class TernaryOperatorNode extends OperatorNode
 		return new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true);
 	}
         
-    protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((TernaryOperatorNode)o).kind == this.kind;
+    }
+
+
+    boolean isEquivalent(ValueNode o) throws StandardException
     {
-    	if (isSameNodeType(o)) 
-	{
-		TernaryOperatorNode other = (TernaryOperatorNode)o;
+        if (isSameNodeKind(o)) {
+            TernaryOperatorNode other = (TernaryOperatorNode)o;
 		
 			/*
 			 * SUBSTR function can either have 2 or 3 arguments.  In the 

@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.TypeId;
@@ -49,7 +48,6 @@ class GroupByColumn extends OrderedColumn
                   ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.GROUP_BY_COLUMN);
         this.columnExpression = colRef;
 	}
 

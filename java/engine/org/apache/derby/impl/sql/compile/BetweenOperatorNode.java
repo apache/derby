@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A BetweenOperatorNode represents a BETWEEN clause. The between values are
@@ -45,7 +44,6 @@ class BetweenOperatorNode extends BinaryListOperatorNode
             ValueNodeList betweenValues,
             ContextManager cm) throws StandardException {
         super(leftOperand, vetValues(betweenValues), "BETWEEN", null, cm);
-        setNodeType(C_NodeTypes.BETWEEN_OPERATOR_NODE);
     }
 
     private static ValueNodeList vetValues(ValueNodeList betweenValues) {
@@ -112,11 +110,11 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO < rightOList.elementAt(0) */
         leftBCO = new BinaryRelationalOperatorNode(
-									C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
-									leftOperand, 
-                                    rightOperandList.elementAt(0),
-                                    false,
-									cm);
+                BinaryRelationalOperatorNode.K_LESS_THAN,
+                leftOperand,
+                rightOperandList.elementAt(0),
+                false,
+                cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
 
@@ -128,11 +126,11 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO > rightOList.elementAt(1) */
         rightBCO = new BinaryRelationalOperatorNode(
-								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
-								leftClone,
-                                rightOperandList.elementAt(1),
-                                false,
-								cm);
+                BinaryRelationalOperatorNode.K_GREATER_THAN,
+                leftClone,
+                rightOperandList.elementAt(1),
+                false,
+                cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();
 
@@ -207,11 +205,11 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 		/* Create the AND <= */
 		BinaryComparisonOperatorNode lessEqual = 
             new BinaryRelationalOperatorNode(
-						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
-						leftClone1, 
-                        rightOperandList.elementAt(1),
-                        false,
-						cm);
+                BinaryRelationalOperatorNode.K_LESS_EQUALS,
+                leftClone1,
+                rightOperandList.elementAt(1),
+                false,
+                cm);
 
 		/* Set type info for the operator node */
 		lessEqual.bindComparisonOperator();
@@ -223,11 +221,11 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 		/* Create the AND >= */
 		BinaryComparisonOperatorNode greaterEqual = 
             new BinaryRelationalOperatorNode(
-					C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
-					leftOperand, 
-                    rightOperandList.elementAt(0),
-                    false,
-					cm);
+                BinaryRelationalOperatorNode.K_GREATER_EQUALS,
+                leftOperand,
+                rightOperandList.elementAt(0),
+                false,
+                cm);
 
 		/* Set type info for the operator node */
 		greaterEqual.bindComparisonOperator();
@@ -276,21 +274,21 @@ class BetweenOperatorNode extends BinaryListOperatorNode
 
 		/* leftO >= rightOList.elementAt(0) */
         leftBCO = new BinaryRelationalOperatorNode(
-							C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
-							leftOperand, 
-                            rightOperandList.elementAt(0),
-                            false,
-							cm);
+                BinaryRelationalOperatorNode.K_GREATER_EQUALS,
+                leftOperand,
+                rightOperandList.elementAt(0),
+                false,
+                cm);
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
 
 		/* leftO <= rightOList.elementAt(1) */
         rightBCO = new BinaryRelationalOperatorNode(
-						C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE,
-						leftOperand, 
-                        rightOperandList.elementAt(1),
-                        false,
-						cm);
+                BinaryRelationalOperatorNode.K_LESS_EQUALS,
+                leftOperand,
+                rightOperandList.elementAt(1),
+                false,
+                cm);
 		/* Set type info for the operator node */
 		rightBCO.bindComparisonOperator();
 

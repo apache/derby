@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A GroupByList represents the list of expressions in a GROUP BY clause in
@@ -42,7 +41,6 @@ class GroupByList extends OrderedColumnList<GroupByColumn>
 
     public GroupByList(ContextManager cm) {
         super(GroupByColumn.class, cm);
-        setNodeType(C_NodeTypes.GROUP_BY_LIST);
     }
 
 

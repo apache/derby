@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -99,7 +98,6 @@ class CastNode extends ValueNode
              DataTypeDescriptor castTarget,
              ContextManager cm) throws StandardException {
         super(cm);
-        setNodeType(C_NodeTypes.CAST_NODE);
         this.castOperand = castOperand;
         setType(castTarget);
 	}
@@ -120,7 +118,6 @@ class CastNode extends ValueNode
              int charLength,
              ContextManager cm) throws StandardException {
         super(cm);
-        setNodeType(C_NodeTypes.CAST_NODE);
         this.castOperand = castOperand;
         int charLen = charLength;
         targetCharType = charType;
@@ -1024,14 +1021,14 @@ class CastNode extends ValueNode
 	 * {@inheritDoc}
 	 * @throws StandardException 
 	 */
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (isSameNodeType(o)) 
-		{
+        if (isSameNodeKind(o)) {
 			CastNode other = (CastNode)o;
 			return getTypeServices().equals(other.getTypeServices())
 				&& castOperand.isEquivalent(other.castOperand);
 		}
+
 		return false;
 	}
 }

@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
@@ -78,7 +77,6 @@ class UnionNode extends SetOperatorNode
               ContextManager cm) throws StandardException {
 
         super(leftResult, rightResult, all, tableProperties, cm);
-        setNodeType(C_NodeTypes.UNION_NODE);
 
         // Is this a UNION ALL for a table constructor?
         this.tableConstructor = tableConstructor;

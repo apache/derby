@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 
 /**
@@ -42,7 +41,6 @@ final class AggregateWindowFunctionNode extends WindowFunctionNode
             ContextManager cm) throws StandardException {
 
         super(null, "?", w, cm);
-        setNodeType(C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE);
         aggregateFunction = agg;
 
         throw StandardException.newException(

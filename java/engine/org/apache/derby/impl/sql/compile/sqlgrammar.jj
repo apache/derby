@@ -56,7 +56,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
@@ -401,17 +400,17 @@ public class SQLParser
 		{
 		  case BinaryOperatorNode.TIMES:
             return new BinaryArithmeticOperatorNode(
-									C_NodeTypes.BINARY_TIMES_OPERATOR_NODE,
-									leftOperand,
-									rightOperand, 
-									getContextManager());
+                BinaryArithmeticOperatorNode.K_TIMES,
+                leftOperand,
+                rightOperand,
+                getContextManager());
 
 		  case BinaryOperatorNode.DIVIDE:
             return new BinaryArithmeticOperatorNode(
-									C_NodeTypes.BINARY_DIVIDE_OPERATOR_NODE,
-									leftOperand,
-									rightOperand,
-									getContextManager());
+                BinaryArithmeticOperatorNode.K_DIVIDE,
+                leftOperand,
+                rightOperand,
+                getContextManager());
 		  case BinaryOperatorNode.CONCATENATE:
               return new ConcatenationOperatorNode(
 									leftOperand,
@@ -780,11 +779,10 @@ public class SQLParser
            trimChar = new CharConstantNode(" ", getContextManager());
         }
         return new TernaryOperatorNode(
-							C_NodeTypes.TRIM_OPERATOR_NODE,
 							trimSource, // receiver
 							trimChar,   // leftOperand.
 							null,
-                            TernaryOperatorNode.TRIM,
+                            TernaryOperatorNode.K_TRIM,
                             trimSpec.intValue(),
 							cm == null ? getContextManager() : cm);
     }
@@ -1665,11 +1663,10 @@ public class SQLParser
                          ValueNode length) throws StandardException
     {
         return new TernaryOperatorNode(
-	    					C_NodeTypes.SUBSTRING_OPERATOR_NODE,
 		    				stringValue,
 			    			startPosition,
 				    		length,
-                            TernaryOperatorNode.SUBSTRING,
+                            TernaryOperatorNode.K_SUBSTRING,
                             -1,
 						    getContextManager());
     }
@@ -1747,13 +1744,13 @@ public class SQLParser
 			autoIncrementInfo = null;
 		}
 
-        return new ModifyColumnNode(
-			C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
-			columnName,
-			defaultNode,
-			null,
-			autoIncrementInfo,
-			getContextManager());
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 defaultNode,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
 	}
 
 	private boolean
@@ -5265,15 +5262,15 @@ isSearchCondition() throws StandardException :
 		if ( isToken != null )
 		{
             result = new IsNullNode(booleanPrimary,
-                                    IsNullNode.Sign.IS_NULL,
+                                    false,
                                     getContextManager());
 		
-				/* Put the NOT on top of the tree */
+            /* Put the NOT on top of the tree */
 				if (notToken != null)
 				{
-                   result = new NotNode(result, getContextManager());
-				}
-		}
+                result = new NotNode(result, getContextManager());
+            }
+        }
 		else { result = booleanPrimary; }
 
 		return result;
@@ -5497,7 +5494,7 @@ additiveExpression(ValueNode farLeftOperand, int compOp) throws StandardExceptio
 {
 	ValueNode	leftOperand;
 	int			operator;
-	int			nodeType;
+    int         kind;
 }
 {
 	leftOperand = multiplicativeExpression(null, 0)  			
@@ -5510,38 +5507,38 @@ additiveExpression(ValueNode farLeftOperand, int compOp) throws StandardExceptio
 		switch (compOp)
 		{
 		  case BinaryOperatorNode.EQ:
-			nodeType = C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_EQUALS;
 			break;
 
 		  case BinaryOperatorNode.NE:
-			nodeType = C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_NOT_EQUALS;
 			break;
 
 		  case BinaryOperatorNode.LT:
-		  	nodeType = C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_LESS_THAN;
 			break;
 
 		  case BinaryOperatorNode.GT:
-			nodeType = C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_GREATER_THAN;
 			break;
 
 		  case BinaryOperatorNode.LE:
-			nodeType = C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_LESS_EQUALS;
 			break;
 
 		  case BinaryOperatorNode.GE:
-			nodeType = C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
+            kind = BinaryRelationalOperatorNode.K_GREATER_EQUALS;
 			break;
 
 		  default:
 			if (SanityManager.DEBUG)
 			SanityManager.THROWASSERT("Unknown comparison operator " + compOp);
-			nodeType = 0;
+            kind = -1;
 			break;
 		}
 
         return new BinaryRelationalOperatorNode(
-							nodeType,
+                            kind,
 							farLeftOperand,
 							leftOperand,
                             false,
@@ -5589,19 +5586,17 @@ multiplicativeExpression(ValueNode farLeftOperand, int additiveOperator) throws 
 		{
 		  case BinaryOperatorNode.PLUS:
             return new BinaryArithmeticOperatorNode(
-									C_NodeTypes.BINARY_PLUS_OPERATOR_NODE,
-									farLeftOperand,
-									leftOperand,
-									getContextManager()
-									);
+                BinaryArithmeticOperatorNode.K_PLUS,
+                farLeftOperand,
+                leftOperand,
+                getContextManager());
 
 		  case BinaryOperatorNode.MINUS:
               return new BinaryArithmeticOperatorNode(
-									C_NodeTypes.BINARY_MINUS_OPERATOR_NODE,
-									farLeftOperand,
-									leftOperand,
-									getContextManager()
-									);
+                  BinaryArithmeticOperatorNode.K_MINUS,
+                  farLeftOperand,
+                  leftOperand,
+                  getContextManager());
 
 		  default:
 			if (SanityManager.DEBUG)
@@ -5667,14 +5662,14 @@ unaryExpression(ValueNode farLeftOperand, int multiplicativeOperator) throws Sta
 		{
            value = new UnaryArithmeticOperatorNode(
                value,
-               UnaryArithmeticOperatorNode.OperatorType.MINUS,
+               UnaryArithmeticOperatorNode.K_MINUS,
                getContextManager());
 		}
 		else if ("+".equals(sign))
 		{
            value = new UnaryArithmeticOperatorNode(
                value,
-               UnaryArithmeticOperatorNode.OperatorType.PLUS,
+               UnaryArithmeticOperatorNode.K_PLUS,
                getContextManager());
 		}
 		else if (SanityManager.DEBUG)
@@ -6115,11 +6110,10 @@ timestampArithmeticFuncion() throws StandardException :
        count = additiveExpression(null,0) <COMMA>
        tstamp1 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return new TernaryOperatorNode(C_NodeTypes.TIMESTAMP_ADD_FN_NODE,
-                                       tstamp1,
+        return new TernaryOperatorNode(tstamp1,
                                        intervalType,
                                        count,
-                                       TernaryOperatorNode.TIMESTAMPADD,
+                                       TernaryOperatorNode.K_TIMESTAMPADD,
                                        -1,
                                        getContextManager());
     }
@@ -6128,11 +6122,10 @@ timestampArithmeticFuncion() throws StandardException :
        tstamp1 = additiveExpression(null,0) <COMMA>
        tstamp2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
-        return new TernaryOperatorNode(C_NodeTypes.TIMESTAMP_DIFF_FN_NODE,
-                                       tstamp2,
+        return new TernaryOperatorNode(tstamp2,
                                        intervalType,
                                        tstamp1,
-                                       TernaryOperatorNode.TIMESTAMPDIFF,
+                                       TernaryOperatorNode.K_TIMESTAMPDIFF,
                                        -1,
                                        getContextManager());
     }
@@ -6220,7 +6213,7 @@ numericValueFunction() throws StandardException :
     {
         return new UnaryArithmeticOperatorNode(
                 value,
-                UnaryArithmeticOperatorNode.OperatorType.SQRT,
+                UnaryArithmeticOperatorNode.K_SQRT,
                 getContextManager());
     }
 |
@@ -6234,7 +6227,8 @@ numericValueFunction() throws StandardException :
 	<IDENTITY_VAL_LOCAL> <LEFT_PAREN> <RIGHT_PAREN>
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.IDENTITY_VAL_NODE, getContextManager());
+            SpecialFunctionNode.K_IDENTITY_VAL,
+            getContextManager());
 	}
 }
 
@@ -6287,7 +6281,7 @@ absFunction() throws StandardException :
     {
         return new UnaryArithmeticOperatorNode(
                 value,
-                UnaryArithmeticOperatorNode.OperatorType.ABS,
+                UnaryArithmeticOperatorNode.K_ABS,
                 getContextManager());
     }
 }
@@ -6305,8 +6299,9 @@ modFunction() throws StandardException :
             int2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return new BinaryArithmeticOperatorNode(
-                C_NodeTypes.MOD_OPERATOR_NODE,
-                int1, int2,
+                BinaryArithmeticOperatorNode.K_MOD,
+                int1,
+                int2,
                 getContextManager());
     }
 }
@@ -6380,7 +6375,6 @@ characterValueFunction() throws StandardException :
     {
 		// if start is missing, start is equal to 1
         return new TernaryOperatorNode(
-                            C_NodeTypes.LOCATE_FUNCTION_NODE,
                             str1,
                             str2,
                             (value == null) ?
@@ -6389,7 +6383,7 @@ characterValueFunction() throws StandardException :
                                     ReuseFactory.getInteger(1),
                                     getContextManager() ) :
                                 value,
-                            TernaryOperatorNode.LOCATE,
+                            TernaryOperatorNode.K_LOCATE,
                             -1,
                             getContextManager());
     }
@@ -6521,14 +6515,14 @@ valueExpressionPrimary() throws StandardException :
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.CURRENT_SCHEMA_NODE, getContextManager());
+            SpecialFunctionNode.K_CURRENT_SCHEMA, getContextManager());
 	}
 |
 	LOOKAHEAD({getToken(2).kind == ISOLATION}) 
 	<CURRENT> <ISOLATION>
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.CURRENT_ISOLATION_NODE, getContextManager());
+            SpecialFunctionNode.K_CURRENT_ISOLATION, getContextManager());
 	}
 |
 	/* Omitted "case_expression" */
@@ -6871,9 +6865,8 @@ ValueNode
 {
 	value = additiveExpression(null,0) wsOption = xmlPreserveWhitespace() {
         return new UnaryOperatorNode(
-					C_NodeTypes.XML_PARSE_OPERATOR_NODE,
 					value,
-                    UnaryOperatorNode.XMLPARSE_OP,
+                    UnaryOperatorNode.K_XMLPARSE,
                     null, /* N/A for PARSE */
                     wsOption,
 					getContextManager());
@@ -6939,9 +6932,8 @@ ValueNode
 		targetType = xmlSerializeTargetType()
 	{
         return new UnaryOperatorNode(
-					C_NodeTypes.XML_SERIALIZE_OPERATOR_NODE,
 					value,
-                    UnaryOperatorNode.XMLSERIALIZE_OP,
+                    UnaryOperatorNode.K_XMLSERIALIZE,
 					targetType,
                     false, /* N/A for SERIALIZE */
 					getContextManager());
@@ -7064,14 +7056,11 @@ ValueNode
 	)
 	{
         ValueNode vNode = new BinaryOperatorNode(
-			(existsOnly
-				? C_NodeTypes.XML_EXISTS_OPERATOR_NODE
-				: C_NodeTypes.XML_QUERY_OPERATOR_NODE),
 			xqueryExpr,
 			xmlValue,
 			(existsOnly
-                ? BinaryOperatorNode.XMLEXISTS_OP
-                : BinaryOperatorNode.XMLQUERY_OP),
+                ? BinaryOperatorNode.K_XMLEXISTS
+                : BinaryOperatorNode.K_XMLQUERY),
 			getContextManager());
 
 		return vNode;
@@ -7353,7 +7342,7 @@ dateTimeScalarFunction() throws StandardException :
 	{
        return new UnaryDateTimestampOperatorNode(
             value,
-            UnaryDateTimestampOperatorNode.OperatorType.DATE,
+            UnaryDateTimestampOperatorNode.K_DATE,
             getContextManager());
         }
 |
@@ -7385,7 +7374,7 @@ timestampFunctionCompletion( ValueNode firstArg) throws StandardException :
 	{
        return new UnaryDateTimestampOperatorNode(
             firstArg,
-            UnaryDateTimestampOperatorNode.OperatorType.TIMESTAMP,
+            UnaryDateTimestampOperatorNode.K_TIMESTAMP,
             getContextManager());
         }
 |
@@ -7449,19 +7438,19 @@ userNode() throws StandardException :
 	<USER>
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.USER_NODE, getContextManager());
+            SpecialFunctionNode.K_USER, getContextManager());
 	}
 |
 	<CURRENT_USER>
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.CURRENT_USER_NODE, getContextManager());
+            SpecialFunctionNode.K_CURRENT_USER, getContextManager());
 	}
 |
 	<SESSION_USER>
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.SESSION_USER_NODE, getContextManager());
+            SpecialFunctionNode.K_SESSION_USER, getContextManager());
 	}
 }
 
@@ -7479,7 +7468,7 @@ currentRoleNode() throws StandardException :
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("CURRENT_ROLE");
         return new SpecialFunctionNode(
-            C_NodeTypes.CURRENT_ROLE_NODE, getContextManager());
+            SpecialFunctionNode.K_CURRENT_ROLE, getContextManager());
 	}
 }
 
@@ -11375,7 +11364,7 @@ DB2DefaultOption(String columnName) throws StandardException :
 	<CURRENT> (<SCHEMA> | <SQLID>)
 	{
         return new SpecialFunctionNode(
-            C_NodeTypes.CURRENT_SCHEMA_NODE, getContextManager());
+            SpecialFunctionNode.K_CURRENT_SCHEMA, getContextManager());
 	}
 |
 	/* Revert DB2 restriction: DERBY-3013. Accept standard SQL CURRENT_USER,
@@ -12318,15 +12307,16 @@ valueSpecification() throws StandardException :
        thenElseList.addElement(new UntypedNullConstantNode(cm));
 		thenElseList.addElement(leftExpression);
 
-        return new ConditionalNode(new BinaryRelationalOperatorNode(
-                                       C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-                                       leftExpression,
-                                       rightExpression,
-                                       false,
-                                       cm),
-                                   thenElseList,
-                                   true, // this node is for nullif
-                                   cm);
+        return new ConditionalNode(
+                   new BinaryRelationalOperatorNode(
+                       BinaryRelationalOperatorNode.K_EQUALS,
+                       leftExpression,
+                       rightExpression,
+                       false,
+                       cm),
+                   thenElseList,
+                   true, // this node is for nullif
+                   cm);
 	}
 |
 	// CASE WHEN P1 THEN [T1 | NULL] (WHEN Pi THEN [Ti | NULL])* [ELSE E | NULL] END
@@ -13085,11 +13075,13 @@ dropColumnDefinition(TableName tableName, TableElementList tableElementList, int
 	[ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 				 dropColumnReferentialAction(behavior)
 	{
-        tableElement = new ModifyColumnNode(
-						C_NodeTypes.DROP_COLUMN_NODE,
-						columnName, null,
-						null, null,
-						getContextManager());
+        tableElement =
+            new ModifyColumnNode(ModifyColumnNode.K_DROP_COLUMN,
+                                 columnName,
+                                 null,
+                                 null,
+                                 null,
+                                 getContextManager());
 		tableElementList.addTableElement(tableElement);
         return new AlterTableNode(
 							tableName,
@@ -13153,11 +13145,13 @@ columnAlterClause(String columnName) throws StandardException :
 	LOOKAHEAD( {getToken(2).kind == DATA} )
 	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
 	{
-        return new ModifyColumnNode(
-						C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
-						columnName, null,
-						typeDescriptor, null,
-						getContextManager());
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_TYPE,
+                                 columnName,
+                                 null,
+                                 typeDescriptor,
+                                 null,
+                                 getContextManager());
 	}
 |
 	LOOKAHEAD( {getToken(2).kind == INCREMENT} )
@@ -13165,22 +13159,26 @@ columnAlterClause(String columnName) throws StandardException :
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
-        return new ModifyColumnNode(
-						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
-						columnName,
-						null, null, autoIncrementInfo,
-						getContextManager());
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
 	}
 |
 	<RESTART> <WITH> autoIncrementRestartWith = exactNumber()
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementRestartWith;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE;
-        return new ModifyColumnNode(
-						C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
-						columnName,
-						null, null, autoIncrementInfo,
-						getContextManager());
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
 	}
 |
 	LOOKAHEAD( {getToken(1).kind == WITH || getToken(1).kind == _DEFAULT ||
@@ -13210,10 +13208,13 @@ columnAlterClause(String columnName) throws StandardException :
 		// column constraint is specified by setting the right value
 		// in the nullability field of the data type but we don't have
 		// a datatype here.
-        return new ModifyColumnNode(
-								C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE,
-								columnName, null, null, null,
-								getContextManager());
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_CONSTRAINT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 null,
+                                 getContextManager());
 	}
 |
 	LOOKAHEAD({getToken(1).kind == NOT})
@@ -13225,9 +13226,12 @@ columnAlterClause(String columnName) throws StandardException :
 		// in the nullability field of the data type but we don't have
 		// a datatype here.
         return new ModifyColumnNode(
-								C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE,
-								columnName, null, null, null,
-								getContextManager());
+            ModifyColumnNode.K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL,
+            columnName,
+            null,
+            null,
+            null,
+            getContextManager());
 	}
 }
 

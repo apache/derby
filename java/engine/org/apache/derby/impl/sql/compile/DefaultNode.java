@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -52,7 +51,6 @@ public  class DefaultNode extends ValueNode
      */
     DefaultNode(ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.DEFAULT_NODE);
     }
 
     /**
@@ -66,7 +64,6 @@ public  class DefaultNode extends ValueNode
                 String defaultText,
                 ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.DEFAULT_NODE);
         this.defaultTree = defaultTree;
         this.defaultText = defaultText;
 	}
@@ -77,7 +74,6 @@ public  class DefaultNode extends ValueNode
 	 */
     DefaultNode(String columnName, ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.DEFAULT_NODE);
         this.columnName = columnName;
 	}
 
@@ -300,7 +296,7 @@ public  class DefaultNode extends ValueNode
     /**
      * @inheritDoc
      */
-	protected boolean isEquivalent(ValueNode other)
+    boolean isEquivalent(ValueNode other)
     {
 		return false;
     }

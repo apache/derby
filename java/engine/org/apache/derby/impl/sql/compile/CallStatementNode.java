@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -71,7 +70,6 @@ class CallStatementNode extends DMLStatementNode
     CallStatementNode(JavaToSQLValueNode methodCall, ContextManager cm)
 	{
         super(null, cm);
-        setNodeType(C_NodeTypes.CALL_STATEMENT_NODE);
         this.methodCall = methodCall;
 		this.methodCall.getJavaValueNode().markForCallStatement();
 	}

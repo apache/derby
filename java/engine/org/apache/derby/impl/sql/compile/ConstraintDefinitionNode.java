@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
@@ -72,7 +71,6 @@ class ConstraintDefinitionNode extends TableElementNode
 		 * since constraintName may be null.
 		 */
         super(null, cm);
-        setNodeType(C_NodeTypes.CONSTRAINT_DEFINITION_NODE);
 
         this.constraintName = constraintName;
 

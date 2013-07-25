@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -44,49 +43,25 @@ import org.apache.derby.iapi.types.TypeId;
 public final class IsNullNode extends UnaryComparisonOperatorNode
 						implements RelationalOperator
 {
-    enum Sign {IS_NULL, IS_NOT_NULL};
 	private DataValueDescriptor nullValue;
 
-    IsNullNode(ValueNode operand, Sign t, ContextManager cm)
+    /**
+     * If {@code true}, this node represents a NOT NULL node rather than a
+     * NULL node. Note that this state is mutable, cf {@link #getNegation}.
+     */
+    private boolean notNull;
+
+    IsNullNode(ValueNode operand, boolean notNull, ContextManager cm)
             throws StandardException {
         super(operand, cm);
-        setNodeType(
-            t == Sign.IS_NOT_NULL ?
-                C_NodeTypes.IS_NOT_NULL_NODE :
-                C_NodeTypes.IS_NULL_NODE);
+        this.notNull = notNull;
+        updateOperatorDetails();
     }
 
-    @Override
-    void setNodeType(int nodeType)
+    private void updateOperatorDetails()
 	{
-        String op;
-        String methodNam;
-
-		if (nodeType == C_NodeTypes.IS_NULL_NODE)
-		{
-			/* By convention, the method name for the is null operator is "isNull" */
-            op = "is null";
-            methodNam = "isNullOp";
-		}
-		else
-		{
-			if (SanityManager.DEBUG)
-			{
-				if (nodeType != C_NodeTypes.IS_NOT_NULL_NODE)
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + nodeType);
-				}
-			}
-			/* By convention, the method name for the is not null operator is 
-			 * "isNotNull" 
-			 */
-            op = "is not null";
-            methodNam = "isNotNull";
-		}
-        setOperator(op);
-        setMethodName(methodNam);
-		super.setNodeType(nodeType);
+        setOperator(notNull ? "is not null" : "is null");
+        setMethodName(notNull ? "isNotNull" : "isNullOp");
 	}
 
 	/**
@@ -101,30 +76,14 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	UnaryOperatorNode getNegation(ValueNode operand)
 				throws StandardException
 	{
-		UnaryOperatorNode negation;
-
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(getTypeServices() != null,
 						"dataTypeServices is expected to be non-null");
 		}
 
-		if (isNullNode())
-		{
-			setNodeType(C_NodeTypes.IS_NOT_NULL_NODE);
-		}
-		else
-		{
-			if (SanityManager.DEBUG)
-			{
-				if (! isNotNullNode())
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + getNodeType());
-				}
-			}
-			setNodeType(C_NodeTypes.IS_NULL_NODE);
-		}
+        notNull = !notNull;
+        updateOperatorDetails();
 		return this;
 	}
 
@@ -166,30 +125,28 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	}
 
 	/** @see RelationalOperator#getStartOperator */
+    @Override
 	public int getStartOperator(Optimizable optTable)
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (! isNullNode())
-			{
-				SanityManager.THROWASSERT(
-					"getNodeType() not expected to return " + getNodeType());
+        if (SanityManager.DEBUG) {
+            if (notNull) {
+                SanityManager.THROWASSERT("NOT NULL not expected here");
 			}
 		}
+
 		return ScanController.GE;
 	}
 
 	/** @see RelationalOperator#getStopOperator */
+    @Override
 	public int getStopOperator(Optimizable optTable)
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (! isNullNode())
-			{
-				SanityManager.THROWASSERT(
-					"getNodeType() not expected to return " + getNodeType());
+        if (SanityManager.DEBUG) {
+            if (notNull) {
+                SanityManager.THROWASSERT("NOT NULL not expected here");
 			}
 		}
+
 		return ScanController.GT;
 	}
 
@@ -204,31 +161,13 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public void generateNegate(MethodBuilder mb,
 										Optimizable optTable)
 	{
-		mb.push(isNotNullNode());
+        mb.push(notNull);
 	}
 
 	/** @see RelationalOperator#getOperator */
 	public int getOperator()
 	{
-        int op;
-		if (isNullNode())
-		{
-            op = IS_NULL_RELOP;
-		}
-		else
-		{
-			if (SanityManager.DEBUG)
-			{
-				if (! isNotNullNode())
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + getNodeType());
-				}
-			}
-            op = IS_NOT_NULL_RELOP;
-		}
-
-        return op;
+        return notNull ? IS_NOT_NULL_RELOP : IS_NULL_RELOP;
 	}
 
 	/** @see RelationalOperator#compareWithKnownConstant */
@@ -256,13 +195,13 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	/** @see RelationalOperator#equalsComparisonWithConstantExpression */
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
 	{
-		boolean retval = false;
-
 		// Always return false for NOT NULL
-		if (isNotNullNode())
+        if (notNull)
 		{
 			return false;
 		}
+
+        boolean retval = false;
 
 		/*
 		** Is the operand a column in the given table?
@@ -288,11 +227,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
-        return new IsNullNode(otherCR,
-                getNodeType() == C_NodeTypes.IS_NULL_NODE ?
-                Sign.IS_NULL :
-                Sign.IS_NOT_NULL,
-                getContextManager());
+        return new IsNullNode(otherCR, notNull, getContextManager());
 	}
 
 	/**
@@ -304,39 +239,23 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 	    return ClassName.DataValueDescriptor;
 	}
 
-	/** IS NULL is like =, so should have the same selectivity */
     @Override
 	public double selectivity(Optimizable optTable) 
 	{
-		if (isNullNode())
-		{
-			return 0.1d;
-		}
-		else
-		{
-			if (SanityManager.DEBUG)
-			{
-				if (! isNotNullNode())
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + getNodeType());
-				}
-			}
-			/* IS NOT NULL is like <>, so should have same selectivity */
+        if (notNull) {
+            /* IS NOT NULL is like <>, so should have same selectivity */
 			return 0.9d;
-		}
+        } else {
+            /** IS NULL is like =, so should have the same selectivity */
+            return 0.1d;
+        }
 	}
 
-	private boolean isNullNode()
+    boolean isNullNode()
 	{
-		return getNodeType() == C_NodeTypes.IS_NULL_NODE;
+        return !notNull;
 	}
 
-	private boolean isNotNullNode()
-	{
-		return getNodeType() == C_NodeTypes.IS_NOT_NULL_NODE;
-	}
-	
 	/** @see ValueNode#isRelationalOperator */
     @Override
     boolean isRelationalOperator()

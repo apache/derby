@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
@@ -53,7 +52,6 @@ class DropSchemaNode extends DDLStatementNode
     DropSchemaNode(String schemaName, int dropBehavior, ContextManager cm)
 	{
         super(null, cm);
-        setNodeType(C_NodeTypes.DROP_SCHEMA_NODE);
         this.schemaName = schemaName;
         this.dropBehavior = dropBehavior;
 	}

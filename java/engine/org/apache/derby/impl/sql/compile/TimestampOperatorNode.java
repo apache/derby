@@ -29,7 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -53,7 +52,6 @@ class TimestampOperatorNode extends BinaryOperatorNode
                           ContextManager cm)
     {
         super(cm);
-        setNodeType(C_NodeTypes.TIMESTAMP_OPERATOR_NODE);
         leftOperand = date;
         rightOperand = time;
         operator = "timestamp";

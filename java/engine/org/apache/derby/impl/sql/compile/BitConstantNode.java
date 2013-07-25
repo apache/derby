@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.BitDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.StringUtil;
@@ -42,7 +41,6 @@ class BitConstantNode extends ConstantNode
     BitConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, 0, cm);
-        setNodeType(C_NodeTypes.BIT_CONSTANT_NODE);
     }
 
 
@@ -55,7 +53,6 @@ class BitConstantNode extends ConstantNode
     BitConstantNode(String hexString, int bitLength, ContextManager cm)
             throws StandardException {
         super(TypeId.getBuiltInTypeId(Types.BINARY), false, bitLength, cm);
-        setNodeType(C_NodeTypes.BIT_CONSTANT_NODE);
         byte[] nv = StringUtil.fromHexString(hexString, 0, hexString.length());
         BitDataValue dvd = getDataValueFactory().getBitDataValue(nv);
 		dvd.setWidth(bitLength, 0, false);

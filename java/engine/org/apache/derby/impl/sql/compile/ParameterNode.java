@@ -29,7 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -117,7 +116,6 @@ public class ParameterNode extends ValueNode
                   DataValueDescriptor defaultValue,
                   ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.PARAMETER_NODE);
         this.parameterNumber = parameterNumber;
         this.defaultValue = defaultValue;
 	}
@@ -506,7 +504,7 @@ public class ParameterNode extends ValueNode
     /**
      * @inheritDoc
      */
-    protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
     {
     	return false;
     }

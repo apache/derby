@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -108,9 +107,9 @@ public class ColumnDefinitionNode extends TableElementNode
 		throws StandardException
 	{
         super(name, cm);
-        setNodeType(C_NodeTypes.COLUMN_DEFINITION_NODE);
         this.type = dataTypeServices;
-		if (defaultNode instanceof UntypedNullConstantNode)
+
+        if (defaultNode instanceof UntypedNullConstantNode)
 		{
 			/* No DTS yet for MODIFY DEFAULT */
 			if (dataTypeServices != null)
@@ -730,29 +729,26 @@ public class ColumnDefinitionNode extends TableElementNode
 				(colType == StoredFormatIds.LONGVARCHAR_TYPE_ID));
 
 			if (defaultNode instanceof SpecialFunctionNode) {
+                switch (((SpecialFunctionNode)defaultNode).kind) {
+                    case SpecialFunctionNode.K_USER:
+                    case SpecialFunctionNode.K_CURRENT_USER:
+                    case SpecialFunctionNode.K_CURRENT_ROLE:
+                    case SpecialFunctionNode.K_SESSION_USER:
+                    case SpecialFunctionNode.K_SYSTEM_USER:
+                        // DB2 enforces min length of 8.
+                        // Note also: any size under 30 gives a warning in DB2.
+                        return (charCol && (columnDesc.getMaximumWidth() >=
+                                Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_USER));
 
-				switch (defaultNode.getNodeType())
-				{
-				case C_NodeTypes.USER_NODE:
-				case C_NodeTypes.CURRENT_USER_NODE:
-				case C_NodeTypes.CURRENT_ROLE_NODE:
-				case C_NodeTypes.SESSION_USER_NODE:
-				case C_NodeTypes.SYSTEM_USER_NODE:
-				// DB2 enforces min length of 8.
-				// Note also: any size under 30 gives a warning in DB2.
-					return (charCol && (columnDesc.getMaximumWidth() >=
-						Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_USER));
-
-				case C_NodeTypes.CURRENT_SCHEMA_NODE:
-				// DB2 enforces min length of 128.
-					return (charCol && (columnDesc.getMaximumWidth() >=
-						Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_SCHEMA));
-				default:
-					// else, function not allowed.
-					return false;
-				}
+                    case SpecialFunctionNode.K_CURRENT_SCHEMA:
+                        // DB2 enforces min length of 128.
+                        return (charCol && (columnDesc.getMaximumWidth() >=
+                                Limits.DB2_MIN_COL_LENGTH_FOR_CURRENT_SCHEMA));
+                    default:
+                        // else, function not allowed.
+                        return false;
+                }
 			}
-
 		}
 
 		switch (colType) {

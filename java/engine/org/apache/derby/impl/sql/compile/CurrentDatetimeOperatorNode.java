@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -59,7 +58,6 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 
     CurrentDatetimeOperatorNode(int whichType, ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.CURRENT_DATETIME_OPERATOR_NODE);
         this.whichType = whichType;
 
         if (SanityManager.DEBUG) {
@@ -174,16 +172,16 @@ class CurrentDatetimeOperatorNode extends ValueNode {
 		}
 	}
         
-        /**
-         * {@inheritDoc}
-         */
-	protected boolean isEquivalent(ValueNode o)
+    /**
+     * {@inheritDoc}
+     */
+    boolean isEquivalent(ValueNode o)
 	{
-		if (isSameNodeType(o)) 
-		{
+        if (isSameNodeKind(o)) {
 			CurrentDatetimeOperatorNode other = (CurrentDatetimeOperatorNode)o;
 			return other.whichType == whichType;
 		}
+
 		return false;
 	}
 }

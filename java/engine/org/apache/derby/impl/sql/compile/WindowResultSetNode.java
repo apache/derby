@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 
 /**
@@ -66,7 +65,6 @@ class WindowResultSetNode extends SingleChildResultSetNode
                         ContextManager           cm) throws StandardException
     {
         super(bottomPR, null, cm);
-        setNodeType(C_NodeTypes.WINDOW_RESULTSET_NODE);
         this.wdn = windowDef;
         this.windowFuncCalls = windowFuncCalls;
         setLevel(nestingLevel);

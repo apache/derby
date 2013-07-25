@@ -40,35 +40,36 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	private final static String[] UNARY_OPERATORS = {"+","-","SQRT", "ABS/ABSVAL"};
 	private final static String[] UNARY_METHODS = {"plus","minus","sqrt", "absolute"};
 
-   private final OperatorType operatorType;
-
-    public enum OperatorType {PLUS(0), MINUS(1), SQRT(2), ABS(3);
-
-        private int representation;
-
-        private OperatorType(int repr) {
-            this.representation = repr;
-        }
-
-        public int getVal() { return representation; }
-    }
+    // Allowed kinds
+    final static int K_PLUS = 0;
+    final static int K_MINUS = 1;
+    final static int K_SQRT = 2;
+    final static int K_ABS = 3;
     
     /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
+    /**
      * @param operand The operand of the node
-     * @param type unary operator identity
+     * @param kind unary operator identity
      * @param cm context manager
      * @throws StandardException
      */
     UnaryArithmeticOperatorNode(
             ValueNode operand,
-            OperatorType type,
+            int kind,
             ContextManager cm) throws StandardException {
         super(operand,
-              UNARY_OPERATORS[type.getVal()],
-              UNARY_METHODS[type.getVal()],
+              UNARY_OPERATORS[kind],
+              UNARY_METHODS[kind],
               cm);
-        this.operatorType = type;
+        this.kind = kind;
     }
+
     /**
      * Unary + and - require their type to be set if
      * they wrap another node (e.g. a parameter) that
@@ -78,8 +79,8 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
     public boolean requiresTypeFromContext()
     {
-        if (operatorType == OperatorType.PLUS ||
-            operatorType == OperatorType.MINUS) {
+        if (kind == K_PLUS ||
+            kind == K_MINUS) {
             return operand.requiresTypeFromContext(); 
         }
         return false;
@@ -91,8 +92,8 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
     public boolean isParameterNode()
     {
-        if (operatorType == OperatorType.PLUS ||
-            operatorType == OperatorType.MINUS) {
+        if (kind == K_PLUS ||
+            kind == K_MINUS) {
             return operand.isParameterNode(); 
         }
         return false;
@@ -112,8 +113,8 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
     @Override
 	void bindParameter() throws StandardException
 	{
-       if (operatorType == OperatorType.SQRT ||
-            operatorType == OperatorType.ABS)
+       if (kind == K_SQRT ||
+            kind == K_ABS)
 		{
 			operand.setType(
 				new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.DOUBLE), true));
@@ -121,8 +122,8 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		}
         
 		//Derby-582 add support for dynamic parameter for unary plus and minus
-       if (operatorType == OperatorType.MINUS ||
-            operatorType == OperatorType.PLUS)
+       if (kind == K_MINUS ||
+            kind == K_PLUS)
 			return;
         
         // Not expected to get here since only the above types are supported
@@ -149,20 +150,20 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	{
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
        if (operand.requiresTypeFromContext() &&
-                ((operatorType == OperatorType.PLUS ||
-                  operatorType == OperatorType.MINUS))
+                ((kind == K_PLUS ||
+                  kind == K_MINUS))
 				&& operand.getTypeServices() == null)
 				return this;
 
         bindOperand(fromList, subqueryList, aggregates);
 
-       if (operatorType == OperatorType.SQRT ||
-            operatorType == OperatorType.ABS)
+       if (kind == K_SQRT ||
+            kind == K_ABS)
 		{
 			bindSQRTABS();
 		}
-       else if (operatorType == OperatorType.PLUS ||
-                 operatorType == OperatorType.MINUS)
+       else if (kind == K_PLUS ||
+                 kind == K_MINUS)
 		{
             checkOperandIsNumeric(operand.getTypeId());
 		}
@@ -183,7 +184,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	    {
 	        throw StandardException.newException(
                     SQLState.LANG_UNARY_ARITHMETIC_BAD_TYPE, 
-                   (operatorType == OperatorType.PLUS) ? "+" : "-",
+                   (kind == K_PLUS) ? "+" : "-",
 	                        operandType.getSQLTypeName());
 	    }
 	    
@@ -202,7 +203,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 									throws StandardException
 	{
 		/* Unary + doesn't do anything.  Just return the operand */
-       if (operatorType == OperatorType.PLUS)
+       if (kind == K_PLUS)
 			operand.generateExpression(acb, mb);
 		else
 			super.generateExpression(acb, mb);
@@ -242,7 +243,7 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 						getOperatorString(), operandType.getSQLTypeName());
 
 		/* For SQRT, if operand is not a DOUBLE, convert it to DOUBLE */
-       if (operatorType == OperatorType.SQRT &&
+       if (kind == K_SQRT &&
             jdbcType != Types.DOUBLE)
 		{
             operand = new CastNode(
@@ -267,4 +268,10 @@ class UnaryArithmeticOperatorNode extends UnaryOperatorNode
         }
 		super.setType(descriptor);
 	}
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((UnaryArithmeticOperatorNode)o).kind == kind;
+    }
 }

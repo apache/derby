@@ -26,7 +26,6 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.util.IdUtil;
 
@@ -58,7 +57,6 @@ public class TableName extends QueryTreeNode
     TableName(String schemaName, String tableName, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.TABLE_NAME);
 		hasSchema = schemaName != null;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -84,7 +82,6 @@ public class TableName extends QueryTreeNode
         ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.TABLE_NAME);
         hasSchema = schemaName != null;
         this.schemaName = schemaName;
         this.tableName = tableName;

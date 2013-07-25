@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -84,7 +83,6 @@ class AggregateNode extends UnaryOperatorNode
             String aggregateName,
             ContextManager cm) throws StandardException {
         super(operand, cm);
-        setNodeType(C_NodeTypes.AGGREGATE_NODE);
         this.aggregateName = aggregateName;
         setUserDefinedAggregate(uadClass);
         this.distinct = distinct;
@@ -108,7 +106,6 @@ class AggregateNode extends UnaryOperatorNode
             String aggregateName,
             ContextManager cm) throws StandardException {
         super(operand, cm);
-        setNodeType(C_NodeTypes.AGGREGATE_NODE);
         this.aggregateName = aggregateName;
         this.userAggregateName = uadClass;
         this.distinct = distinct;
@@ -131,7 +128,6 @@ class AggregateNode extends UnaryOperatorNode
             String aggregateName,
             ContextManager cm) throws StandardException {
         super(operand, cm);
-        setNodeType(C_NodeTypes.AGGREGATE_NODE);
         this.aggregateName = aggregateName;
         this.aggregateDefinitionClass = uadClass;
 

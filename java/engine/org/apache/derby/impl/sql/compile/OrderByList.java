@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -78,7 +77,6 @@ class OrderByList extends OrderedColumnList<OrderByColumn>
     */
    OrderByList(ResultSetNode rs, ContextManager cm) {
        super(OrderByColumn.class, cm);
-       setNodeType(C_NodeTypes.ORDER_BY_LIST);
        this.isTableValueCtorOrdering =
                 (rs instanceof UnionNode &&
                 ((UnionNode)rs).tableConstructor()) ||

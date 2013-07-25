@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -51,7 +50,6 @@ class NextSequenceNode extends ValueNode {
     NextSequenceNode(TableName sequenceName,
                      ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.NEXT_SEQUENCE_NODE);
         this.sequenceName = sequenceName;
     }
 
@@ -187,7 +185,7 @@ class NextSequenceNode extends ValueNode {
         }
     }
 
-    protected boolean isEquivalent(ValueNode other) throws StandardException {
+    boolean isEquivalent(ValueNode other) throws StandardException {
         return false;
     }
 }

@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 
 /**
@@ -42,7 +41,6 @@ class MaterializeSubqueryNode extends ResultSetNode
 
     MaterializeSubqueryNode(LocalField lf, ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.MATERIALIZE_RESULT_SET_NODE);
 		this.lf = lf;
 	}
 

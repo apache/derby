@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 /**
@@ -36,7 +35,6 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 {
     SubqueryList(ContextManager cm) {
         super(SubqueryNode.class, cm);
-        setNodeType(C_NodeTypes.SUBQUERY_LIST);
     }
 
 	/**

@@ -26,7 +26,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -64,7 +63,6 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
               StatementType.DROP_DEFAULT,
               DataDictionary.DROP_CONSTRAINT,
               cm);
-        setNodeType(C_NodeTypes.FK_CONSTRAINT_DEFINITION_NODE);
 
         this.refRcl = refRcl;
         this.refTableName = refTableName;

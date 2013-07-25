@@ -40,7 +40,6 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.StatementUtil;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
@@ -81,7 +80,6 @@ public abstract class QueryTreeNode implements Visitable
 	                                // which this query node encodes.
 	private int		endOffset = -1;
 
-	private int nodeType;
 	private ContextManager cm;
 	private LanguageConnectionContext lcc;
 	private GenericConstantActionFactory	constantActionFactory;
@@ -616,35 +614,6 @@ public abstract class QueryTreeNode implements Visitable
 		return	null;
 	}
 
-    /**
-	 * Set the node type for this node.
-	 *
-	 * @param nodeType The node type.
-	 */
-    void setNodeType(int nodeType)
-	{
-		this.nodeType = nodeType;
-	}
-
-	protected int getNodeType()
-	{
-		return nodeType;
-	}
-
-	/**
-	 * For final nodes, return whether or not
-	 * the node represents the specified nodeType.
-	 *
-	 * @param nodeType	The nodeType of interest.
-	 *
-	 * @return Whether or not
-	 * the node represents the specified nodeType.
-	 */
-	protected boolean isInstanceOf(int nodeType)
-	{
-		return (this.nodeType == nodeType);
-	}
-
 	/**
 	 * Get the DataDictionary
 	 *
@@ -809,7 +778,7 @@ public abstract class QueryTreeNode implements Visitable
         {
           case Types.VARCHAR: {
               CharConstantNode ccn = new CharConstantNode(
-                      C_NodeTypes.VARCHAR_CONSTANT_NODE,
+                      CharConstantNode.K_VARCHAR,
                       type.getTypeId(),
                       cm);
               ccn.setType(type.getNullabilityType(true));
@@ -861,13 +830,13 @@ public abstract class QueryTreeNode implements Visitable
           }
           case Types.LONGVARCHAR: {
               CharConstantNode ccn = new CharConstantNode(
-                  C_NodeTypes.LONGVARCHAR_CONSTANT_NODE, type.getTypeId(), cm);
+                  CharConstantNode.K_LONGVARCHAR, type.getTypeId(), cm);
               ccn.setType(type.getNullabilityType(true));
               return ccn;
           }
           case Types.CLOB: {
               CharConstantNode ccn = new CharConstantNode(
-                  C_NodeTypes.CLOB_CONSTANT_NODE, type.getTypeId(), cm);
+                  CharConstantNode.K_CLOB, type.getTypeId(), cm);
               ccn.setType(type.getNullabilityType(true));
               return ccn;
           }

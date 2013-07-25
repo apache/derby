@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DateTimeDataValue;
@@ -55,7 +54,6 @@ static private final String fieldName[] = {
                 "EXTRACT " + fieldName[field],
                 fieldMethod[field],
                 cm);
-        setNodeType(C_NodeTypes.EXTRACT_OPERATOR_NODE);
         this.extractField = field;
     }
 

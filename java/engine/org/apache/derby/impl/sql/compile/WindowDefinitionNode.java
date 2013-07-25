@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * This class represents an OLAP window definition.
@@ -55,7 +54,6 @@ public final class WindowDefinitionNode extends WindowNode
                          OrderByList    orderByList,
                          ContextManager cm) throws StandardException {
         super(windowName != null ? windowName : "IN-LINE", cm);
-        setNodeType(C_NodeTypes.WINDOW_DEFINITION_NODE);
         this.orderByList = orderByList;
 
         if (windowName != null) {

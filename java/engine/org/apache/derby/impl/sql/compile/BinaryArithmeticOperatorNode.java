@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -38,16 +37,31 @@ import org.apache.derby.iapi.types.TypeId;
 
 public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 {
+    // Allowed kinds
+    final static int K_DIVIDE = 0;
+    final static int K_MINUS = 1;
+    final static int K_PLUS = 2;
+    final static int K_TIMES = 3;
+    final static int K_MOD = 4;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
 	/**
      * Constructor for a BinaryArithmeticOperatorNode
 	 *
+     * @param kind          The kind of operator
 	 * @param leftOperand	The left operand
 	 * @param rightOperand	The right operand
      * @param cm            The context manager
 	 */
 
     BinaryArithmeticOperatorNode(
-            int nodeType,
+            int kind,
             ValueNode leftOperand,
             ValueNode rightOperand,
             ContextManager cm)
@@ -57,52 +71,46 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
               ClassName.NumberDataValue,
               ClassName.NumberDataValue,
               cm);
-        setNodeType(nodeType);
-	}
+        this.kind = kind;
 
-    @Override
-    void setNodeType(int nodeType)
-	{
-        String op = null;
-        String mNam = null;
+        final String op;
+        final String mNam;
 
-		switch (nodeType)
+        switch (kind)
 		{
-			case C_NodeTypes.BINARY_DIVIDE_OPERATOR_NODE:
+            case K_DIVIDE:
                 op = TypeCompiler.DIVIDE_OP;
                 mNam = "divide";
 				break;
 
-			case C_NodeTypes.BINARY_MINUS_OPERATOR_NODE:
+            case K_MINUS:
                 op = TypeCompiler.MINUS_OP;
                 mNam = "minus";
 				break;
 
-			case C_NodeTypes.BINARY_PLUS_OPERATOR_NODE:
+            case K_PLUS:
                 op = TypeCompiler.PLUS_OP;
                 mNam = "plus";
 				break;
 
-			case C_NodeTypes.BINARY_TIMES_OPERATOR_NODE:
+            case K_TIMES:
                 op = TypeCompiler.TIMES_OP;
                 mNam = "times";
 				break;
 
-			case C_NodeTypes.MOD_OPERATOR_NODE:
+            case K_MOD:
                 op = TypeCompiler.MOD_OP;
                 mNam = "mod";
 				break;
-
-			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + nodeType);
-				}
-		}
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+                op = null;
+                mNam = null;
+        }
         setOperator(op);
         setMethodName(mNam);
-		super.setNodeType(nodeType);
 	}
 
 	/**
@@ -203,4 +211,10 @@ public final class BinaryArithmeticOperatorNode extends BinaryOperatorNode
 
 		return this;
 	}
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((BinaryArithmeticOperatorNode)o).kind == kind;
+    }
 }

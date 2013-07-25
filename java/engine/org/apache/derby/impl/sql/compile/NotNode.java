@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A NotNode represents a NOT operator. Preprocessing will eliminate the 
@@ -47,7 +46,6 @@ public final class NotNode extends UnaryLogicalOperatorNode
     NotNode(ValueNode operand, ContextManager cm)
             throws StandardException {
         super(operand, "not", cm);
-        setNodeType(C_NodeTypes.NOT_NODE);
     }
 
     /**

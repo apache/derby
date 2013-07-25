@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -57,7 +56,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
             ValueNodeList rightOperandList,
             ContextManager cm) throws StandardException {
         super(leftOperand, rightOperandList, "IN", "in", cm);
-        setNodeType(C_NodeTypes.IN_LIST_OPERATOR_NODE);
     }
 
     /**
@@ -135,11 +133,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		{
 			BinaryComparisonOperatorNode equal = 
                 new BinaryRelationalOperatorNode(
-						C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-						leftOperand, 
-                        rightOperandList.elementAt(0),
-                        false,
-						getContextManager());
+                    BinaryRelationalOperatorNode.K_EQUALS,
+                    leftOperand,
+                    rightOperandList.elementAt(0),
+                    false,
+                    getContextManager());
 			/* Set type info for the operator node */
 			equal.bindComparisonOperator();
 			return equal;
@@ -274,7 +272,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 				{
 					BinaryComparisonOperatorNode equal = 
                         new BinaryRelationalOperatorNode(
-							C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+                            BinaryRelationalOperatorNode.K_EQUALS,
 							leftOperand, 
 							minValue,
                             false,
@@ -341,7 +339,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 */
 			BinaryComparisonOperatorNode equal = 
                 new BinaryRelationalOperatorNode(
-					C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+                    BinaryRelationalOperatorNode.K_EQUALS,
 					leftOperand, 
 					pNode,
 					this,
@@ -435,11 +433,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		 */
 		ValueNode leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
         leftBCO = new BinaryRelationalOperatorNode(
-						C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
-						leftClone,
-                        rightOperandList.elementAt(0),
-                        false,
-						getContextManager());
+                BinaryRelationalOperatorNode.K_NOT_EQUALS,
+                leftClone,
+                rightOperandList.elementAt(0),
+                false,
+                getContextManager());
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
 
@@ -451,11 +449,11 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			/* leftO <> rightOList.elementAt(elemsDone) */
 			leftClone = (leftOperand instanceof ColumnReference) ? leftOperand.getClone() : leftOperand;
             rightBCO = new BinaryRelationalOperatorNode(
-							C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE,
-							leftClone,
-                            rightOperandList.elementAt(elemsDone),
-                            false,
-							getContextManager());
+                    BinaryRelationalOperatorNode.K_NOT_EQUALS,
+                    leftClone,
+                    rightOperandList.elementAt(elemsDone),
+                    false,
+                    getContextManager());
 			/* Set type info for the operator node */
 			rightBCO.bindComparisonOperator();
 

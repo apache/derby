@@ -24,7 +24,6 @@ package    org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
 
 public final class XMLConstantNode extends ConstantNode
@@ -32,7 +31,6 @@ public final class XMLConstantNode extends ConstantNode
     XMLConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, 0, cm);
-        setNodeType(C_NodeTypes.XML_CONSTANT_NODE);
     }
 
     /**

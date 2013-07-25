@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 /**
@@ -56,7 +55,6 @@ class SetRoleNode extends MiscellaneousStatementNode
         super(cm);
         this.name = roleName;
         this.type = type;
-        setNodeType(C_NodeTypes.SET_ROLE_NODE);
     }
 
     /**

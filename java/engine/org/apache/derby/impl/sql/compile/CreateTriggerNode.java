@@ -25,14 +25,12 @@ import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -257,7 +255,7 @@ class CreateTriggerNode extends DDLStatementNode
 	) throws StandardException
 	{
         super(triggerName, cm);
-        setNodeType(C_NodeTypes.CREATE_TRIGGER_NODE);
+
         this.triggerName = triggerName;
         this.tableName = tableName;
         this.triggerEventMask = triggerEventMask;

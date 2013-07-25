@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A NOPStatement node is for statements that don't do anything.  At the
@@ -38,7 +37,6 @@ class NOPStatementNode extends StatementNode
 
     NOPStatementNode(ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.NOP_STATEMENT_NODE);
     }
 
     String statementToString()

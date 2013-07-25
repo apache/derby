@@ -32,7 +32,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
@@ -114,7 +113,6 @@ class ProjectRestrictNode extends SingleChildResultSetNode
                         ContextManager   cm)
 	{
         super(childResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.PROJECT_RESTRICT_NODE);
         resultColumns = projection;
         this.restriction = restriction;
         this.restrictionList = restrictionList;

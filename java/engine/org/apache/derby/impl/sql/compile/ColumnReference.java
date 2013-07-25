@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
@@ -123,7 +122,6 @@ public class ColumnReference extends ValueNode
                     int            tokEndOffset,
                     ContextManager cm)  {
         super(cm);
-        setNodeType(C_NodeTypes.COLUMN_REFERENCE);
         this.columnName = columnName;
         this.tableName = tableName;
         this.setBeginOffset(tokBeginOffset);
@@ -143,7 +141,6 @@ public class ColumnReference extends ValueNode
                     TableName      tableName,
                     ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.COLUMN_REFERENCE);
         this.columnName = columnName;
         this.tableName = tableName;
 		tableNumber = -1;
@@ -593,11 +590,11 @@ public class ColumnReference extends ValueNode
 
         trueNode = new BooleanConstantNode(true, getContextManager());
         equalsNode = new BinaryRelationalOperatorNode(
-										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-										this,
-										trueNode,
-                                        false,
-										getContextManager());
+                BinaryRelationalOperatorNode.K_EQUALS,
+                this,
+                trueNode,
+                false,
+                getContextManager());
 		/* Set type info for the operator node */
 		equalsNode.bindComparisonOperator();
 
@@ -1192,11 +1189,12 @@ public class ColumnReference extends ValueNode
 		return null;
 	}
 	
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (!isSameNodeType(o)) {
+        if (! isSameNodeKind(o)) {
 			return false;
 		}
+
 		ColumnReference other = (ColumnReference)o;
 		return (tableNumber == other.tableNumber 
 				&& columnName.equals(other.getColumnName()));

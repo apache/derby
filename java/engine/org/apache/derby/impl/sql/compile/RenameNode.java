@@ -26,7 +26,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -100,7 +99,6 @@ class RenameNode extends DDLStatementNode
                ContextManager cm) throws StandardException
 	{
         super(cm);
-        setNodeType(C_NodeTypes.RENAME_NODE);
         this.usedAlterTable = usedAlterTable;
         this.renamingWhat = renamingWhat;
 

@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
@@ -72,7 +71,6 @@ class DistinctNode extends SingleChildResultSetNode
                  ContextManager cm) throws StandardException
 	{
         super(childResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.DISTINCT_NODE);
 
 		if (SanityManager.DEBUG)
 		{

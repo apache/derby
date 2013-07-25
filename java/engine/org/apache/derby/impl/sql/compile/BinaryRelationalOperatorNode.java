@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -47,8 +46,23 @@ class BinaryRelationalOperatorNode
 	extends BinaryComparisonOperatorNode
 	implements RelationalOperator
 {
-	private int operatorType;
+    // Allowed kinds
+    final static int K_EQUALS = 0;
+    final static int K_GREATER_EQUALS = 1;
+    final static int K_GREATER_THAN = 2;
+    final static int K_LESS_EQUALS = 3;
+    final static int K_LESS_THAN = 4;
+    final static int K_NOT_EQUALS = 5;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
 	/* RelationalOperator Interface */
+    private int relOpType;
 
 	// Visitor for finding base tables beneath optimizables and column
 	// references.  Created once and re-used thereafter.
@@ -85,12 +99,14 @@ class BinaryRelationalOperatorNode
      *  be passed as the originalNode.getForQueryRewrite(). Examples of this
      *  can be found in Predicate.Java and PredicateList.java
      *
-     * @param leftOperand
-     * @param rightOperand
-     * @param forQueryRewrite
+     * @param kind            The kind of operator
+     * @param leftOperand     The left operand
+     * @param rightOperand    The right operand
+     * @param forQueryRewrite See method description
+     * @paran cm              The context manager
      */
     BinaryRelationalOperatorNode(
-            int nodeType,
+            int kind,
             ValueNode leftOperand,
             ValueNode rightOperand,
             boolean forQueryRewrite,
@@ -98,11 +114,12 @@ class BinaryRelationalOperatorNode
 	{
         super(leftOperand,
               rightOperand,
-              getOperatorName(nodeType),
-              getMethodName(nodeType),
+              getOperatorName(kind),
+              getMethodName(kind),
               forQueryRewrite,
               cm);
-        constructorMinion(nodeType);
+        this.kind = kind;
+        constructorMinion();
     }
 
     /**
@@ -122,7 +139,7 @@ class BinaryRelationalOperatorNode
      *  can be found in Predicate.Java and PredicateList.java
      */
     BinaryRelationalOperatorNode(
-            int nodeType,
+            int kind,
             ValueNode leftOperand,
             ValueNode rightOperand,
             InListOperatorNode inListOp,
@@ -131,43 +148,43 @@ class BinaryRelationalOperatorNode
     {
         super(leftOperand,
               rightOperand,
-              getOperatorName(nodeType),
-              getMethodName(nodeType),
+              getOperatorName(kind),
+              getMethodName(kind),
               forQueryRewrite,
               cm);
-        constructorMinion(nodeType);
+        this.kind = kind;
+        constructorMinion();
         this.inListProbeSource = inListOp;
     }
 
-    private void constructorMinion(int nodeType) {
-        this.operatorType = getOperatorType(nodeType);
-        setNodeType(nodeType);
+    private void constructorMinion() {
+        this.relOpType = getRelOpType(this.kind);
         btnVis = null;
     }
 
-    private static String getMethodName(int nodeType) {
+    private static String getMethodName(int kind) {
         String methodName = "";
-        switch (nodeType) {
-			case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+        switch (kind) {
+        case K_EQUALS:
 				methodName = "equals";
 				break;
 
-			case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+        case K_GREATER_EQUALS:
 				methodName = "greaterOrEquals";
 				break;
 
-			case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+        case K_GREATER_THAN:
 				methodName = "greaterThan";
 				break;
 
-			case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+        case K_LESS_EQUALS:
 				methodName = "lessOrEquals";
 				break;
 
-			case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+        case K_LESS_THAN:
 				methodName = "lessThan";
 				break;
-			case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
+        case K_NOT_EQUALS:
 				methodName = "notEquals";
                 break;
 
@@ -175,37 +192,37 @@ class BinaryRelationalOperatorNode
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
                             "Constructor for BinaryRelationalOperatorNode" +
-                            " called with wrong nodeType = " + nodeType);
+                            " called with wrong nodeType = " + kind);
                 }
                 break;
         }
         return methodName;
     }
 
-    private static String getOperatorName(int nodeType) {
+    private static String getOperatorName(int kind) {
         String operatorName = "";
 
-        switch (nodeType) {
-            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+        switch (kind) {
+        case K_EQUALS:
                 operatorName = "=";
                 break;
 
-            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+        case K_GREATER_EQUALS:
                 operatorName = ">=";
                 break;
 
-            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+        case K_GREATER_THAN:
                 operatorName = ">";
                 break;
 
-            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+        case K_LESS_EQUALS:
                 operatorName = "<=";
                 break;
 
-            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+        case K_LESS_THAN:
                 operatorName = "<";
                 break;
-            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
+        case K_NOT_EQUALS:
 				operatorName = "<>";
 				break;
 
@@ -213,7 +230,7 @@ class BinaryRelationalOperatorNode
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
                             "Constructor for BinaryRelationalOperatorNode " +
-                            "called with wrong nodeType = " + nodeType);
+                            "called with wrong nodeType = " + kind);
 				}
 			    break;
 		}
@@ -221,25 +238,25 @@ class BinaryRelationalOperatorNode
         return operatorName;
     }
 
-    private int getOperatorType(int nodeType) {
-        switch (nodeType) {
-            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+    private int getRelOpType(int op) {
+        switch (op) {
+        case K_EQUALS:
                 return RelationalOperator.EQUALS_RELOP;
-            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+        case K_GREATER_EQUALS:
                 return RelationalOperator.GREATER_EQUALS_RELOP;
-            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+        case K_GREATER_THAN:
                 return RelationalOperator.GREATER_THAN_RELOP;
-            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+        case K_LESS_EQUALS:
                 return RelationalOperator.LESS_EQUALS_RELOP;
-            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+        case K_LESS_THAN:
                 return RelationalOperator.LESS_THAN_RELOP;
-            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
+        case K_NOT_EQUALS:
                 return RelationalOperator.NOT_EQUALS_RELOP;
             default:
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
                             "Constructor for BinaryRelationalOperatorNode " +
-                            "called with wrong nodeType = " + getNodeType());
+                            "called with wrong operator type = " + kind);
                 }
                 return 0;
         }
@@ -1094,7 +1111,7 @@ class BinaryRelationalOperatorNode
 
             if (!leftVal.isNull() && !rightVal.isNull()) {
                 int comp = leftVal.compare(rightVal);
-                switch (operatorType) {
+                switch (relOpType) {
                     case EQUALS_RELOP:
                         return newBool(comp == 0);
                     case NOT_EQUALS_RELOP:
@@ -1145,35 +1162,36 @@ class BinaryRelationalOperatorNode
 	}
 
 	/* map current node to its negation */
-	private int getNegationNode()
+    private int getNegationNode()
 	{
-		switch (getNodeType())
+        switch (this.kind)
 		{
-			case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
-				return C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+            case K_EQUALS:
+                return K_NOT_EQUALS;
 
-			case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
-				return C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
+            case K_GREATER_EQUALS:
+                return K_LESS_THAN;
 
-			case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
-				return C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
+            case K_GREATER_THAN:
+                return K_LESS_EQUALS;
 
-			case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
-				return C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
+            case K_LESS_THAN:
+                return K_GREATER_EQUALS;
 				
-			case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
-				return C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
+            case K_LESS_EQUALS:
+                return K_GREATER_THAN;
 
-			case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:				
-				return C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
-		}
-		
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT("getNegationNode called with invalid nodeType: " + getNodeType());
-		}
+            case K_NOT_EQUALS:
+                return K_EQUALS;
 
-		return -1;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                        "getNegationNode called with invalid node type: " +
+                        kind);
+                }
+        }
+        return -1;
 	}	
 
     /**
@@ -1183,7 +1201,7 @@ class BinaryRelationalOperatorNode
      */
     BinaryOperatorNode getSwappedEquivalent() throws StandardException {
         BinaryOperatorNode newNode = new BinaryRelationalOperatorNode(
-            getNodeTypeForSwap(),
+            getKindForSwap(),
             rightOperand,
             leftOperand,
             false,
@@ -1203,24 +1221,24 @@ class BinaryRelationalOperatorNode
      * @return a node type that preserves the meaning of the expression if
      * the operands are swapped
      */
-    private int getNodeTypeForSwap() {
-        switch (getNodeType()) {
-            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
-            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
-            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
-            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
-            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
-            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
-                return C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+    private int getKindForSwap() {
+        switch (this.kind) {
+            case K_EQUALS:
+                return K_EQUALS;
+            case K_GREATER_EQUALS:
+                return K_LESS_EQUALS;
+            case K_GREATER_THAN:
+                return K_LESS_THAN;
+            case K_LESS_THAN:
+                return K_GREATER_THAN;
+            case K_LESS_EQUALS:
+                return K_GREATER_EQUALS;
+            case K_NOT_EQUALS:
+                return K_NOT_EQUALS;
             default:
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT(
-                            "Invalid nodeType: " + getNodeType());
+                            "Invalid operator type: " + kind);
                 }
                 return -1;
         }
@@ -1236,7 +1254,7 @@ class BinaryRelationalOperatorNode
 	 */
 	protected boolean usefulStartKey(boolean columnOnLeft)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 				return true;
@@ -1260,7 +1278,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#usefulStopKey */
 	protected boolean usefulStopKey(boolean columnOnLeft)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 				return true;
@@ -1282,7 +1300,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#getStartOperator */
 	public int getStartOperator(Optimizable optTable)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 			case RelationalOperator.LESS_EQUALS_RELOP:
@@ -1304,7 +1322,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#getStopOperator */
 	public int getStopOperator(Optimizable optTable)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 			case RelationalOperator.GREATER_EQUALS_RELOP:
@@ -1326,7 +1344,7 @@ class BinaryRelationalOperatorNode
 	public void generateOperator(MethodBuilder mb,
 								 Optimizable optTable)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 				mb.push(Orderable.ORDER_OP_EQUALS);
@@ -1352,7 +1370,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#generateNegate */
 	public void generateNegate(MethodBuilder mb, Optimizable optTable)
 	{
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 				mb.push(false);
@@ -1374,7 +1392,7 @@ class BinaryRelationalOperatorNode
 	/** @see RelationalOperator#getOperator */
 	public int getOperator()
 	{
-		return operatorType;
+        return relOpType;
 	}
 
 	/** return the selectivity of this predicate.
@@ -1388,7 +1406,7 @@ class BinaryRelationalOperatorNode
 		if (retval >= 0.0d)
 			return retval;
 			
-		switch (operatorType)
+        switch (relOpType)
 		{
 			case RelationalOperator.EQUALS_RELOP:
 				return 0.1;
@@ -1411,7 +1429,7 @@ class BinaryRelationalOperatorNode
 	public RelationalOperator getTransitiveSearchClause(ColumnReference otherCR)
 		throws StandardException
 	{
-        return new BinaryRelationalOperatorNode(getNodeType(),
+        return new BinaryRelationalOperatorNode(kind,
                                                 otherCR,
                                                 rightOperand,
                                                 false,
@@ -1420,7 +1438,7 @@ class BinaryRelationalOperatorNode
 	
 	public boolean equalsComparisonWithConstantExpression(Optimizable optTable)
 	{
-		if (operatorType != EQUALS_RELOP)
+        if (relOpType != EQUALS_RELOP)
 			return false;
 
 		boolean retval = false;
@@ -1459,7 +1477,7 @@ class BinaryRelationalOperatorNode
 		 * operator.
 		 */
 		return !isInListProbeNode() &&
-			(operatorType == RelationalOperator.EQUALS_RELOP);
+            (relOpType == RelationalOperator.EQUALS_RELOP);
 	}
 
 	/**
@@ -1483,7 +1501,7 @@ class BinaryRelationalOperatorNode
 										   boolean isNullOkay)
 		throws StandardException
 	{
-		if (operatorType != EQUALS_RELOP)
+        if (relOpType != EQUALS_RELOP)
 			return false;
 
 		/* If this rel op is for a probe predicate then we do not treat
@@ -1539,7 +1557,7 @@ class BinaryRelationalOperatorNode
     @Override
     ValueNode genSQLJavaSQLTree() throws StandardException
 	{
-		if (operatorType == EQUALS_RELOP)
+        if (relOpType == EQUALS_RELOP)
 			return this;
 		
 		return super.genSQLJavaSQLTree();
@@ -1927,4 +1945,9 @@ class BinaryRelationalOperatorNode
 		ft.accept(btnVis);
 	}
 
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((BinaryRelationalOperatorNode)o).kind == kind;
+    }
 }

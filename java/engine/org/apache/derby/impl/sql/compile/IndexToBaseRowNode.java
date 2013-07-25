@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
@@ -70,7 +69,6 @@ class IndexToBaseRowNode extends FromTable
             ContextManager   cm)
 	{
         super(null, tableProperties, cm);
-        setNodeType(C_NodeTypes.INDEX_TO_BASE_ROW_NODE);
         this.source = source;
         this.baseCD = baseCD;
         this.resultColumns = resultColumns;

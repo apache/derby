@@ -23,7 +23,6 @@ package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * Represents a reference to an explicitly defined window
@@ -42,7 +41,6 @@ public final class WindowReferenceNode extends WindowNode
         throws StandardException
     {
         super(windowName, cm);
-        setNodeType(C_NodeTypes.WINDOW_REFERENCE_NODE);
     }
 
     @Override

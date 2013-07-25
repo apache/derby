@@ -39,7 +39,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -108,7 +107,6 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
     ResultColumnList(ContextManager cm) {
         super(ResultColumn.class, cm);
-        setNodeType(C_NodeTypes.RESULT_COLUMN_LIST);
 	}
 
 	/**

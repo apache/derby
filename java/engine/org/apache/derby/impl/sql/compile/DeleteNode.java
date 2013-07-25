@@ -40,7 +40,6 @@ import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -92,7 +91,6 @@ class DeleteNode extends DMLModStatementNode
                ResultSetNode queryExpression,
                ContextManager cm) {
         super(queryExpression, cm);
-        setNodeType(C_NodeTypes.DELETE_NODE);
         this.targetTableName = targetTableName;
 	}
 

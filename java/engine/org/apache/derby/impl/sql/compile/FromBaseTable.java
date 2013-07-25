@@ -41,11 +41,9 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.LanguageProperties;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
-import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
@@ -209,7 +207,6 @@ class FromBaseTable extends FromTable
                   ContextManager cm)
     {
         super(correlationName, tableProperties, cm);
-        setNodeType(C_NodeTypes.FROM_BASE_TABLE);
         this.tableName = tableName;
         resultColumns = derivedRCL;
         setOrigTableName(this.tableName);
@@ -232,7 +229,6 @@ class FromBaseTable extends FromTable
                   ContextManager cm)
 	{
         super(correlationName, null, cm);
-        setNodeType(C_NodeTypes.FROM_BASE_TABLE);
         this.tableName = tableName;
         this.updateOrDelete = updateOrDelete;
         resultColumns = derivedRCL;

@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -43,7 +42,6 @@ class SimpleStringOperatorNode extends UnaryOperatorNode
             String methodName,
             ContextManager cm) throws StandardException {
         super(operand, methodName, methodName, cm);
-        setNodeType(C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE);
     }
 
     /**

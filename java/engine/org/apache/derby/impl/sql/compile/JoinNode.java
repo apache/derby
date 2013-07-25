@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
@@ -111,7 +110,6 @@ class JoinNode extends TableOperatorNode
              ContextManager   cm) throws StandardException {
 
         super(leftResult, rightResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.JOIN_NODE);
         this.resultColumns = selectList;
         this.joinClause = onClause;
         this.joinClauseNormalized = false;
@@ -879,11 +877,11 @@ class JoinNode extends TableOperatorNode
 
 				/* Create and insert the new = condition */
                 equalsNode = new BinaryRelationalOperatorNode(
-										C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-										leftCR,
-										rightCR,
-                                        false,
-                                        cm);
+                        BinaryRelationalOperatorNode.K_EQUALS,
+                        leftCR,
+                        rightCR,
+                        false,
+                        cm);
 				equalsNode.bindComparisonOperator();
 
                 // Create a new join clause by ANDing the new = condition and

@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -62,7 +61,6 @@ class CreateSchemaNode extends DDLStatementNode
         super(null, cm);
         this.name = schemaName;
         this.aid = aid;
-        setNodeType(C_NodeTypes.CREATE_SCHEMA_NODE);
 	}
 
 	/**

@@ -36,7 +36,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -142,7 +141,6 @@ class StaticMethodCallNode extends MethodCallNode
             String javaClassName,
             ContextManager cm) {
         super(methodName, cm);
-        setNodeType(C_NodeTypes.STATIC_METHOD_CALL_NODE);
         this.javaClassName = javaClassName;
     }
 
@@ -160,7 +158,6 @@ class StaticMethodCallNode extends MethodCallNode
             ContextManager cm) {
         super(methodName.getTableName(), cm);
         procedureName = methodName;
-        setNodeType(C_NodeTypes.STATIC_METHOD_CALL_NODE);
         this.javaClassName = javaClassName;
     }
 

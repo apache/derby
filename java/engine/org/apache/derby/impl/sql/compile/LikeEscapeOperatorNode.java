@@ -29,8 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.Like;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -119,10 +117,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         super(receiver,
               leftOperand,
               rightOperand,
-              TernaryOperatorNode.LIKE,
-              -1, // default trimType
+              TernaryOperatorNode.K_LIKE,
               cm);
-        setNodeType(C_NodeTypes.LIKE_ESCAPE_OPERATOR_NODE);
     }
 
     /**
@@ -135,6 +131,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
      *
      * @exception StandardException thrown on failure
      */
+    @Override
     ValueNode bindExpression(
     FromList fromList, SubqueryList subqueryList, List<AggregateNode> aggregates)
         throws StandardException
@@ -381,7 +378,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     //  column  'Derby'
                     BinaryComparisonOperatorNode equals = 
                         new BinaryRelationalOperatorNode(
-                            C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+                            BinaryRelationalOperatorNode.K_EQUALS,
                             leftClone, 
                             new CharConstantNode(newPattern,
                                                  getContextManager()),
@@ -496,7 +493,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
     * @exception StandardException  Thrown on error
     */
     @Override
-    public ValueNode preprocess(
+    ValueNode preprocess(
     int             numTables,
     FromList        outerFromList,
     SubqueryList    outerSubqueryList,
@@ -652,7 +649,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
 
             BinaryComparisonOperatorNode lessThan = 
                 new BinaryRelationalOperatorNode(
-                    C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE,
+                    BinaryRelationalOperatorNode.K_LESS_THAN,
                     receiver.getClone(), 
                     likeLTopt,
                     false,
@@ -705,7 +702,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         //  reciever pattern
         BinaryComparisonOperatorNode greaterEqual = 
             new BinaryRelationalOperatorNode(
-                C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE,
+                BinaryRelationalOperatorNode.K_GREATER_EQUALS,
                 receiver.getClone(), 
                 likeGEopt,
                 false,

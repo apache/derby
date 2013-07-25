@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -121,7 +120,6 @@ class CoalesceFunctionNode extends ValueNode
         super(cm);
         this.functionName = functionName;
         this.argumentsList = argumentsList;
-        setNodeType(C_NodeTypes.COALESCE_FUNCTION_NODE);
 	}
 
 	/**
@@ -356,10 +354,9 @@ class CoalesceFunctionNode extends ValueNode
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isEquivalent(ValueNode o) throws StandardException
+    boolean isEquivalent(ValueNode o) throws StandardException
 	{
-		if (!isSameNodeType(o))
-		{
+        if (! isSameNodeKind(o)) {
 			return false;
 		}
 		

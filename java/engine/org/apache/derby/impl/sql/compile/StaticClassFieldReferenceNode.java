@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.util.JBitSet;
@@ -72,7 +71,6 @@ public final class StaticClassFieldReferenceNode extends JavaValueNode
             ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.STATIC_CLASS_FIELD_REFERENCE_NODE);
         this.fieldName = fieldName;
         this.javaClassName = javaClassName;
         this.classNameDelimitedIdentifier = classNameDelimitedIdentifier;

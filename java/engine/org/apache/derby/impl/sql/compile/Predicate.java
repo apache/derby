@@ -27,7 +27,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -78,7 +77,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
     Predicate(AndNode andNode, JBitSet referencedSet, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.PREDICATE);
         this.andNode = andNode;
 		pushable = false;
         this.referencedSet = referencedSet;
@@ -750,16 +748,18 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		if (opNode.getLeftOperand() instanceof ColumnReference)
 		{
 			sBuf.append(
-				((ColumnReference)opNode.getLeftOperand()).getTableName() +
-				"." +
-				((ColumnReference)opNode.getLeftOperand()).getColumnName()
-			);
+                    ((ColumnReference)opNode.getLeftOperand()).getTableName());
+            sBuf.append('.');
+            sBuf.append(
+                    ((ColumnReference)opNode.getLeftOperand()).getColumnName());
 		}
 		else
 			sBuf.append(DUMMY_VAL);
 
 		// Get the operator type.
-		sBuf.append(" " + opNode.operator + " ");
+        sBuf.append(' ');
+        sBuf.append(opNode.operator);
+        sBuf.append(' ');
 
 		// Get right operand's name.
 		if (opNode.getRightOperand() instanceof ColumnReference) {
@@ -977,7 +977,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		// to the received result set's columns as appropriate.
 		BinaryRelationalOperatorNode newOpNode = 
             new BinaryRelationalOperatorNode(
-				opNode.getNodeType(),
+                opNode.kind,
 				opNode.getScopedOperand(
 					BinaryRelationalOperatorNode.LEFT,
 					parentRSNsTables,

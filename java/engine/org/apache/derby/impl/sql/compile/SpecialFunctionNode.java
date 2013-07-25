@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -76,6 +75,23 @@ class SpecialFunctionNode extends ValueNode
 	*/
 	String sqlName;
 
+    // Allowed kinds
+    final static int K_IDENTITY_VAL = 0;
+    final static int K_CURRENT_ISOLATION = 1;
+    final static int K_CURRENT_SCHEMA = 2;
+    final static int K_USER = 3;
+    final static int K_CURRENT_USER = 4;
+    final static int K_SESSION_USER = 5;
+    final static int K_SYSTEM_USER = 6; // currently not in use
+    final static int K_CURRENT_ROLE = 7;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
 	/**
 		Java method name
 	*/
@@ -86,12 +102,16 @@ class SpecialFunctionNode extends ValueNode
 	*/
 	private String methodType;
 
-    SpecialFunctionNode(int nodeType, ContextManager cm) {
+    SpecialFunctionNode(int kind, ContextManager cm) {
         super(cm);
-        setNodeType(nodeType); // valid nodeType checked below in bindExpression
+        this.kind = kind;
+
+        if (SanityManager.DEBUG) {
+            if (kind == K_SYSTEM_USER) {
+                SanityManager.THROWASSERT("SYSTEM_USER not expected");
+            }
+        }
     }
-
-
 	/**
 	 * Binding this special function means setting the result DataTypeServices.
 	 * In this case, the result type is based on the operation requested.
@@ -114,37 +134,41 @@ class SpecialFunctionNode extends ValueNode
             throws StandardException
     {
         DataTypeDescriptor dtd;
-		int nodeType = getNodeType();
-		switch (nodeType)
-		{
-		case C_NodeTypes.USER_NODE:
-		case C_NodeTypes.CURRENT_USER_NODE:
-		case C_NodeTypes.SYSTEM_USER_NODE:
-			switch (nodeType)
-			{
-				case C_NodeTypes.USER_NODE: sqlName = "USER"; break;
-				case C_NodeTypes.CURRENT_USER_NODE: sqlName = "CURRENT_USER"; break;
-				case C_NodeTypes.SYSTEM_USER_NODE: sqlName = "SYSTEM_USER"; break;
+
+        switch (kind) {
+        case K_USER:
+        case K_CURRENT_USER:
+        case K_SYSTEM_USER:
+            switch (kind) {
+                case K_USER:
+                    sqlName = "USER";
+                    break;
+                case K_CURRENT_USER:
+                    sqlName = "CURRENT_USER";
+                    break;
+                case K_SYSTEM_USER:
+                    sqlName = "SYSTEM_USER";
+                    break;
 			}
             methodName = "getCurrentUserId";
 			methodType = "java.lang.String";
             
-			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type 
-			//of these functions will be the collation of character set 
-			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
-			//these functions will be UCS_BASIC. The collation derivation will 
+            // SQL spec Section 6.4 Syntax Rule 4 says that the collation type
+            // of these functions will be the collation of character set
+            // SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
+            // these functions will be UCS_BASIC. The collation derivation will
 			//be implicit. 
             dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
 
-        case C_NodeTypes.SESSION_USER_NODE:
+        case K_SESSION_USER:
             methodName = "getSessionUserId";
             methodType = "java.lang.String";
             sqlName = "SESSION_USER";
             dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
             break;
 
-		case C_NodeTypes.CURRENT_SCHEMA_NODE:
+        case K_CURRENT_SCHEMA:
 			sqlName = "CURRENT SCHEMA";
 			methodName = "getCurrentSchemaName";
 			methodType = "java.lang.String";
@@ -156,7 +180,7 @@ class SpecialFunctionNode extends ValueNode
             dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
 
-		case C_NodeTypes.CURRENT_ROLE_NODE:
+        case K_CURRENT_ROLE:
 			sqlName = "CURRENT_ROLE";
 			methodName = "getCurrentRoleIdDelimited";
 			methodType = "java.lang.String";
@@ -171,14 +195,14 @@ class SpecialFunctionNode extends ValueNode
 			//be implicit. (set by default)
 			break;
 
-		case C_NodeTypes.IDENTITY_VAL_NODE:
+        case K_IDENTITY_VAL:
 			sqlName = "IDENTITY_VAL_LOCAL";
 			methodName = "getIdentityValue";
 			methodType = "java.lang.Long";
 			dtd = DataTypeDescriptor.getSQLDataTypeDescriptor("java.math.BigDecimal", 31, 0, true, 31);
 			break;
 
-		case C_NodeTypes.CURRENT_ISOLATION_NODE:
+        case K_CURRENT_ISOLATION:
 			sqlName = "CURRENT ISOLATION";
 			methodName = "getCurrentIsolationLevelStr";
 			methodType = "java.lang.String";
@@ -189,13 +213,13 @@ class SpecialFunctionNode extends ValueNode
 			//derivation will be implicit. (set by default).
 			break;
 		default:
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT("Invalid type for SpecialFunctionNode " + nodeType);
-			}
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT(
+                        "Invalid type for SpecialFunctionNode " + kind);
+            }
 			dtd = null;
 			break;
-		}
+        }
 
 		checkReliability(sqlName, CompilerContext.USER_ILLEGAL );
 		setType(dtd);
@@ -268,14 +292,20 @@ class SpecialFunctionNode extends ValueNode
 			return "";
 		}
 	}
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) &&
+                ((SpecialFunctionNode)o).kind == this.kind;
+    }
         
-	protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
 	{
-		if (isSameNodeType(o))
-		{
+        if (isSameNodeKind(o)) {
 			SpecialFunctionNode other = (SpecialFunctionNode)o;
 			return methodName.equals(other.methodName);
 		}
+
 		return false;
 	}
 }

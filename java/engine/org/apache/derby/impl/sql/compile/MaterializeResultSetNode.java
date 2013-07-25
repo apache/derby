@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A MaterializeResultSetNode represents a materialization result set for any 
@@ -52,7 +51,6 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
                              Properties tableProperties,
                              ContextManager cm) {
         super(childResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.MATERIALIZE_RESULT_SET_NODE);
         resultColumns = rcl;
 	}
 

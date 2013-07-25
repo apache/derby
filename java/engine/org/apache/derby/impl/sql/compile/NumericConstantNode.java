@@ -26,7 +26,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.SQLDouble;
@@ -39,6 +38,23 @@ import org.apache.derby.iapi.types.TypeId;
 
 public final class NumericConstantNode extends ConstantNode
 {
+
+    // Allowed kinds
+    final static int K_TINYINT = 0;
+    final static int K_SMALLINT = 1;
+    final static int K_INT = 2;
+    final static int K_BIGINT = 3;
+    final static int K_DECIMAL = 4;
+    final static int K_DOUBLE = 5;
+    final static int K_REAL = 6;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
     /**
      * Constructor for a typed null node
      * @param t type
@@ -53,7 +69,7 @@ public final class NumericConstantNode extends ConstantNode
                 getScale(t, null),
                 true,
                 getMaxWidth(t, null));
-        setNodeType(getNodeType(t));
+        kind = getKind(t);
     }
 
     /**
@@ -64,7 +80,7 @@ public final class NumericConstantNode extends ConstantNode
     NumericConstantNode(TypeId t, Object value, ContextManager cm)
             throws StandardException {
         super(cm);
-        setNodeType(getNodeType(t));
+        kind = getKind(t);
         setType(t,
                 getPrecision(t, value),
                 getScale(t, value),
@@ -74,64 +90,64 @@ public final class NumericConstantNode extends ConstantNode
     }
 
     private int getPrecision(TypeId t, Object val) throws StandardException {
-        int foo = t.getJDBCTypeId();
-       //switch (t.getJDBCTypeId()) {
-        switch (foo) {
-       case Types.TINYINT:
-           return TypeId.SMALLINT_PRECISION; // FIXME
-       case Types.INTEGER:
-           return TypeId.INT_PRECISION;
-       case Types.SMALLINT:
-           return TypeId.SMALLINT_PRECISION;
-       case Types.BIGINT:
-           return TypeId.LONGINT_PRECISION;
-       case Types.DECIMAL:
+
+        switch (t.getJDBCTypeId()) {
+
+        case Types.TINYINT:
+            return TypeId.SMALLINT_PRECISION; // FIXME
+        case Types.INTEGER:
+            return TypeId.INT_PRECISION;
+        case Types.SMALLINT:
+            return TypeId.SMALLINT_PRECISION;
+        case Types.BIGINT:
+            return TypeId.LONGINT_PRECISION;
+        case Types.DECIMAL:
             if (val != null) {
-               NumberDataValue constantDecimal =
+                NumberDataValue constantDecimal =
                     getDataValueFactory().getDecimalDataValue((String)val);
-               return constantDecimal.getDecimalValuePrecision();
+                return constantDecimal.getDecimalValuePrecision();
             } else {
                 return TypeId.DECIMAL_PRECISION;
             }
-       case Types.DOUBLE:
-           return TypeId.DOUBLE_PRECISION;
-       case Types.REAL:
-           return TypeId.REAL_PRECISION;
-       default:
-           if (SanityManager.DEBUG) {
+        case Types.DOUBLE:
+            return TypeId.DOUBLE_PRECISION;
+        case Types.REAL:
+            return TypeId.REAL_PRECISION;
+        default:
+            if (SanityManager.DEBUG) {
                 SanityManager.NOTREACHED();
-           }
-           return 0;
+            }
+            return 0;
 		}
     }
 
     private int getScale(TypeId t, Object val) throws StandardException {
-       switch (t.getJDBCTypeId()) {
-       case Types.TINYINT:
-           return TypeId.SMALLINT_SCALE; // FIXME
-       case Types.INTEGER:
-           return TypeId.INT_SCALE;
-       case Types.SMALLINT:
-           return TypeId.SMALLINT_SCALE;
-       case Types.BIGINT:
-           return TypeId.LONGINT_SCALE;
-       case Types.DECIMAL:
+        switch (t.getJDBCTypeId()) {
+        case Types.TINYINT:
+            return TypeId.SMALLINT_SCALE; // FIXME
+        case Types.INTEGER:
+            return TypeId.INT_SCALE;
+        case Types.SMALLINT:
+            return TypeId.SMALLINT_SCALE;
+        case Types.BIGINT:
+            return TypeId.LONGINT_SCALE;
+        case Types.DECIMAL:
             if (val != null) {
-               NumberDataValue constantDecimal =
-                        getDataValueFactory().getDecimalDataValue((String)val);
-               return constantDecimal.getDecimalValueScale();
+                NumberDataValue constantDecimal =
+                    getDataValueFactory().getDecimalDataValue((String)val);
+                return constantDecimal.getDecimalValueScale();
             } else {
                 return TypeId.DECIMAL_SCALE;
             }
-       case Types.DOUBLE:
+        case Types.DOUBLE:
             return TypeId.DOUBLE_SCALE;
-       case Types.REAL:
-           return TypeId.REAL_SCALE;
-       default:
-           if (SanityManager.DEBUG) {
+        case Types.REAL:
+            return TypeId.REAL_SCALE;
+        default:
+            if (SanityManager.DEBUG) {
                 SanityManager.NOTREACHED();
-           }
-           return 0;
+            }
+            return 0;
         }
     }
 
@@ -170,27 +186,27 @@ public final class NumericConstantNode extends ConstantNode
        }
     }
 
-    private int getNodeType(TypeId t) {
+    private int getKind(TypeId t) {
        switch (t.getJDBCTypeId()) {
        case Types.TINYINT:
-           return C_NodeTypes.TINYINT_CONSTANT_NODE;
+           return K_TINYINT;
        case Types.INTEGER:
-           return C_NodeTypes.INT_CONSTANT_NODE;
+           return K_INT;
        case Types.SMALLINT:
-           return C_NodeTypes.SMALLINT_CONSTANT_NODE;
+           return K_SMALLINT;
        case Types.BIGINT:
-           return C_NodeTypes.BIGINT_CONSTANT_NODE;
+           return K_BIGINT;
        case Types.DECIMAL:
-            return C_NodeTypes.DECIMAL_CONSTANT_NODE;
+            return K_DECIMAL;
        case Types.DOUBLE:
-           return C_NodeTypes.DOUBLE_CONSTANT_NODE;
+           return K_DOUBLE;
        case Types.REAL:
-           return C_NodeTypes.REAL_CONSTANT_NODE;
+           return K_REAL;
        default:
            if (SanityManager.DEBUG) {
                 SanityManager.NOTREACHED();
            }
-           return 0;
+           return -1;
        }
     }
 
@@ -257,29 +273,29 @@ public final class NumericConstantNode extends ConstantNode
 	void generateConstant(ExpressionClassBuilder acb, MethodBuilder mb)
 		throws StandardException
 	{
-		switch (getNodeType())
+        switch (kind)
 		{
-		case C_NodeTypes.INT_CONSTANT_NODE:
+        case K_INT:
 			mb.push(value.getInt());
 			break;
-		case C_NodeTypes.TINYINT_CONSTANT_NODE:
+        case K_TINYINT:
 			mb.push(value.getByte());
 			break;
-		case C_NodeTypes.SMALLINT_CONSTANT_NODE:
+        case K_SMALLINT:
 			mb.push(value.getShort());
 			break;
-		case C_NodeTypes.DECIMAL_CONSTANT_NODE:
+        case K_DECIMAL:
             mb.pushNewStart("java.math.BigDecimal");
 			mb.push(value.getString());
             mb.pushNewComplete(1);
 			break;
-		case C_NodeTypes.DOUBLE_CONSTANT_NODE:
+        case K_DOUBLE:
 			mb.push(value.getDouble());
 			break;
-        case C_NodeTypes.REAL_CONSTANT_NODE:
+        case K_REAL:
 			mb.push(value.getFloat());
 			break;
-        case C_NodeTypes.BIGINT_CONSTANT_NODE:
+        case K_BIGINT:
 			mb.push(value.getLong());
 			break;
 		default:
@@ -288,8 +304,12 @@ public final class NumericConstantNode extends ConstantNode
 				// we should never really come here-- when the class is created
 				// it should have the correct nodeType set.
 				SanityManager.THROWASSERT(
-						  "Unexpected nodeType = " + getNodeType());
+                          "Unexpected numeric type = " + kind);
 			}
 		}	
 	}
-}		
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) && ((NumericConstantNode)o).kind == kind;
+    }}

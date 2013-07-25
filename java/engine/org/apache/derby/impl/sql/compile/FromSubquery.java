@@ -25,7 +25,6 @@ import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -81,7 +80,6 @@ class FromSubquery extends FromTable
                  ContextManager cm)
 	{
         super(correlationName, tableProperties, cm);
-        setNodeType(C_NodeTypes.FROM_SUBQUERY);
         this.subquery = subquery;
         this.orderByList = orderByList;
         this.offset = offset;

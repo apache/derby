@@ -28,7 +28,6 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
 
 
@@ -75,7 +74,6 @@ class CreateSequenceNode extends DDLStatementNode
          ) throws StandardException {
 
         super(sequenceName, cm);
-        setNodeType(C_NodeTypes.CREATE_SEQUENCE_NODE);
         this._sequenceName = sequenceName;
 
         if (dataType != null) {

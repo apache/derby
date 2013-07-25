@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.Optimizer;
@@ -79,7 +78,6 @@ class HashTableNode extends SingleChildResultSetNode
                   ContextManager cm)
 	{
         super(childResult, tableProperties, cm);
-        setNodeType(C_NodeTypes.HASH_TABLE_NODE);
         this.resultColumns = resultColumns;
         this.searchPredicateList = searchPredicateList;
         this.joinPredicateList = joinPredicateList;

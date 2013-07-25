@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.util.JBitSet;
@@ -64,7 +63,6 @@ class NonStaticMethodCallNode extends MethodCallNode
 			throws StandardException
 	{
         super(methodName, cm);
-        setNodeType(C_NodeTypes.NON_STATIC_METHOD_CALL_NODE);
 		/*
 		** If the receiver is a Java value that has been converted to a
 		** SQL value, get rid of the conversion and just use the Java value

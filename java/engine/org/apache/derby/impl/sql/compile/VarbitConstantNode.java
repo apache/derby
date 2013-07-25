@@ -25,11 +25,22 @@ import java.sql.Types;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
 
 public final class VarbitConstantNode extends BitConstantNode
 {
+    // Allowed kinds
+    final static int K_VAR = 0;
+    final static int K_LONGVAR = 1;
+    final static int K_BLOB = 2;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
     /**
      * Construct constant node for one of VARBINARY, LONG VARBINARY and
      * BLOB types.
@@ -41,24 +52,22 @@ public final class VarbitConstantNode extends BitConstantNode
             throws StandardException {
         super(t, cm);
 
-        int nodeType = 0;
         switch (t.getJDBCTypeId()) {
             case Types.VARBINARY:
-                nodeType = C_NodeTypes.VARBIT_CONSTANT_NODE;
+                kind = K_VAR;
                 break;
             case Types.LONGVARBINARY:
-                nodeType = C_NodeTypes.LONGVARBIT_CONSTANT_NODE;
+                kind = K_LONGVAR;
                 break;
             case Types.BLOB:
-                nodeType = C_NodeTypes.BLOB_CONSTANT_NODE;
+                kind = K_BLOB;
                 break;
             default:
                 if (SanityManager.DEBUG) {
                     SanityManager.NOTREACHED();
                 }
+                kind = -1;
         }
-
-        setNodeType(nodeType);
     }
 
     VarbitConstantNode(
@@ -66,6 +75,11 @@ public final class VarbitConstantNode extends BitConstantNode
             int bitLength,
             ContextManager cm) throws StandardException {
         super(hexValue, bitLength, cm);
-        setNodeType(C_NodeTypes.VARBIT_CONSTANT_NODE);
+        kind = K_VAR;
+    }
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) && ((VarbitConstantNode)o).kind == kind;
     }
 }

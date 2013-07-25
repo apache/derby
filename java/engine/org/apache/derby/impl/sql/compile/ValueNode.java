@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -470,11 +469,11 @@ public abstract class ValueNode extends QueryTreeNode
 
         falseNode = new BooleanConstantNode(false, getContextManager());
         equalsNode = new BinaryRelationalOperatorNode(
-								C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
-								this,
-								falseNode,
-                                false,
-								getContextManager());
+                BinaryRelationalOperatorNode.K_EQUALS,
+                this,
+                falseNode,
+                false,
+                getContextManager());
 		nullableResult = getTypeServices().isNullable();
 		equalsNode.setType(new DataTypeDescriptor(
 									TypeId.BOOLEAN_ID,
@@ -495,8 +494,7 @@ public abstract class ValueNode extends QueryTreeNode
 	{
 		IsNullNode isNullNode;
 
-       isNullNode = new IsNullNode(
-                this, IsNullNode.Sign.IS_NULL, getContextManager());
+       isNullNode = new IsNullNode(this, false, getContextManager());
 		isNullNode.setType(new DataTypeDescriptor(
 									TypeId.BOOLEAN_ID,
 									false)
@@ -1301,20 +1299,21 @@ public abstract class ValueNode extends QueryTreeNode
     abstract boolean isEquivalent(ValueNode other)
 		throws StandardException;
 
-	/**
-	 * Tests if this node is of the same type as the specified node as
-	 * reported by {@link QueryTreeNode#getNodeType()}.
-	 * 
-	 * @param other the node to compare this value node against. 
-	 * 
-	 * @return <code>true</code> if the two nodes are of the same type.  
-	 */
-	protected final boolean isSameNodeType(ValueNode other)
-	{
-		if (other != null) {
-			return other.getNodeType() == getNodeType();
-		}
-		return false;
-	}
-	
+    /**
+     * Some node classes represent several logical node types (to reduce
+     * footprint), which we call <em>kinds</em>.
+     * This means that implementations of {@link #isEquivalent()}
+     * cannot always just use {@code instanceof} to check if the other node
+     * represents the same kind. Hence this method needs to be
+     * implemented by all node classes that represent several kinds.
+     * It is only called from implementations of {@code isEquivalent}.
+     *
+     * @param other The other value node whose kind we want to compare with.
+     * @return {@code true} if {@code this} and {@code o} represent the same
+     *         logical node type, i.e. kind.
+     */
+    boolean isSameNodeKind(ValueNode other) {
+        // Default implementation does not look at kinds.
+        return other != null && other.getClass().equals(this.getClass());
+    }
 }

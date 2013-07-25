@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * An AllResultColumn represents a "*" result column in a SELECT
@@ -39,7 +38,6 @@ class AllResultColumn extends ResultColumn
 
     AllResultColumn(TableName tableName, ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.ALL_RESULT_COLUMN);
         this.tableName = tableName;
     }
 	/** 

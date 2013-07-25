@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -59,10 +58,9 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
             String constraintName,
             ContextManager cm) throws StandardException {
         super(booleanValue, "throwExceptionIfFalse", cm);
-        setNodeType(C_NodeTypes.TEST_CONSTRAINT_NODE);
         this.sqlState = sqlState;
-       this.tableName = tableName;
-       this.constraintName = constraintName;
+        this.tableName = tableName;
+        this.constraintName = constraintName;
     }
 
     /**

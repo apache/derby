@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
@@ -80,7 +79,6 @@ class PrivilegeNode extends QueryTreeNode
                   TablePrivilegesNode specificPrivileges,
                   ContextManager      cm) throws StandardException {
         super(cm);
-        setNodeType(C_NodeTypes.PRIVILEGE_NODE);
         this.objectType = objectType;
 
         if ( SanityManager.DEBUG)
@@ -133,7 +131,6 @@ class PrivilegeNode extends QueryTreeNode
                   ContextManager cm)
     {
         super(cm);
-        setNodeType(C_NodeTypes.PRIVILEGE_NODE);
         this.objectType = objectType;
         this.objectName = objectName;
         this.privilege = privilege;

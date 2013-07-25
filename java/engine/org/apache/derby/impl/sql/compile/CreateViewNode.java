@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Visitor;
@@ -90,7 +89,6 @@ class CreateViewNode extends DDLStatementNode
 		throws StandardException
 	{
         super(viewName, cm);
-        setNodeType(C_NodeTypes.CREATE_VIEW_NODE);
         this.resultColumns = resultColumns;
         this.queryExpression = queryExpression;
         this.checkOption = checkOption;

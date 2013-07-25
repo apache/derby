@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.util.JBitSet;
@@ -49,7 +48,6 @@ public final class GetCurrentConnectionNode extends JavaValueNode
     GetCurrentConnectionNode(ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.GET_CURRENT_CONNECTION_NODE);
 		/*
 		** The result type of getCurrentConnection is
 		** java.sql.Connection

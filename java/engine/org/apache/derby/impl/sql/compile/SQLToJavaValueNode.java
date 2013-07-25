@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.JSQLType;
@@ -66,7 +65,6 @@ class SQLToJavaValueNode extends JavaValueNode
 	 */
     SQLToJavaValueNode(ValueNode value, ContextManager cm) {
         super(cm);
-        setNodeType(C_NodeTypes.SQL_TO_JAVA_VALUE_NODE);
         this.value = value;
     }
 

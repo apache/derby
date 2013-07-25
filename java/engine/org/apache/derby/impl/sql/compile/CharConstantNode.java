@@ -26,12 +26,25 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 public final class CharConstantNode extends ConstantNode
 {
+
+    // Allowed kinds
+    final static int K_CHAR = 0;
+    final static int K_VARCHAR = 1;
+    final static int K_LONGVARCHAR = 2;
+    final static int K_CLOB = 3;
+
+    /**
+     * This class is used to hold logically different objects for
+     * space efficiency. {@code kind} represents the logical object
+     * type. See also {@link ValueNode#isSameNodeKind}.
+     */
+    final int kind;
+
     CharConstantNode(String value, ContextManager cm)
             throws StandardException {
         super(TypeId.CHAR_ID,
@@ -40,25 +53,25 @@ public final class CharConstantNode extends ConstantNode
               cm);
 
         setValue(getDataValueFactory().getCharDataValue(value));
-        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+        kind = K_CHAR;
     }
 
     CharConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, 0, cm);
-        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+        kind = K_CHAR;
     }
 
     /**
-     * @param type VARCHAR_CONSTANT_NODE or LONGVARCHAR_CONSTANT_NODE
-     * @param t typeId
-     * @param cm context manager
+     * @param kind The node kind
+     * @param t    The type id
+     * @param cm   The context manager
      * @throws StandardException
      */
-    CharConstantNode(int type, TypeId t, ContextManager cm)
+    CharConstantNode(int kind, TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, 0, cm);
-        setNodeType(type);
+        this.kind = kind;
     }
 
     /**
@@ -77,7 +90,7 @@ public final class CharConstantNode extends ConstantNode
               newLength,
               cm);
 
-        setNodeType(C_NodeTypes.CHAR_CONSTANT_NODE);
+        kind = K_CHAR;
 
         if (newValue.length() > newLength) {
            throw StandardException.newException(
@@ -179,4 +192,8 @@ public final class CharConstantNode extends ConstantNode
 		// "#getString()"
 		mb.push(getString());
 	}
-}
+
+    @Override
+    boolean isSameNodeKind(ValueNode o) {
+        return super.isSameNodeKind(o) && ((CharConstantNode)o).kind == kind;
+    }}

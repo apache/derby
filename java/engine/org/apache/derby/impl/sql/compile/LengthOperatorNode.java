@@ -28,7 +28,6 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -45,33 +44,14 @@ public final class LengthOperatorNode extends UnaryOperatorNode
     LengthOperatorNode(ValueNode operator, ContextManager cm)
             throws StandardException {
         super(operator, cm);
-        setNodeType(C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE);
-    }
 
-    @Override
-    void setNodeType(int nodeType)
-	{
-        String op = null;
-        String methodNam = null;
+        String op = "char_length";
+        String methodNam = "charLength";
+        parameterType = Types.VARCHAR;
+        parameterWidth = TypeId.VARCHAR_MAXWIDTH;
 
-		if (nodeType == C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE)
-		{
-                op = "char_length";
-                methodNam = "charLength";
-				parameterType = Types.VARCHAR;
-				parameterWidth = TypeId.VARCHAR_MAXWIDTH;
-		}
-		else
-		{
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT(
-						"Unexpected nodeType = " + nodeType);
-				}
-		}
         setOperator(op);
         setMethodName(methodNam);
-		super.setNodeType(nodeType);
 	}
 
 	/**

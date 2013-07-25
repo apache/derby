@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -58,7 +57,6 @@ class LockTableNode extends MiscellaneousStatementNode
         super(cm);
         this.tableName = tableName;
         this.exclusiveMode = exclusiveMode;
-        setNodeType(C_NodeTypes.LOCK_TABLE_NODE);
     }
 
     /**

@@ -28,7 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
@@ -82,7 +81,6 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
     FromList(ContextManager cm) {
         super(ResultSetNode.class, cm);
         this.isTransparent = false;
-        setNodeType(C_NodeTypes.FROM_LIST);
     }
 
     /**
@@ -120,7 +118,6 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
     private void constructorMinion(boolean optimizeJoinOrder) {
         this.fixedJoinOrder = !optimizeJoinOrder;
         this.isTransparent = false;
-        setNodeType(C_NodeTypes.FROM_LIST);
     }
 	/*
 	 * OptimizableList interface

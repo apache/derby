@@ -24,7 +24,6 @@ import java.sql.Types;
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.types.TypeId;
 
 /**
@@ -40,7 +39,6 @@ public final class RowNumberFunctionNode extends WindowFunctionNode
     RowNumberFunctionNode(ValueNode op, WindowNode w, ContextManager cm)
             throws StandardException {
         super(op, "ROW_NUMBER", w, cm);
-        setNodeType(C_NodeTypes.ROW_NUMBER_FUNCTION_NODE);
         setType( TypeId.getBuiltInTypeId( Types.BIGINT ),
                  TypeId.LONGINT_PRECISION,
                  TypeId.LONGINT_SCALE,

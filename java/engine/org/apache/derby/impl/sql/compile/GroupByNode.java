@@ -37,7 +37,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.AccessPath;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
@@ -135,7 +134,6 @@ class GroupByNode extends SingleChildResultSetNode
 			throws StandardException
 	{
         super(bottomPR, null /* tableProperties */, cm);
-        setNodeType(C_NodeTypes.GROUP_BY_NODE);
         setLevel(nestingLevel);
         this.havingClause = havingClause;
         this.havingSubquerys = havingSubquerys;

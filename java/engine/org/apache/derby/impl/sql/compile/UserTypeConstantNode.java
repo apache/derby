@@ -34,7 +34,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLDate;
@@ -68,7 +67,6 @@ class UserTypeConstantNode extends ConstantNode {
     UserTypeConstantNode(TypeId t, ContextManager cm)
             throws StandardException {
         super(t, true, TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN, cm);
-        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
     }
 
     UserTypeConstantNode(Date d, ContextManager cm)
@@ -79,7 +77,6 @@ class UserTypeConstantNode extends ConstantNode {
               cm);
         setValue(new SQLDate(d));
         val = d;
-        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
     }
 
     UserTypeConstantNode(Time t, ContextManager cm)
@@ -90,7 +87,6 @@ class UserTypeConstantNode extends ConstantNode {
               cm);
         setValue(new SQLTime(t));
         val = t;
-        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
     }
 
     UserTypeConstantNode(Timestamp t, ContextManager cm)
@@ -101,7 +97,6 @@ class UserTypeConstantNode extends ConstantNode {
                 cm);
         setValue(new SQLTimestamp(t));
         val = t;
-        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
     }
 
     /**
@@ -117,7 +112,6 @@ class UserTypeConstantNode extends ConstantNode {
               cm);
         setValue(dvd);
         val = dvd;
-        setNodeType(C_NodeTypes.USERTYPE_CONSTANT_NODE);
     }
 
     private static TypeId getTypeId(DataValueDescriptor dvd) {

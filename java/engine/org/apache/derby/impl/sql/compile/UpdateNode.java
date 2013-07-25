@@ -25,7 +25,6 @@ import java.lang.reflect.Modifier;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
@@ -38,7 +37,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -95,7 +93,6 @@ public final class UpdateNode extends DMLModStatementNode
                ContextManager cm)
 	{
         super(resultSet, cm);
-        setNodeType(C_NodeTypes.UPDATE_NODE);
         this.targetTableName = targetTableName;
 	}
 

@@ -33,7 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -140,7 +139,6 @@ class CreateAliasNode extends DDLStatementNode
 		throws StandardException
 	{		
         super(aliasName, cm);
-        setNodeType(C_NodeTypes.CREATE_ALIAS_NODE);
         this.aliasType = aliasType;
 
 		switch (this.aliasType)

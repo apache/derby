@@ -170,14 +170,14 @@ class BaseColumnNode extends ValueNode
     /**
      * {@inheritDoc}
      */
-	protected boolean isEquivalent(ValueNode o)
+    boolean isEquivalent(ValueNode o)
 	{
-		if (isSameNodeType(o)) 
-		{
+        if (isSameNodeKind(o)) {
 			BaseColumnNode other = (BaseColumnNode)o;
 			return other.tableName.equals(tableName)
 			&& other.columnName.equals(columnName);
 		} 
+
 		return false;
 	}
 }

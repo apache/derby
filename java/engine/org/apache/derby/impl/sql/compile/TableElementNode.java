@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A TableElementNode is an item in a TableElementList, and represents
@@ -77,7 +76,6 @@ class TableElementNode extends QueryTreeNode
     TableElementNode(String name, ContextManager cm)
 	{
         super(cm);
-        setNodeType(C_NodeTypes.TABLE_ELEMENT_NODE);
         this.name = name;
 	}
 
@@ -176,8 +174,12 @@ class TableElementNode extends QueryTreeNode
 		else if ( this instanceof ConstraintDefinitionNode ) { return AT_DROP_CONSTRAINT; }
 		else if ( this instanceof ModifyColumnNode )
         {
-            if ( getNodeType() == C_NodeTypes.DROP_COLUMN_NODE ) { return AT_DROP_COLUMN; }
-            else { return AT_MODIFY_COLUMN; }
+            if (((ModifyColumnNode)this).kind == ModifyColumnNode.K_DROP_COLUMN)
+            {
+                return AT_DROP_COLUMN;
+            } else {
+                return AT_MODIFY_COLUMN;
+            }
         }
 		else { return elementType; }
 	}
