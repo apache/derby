@@ -103,7 +103,7 @@ class BinaryRelationalOperatorNode
      * @param leftOperand     The left operand
      * @param rightOperand    The right operand
      * @param forQueryRewrite See method description
-     * @paran cm              The context manager
+     * @param cm              The context manager
      */
     BinaryRelationalOperatorNode(
             int kind,

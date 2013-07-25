@@ -260,7 +260,7 @@ class FromBaseTable extends FromTable
 	 */
 
 	/**
-	 * @see Optimizable#nextAccessPath
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#nextAccessPath
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -529,7 +529,7 @@ class FromBaseTable extends FromTable
 		return getCurrentAccessPath().getCostEstimate();
 	}
 
-	/** @see Optimizable#getTableDescriptor */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#getTableDescriptor */
     @Override
 	public TableDescriptor getTableDescriptor()
 	{
@@ -537,7 +537,7 @@ class FromBaseTable extends FromTable
 	}
 
 
-	/** @see Optimizable#isMaterializable 
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#isMaterializable 
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -551,7 +551,7 @@ class FromBaseTable extends FromTable
 
 
 	/**
-	 * @see Optimizable#pushOptPredicate
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#pushOptPredicate
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -573,7 +573,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#pullOptPredicates
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#pullOptPredicates
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -590,7 +590,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/** 
-	 * @see Optimizable#isCoveringIndex
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#isCoveringIndex
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
@@ -649,7 +649,7 @@ class FromBaseTable extends FromTable
 		return coveringIndex;
 	}
 
-	/** @see Optimizable#verifyProperties 
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#verifyProperties 
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
@@ -844,14 +844,14 @@ class FromBaseTable extends FromTable
 		}
 	}
 
-	/** @see Optimizable#getBaseTableName */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#getBaseTableName */
     @Override
 	public String getBaseTableName()
 	{
 		return tableName.getTableName();
 	}
 
-	/** @see Optimizable#startOptimizing */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#startOptimizing */
     @Override
 	public void startOptimizing(Optimizer optimizer, RowOrdering rowOrdering)
 	{
@@ -887,7 +887,7 @@ class FromBaseTable extends FromTable
 		super.startOptimizing(optimizer, rowOrdering);
 	}
 
-	/** @see Optimizable#convertAbsoluteToRelativeColumnPosition */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#convertAbsoluteToRelativeColumnPosition */
     @Override
 	public int convertAbsoluteToRelativeColumnPosition(int absolutePosition)
 	{
@@ -909,7 +909,7 @@ class FromBaseTable extends FromTable
      * allows more concurrency.
      * </p>
      *
-	 * @see Optimizable#estimateCost
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#estimateCost
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2065,14 +2065,14 @@ class FromBaseTable extends FromTable
 									TransactionController.MODE_RECORD);
 	}
 
-	/** @see Optimizable#isBaseTable */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#isBaseTable */
     @Override
 	public boolean isBaseTable()
 	{
 		return true;
 	}
 
-	/** @see Optimizable#forUpdate */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#forUpdate */
     @Override
 	public boolean forUpdate()
 	{
@@ -2084,14 +2084,14 @@ class FromBaseTable extends FromTable
 		return (updateOrDelete != 0) || cursorTargetTable || getUpdateLocks;
 	}
 
-	/** @see Optimizable#initialCapacity */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#initialCapacity */
     @Override
 	public int initialCapacity()
 	{
 		return initialCapacity;
 	}
 
-	/** @see Optimizable#loadFactor */
+	/** @see org.apache.derby.iapi.sql.compile.Optimizable#loadFactor */
     @Override
 	public float loadFactor()
 	{
@@ -2099,7 +2099,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#memoryUsageOK
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#memoryUsageOK
 	 */
     @Override
 	public boolean memoryUsageOK(double rowCount, int maxMemoryPerTable)
@@ -2109,7 +2109,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#isTargetTable
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#isTargetTable
 	 */
     @Override
 	public boolean isTargetTable()
@@ -2118,7 +2118,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#uniqueJoin
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#uniqueJoin
 	 */
     @Override
 	public double uniqueJoin(OptimizablePredicateList predList)
@@ -2154,7 +2154,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#isOneRowScan
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#isOneRowScan
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2175,7 +2175,7 @@ class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * @see Optimizable#legalJoinOrder
+	 * @see org.apache.derby.iapi.sql.compile.Optimizable#legalJoinOrder
 	 */
     @Override
 	public boolean legalJoinOrder(JBitSet assignedTableMap)

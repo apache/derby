@@ -1302,11 +1302,11 @@ public abstract class ValueNode extends QueryTreeNode
     /**
      * Some node classes represent several logical node types (to reduce
      * footprint), which we call <em>kinds</em>.
-     * This means that implementations of {@link #isEquivalent()}
+     * This means that implementations of {@link #isEquivalent}
      * cannot always just use {@code instanceof} to check if the other node
      * represents the same kind. Hence this method needs to be
      * implemented by all node classes that represent several kinds.
-     * It is only called from implementations of {@code isEquivalent}.
+     * It is only called from implementations of {@code #isEquivalent}.
      *
      * @param other The other value node whose kind we want to compare with.
      * @return {@code true} if {@code this} and {@code o} represent the same
