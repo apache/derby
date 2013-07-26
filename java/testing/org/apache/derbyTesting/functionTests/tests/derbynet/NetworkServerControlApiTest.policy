@@ -169,8 +169,10 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
   // just add the complete gross policy change for NetworkServerControlApiTest
-  // execute permission is for 'java', but this can be at a variety of locations.
-  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+
+  // Tests need to be able to exec a java program. DERBY-6295: Also give them
+  // read permission so that detailed error message is shown.
+  permission java.io.FilePermission "${java.home}${/}-", "execute, read";
 
   // When running with useprocess=false need to install and uninstall
   // the security manager and allow setIO to change the system err and out
@@ -196,8 +198,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.io.FilePermission "${derby.system.home}", "read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
   // just add the complete gross policy change for NetworkServerControlApiTest
-  // execute permission is for 'java', but this can be at a variety of locations.
-  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+
+  // Tests need to be able to exec a java program. DERBY-6295: Also give them
+  // read permission so that detailed error message is shown.
+  permission java.io.FilePermission "${java.home}${/}-", "execute, read";
 
   // combination of client and server side.
   permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";

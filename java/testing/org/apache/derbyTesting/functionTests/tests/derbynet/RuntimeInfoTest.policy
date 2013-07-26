@@ -361,7 +361,9 @@ grant {
     permission java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read";
     
     //client side: test execs another jvm with relative path
-  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+  // DERBY-6295: Also grant read permission so that detailed error
+  // message is shown.
+  permission java.io.FilePermission "${java.home}${/}-", "execute, read";
 };
 
 // These permissions are needed when testing code instrumented with EMMA.
