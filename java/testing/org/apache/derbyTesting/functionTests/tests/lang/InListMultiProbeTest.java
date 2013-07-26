@@ -1367,6 +1367,36 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test case that exercises an otherwise untested code path through
+     * {@code MultiProbeTableScanResultSet.getNextProbeValue()}, as suggested
+     * in DERBY-4378. The code path is taken if the highest value in the
+     * IN list is duplicated. Since duplicate literals are removed during
+     * compilation, the values must be non-literals for the path to be taken.
+     */
+    public void testDuplicateParameters() throws SQLException {
+        // Disable auto-commit to allow easy cleanup with rollback().
+        setAutoCommit(false);
+
+        // Create a test table.
+        Statement s = createStatement();
+        s.execute("create table d4378(x int primary key, y int)");
+        s.execute("insert into d4378 values (1,2),(3,4),(5,6),(7,8),(9,10)");
+        s.execute("insert into d4378 select y, x from d4378");
+
+        // Perform a query where all the elements in the probe list are
+        // parameters, and all parameters are set to the same value.
+        PreparedStatement ps =
+                prepareStatement("select * from d4378 where x in (?,?,?)");
+        ps.setInt(1, 1);
+        ps.setInt(2, 1);
+        ps.setInt(3, 1);
+        JDBC.assertFullResultSet(
+                ps.executeQuery(), new String[][] {{"1", "2"}});
+
+        rollback();
+    }
+
+    /**
      * Insert the received number of rows into DATA_TABLE via
      * batch processing.
      */
