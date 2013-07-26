@@ -178,7 +178,8 @@ public class NetworkServerMBeanTest extends MBeanTest {
                 getNetworkServerMBeanObjectName(), 
                 "DrdaHost");
             assertNotNull(mbeanHost);
-            assertTrue(mbeanHost.equals("localhost") 
+            assertTrue("mbeanHost = " + mbeanHost + " (not localhost or 127.0.0.1)", 
+            mbeanHost.equals("localhost") 
                     || mbeanHost.equals("127.0.0.1"));
         } else {
             assertStringAttribute(serverHost,
