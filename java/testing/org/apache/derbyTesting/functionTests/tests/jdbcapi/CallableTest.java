@@ -20,14 +20,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
 import java.util.Arrays;   // Used by testUpdateLongBinaryProc
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import java.sql.BatchUpdateException;
@@ -37,6 +45,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.sql.Types;
 
@@ -1144,4 +1153,926 @@ public class CallableTest extends BaseJDBCTestCase {
         ps.close();
         conn.close();
     }
+    
+      
+//jdbc 3.0 test methods
+    
+    public void testsetURL() throws SQLException, MalformedURLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		URL domain = new URL("http://www.apache.org");
+    	    cs.setURL("URL",domain);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNull() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setNull("P1",1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetBoolean() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setBoolean("P1",true);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetByte() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?, ?,?,?,?,?,?)");
+    	try {
+    	    cs.setByte("P1",(byte)1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetShort() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?, ?,?,?,?,?,?)");
+    	try {
+    	    cs.setShort("P1",(short)1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    
+    public void testsetInt() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setInt("P1", 6);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetLong() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setLong("P1", (long)6000);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetFloat() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?, ?,?,?,?,?,?)");
+    	try {
+    	    cs.setFloat("P1",(float)6.123453);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetDouble() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?, ?,?,?,?,?,?)");
+    	try {
+    	    cs.setDouble("P5",(double)6.123453);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetDecimal() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?, ?,?,?,?,?,?)");
+    	try {
+    	    cs.setBigDecimal("P6",new BigDecimal("33.333"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetString() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setString("P4","test");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetBytes() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setBytes("P1",new byte[] { (byte)0xe0, 0x4f, (byte)0xd0,
+    	    	    0x20, (byte)0xea, 0x3a, 0x69, 0x10, (byte)0xa2, (byte)0xd8, 0x08, 0x00, 0x2b,
+    	    	    0x30, 0x30, (byte)0x9d });
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetDate() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setDate("P1",Date.valueOf("2013-07-13"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetTime() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setTime("P2",Time.valueOf("10:05:02"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetTimestamp() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setTimestamp("P3",Timestamp.valueOf("2002-05-12 10:05:02.000000000"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetAsciiStream() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setAsciiStream("PAscii",is,1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetBinaryStream() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setBinaryStream("PBinary",is,1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetObject() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setObject("P1","Object",1,2);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetObject1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setObject("P1","Object",1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetObject2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setObject("P1","Object");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetCharacterStream() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    	    cs.setCharacterStream("P1",br,1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetDate1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setDate("P1",Date.valueOf("2013-07-13"),Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetTime1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setTime("P2",Time.valueOf("10:05:02"),Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetTimestamp1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.setTimestamp("P3",Timestamp.valueOf("2002-05-12 10:05:02.000000000"),Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNull1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setNull("P1",1,"Null");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetString() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getString("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetBoolean() throws SQLException
+    {
+    	CallableStatement cs =prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getBoolean("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetByte() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getByte("P1");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetShort() throws SQLException
+    {
+    	CallableStatement cs =prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getShort("P1");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetInt() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getInt("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetLong() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getLong("P3");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetFloat() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getFloat("P5");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetDouble() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getDouble("P5");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetBytes() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getBytes("P1");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetDate() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getDate("P1");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetTime() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getTime("P2");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetTimestamp() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getTimestamp("P3");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetObject() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getObject("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetBigDecimal() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?, ?,?)");
+    	try {
+    	    cs.getBigDecimal("P6");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+   
+    public void testgetObject1() throws SQLException, MalformedURLException
+    {
+    	Map<String, Class<?>> format = new HashMap<String, Class<?>>();
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.getObject("P1",format);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetRef() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getRef("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetBlob() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getBlob("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetClob1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getClob("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetArray() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getArray("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetDate1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getDate("P1",Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetTime1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getTime("P2",Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetTimestamp1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?, ?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getTimestamp("P3",Calendar.getInstance());
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetURL() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getURL("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testregisterOutParameter() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.registerOutParameter("String",1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testregisterOutParameter1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.registerOutParameter("String",1,2);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testregisterOutParameter2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.registerOutParameter("String",1);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testregisterOutParameter3() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.registerOutParameter("String1",1,"String2");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    //test  methods for jdbc 4.0
+    
+    public void testgetCharacterStream() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getCharacterStream("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    
+    public void testgetNCharacterStream() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?, ?, ?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getNCharacterStream("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    
+    public void testgetNString() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?, ?, ?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getNString("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetRowId() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?, ?, ?,?,?, ?, ?,?)");
+    	try {
+    	    cs.getRowId("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetRowId() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setRowId("P1",cs.getRowId("P2"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetBlob() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setBlob("P1",cs.getBlob("P2"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetClob() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setClob("P1",cs.getClob("P2"));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNString() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setNString("P1","value");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNCharacterStream1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    	    cs.setNCharacterStream("P1",br);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNCharacterStream2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    	    cs.setNCharacterStream("P1",br,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNClob() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		cs.setNClob("P1",cs.getNClob(1));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetClob1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    		cs.setNClob("P1",br);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetClob2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    		cs.setNClob("P1",br,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetClobInputStream1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		cs.setBlob("P1",is);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetClobInputStream2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		cs.setBlob("P1",is,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNClobInput1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    		cs.setNClob("P1",br);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetNClobInput2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    		cs.setNClob("P1",br,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    
+    public void testgetNClob() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getNClob("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetSQLXML() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    	    cs.setSQLXML("P1",cs.getSQLXML(1));
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testgetSQLXML() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC (?,?,?,?,?,?,?,?)");
+    	try {
+    	    cs.getSQLXML("P4");
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetAsciiStream1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setAsciiStream("P1",is);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetAsciiStream2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setAsciiStream("P1",is,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetBinaryStream1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setBinaryStream("P1",is);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+   public void testsetBinaryStream2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    	    cs.setBinaryStream("P1",is,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetCharacterStream1() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?,?,?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    	    cs.setCharacterStream("P1",br);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+    public void testsetCharacterStream2() throws SQLException
+    {
+    	CallableStatement cs = prepareCall("call TWO_IN_ONE_OUT_PROC (?,?,?)");
+    	try {
+    		String str = "This is a String";
+    		InputStream is = new ByteArrayInputStream(str.getBytes());
+    		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    	    cs.setCharacterStream("P1",br,(long)345678788);
+    	    fail("should have failed");
+    	} catch (SQLFeatureNotSupportedException e) {
+    	    assertSQLState("0A000", e);
+    	}
+    }
+    
+
+
 }
+    
+    
+
+
