@@ -634,14 +634,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		isQualifier = false;
 	}
 
-	/**
-	 * Clear the qualifier flag.
-	 */
-	void clearQualifierFlag()
-	{
-		isQualifier = false;
-	}
-
 	void generateExpressionOperand(Optimizable optTable,
 										int columnPosition,
 										ExpressionClassBuilder acb,
@@ -654,51 +646,6 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 													mb);
 	}
 
-	void generateAbsoluteColumnId(MethodBuilder mb,
-										Optimizable optTable)
-	{
-		getRelop().generateAbsoluteColumnId(mb, optTable);
-	}
-
-	void generateRelativeColumnId(MethodBuilder mb,
-										Optimizable optTable)
-	{
-		getRelop().generateRelativeColumnId(mb, optTable);
-	}
-
-	void generateOperator(MethodBuilder mb,
-								Optimizable optTable)
-	{
-		getRelop().generateOperator(mb, optTable);
-	}
-
-	void generateQualMethod(ExpressionClassBuilder acb,
-								MethodBuilder mb,
-								Optimizable optTable)
-					throws StandardException
-	{
-		getRelop().generateQualMethod(acb, mb, optTable);
-	}
-
-	void generateOrderedNulls(MethodBuilder mb)
-	{
-		getRelop().generateOrderedNulls(mb);
-	}
-
-	void generateNegate(MethodBuilder mb,
-								Optimizable optTable)
-	{
-		getRelop().generateNegate(mb, optTable);
-	}
-
-	void generateOrderableVariantType(MethodBuilder mb,
-								Optimizable optTable)
-					throws StandardException
-	{
-		int variantType = getRelop().getOrderableVariantType(optTable);
-		mb.push(variantType);
-
-	}
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
