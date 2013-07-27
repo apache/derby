@@ -1305,7 +1305,8 @@ public abstract class ValueNode extends QueryTreeNode
      * This means that implementations of {@link #isEquivalent}
      * cannot always just use {@code instanceof} to check if the other node
      * represents the same kind. Hence this method needs to be
-     * implemented by all node classes that represent several kinds.
+     * overridden by all node classes that represent several kinds.
+     * This default implementation does not look at kinds.
      * It is only called from implementations of {@code isEquivalent}.
      *
      * @param other The other value node whose kind we want to compare with.
