@@ -173,14 +173,16 @@ public class NetworkServerMBeanTest extends MBeanTest {
         // localhost may also be 127.0.0.1
         // serverHost = expected host
         String serverHost = TestConfiguration.getCurrent().getHostName();
-        if (serverHost.equals("localhost") || serverHost.equals("127.0.0.1")) {
+        if (serverHost.equals("localhost") || serverHost.equals("127.0.0.1") ||
+                serverHost.equals(" 0:0:0:0:0:0:0:1")) {
             String mbeanHost = (String) getAttribute(
                 getNetworkServerMBeanObjectName(), 
                 "DrdaHost");
             assertNotNull(mbeanHost);
-            assertTrue("mbeanHost = " + mbeanHost + " (not localhost or 127.0.0.1)", 
+            assertTrue("mbeanHost = " + mbeanHost + " (not localhost, 127.0.0.1, or  0:0:0:0:0:0:0:1)", 
             mbeanHost.equals("localhost") 
-                    || mbeanHost.equals("127.0.0.1"));
+                    || mbeanHost.equals("127.0.0.1") ||
+                    mbeanHost.equals("0:0:0:0:0:0:0:1"));
         } else {
             assertStringAttribute(serverHost,
                     getNetworkServerMBeanObjectName(), 
