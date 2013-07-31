@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.OptimizerOverridingTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.OptimizerOverridesTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
