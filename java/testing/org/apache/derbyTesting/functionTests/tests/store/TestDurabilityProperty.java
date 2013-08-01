@@ -337,6 +337,9 @@ public class TestDurabilityProperty {
                             + " range as with this property set.");
                     report("-- Please note this test times inserts and approximate estimates were " +
                             "considered to report this observation.");
+                    report("timeCommitOn = " + timeCommitOn);
+                    report("timeWithTestModeCommitOn = " + timeWithTestModeCommitOn);
+                    report("timeWithTestModeCommitOff = " + timeWithTestModeCommitOff);
                 }
             }
         }
