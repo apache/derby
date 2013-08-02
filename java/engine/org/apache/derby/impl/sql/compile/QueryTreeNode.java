@@ -42,6 +42,7 @@ import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.StatementUtil;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -144,6 +145,12 @@ public abstract class QueryTreeNode implements Visitable
                                                         getOptimizerFactory();
 	}
 
+    /** Convenience method for finding the optimizer tracer */
+    public  OptTrace    getOptimizerTracer()    { return getLanguageConnectionContext().getOptimizerTracer(); }
+
+    /** Convenience method for checking whether optimizer tracing is on */
+    public  boolean optimizerTracingIsOn() { return getLanguageConnectionContext().optimizerTracingIsOn(); }
+    
 	/**
 	  *	Gets the constant action factory for this database.
 	  *

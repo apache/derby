@@ -87,9 +87,6 @@ public interface Optimizer
 	/** Indicates a sort-avoidance plan */
 	int SORT_AVOIDANCE_PLAN = 2;
 
-    /** Return true if optimizer tracing is on */
-    public  boolean tracingIsOn();
-
 	/**
 	 * Iterate through the permutations, returning false when the permutations
 	 * are exhausted.
@@ -187,9 +184,6 @@ public interface Optimizer
 	 * @exception StandardException		Thrown on error
 	 */
 	public void modifyAccessPaths() throws StandardException;
-
-	/** Get the trace machinery */
-	public OptTrace tracer();
 
 	/** Get the estimated cost of the optimized query */
 	public CostEstimate getOptimizedCost();

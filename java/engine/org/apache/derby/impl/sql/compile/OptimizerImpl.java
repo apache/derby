@@ -387,7 +387,7 @@ class OptimizerImpl implements Optimizer
 		desiredJoinOrderFound = false;
 	}
 
-    public  boolean tracingIsOn() { return lcc.optimizerTracingIsOn(); }
+    private  boolean tracingIsOn() { return lcc.optimizerTracingIsOn(); }
 
     public int getMaxMemoryPerTable()
     {
@@ -2848,7 +2848,7 @@ class OptimizerImpl implements Optimizer
 	}
 
     /** Get the trace machinery */
-    public  OptTrace    tracer()    { return lcc.getOptimizerTracer(); }
+    private  OptTrace    tracer()    { return lcc.getOptimizerTracer(); }
 
     public  int getOptimizableCount() { return optimizableList.size(); }
 

@@ -68,7 +68,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 		 */
 		if (! innerTable.isMaterializable())
 		{
-            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceSkipUnmaterializableHashJoin(); }
+            if ( innerTable.optimizerTracingIsOn() ) { innerTable.getOptimizerTracer().traceSkipUnmaterializableHashJoin(); }
 			return false;
 		}
 
@@ -150,15 +150,15 @@ class HashJoinStrategy extends BaseJoinStrategy {
 
 		if (SanityManager.DEBUG)
 		{
-            if ( optimizer.tracingIsOn() )
+            if ( innerTable.optimizerTracingIsOn() )
             {
                 if (hashKeyColumns == null)
                 {
-                    optimizer.tracer().traceSkipHashJoinNoHashKeys();
+                    innerTable.getOptimizerTracer().traceSkipHashJoinNoHashKeys();
                 }
                 else
                 {
-                    optimizer.tracer().traceHashKeyColumns( ArrayUtil.copy( hashKeyColumns ) );
+                    innerTable.getOptimizerTracer().traceHashKeyColumns( ArrayUtil.copy( hashKeyColumns ) );
                 }
             }
 		}

@@ -275,8 +275,8 @@ class FromBaseTable extends FromTable
 		ConglomerateDescriptor currentConglomerateDescriptor =
 												ap.getConglomerateDescriptor();
 
-        if ( optimizer.tracingIsOn() )
-        { optimizer.tracer().traceNextAccessPath( getExposedName(), ((predList == null) ? 0 : predList.size()) ); }
+        if ( optimizerTracingIsOn() )
+        { getOptimizerTracer().traceNextAccessPath( getExposedName(), ((predList == null) ? 0 : predList.size()) ); }
 
 		/*
 		** Remove the ordering of the current conglomerate descriptor,
@@ -306,8 +306,8 @@ class FromBaseTable extends FromTable
 			}
 			else
 			{
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceLookingForSpecifiedIndex( userSpecifiedIndexName, tableNumber ); }
+                if ( optimizerTracingIsOn() )
+                { getOptimizerTracer().traceLookingForSpecifiedIndex( userSpecifiedIndexName, tableNumber ); }
 
 				if (StringUtil.SQLToUpperCase(userSpecifiedIndexName).equals("NULL"))
 				{
@@ -414,13 +414,13 @@ class FromBaseTable extends FromTable
 
 		if (currentConglomerateDescriptor == null)
 		{
-            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceNoMoreConglomerates( tableNumber ); }
+            if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNoMoreConglomerates( tableNumber ); }
 		}
 		else
 		{
 			currentConglomerateDescriptor.setColumnNames(columnNames);
 
-            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceConsideringConglomerate( currentConglomerateDescriptor, tableNumber ); }
+            if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceConsideringConglomerate( currentConglomerateDescriptor, tableNumber ); }
 		}
 
 		/*
@@ -438,14 +438,14 @@ class FromBaseTable extends FromTable
 				 */
 				if (! isOneRowResultSet(predList))
 				{
-                    if ( optimizer.tracingIsOn() )
-                    { optimizer.tracer().traceAddingUnorderedOptimizable( ((predList == null) ? 0 : predList.size()) ); }
+                    if ( optimizerTracingIsOn() )
+                    { getOptimizerTracer().traceAddingUnorderedOptimizable( ((predList == null) ? 0 : predList.size()) ); }
 
 					rowOrdering.addUnorderedOptimizable(this);
 				}
 				else
 				{
-                    if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceScanningHeapWithUniqueKey(); }
+                    if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceScanningHeapWithUniqueKey(); }
 				}
 			}
 			else
@@ -957,7 +957,7 @@ class FromBaseTable extends FromTable
 		JoinStrategy currentJoinStrategy = 
             currAccessPath.getJoinStrategy();
 
-        if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceEstimatingCostOfConglomerate( cd, tableNumber ); }
+        if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEstimatingCostOfConglomerate( cd, tableNumber ); }
 
 		/* Get the uniqueness factory for later use (see below) */
 		double tableUniquenessFactor =
@@ -998,7 +998,7 @@ class FromBaseTable extends FromTable
 										(FormatableBitSet) null,
 										0);
 
-            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceSingleMatchedRowCost( cost, tableNumber ); }
+            if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceSingleMatchedRowCost( cost, tableNumber ); }
 
             costEst.setCost(cost, 1.0d, 1.0d);
 
@@ -1054,15 +1054,15 @@ class FromBaseTable extends FromTable
                 currAccessPath.setLockMode(
 											TransactionController.MODE_RECORD);
 
-                if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceConstantStartStopPositions(); }
+                if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceConstantStartStopPositions(); }
 			}
 			else
 			{
                 setLockingBasedOnThreshold(optimizer, costEst.rowCount());
 			}
 
-            if (optimizer.tracingIsOn()) {
-                optimizer.tracer().traceCostOfNScans(
+            if (optimizerTracingIsOn()) {
+                getOptimizerTracer().traceCostOfNScans(
                     tableNumber,
                     outerCost.rowCount(),
                     costEst );
@@ -1098,7 +1098,7 @@ class FromBaseTable extends FromTable
                 costEst.setEstimatedCost(
                                 costEst.getEstimatedCost() + cost);
 
-                if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceNonCoveringIndexCost( cost, tableNumber ); }
+                if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNonCoveringIndexCost( cost, tableNumber ); }
 			}
 		}
 		else
@@ -1531,9 +1531,9 @@ class FromBaseTable extends FromTable
 				}
 			}
 
-            if ( optimizer.tracingIsOn() )
+            if ( optimizerTracingIsOn() )
             {
-                optimizer.tracer().traceCostOfConglomerateScan
+                getOptimizerTracer().traceCostOfConglomerateScan
                     (
                      tableNumber,
                      cd,
@@ -1576,8 +1576,8 @@ class FromBaseTable extends FromTable
                     costEst.singleScanRowCount() *
                     statStartStopSelectivity);
                 
-                if (optimizer.tracingIsOn()) {
-                    optimizer.tracer().
+                if (optimizerTracingIsOn()) {
+                    getOptimizerTracer().
                         traceCostIncludingStatsForIndex(costEst, tableNumber);
                 }
 			}
@@ -1600,8 +1600,8 @@ class FromBaseTable extends FromTable
                          costEst.singleScanRowCount() *
                              extraFirstColumnSelectivity);
 
-                    if (optimizer.tracingIsOn()) {
-                        optimizer.tracer().
+                    if (optimizerTracingIsOn()) {
+                        getOptimizerTracer().
                             traceCostIncludingExtra1stColumnSelectivity(
                                 costEst, tableNumber);
                     }
@@ -1619,8 +1619,8 @@ class FromBaseTable extends FromTable
                         costEst.singleScanRowCount() *
                             extraStartStopSelectivity);
 
-                    if (optimizer.tracingIsOn()) {
-                        optimizer.tracer().traceCostIncludingExtraStartStop(
+                    if (optimizerTracingIsOn()) {
+                        getOptimizerTracer().traceCostIncludingExtraStartStop(
                             costEst, tableNumber);
                     }
 				}
@@ -1668,7 +1668,7 @@ class FromBaseTable extends FromTable
                 currAccessPath.setLockMode(
 											TransactionController.MODE_TABLE);
 
-                if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceNoStartStopPosition(); }
+                if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceNoStartStopPosition(); }
 			}
 			else
 			{
@@ -1777,8 +1777,8 @@ class FromBaseTable extends FromTable
                 costEst.setEstimatedCost(
                                 costEst.getEstimatedCost() + cost);
 
-                if (optimizer.tracingIsOn()) {
-                    optimizer.tracer().traceCostOfNoncoveringIndex(
+                if (optimizerTracingIsOn()) {
+                    getOptimizerTracer().traceCostOfNoncoveringIndex(
                         costEst, tableNumber);
                 }
 			}
@@ -1795,8 +1795,8 @@ class FromBaseTable extends FromTable
                         costEst.singleScanRowCount() *
                             extraQualifierSelectivity);
 
-                if (optimizer.tracingIsOn()) {
-                    optimizer.tracer().
+                if (optimizerTracingIsOn()) {
+                    getOptimizerTracer().
                         traceCostIncludingExtraQualifierSelectivity(
                             costEst, tableNumber);
                 }
@@ -1924,8 +1924,8 @@ class FromBaseTable extends FromTable
                 costEst.singleScanRowCount());
 
 
-            if (optimizer.tracingIsOn()) {
-                optimizer.tracer().traceCostOfNScans(
+            if (optimizerTracingIsOn()) {
+                getOptimizerTracer().traceCostOfNScans(
                     tableNumber, outerCost.rowCount(), costEst);
             }
 
@@ -1952,8 +1952,8 @@ class FromBaseTable extends FromTable
 			{
                 costEst.setCost(costEst.getEstimatedCost(), rc, src);
 
-                if (optimizer.tracingIsOn()) {
-                    optimizer.tracer().
+                if (optimizerTracingIsOn()) {
+                    getOptimizerTracer().
                         traceCostIncludingExtraNonQualifierSelectivity(
                             costEst, tableNumber);
                 }
@@ -1970,8 +1970,8 @@ class FromBaseTable extends FromTable
 				*/
 
 				double compositeStatRC = initialRowCount * statCompositeSelectivity;
-                if ( optimizer.tracingIsOn() )
-                { optimizer.tracer().traceCompositeSelectivityFromStatistics( statCompositeSelectivity ); }
+                if ( optimizerTracingIsOn() )
+                { getOptimizerTracer().traceCompositeSelectivityFromStatistics( statCompositeSelectivity ); }
 
 				if (tableUniquenessFactor > 0.0)
 				{
@@ -2001,8 +2001,8 @@ class FromBaseTable extends FromTable
 									 1 : 
 									 compositeStatRC / outerCost.rowCount());
 
-                if (optimizer.tracingIsOn()) {
-                    optimizer.tracer().
+                if (optimizerTracingIsOn()) {
+                    getOptimizerTracer().
                         traceCostIncludingCompositeSelectivityFromStats(
                             costEst, tableNumber);
                 }
@@ -2940,8 +2940,8 @@ class FromBaseTable extends FromTable
 		JoinStrategy trulyTheBestJoinStrategy = ap.getJoinStrategy();
         Optimizer opt = ap.getOptimizer();
 
-        if (opt.tracingIsOn()) {
-            opt.tracer().traceChangingAccessPathForTable(tableNumber);
+        if (optimizerTracingIsOn()) {
+            getOptimizerTracer().traceChangingAccessPathForTable(tableNumber);
         }
 
 		if (SanityManager.DEBUG)

@@ -249,7 +249,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 			found = true;
 
-            if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceConsideringJoinStrategy( ap.getJoinStrategy(), tableNumber ); }
+            if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceConsideringJoinStrategy( ap.getJoinStrategy(), tableNumber ); }
 		}
 
 		/*
@@ -310,22 +310,22 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 		ap.setJoinStrategy(getCurrentAccessPath().getJoinStrategy());
 
-        if (opt.tracingIsOn()) {
-            opt.tracer().traceRememberingJoinStrategy(
+        if (optimizerTracingIsOn()) {
+            getOptimizerTracer().traceRememberingJoinStrategy(
                 getCurrentAccessPath().getJoinStrategy(), tableNumber);
         }
 
 		if (ap == bestAccessPath)
 		{
-            if (opt.tracingIsOn()) {
-                opt.tracer().traceRememberingBestAccessPathSubstring(
+            if (optimizerTracingIsOn()) {
+                getOptimizerTracer().traceRememberingBestAccessPathSubstring(
                     ap, tableNumber);
             }
 		}
 		else if (ap == bestSortAvoidancePath)
 		{
-            if (opt.tracingIsOn()) {
-                opt.tracer().
+            if (optimizerTracingIsOn()) {
+                getOptimizerTracer().
                     traceRememberingBestSortAvoidanceAccessPathSubstring(
                         ap, tableNumber);
             }
@@ -341,8 +341,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 					"unknown access path type");
 			}
 			 */
-            if (opt.tracingIsOn()) {
-                opt.tracer().traceRememberingBestUnknownAccessPathSubstring(
+            if (optimizerTracingIsOn()) {
+                getOptimizerTracer().traceRememberingBestUnknownAccessPathSubstring(
                     ap, tableNumber);
             }
 		}
@@ -647,8 +647,8 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 		setCostEstimate(bestPath.getCostEstimate());
 
-        if ( bestPath.getOptimizer().tracingIsOn() )
-        { bestPath.getOptimizer().tracer().traceRememberingBestAccessPath( bestPath, tableNumber, planType ); }
+        if ( optimizerTracingIsOn() )
+        { getOptimizerTracer().traceRememberingBestAccessPath( bestPath, tableNumber, planType ); }
 	}
 
 	/** @see Optimizable#startOptimizing */

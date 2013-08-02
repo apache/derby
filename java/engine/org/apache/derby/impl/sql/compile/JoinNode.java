@@ -161,7 +161,7 @@ class JoinNode extends TableOperatorNode
 							RowOrdering rowOrdering)
 			throws StandardException
 	{
-        if ( optimizer.tracingIsOn() ) { optimizer.tracer().traceOptimizingJoinNode(); }
+        if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceOptimizingJoinNode(); }
 
 		// It's possible that a call to optimize the left/right will cause
 		// a new "truly the best" plan to be stored in the underlying base

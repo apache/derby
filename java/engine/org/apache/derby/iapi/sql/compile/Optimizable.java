@@ -453,4 +453,11 @@ public interface Optimizable extends Visitable {
 	 */
 	public double uniqueJoin(OptimizablePredicateList predList)
 								throws StandardException;
+
+    /** Get the optimizer tracer, if any */
+    public  OptTrace    getOptimizerTracer();
+    
+    /** Report whether optimizer tracing is on */
+    public  boolean optimizerTracingIsOn();
+    
 }
