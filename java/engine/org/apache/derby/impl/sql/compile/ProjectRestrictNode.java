@@ -1209,19 +1209,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 											restrictionList,
 											outerRows);
 
-        Optimizer opt = getOptimizer(
-            new FromList(
-                getOptimizerFactory().doJoinOrderOptimization(),
-                this,
-                getContextManager()),
-            predicates,
-            dataDictionary,
-            (RequiredRowOrdering) null,
-            null );
-
 		// RESOLVE: SHOULD FACTOR IN THE NON-OPTIMIZABLE PREDICATES THAT
 		// WERE NOT PUSHED DOWN
-        costEstimate = opt.newCostEstimate();
+        costEstimate = getOptimizerFactory().getCostEstimate();
 
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),

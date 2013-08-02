@@ -188,9 +188,6 @@ public interface Optimizer
 	 */
 	public void modifyAccessPaths() throws StandardException;
 
-	/** Get a new CostEstimate object */
-	public CostEstimate newCostEstimate();
-
 	/** Get the trace machinery */
 	public OptTrace tracer();
 

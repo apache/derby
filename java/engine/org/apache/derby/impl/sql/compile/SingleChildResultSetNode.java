@@ -402,15 +402,7 @@ abstract class SingleChildResultSetNode extends FromTable
 										predicates,
 										outerRows);
 
-        Optimizer opt = getOptimizer(
-                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
-                             getContextManager()),
-                predicates,
-                dataDictionary,
-                (RequiredRowOrdering) null,
-                null );
-
-        costEstimate = opt.newCostEstimate();
+        costEstimate = getOptimizerFactory().getCostEstimate();
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
 							childResult.getCostEstimate().singleScanRowCount());

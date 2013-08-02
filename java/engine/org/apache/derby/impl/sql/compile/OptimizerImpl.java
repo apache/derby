@@ -2516,8 +2516,7 @@ class OptimizerImpl implements Optimizer
 		}
 	}
 
-	/** @see Optimizer#newCostEstimate */
-	public CostEstimate newCostEstimate()
+	private CostEstimate newCostEstimate()
 	{
 		return new CostEstimateImpl();
 	}

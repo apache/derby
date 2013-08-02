@@ -1029,7 +1029,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	{
 		if (costEstimate == null)
 		{
-			costEstimate = optimizer.newCostEstimate();
+			costEstimate = getOptimizerFactory().getCostEstimate();
 		}
 		return costEstimate;
 	}
@@ -1045,7 +1045,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	{
 		if (scratchCostEstimate == null)
 		{
-			scratchCostEstimate = optimizer.newCostEstimate();
+			scratchCostEstimate = getOptimizerFactory().getCostEstimate();
 		}
 
 		return scratchCostEstimate;

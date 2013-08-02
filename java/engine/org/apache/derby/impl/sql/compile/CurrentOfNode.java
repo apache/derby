@@ -109,7 +109,7 @@ public final class CurrentOfNode extends FromTable {
 		*/
 		if (singleScanCostEstimate == null)
 		{
-			singleScanCostEstimate = optimizer.newCostEstimate();
+			singleScanCostEstimate = getOptimizerFactory().getCostEstimate();
 		}
 
 		singleScanCostEstimate.setCost(0.0d, 1.0d, 1.0d);
@@ -389,20 +389,10 @@ public final class CurrentOfNode extends FromTable {
     ResultSetNode optimize(DataDictionary dataDictionary,
 					     PredicateList predicateList,
 						 double outerRows) 
-						throws StandardException {
-		/* Get an optimizer so we can get a cost */
-        Optimizer opt =
-            getOptimizer(new FromList(
-                             getOptimizerFactory().doJoinOrderOptimization(),
-                             this,
-                             getContextManager()),
-                         predicateList,
-                         dataDictionary,
-                         (RequiredRowOrdering) null,
-                         null );
-
+						throws StandardException
+    {
 		/* Assume there is no cost associated with fetching the current row */
-        bestCostEstimate = opt.newCostEstimate();
+        bestCostEstimate = getOptimizerFactory().getCostEstimate();
 		bestCostEstimate.setCost(0.0d, outerRows, outerRows);
 
 		return this;

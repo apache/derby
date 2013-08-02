@@ -936,17 +936,10 @@ class GroupByNode extends SingleChildResultSetNode
         childResult = childResult.optimize(dataDictionary,
                                            predicates,
                                            outerRows);
-        Optimizer opt = getOptimizer(
-            new FromList(getOptimizerFactory().doJoinOrderOptimization(),
-                         getContextManager()),
-            predicates,
-            dataDictionary,
-            (RequiredRowOrdering) null,
-            null );
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
-        costEstimate = opt.newCostEstimate();
+        costEstimate = getOptimizerFactory().getCostEstimate();
 
 		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),

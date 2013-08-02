@@ -178,7 +178,7 @@ class RowResultSetNode extends FromTable
 		*/
 		if (costEstimate == null)
 		{
-			costEstimate = optimizer.newCostEstimate();
+			costEstimate = getOptimizerFactory().getCostEstimate();
 		}
 
 		costEstimate.setCost(0.0d, 1.0d, 1.0d);
@@ -623,15 +623,7 @@ class RowResultSetNode extends FromTable
 		** CostEstimate object, so we can represent the cost of this node.
 		** This seems like overkill, but it's just an object allocation...
 		*/
-        Optimizer opt = getOptimizer(
-                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
-                             getContextManager()),
-                predicateList,
-                dataDictionary,
-                (RequiredRowOrdering) null,
-                null );
-
-        costEstimate = opt.newCostEstimate();
+        costEstimate = getOptimizerFactory().getCostEstimate();
 
 		// RESOLVE: THE COST SHOULD TAKE SUBQUERIES INTO ACCOUNT
 		costEstimate.setCost(0.0d, outerRows, outerRows);

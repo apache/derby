@@ -687,17 +687,7 @@ abstract class TableOperatorNode extends FromTable
 								  double outerRows)
 				throws StandardException
 	{
-		/* Get an optimizer, so we can get a cost structure */
-        Optimizer opt = getOptimizer(
-                new FromList(getOptimizerFactory().doJoinOrderOptimization(),
-                             this,
-                             getContextManager()),
-                predicateList,
-                dataDictionary,
-                (RequiredRowOrdering) null,
-                null );
-
-        costEstimate = opt.newCostEstimate();
+        costEstimate = getOptimizerFactory().getCostEstimate();
 
 		/* RESOLVE: This is just a stub for now */
 		leftResultSet = leftResultSet.optimize(

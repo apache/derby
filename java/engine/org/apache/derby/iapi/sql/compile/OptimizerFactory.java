@@ -72,8 +72,7 @@ public interface OptimizerFactory {
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public CostEstimate getCostEstimate()
-		throws StandardException;
+	public CostEstimate getCostEstimate();
 
 	/**
 	 * Return whether or not the optimizer associated with

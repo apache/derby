@@ -519,7 +519,9 @@ class   XMLOptTrace implements  OptTrace
             }
             else if ( isFromTable( optimizable ) )
             {
-                return ((FromTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableName();
+                TableName   retval = ((FromTable) ((ProjectRestrictNode) optimizable).getChildResult()).getTableName();
+
+                if ( retval !=  null ) { return retval; }
             }
         }
         catch (StandardException e)

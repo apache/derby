@@ -178,7 +178,6 @@ public class OptimizerFactoryImpl
 	 * @exception StandardException		Thrown on error
 	 */
 	public CostEstimate getCostEstimate()
-		throws StandardException
 	{
 		return new CostEstimateImpl();
 	}
