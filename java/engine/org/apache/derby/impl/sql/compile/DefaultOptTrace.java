@@ -78,7 +78,7 @@ public  class   DefaultOptTrace implements  OptTrace
         appendTraceString( statementText );
     }
     
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList )
+    public  void    traceStartQueryBlock( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList )
     {
         appendTraceString
             (
@@ -87,6 +87,8 @@ public  class   DefaultOptTrace implements  OptTrace
              " using optimizer " + optimizerID
              );
     }
+
+    public  void    traceEndQueryBlock() {}
 
     public  void    traceTimeout( long currentTime, CostEstimate bestCost )
     {

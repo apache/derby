@@ -276,7 +276,7 @@ class OptimizerImpl implements Optimizer
 		bestJoinOrderUsedPredsFromAbove = false;
 
 		// Optimization started
-		if (tracingIsOn()) { tracer().traceStart( timeOptimizationStarted, hashCode(), optimizableList ); }
+		if (tracingIsOn()) { tracer().traceStartQueryBlock( timeOptimizationStarted, hashCode(), optimizableList ); }
 
         // make sure that optimizer overrides are bound and left-deep
         if ( overridingPlan != null )

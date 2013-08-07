@@ -22,6 +22,7 @@ package org.apache.derby.impl.sql.compile;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Stack;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -166,6 +167,39 @@ class   XMLOptTrace implements  OptTrace
         
     ////////////////////////////////////////////////////////////////////////
     //
+    //	NESTED CLASSES
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    public  static  final   class   QueryBlock
+    {
+        final   int                 queryBlockID;
+        final   OptimizableList optimizableList;
+        final   Element         queryBlockElement;
+        
+        Element         currentJoinsElement;
+        int[]              currentJoinOrder;
+        Element         currentBestPlan;
+
+        // reset per join order
+        JoinStrategy    currentDecorationStrategy;
+        Element         currentDecoration;
+
+        public  QueryBlock
+            (
+             int    queryBlockID,
+             OptimizableList    optimizableList,
+             Element    queryBlockElement
+             )
+        {
+            this.queryBlockID = queryBlockID;
+            this.optimizableList = optimizableList;
+            this.queryBlockElement = queryBlockElement;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    //
     //	STATE
     //
     ////////////////////////////////////////////////////////////////////////
@@ -175,17 +209,12 @@ class   XMLOptTrace implements  OptTrace
     
     private Element         _currentStatement;
     private int                 _currentStatementID;
+    private QueryBlock      _currentQueryBlock;
+    private int                 _maxQueryID;
 
-    private Element         _currentQuery;
-    private int                 _currentQueryID;
-    private OptimizableList _currentOptimizableList;
-    private Element         _currentJoinsElement;
-    private int[]              _currentJoinOrder;
-    private Element         _currentBestPlan;
 
-    // reset per join order
-    private JoinStrategy    _currentDecorationStrategy;
-    private Element         _currentDecoration;
+    // pushed and popped on query block boundaries
+    private Stack<QueryBlock>  _queryBlockStack;
 
     // context
     private ContextManager  _cm;
@@ -215,86 +244,84 @@ class   XMLOptTrace implements  OptTrace
     public  void    traceStartStatement( String statementText )
     {
         _currentStatementID++;
-        _currentQueryID = 0;
+        _maxQueryID = 0;
+        _currentQueryBlock = null;
+        _queryBlockStack = new Stack<QueryBlock>();
         
         _currentStatement = createElement( _root, STMT, null );
         _currentStatement .setAttribute( STMT_ID, Integer.toString( _currentStatementID ) );
 
-        _currentOptimizableList = null;
-        _currentJoinsElement = null;
-        _currentJoinOrder = null;
-
-        _currentDecorationStrategy = null;
-        _currentDecoration = null;
-
-        _currentBestPlan = null;
-        
         createElement( _currentStatement, STMT_TEXT, statementText );
     }
     
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList )
+    public  void    traceStartQueryBlock( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList )
     {
-        _currentQueryID++;
-        _currentOptimizableList = optimizableList;
-        _currentJoinOrder = null;
+        _maxQueryID++;
+        if ( _currentQueryBlock != null ) { _queryBlockStack.push( _currentQueryBlock ); }
 
-        _currentDecorationStrategy = null;
-        _currentDecoration = null;
+        Element queryElement = createElement( _currentStatement, QBLOCK, null );
+        queryElement.setAttribute( QBLOCK_OPTIMIZER_ID, Integer.toString( optimizerID ) );
+        queryElement.setAttribute( QBLOCK_START_TIME, formatTimestamp( timeOptimizationStarted ) );
+        queryElement.setAttribute( QBLOCK_ID, Integer.toString( _maxQueryID ) );
 
-        _currentBestPlan = null;
+        _currentQueryBlock = new QueryBlock( _maxQueryID, optimizableList, queryElement );
 
-        _currentQuery = createElement( _currentStatement, QBLOCK, null );
-        _currentQuery.setAttribute( QBLOCK_OPTIMIZER_ID, Integer.toString( optimizerID ) );
-        _currentQuery.setAttribute( QBLOCK_START_TIME, formatTimestamp( timeOptimizationStarted ) );
-        _currentQuery.setAttribute( QBLOCK_ID, Integer.toString( _currentQueryID ) );
-
-        if ( _currentOptimizableList != null )
+        if ( optimizableList != null )
         {
-            for ( int i = 0; i < _currentOptimizableList.size(); i++ )
+            for ( int i = 0; i < optimizableList.size(); i++ )
             {
-                Optimizable opt = _currentOptimizableList.getOptimizable( i );
+                Optimizable opt = optimizableList.getOptimizable( i );
 
-                if ( i == 0 )
+                if ( _cm == null )
                 {
                     _cm = ((QueryTreeNode) opt).getContextManager();
                     _lcc = (LanguageConnectionContext) _cm.getContext( LanguageConnectionContext.CONTEXT_ID );
                 }
                 
                 Element optElement = createElement
-                    ( _currentQuery, QBLOCK_OPTIMIZABLE, getOptimizableName( opt ).getFullSQLName() );
+                    ( queryElement, QBLOCK_OPTIMIZABLE, getOptimizableName( opt ).getFullSQLName() );
                 optElement.setAttribute( QBLOCK_OPT_TABLE_NUMBER, Integer.toString( opt.getTableNumber() ) );
             }
         }
     }
     
+    public  void    traceEndQueryBlock()
+    {
+        if ( _queryBlockStack.size() > 0 )
+        {
+            _currentQueryBlock = _queryBlockStack.pop();
+        }
+    }
+
     public  void    traceTimeout( long currentTime, CostEstimate bestCost )
     {
-        Element timeout = createElement( _currentQuery, QBLOCK_TIMEOUT, null );
+        Element timeout = createElement( _currentQueryBlock.queryBlockElement, QBLOCK_TIMEOUT, null );
         formatCost( timeout, bestCost );
     }
     
     public  void    traceVacuous()
     {
-        createElement( _currentQuery, QBLOCK_VACUOUS, null );
+        createElement( _currentQueryBlock.queryBlockElement, QBLOCK_VACUOUS, null );
     }
     
     public  void    traceCompleteJoinOrder()
     {
-        if ( _currentJoinsElement != null )    { _currentJoinsElement.setAttribute( JO_COMPLETE, "true" ); }
+        if ( _currentQueryBlock.currentJoinsElement != null )
+        { _currentQueryBlock.currentJoinsElement.setAttribute( JO_COMPLETE, "true" ); }
     }
     
     public  void    traceSortCost( CostEstimate sortCost, CostEstimate currentCost )
     {
-        Element sc = createElement( _currentQuery, QBLOCK_SORT_COST, null );
+        Element sc = createElement( _currentQueryBlock.queryBlockElement, QBLOCK_SORT_COST, null );
         formatCost( sc, sortCost );
             
-        Element tcis = createElement( _currentQuery, QBLOCK_TOTAL_COST, null );
+        Element tcis = createElement( _currentQueryBlock.queryBlockElement, QBLOCK_TOTAL_COST, null );
         formatCost( tcis, currentCost );
     }
     
     public  void    traceNoBestPlan()
     {
-        createElement( _currentQuery, QBLOCK_NO_BEST_PLAN, null );
+        createElement( _currentQueryBlock.queryBlockElement, QBLOCK_NO_BEST_PLAN, null );
     }
     
     public  void    traceModifyingAccessPaths( int optimizerID ) {}
@@ -303,11 +330,11 @@ class   XMLOptTrace implements  OptTrace
     
     public  void    traceSkippingJoinOrder( int nextOptimizable, int joinPosition, int[] proposedJoinOrder, JBitSet assignedTableMap )
     {
-        Optimizable opt = _currentOptimizableList.getOptimizable( nextOptimizable );
+        Optimizable opt = _currentQueryBlock.optimizableList.getOptimizable( nextOptimizable );
 
         Element skip = formatSkip
             (
-             _currentQuery, QBLOCK_SKIP,
+             _currentQueryBlock.queryBlockElement, QBLOCK_SKIP,
              "Useless join order. " + getOptimizableName( opt ).getFullSQLName() + " depends on tables after it in the join order"
              );
         formatJoinOrder( skip, proposedJoinOrder );
@@ -318,21 +345,21 @@ class   XMLOptTrace implements  OptTrace
     
     public  void    traceJoinOrderConsideration( int joinPosition, int[] proposedJoinOrder, JBitSet assignedTableMap )
     {
-        _currentJoinsElement = createElement( _currentQuery, JO, null );
-        _currentJoinOrder = proposedJoinOrder;
+        _currentQueryBlock.currentJoinsElement = createElement( _currentQueryBlock.queryBlockElement, JO, null );
+        _currentQueryBlock.currentJoinOrder = proposedJoinOrder;
 
-        _currentDecorationStrategy = null;
-        _currentDecoration = null;
+        _currentQueryBlock.currentDecorationStrategy = null;
+        _currentQueryBlock.currentDecoration = null;
 
-        formatJoinOrder( _currentJoinsElement, proposedJoinOrder );
+        formatJoinOrder( _currentQueryBlock.currentJoinsElement, proposedJoinOrder );
     }
 
     public  void    traceCostWithoutSortAvoidance( CostEstimate currentCost )
     {
         formatPlanCost
             (
-             _currentJoinsElement, "withoutSortAvoidance",
-             _currentJoinOrder, Optimizer.NORMAL_PLAN, currentCost
+             _currentQueryBlock.currentJoinsElement, "withoutSortAvoidance",
+             _currentQueryBlock.currentJoinOrder, Optimizer.NORMAL_PLAN, currentCost
              );
     }
     
@@ -340,8 +367,8 @@ class   XMLOptTrace implements  OptTrace
     {
         formatPlanCost
             (
-             _currentJoinsElement, "withSortAvoidance",
-             _currentJoinOrder, Optimizer.SORT_AVOIDANCE_PLAN, currentSortAvoidanceCost
+             _currentQueryBlock.currentJoinsElement, "withSortAvoidance",
+             _currentQueryBlock.currentJoinOrder, Optimizer.SORT_AVOIDANCE_PLAN, currentSortAvoidanceCost
              );
     }
     
@@ -352,25 +379,29 @@ class   XMLOptTrace implements  OptTrace
     public  void    traceRememberingBestJoinOrder
         ( int joinPosition, int[] bestJoinOrder, int planType, CostEstimate planCost, JBitSet assignedTableMap )
     {
-        if ( _currentBestPlan != null ) { _currentQuery.removeChild( _currentBestPlan ); }
-        _currentBestPlan = formatPlanCost( _currentQuery, "bestPlan", bestJoinOrder, planType, planCost );
+        if ( _currentQueryBlock.currentBestPlan != null )
+        { _currentQueryBlock.queryBlockElement.removeChild( _currentQueryBlock.currentBestPlan ); }
+        _currentQueryBlock.currentBestPlan = formatPlanCost
+            ( _currentQueryBlock.queryBlockElement, "bestPlan", bestJoinOrder, planType, planCost );
     }
     
     public  void    traceSkippingBecauseTooMuchMemory( int maxMemoryPerTable )
     {
-        formatSkip( _currentDecoration, DECORATION_SKIP, "Exceeds limit on memory per table: " + maxMemoryPerTable );
+        formatSkip
+            ( _currentQueryBlock.currentDecoration, DECORATION_SKIP, "Exceeds limit on memory per table: " + maxMemoryPerTable );
     }
     
     public  void    traceCostOfNScans( int tableNumber, double rowCount, CostEstimate cost ) {}
     
     public  void    traceSkipUnmaterializableHashJoin()
     {
-        formatSkip( _currentDecoration, DECORATION_SKIP, "Hash strategy not possible because table is not materializable" );
+        formatSkip
+            ( _currentQueryBlock.currentDecoration, DECORATION_SKIP, "Hash strategy not possible because table is not materializable" );
     }
     
     public  void    traceSkipHashJoinNoHashKeys()
     {
-        formatSkip( _currentDecoration, DECORATION_SKIP, "No hash keys" );
+        formatSkip( _currentQueryBlock.currentDecoration, DECORATION_SKIP, "No hash keys" );
     }
     
     public  void    traceHashKeyColumns( int[] hashKeyColumns ) {}
@@ -378,7 +409,7 @@ class   XMLOptTrace implements  OptTrace
     
     public  void    traceConsideringJoinStrategy( JoinStrategy js, int tableNumber )
     {
-        _currentDecorationStrategy = js;
+        _currentQueryBlock.currentDecorationStrategy = js;
     }
     
     public  void    traceRememberingBestAccessPath( AccessPath accessPath, int tableNumber, int planType ) {}
@@ -388,11 +419,12 @@ class   XMLOptTrace implements  OptTrace
     {
         Optimizable opt = getOptimizable( tableNumber );
         
-        _currentDecoration = createElement( _currentJoinsElement, DECORATION, null );
+        _currentQueryBlock.currentDecoration = createElement( _currentQueryBlock.currentJoinsElement, DECORATION, null );
 
-        _currentDecoration.setAttribute( DECORATION_CONGLOM_NAME, cd.getConglomerateName() );
-        _currentDecoration.setAttribute( DECORATION_TABLE_NAME, getOptimizableName( opt ).toString() );
-        _currentDecoration.setAttribute( DECORATION_JOIN_STRATEGY, _currentDecorationStrategy.getName() );
+        _currentQueryBlock.currentDecoration.setAttribute( DECORATION_CONGLOM_NAME, cd.getConglomerateName() );
+        _currentQueryBlock.currentDecoration.setAttribute( DECORATION_TABLE_NAME, getOptimizableName( opt ).toString() );
+        _currentQueryBlock.currentDecoration.setAttribute
+            ( DECORATION_JOIN_STRATEGY, _currentQueryBlock.currentDecorationStrategy.getName() );
         
 		String[]	columnNames = cd.getColumnNames();
 
@@ -402,7 +434,7 @@ class   XMLOptTrace implements  OptTrace
 
             for ( int i = 0; i < keyColumns.length; i++ )
             {
-                createElement( _currentDecoration, DECORATION_KEY, columnNames[ keyColumns[ i ] - 1 ] );
+                createElement( _currentQueryBlock.currentDecoration, DECORATION_KEY, columnNames[ keyColumns[ i ] - 1 ] );
             }
 		}
     }
@@ -444,7 +476,7 @@ class   XMLOptTrace implements  OptTrace
          double    extraNonQualifierSelectivity
          )
     {
-        Element cost = createElement( _currentDecoration, DECORATION_CONGLOM_COST, null );
+        Element cost = createElement( _currentQueryBlock.currentDecoration, DECORATION_CONGLOM_COST, null );
         cost.setAttribute( "name", cd.getConglomerateName() );
 
         formatCost( cost, costEstimate );
@@ -488,9 +520,9 @@ class   XMLOptTrace implements  OptTrace
     /** Get the Optimizable with the given tableNumber */
     private Optimizable getOptimizable( int tableNumber )
     {
-        for ( int i = 0; i < _currentOptimizableList.size(); i++ )
+        for ( int i = 0; i < _currentQueryBlock.optimizableList.size(); i++ )
         {
-            Optimizable candidate = _currentOptimizableList.getOptimizable( i );
+            Optimizable candidate = _currentQueryBlock.optimizableList.getOptimizable( i );
             
             if ( tableNumber == candidate.getTableNumber() )    { return candidate; }
         }
@@ -619,7 +651,7 @@ class   XMLOptTrace implements  OptTrace
     private boolean isComplete( int[] joinOrder )
     {
         if ( joinOrder == null ) { return false; }
-        if ( joinOrder.length < _currentOptimizableList.size() ) { return false; }
+        if ( joinOrder.length < _currentQueryBlock.optimizableList.size() ) { return false; }
 
         for ( int i = 0; i < joinOrder.length; i++ )
         {
@@ -655,7 +687,7 @@ class   XMLOptTrace implements  OptTrace
                 int     optimizableNumber = proposedJoinOrder[ idx ];
                 if ( optimizableNumber >= 0 )
                 {
-                    Optimizable optimizable = _currentOptimizableList.getOptimizable( optimizableNumber );
+                    Optimizable optimizable = _currentQueryBlock.optimizableList.getOptimizable( optimizableNumber );
                     createElement( parent, JO_SLOT, getOptimizableName( optimizable ).getFullSQLName() );
                 }
             }
@@ -696,14 +728,14 @@ class   XMLOptTrace implements  OptTrace
             {
                 int     listIndex = planOrder[ i ];
 
-                if ( listIndex >= _currentOptimizableList.size() )
+                if ( listIndex >= _currentQueryBlock.optimizableList.size() )
                 {
                     // should never happen!
                     buffer.append( "{ UNKNOWN LIST INDEX " + listIndex + " } " );
                     continue;
                 }
 
-                Optimizable optimizable = _currentOptimizableList.getOptimizable( listIndex );
+                Optimizable optimizable = _currentQueryBlock.optimizableList.getOptimizable( listIndex );
             
                 AccessPath  ap = avoidSort ?
                     optimizable.getBestSortAvoidancePath() : optimizable.getBestAccessPath();
@@ -712,7 +744,9 @@ class   XMLOptTrace implements  OptTrace
                     ((StaticMethodCallNode) ((FromVTI) ((ProjectRestrictNode) optimizable).getChildResult()).getMethodCall()).ad :
                     ap.getConglomerateDescriptor();
 
-                OptimizerPlan   current = OptimizerPlan.makeRowSource( utd, _lcc.getDataDictionary() );
+                OptimizerPlan   current =   (utd == null) ?
+                    new OptimizerPlan.DeadEnd( getOptimizableName( optimizable ).toString() ) :
+                    OptimizerPlan.makeRowSource( utd, _lcc.getDataDictionary() );
 
                 if ( plan != null )
                 {

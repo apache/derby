@@ -89,7 +89,8 @@ public  class   DummyOptTrace   implements  OptTrace
     //
     // Don't need to bother implementing the rest of the behavior.
     //
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList ) {}
+    public  void    traceStartQueryBlock( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList ) {}
+    public  void    traceEndQueryBlock() {}
     public  void    traceTimeout( long currentTime, CostEstimate bestCost ) {}
     public  void    traceVacuous() {}
     public  void    traceCompleteJoinOrder() {}

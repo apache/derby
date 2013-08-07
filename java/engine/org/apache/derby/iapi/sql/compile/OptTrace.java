@@ -46,8 +46,11 @@ public  interface   OptTrace
     /** Start the start of tracing a statement. */
     public  void    traceStartStatement( String statementText );
 
-    /** Start optimizer tracing. */
-    public  void    traceStart( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList );
+    /** Start optimizer tracing for a query block. */
+    public  void    traceStartQueryBlock( long timeOptimizationStarted, int optimizerID, OptimizableList optimizableList );
+
+    /** End tracing the optimization of a query block. */
+    public  void    traceEndQueryBlock();
 
     /** Say that the optimizer ran out of time. */
     public  void    traceTimeout( long currentTime, CostEstimate bestCost );

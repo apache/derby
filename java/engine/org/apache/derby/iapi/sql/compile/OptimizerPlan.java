@@ -116,7 +116,7 @@ public abstract class OptimizerPlan
      * Get the leftmost leaf node in this plan.
      * </p>
      */
-    public abstract    RowSource    leftmostLeaf();
+    public abstract    OptimizerPlan    leftmostLeaf();
     
     /**
      * <p>
@@ -179,7 +179,7 @@ public abstract class OptimizerPlan
             return _leafNodeCount;
         }
 
-        public RowSource    leftmostLeaf()   { return leftChild.leftmostLeaf(); }
+        public OptimizerPlan    leftmostLeaf()   { return leftChild.leftmostLeaf(); }
         
         public boolean  isLeftPrefixOf( OptimizerPlan other )
         {
@@ -216,6 +216,39 @@ public abstract class OptimizerPlan
 
             return this.leftChild.equals( that.leftChild) && this.rightChild.equals( that.rightChild );
         }
+    }
+
+    /** Generic plan for row sources we don't understand */
+    public static  class    DeadEnd extends OptimizerPlan
+    {
+        private String  _name;
+
+        public DeadEnd( String name )
+        {
+            _name = name;
+        }
+
+        public void    bind
+            (
+             DataDictionary dataDictionary,
+             LanguageConnectionContext lcc,
+             CompilerContext cc
+             )
+            throws StandardException
+        {}
+        
+        public boolean isBound() { return true; }
+
+        public int countLeafNodes()    { return 1; }
+
+        public OptimizerPlan    leftmostLeaf()   { return this; }
+        
+        public boolean  isLeftPrefixOf( OptimizerPlan that )
+        {
+            return this.equals( that.leftmostLeaf() );
+        }
+        
+        public  String  toString()  { return _name; }
     }
 
     public abstract    static  class   RowSource<D extends UniqueTupleDescriptor>   extends OptimizerPlan
@@ -255,7 +288,7 @@ public abstract class OptimizerPlan
 
         public int countLeafNodes()    { return 1; }
 
-        public RowSource    leftmostLeaf()   { return this; }
+        public OptimizerPlan    leftmostLeaf()   { return this; }
         
         public boolean  isLeftPrefixOf( OptimizerPlan that )
         {

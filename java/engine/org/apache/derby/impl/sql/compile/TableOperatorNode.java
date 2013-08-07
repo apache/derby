@@ -847,6 +847,7 @@ abstract class TableOperatorNode extends FromTable
 			if (predList == null)
                 predList = new PredicateList(getContextManager());
 
+            // recursively create a new optimizer
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
 			OptimizerFactory optimizerFactory = lcc.getOptimizerFactory();
 			optimizer = optimizerFactory.getOptimizer(optList,
@@ -888,11 +889,14 @@ abstract class TableOperatorNode extends FromTable
 			}
 
 			retval = sourceResultSet;
+
+            // dispose of the recursively created optimizer
+            if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEndQueryBlock(); }
 		}
 		else
 		{
 			retval = sourceResultSet.optimize(
-										optimizer.getDataDictionary(),
+										getDataDictionary(),
 										predList,
 										outerCost.rowCount());
 		}
