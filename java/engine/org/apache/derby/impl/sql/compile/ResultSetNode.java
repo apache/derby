@@ -1475,39 +1475,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Get an optimizer to use for this ResultSetNode.  Only get it once -
-	 * subsequent calls return the same optimizer.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	protected Optimizer getOptimizer(
-							OptimizableList optList,
-							OptimizablePredicateList predList,
-							DataDictionary dataDictionary,
-							RequiredRowOrdering requiredRowOrdering,
-							OptimizerPlan overridingPlan)
-			throws StandardException
-	{
-		if (optimizer == null)
-		{
-			/* Get an optimizer. */
-			OptimizerFactory optimizerFactory = getLanguageConnectionContext().getOptimizerFactory();
-
-			optimizer = optimizerFactory.getOptimizer(
-											optList,
-											predList,
-											dataDictionary,
-											requiredRowOrdering,
-											getCompilerContext().getNumTables(),
-											overridingPlan,
-								getLanguageConnectionContext());
-		}
-
-		optimizer.prepForNextRound();
-		return optimizer;
-	}
-
-	/**
 	 * Get the optimizer for this result set.
 	 * 
 	 * @return If this.optimizer has has already been created by the

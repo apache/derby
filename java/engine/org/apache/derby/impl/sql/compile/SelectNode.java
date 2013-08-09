@@ -32,8 +32,12 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.OptimizableList;
+import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.OptimizerPlan;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -2041,7 +2045,43 @@ class SelectNode extends ResultSetNode
 			havingSubquerys.optimize(dataDictionary, costEstimate.rowCount());
 		}
 
-		return this;
+        // dispose of the optimizer we created above
+        if ( optimizerTracingIsOn() ) { getOptimizerTracer().traceEndQueryBlock(); }
+
+        return this;
+	}
+
+	/**
+	 * Get an optimizer to use for this SelectNode.  Only get it once -
+	 * subsequent calls return the same optimizer.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	private Optimizer getOptimizer(
+							OptimizableList optList,
+							OptimizablePredicateList predList,
+							DataDictionary dataDictionary,
+							RequiredRowOrdering requiredRowOrdering,
+							OptimizerPlan overridingPlan)
+			throws StandardException
+	{
+		if (optimizer == null)
+		{
+			/* Get an optimizer. */
+			OptimizerFactory optimizerFactory = getLanguageConnectionContext().getOptimizerFactory();
+
+			optimizer = optimizerFactory.getOptimizer(
+											optList,
+											predList,
+											dataDictionary,
+											requiredRowOrdering,
+											getCompilerContext().getNumTables(),
+											overridingPlan,
+								getLanguageConnectionContext());
+		}
+
+		optimizer.prepForNextRound();
+		return optimizer;
 	}
 
 	/**

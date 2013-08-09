@@ -188,6 +188,33 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
                  "create index r_a on r( a )"
                  );
         }
+        
+        if ( !tableExists( conn, "T1" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create table t1( c1 int, c2 int, c3 int )"
+                 );
+        }
+        
+        if ( !tableExists( conn, "T2" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create table t2( c1 int, c2 int, c3 int )"
+                 );
+        }
+        
+        if ( !tableExists( conn, "T3" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create table t3( c1 int, c2 int, c3 int )"
+                 );
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +320,9 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
              conn,
              "call syscs_util.syscs_register_tool( 'optimizerTracingViews', false )"
              );
+
+        // use planCost to examine an outer join
+        vetOuterJoin( conn );
     }
 
     /**
@@ -542,6 +572,72 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
         goodStatement( conn, "drop type ArrayList restrict" );
     }
 
+
+    /**
+     * <p>
+     * Test xml optimizer tracing of outer joins.
+     * </p>
+     */
+    private void vetOuterJoin( Connection conn ) throws Exception
+    {
+        File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
+
+        // turn on xml-based optimizer tracing
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'xml' )"
+             );
+
+        // run an outer join
+        goodStatement
+            (
+             conn,
+             "select * from t3, (t1 left outer join t2 on t1.c1 = t2.c1) where t3.c1 = t1.c1"
+             );
+
+        // turn off optimizer tracing
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', false, '" + traceFile.getPath() + "' )"
+             );
+
+        // load the trace viewer
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracingViews', true, '" + traceFile.getPath() + "' )"
+             );
+
+        // verify the plan shapes which were considered
+        PreparedStatement   ps = chattyPrepare
+            (
+             conn,
+             "select distinct summary from planCost\n" +
+             "where complete and qbID = 1\n" +
+             "order by summary\n"
+             );
+        ResultSet   rs = ps.executeQuery();
+        rs.next();
+        String  summary1 = rs.getString( 1 ).trim();
+        rs.next();
+        String  summary2 = rs.getString( 1 ).trim();
+        assertTrue( summary1.startsWith( "( \"APP\"." ) );
+        assertTrue( summary1.endsWith( " * ProjectRestrictNode )" ) );
+        assertTrue( summary2.startsWith( "( ProjectRestrictNode # \"APP\"." ) );
+        rs.close();
+        ps.close();
+
+        // unload the trace viewer
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracingViews', false )"
+             );
+
+    }
+    
    ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
