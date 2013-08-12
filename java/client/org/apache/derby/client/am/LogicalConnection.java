@@ -96,36 +96,41 @@ public class LogicalConnection implements Connection {
     // ------------------------ logical connection close -------------------------
     // All methods are simply forwarded to the physical connection, except for close() and isClosed().
 
-    synchronized public void close() throws SQLException {
-        try
-        {
-            // we also need to loop thru all the logicalStatements and close them
-            if (physicalConnection_ == null) {
-                return;
-            }
-            if (physicalConnection_.agent_.loggingEnabled()) {
-                physicalConnection_.agent_.logWriter_.traceEntry(this, "close");
-            }
+    public void close() throws SQLException {
+        // The pooledConnection owns this LogicalConnection.  To ensure that
+        //  there is no deadlock when calling back into the pooledConnection_.recycleConnection
+        //  below, we first synchronize on the pooledConnection and then on this
+        //  LogicalConnection
+        synchronized (pooledConnection_) {
+            synchronized (this) {
+                try {
+                    // we also need to loop thru all the logicalStatements and close them
+                    if (physicalConnection_ == null) {
+                        return;
+                    }
+                    if (physicalConnection_.agent_.loggingEnabled()) {
+                        physicalConnection_.agent_.logWriter_.traceEntry(this, "close");
+                    }
 
-            if (physicalConnection_.isClosed()) // connection is closed or has become stale
-            {
-                pooledConnection_.informListeners(new SqlException(null, 
-                    new ClientMessageId(
-                        SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
-            } else {
-                physicalConnection_.checkForTransactionInProgress();
-                physicalConnection_.closeForReuse(
-                        pooledConnection_.isStatementPoolingEnabled());
-                if (!physicalConnection_.isGlobalPending_()) {
-                    pooledConnection_.recycleConnection();
+                    if (physicalConnection_.isClosed()) // connection is closed or has become stale
+                    {
+                        pooledConnection_.informListeners(new SqlException(null,
+                                new ClientMessageId(
+                                SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
+                    } else {
+                        physicalConnection_.checkForTransactionInProgress();
+                        physicalConnection_.closeForReuse(
+                                pooledConnection_.isStatementPoolingEnabled());
+                        if (!physicalConnection_.isGlobalPending_()) {
+                            pooledConnection_.recycleConnection();
+                        }
+                    }
+                    physicalConnection_ = null;
+                    pooledConnection_.nullLogicalConnection();
+                } catch (SqlException se) {
+                    throw se.getSQLException();
                 }
             }
-            physicalConnection_ = null;
-            pooledConnection_.nullLogicalConnection();
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
         }
     }
 
