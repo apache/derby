@@ -77,9 +77,14 @@ public class LogicalConnection implements java.sql.Connection {
     // ------------------------ logical connection close -------------------------
     // All methods are simply forwarded to the physical connection, except for close() and isClosed().
 
-    synchronized public void close() throws SQLException {
-        try
-        {
+    public void close() throws SQLException {
+        // The pooledConnection owns this LogicalConnection.  To ensure that
+        //  there is no deadlock when calling back into the pooledConnection_.recycleConnection
+        //  below, we first synchronize on the pooledConnection and then on this
+        //  LogicalConnection
+        synchronized (pooledConnection_) {
+            synchronized (this) {
+                try {
             // we also need to loop thru all the logicalStatements and close them
             if (physicalConnection_ == null) {
                 return;
@@ -90,7 +95,7 @@ public class LogicalConnection implements java.sql.Connection {
 
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
-                pooledConnection_.informListeners(new SqlException(null, 
+                        pooledConnection_.informListeners(new SqlException(null,
                     new ClientMessageId(
                         SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
             } else {
@@ -103,10 +108,10 @@ public class LogicalConnection implements java.sql.Connection {
             }
             physicalConnection_ = null;
             pooledConnection_.nullLogicalConnection();
-        }
-        catch ( SqlException se )
-        {
+                } catch (SqlException se) {
             throw se.getSQLException();
+        }
+    }
         }
     }
 
