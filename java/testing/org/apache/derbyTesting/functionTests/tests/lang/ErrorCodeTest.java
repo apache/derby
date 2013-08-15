@@ -187,7 +187,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM0R","Unable to remove File {0}.  ","45000"},
         		{"XBM0S","Unable to rename file '{0}' to '{1}'","45000"},
         		{"XBM0T","Ambiguous sub-protocol for database name {0}.   ","45000"},
-        		{"XBM0X","Supplied territory description '{0}' is invalid, expecting ln[_CO[_variant]]\nln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.","45000"},
+        		{"XBM0X","Supplied locale description '{0}' is invalid, expecting ln[_CO[_variant]]\nln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.","45000"},
         		{"XBM0Y","Backup database directory {0} not found. Please make sure that the specified backup path is right.","45000"},
         		{"XBM0Z","Unable to copy file '{0}' to '{1}'. Please make sure that there is enough space and permissions are correct. ","45000"},
         		{"XCW00","Unsupported upgrade from '{0}' to '{1}'.","45000"},

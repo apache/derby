@@ -4015,9 +4015,9 @@ Guide.
 
             <msg>
                 <name>XBM0X.D</name>
-                <text>Supplied territory description '{0}' is invalid, expecting ln[_CO[_variant]]
+                <text>Supplied locale description '{0}' is invalid, expecting ln[_CO[_variant]]
 ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-3166 country codes, see java.util.Locale.</text>
-                <arg>territoryID</arg>
+                <arg>localeID</arg>
             </msg>
 
             <msg>
@@ -4329,7 +4329,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCXE0.S</name>
-                <text>You are trying to do an operation that uses the territory of the database, but the database does not have a territory.</text>
+                <text>You are trying to do an operation that uses the locale of the database, but the database does not have a locale.</text>
             </msg>
 
         </family>
@@ -8021,7 +8021,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J021</name>
-                <text>Territory for the database</text>
+                <text>Locale for the database</text>
             </msg>
 
             <msg>
