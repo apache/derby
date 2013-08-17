@@ -22,7 +22,7 @@
 package org.apache.derbyBuild;
 
 import org.apache.derby.iapi.services.classfile.*;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.*;
 import java.util.zip.*;
 import java.io.*;

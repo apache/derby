@@ -31,7 +31,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  *	This is the implementation for Qualifier.  It is used for generated scans.

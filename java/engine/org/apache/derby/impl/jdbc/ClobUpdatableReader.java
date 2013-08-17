@@ -25,7 +25,7 @@ package org.apache.derby.impl.jdbc;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * {@code ClobUpdatableReader} is used to create a {@code Reader} capable of

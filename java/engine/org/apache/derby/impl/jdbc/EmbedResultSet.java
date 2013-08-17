@@ -23,7 +23,7 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.ByteArrayInputStream;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 

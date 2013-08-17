@@ -50,7 +50,7 @@ import org.apache.derby.iapi.store.raw.Undoable;
 
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;

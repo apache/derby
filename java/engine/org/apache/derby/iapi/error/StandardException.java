@@ -27,7 +27,7 @@ import java.sql.SQLWarning;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	StandardException is the root of all exceptions that are handled

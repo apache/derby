@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.access.conglomerate;
 
 import org.apache.derby.iapi.reference.Property;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatIdUtil;

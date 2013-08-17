@@ -20,7 +20,7 @@
  */
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RecordHandle;

@@ -31,7 +31,7 @@
 
 package org.apache.derby.impl.drda;
 import java.util.Hashtable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 class DRDAProtocolException extends Exception
 {

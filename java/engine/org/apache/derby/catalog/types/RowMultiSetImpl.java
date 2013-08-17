@@ -21,7 +21,7 @@
 
 package org.apache.derby.catalog.types;
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import java.io.ObjectOutput;

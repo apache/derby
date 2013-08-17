@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.store.raw;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 

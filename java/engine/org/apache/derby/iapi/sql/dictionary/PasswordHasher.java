@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.shared.common.reference.SQLState;
 

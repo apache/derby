@@ -25,7 +25,7 @@ import org.apache.derby.impl.store.raw.data.BaseContainerHandle;
 import org.apache.derby.impl.store.raw.data.BasePage;
 
 import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;

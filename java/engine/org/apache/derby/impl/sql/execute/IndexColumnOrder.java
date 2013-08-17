@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdUtil;

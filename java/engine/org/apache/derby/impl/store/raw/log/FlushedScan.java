@@ -28,7 +28,7 @@ import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.impl.store.raw.log.LogRecord;
 import org.apache.derby.impl.store.raw.log.StreamLogScan;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.store.raw.log.LogInstant;

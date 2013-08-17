@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.bytecode;
 
 import java.lang.reflect.*;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.Hashtable;
 import org.apache.derby.iapi.services.loader.*;
 import org.apache.derby.iapi.services.context.*;

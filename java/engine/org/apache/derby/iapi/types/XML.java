@@ -30,7 +30,7 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.loader.ClassInspector;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 import org.apache.derby.iapi.reference.SQLState;

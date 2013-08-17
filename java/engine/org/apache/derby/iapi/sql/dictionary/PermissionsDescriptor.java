@@ -25,7 +25,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This class is used by rows in the SYS.SYSTABLEPERMS, SYS.SYSCOLPERMS, and SYS.SYSROUTINEPERMS

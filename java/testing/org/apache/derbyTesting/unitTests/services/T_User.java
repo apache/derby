@@ -24,7 +24,7 @@ package org.apache.derbyTesting.unitTests.services;
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.locks.*;
 
 class T_User implements Runnable {

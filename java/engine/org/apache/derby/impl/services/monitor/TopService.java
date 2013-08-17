@@ -27,7 +27,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.EngineType;

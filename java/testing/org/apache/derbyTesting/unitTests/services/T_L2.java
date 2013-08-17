@@ -21,7 +21,7 @@
 
 package org.apache.derbyTesting.unitTests.services;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.Hashtable;
 import org.apache.derby.iapi.services.locks.*;
 

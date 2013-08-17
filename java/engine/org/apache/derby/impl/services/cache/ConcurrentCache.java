@@ -30,7 +30,7 @@ import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheableFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.Matchable;
 
 /**

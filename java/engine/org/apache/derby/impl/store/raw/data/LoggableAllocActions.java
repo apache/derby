@@ -25,7 +25,7 @@ import org.apache.derby.impl.store.raw.data.AllocationActions;
 import org.apache.derby.impl.store.raw.data.BasePage;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.store.raw.Loggable;

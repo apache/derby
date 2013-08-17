@@ -24,7 +24,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 /**
  * This interface is used to get information from a KeyConstraintDescriptor.
  * A KeyConstraintDescriptor can represent a primary/unique/foreign key

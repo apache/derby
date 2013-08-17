@@ -24,7 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.sql.Types;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.TypeId;
 
 public final class VarbitConstantNode extends BitConstantNode

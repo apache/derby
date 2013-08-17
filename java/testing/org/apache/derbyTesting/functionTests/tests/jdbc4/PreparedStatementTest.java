@@ -32,7 +32,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import java.io.*;
 import java.sql.*;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 

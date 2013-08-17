@@ -28,7 +28,7 @@ import org.apache.derby.iapi.store.raw.PageKey;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.Serviceable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.data.DataFactory;

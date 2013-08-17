@@ -31,7 +31,7 @@ import java.util.Properties;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This class is used at COMPILE TIME ONLY.  It is responsible for generating

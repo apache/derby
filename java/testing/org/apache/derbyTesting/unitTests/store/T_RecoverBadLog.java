@@ -33,7 +33,7 @@ import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.services.property.PropertyUtil;

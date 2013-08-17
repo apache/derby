@@ -32,7 +32,7 @@ import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * TypeId describes the static information about a SQL type

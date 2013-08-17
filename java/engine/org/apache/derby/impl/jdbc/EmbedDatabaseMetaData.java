@@ -25,7 +25,7 @@ import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 

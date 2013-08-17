@@ -38,7 +38,7 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.util.Observable;
 

@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.daemon;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /** 
 

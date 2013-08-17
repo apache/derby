@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.replication.buffer;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.util.NoSuchElementException;
 import java.util.LinkedList;

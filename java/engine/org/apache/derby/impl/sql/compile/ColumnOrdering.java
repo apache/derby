@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 class ColumnOrdering {

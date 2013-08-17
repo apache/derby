@@ -22,7 +22,7 @@ package org.apache.derby.impl.drda;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class Utf8CcsidManager extends CcsidManager {
 

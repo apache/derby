@@ -31,7 +31,7 @@ import org.apache.derby.catalog.UUID;
 import java.sql.Timestamp;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;

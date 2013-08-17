@@ -28,7 +28,7 @@ import org.apache.derby.iapi.services.locks.C_LockFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
 
 import org.apache.derby.iapi.reference.Property;

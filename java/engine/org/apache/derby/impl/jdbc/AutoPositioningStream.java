@@ -28,7 +28,7 @@ import org.apache.derby.iapi.error.StandardException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This Stream is a wrapper for PositionedStoreStream to set the position

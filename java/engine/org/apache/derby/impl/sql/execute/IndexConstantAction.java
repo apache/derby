@@ -22,7 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  *	This class is the superclass for the classes that describe actions 

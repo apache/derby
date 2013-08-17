@@ -20,7 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.sql.execute.RowUtil;

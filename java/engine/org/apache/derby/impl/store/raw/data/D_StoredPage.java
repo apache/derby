@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticableGeneric;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.Qualifier;

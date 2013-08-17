@@ -30,7 +30,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.authentication.UserAuthenticator;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.MessageId;

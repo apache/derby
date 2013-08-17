@@ -25,7 +25,7 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
 import org.apache.derby.iapi.store.raw.*;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;

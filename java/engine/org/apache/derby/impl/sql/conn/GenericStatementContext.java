@@ -23,7 +23,7 @@ package org.apache.derby.impl.sql.conn;
 
 import org.apache.derby.iapi.services.context.Context;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 

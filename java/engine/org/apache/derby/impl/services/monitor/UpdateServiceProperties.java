@@ -22,7 +22,7 @@
 package org.apache.derby.impl.services.monitor;
 
 import org.apache.derby.iapi.services.monitor.PersistentService;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.util.Properties;
 import java.util.Hashtable;

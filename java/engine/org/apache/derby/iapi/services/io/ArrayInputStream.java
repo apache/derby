@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.EOFException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.ErrorObjectInput;

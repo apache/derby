@@ -26,7 +26,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.shared.common.reference.MessageId;
 

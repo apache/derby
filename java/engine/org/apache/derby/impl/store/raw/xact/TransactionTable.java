@@ -23,7 +23,7 @@ package org.apache.derby.impl.store.raw.xact;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 

@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.cache;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

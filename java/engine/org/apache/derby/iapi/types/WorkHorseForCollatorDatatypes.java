@@ -24,7 +24,7 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.text.CollationElementIterator;
 import java.text.CollationKey;

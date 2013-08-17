@@ -24,7 +24,7 @@ package org.apache.derbyTesting.unitTests.store;
 import org.apache.derby.iapi.store.raw.*;
 
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.locks.LockFactory;

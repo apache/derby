@@ -32,7 +32,7 @@ import javax.naming.directory.*;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**

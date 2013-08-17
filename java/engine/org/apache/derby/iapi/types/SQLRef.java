@@ -25,7 +25,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.catalog.TypeDescriptor;
 

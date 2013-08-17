@@ -22,7 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A TableElementNode is an item in a TableElementList, and represents

@@ -41,7 +41,7 @@ import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This class implements a Cacheable for a DataDictionary cache of

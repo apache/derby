@@ -32,7 +32,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.Matchable;
 import org.apache.derby.iapi.reference.Property;
 

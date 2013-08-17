@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import java.sql.SQLException;
 
 final class ImportReadData implements java.security.PrivilegedExceptionAction<Object> {

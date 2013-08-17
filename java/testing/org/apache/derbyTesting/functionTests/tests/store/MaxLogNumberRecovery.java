@@ -24,7 +24,7 @@ import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.derby.tools.ij;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /*
  * This class  tests recovery logic with large log file id's and  the error

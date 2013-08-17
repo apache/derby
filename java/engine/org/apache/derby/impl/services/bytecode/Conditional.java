@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.services.bytecode;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	A Conditional represents an if/then/else block.

@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.replication.buffer;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * ReplicationLogBuffer consists of n LogBufferElements, each of which

@@ -21,7 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

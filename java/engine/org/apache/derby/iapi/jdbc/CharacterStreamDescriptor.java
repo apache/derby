@@ -21,7 +21,7 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.io.InputStream;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.PositionedStream;
 
 /**

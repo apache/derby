@@ -24,7 +24,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;

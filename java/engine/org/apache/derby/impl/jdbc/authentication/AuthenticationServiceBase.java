@@ -40,7 +40,7 @@ import org.apache.derby.iapi.services.property.PropertyFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.Attribute;
 

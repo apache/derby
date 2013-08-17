@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.io.IOException;
 import java.io.InputStream;

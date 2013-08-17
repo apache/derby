@@ -26,7 +26,7 @@ import org.apache.derby.iapi.services.cache.CacheableFactory;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
 
 /**

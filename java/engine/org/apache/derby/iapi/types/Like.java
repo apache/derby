@@ -23,7 +23,7 @@ package org.apache.derby.iapi.types;
 
 // RESOLVE: MOVE THIS CLASS TO PROTOCOL (See LikeOperatorNode)
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;

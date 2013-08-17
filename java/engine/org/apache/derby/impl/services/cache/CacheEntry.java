@@ -24,7 +24,7 @@ package org.apache.derby.impl.services.cache;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Class representing an entry in the cache. It is used by

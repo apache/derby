@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.store.access.btree.index;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;

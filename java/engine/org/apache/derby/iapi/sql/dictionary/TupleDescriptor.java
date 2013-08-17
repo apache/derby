@@ -22,7 +22,7 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import	org.apache.derby.catalog.DependableFinder;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This is the superclass of all Descriptors. Users of DataDictionary should use
