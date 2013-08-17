@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.sanity.SanityManager
+   Derby - Class org.apache.derby.shared.common.sanity.SanityManager
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -48,7 +48,7 @@ import java.util.Enumeration;
  * and bring the system down if the state is not correct. Debug checks
  * are meant to display internal information about a running system.
  * <p>
- * @see org.apache.derby.iapi.services.sanity.AssertFailure
+ * @see org.apache.derby.shared.common.sanity.AssertFailure
  */
 public class SanityManager {
 	/**
@@ -89,7 +89,7 @@ public class SanityManager {
 	 * A message about the assertion failing is
 	 * printed.
 	 * <p>
-	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
+	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void ASSERT(boolean mustBeTrue) {
 		if (DEBUG)
@@ -111,7 +111,7 @@ public class SanityManager {
 	 * false, throws AssertFailure. The message will
 	 * be printed and included in the assertion.
 	 * <p>
-	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
+	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void ASSERT(boolean mustBeTrue, String msgIfFail) {
 		if (DEBUG)
@@ -138,7 +138,7 @@ public class SanityManager {
      * <p>
 	 * @param msgIfFail message to print with the assertion
 	 *
-	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
+	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(String msgIfFail) {
 		// XXX (nat) Hmm, should we check ASSERT here?  The caller is
@@ -156,7 +156,7 @@ public class SanityManager {
 	 * @param msg message to print with the assertion
 	 * @param t exception to print with the assertion
 	 *
-	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
+	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(String msg, Throwable t) {
 		AssertFailure af = new AssertFailure("ASSERT FAILED " + msg, t);
@@ -177,7 +177,7 @@ public class SanityManager {
      * <p>
 	 * @param t exception to print with the assertion
 	 *
-	 * @see org.apache.derby.iapi.services.sanity.AssertFailure
+	 * @see org.apache.derby.shared.common.sanity.AssertFailure
 	 */
 	public static final void THROWASSERT(Throwable t) {
 		THROWASSERT(t.toString(), t);
