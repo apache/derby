@@ -4,7 +4,7 @@ encryptionProvider - value: null - description: Cryptographic service provider -
 encryptionAlgorithm - value: null - description: Cryptographic algorithm - required false - choices null 
 encryptionKeyLength - value: null - description: Cryptographic key length - required false - choices null 
 encryptionKey - value: null - description: External cryptographic key - required false - choices null 
-territory - value: null - description: Territory for the database - required false - choices null 
+territory - value: null - description: Locale for the database - required false - choices null 
 collation - value: null - description: Collation for character datatypes - required false - choices null 
 user - value: null - description: User name - required false - choices null 
 logDevice - value: null - description: Log directory path - required false - choices null 
@@ -23,7 +23,7 @@ encryptionProvider - value: null - description: Cryptographic service provider -
 encryptionAlgorithm - value: null - description: Cryptographic algorithm - required false - choices null 
 encryptionKeyLength - value: null - description: Cryptographic key length - required false - choices null 
 encryptionKey - value: null - description: External cryptographic key - required false - choices null 
-territory - value: null - description: Territory for the database - required false - choices null 
+territory - value: null - description: Locale for the database - required false - choices null 
 collation - value: null - description: Collation for character datatypes - required false - choices null 
 user - value: null - description: User name - required false - choices null 
 logDevice - value: null - description: Log directory path - required false - choices null 
