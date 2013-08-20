@@ -134,6 +134,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CaseExpressionTest.suite());
         suite.addTest(CharUTF8Test.suite());
         suite.addTest(AggregateClassLoadingTest.suite());
+        suite.addTest(LockTableTest.suite());
         suite.addTest(TableFunctionTest.suite());
         suite.addTest(VarargsTest.suite());
         suite.addTest(DeclareGlobalTempTableJavaTest.suite());
