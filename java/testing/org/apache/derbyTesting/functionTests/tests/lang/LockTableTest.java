@@ -42,8 +42,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests the LOCK TABLE in various modes.
- * 
- * @exception SQLException
  */
 public class LockTableTest extends BaseJDBCTestCase {
 
