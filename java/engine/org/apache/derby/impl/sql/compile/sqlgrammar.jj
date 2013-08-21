@@ -757,7 +757,7 @@ public class SQLParser
                                               getContextManager());
 
         StatementNode retval =
-            new UpdateNode(tableName, resultSet, getContextManager());
+            new UpdateNode(tableName, resultSet, false, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -2344,7 +2344,9 @@ TOKEN [IGNORE_CASE] :
 |	<LOCKS: "locks">
 |	<LOCKSIZE: "locksize">
 |	<LOGGED: "logged">
+|	<MATCHED: "matched">
 |	<MAXVALUE: "maxvalue">
+|	<MERGE: "merge">
 |	<MINVALUE: "minvalue">
 |       <MOD: "mod">
 |	<MODIFIES: "modifies">
@@ -2885,6 +2887,8 @@ proceduralStatement(Token[] tokenHolder) throws StandardException :
 |
 	statementNode =  preparableSelectStatement(true)	
 |
+	statementNode =  mergeStatement()	
+|
 	statementNode =  callStatement()	
 )
 	{
@@ -3098,6 +3102,11 @@ preparableSQLDataStatement() throws StandardException :
 	}
 |
 	dmlStatement = insertStatement()
+	{
+		return dmlStatement;
+	}
+|
+	dmlStatement =  mergeStatement()	
 	{
 		return dmlStatement;
 	}
@@ -3551,6 +3560,98 @@ bareCallStatement() throws StandardException :
 		setUpAndLinkParameters();
 
 		return cursorNode;
+	}
+}
+
+/*
+ * <A NAME="mergeStatement">mergeStatement</A>
+ */
+StatementNode
+mergeStatement() throws StandardException :
+{
+	FromTable   targetTable;
+    FromTable       sourceTable;
+    ValueNode       searchCondition;
+    ArrayList<MatchingClauseNode>   matchingClauses;
+}
+{
+	<MERGE> <INTO> targetTable = tableFactor()
+    <USING> sourceTable = tableFactor()
+    searchCondition = joinCondition()
+    matchingClauses = matchingClauseList()
+	{
+        return new MergeNode
+        (
+            targetTable,
+            sourceTable,
+            searchCondition,
+            matchingClauses,
+            getContextManager()
+        );
+	}
+}
+
+/*
+ * <A NAME="matchingClauseList">matchingClauseList</A>
+ */
+ArrayList<MatchingClauseNode>
+matchingClauseList() throws StandardException :
+{
+    ArrayList<MatchingClauseNode>   matchingClauses = new ArrayList<MatchingClauseNode>();
+}
+{
+    matchingClause( matchingClauses ) ( <COMMA> matchingClause( matchingClauses ) ) *
+	{
+        return matchingClauses;
+	}
+}
+
+/*
+ * <A NAME="matchingClause">matchingClause</A>
+ */
+void
+matchingClause( ArrayList<MatchingClauseNode> matchingClauses ) throws StandardException :
+{
+    ValueNode   matchingRefinement = null;
+    ResultColumnList               updateColumns = null;
+    ResultColumnList               insertColumns = null;
+	ResultColumnList               insertValues = new ResultColumnList( getContextManager() );
+    MatchingClauseNode             matchingClause;
+}
+{
+    LOOKAHEAD ( { getToken(1).kind == WHEN && getToken(2).kind != NOT } )
+    <WHEN> <MATCHED> [ <AND> matchingRefinement = valueExpression() ]
+    <THEN>
+    (
+        <DELETE>
+        |
+        <UPDATE> <SET> updateColumns = setClauseList()
+    )
+	{
+        if ( updateColumns != null )
+        {
+            matchingClause = MatchingClauseNode.makeUpdateClause
+            ( matchingRefinement, updateColumns, getContextManager() );
+        }
+        else
+        {
+            matchingClause = MatchingClauseNode.makeDeleteClause
+            ( matchingRefinement, getContextManager() );
+        }
+
+        matchingClauses.add( matchingClause );
+	}
+|
+    LOOKAHEAD ( { getToken(1).kind == WHEN && getToken(2).kind == NOT } )
+    <WHEN> <NOT> <MATCHED> [ <AND> matchingRefinement = valueExpression() ]
+    <THEN>
+    <INSERT> [ <LEFT_PAREN> insertColumns = insertColumnList() <RIGHT_PAREN> ]
+    <VALUES> <LEFT_PAREN> rowValueConstructorList( insertValues ) <RIGHT_PAREN>
+	{
+        matchingClause = MatchingClauseNode.makeInsertClause
+        ( matchingRefinement, insertColumns, insertValues, getContextManager() );
+
+        matchingClauses.add( matchingClause );
 	}
 }
 
@@ -14376,7 +14477,9 @@ nonReservedKeyword()  :
 	|	tok = <LOCKSIZE>
 	|	tok = <LOGGED>
 	|	tok = <LONG>
+	|	tok = <MATCHED>
 	|	tok = <MAXVALUE>
+	|	tok = <MERGE>
 	|	tok = <MINVALUE>
 	|	tok = <MESSAGE_LOCALE>
 	|	tok = <METHOD>

@@ -306,6 +306,18 @@ public final class InsertNode extends DMLModStatementNode
              ((UnionNode)resultSet).tableConstructor()) ||
             resultSet instanceof RowResultSetNode;
 
+        //
+        // For the MERGE statement, DEFAULT expressions in the SELECT node
+        // may have been replaced with generated expressions already.
+        //
+        ResultColumnList    tempRCL = resultSet.getResultColumns();
+        boolean defaultsWereReplaced = false;
+        for ( int i = 0; i < tempRCL.size(); i++ )
+        {
+            ResultColumn    rc = tempRCL.getResultColumn( i+1 );
+            if ( rc.wasDefaultColumn() ) { defaultsWereReplaced = true; }
+        }
+
         resultSet.replaceOrForbidDefaults(targetTableDescriptor,
                                           targetColumnList,
                                           isTableConstructor);
@@ -436,7 +448,7 @@ public final class InsertNode extends DMLModStatementNode
 
         bindOffsetFetch(offset, fetchFirst);
 
-		resultSet = enhanceAndCheckForAutoincrement(resultSet, inOrder, colMap);
+		resultSet = enhanceAndCheckForAutoincrement( resultSet, inOrder, colMap, defaultsWereReplaced );
 
 		resultColumnList.checkStorableExpressions(resultSet.getResultColumns());
 		/* Insert a NormalizeResultSetNode above the source if the source
@@ -550,12 +562,18 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param resultSet			current node in the result set tree
 	 * @param inOrder			FALSE if the column list needs reordering
 	 * @param colMap            correspondence between RCLs
+	 * @param defaultsWereReplaced  true if DEFAULT clauses were replaced with generated expressions
 	 * @return a node representing the source for the insert
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-	ResultSetNode enhanceAndCheckForAutoincrement(
-			ResultSetNode resultSet, boolean inOrder, int[] colMap)
+	ResultSetNode enhanceAndCheckForAutoincrement
+        (
+         ResultSetNode resultSet,
+         boolean inOrder,
+         int[] colMap,
+         boolean    defaultsWereReplaced
+         )
 		throws StandardException
 	{
 		/*
@@ -593,7 +611,7 @@ public final class InsertNode extends DMLModStatementNode
 			// doesn't tell whether or not DEFAULT is specified at the leaf
 			// level, we need to skip it here to avoid false positives.
 		} else {
-			resultColumnList.forbidOverrides(resultSet.getResultColumns());
+			resultColumnList.forbidOverrides( resultSet.getResultColumns(), defaultsWereReplaced );
 		}
 
 		return resultSet;

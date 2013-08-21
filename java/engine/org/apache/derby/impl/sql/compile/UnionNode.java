@@ -195,10 +195,10 @@ class UnionNode extends SetOperatorNode
 		throws StandardException
 	{
 		if (tableConstructor()) {
-			leftResultSet = target.enhanceAndCheckForAutoincrement(
-					leftResultSet, inOrder, colMap);
-			rightResultSet = target.enhanceAndCheckForAutoincrement(
-					rightResultSet, inOrder, colMap);
+			leftResultSet = target.enhanceAndCheckForAutoincrement
+                ( leftResultSet, inOrder, colMap, false );
+			rightResultSet = target.enhanceAndCheckForAutoincrement
+                ( rightResultSet, inOrder, colMap, false );
 			if (!inOrder ||
 					resultColumns.size() < target.resultColumnList.size()) {
 				resultColumns = getRCLForInsert(target, colMap);

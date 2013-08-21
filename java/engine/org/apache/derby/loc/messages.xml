@@ -2248,6 +2248,21 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XAK</name>
+                <text>The target table of a MERGE statement must be a base table.</text>
+            </msg>
+
+            <msg>
+                <name>42XAL</name>
+                <text>The source table of a MERGE statement must be a base table, view, or table function.</text>
+            </msg>
+
+            <msg>
+                <name>42XAM</name>
+                <text>The source and target tables of a MERGE statement may not have the same correlation name.</text>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

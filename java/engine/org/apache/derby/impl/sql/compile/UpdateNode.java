@@ -78,6 +78,8 @@ public final class UpdateNode extends DMLModStatementNode
 	protected FormatableBitSet 			readColsBitSet;
 	protected boolean 			positionedUpdate;
 
+    private     boolean         inMatchedClause;
+
 	/* Column name for the RowLocation in the ResultSet */
     static final String COLUMNNAME = "###RowLocationToUpdate";
 
@@ -86,14 +88,17 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @param targetTableName	The name of the table to update
      * @param resultSet         The ResultSet that we will generate
+     * @param inMatchedClause   True if this UPDATE is part of a MATCHED ... THEN UPDATE clause of a MERGE statement.
      * @param cm                The context manager
 	 */
     UpdateNode(TableName targetTableName,
                ResultSetNode resultSet,
+               boolean  inMatchedClause,
                ContextManager cm)
 	{
         super(resultSet, cm);
         this.targetTableName = targetTableName;
+        this.inMatchedClause = inMatchedClause;
 	}
 
 	/**
@@ -321,10 +326,12 @@ public final class UpdateNode extends DMLModStatementNode
 		** Get the result FromTable, which should be the only table in the
 	 	** from list.
 		*/
+        /*
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(resultSet.getFromList().size() == 1,
                     "More than one table in result from list in an update.");
         }
+        */
 		/* Normalize the SET clause's result column list for synonym */
 		if (synonymTableName != null)
 			normalizeSynonymColumns( resultSet.resultColumns, targetTable );
@@ -435,6 +442,7 @@ public final class UpdateNode extends DMLModStatementNode
                                         afterColumns, affectedGeneratedColumns );
 
 				afterColumns = fbt.addColsToList(afterColumns, readColsBitSet);
+                
 				resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
 
 				/*
@@ -1328,11 +1336,15 @@ public final class UpdateNode extends DMLModStatementNode
 			 * the cursor, then a match for the ColumnReference would not
 			 * be found if we didn't null out the name.  (Aren't you
 			 * glad you asked?)
+             *
+             * However, we need the table name if this UPDATE is part of a MERGE
+             * statement. If we clear the table name, then we will not be able to
+             * resolve which table (target or source) holds the column.
 			 */
-			column.clearTableName();
+			if ( !inMatchedClause ) { column.clearTableName(); }
 		}
 	}
-	
+
 	/**
 	 * Normalize synonym column references to have the name of the base table. 
 	 *

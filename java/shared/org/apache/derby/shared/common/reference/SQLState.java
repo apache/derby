@@ -942,6 +942,9 @@ public interface SQLState {
     String LANG_NEXT_VALUE_FOR_ILLEGAL                                      = "42XAH";    
     String LANG_SEQUENCE_REFERENCED_TWICE                                      = "42XAI";    
     String LANG_DUPLICATE_CS_CLAUSE                                      = "42XAJ";    
+    String LANG_TARGET_NOT_BASE_TABLE                                  = "42XAK";    
+    String LANG_SOURCE_NOT_BASE_VIEW_OR_VTI                        = "42XAL";    
+    String LANG_SAME_EXPOSED_NAME                                       = "42XAM";    
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

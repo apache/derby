@@ -803,7 +803,7 @@ class DeleteNode extends DMLModStatementNode
                                               null, /* optimizer override plan */
                                               getContextManager());
 
-        return new UpdateNode(tableName, sn, getContextManager());
+        return new UpdateNode(tableName, sn, false, getContextManager());
 
     }
 

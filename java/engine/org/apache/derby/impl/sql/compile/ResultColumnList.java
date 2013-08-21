@@ -891,6 +891,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 						targetTableDescriptor,
 						index + 1
 					);
+            
             int colIdx = rc.getColumnPosition() - 1;
             if( SanityManager.DEBUG)
                 SanityManager.ASSERT( colIdx >= 0 && colIdx < targetTableDescriptor.getNumberOfColumns(),
@@ -4035,6 +4036,19 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     void forbidOverrides(ResultColumnList sourceRSRCL)
 		throws StandardException
 	{
+        forbidOverrides( sourceRSRCL, false );
+    }
+    
+	/**
+	 * check if any autoincrement or generated columns exist in the result column list.
+	 * called from insert or update where you cannot insert/update the value
+	 * of a generated or autoincrement column.
+	 *
+	 * @exception StandardException		If the column is an ai column
+	 */
+    void forbidOverrides(ResultColumnList sourceRSRCL, boolean defaultsWereReplaced )
+		throws StandardException
+	{
 		int size = size();
 
 		for (int index = 0; index < size; index++)
@@ -4046,7 +4060,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
             if ( (cd != null) && cd.hasGenerationClause() )
             {
-                if ( (sourceRC != null) && !sourceRC.hasGenerationClause() && !sourceRC.wasDefaultColumn() )
+                if ( !defaultsWereReplaced && (sourceRC != null) && !sourceRC.hasGenerationClause() && !sourceRC.wasDefaultColumn() )
                 {
                     throw StandardException.newException(SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE, rc.getName());
                 }
@@ -4056,8 +4070,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			
 			if ((cd != null) && (cd.isAutoincrement()))
 			{
-				if ((sourceRC != null) && 
-					(sourceRC.isAutoincrementGenerated()))
+				if (
+                    ( (sourceRC != null) && (sourceRC.isAutoincrementGenerated()) ) ||
+                    ( cd.isAutoincAlways() && defaultsWereReplaced )
+                    )
 				{
 					sourceRC.setColumnDescriptor(cd.getTableDescriptor(), cd);
 
