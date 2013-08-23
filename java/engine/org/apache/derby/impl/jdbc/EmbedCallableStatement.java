@@ -363,10 +363,6 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
 
 	}
 
-	/*
-	** Methods using BigDecimal, moved back into EmbedCallableStatement
-    ** because our small device implementation now requires CDC/FP 1.1.
-	*/
     /**
      * JDBC 2.0
      *

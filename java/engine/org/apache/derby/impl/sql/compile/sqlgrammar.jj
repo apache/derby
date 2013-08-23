@@ -39,6 +39,7 @@ PARSER_BEGIN(SQLParser)
 
 package org.apache.derby.impl.sql.compile;
 
+import java.math.BigDecimal;
 import java.sql.ParameterMetaData;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -541,7 +542,7 @@ public class SQLParser
 		}
 
        return new NumericConstantNode(
-           TypeId.getBuiltInTypeId(Types.DECIMAL), num, cm);
+           TypeId.getBuiltInTypeId(Types.DECIMAL), new BigDecimal(num), cm);
 	}
 	/**
 	 * Determine whether the current token represents one of

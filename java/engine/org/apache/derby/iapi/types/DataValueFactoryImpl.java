@@ -21,43 +21,22 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.UserDataValue;
-import org.apache.derby.iapi.types.RefDataValue;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.RowLocation;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
-import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.RegisteredFormatIds;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-import org.apache.derby.iapi.services.loader.ClassInfo;
-import org.apache.derby.iapi.services.loader.InstanceGetter;
-
 import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -71,25 +50,19 @@ import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.services.context.ContextService;
 
 /**
- * Core implementation of DataValueFactory. Does not implement
- * methods required to generate DataValueDescriptor implementations
- * for the DECIMAL datatype. J2ME and J2SE require different implementations.
+ * Core implementation of DataValueFactory.
  *
  * @see DataValueFactory
  */
-abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
+public final class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 {
-        LocaleFinder localeFinder;
+        private LocaleFinder localeFinder;
         //BasicDatabase first boots DVF in it's boot method and then sets 
         //this databaseLocale in DVF.
     	private Locale databaseLocale;
     	//Following Collator object will be initialized using databaseLocale.  
     	private RuleBasedCollator collatorForCharacterTypes;
 
-        DataValueFactoryImpl()
-        {
-        }
-        
         /*
          ** ModuleControl methods.
          */
@@ -99,16 +72,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     	 */
     	public void boot(boolean create, Properties properties) throws StandardException {
     		
-    		DataValueDescriptor decimalImplementation = getNullDecimal(null);
-    		
-    		TypeId.decimalImplementation = decimalImplementation;
-    		RegisteredFormatIds.setDecimalClassName( decimalImplementation.getClass().getName() );
-    		    		
-    		// Generate a DECIMAL value represetentation of 0
-    		decimalImplementation = decimalImplementation.getNewNull();
-    		decimalImplementation.setValue(0L);
-    		NumberDataType.ZERO_DECIMAL = decimalImplementation;    		
-
     		ModuleFactory monitor = Monitor.getMonitor();
     		//The Locale on monitor has already been set by the boot code in
     		//BasicDatabase so we can simply do a get here.
@@ -294,33 +257,14 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 previous.setValue(value);
                 return previous;
         }
-        public final NumberDataValue getDecimalDataValue(Number value)
-			throws StandardException
-        {
-			NumberDataValue ndv = getNullDecimal((NumberDataValue) null);
-			ndv.setValue(value);
-			return ndv;
-        }
 
         public final NumberDataValue getDecimalDataValue(Number value, NumberDataValue previous)
                         throws StandardException
         {
-                if (previous == null)
-                        return getDecimalDataValue(value);
-
-                previous.setValue(value);
-                return previous;
-        }
-
-        public final NumberDataValue getDecimalDataValue(String value,
-                                                                                                NumberDataValue previous)
-                        throws StandardException
-        {
-                if (previous == null)
-                        return getDecimalDataValue(value);
-
-                previous.setValue(value);
-                return previous;
+            NumberDataValue retValue =
+                    (previous == null) ? getNullDecimal(null) : previous;
+            retValue.setValue(value);
+            return retValue;
         }
 
         public BooleanDataValue getDataValue(boolean value,
@@ -706,6 +650,16 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         dataValue.setToNull();
                         return dataValue;
                 }
+        }
+
+        public final NumberDataValue getNullDecimal(NumberDataValue dataValue)
+        {
+            if (dataValue == null) {
+                return new SQLDecimal();
+            }
+
+            dataValue.setToNull();
+            return dataValue;
         }
 
         public BooleanDataValue getNullBoolean(BooleanDataValue dataValue)
@@ -1111,28 +1065,26 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     public DataValueDescriptor getNull(int formatId, int collationType) 
     throws StandardException {
 
-    	//For StoredFormatIds.SQL_DECIMAL_ID, different implementations are 
-    	//required for different VMs. getNullDecimal method is not static and 
-    	//hence can't be called in the static getNullDVDWithUCS_BASICcollation
-    	//method in this class. That is why StoredFormatIds.SQL_DECIMAL_ID is 
-    	//getting handled here.
-    	if (formatId == StoredFormatIds.SQL_DECIMAL_ID)
-    		return getNullDecimal(null);
-		else {
-			DataValueDescriptor returnDVD = 
-				DataValueFactoryImpl.getNullDVDWithUCS_BASICcollation(formatId);
-			//If we are dealing with default collation, then we have got the
-			//right DVD already. Just return it.
-			if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC)
-				return returnDVD;			
-			//If we are dealing with territory based collation and returnDVD is 
-			//of type StringDataValue, then we need to return a StringDataValue   
-			//with territory based collation.
-			if (returnDVD instanceof StringDataValue) 
-				return ((StringDataValue)returnDVD).getValue(getCharacterCollator(collationType));
-			else
-				return returnDVD;			
-		}
+        DataValueDescriptor returnDVD =
+            DataValueFactoryImpl.getNullDVDWithUCS_BASICcollation(formatId);
+
+        // If we are dealing with default collation, then we have got the
+        // right DVD already. Just return it.
+        if (collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC) {
+            return returnDVD;
+        }
+
+        // If we are dealing with territory based collation and returnDVD is
+        // of type StringDataValue, then we need to return a StringDataValue
+        // with territory based collation.
+        if (returnDVD instanceof StringDataValue) {
+            return ((StringDataValue) returnDVD)
+                    .getValue(getCharacterCollator(collationType));
+        }
+
+        // Otherwise, it's not a StringDataValue, and it can be returned
+        // as it is.
+        return returnDVD;
     }
     
     /**
@@ -1140,16 +1092,10 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
      * into account the collation that should be associated with collation
      * sensitive DVDs, which are all the character type DVDs. Such DVDs 
      * returned from this method have default UCS_BASIC collation associated
-     * with them. If collation associated should be terriotry based, then that
+     * with them. If collation associated should be territory based, then that
      * needs to be handled by the caller of this method. An example of such 
      * code in the caller can be seen in DataValueFactory.getNull method.
      * 
-     * Another thing to note is this method does not deal with format id
-     * associated with decimal. This is because different implementation are
-     * required for different VMs. This is again something that needs to be
-     * handled by the caller. An example of such code in the caller can be 
-     * seen in DataValueFactory.getNull method.
-     *  
      * @param formatId Return a DVD based on the format id
      * @return DataValueDescriptor with default collation of UCS_BASIC 
      */
@@ -1162,6 +1108,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         case StoredFormatIds.SQL_BOOLEAN_ID: return new SQLBoolean();
         case StoredFormatIds.SQL_CHAR_ID: return new SQLChar();
         case StoredFormatIds.SQL_DATE_ID: return new SQLDate();
+        case StoredFormatIds.SQL_DECIMAL_ID: return new SQLDecimal();
         case StoredFormatIds.SQL_DOUBLE_ID: return new SQLDouble();
         case StoredFormatIds.SQL_INTEGER_ID: return new SQLInteger();
         case StoredFormatIds.SQL_LONGINT_ID: return new SQLLongint();

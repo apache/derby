@@ -455,11 +455,6 @@ public class EmbedPreparedStatement extends EmbedStatement
 
 	}
 
-	/*
-	** Methods using BigDecimal, moved back into EmbedPreparedStatement
-	** since our small device implementation now requires CDC/FP 1.1, which
-    ** supports BigDecimal.
-	*/
 	/**
      * Set a parameter to a java.lang.BigDecimal value.  
      * The driver converts this to a SQL NUMERIC value when

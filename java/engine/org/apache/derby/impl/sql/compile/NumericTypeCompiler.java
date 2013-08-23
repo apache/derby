@@ -317,10 +317,12 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		return numberStorable(getTypeId(), otherType, cf);
 	}
 
-	/**
-		Return the method name to get a Derby DataValueDescriptor
-		object of the correct type. This implementation returns "getDataValue".
-	*/
+    /**
+     * Return the method name to get a Derby DataValueDescriptor object of the
+     * correct type. This implementation returns {@code "getDataValue"}, unless
+     * the type is {@code DECIMAL}, in which case {@code "getDecimalDataValue"}
+     * is returned.
+     */
     @Override
 	String dataValueMethodName()
 	{
@@ -522,7 +524,9 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 	{
         if (getTypeId().isDecimalTypeId())
 		{
-			// cast the value to a Number (from BigDecimal) for method resolution
+            // Cast the value to a Number for method resolution. It is most
+            // frequently a BigDecimal, but it could also be an instance of
+            // other subclasses of Number, such as Long.
 			mb.upCast("java.lang.Number");
 		}
 

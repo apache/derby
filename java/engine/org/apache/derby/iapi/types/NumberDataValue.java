@@ -193,24 +193,6 @@ public interface NumberDataValue extends DataValueDescriptor
 	 *
 	 */
 	public void setValue(Number theValue) throws StandardException;
-
-	/**
-		Return the SQL precision of this specific DECIMAL value.
-		This does not match the return from BigDecimal.precision()
-		added in J2SE 5.0, which represents the precision of the unscaled value.
-		If the value does not represent a SQL DECIMAL then
-		the return is undefined.
-	*/
-	public int getDecimalValuePrecision();
-
-	/**
-		Return the SQL scale of this specific DECIMAL value.
-		This does not match the return from BigDecimal.scale()
-		since in J2SE 5.0 onwards that can return negative scales.
-		If the value does not represent a SQL DECIMAL then
-		the return is undefined.
-	*/
-	public int getDecimalValueScale();
 }
 
 

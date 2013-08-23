@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.math.BigDecimal;
 import java.sql.Types;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -28,6 +29,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.iapi.types.SQLDecimal;
 import org.apache.derby.iapi.types.SQLDouble;
 import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.SQLLongint;
@@ -77,7 +79,7 @@ public final class NumericConstantNode extends ConstantNode
      * @param cm context manager
      * @throws StandardException
      */
-    NumericConstantNode(TypeId t, Object value, ContextManager cm)
+    NumericConstantNode(TypeId t, Number value, ContextManager cm)
             throws StandardException {
         super(cm);
         kind = getKind(t);
@@ -89,7 +91,7 @@ public final class NumericConstantNode extends ConstantNode
         setValue(t, value);
     }
 
-    private int getPrecision(TypeId t, Object val) throws StandardException {
+    private int getPrecision(TypeId t, Number val) throws StandardException {
 
         switch (t.getJDBCTypeId()) {
 
@@ -103,8 +105,7 @@ public final class NumericConstantNode extends ConstantNode
             return TypeId.LONGINT_PRECISION;
         case Types.DECIMAL:
             if (val != null) {
-                NumberDataValue constantDecimal =
-                    getDataValueFactory().getDecimalDataValue((String)val);
+                SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                 return constantDecimal.getDecimalValuePrecision();
             } else {
                 return TypeId.DECIMAL_PRECISION;
@@ -133,8 +134,7 @@ public final class NumericConstantNode extends ConstantNode
             return TypeId.LONGINT_SCALE;
         case Types.DECIMAL:
             if (val != null) {
-                NumberDataValue constantDecimal =
-                    getDataValueFactory().getDecimalDataValue((String)val);
+                SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                 return constantDecimal.getDecimalValueScale();
             } else {
                 return TypeId.DECIMAL_SCALE;
@@ -163,8 +163,7 @@ public final class NumericConstantNode extends ConstantNode
            return val != null ? TypeId.LONGINT_MAXWIDTH: 0;
        case Types.DECIMAL:
             if (val != null) {
-               NumberDataValue constantDecimal =
-                        getDataValueFactory().getDecimalDataValue((String) val);
+               SQLDecimal constantDecimal = new SQLDecimal((BigDecimal) val);
                int precision = constantDecimal.getDecimalValuePrecision();
                int scal = constantDecimal.getDecimalValueScale();
                /* be consistent with our convention on maxwidth, see also
@@ -210,7 +209,7 @@ public final class NumericConstantNode extends ConstantNode
        }
     }
 
-    private void setValue(TypeId t, Object value ) throws StandardException {
+    private void setValue(TypeId t, Number value ) throws StandardException {
        switch (t.getJDBCTypeId()) {
        case Types.TINYINT:
            setValue(new SQLTinyint((Byte)value));
@@ -225,9 +224,7 @@ public final class NumericConstantNode extends ConstantNode
            setValue(new SQLLongint((Long)value));
             break;
        case Types.DECIMAL:
-            NumberDataValue constantDecimal =
-                    getDataValueFactory().getDecimalDataValue((String)value);
-            setValue(constantDecimal);
+           setValue(new SQLDecimal((BigDecimal)value));
             break;
        case Types.DOUBLE:
            setValue(new SQLDouble((Double)value));

@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -321,35 +320,14 @@ public interface DataValueFactory
                                                         throws StandardException;
 
         /**
-         * Get a SQL DECIMAL with the given value.  The second form re-uses the
+         * Get a SQL DECIMAL with the given value. Uses the
          * previous value, if non-null, as the data holder to return.
          *
          * @exception StandardException         Thrown on error
          */
-        NumberDataValue         getDecimalDataValue(Number value) throws StandardException;
         NumberDataValue         getDecimalDataValue(Number value, NumberDataValue previous)
                                                         throws StandardException;
 
-
-        /**
-         * Get a SQL DECIMAL with the given value.
-         *
-         * @exception StandardException         Thrown on error
-         */
-        NumberDataValue         getDecimalDataValue(Long value, NumberDataValue previous)
-                                                        throws StandardException;
-
-
-        /**
-         * Get a SQL DECIMAL with the given value.  The second form re-uses the
-         * previous value, if non-null, as the data holder to return.
-         *
-         * @exception StandardException         Thrown on error
-         */
-        NumberDataValue         getDecimalDataValue(String value) throws StandardException;
-        NumberDataValue         getDecimalDataValue(String value,
-                                                                                        NumberDataValue previous)
-                                                        throws StandardException;
 
         /**
          * Get a SQL boolean with the given value.  The second arg re-uses the

@@ -335,12 +335,6 @@ public final class TypeId
         XML_ID,
     };
 
-        /**
-         * Implementation of DECIMAL datatype for generating holders through getNull.
-         * Set by the booted DataValueFactory implementation.
-         */
-        static DataValueDescriptor		decimalImplementation;
-
         /*
         ** Static methods to obtain TypeIds
         */
@@ -1427,7 +1421,7 @@ public final class TypeId
 
                         // Implementation of DECIMAL can change.
                         case StoredFormatIds.DECIMAL_TYPE_ID:
-                        	return decimalImplementation.getNewNull();
+                            return new SQLDecimal();
 
                         case StoredFormatIds.DOUBLE_TYPE_ID:
                                 return new SQLDouble();

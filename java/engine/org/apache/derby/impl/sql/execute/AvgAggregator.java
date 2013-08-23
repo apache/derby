@@ -21,11 +21,11 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ExecAggregator;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLDecimal;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -70,7 +70,7 @@ public final class AvgAggregator extends SumAggregator
 				scale = TypeId.DECIMAL_SCALE;
 			} else {
 				// DECIMAL
-				scale = ((NumberDataValue) addend).getDecimalValueScale();
+				scale = ((SQLDecimal) addend).getDecimalValueScale();
 				if (scale < NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE)
 					scale = NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE;
 			}
@@ -115,8 +115,7 @@ public final class AvgAggregator extends SumAggregator
 		} else if (typeName.equals(TypeId.REAL_NAME)) {
 			newValue = new org.apache.derby.iapi.types.SQLDouble();
 		} else {
-			TypeId decimalTypeId = TypeId.getBuiltInTypeId(java.sql.Types.DECIMAL);
-			newValue = decimalTypeId.getNull();
+            newValue = new SQLDecimal();
 		}
 		
 		newValue.setValue(value);

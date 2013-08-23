@@ -42,16 +42,10 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 public abstract class NumberDataType extends DataType 
 									 implements NumberDataValue
 {
-	/**
-	 * Set by the booting DataValueFactory implementation.
-	 */
-	static DataValueDescriptor ZERO_DECIMAL;
-	
-	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
-	static final BigDecimal ONE = BigDecimal.valueOf(1L);
-	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
-	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
-
+    static final BigDecimal MAXLONG_PLUS_ONE =
+            BigDecimal.valueOf(Long.MAX_VALUE).add(BigDecimal.ONE);
+    static final BigDecimal MINLONG_MINUS_ONE =
+            BigDecimal.valueOf(Long.MIN_VALUE).subtract(BigDecimal.ONE);
 
     /**
      * Numbers check for isNegative first and negate it if negative.
@@ -441,26 +435,7 @@ public abstract class NumberDataType extends DataType
 	{
 		return java.sql.Types.BIGINT;
 	}
-	/**
-		Return the precision of this specific DECIMAL value.
-		If the value does not represent a SQL DECIMAL then
-		the return is undefined.
-	*/
-	public int getDecimalValuePrecision()
-	{
-		return -1;
-	}
 
-	/**
-		Return the scale of this specific DECIMAL value.
-		If the value does not represent a SQL DECIMAL then
-		the return is undefined.
-	*/
-	public int getDecimalValueScale()
- 	{
-		return -1;
-	}
-   
 	protected final boolean objectNull(Object o) 
 	{
 		if (o == null) 

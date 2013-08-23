@@ -23,7 +23,6 @@ package org.apache.derby.iapi.tools.i18n;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 
 import java.util.ResourceBundle;
 import java.util.Date;
@@ -46,26 +45,6 @@ import java.sql.Types;
 
 public final class LocalizedResource  implements java.security.PrivilegedAction<String> {
 
-	private static final boolean SUPPORTS_BIG_DECIMAL_CALLS;
-	
-	static {
-		boolean supportsBigDecimalCalls;
-		try {
-			// This class attempts to make a call to a 
-			// ResultSet.getBigDecimal method, which may not be available.
-			// For instance, java.math.BigDecimal is not available with
-			// J2ME/CDC/Foundation 1.0 profile.
-			Class.forName("java.math.BigDecimal");
-			supportsBigDecimalCalls = true;
-			// And no methods using BigDecimal are available with JSR169 spec.
-			Method getbd = ResultSet.class.getMethod("getBigDecimal", new Class[] {int.class});
-			supportsBigDecimalCalls = true;
-		} catch (Throwable t) {
-			supportsBigDecimalCalls = false;
-		}
-		SUPPORTS_BIG_DECIMAL_CALLS = supportsBigDecimalCalls;
-	}
-	
 	private ResourceBundle res;
 	private Locale locale;
 	private String encode;
@@ -77,7 +56,6 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	private LocalizedOutput out;
 	private LocalizedInput in;
 	private boolean enableLocalized;
-	private boolean unicodeEscape;
 	private static LocalizedResource local;
 	private int dateSize;
 	private int timeSize;
@@ -318,11 +296,8 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 					type == Types.DOUBLE ) {
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
-			else if (SUPPORTS_BIG_DECIMAL_CALLS && (type == Types.NUMERIC || type == Types.DECIMAL)) {
-				// BigDecimal JDBC calls are supported on this platform, but
-				// use getObject() so that the class can be compiled against
-				// the JSR-169 libraries.
-				return getNumberAsString(rs.getObject(columnNumber));
+            else if (type == Types.NUMERIC || type == Types.DECIMAL) {
+                return getNumberAsString(rs.getBigDecimal(columnNumber));
 			}
 			else if (type == Types.TIME ) {
 				return getTimeAsString(rs.getTime(columnNumber));

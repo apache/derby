@@ -26,7 +26,6 @@ import org.apache.derby.iapi.tools.i18n.*;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -36,7 +35,6 @@ import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,23 +52,6 @@ import java.util.Locale;
 	@see org.apache.derby.tools.JDBCDisplayUtil
  */
 public final class util implements java.security.PrivilegedAction<String> {
-	
-	private static boolean IS_AT_LEAST_JDBC2;
-	
-	{
-		boolean isAtLeastJDBC2;
-		try {
-            // Need to test to see if this is
-            // currently JDBC 2 or JSR169.
-            // Checking for BigDecimal doesn't work because
-            // BigDecimal exists in J2ME/CDC/Foundation 1.1
-            Class.forName("java.sql.Driver");
-			isAtLeastJDBC2 = true;
-		} catch (Throwable t) {
-			isAtLeastJDBC2 = false;
-		}
-		IS_AT_LEAST_JDBC2 = isAtLeastJDBC2;
-	}
 	
 	private static final Class[] DS_GET_CONN_TYPES = {"".getClass(), "".getClass()};
 	private util() {}
@@ -424,12 +405,12 @@ public final class util implements java.security.PrivilegedAction<String> {
         driverName = util.getSystemProperty("driver");
         if (driverName == null) driverName = util.getSystemProperty("ij.driver");
 	if (driverName == null || driverName.length()==0) driverName = defaultDriver;
-        if (driverName != null && IS_AT_LEAST_JDBC2) {
+        if (driverName != null) {
 	    util.loadDriver(driverName);
 	}
 
 	String jdbcProtocol = util.getSystemProperty("ij.protocol");
-	if (jdbcProtocol != null && IS_AT_LEAST_JDBC2)
+	if (jdbcProtocol != null)
 	    util.loadDriverIfKnown(jdbcProtocol);
 	
     String user = util.getSystemProperty("ij.user");
@@ -439,7 +420,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	databaseURL = util.getSystemProperty("database");
 	if (databaseURL == null) databaseURL = util.getSystemProperty("ij.database");
 	if (databaseURL == null || databaseURL.length()==0) databaseURL = defaultURL;
-	if (databaseURL != null && IS_AT_LEAST_JDBC2) {
+	if (databaseURL != null) {
 	    // add protocol if might help find driver.
 		// if have full URL, load driver for it
 		if (databaseURL.startsWith("jdbc:"))
@@ -617,36 +598,7 @@ AppUI.out.println("SIZE="+l);
 				
 				if (sqlType == Types.DECIMAL)
 				{
-					if (util.IS_AT_LEAST_JDBC2)
-					{
-						ps.setObject(c,rs.getObject(c),
-								 sqlType,
-								 rsmd.getScale(c));							
-					}
-					else
-					{
-						// In J2ME there is no object that represents
-						// a DECIMAL value. By default use String to
-						// pass values around, but for integral types
-						// first convert to a integral type from the DECIMAL
-						// because strings like 3.4 are not convertible to
-						// an integral type. Of course in JSR169 we have
-                        // no way to determine the parameter types,
-                        // ParameterMetaData is not supported.
-                        // So convert as string, and on a conversion error
-                        // try as a long.
-                        
-                        try {
-                            ps.setString(c, rs.getString(c));
-                        } catch (SQLException e) {
-                            // 22018 - invalid format
-                            if ("22018".equals(e.getSQLState()))
-                                ps.setLong(c, rs.getLong(c));
-                            else
-                                throw e;
-                        }						
-					}
-					
+                    ps.setObject(c, rs.getObject(c), sqlType, rsmd.getScale(c));
 				}
 				else
 				{

@@ -495,9 +495,7 @@ public final class SQLBoolean
 		}
 		else
 		{
-			DataValueDescriptor tempDecimal = NumberDataType.ZERO_DECIMAL.getNewNull();
-			tempDecimal.setBigDecimal(bigDecimal);
-			value = NumberDataType.ZERO_DECIMAL.compare(tempDecimal) != 0;
+            value = BigDecimal.ZERO.compareTo(bigDecimal) != 0;
 			isnull = false;
 		}
 

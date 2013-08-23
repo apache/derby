@@ -249,7 +249,7 @@ private static final    String[] TwoByte = {
         /* 197 */       null,
         /* 198 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 199 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
-        /* 200 */       null, // DECIMAL - register dynamically by DataValueFactory implementation
+        /* 200 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 201 */       null,
         /* 202 */       "org.apache.derby.iapi.types.UserType",
         /* 203 */       null,
@@ -541,13 +541,4 @@ private static final    String[] TwoByte = {
 
     /** Return the class name bound to an index into TwoByte */
     public  static  String  classNameForTwoByteID( int idx ) { return TwoByte[ idx ]; }
-
-    /**
-     * Set the class name associated with the DECIMAL datatype. When we
-     * stop supporting CDC, we can remove this method.
-     */
-    public  static  void    setDecimalClassName( String decimalClassName )
-    {
-        TwoByte[ StoredFormatIds.SQL_DECIMAL_ID ] = decimalClassName;
-    }
 }

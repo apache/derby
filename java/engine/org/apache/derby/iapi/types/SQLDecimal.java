@@ -298,7 +298,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		if (localValue == null)
 			return false;
 
-		return localValue.compareTo(ZERO) != 0;
+		return localValue.compareTo(BigDecimal.ZERO) != 0;
 	}
 
 	public String	getString()
@@ -673,7 +673,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 */
 	public void setValue(boolean theValue)
 	{
-		setCoreValue(theValue ? ONE : ZERO);
+		setCoreValue(theValue ? BigDecimal.ONE : BigDecimal.ZERO);
 	}
 
 	/*
@@ -885,7 +885,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
 		BigDecimal divisorBigDecimal = SQLDecimal.getBigDecimal(divisor);
 
-		if (divisorBigDecimal.compareTo(ZERO) == 0)
+		if (divisorBigDecimal.compareTo(BigDecimal.ZERO) == 0)
 		{
 			throw  StandardException.newException(SQLState.LANG_DIVIDE_BY_ZERO);
 		}
@@ -948,7 +948,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 
     protected boolean isNegative()
     {
-        return !isNull() && (getBigDecimal().compareTo(ZERO) == -1);
+        return !isNull() && (getBigDecimal().compareTo(BigDecimal.ZERO) == -1);
     }
     
 	/*
@@ -1117,7 +1117,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
          * if ONE > abs(value) then the number of whole digits is 0
          */
         decimalValue = decimalValue.abs();
-        if (ONE.compareTo(decimalValue) == 1)
+        if (BigDecimal.ONE.compareTo(decimalValue) == 1)
         {
             return 0;
         }

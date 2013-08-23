@@ -1193,9 +1193,6 @@ public final class NetworkServerControlImpl {
         try {
             final Permission sp  = new SystemPermission(
                   SystemPermission.SERVER, SystemPermission.SHUTDOWN);
-            // For porting the network server to J2ME/CDC, consider calling
-            // abstract method InternalDriver.checkShutdownPrivileges(user)
-            // instead of static SecurityUtil.checkUserHasPermission().
             // SecurityUtil.checkUserHasPermission(userArg, sp);
         } catch (AccessControlException ace) {
             throw Util.generateCsSQLException(
