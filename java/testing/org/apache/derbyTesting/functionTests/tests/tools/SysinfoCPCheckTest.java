@@ -36,6 +36,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
@@ -224,5 +225,57 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
     ByteArrayOutputStream getOutputStream() {
         return new ByteArrayOutputStream(20 * 1024);
+    }
+    
+    public void testjavaVersion(){
+  	   assertTrue( JVMInfo.JDK_ID == JVMInfo.J2SE_16 ||
+  		       JVMInfo.JDK_ID == JVMInfo.J2SE_17 ||
+  		       JVMInfo.JDK_ID == JVMInfo.J2SE_18 );  
+     }
+     
+     public void testderbyVMLevel(){
+     	switch (JVMInfo.JDK_ID) {
+         	case JVMInfo.J2SE_16: 
+         		assertEquals("Java SE 6 - JDBC 4.1",JVMInfo.derbyVMLevel());
+         		break;
+         	case JVMInfo.J2SE_17: 
+         		assertEquals("Java SE 7 - JDBC 4.1",JVMInfo.derbyVMLevel());
+         		break;
+         	case JVMInfo.J2SE_18: 
+         		assertEquals("Java SE 8 - JDBC 4.1",JVMInfo.derbyVMLevel());
+         		break;
+         	default: 
+ 			 assertEquals("?-?",JVMInfo.derbyVMLevel());
+ 			 break;
+ 		}
+     	
+     }
+     
+     public void testisSunJVM(){
+    	 if(JVMInfo.isSunJVM()==true){
+    		 assertEquals(true,JVMInfo.isSunJVM());	
+    	 }
+    	 else{
+    		 assertEquals(false,JVMInfo.isSunJVM());		 
+    	 }
+     }
+     
+     public void testisIBMJVM(){
+    	 if(JVMInfo.isIBMJVM()==true){
+    		 assertEquals(true,JVMInfo.isIBMJVM());	
+    	 }
+    	 else{
+    		 assertEquals(false,JVMInfo.isIBMJVM());		 
+    	 }
+    }
+     
+    public void testhasJNDI(){
+    	if(JVMInfo.hasJNDI()==true){
+    		assertEquals(true,JVMInfo.hasJNDI());		
+    	}
+    	else{
+    		assertEquals(false,JVMInfo.hasJNDI());
+    	}
+    	
     }
 }
