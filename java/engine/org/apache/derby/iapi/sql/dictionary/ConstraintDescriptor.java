@@ -60,11 +60,11 @@ public abstract class ConstraintDescriptor
 	// field that we want users to be able to know about
 	public static final int SYSCONSTRAINTS_STATE_FIELD = 6;
 
-	TableDescriptor		table;
-	final String				constraintName;
-	private final boolean				deferrable;
-	private final boolean				initiallyDeferred;
-	boolean				isEnabled;
+    TableDescriptor       table;
+    final String          constraintName;
+    private boolean deferrable;
+    private boolean initiallyDeferred;
+    private boolean enforced;
 	private final int[]				referencedColumns;
 	final UUID					constraintId;
 	private final SchemaDescriptor	schemaDesc;
@@ -81,6 +81,7 @@ public abstract class ConstraintDescriptor
 	 * @param referencedColumns columns that the constraint references
 	 * @param constraintId		UUID of constraint
 	 * @param schemaDesc		SchemaDescriptor
+     * @param enforced          Is the constraint enforced?
 	 */
 
 	ConstraintDescriptor(
@@ -92,7 +93,7 @@ public abstract class ConstraintDescriptor
 			int[] referencedColumns,
 			UUID constraintId,
 			SchemaDescriptor schemaDesc,
-			boolean isEnabled
+            boolean enforced
 			)
 	{
 		super( dataDictionary );
@@ -100,11 +101,11 @@ public abstract class ConstraintDescriptor
 		this.table = table;
 		this.constraintName = constraintName;
 		this.deferrable = deferrable;
-		this.initiallyDeferred = initiallyDeferred;
+        this.initiallyDeferred = initiallyDeferred;
 		this.referencedColumns = referencedColumns;
 		this.constraintId = constraintId;
 		this.schemaDesc = schemaDesc;
-		this.isEnabled = isEnabled;
+        this.enforced = enforced;
 	}
 
 
@@ -161,28 +162,33 @@ public abstract class ConstraintDescriptor
 
 	/**
 	 * Returns TRUE if the constraint is deferrable
-	 * (we will probably not do deferrable constraints in the
-	 * initial release, but I want this to be part of the interface).
 	 *
-	 * @return	TRUE if the constraint is deferrable, FALSE if not
+     * @return  TRUE if the constraint is DEFERRABLE, FALSE if it is
+     *          NOT DEFERRABLE.
 	 */
-	public boolean	deferrable()
+    public boolean deferrable()
 	{
 		return deferrable;
 	}
 
+    public void setDeferrable(boolean b) {
+        deferrable = b;
+    }
+
 	/**
 	 * Returns TRUE if the constraint is initially deferred
-	 * (we will probably not do initially deferred constraints
-	 * in the initial release, but I want this to be part of the interface).
 	 *
-	 * @return	TRUE if the constraint is initially deferred,
-	 *		FALSE if not
+     * @return  TRUE if the constraint is initially DEFERRED,
+     *      FALSE if the constraint is initially IMMEDIATE
 	 */
 	public boolean	initiallyDeferred()
 	{
-		return initiallyDeferred;
+        return initiallyDeferred;
 	}
+
+    public void setInitiallyDeferred(boolean b) {
+        initiallyDeferred = b;
+    }
 
 	/**
 	 * Returns an array of column ids (i.e. ordinal positions) for
@@ -238,32 +244,18 @@ public abstract class ConstraintDescriptor
 	}
 
 	/**
-	 * Is this constraint active?
+     * Is this constraint enforced?
 	 *
 	 * @return true/false
 	 */
-	public boolean isEnabled()
+    public boolean enforced()
 	{
-		return isEnabled;
+        return enforced;
 	}
 
-	/**
-	 * Set the constraint to enabled.
-	 * Does not update the data dictionary
-	 */
-	public void setEnabled()
-	{
-		isEnabled = true;
-	}
-
-	/**
-	 * Set the constraint to disabled.
-	 * Does not update the data dictionary
-	 */
-	public void setDisabled()
-	{
-		isEnabled = false;
-	}
+    public void setEnforced(boolean b) {
+        enforced = b;
+    }
 
 	/**
 	 * Is this constraint referenced?  Return
@@ -277,7 +269,7 @@ public abstract class ConstraintDescriptor
 	}
 
 	/**
-	 * Get the number of enabled fks that
+     * Get the number of enforced fks that
 	 * reference this key.  Overriden by
 	 * ReferencedKeyConstraints.
 	 *
@@ -456,7 +448,7 @@ public abstract class ConstraintDescriptor
 				"constraintName: " + constraintName + "\n" +
 				"constraintId: " + constraintId + "\n" +
 				"deferrable: " + deferrable + "\n" +
-				"initiallyDeferred: " + initiallyDeferred + "\n" +
+                "initiallyDeferred: " + initiallyDeferred + "\n" +
                "referencedColumns: " +
                     Arrays.toString(referencedColumns) + "\n" +
 				"schemaDesc: " + schemaDesc + "\n"

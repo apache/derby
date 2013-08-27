@@ -538,7 +538,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // adjust dependencies on user defined types
         adjustUDTDependencies( lcc, dd, td, columnInfo, false );
 
-		/* Create/Drop any constraints */
+        /* Create/Drop/alter any constraints */
 		if (constraintActions != null)
 		{
 			for (int conIndex = 0; 
@@ -607,7 +607,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				{
 					if (SanityManager.DEBUG)
 					{
-						if (!(cca instanceof DropConstraintConstantAction))
+                        if (!(cca instanceof DropConstraintConstantAction ||
+                              cca instanceof AlterConstraintConstantAction))
 						{
 							SanityManager.THROWASSERT(
                                 "constraintActions[" + conIndex + 

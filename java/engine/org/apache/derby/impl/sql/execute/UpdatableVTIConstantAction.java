@@ -57,13 +57,15 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
 	/**
 	 *	Make the ConstantAction for an updatable VTI statement.
 	 *
+     * @param statementType             Statement type, cf.
+     * {@link org.apache.derby.vti.DeferModification#INSERT_STATEMENT} etc.
 	 * @param deferred					Whether or not to do operation in deferred mode
      * @param changedColumnIds Array of ids of changed columns
 	 *
 	 */
     UpdatableVTIConstantAction(int statementType,
-                                        boolean deferred,
-                                        int[] changedColumnIds)
+                               boolean deferred,
+                               int[] changedColumnIds)
 	{
 		super(0, 
 			  null,

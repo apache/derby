@@ -4742,7 +4742,7 @@ public final class	DataDictionaryImpl
 		getConstraintDescriptorViaHeap(
 						(ScanQualifier[][]) null,
 						ti,
-						(TupleDescriptor) null,
+                        (TupleDescriptor) null,
 						list);
 		return list;
 	}
@@ -6228,7 +6228,7 @@ public final class	DataDictionaryImpl
 
 	/**
 	 * Return a list of foreign keys constraints referencing
-	 * this constraint.  Returns both enabled and disabled
+     * this constraint.  Returns both enforced and not enforced
 	 * foreign keys.  
 	 *
 	 * @param constraintId	The id of the referenced constraint
@@ -6463,12 +6463,12 @@ public final class	DataDictionaryImpl
 	 * Update the constraint descriptor in question.  Updates
 	 * every row in the base conglomerate.  
 	 *
-	 * @param cd					The Constraintescriptor
+     * @param cd                    The Constraint descriptor
 	 * @param formerUUID			The UUID for this column in SYSCONSTRAINTS,
-	 *								may differ from what is in cd if this
+     *                              may differ from what is in {@code cd} if this
 	 *								is the column that is being set.
-	 * @param colsToSet 			Array of ints of columns to be modified,
-	 *								1 based.  May be null (all cols).
+     * @param colsToSet             Array of integers of columns to be modified,
+     *                              1 based.  May be null (all columns).
 	 * @param tc					The TransactionController to use
 	 *
 	 * @exception StandardException		Thrown on failure

@@ -85,27 +85,14 @@ public class GenericConstantActionFactory
 	/**
 	 * Get ConstantAction for SET CONSTRAINTS statement.
 	 *
-	 *  @param cdl			the constraints to set, if null,
-	 *						we'll go ahead and set them all
-	 *  @param enable		if true, turn them on, if false
-	 *						disable them
-	 *  @param unconditionallyEnforce	Replication sets this to true at
-	 *									the end of REFRESH. This forces us
-	 *									to run the included foreign key constraints even
-	 *									if they're already marked ENABLED.
-	 *	@param ddlList		Replication list of actions to propagate,
-	 *						null unless a replication source
+     *  @param constraints  The constraints to set, if null,
+     *                      set them ALL.
+     *  @param initiallyDeferred   ncodes IMMEDIATE (false), DEFERRED (true)
 	 */
-	public	ConstantAction getSetConstraintsConstantAction
-	(
-		ConstraintDescriptorList	cdl,
-		boolean						enable,
-		boolean						unconditionallyEnforce,
-		Object[]					ddlList
-    )
-	{
-		// ignore rep arg
-		return new SetConstraintsConstantAction(cdl, enable, unconditionallyEnforce);
+    public  ConstantAction getSetConstraintsConstantAction(
+            List<TableName> constraints,
+            boolean         initiallyDeferred) {
+        return new SetConstraintsConstantAction(constraints, initiallyDeferred);
 	}
 
 
@@ -183,6 +170,9 @@ public class GenericConstantActionFactory
 	 *
 	 *  @param constraintName	Constraint name.
 	 *  @param constraintType	Constraint type.
+     *  @param constraintCharacteristics
+     *                          Constraint characteristics, see {@link
+     *  org.apache.derby.impl.sql.compile.ConstraintDefinitionNode#characteristics}
      *  @param forCreateTable   True if for a CREATE TABLE
 	 *  @param tableName		Table name.
 	 *	@param tableId			UUID of table.
@@ -190,8 +180,6 @@ public class GenericConstantActionFactory
 	 *  @param columnNames		String[] for column names
 	 *  @param indexAction		IndexConstantAction for constraint (if necessary)
 	 *  @param constraintText	Text for check constraint
-	 *	@param enabled			Should the constraint be created as enabled 
-	 *							(enabled == true), or disabled (enabled == false).
 	 *	@param otherConstraint	The referenced constraint, if a foreign key constraint
 	 *  @param providerInfo Information on all the Providers
 	 */
@@ -199,6 +187,7 @@ public class GenericConstantActionFactory
 	(
 		String				constraintName,
 		int					constraintType,
+        boolean[]           constraintCharacteristics,
         boolean             forCreateTable,
 		String				tableName,
 		UUID				tableId,
@@ -206,15 +195,23 @@ public class GenericConstantActionFactory
 		String[]			columnNames,
 		IndexConstantAction indexAction,
 		String				constraintText,
-		boolean				enabled,
 		ConstraintInfo		otherConstraint,
 		ProviderInfo[]		providerInfo
 	)
 	{
-		return new CreateConstraintConstantAction
-			( constraintName, constraintType, forCreateTable, tableName, 
-			  tableId, schemaName, columnNames, indexAction, constraintText, 
-			  enabled, otherConstraint, providerInfo );
+        return new CreateConstraintConstantAction(
+                constraintName,
+                constraintType,
+                constraintCharacteristics,
+                forCreateTable,
+                tableName,
+                tableId,
+                schemaName,
+                columnNames,
+                indexAction,
+                constraintText,
+                otherConstraint,
+                providerInfo );
 	}
 
 
@@ -554,6 +551,39 @@ public class GenericConstantActionFactory
 
 
 	/**
+     *  Make ConstantAction to drop a constraint.
+     *
+     *  @param constraintName   Constraint name.
+     *  @param constraintSchemaName     Constraint Schema Name
+     *  @param characteristics  The presumably altered characteristics
+     *  @param tableName        Table name.
+     *  @param tableId          UUID of table.
+     *  @param tableSchemaName  The schema that table lives in.
+     *  @param indexAction      IndexConstantAction for constraint (if necessary)
+     */
+    public  ConstraintConstantAction    getAlterConstraintConstantAction
+    (
+        String                  constraintName,
+        String                  constraintSchemaName,
+        boolean[]               characteristics,
+        String                  tableName,
+        UUID                    tableId,
+        String                  tableSchemaName,
+        IndexConstantAction     indexAction
+    )
+    {
+        return  new AlterConstraintConstantAction(
+                constraintName,
+                constraintSchemaName,
+                characteristics,
+                tableName,
+                tableId,
+                tableSchemaName,
+                indexAction);
+    }
+
+
+    /**
 	 *	Make the ConstantAction for a DROP INDEX statement.
 	 *
 	 *
@@ -782,7 +812,9 @@ public class GenericConstantActionFactory
 	/**
 	 *	Make the ConstantAction for an updatable VTI statement.
 	 *
-	 * @param deferred					Deferred mode?
+     * @param statementType             Statement type, cf.
+     * {@link org.apache.derby.vti.DeferModification#INSERT_STATEMENT} etc.
+     * @param deferred                  Deferred processing mode?
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -795,7 +827,9 @@ public class GenericConstantActionFactory
 	/**
 	 *	Make the ConstantAction for an updatable VTI statement.
 	 *
-	 * @param deferred					Deferred mode?
+     * @param statementType    Statement type, cf.
+     * {@link org.apache.derby.vti.DeferModification#INSERT_STATEMENT} etc.
+     * @param deferred         Deferred processing mode?
      * @param changedColumnIds Array of ids of changed columns
 	 *
 	 * @exception StandardException		Thrown on failure

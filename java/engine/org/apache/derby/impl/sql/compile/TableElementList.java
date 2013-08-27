@@ -276,7 +276,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
             checkForDuplicateConstraintNames(ddlStmt, constraintNames, cdn.getConstraintMoniker());
 
 			/* Make sure that the constraint we are trying to drop exists */
-			if (cdn.getConstraintType() == DataDictionary.DROP_CONSTRAINT)
+            if (cdn.getConstraintType() == DataDictionary.DROP_CONSTRAINT ||
+                cdn.getConstraintType() == DataDictionary.MODIFY_CONSTRAINT)
 			{
 				/*
 				** If no schema descriptor, then must be an invalid
@@ -298,7 +299,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 										false);
 					if (cd == null)
 					{
-						throw StandardException.newException(SQLState.LANG_DROP_NON_EXISTENT_CONSTRAINT,
+                        throw StandardException.newException(SQLState.LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT,
 								(sd.getSchemaName() + "."+ dropConstraintName),
 								td.getQualifiedName());
 					}
@@ -501,7 +502,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 								coldef.getAutoinc_create_or_modify_Start_Increment() : -1));
 
 			/* Remember how many constraints that we've seen */
-			if (coldef.hasConstraint())
+        if (coldef.hasConstraint())
 			{
 				numConstraints++;
 			}
@@ -999,6 +1000,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 			}
 
 			int constraintType = constraintDN.getConstraintType();
+            boolean[] cChars = constraintDN.getCharacteristics();
 			String constraintText = constraintDN.getConstraintText();
 
 			/*
@@ -1076,6 +1078,19 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 												 constraintDN.getDropBehavior(),
                                                  constraintDN.getVerifyType());
 			}
+            else if (constraintType == DataDictionary.MODIFY_CONSTRAINT) {
+                conActions[conActionIndex] =
+                    getGenericConstantActionFactory().
+                        getAlterConstraintConstantAction(
+                                                 constraintName,
+                                                 constraintDN.getDropSchemaName(),
+                                                 cChars,
+                                                 tableName,
+                                                 td.getUUID(),
+                                                 tableSd.getSchemaName(),
+                                                 indexAction);
+
+            }
 			else
 			{
 				ProviderList apl = constraintDN.getAuxiliaryProviderList();
@@ -1107,6 +1122,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						getCreateConstraintConstantAction(
 												 constraintName, 
 											     constraintType,
+                                                 cChars,
                                                  forCreateTable,
 												 tableName, 
 												 ((td != null) ? td.getUUID() : (UUID) null),
@@ -1114,7 +1130,6 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 												 columnNames,
 												 indexAction,
 												 constraintText,
-												 true, 		// enabled
 												 refInfo,
 												 providerInfos);
 			}

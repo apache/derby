@@ -145,7 +145,7 @@ public class CheckConstraintDescriptor extends ConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
-		if (!isEnabled)
+        if (!enforced())
 		{
 			return false;
 		}

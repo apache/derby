@@ -50,7 +50,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 
 	int			referenceCount;
 
-	// enabled foreign keys
+    // enforced foreign keys
 	private	ConstraintDescriptorList fkEnabledConstraintList;
 	// all foreign keys
 	private	ConstraintDescriptorList fkConstraintList;
@@ -71,8 +71,8 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @param constraintId		UUID of constraint
 	 * @param indexId			The UUID for the backing index
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
-	 * @param isEnabled			is the constraint enabled?
-	 * @param referenceCount	number of FKs (enabled only)
+     * @param enforced          is the constraint enforced?
+     * @param referenceCount    number of FKs (enforced only)
 	 */
 	protected ReferencedKeyConstraintDescriptor(int constraintType,
 		    DataDictionary dataDictionary,
@@ -84,13 +84,13 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			UUID constraintId,
 			UUID indexId,
 			SchemaDescriptor schemaDesc,
-			boolean	isEnabled,
+            boolean enforced,
 			int referenceCount
 			)							
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, columns, 
-			  constraintId, indexId, schemaDesc, isEnabled);
+              constraintId, indexId, schemaDesc, enforced);
 		this.referenceCount = referenceCount;
 		this.constraintType = constraintType;
 	}
@@ -248,7 +248,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		
 	/**
 	 * Is this constraint referenced? Returns
-	 * true if there are enabled fks that 
+     * true if there are enforced fks that
 	 * reference this constraint.
 	 *
 	 * @return false
@@ -260,7 +260,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 	}
 
 	/**
-	 * Get the number of enabled fks that
+     * Get the number of enforced fks that
 	 * reference this key.
 	 *
 	 * @return the number of fks
@@ -308,7 +308,7 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
-		if (!isEnabled)
+        if (!enforced())
 		{
 			return false;
 		}

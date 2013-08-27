@@ -62,7 +62,7 @@ public abstract class KeyConstraintDescriptor extends ConstraintDescriptor
 	 * @param constraintId		UUID of constraint
 	 * @param indexId			The UUID for the backing index
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
-	 * @param isEnabled			is this constraint enabled
+     * @param enforced          {@code true} if this constraint is enforced
 	 */
 	KeyConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -74,12 +74,12 @@ public abstract class KeyConstraintDescriptor extends ConstraintDescriptor
 			UUID constraintId,
 			UUID indexId,
 			SchemaDescriptor schemaDesc,
-			boolean isEnabled
+            boolean enforced
 			)							
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, referencedColumns,
-			  constraintId, schemaDesc, isEnabled);
+              constraintId, schemaDesc, enforced);
 		this.indexId = indexId;
 	}
 

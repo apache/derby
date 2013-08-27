@@ -789,7 +789,7 @@ CREATE TABLE testsetconst1 (col1 CHAR(7) NOT NULL, PRIMARY KEY(col1));
 ij> CREATE TABLE testsetconst2 (col1 char(7) NOT NULL, CONSTRAINT fk FOREIGN KEY(col1) REFERENCES testsetconst1(col1));
 0 rows inserted/updated/deleted
 ij> SET CONSTRAINTS fk DISABLED;
-ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ERROR 42X01: Syntax error: Encountered "DISABLED" at line 1, column 20.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -799,7 +799,7 @@ ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
 E
 E
 ij> SET CONSTRAINTS fk ENABLED;
-ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ERROR 42X01: Syntax error: Encountered "ENABLED" at line 1, column 20.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -809,7 +809,7 @@ ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
 E
 E
 ij> SET CONSTRAINTS ALL DISABLED;
-ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ERROR 42X01: Syntax error: Encountered "DISABLED" at line 1, column 21.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -819,7 +819,7 @@ ij> SELECT STATE FROM SYS.SYSCONSTRAINTS;
 E
 E
 ij> SET CONSTRAINTS FOR testsetconst1 ENABLED;
-ERROR 42X01: Syntax error: Encountered "CONSTRAINTS" at line 1, column 5.
+ERROR 42X01: Syntax error: Encountered "FOR" at line 1, column 17.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.

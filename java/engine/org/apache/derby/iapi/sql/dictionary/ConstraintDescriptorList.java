@@ -193,17 +193,17 @@ public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 	}
 
 	/**
-	 * Return a list of constraints where enabled is
+     * Return a list of constraints where enforced is
 	 * as passed in.
 	 *
-	 * @param enabled true or false
+     * @param enforced true or false
 	 *
 	 * @return a constraint descriptor list built from this.  Always
 	 * a new list even if all the elements in this were of the correct
 	 * type (i.e. not optimized for the case where every element is
 	 * desired).
 	 */
-	public ConstraintDescriptorList getConstraintDescriptorList(boolean enabled)
+    public ConstraintDescriptorList getConstraintDescriptorList(boolean enforced)
 	{
 		ConstraintDescriptorList cdl = new ConstraintDescriptorList();
 		int size = size();
@@ -212,7 +212,7 @@ public class ConstraintDescriptorList extends ArrayList<ConstraintDescriptor>
 		{
 			ConstraintDescriptor cd = elementAt(index);
 
-			if (cd.isEnabled() == enabled)
+            if (cd.enforced() == enforced)
 			{
 				cdl.add(cd);
 			}

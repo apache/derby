@@ -55,6 +55,8 @@ import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.impl.sql.compile.ConstraintDefinitionNode;
 
 /**
  *	This class  describes actions that are ALWAYS performed for a
@@ -74,13 +76,16 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	private	ClassFactory	cf;
 
 	/*
-	** Is this constraint to be created as enabled or not.
+    ** Is this constraint to be created as enforced or not.
 	** The only way to create a disabled constraint is by
 	** publishing a disabled constraint.
 	*/
 	private boolean			enabled;
 
-	private ProviderInfo[] providerInfo;
+    // boolean[3]: {deferrable?, initiallyDeferred?, enforced?}
+    private boolean[]       characteristics;
+
+    private ProviderInfo[] providerInfo;
 
 	// CONSTRUCTORS
 
@@ -89,6 +94,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	 *
 	 *  @param constraintName	Constraint name.
 	 *  @param constraintType	Constraint type.
+     *  @param characteristics  Constraint characteristics
      *  @param forCreateTable   Constraint is being added for a CREATE TABLE
 	 *  @param tableName		Table name.
 	 *	@param tableId			UUID of table.
@@ -96,16 +102,13 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	 *  @param columnNames		String[] for column names
 	 *  @param indexAction		IndexConstantAction for constraint (if necessary)
 	 *  @param constraintText	Text for check constraint
-	 *  RESOLVE - the next parameter should go away once we use UUIDs
-	 *			  (Generated constraint names will be based off of uuids)
-	 *	@param enabled			Should the constraint be created as enabled 
-	 *							(enabled == true), or disabled (enabled == false).
 	 *	@param otherConstraint 	information about the constraint that this references
 	 *  @param providerInfo Information on all the Providers
 	 */
 	CreateConstraintConstantAction(
 		               String	constraintName,
 					   int		constraintType,
+                       boolean[] characteristics,
                        boolean  forCreateTable,
 		               String	tableName,
 					   UUID		tableId,
@@ -113,7 +116,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 					   String[]	columnNames,
 					   IndexConstantAction indexAction,
 					   String	constraintText,
-					   boolean	enabled,
 				       ConstraintInfo	otherConstraint,
 					   ProviderInfo[] providerInfo)
 	{
@@ -122,7 +124,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
         this.forCreateTable = forCreateTable;
 		this.columnNames = columnNames;
 		this.constraintText = constraintText;
-		this.enabled = enabled;
+        this.characteristics = characteristics.clone();
 		this.otherConstraintInfo = otherConstraint;
 		this.providerInfo = providerInfo;
 	}
@@ -282,6 +284,23 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 
 		UUID constraintId = uuidFactory.createUUID();
 
+        boolean[] defaults = new boolean[]{
+            ConstraintDefinitionNode.DEFERRABLE_DEFAULT,
+            ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT,
+            ConstraintDefinitionNode.ENFORCED_DEFAULT
+        };
+
+        for (int i=0; i < characteristics.length; i++) {
+            if (characteristics[i] != defaults[i]) {
+                // Remove when feature DERBY-532 is completed
+                if (!PropertyUtil.getSystemProperty("derby.constraintsTesting",
+                        tableName).equals("true")) {
+                    throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
+                            "non-default constraint characteristics");
+                }
+            }
+        }
+
 		/* Now, lets create the constraint descriptor */
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 		switch (constraintType)
@@ -289,13 +308,13 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			case DataDictionary.PRIMARYKEY_CONSTRAINT:
 				conDesc = ddg.newPrimaryKeyConstraintDescriptor(
 								td, constraintName,
-								false, //deferable,
-								false, //initiallyDeferred,
+                                characteristics[0], //deferable,
+                                characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
 								constraintId, 
 								indexId, 
 								sd,
-								enabled,
+                                characteristics[2],
 								0				// referenceCount
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
@@ -304,13 +323,13 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			case DataDictionary.UNIQUE_CONSTRAINT:
 				conDesc = ddg.newUniqueConstraintDescriptor(
 								td, constraintName,
-								false, //deferable,
-								false, //initiallyDeferred,
+                                characteristics[0], //deferable,
+                                characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
 								constraintId, 
 								indexId, 
 								sd,
-								enabled,
+                                characteristics[2],
 								0				// referenceCount
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
@@ -319,13 +338,13 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			case DataDictionary.CHECK_CONSTRAINT:
 				conDesc = ddg.newCheckConstraintDescriptor(
 								td, constraintName,
-								false, //deferable,
-								false, //initiallyDeferred,
+                                characteristics[0], //deferable,
+                                characteristics[1], //initiallyDeferred,
 								constraintId, 
 								constraintText, 
 								new ReferencedColumnsDescriptorImpl(genColumnPositions(td, false)), //int[],
 								sd,
-								enabled
+                                characteristics[2]
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
 				storeConstraintDependenciesOnPrivileges
@@ -339,14 +358,14 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				
 				conDesc = ddg.newForeignKeyConstraintDescriptor(
 								td, constraintName,
-								false, //deferable,
-								false, //initiallyDeferred,
+                                characteristics[0], //deferable,
+                                characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
 								constraintId,
 								indexId,
 								sd,
 								referencedConstraint,
-								enabled,
+                                characteristics[2],
 								otherConstraintInfo.getReferentialActionDeleteRule(),
 								otherConstraintInfo.getReferentialActionUpdateRule()
 								);
@@ -379,6 +398,10 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 					 providerInfo);
 				break;
 
+            case DataDictionary.MODIFY_CONSTRAINT:
+                throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
+                       "ALTER CONSTRAINT");
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -387,6 +410,9 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				}
 				break;
 		}
+
+
+
 
 		/* Create stored dependencies for each provider */
 		if (providerInfo != null)

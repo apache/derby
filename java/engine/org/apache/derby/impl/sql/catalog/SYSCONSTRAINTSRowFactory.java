@@ -46,6 +46,7 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.SQLVarchar;
+import org.apache.derby.impl.sql.compile.ConstraintDefinitionNode;
 
 /**
  * Factory for creating a SYSCONTRAINTS row.
@@ -62,7 +63,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 	protected static final int		SYSCONSTRAINTS_CONSTRAINTNAME = 3;
 	protected static final int		SYSCONSTRAINTS_TYPE = 4;
 	protected static final int		SYSCONSTRAINTS_SCHEMAID = 5;
-	protected static final int		SYSCONSTRAINTS_STATE = ConstraintDescriptor.SYSCONSTRAINTS_STATE_FIELD;
+    public static final int     SYSCONSTRAINTS_STATE = ConstraintDescriptor.SYSCONSTRAINTS_STATE_FIELD;
 	protected static final int		SYSCONSTRAINTS_REFERENCECOUNT = 7;
 
 	protected static final int		SYSCONSTRAINTS_INDEX1_ID = 0;
@@ -129,7 +130,14 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		String					tableID = null;
 		String					constraintName = null;
 		String					schemaID = null;
-		boolean					isEnabled = true;
+
+        boolean                 deferrable =
+            ConstraintDefinitionNode.DEFERRABLE_DEFAULT;
+        boolean                 initiallyDeferred =
+            ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT;
+        boolean                 enforced =
+            ConstraintDefinitionNode.ENFORCED_DEFAULT;
+
 		int						referenceCount = 0;
 
 		if (td != null)
@@ -174,8 +182,13 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 			}
 
 			schemaID = constraint.getSchemaDescriptor().getUUID().toString();
-			isEnabled = constraint.isEnabled();
-			referenceCount = constraint.getReferenceCount();
+
+            // constraint characteristics
+            deferrable = constraint.deferrable();
+            initiallyDeferred   = constraint.initiallyDeferred();
+            enforced   = constraint.enforced();
+
+            referenceCount = constraint.getReferenceCount();
 		}
 
 		/* Insert info into sysconstraints */
@@ -203,7 +216,8 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		row.setColumn(SYSCONSTRAINTS_SCHEMAID, new SQLChar(schemaID));
 
 		/* 6th column is STATE (char(1)) */
-		row.setColumn(SYSCONSTRAINTS_STATE, new SQLChar(isEnabled ? "E" : "D"));
+        row.setColumn(SYSCONSTRAINTS_STATE,
+            new SQLChar(encodeCharacteristics(deferrable, initiallyDeferred, enforced)));
 
 		/* 7th column is REFERENCED */
 		row.setColumn(SYSCONSTRAINTS_REFERENCECOUNT, new SQLInteger(referenceCount));
@@ -211,6 +225,56 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		return row;
 	}
 
+    /*
+     * Encode the characteristics of the constraints into a single character.
+     *
+     * {deferrable, initiallyDeferred, enforced}     -> 'e'
+     * {deferrable, initiallyDeferred, not enforced} -> 'd'
+     * {deferrable, immediate, enforced}             -> 'i'
+     * {deferrable, immediate, not enforced}         -> 'j'
+     * {not deferrable, immediate, enforced}         -> 'E'
+     * {not deferrable, immediate, not enforced      -> 'D'
+     *
+     * Other combinations are prohibited and not used. Note that the
+     * value 'E' is only value used prior to version 10.11, and as
+     * such upward compatibily since by default, constraints are {not
+     * deferrable, immediate, enforced}.
+     */
+    private String encodeCharacteristics(
+            boolean deferrable, boolean initiallyDeferred, boolean enforced) {
+        char c;
+
+        if (deferrable) {
+            if (initiallyDeferred) {
+                if (enforced) {
+                    c = 'e'; // deferrable initially deferred enforced
+                } else {
+                    c = 'd'; // deferrable initially deferred not enforced
+                }
+            } else {
+                if (enforced) {
+                    c = 'i'; // deferrable initially immediate enforced
+                } else {
+                    c = 'j'; // deferrable initially immediate not enforced
+                }
+            }
+        } else {
+            if (initiallyDeferred) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+                c = 'E';
+            } else {
+                if (enforced) {
+                    c = 'E'; // not deferrable initially immediate enforced
+                } else {
+                    c = 'D'; // not deferrable initially immediate not enforced
+                }
+            }
+        }
+
+        return String.valueOf(c);
+    }
 
 	///////////////////////////////////////////////////////////////////////////
 	//
@@ -257,7 +321,12 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		String				constraintName;
 		String				constraintSType;
 		String				constraintStateStr;
-		boolean				constraintEnabled;
+        boolean             deferrable =
+                ConstraintDefinitionNode.DEFERRABLE_DEFAULT;
+        boolean             initiallyDeferred =
+                ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT;
+        boolean             enforced =
+                ConstraintDefinitionNode.ENFORCED_DEFAULT;
 		int					referenceCount;
 		String				constraintUUIDString;
 		String				schemaUUIDString;
@@ -420,16 +489,41 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				"Sixth column (state) type incorrect");
 		}
 
+        // Cf. the encoding description in javadoc for
+        // #encodeCharacteristics.
 		switch (constraintStateStr.charAt(0))
 		{
 			case 'E': 
-				constraintEnabled = true;
+                deferrable = false;
+                initiallyDeferred = false;
+                enforced = true;
 				break;
 			case 'D':
-				constraintEnabled = false;
+                deferrable = false;
+                initiallyDeferred = false;
+                enforced = false;
 				break;
+            case 'e':
+                deferrable = true;
+                initiallyDeferred = true;
+                enforced = true;
+                break;
+            case 'd':
+                deferrable = true;
+                initiallyDeferred = true;
+                enforced = false;
+                break;
+            case 'i':
+                deferrable = true;
+                initiallyDeferred = false;
+                enforced = true;
+                break;
+            case 'j':
+                deferrable = true;
+                initiallyDeferred = false;
+                enforced = false;
+                break;
 			default: 
-				constraintEnabled = true;
 				if (SanityManager.DEBUG)
 				{
 					SanityManager.THROWASSERT("Invalidate state value '"
@@ -449,14 +543,14 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newPrimaryKeyConstraintDescriptor(
 										td, 
 										constraintName, 
-										false, //deferable,
-										false, //initiallyDeferred,
+                                        deferrable,
+                                        initiallyDeferred,
 										keyColumns,//genReferencedColumns(dd, td), //int referencedColumns[],
 										constraintUUID,
 										((SubKeyConstraintDescriptor) 
 											parentTupleDescriptor).getIndexId(),
 										schema,
-										constraintEnabled,
+                                        enforced,
 										referenceCount);
 				break;
 
@@ -464,14 +558,14 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newUniqueConstraintDescriptor(
 										td, 
 										constraintName, 
-										false, //deferable,
-										false, //initiallyDeferred,
+                                        deferrable,
+                                        initiallyDeferred,
 										keyColumns,//genReferencedColumns(dd, td), //int referencedColumns[],
 										constraintUUID,
 										((SubKeyConstraintDescriptor) 
 											parentTupleDescriptor).getIndexId(),
 										schema,
-										constraintEnabled,
+                                        enforced,
 										referenceCount);
 				break;
 
@@ -485,15 +579,15 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newForeignKeyConstraintDescriptor(
 										td, 
 										constraintName, 
-										false, //deferable,
-										false, //initiallyDeferred,
+                                        deferrable,
+                                        initiallyDeferred,
 										keyColumns,//genReferencedColumns(dd, td), //int referencedColumns[],
 										constraintUUID,
 										((SubKeyConstraintDescriptor) 
 											parentTupleDescriptor).getIndexId(),
 										schema,
 										referencedConstraintId,
-										constraintEnabled,
+                                        enforced,
 										((SubKeyConstraintDescriptor) 
 											parentTupleDescriptor).getRaDeleteRule(),
 										((SubKeyConstraintDescriptor) 
@@ -511,15 +605,15 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 				constraintDesc = ddg.newCheckConstraintDescriptor(
 										td, 
 										constraintName, 
-										false, //deferable,
-										false, //initiallyDeferred,
+                                        deferrable,
+                                        initiallyDeferred,
 										constraintUUID,
 										((SubCheckConstraintDescriptor) 
 											parentTupleDescriptor).getConstraintText(),
 										((SubCheckConstraintDescriptor) 
 											parentTupleDescriptor).getReferencedColumnsDescriptor(),
 										schema,
-										constraintEnabled);
+                                        enforced);
 				break;
 		}
 		return constraintDesc;

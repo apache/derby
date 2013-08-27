@@ -2119,6 +2119,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42X97</name>
+                <text>Conflicting constraint characteristics for constraint.</text>
+            </msg>
+
+            <msg>
                 <name>42X98</name>
                 <text>Parameters are not allowed in a VIEW definition.</text>
             </msg>
@@ -2260,6 +2265,11 @@ Guide.
             <msg>
                 <name>42XAM</name>
                 <text>The source and target tables of a MERGE statement may not have the same correlation name.</text>
+            </msg>		
+
+	    <msg>
+                <name>42XAN</name>
+                <text>Constraint characteristics not allowed for NOT NULL.</text>
             </msg>
 
             <msg>

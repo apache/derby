@@ -79,7 +79,7 @@ import java.io.IOException;
  * <li> public ReferencedColumns getReferencedColumnsDescriptor()
  * <li> public int[] getReferencedCols();
  * <li> public int[] getReferencedColsInTriggerAction();
- * <li> public boolean isEnabled();
+ * <li> public boolean enforced();
  * <li> public void setEnabled();
  * <li> public void setDisabled();
  * <li> public boolean needsToFire(int stmtType, int[] modifiedCols)
@@ -140,7 +140,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 * @param eventMask	TriggerDescriptor.TRIGGER_EVENT_XXXX
 	 * @param isBefore	is this a before (as opposed to after) trigger 
 	 * @param isRow		is this a row trigger or statement trigger
-	 * @param isEnabled	is this trigger enabled or disabled
+     * @param isEnabled  is this trigger enabled or disabled
 	 * @param td		the table upon which this trigger is defined
 	 * @param whenSPSId	the sps id for the when clause (may be null)
 	 * @param actionSPSId	the spsid for the trigger action (may be null)
@@ -488,9 +488,9 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
     }
 
 	/**
-	 * Is this trigger enabled
+     * Is this trigger enforced
 	 *
-	 * @return true if it is enabled
+     * @return true if it is enforced
 	 */
 	public boolean isEnabled()
 	{
@@ -498,7 +498,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	}
 
 	/**
-	 * Mark this trigger as enabled
+     * Mark this trigger as enforced
 	 *
 	 */
 	public void setEnabled()

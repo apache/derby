@@ -62,7 +62,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @param indexId			The UUID for the backing index
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
 	 * @param referencedConstraintDescriptor	is referenced constraint descriptor
-	 * @param isEnabled			is the constraint enabled?
+     * @param enforced          is the constraint enforced?
 	 */
 	protected ForeignKeyConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -75,14 +75,14 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 			UUID indexId,
 			SchemaDescriptor schemaDesc,
 			ReferencedKeyConstraintDescriptor referencedConstraintDescriptor,
-			boolean isEnabled,
+            boolean enforced,
 			int raDeleteRule,
 			int raUpdateRule
 			)							
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, fkColumns,
-			  constraintId, indexId, schemaDesc, isEnabled);
+              constraintId, indexId, schemaDesc, enforced);
 
 		this.referencedConstraintDescriptor = referencedConstraintDescriptor;
 		this.raDeleteRule = raDeleteRule;
@@ -102,7 +102,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @param indexId			The UUID for the backing index
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
 	 * @param referencedConstraintId	is referenced constraint id
-	 * @param isEnabled			is the constraint enabled?
+     * @param enforced          {@code true} if this constraint is enforced
 	 */
 	ForeignKeyConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -115,14 +115,14 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 			UUID indexId,
 			SchemaDescriptor schemaDesc,
 			UUID referencedConstraintId,
-			boolean isEnabled,
+            boolean enforced,
 			int raDeleteRule,
 			int raUpdateRule
 			)							
 	{
 		super(dataDictionary, table, constraintName, deferrable,
 			  initiallyDeferred, fkColumns,
-			  constraintId, indexId, schemaDesc, isEnabled);
+              constraintId, indexId, schemaDesc, enforced);
 		this.referencedConstraintId = referencedConstraintId;
 		this.raDeleteRule = raDeleteRule;
 		this.raUpdateRule = raUpdateRule;
@@ -236,7 +236,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 		/*
 		** If we are disabled, we never fire
 		*/
-		if (!isEnabled)
+        if (!enforced())
 		{
 			return false;
 		}

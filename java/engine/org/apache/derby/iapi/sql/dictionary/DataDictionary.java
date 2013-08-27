@@ -210,6 +210,7 @@ public interface DataDictionary
 	public static final int CHECK_CONSTRAINT = 4;
 	public static final int DROP_CONSTRAINT = 5;
 	public static final int FOREIGNKEY_CONSTRAINT = 6;
+    public static final int MODIFY_CONSTRAINT = 7;
 
 	/** Modes returned from startReading() */
 	public static final int COMPILE_ONLY_MODE = 0;
@@ -834,13 +835,13 @@ public interface DataDictionary
 
 	/**
 	 * Load up the constraint descriptor list for this table
-	 * descriptor and return it.  If the descriptor list
-	 * is already loaded up, it is retuned without further
+     * descriptor (or all) and return it.  If the descriptor list
+     * is already loaded up, it is returned without further
 	 * ado.
 	 *
-	 * @param td			The table descriptor.
-	 *
-	 * @return The ConstraintDescriptorList for the table
+     * @param td The table descriptor.
+     * @return   The ConstraintDescriptorList for the table. If null, return
+     *           a list of all the constraint descriptors in all schemas.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

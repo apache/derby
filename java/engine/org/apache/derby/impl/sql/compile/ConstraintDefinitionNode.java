@@ -38,7 +38,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
  *
  */
 
-class ConstraintDefinitionNode extends TableElementNode
+public class ConstraintDefinitionNode extends TableElementNode
 {
 	
 	private TableName constraintName;
@@ -55,6 +55,15 @@ class ConstraintDefinitionNode extends TableElementNode
 	ValueNode		 checkCondition;
 	private int				 behavior;
     private int verifyType;
+
+    public final static boolean DEFERRABLE_DEFAULT = false;
+    public final static boolean INITIALLY_DEFERRED_DEFAULT = false;
+    public final static boolean ENFORCED_DEFAULT = true;
+
+    /**
+     * boolean[3]: {deferrable?, initiallyDeferred?, enforced?}
+     */
+    private boolean[] characteristics;
 
     ConstraintDefinitionNode(
                     TableName constraintName,
@@ -86,6 +95,23 @@ class ConstraintDefinitionNode extends TableElementNode
         this.behavior = behavior;
         this.verifyType = verifyType;
 	}
+
+
+    void setCharacteristics(boolean[] cc) {
+        characteristics = cc.clone();
+    }
+
+    boolean[] getCharacteristics() {
+        if (characteristics == null) {
+            characteristics = new boolean[]{
+                ConstraintDefinitionNode.DEFERRABLE_DEFAULT,
+                ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT,
+                ConstraintDefinitionNode.ENFORCED_DEFAULT
+            };
+        }
+
+        return characteristics.clone();
+    }
 
 	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
@@ -167,7 +193,7 @@ class ConstraintDefinitionNode extends TableElementNode
 	}
 
 	/**
-		To support dropping exisiting constraints that may have mismatched schema names
+        To support dropping existing constraints that may have mismatched schema names
 		we need to support ALTER TABLE S1.T DROP CONSTRAINT S2.C.
 		If a constraint name was specified this returns it, otherwise it returns null.
 	*/
@@ -285,9 +311,11 @@ class ConstraintDefinitionNode extends TableElementNode
 	}
 
 	/**
-	 * Is this a foreign key constraint.
+     * Does this constraint require a backing index for its implementation?
 	 *
-	 * @return boolean	Whether or not this is a unique key constraint
+     * @return boolean  {@code true} if this constraint requires a backing
+     *                  index, i.e. if is a foreign key, primary key or
+     *                  unique key constraint
 	 */
 	boolean requiresBackingIndex()
 	{
@@ -303,9 +331,10 @@ class ConstraintDefinitionNode extends TableElementNode
 	}	
 
 	/**
-	 * Is this a foreign key constraint.
+     * Is this a primary key or unique constraint?
 	 *
-	 * @return boolean	Whether or not this is a unique key constraint
+     * @return boolean  {@code true} if this is a primary key or
+     *                  unique key constraint
 	 */
 	boolean requiresUniqueIndex()
 	{
@@ -433,7 +462,8 @@ class ConstraintDefinitionNode extends TableElementNode
 	}
 
 	/**
-	 * Return the behavior of this constriant (DropStatementNode.xxx)	
+     * Return the behavior of this constraint.
+     * See {@link org.apache.derby.iapi.sql.StatementType#DROP_CASCADE} etc.
 	 *
 	 * @return the behavior
 	 */

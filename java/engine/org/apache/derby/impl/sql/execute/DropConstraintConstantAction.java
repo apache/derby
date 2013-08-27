@@ -188,7 +188,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			String errorName = constraintName == null ? "PRIMARY KEY" :
 								(constraintSd.getSchemaName() + "."+ constraintName);
 
-			throw StandardException.newException(SQLState.LANG_DROP_NON_EXISTENT_CONSTRAINT, 
+            throw StandardException.newException(SQLState.LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT,
 						errorName,
 						td.getQualifiedName());
 		}

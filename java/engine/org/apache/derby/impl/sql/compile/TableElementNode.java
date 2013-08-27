@@ -47,6 +47,7 @@ class TableElementNode extends QueryTreeNode
 	public	static	final	int	AT_DROP_CONSTRAINT				= 5;
 	public	static	final	int	AT_MODIFY_COLUMN				= 6;
 	public	static	final	int	AT_DROP_COLUMN					= 7;
+    public  static  final   int AT_MODIFY_CONSTRAINT            = 8;
 
 
 	/////////////////////////////////////////////////////////////////////////

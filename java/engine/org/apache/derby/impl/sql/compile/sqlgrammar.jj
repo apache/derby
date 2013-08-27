@@ -2329,6 +2329,7 @@ TOKEN [IGNORE_CASE] :
 |	<DEFINER: "definer">
 |	<DETERMINISTIC: "deterministic">
 |   <DYNAMIC: "dynamic">
+|   <ENFORCED: "enforced">
 |	<FORTRAN: "fortran">
 |   <GENERATED: "generated">
 |	<IDENTITY_VAL_LOCAL: "identity_val_local">
@@ -3050,29 +3051,83 @@ spsSetStatement() throws StandardException :
 	StatementNode statementNode;
 }
 {
-        LOOKAHEAD ( { getToken(1).kind == SET && getToken(2).kind != CURRENT } )
+    LOOKAHEAD ( { getToken(1).kind == SET && getToken(2).kind != CURRENT } )
 	<SET>
-        (
-                statementNode = setIsolationStatement() |
-	        statementNode = setSchemaStatement() |
-            statementNode = setMessageLocaleStatement() |
-            statementNode = setRoleStatement()
-        )
+    (
+        statementNode = setIsolationStatement() |
+        statementNode = setSchemaStatement() |
+        statementNode = setMessageLocaleStatement() |
+        statementNode = setRoleStatement() |
+        statementNode = setConstraintsStatement()
+    )
 	{
 		return statementNode;
 	}
 |
-        LOOKAHEAD ( { getToken(1).kind == SET && getToken(2).kind == CURRENT } )
+    LOOKAHEAD ( { getToken(1).kind == SET && getToken(2).kind == CURRENT } )
 	<SET>
-        (
-	        statementNode = setSchemaStatement() |
-                statementNode = setIsolationStatement()
-
-        )
+    (
+        statementNode = setSchemaStatement() |
+        statementNode = setIsolationStatement()
+    )
 	{
 		return statementNode;
 	}
 }
+
+
+/**
+ * <A NAME="constraintsReference">constraintsReference</A>
+ */
+void
+constraintsReference(List<TableName> constraints) throws StandardException :
+{
+    TableName constraint;
+}
+{
+    constraint = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+    {
+        constraints.add(constraint);
+    }
+}
+
+
+/**
+ * <A NAME="setConstraintsStatement">setConstraintsStatement</A>
+ */
+StatementNode
+setConstraintsStatement() throws StandardException :
+{
+    List<TableName> constraints = new ArrayList<TableName>();
+    boolean initiallyDeferred;
+}
+{
+    <CONSTRAINTS>
+    (
+        constraintsReference(constraints)
+        ( <COMMA> constraintsReference(constraints) )*
+    |
+        <ALL>
+        {
+            constraints = null;
+        }
+    )
+    (
+        <DEFERRED>
+        {
+            initiallyDeferred = true;
+        }
+    |
+        <IMMEDIATE>
+        {
+            initiallyDeferred = false;
+        }
+    )
+    {
+        return new SetConstraintsNode(constraints, initiallyDeferred, cm);
+    }
+}
+
 		
 /*
  * <A NAME="preparableSQLDataStatement">preparableSQLDataStatement</A>
@@ -12532,22 +12587,26 @@ ConstraintDefinitionNode
 tableConstraint(TableName constraintName) throws StandardException :
 {
 	ConstraintDefinitionNode tcdn;
+    boolean[] cc = null;
 }
 {
-	tcdn = uniqueConstraintDefinition(constraintName) 
-	{
-		return tcdn;
-	}
-|
-	tcdn = referentialConstraintDefinition(constraintName) 
-	{
-		return tcdn;
-	}
-|
-	tcdn = checkConstraintDefinition(constraintName, null)
-	{
-		return tcdn;
-	}
+    (
+        tcdn = uniqueConstraintDefinition(constraintName)
+    |
+        tcdn = referentialConstraintDefinition(constraintName)
+    |
+        tcdn = checkConstraintDefinition(constraintName, null)
+    )
+
+    [ cc = constraintCharacteristics() ]
+
+    {
+        if (cc != null) {
+            tcdn.setCharacteristics(cc);
+        }
+
+        return tcdn;
+    }
 }
 
 ConstraintDefinitionNode
@@ -12710,6 +12769,135 @@ deleteReferentialAction() :
 	   )
 }
 
+
+/*
+ * <A NAME="constraintCharacteristics">constraintCharacteristics</A>
+ */
+boolean[]
+constraintCharacteristics() throws StandardException :
+{
+    boolean deferrable =
+        ConstraintDefinitionNode.DEFERRABLE_DEFAULT;
+    boolean initiallyDeferred =
+        ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT;
+    boolean enforced =
+        ConstraintDefinitionNode.ENFORCED_DEFAULT;
+    boolean explicitlySpecified[] =
+        new boolean[]{false, false}; // deferrable, initiallyDeferred
+}
+{
+    (
+        ( initiallyDeferred = initiallyDeferred()
+          {
+              explicitlySpecified[1] = true;
+          } )
+
+        [ LOOKAHEAD ( { getToken(1).kind == DEFERRABLE || getToken(2).kind == DEFERRABLE } )
+          deferrable = deferrable()
+          {
+              explicitlySpecified[0] = true;
+          } ]
+
+        [ LOOKAHEAD ( { getToken(1).kind == ENFORCED || getToken(2).kind == ENFORCED } )
+          enforced = constraintEnforcement() ]
+    |
+        LOOKAHEAD ( { getToken(1).kind == DEFERRABLE || getToken(2).kind == DEFERRABLE } )
+        ( deferrable = deferrable()
+          {
+              explicitlySpecified[0] = true;
+          } )
+
+        [ initiallyDeferred = initiallyDeferred()
+          {
+              explicitlySpecified[1] = true;
+          } ]
+
+        [ LOOKAHEAD ( { getToken(1).kind == ENFORCED || getToken(2).kind == ENFORCED } )
+          enforced = constraintEnforcement() ]
+    |
+        LOOKAHEAD ( { getToken(1).kind == ENFORCED || getToken(2).kind == ENFORCED } )
+        enforced = constraintEnforcement()
+    )
+    {
+        if (!explicitlySpecified[0] &&
+            explicitlySpecified[1] && initiallyDeferred) {
+            // "INITIALLY DEFERRED" implies "DEFERRABLE"
+            deferrable = true;
+        }
+
+        if (explicitlySpecified[0] && (!deferrable) &&
+            explicitlySpecified[1] && initiallyDeferred) {
+            // "NOT DEFERRABLE INITIALLY DEFERRED" is inconsistent
+            throw StandardException.newException(
+                SQLState.LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS);
+        }
+
+        return new boolean[]{deferrable, initiallyDeferred, enforced};
+    }
+}
+
+/*
+ * <A NAME="initiallyDeferred">initiallyDeferred</A>
+ */
+boolean
+initiallyDeferred() :
+{
+}
+{
+    <INITIALLY>
+    (
+        <IMMEDIATE>
+        {
+            return false;
+        }
+    |   <DEFERRED>
+        {
+            return true;
+        }
+    )
+}
+
+/*
+ * <A NAME="deferrable">deferrable</A>
+ */
+boolean
+deferrable() :
+{
+    boolean deferrable = true;
+}
+{
+    [ <NOT>
+      {
+          deferrable = false;
+      }
+    ]
+    <DEFERRABLE>
+    {
+        return deferrable;
+    }
+}
+
+/*
+ * <A NAME="constraintEnforcement">constraintEnforcement</A>
+ */
+boolean
+constraintEnforcement() :
+{
+    boolean enforced = true;
+}
+{
+    [ <NOT>
+      {
+          enforced = false;
+      }
+    ]
+    <ENFORCED>
+    {
+        return enforced;
+    }
+}
+
+
 /*
  * <A NAME="columnConstraintDefinition">columnConstraintDefinition</A>
  */
@@ -12719,13 +12907,24 @@ columnConstraintDefinition(DataTypeDescriptor[] dataTypeDescriptor,
 						   String columnName) throws StandardException :
 {
 	int constraintType;
-	TableElementNode tcdn;
+    ConstraintDefinitionNode tcdn;
 	TableName constraintName = null;
+    boolean[] cc = null; // constraint characteristics
 }
 {
 	[ constraintName = constraintNameDefinition() ]
-		tcdn = columnConstraint(constraintName, dataTypeDescriptor, columnName)
+    tcdn = columnConstraint(constraintName, dataTypeDescriptor, columnName)
+    [ cc = constraintCharacteristics() ]
 	{
+        if (cc != null) {
+            if (tcdn == null) {
+                throw StandardException.newException(
+                    SQLState.LANG_NOT_NULL_CHARACTERISTICS);
+            }
+
+            tcdn.setCharacteristics(cc);
+        }
+
 		/* NOT NULL constraints are handled by marking the dataTypeDescriptor
 		 * as being non-nullable.
 		 */
@@ -13126,6 +13325,8 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	Token				tok = null;
 	String				columnName;
 	long[]				autoIncrementInfo = new long[4];
+    boolean             enforced;
+    TableName           constraintName;
 }
 {
 	<ADD>
@@ -13147,6 +13348,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		return lockGranularity;
 	}
 |
+        LOOKAHEAD ( { getToken(1).kind == ALTER && getToken(2).kind != CONSTRAINT } )
 	<ALTER> [ <COLUMN> ] columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
 		tableElement = columnAlterClause(columnName)
 	{
@@ -13154,6 +13356,32 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 		tableElementList.addTableElement(tableElement);
 		return lockGranularity;
 	}
+|
+    <ALTER> constraintName = constraintNameDefinition()
+    enforced = constraintEnforcement()
+    {
+        ConstraintDefinitionNode cdn = new ConstraintDefinitionNode(
+            constraintName,
+            DataDictionary.MODIFY_CONSTRAINT,
+            null,
+            null,
+            null,
+            null,
+            StatementType.DROP_DEFAULT,
+            DataDictionary.MODIFY_CONSTRAINT,
+            getContextManager());
+
+        boolean[] cc = new boolean[]{
+            ConstraintDefinitionNode.DEFERRABLE_DEFAULT,
+            ConstraintDefinitionNode.INITIALLY_DEFERRED_DEFAULT,
+            enforced};
+
+        cdn.setCharacteristics(cc);
+        changeType[0] = DDLStatementNode.MODIFY_TYPE;
+        tableElementList.addTableElement(cdn);
+
+        return lockGranularity;
+    }
 |
 	lockGranularity = DB2lockGranularityClause()
 	{
@@ -14452,6 +14680,7 @@ nonReservedKeyword()  :
 	|	tok = <DERBY>
 	|	tok = <DERBY_JDBC_RESULT_SET>
 	|	tok = <DOCUMENT>
+    |   tok = <ENFORCED>
 	|	tok = <EACH>
 	|	tok = <EMPTY>
 	|	tok = <EXCLUSIVE>

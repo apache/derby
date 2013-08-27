@@ -241,6 +241,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NewOptimizerOverridesTest.suite());
         suite.addTest(XMLOptimizerTraceTest.suite());
         suite.addTest(MergeStatementTest.suite());
+        suite.addTest(ConstraintCharacteristicsTest.suite());
         return suite;
 	}
 }

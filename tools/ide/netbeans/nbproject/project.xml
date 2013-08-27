@@ -39,6 +39,10 @@
                     <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
+                    <label>generated/java</label>
+                    <location>${project.dir}/generated/java</location>
+                </source-folder>
+                <source-folder>
                     <label>java/build</label>
                     <type>java</type>
                     <location>${project.dir}/java/build</location>
@@ -97,10 +101,6 @@
                     <type>java</type>
                     <location>${project.dir}/generated/java</location>
                     <encoding>UTF-8</encoding>
-                </source-folder>
-                <source-folder>
-                    <label>generated/java</label>
-                    <location>${project.dir}/generated/java</location>
                 </source-folder>
             </folders>
             <ide-actions>
