@@ -328,7 +328,7 @@ private static final    String[] TwoByte = {
         /* 276 */       null,
         /* 277 */       null,
         /* 278 */       "org.apache.derby.impl.sql.execute.ConstraintInfo",
-        /* 279 */       null,
+        /* 279 */       "org.apache.derby.iapi.sql.execute.ExecRowBuilder",
         /* 280 */       null,
         /* 281 */       null,
         /* 282 */       "org.apache.derby.impl.sql.execute.FKInfo",

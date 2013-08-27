@@ -21,37 +21,47 @@
 
 package org.apache.derby.iapi.sql.execute;
 
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
+ * <p>
  * A class used for storing information on how to build {@code ExecRow}
  * instances. Typically created by the compiler and used during execution
  * to produce and reset row templates.
+ * </p>
+ *
+ * <p>
+ * This class must be {@code Formatable} so that it can be stored in the
+ * database as part of a stored prepared statement generated for trigger
+ * actions or metadata queries. The stored format does not need to be stable
+ * across different versions, since the stored prepared statements are
+ * discarded on upgrade and will never be read by other Derby versions than
+ * the one that originally wrote them.
+ * </p>
  */
-public class ExecRowBuilder implements Serializable {
-
-    /**
-     * Serial version produced by the serialver utility. Needed in order to
-     * make serialization work reliably across different compilers.
-     */
-    private static final long serialVersionUID = -1078823466492523202L;
+public class ExecRowBuilder implements Formatable {
 
     /** If true, the row should be an {@code ExecIndexRow}. */
-    private final boolean indexable;
+    private boolean indexable;
 
     /**
      * Array of templates used for creating NULL values to put in the row.
      * The templates are either {@code DataValueDescriptor}s or
      * {@code DataTypeDescriptor}s.
      */
-    private final Object[] template;
+    private Object[] template;
 
     /** Array of 1-based column numbers for the columns to access. */
-    private final int[] columns;
+    private int[] columns;
 
     /** The number of columns to set in the row. */
     private int count;
@@ -71,6 +81,13 @@ public class ExecRowBuilder implements Serializable {
         this.template = new Object[size];
         this.columns = new int[size];
         this.indexable = indexable;
+    }
+
+    /**
+     * Public no-arg constructor required by the {@code Formatable} interface.
+     * Should not be called directly.
+     */
+    public ExecRowBuilder() {
     }
 
     /**
@@ -130,5 +147,31 @@ public class ExecRowBuilder implements Serializable {
             int col = columns[i];
             row.setColumn(col, row.getColumn(col).getNewNull());
         }
+    }
+
+    // Methods required by the Formatable interface.
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeBoolean(indexable);
+        ArrayUtil.writeArray(out, template);
+        out.writeObject(columns);
+        out.writeInt(count);
+        out.writeInt(maxColumnNumber);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in)
+            throws IOException, ClassNotFoundException {
+        indexable = in.readBoolean();
+        template = ArrayUtil.readObjectArray(in);
+        columns = (int[]) in.readObject();
+        count = in.readInt();
+        maxColumnNumber = in.readInt();
+    }
+
+    @Override
+    public int getTypeFormatId() {
+        return StoredFormatIds.EXEC_ROW_BUILDER_ID;
     }
 }

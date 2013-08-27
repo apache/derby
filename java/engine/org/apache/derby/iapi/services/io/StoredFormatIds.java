@@ -1091,6 +1091,9 @@ public interface StoredFormatIds {
     static public final int CONSTRAINT_INFO_V01_ID  =
             (MIN_ID_2 + 278);
 
+    /** Class org.apache.derby.iapi.sql.execute.ExecRowBuilder. */
+    int EXEC_ROW_BUILDER_ID = MIN_ID_2 + 279;
+
     /**
      */
     static public final int UNUSED_2_280 =

@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassFactoryContext;
@@ -63,7 +62,7 @@ public final class FormatIdInputStream extends DataInputStream
 	  Read an object from this stream.
 
 	  @return The read object.
-	  @exception java.io.IOException An IO or serialization error occured.
+      @exception java.io.IOException An IO or serialization error occurred.
 	  @exception java.lang.ClassNotFoundException A class for an object in
 	  the stream could not be found.
 	  */
@@ -94,17 +93,13 @@ public final class FormatIdInputStream extends DataInputStream
 					Object result = ois.readObject();
 					return result;
 				} catch (IOException ioe) {
-					setErrorInfo((ErrorInfo) ois);
-					throw ioe;
+                    throw handleReadError(ioe, ois);
 				} catch (ClassNotFoundException cnfe) {
-					setErrorInfo((ErrorInfo) ois);
-					throw cnfe;
+                    throw handleReadError(cnfe, ois);
 				} catch (LinkageError le) {
-					setErrorInfo((ErrorInfo) ois);
-					throw le;
+                    throw handleReadError(le, ois);
 				} catch (ClassCastException cce) {
-					setErrorInfo((ErrorInfo) ois);
-					throw cce;
+                    throw handleReadError(cce, ois);
 				}
 			}
 
@@ -182,6 +177,25 @@ public final class FormatIdInputStream extends DataInputStream
         errorInfo = ei;
 	}
 
+    /**
+     * Handle an error that happened within {@code readObject()} when reading
+     * a {@code Serializable} object.
+     *
+     * @param <T> the type of exception that was thrown
+     * @param cause the thrown exception
+     * @param stream the stream from which the exception was thrown
+     * @return the thrown exception
+     */
+    private <T extends Throwable> T handleReadError(
+            T cause, ObjectInputStream stream) {
+        // If the input stream implements the ErrorInfo interface, it contains
+        // extra information about the error, and we want to make that
+        // information available to error handlers on a higher level.
+        if (stream instanceof ErrorInfo) {
+            setErrorInfo((ErrorInfo) stream);
+        }
+        return cause;
+    }
 
     ClassFactory getClassFactory() {
 		if (cf == null) {
