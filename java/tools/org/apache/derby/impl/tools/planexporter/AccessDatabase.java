@@ -144,15 +144,20 @@ public class AccessDatabase {
      * name that was passed in to this instance.
      */
     private boolean schemaExists() throws SQLException {
-    	boolean found=false;
     	ResultSet result = conn.getMetaData().getSchemas();
-    	while(result.next()){
-    		if(result.getString(1).equals(schema)){
-    			found=true;
-    			break;
-    		}
-    	}	
-    	return found;
+        try {
+            while (result.next()) {
+                if (result.getString(1).equals(schema)) {
+                    // Found it!
+                    return true;
+                }
+            }
+        } finally {
+            result.close();
+        }
+
+        // Didn't find the schema.
+        return false;
     }
 
     public boolean verifySchemaExistance() {
