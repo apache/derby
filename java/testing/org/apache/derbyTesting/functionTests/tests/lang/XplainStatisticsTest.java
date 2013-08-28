@@ -1092,7 +1092,6 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     public void testSimpleXplainOnly() throws Exception
     {
         Statement s = createStatement();
-        ResultSet rs;
 
         enableXplainStyle(s);
         enableXplainOnlyMode(s);
@@ -1220,7 +1219,6 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     public void testXplainOnlyExecutePrepared() throws Exception
     {
         Statement s = createStatement();
-        ResultSet rs;
 
         String selectStatement = 
             "select region, count(country) from app.countries group by region";
@@ -1294,12 +1292,16 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(ps.executeQuery());
         clearXplainOnlyMode(s);
         disableXplainStyle(s);
+
+        // Verify that statistics were collected.
+        JDBC.assertDrainResults(
+                s.executeQuery("select * from xpltest.sysxplain_statements"),
+                1);
     }
     
     public void testXplainOnlyPrepared() throws Exception
     {
         Statement s = createStatement();
-        ResultSet rs;
 
         String selectStatement = 
             "select region, count(country) from app.countries group by region";
