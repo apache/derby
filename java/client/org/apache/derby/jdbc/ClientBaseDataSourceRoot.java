@@ -425,7 +425,7 @@ public abstract class ClientBaseDataSourceRoot implements
                 Attribute.CLIENT_JVM_PROPERTY_PREFIX +
                 Attribute.CLIENT_TRACE_DIRECTORY);
 
-        if (traceDirectoryString == null) {
+        if (traceDirectoryString == null  && properties != null) {
             return properties.getProperty(Attribute.CLIENT_TRACE_DIRECTORY);
         } else {
             return traceDirectoryString;
@@ -989,12 +989,15 @@ public abstract class ClientBaseDataSourceRoot implements
         traceLevelString  =
             readSystemProperty(Attribute.CLIENT_JVM_PROPERTY_PREFIX +
                                Attribute.CLIENT_TRACE_LEVEL);
-        if (traceLevelString == null) {
+        if (traceLevelString == null  && properties != null) {
             traceLevelString =
                 properties.getProperty(Attribute.CLIENT_TRACE_LEVEL);
         }
-
-        return parseInt(traceLevelString, propertyDefault_traceLevel);
+        if (traceLevelString != null ) {
+            return parseInt(traceLevelString, propertyDefault_traceLevel);
+        } else {
+            return propertyDefault_traceLevel;
+        }
     }
 
     synchronized public void setTraceLevel(int traceLevel) {
@@ -1060,6 +1063,22 @@ public abstract class ClientBaseDataSourceRoot implements
     private void updateDataSourceValues(Properties prop)
         throws SqlException
     {
+        // DERBY-5553. System properties derby.client.traceDirectory
+        // and derby.client.traceLevel do not work for ClientXADataSource
+        // or ClientConnectionPoolDataSource
+        // Trace level and trace directory will be read from system
+        // properties if they are not specified in the Properties
+        // argument, so we check for them first to avoid getting cut
+        // off by the (prop == null) check below.
+        String traceDir = getTraceDirectory(prop);
+        if (traceDir != null) {
+            setTraceDirectory(traceDir);
+        }
+        
+        int traceLevel = getTraceLevel(prop);
+        if (traceLevel != propertyDefault_traceLevel) {
+            setTraceLevel(traceLevel);
+        }
         if (prop == null) {
             return;
         }
@@ -1072,9 +1091,6 @@ public abstract class ClientBaseDataSourceRoot implements
         }
         if (prop.containsKey(Attribute.CLIENT_TRACE_FILE)) {
             setTraceFile(getTraceFile(prop));
-        }
-        if (prop.containsKey(Attribute.CLIENT_TRACE_DIRECTORY)) {
-            setTraceDirectory(getTraceDirectory(prop));
         }
         if (prop.containsKey(Attribute.CLIENT_TRACE_APPEND)) {
             setTraceFileAppend(getTraceFileAppend(prop));

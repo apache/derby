@@ -23,11 +23,17 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.File;
 import java.security.AccessController;
+import java.sql.Connection;
 import java.util.Properties;
+
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
 
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -38,7 +44,44 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
      *  because we have set the system properties to enable client side
      *  tracing. */
     public void testConnection() throws Exception {
-        getConnection().setAutoCommit(false);
+        Connection conn = openDefaultConnection();
+        conn.setAutoCommit(false);
+        checkTraceFileIsPresent();
+        conn.rollback();
+        conn.close();
+    }
+
+    public void testClientDataSourceConnection() throws Exception {
+       Connection conn = JDBCDataSource.getDataSource().getConnection();
+       conn.setAutoCommit(false);
+       checkTraceFileIsPresent();
+       conn.rollback();
+       conn.close();
+    }
+    
+    public void testClientCPDataSourceConnection() throws Exception {
+        PooledConnection pconn = J2EEDataSource.getConnectionPoolDataSource().
+                getPooledConnection(); 
+        Connection conn = pconn.getConnection();
+        conn.setAutoCommit(false);
+        checkTraceFileIsPresent();
+        conn.rollback();
+        conn.close();
+        pconn.close();
+     }
+
+    public void testClientXADataSourceConnection() throws Exception {
+        XAConnection xaconn = J2EEDataSource.getXADataSource().
+                getXAConnection();
+        Connection conn = xaconn.getConnection();
+        conn.setAutoCommit(false);
+        checkTraceFileIsPresent();
+        conn.close();
+        xaconn.close();
+     }
+
+    
+    private void checkTraceFileIsPresent() {
         //Make sure the connection above created a trace file. This check is 
         //made in the privilege block below by looking inside the 
         //trace Directory and making sure the file count is greater than 0.
@@ -74,7 +117,7 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
     						File tempFile;
     						for (;fileCounter<list.length; fileCounter++) {
     							tempFile = list[fileCounter];
-    							tempFile.delete();
+    							assertTrue(tempFile.delete());
         					}
 		        }
 	            return null;
