@@ -1046,6 +1046,19 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Clear the contents of the statement cache. Useful if a test case
+     * needs to make sure that a statement is actually compiled and not
+     * just fetched from the statement cache.
+     *
+     * @throws SQLException if a database error happens
+     */
+    protected final void emptyStatementCache() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CALL SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()");
+        closeStatement(s);
+    }
+
+    /**
      * Execute a DROP TABLE command using the passed in tableName as-is
      * and the default connection.
      * If the DROP TABLE fails because the table does not exist then

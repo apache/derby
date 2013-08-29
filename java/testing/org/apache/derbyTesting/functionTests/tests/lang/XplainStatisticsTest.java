@@ -100,6 +100,17 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	}
         private static long timeSuiteStarted;
 
+    protected void setUp() throws SQLException {
+        // DERBY-6306: Some of the statistics, especially those that give
+        // information about compilation timing, are sensitive to whether
+        // preparing a statement in fact compiles the statement or if it
+        // just fetches it from the statement cache. Empty the statement
+        // cache between each test case, so that they don't need to worry
+        // about statements lying around from earlier test cases affecting
+        // the results.
+        emptyStatementCache();
+    }
+
 	/**
 	 * Creates a variety of tables used by the various tests.
          * The tests use the same basic schema as the 'toursdb' sample

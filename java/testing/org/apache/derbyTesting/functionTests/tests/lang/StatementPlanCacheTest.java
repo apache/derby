@@ -110,10 +110,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
         cacheInPlanPS_TEXT = prepareStatement(
                 "SELECT COUNT(ID) FROM SYSCS_DIAG.STATEMENT_CACHE WHERE " +
                 "SCHEMANAME = ? AND SQL_TEXT = ?");
-        Statement s = createStatement();
-        s.execute("CALL SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()");
-        s.close();
-       
+        emptyStatementCache();
     }
     
     protected void tearDown() throws Exception {
