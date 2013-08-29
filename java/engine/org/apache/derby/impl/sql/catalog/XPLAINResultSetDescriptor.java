@@ -116,54 +116,21 @@ public class XPLAINResultSetDescriptor extends XPLAINTableDescriptor
         ps.setString(1, rs_id.toString());
         ps.setString(2, op_identifier);
         ps.setString(3, op_details);
-        if (no_opens != null)
-            ps.setInt(4, no_opens.intValue());
-        else
-            ps.setNull(4, Types.INTEGER);
-        if (no_index_updates != null)
-            ps.setInt(5, no_index_updates.intValue());
-        else
-            ps.setNull(5, Types.INTEGER);
+        ps.setObject(4, no_opens, Types.INTEGER);
+        ps.setObject(5, no_index_updates, Types.INTEGER);
         ps.setString(6, lock_mode);
         ps.setString(7, lock_granularity);
         ps.setString(8, (parent_rs_id != null ? parent_rs_id.toString():null));
-        if (est_row_count != null)
-            ps.setDouble(9, est_row_count.doubleValue());
-        else
-            ps.setNull(9, Types.DOUBLE);
-        if (est_cost != null)
-            ps.setDouble(10, est_cost.doubleValue());
-        else
-            ps.setNull(10, Types.DOUBLE);
-        if (affected_rows != null)
-            ps.setInt(11, affected_rows.intValue());
-        else
-            ps.setNull(11, Types.INTEGER);
+        ps.setObject(9, est_row_count, Types.DOUBLE);
+        ps.setObject(10, est_cost, Types.DOUBLE);
+        ps.setObject(11, affected_rows, Types.INTEGER);
         ps.setString(12, deferred_rows);
-        if (input_rows != null)
-            ps.setInt(13, input_rows.intValue());
-        else
-            ps.setNull(13, Types.INTEGER);
-        if (seen_rows != null)
-            ps.setInt(14, seen_rows.intValue());
-        else
-            ps.setNull(14, Types.INTEGER);
-        if (seen_rows_right != null)
-            ps.setInt(15, seen_rows_right.intValue());
-        else
-            ps.setNull(15, Types.INTEGER);
-        if (filtered_rows != null)
-            ps.setInt(16, filtered_rows.intValue());
-        else
-            ps.setNull(16, Types.INTEGER);
-        if (returned_rows != null)
-            ps.setInt(17, returned_rows.intValue());
-        else
-            ps.setNull(17, Types.INTEGER);
-        if (empty_right_rows != null)
-            ps.setInt(18, empty_right_rows.intValue());
-        else
-            ps.setNull(18, Types.INTEGER);
+        ps.setObject(13, input_rows, Types.INTEGER);
+        ps.setObject(14, seen_rows, Types.INTEGER);
+        ps.setObject(15, seen_rows_right, Types.INTEGER);
+        ps.setObject(16, filtered_rows, Types.INTEGER);
+        ps.setObject(17, returned_rows, Types.INTEGER);
+        ps.setObject(18, empty_right_rows, Types.INTEGER);
         ps.setString(19, index_key_optimization);
         ps.setString(20, (scan_rs_id != null ? scan_rs_id.toString():null));
         ps.setString(21, (sort_rs_id != null ? sort_rs_id.toString():null));

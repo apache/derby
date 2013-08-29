@@ -105,44 +105,20 @@ public class XPLAINScanPropsDescriptor extends XPLAINTableDescriptor
         ps.setString(3, scan_object_type);
         ps.setString(4, scan_type);
         ps.setString(5, isolation_level);
-        if (no_visited_pages != null)
-            ps.setInt(6, no_visited_pages.intValue());
-        else
-            ps.setNull(6, Types.INTEGER);
-        if (no_visited_rows != null)
-            ps.setInt(7, no_visited_rows.intValue());
-        else
-            ps.setNull(7, Types.INTEGER);
-        if (no_qualified_rows != null)
-            ps.setInt(8, no_qualified_rows.intValue());
-        else
-            ps.setNull(8, Types.INTEGER);
-        if (no_visited_deleted_rows != null)
-            ps.setInt(9, no_visited_deleted_rows.intValue());
-        else
-            ps.setNull(9, Types.INTEGER);
-        if (no_fetched_columns != null)
-            ps.setInt(10, no_fetched_columns.intValue());
-        else
-            ps.setNull(10, Types.INTEGER);
+        ps.setObject(6, no_visited_pages, Types.INTEGER);
+        ps.setObject(7, no_visited_rows, Types.INTEGER);
+        ps.setObject(8, no_qualified_rows, Types.INTEGER);
+        ps.setObject(9, no_visited_deleted_rows, Types.INTEGER);
+        ps.setObject(10, no_fetched_columns, Types.INTEGER);
         ps.setString(11, bitset_of_fetched_columns);
-        if (btree_height != null)
-            ps.setInt(12, btree_height.intValue());
-        else
-            ps.setNull(12, Types.INTEGER);
-        if (fetch_size != null)
-            ps.setInt(13, fetch_size.intValue());
-        else
-            ps.setNull(13, Types.INTEGER);
+        ps.setObject(12, btree_height, Types.INTEGER);
+        ps.setObject(13, fetch_size, Types.INTEGER);
         ps.setString(14, start_position);
         ps.setString(15, stop_position);
         ps.setString(16, scan_qualifiers);
         ps.setString(17, next_qualifiers);
         ps.setString(18, hash_key_column_numbers);
-        if (hash_table_size != null)
-            ps.setInt(19, hash_table_size.intValue());
-        else
-            ps.setNull(19, Types.INTEGER);
+        ps.setObject(19, hash_table_size, Types.INTEGER);
     }
 
     public void setScan_type(String scan_type) {

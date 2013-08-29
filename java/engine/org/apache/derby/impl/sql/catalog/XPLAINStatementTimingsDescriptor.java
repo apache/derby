@@ -28,7 +28,6 @@ import java.sql.Types;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 
 public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor 
@@ -79,30 +78,12 @@ public class XPLAINStatementTimingsDescriptor extends XPLAINTableDescriptor
         throws SQLException
     {
         ps.setString(1, timing_id.toString());
-        if (parse_time != null)
-            ps.setLong(2, parse_time.longValue());
-        else
-            ps.setNull(2, Types.BIGINT);
-        if (bind_time != null)
-            ps.setLong(3, bind_time.longValue());
-        else
-            ps.setNull(3, Types.BIGINT);
-        if (optimize_time != null)
-            ps.setLong(4, optimize_time.longValue());
-        else
-            ps.setNull(4, Types.BIGINT);
-        if (generate_time != null)
-            ps.setLong(5, generate_time.longValue());
-        else
-            ps.setNull(5, Types.BIGINT);
-        if (compile_time != null)
-            ps.setLong(6, compile_time.longValue());
-        else
-            ps.setNull(6, Types.BIGINT);
-        if (execute_time != null)
-            ps.setLong(7, execute_time.longValue());
-        else
-            ps.setNull(7, Types.BIGINT);
+        ps.setObject(2, parse_time, Types.BIGINT);
+        ps.setObject(3, bind_time, Types.BIGINT);
+        ps.setObject(4, optimize_time, Types.BIGINT);
+        ps.setObject(5, generate_time, Types.BIGINT);
+        ps.setObject(6, compile_time, Types.BIGINT);
+        ps.setObject(7, execute_time, Types.BIGINT);
         ps.setTimestamp(8, begin_comp_time);
         ps.setTimestamp(9, end_comp_time);
         ps.setTimestamp(10, begin_exe_time);

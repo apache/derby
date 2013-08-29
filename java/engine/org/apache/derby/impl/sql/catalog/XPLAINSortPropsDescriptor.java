@@ -76,18 +76,9 @@ public class XPLAINSortPropsDescriptor extends XPLAINTableDescriptor
     {
         ps.setString(1, sort_rs_id.toString());
         ps.setString(2, sort_type);
-        if (no_input_rows != null)
-            ps.setInt(3, no_input_rows.intValue());
-        else
-            ps.setNull(3, Types.INTEGER);
-        if (no_output_rows != null)
-            ps.setInt(4, no_output_rows.intValue());
-        else
-            ps.setNull(4, Types.INTEGER);
-        if (no_merge_runs != null)
-            ps.setInt(5, no_merge_runs.intValue());
-        else
-            ps.setNull(5, Types.INTEGER);
+        ps.setObject(3, no_input_rows, Types.INTEGER);
+        ps.setObject(4, no_output_rows, Types.INTEGER);
+        ps.setObject(5, no_merge_runs, Types.INTEGER);
         ps.setString(6, merge_run_details);
         ps.setString(7, eliminate_dups);
         ps.setString(8, in_sort_order);

@@ -26,7 +26,6 @@ import java.sql.SQLException;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
 import java.sql.Types;
 
 public class XPLAINResultSetTimingsDescriptor extends XPLAINTableDescriptor 
@@ -79,46 +78,16 @@ public class XPLAINResultSetTimingsDescriptor extends XPLAINTableDescriptor
         throws SQLException
     {
         ps.setString(1, timing_id.toString());
-        if (constructor_time != null)
-            ps.setLong(2, constructor_time.longValue());
-        else
-            ps.setNull(2, Types.BIGINT);
-        if (open_time != null)
-            ps.setLong(3, open_time.longValue());
-        else
-            ps.setNull(3, Types.BIGINT);
-        if (next_time != null)
-            ps.setLong(4, next_time.longValue());
-        else
-            ps.setNull(4, Types.BIGINT);
-        if (close_time != null)
-            ps.setLong(5, close_time.longValue());
-        else
-            ps.setNull(5, Types.BIGINT);
-        if (execute_time != null)
-            ps.setLong(6, execute_time.longValue());
-        else
-            ps.setNull(6, Types.BIGINT);
-        if (avg_next_time_per_row != null)
-            ps.setLong(7, avg_next_time_per_row.longValue());
-        else
-            ps.setNull(7, Types.BIGINT);
-        if (projection_time != null)
-            ps.setLong(8, projection_time.longValue());
-        else
-            ps.setNull(8, Types.BIGINT);
-        if (restriction_time != null)
-            ps.setLong(9, restriction_time.longValue());
-        else
-            ps.setNull(9, Types.BIGINT);
-        if (temp_cong_create_time != null)
-            ps.setLong(10, temp_cong_create_time.longValue());
-        else
-            ps.setNull(10, Types.BIGINT);
-        if (temp_cong_fetch_time != null)
-            ps.setLong(11, temp_cong_fetch_time.longValue());
-        else
-            ps.setNull(11, Types.BIGINT);
+        ps.setObject(2, constructor_time, Types.BIGINT);
+        ps.setObject(3, open_time, Types.BIGINT);
+        ps.setObject(4, next_time, Types.BIGINT);
+        ps.setObject(5, close_time, Types.BIGINT);
+        ps.setObject(6, execute_time, Types.BIGINT);
+        ps.setObject(7, avg_next_time_per_row, Types.BIGINT);
+        ps.setObject(8, projection_time, Types.BIGINT);
+        ps.setObject(9, restriction_time, Types.BIGINT);
+        ps.setObject(10, temp_cong_create_time, Types.BIGINT);
+        ps.setObject(11, temp_cong_fetch_time, Types.BIGINT);
     }
 
     public String getCatalogName() { return TABLENAME_STRING; }
