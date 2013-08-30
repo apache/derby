@@ -247,7 +247,7 @@
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
                 <package-root>${project.dir}/generated/java</package-root>
-                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix</classpath>
+                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix:${project.dir}/tools/java/xml-apis.jar</classpath>
                 <built-to>${project.dir}/jars/sane/derby.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyTesting.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyclient.jar</built-to>
