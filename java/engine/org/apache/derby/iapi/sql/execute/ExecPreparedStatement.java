@@ -161,7 +161,7 @@ public interface ExecPreparedStatement
     boolean isUpdateColumn(String columnName);
 
 	/**
-	 * set this parepared statement to be valid
+	 * set this prepared statement to be valid
 	 */
 	void setValid();
 

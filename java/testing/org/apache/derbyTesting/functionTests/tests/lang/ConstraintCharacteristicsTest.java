@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -30,15 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import static junit.framework.Assert.fail;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import static org.apache.derbyTesting.junit.BaseJDBCTestCase.assertSQLState;
-import static org.apache.derbyTesting.junit.BaseJDBCTestCase.assertStatementError;
-import static org.apache.derbyTesting.junit.BaseJDBCTestCase.assertUpdateCount;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
@@ -62,6 +62,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 "testCreateConstraintDictionaryEncodings"));
         s.addTest(new ConstraintCharacteristicsTest(
                 "testAlterConstraintDictionaryEncodings"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                "testAlterConstraintInvalidation"));
+        
         suite.addTest(
             new SystemPropertyTestSetup(
                 s,
@@ -211,14 +214,43 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    private static String[] tableConstraintTypes = {
+    /**
+     * Check that altering constraint characteristics invalidates prepared
+     * statements.
+     * @throws SQLException
+     */
+    public void testAlterConstraintInvalidation() throws SQLException {
+        Connection c = getConnection();
+        Statement s = c.createStatement();
+        
+        s.executeUpdate("create table t(i int, constraint c primary key(i))");
+        PreparedStatement ps = c.prepareStatement("insert into t values 3");
+        ps.execute();
+
+        s.executeUpdate("alter table t alter constraint c not enforced ");
+        
+        ContextManager contextManager = 
+                ((EmbedConnection)c).getContextManager();
+        LanguageConnectionContext lcc = 
+                (LanguageConnectionContext)contextManager.getContext(
+                "LanguageConnectionContext");
+        GenericPreparedStatement derbyPs = 
+                (GenericPreparedStatement)lcc.getLastActivation().
+                getPreparedStatement();
+
+        assertFalse(derbyPs.isValid());
+        
+        rollback();
+    }
+        
+    private final static String[] tableConstraintTypes = {
             " foreign key (i) references referenced(i)",
             " primary key(i)",
             " unique(i)",
             " check(i<3)"
         };
 
-    private static String[] columnConstraintTypes = {
+    private final static String[] columnConstraintTypes = {
             " references referenced(i)",
             " primary key",
             " unique",
