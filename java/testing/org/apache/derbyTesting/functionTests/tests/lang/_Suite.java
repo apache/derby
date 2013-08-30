@@ -242,6 +242,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(XMLOptimizerTraceTest.suite());
         suite.addTest(MergeStatementTest.suite());
         suite.addTest(ConstraintCharacteristicsTest.suite());
+        suite.addTest(DB2IsolationLevelsTest.suite());
         return suite;
 	}
 }
