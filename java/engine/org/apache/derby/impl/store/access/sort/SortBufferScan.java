@@ -67,7 +67,7 @@ public class SortBufferScan extends SortScan
     **/
     public boolean next()
 		throws StandardException
-	{
+    {
         if (SanityManager.DEBUG)
         {
             SanityManager.ASSERT(
@@ -75,9 +75,9 @@ public class SortBufferScan extends SortScan
                 "next() called on scan after scan was closed.");
         }
 
-		super.current = sortBuffer.removeFirst();
-		return (super.current != null);
-	}
+        current = sortBuffer.removeFirst();
+        return current != null;
+    }
 
     /**
     Close the scan.
