@@ -58,6 +58,22 @@ public abstract class JVMInfo
     public static final int J2SE_17 = 8; // Java SE 7
     public static final int J2SE_18 = 9;
 
+    public static int jdbcMajorVersion()
+    { 
+        return 4; 
+    }
+
+    public static int jdbcMinorVersion()
+    {
+        switch (JDK_ID)
+        { 
+        case J2SE_16: return 0; 
+        case J2SE_17: return 1; 
+        case J2SE_18: 
+        default: return 2; 
+        }
+    } 
+
 	static 
 	{
 		int id;
@@ -118,11 +134,12 @@ public abstract class JVMInfo
 	*/
 	public static String derbyVMLevel()
 	{
+		String jdbcVersion = jdbcMajorVersion() + "." + jdbcMinorVersion();
 		switch (JDK_ID)
 		{
-        case J2SE_16: return "Java SE 6 - JDBC 4.1";
-        case J2SE_17: return "Java SE 7 - JDBC 4.1";
-        case J2SE_18: return "Java SE 8 - JDBC 4.1";
+        case J2SE_16: return "Java SE 6 - JDBC " + jdbcVersion;
+        case J2SE_17: return "Java SE 7 - JDBC " + jdbcVersion;
+        case J2SE_18: return "Java SE 8 - JDBC " + jdbcVersion;
 		default: return "?-?";
 		}
 	}

@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.StringTokenizer;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // Note:
@@ -124,6 +125,8 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
             serverJdbcMajorVersion = 3;
             serverJdbcMinorVersion = 0;
         } else {
+            // this value is only used to check that we have at least 4.0; 
+            // higher is irrelevant
             serverJdbcMajorVersion = 4;
             serverJdbcMinorVersion = 0;
         }
@@ -2301,7 +2304,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
     public int getJDBCMinorVersion() throws SQLException {
         checkForClosedConnection();
-        return 1;
+        return JVMInfo.jdbcMinorVersion();
     }
 
     public int getSQLStateType() throws SQLException {

@@ -689,20 +689,23 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         int expectedJDBCMajor = -1;
         int expectedJDBCMinor = -1;
-        if (JDBC.vmSupportsJDBC4())
+        // java 8 - jdbc 4.2
+        if (JDBC.vmSupportsJDBC42())
+        {
+            expectedJDBCMajor = 4;
+            expectedJDBCMinor = 2;
+        }
+        // java 7 - jdbc 4.1
+        else if (JDBC.vmSupportsJDBC41())
         {
             expectedJDBCMajor = 4;
             expectedJDBCMinor = 1;
         }
-        else if (JDBC.vmSupportsJDBC3())
+        // java 6 - jdbc 4.0
+        else if (JDBC.vmSupportsJDBC4())
         {
-            expectedJDBCMajor = 3;
+            expectedJDBCMajor = 4;
             expectedJDBCMinor = 0;
-        }
-        else if (JDBC.vmSupportsJSR169())
-        {
-            // Not sure what is the correct output for JSR 169
-            expectedJDBCMajor = -1;
         }
          
         if (expectedJDBCMajor != -1)

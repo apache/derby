@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.jdbc;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -3306,7 +3307,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getJDBCMinorVersion()
 	{
-        return 1;
+        return JVMInfo.jdbcMinorVersion();
 	}
 
 	/**
