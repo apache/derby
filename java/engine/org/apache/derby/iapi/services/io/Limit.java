@@ -42,7 +42,7 @@ public interface Limit {
 		more beyond the limit will result in an EOFException
 
 		@exception IOException IOException from some underlying stream
-		@exception EOFException The set limit would exceed
+        @exception java.io.EOFException The set limit would exceed
 		the available data in the stream.
 	*/
 	public void setLimit(int length)

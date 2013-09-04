@@ -2318,8 +2318,6 @@ public class GenericLanguageConnectionContext
      * which we compile against.
      *
      * @return the compiler context
-     *
-     * @exception StandardException thrown on failure
      */
     public  final CompilerContext pushCompilerContext()
     {

@@ -328,8 +328,6 @@ public final class SQLLongint
 
 	/**
 	 * @see NumberDataValue#setValue
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 	public final void setValue(Number theValue)
 	{
@@ -845,8 +843,6 @@ public final class SQLLongint
      * This method implements the isNegative method.
      *
      * @return  A boolean.  if this.value is negative, return true.
-     *
-     * @exception StandException       Thrown on error
      */
     
     protected boolean isNegative()

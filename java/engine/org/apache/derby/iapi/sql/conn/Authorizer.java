@@ -142,7 +142,6 @@ public interface Authorizer
 	 Refresh this authorizer to reflect a change in the database
 	 permissions.
 	 
-	 @exception AuthorizerSessionException Connect permission gone.
 	 @exception StandardException Oops.
 	 */
    public void refresh() throws StandardException;  

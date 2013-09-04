@@ -887,9 +887,6 @@ public class SQLChar
         @exception  IOException  if an I/O error occurs.
         @since      JDK1.0
 
-
-      @exception IOException thrown by writeUTF
-
       @see java.io.DataInputStream
 
     */

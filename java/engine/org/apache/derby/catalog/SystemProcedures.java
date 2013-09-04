@@ -679,7 +679,7 @@ public class SystemProcedures  {
      * @param key       The property key.
      * @param value     The new value, if null the property is deleted.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_SET_DATABASE_PROPERTY(
     String  key,
@@ -696,7 +696,7 @@ public class SystemProcedures  {
      *
      * @param key       The property key.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static String SYSCS_GET_DATABASE_PROPERTY(
     String  key)
@@ -881,7 +881,7 @@ public class SystemProcedures  {
      * @param sequential    if non-zero then rebuild indexes sequentially,
      *                      if 0 then rebuild all indexes in parallel.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_COMPRESS_TABLE(
     String  schemaname,
@@ -909,7 +909,7 @@ public class SystemProcedures  {
      * Call internal routine to freeze the database so that a backup
      * can be made.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_FREEZE_DATABASE()
 		throws SQLException
@@ -924,7 +924,7 @@ public class SystemProcedures  {
      * by calling SYSCS_FREEZE_DATABASE().
      * can be made.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  SQLException if a database error occurs
      **/
     public static void SYSCS_UNFREEZE_DATABASE()
 		throws SQLException
@@ -953,7 +953,7 @@ public class SystemProcedures  {
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if it 
      *                  does not exist.
-     * @exception StandardException thrown on error
+     * @exception SQLException if a database error occurs
      */
     public static void SYSCS_BACKUP_DATABASE(String  backupDir)
 		throws SQLException
@@ -975,7 +975,7 @@ public class SystemProcedures  {
      * @param backupDir the name of the directory where the backup should be
      *                  stored. This directory will be created if it 
      *                  does not exist.
-     * @exception StandardException thrown on error
+     * @exception SQLException if a database error occurs
      */
     public static void SYSCS_BACKUP_DATABASE_NOWAIT(String  backupDir)
         throws SQLException
@@ -1004,7 +1004,7 @@ public class SystemProcedures  {
      * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes online 
      *                 archived log files that exist before this backup, delete 
      *                 will occur  only after the backup is  complete.
-     * @exception StandardException thrown on error.
+     * @exception SQLException if a database error occurs
      */
     public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
     String  backupDir,
@@ -1040,7 +1040,7 @@ public class SystemProcedures  {
      *                  archived log files that exist before this backup, delete     
      *                  will occur  only after the backup is  complete.
      *
-     * @exception StandardException thrown on error.
+     * @exception SQLException if a database error occurs
      */
     public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
     String  backupDir,
@@ -1062,9 +1062,8 @@ public class SystemProcedures  {
 	 * @param deleteOnlineArchivedLogFiles  If <tt>non-zero</tt> deletes all the
 	 *        online archived log files that exist before this call immediately.
      *
-	 * @exception StandardException Thrown on error
+     * @exception SQLException if a database error occurs
 	 */
-
     public static void SYSCS_DISABLE_LOG_ARCHIVE_MODE(
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
@@ -1431,7 +1430,7 @@ public class SystemProcedures  {
 	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128))
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_EXPORT_TABLE(
 	String  schemaName,
@@ -1460,7 +1459,7 @@ public class SystemProcedures  {
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
-     * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(
     String  schemaName,
@@ -1492,7 +1491,7 @@ public class SystemProcedures  {
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128))
 	 *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_EXPORT_QUERY(
     String  selectStatement,
@@ -1523,7 +1522,7 @@ public class SystemProcedures  {
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN LOBSFILENAME VARCHAR(32672))
      *
-     * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(
     String  selectStatement,
@@ -1555,7 +1554,7 @@ public class SystemProcedures  {
 	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
 	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
 	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_TABLE(
 	String  schemaName,
@@ -1605,7 +1604,7 @@ public class SystemProcedures  {
      * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
      * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
      * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT)
-     * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(
     String  schemaName,
@@ -1645,7 +1644,7 @@ public class SystemProcedures  {
 	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
 	 *                    IN REPLACE SMALLINT)
 	 *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_IMPORT_DATA(
     String  schemaName,
@@ -1691,7 +1690,7 @@ public class SystemProcedures  {
      *               IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
      *               IN REPLACE SMALLINT)
      *
-     * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static void SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(
     String  schemaName,
@@ -1728,7 +1727,7 @@ public class SystemProcedures  {
 	 * SYSCS_BULK_INSERT (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128), 
 	 *                    IN VTINAME VARCHAR(32672), IN VTIARG VARCHAR(32672))
 	 *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
 	public static void SYSCS_BULK_INSERT(
     String  schemaName,
@@ -2404,7 +2403,7 @@ public class SystemProcedures  {
      * @param schemaName    The name of the schema holding the sequence.
      * @param sequenceName    The name of the sequence in that schema.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception SQLException if a database error occurs
      **/
     public static Long SYSCS_PEEK_AT_SEQUENCE( String schemaName, String sequenceName )
         throws SQLException

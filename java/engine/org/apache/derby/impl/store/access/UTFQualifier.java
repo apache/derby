@@ -49,8 +49,6 @@ public class UTFQualifier implements Qualifier
 
 	/**
 	 * Get the value that the column is to be compared to.
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 	public DataValueDescriptor getOrderable() {
 		return value;

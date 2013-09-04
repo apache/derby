@@ -1125,12 +1125,9 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
     }
 
 	/**
-	    @exception StandardException  Standard Derby exception policy
 		@exception StandardException Thrown if the transaction is not idle, the
 		transaction remains open.
 		@see Transaction#close
-
-		@exception StandardException	Standard Derby policy
 	*/
 	public void close() throws StandardException {
 
@@ -2199,7 +2196,6 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		otherwise it is left in the stack (at the top).
 
 		@return true if any work is rolled back, false if no work is rolled back
-		@exception StandardException	Standard Derby policy
 		@exception StandardException Thrown if a error of severity less than TransactionException#SEVERITY
 		is encountered during the rollback of this savepoint.
 	*/

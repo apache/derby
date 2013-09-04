@@ -36,7 +36,7 @@ public final class DataInputUtil {
      *      DataInput to be skipped.
      * @param skippedBytes
      *      number of bytes to skip. if skippedBytes <= zero, do nothing.
-     * @throws EOFException
+     * @throws java.io.EOFException
      *      if EOF meets before requested number of bytes are skipped.
      * @throws IOException
      *      if IOException occurs. It doesn't contain EOFException.

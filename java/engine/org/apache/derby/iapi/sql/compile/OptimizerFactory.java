@@ -69,8 +69,6 @@ public interface OptimizerFactory {
 
 	/**
 	 * Return a new CostEstimate.
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 	public CostEstimate getCostEstimate();
 

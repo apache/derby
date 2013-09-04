@@ -377,7 +377,8 @@ public final class SQLDate extends DataType
      * @param isJdbcEscape if true then only the JDBC date escape syntax is allowed
      * @param localeFinder
      *
-     * @exception Standard exception if the syntax is invalid or the value is out of range.
+     * @exception StandardException if the syntax is invalid or the value is
+     * out of range
      */
     public SQLDate( String dateStr, boolean isJdbcEscape, LocaleFinder localeFinder)
         throws StandardException
@@ -398,7 +399,8 @@ public final class SQLDate extends DataType
      * @param isJdbcEscape if true then only the JDBC date escape syntax is allowed
      * @param localeFinder
      *
-     * @exception Standard exception if the syntax is invalid or the value is out of range.
+     * @exception StandardException if the syntax is invalid or the value is
+     * out of range
      */
     public SQLDate( String dateStr, boolean isJdbcEscape, LocaleFinder localeFinder, Calendar cal)
         throws StandardException

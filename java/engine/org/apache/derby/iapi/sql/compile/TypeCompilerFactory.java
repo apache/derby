@@ -36,8 +36,6 @@ public interface TypeCompilerFactory
 	 * Get a TypeCompiler corresponding to the given TypeId.
 	 *
 	 * @return	A TypeCompiler
-	 *
-	 * @exception StandardException		Thrown on failure
 	 */
 	public TypeCompiler getTypeCompiler(TypeId typeId);
 }

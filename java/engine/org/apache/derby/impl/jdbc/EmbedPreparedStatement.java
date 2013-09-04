@@ -1014,14 +1014,8 @@ public class EmbedPreparedStatement extends EmbedStatement
      *  ignored if the parameter is not a user-defined type or REF
      * @exception SQLException if a database access error occurs or
      * this method is called on a closed <code>PreparedStatement</code>
-     * @exception SQLFeatureNotSupportedException if <code>sqlType</code> is
-     * a <code>ARRAY</code>, <code>BLOB</code>, <code>CLOB</code>,
-     * <code>DATALINK</code>, <code>JAVA_OBJECT</code>, <code>NCHAR</code>,
-     * <code>NCLOB</code>, <code>NVARCHAR</code>, <code>LONGNVARCHAR</code>,
-     *  <code>REF</code>, <code>ROWID</code>, <code>SQLXML</code>
-     * or  <code>STRUCT</code> data type and the JDBC driver does not support
-     * this data type or if the JDBC driver does not support this method
-     *
+     * @exception java.sql.SQLFeatureNotSupportedException if Derby does not
+     * support the type specified in the {@code sqlType} parameter
      */
     public void setNull(int paramIndex,
         int sqlType,

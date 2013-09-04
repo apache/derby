@@ -1868,7 +1868,7 @@ public class NetConnection extends ClientConnection {
      *
      * @param name a property key <code>String</code>
      * @param value a property value <code>String</code>
-     * @exception SQLException always.
+     * @exception SQLClientInfoException always.
      */
     public void setClientInfo(String name, String value)
     throws SQLClientInfoException{

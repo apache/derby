@@ -178,7 +178,8 @@ public interface PersistentService {
 		Convert a service name into its canonical form. Returns null if the name
 		cannot be converted into a canonical form.
 		
-		@exception No canonical name, name probably invalid
+        @exception StandardException if an error happens when converting the
+        name (name probably invalid)
 	*/
 	public String getCanonicalServiceName(String name)
 		throws StandardException;

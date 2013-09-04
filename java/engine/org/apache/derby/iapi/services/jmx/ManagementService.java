@@ -71,7 +71,6 @@ public interface ManagementService extends ManagementMBean {
      * Unregister a mbean previously registered with registerMBean.
      * 
      * @param mbeanIdentifier An identifier returned by registerMBean.
-     * @throws StandardException Error unregistering bean.
      */
     public void unregisterMBean(Object mbeanIdentifier);
 }

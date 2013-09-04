@@ -68,7 +68,7 @@ public interface ResultColumnDescriptor
 	 * @return	A String containing the name of the base table of the Column
 	 *		is in. If the column is not in a table (i.e. is a
 	 * 		derived column), it returns NULL.
-	 * @return	The name of the Column's base table. If the column
+     *      The name of the Column's base table. If the column
 	 *		is not in a schema (i.e. is a derived column), it returns NULL.
 	 */
 	String	getSourceTableName();

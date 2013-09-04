@@ -58,8 +58,8 @@ public interface PositionedStream {
      *
      * @param requestedPos requested byte position, first position is {@code 0}
      * @throws IOException if accessing the stream fails
-     * @throws EOFException if the requested position is equal to or larger
-     *      than the length of the stream
+     * @throws java.io.EOFException if the requested position is equal to or
+     *      larger than the length of the stream
      * @throws StandardException if an error occurs in store
      */
     void reposition(long requestedPos)

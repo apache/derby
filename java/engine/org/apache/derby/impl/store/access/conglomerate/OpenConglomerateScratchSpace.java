@@ -225,8 +225,6 @@ public class OpenConglomerateScratchSpace
      * <p>
      *
 	 * @return a scratch RowPosition.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     public RowPosition get_scratch_row_position()
     {

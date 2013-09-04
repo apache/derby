@@ -57,8 +57,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
      * @param blob
      *            the given blob
      * @throws SQLException
-     *             if an error is encountered during serialization
-     * @throws SQLException
+     *             if an error is encountered during serialization, or
      *             if <code>blob</code> is null
      */
     public HarmonySerialBlob(Blob blob) throws SQLException {
@@ -75,10 +74,6 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
      * 
      * @param buf
      *            the given buffer
-     * @throws SQLException
-     *             if an error is encountered during serialization
-     * @throws SQLException
-     *             if a SQL error is encountered
      */
     public HarmonySerialBlob(byte[] buf) {
         this.buf = new byte[buf.length];
@@ -154,8 +149,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
      * @return a long value with the position at which the pattern begins. -1 if
      *         the pattern is not found in this Blob.
      * @throws SQLException
-     *             if an error occurs accessing the Blob
-     * @throws SQLException
+     *             if an error occurs accessing the Blob, or
      *             if an error is encountered
      */
     public long position(Blob pattern, long start) throws SQLException {
@@ -176,8 +170,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
      * @return a long value with the position at which the pattern begins. -1 if
      *         the pattern is not found in this Blob.
      * @throws SQLException
-     *             if an error is encountered
-     * @throws SQLException
+     *             if an error is encountered, or
      *             if an error occurs accessing the Blob
      */
     public long position(byte[] pattern, long start) throws SQLException {

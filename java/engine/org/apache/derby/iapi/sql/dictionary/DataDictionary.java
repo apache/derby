@@ -1782,7 +1782,7 @@ public interface DataDictionary
 	 * 
 	 * @return  array of row locations, null if table has no autoinc columns.
 	 *
-	 * @exception standard exception on error.
+     * @exception StandardException if an error happens
 	 */
 	public RowLocation[] computeAutoincRowLocations(TransactionController tc,
 											   TableDescriptor td)

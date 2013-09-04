@@ -174,8 +174,6 @@ public class OptimizerFactoryImpl
 
 	/**
 	 * @see OptimizerFactory#getCostEstimate
-	 *
-	 * @exception StandardException		Thrown on error
 	 */
 	public CostEstimate getCostEstimate()
 	{

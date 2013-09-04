@@ -103,7 +103,7 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	 * and at the system level.
 	 *
 	 * @return	The authentication service handle for the database
-	 * @exception Standard Derby exception policy
+     * @exception StandardException standard Derby exception policy
 	 */
 	public AuthenticationService getAuthenticationService()
 		throws StandardException;

@@ -101,8 +101,7 @@ public interface XMLDataValue extends DataValueDescriptor
      *  version of the results from evaluation of the query expression.
      *  Note: this XMLDataValue may not be storable into Derby XML
      *  columns.
-     * @exception Exception thrown on error (and turned into a
-     *  StandardException by the caller).
+     * @exception StandardException thrown on error
      */
     public XMLDataValue XMLQuery(SqlXmlUtil sqlxUtil, XMLDataValue result)
 		throws StandardException;
