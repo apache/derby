@@ -549,6 +549,13 @@ public	class DD_Version implements	Formatable
 		boolean isReadOnly = bootingDictionary.af.isReadOnly();
 
 		if (!isReadOnly) {
+            // Make sure all stored plans are cleared, both for triggers and
+            // for metadata queries. The plans will be recompiled automatically
+            // on the first execution after upgrade. We clear the plans because
+            // the stored format may have changed between the versions, so it
+            // might not be possible to read or execute them in this version.
+            bootingDictionary.clearSPSPlans();
+
 			// Once a database is version 10.5 we will start updating metadata SPSes
 			// on any version change,up or down.  This will ensure that metadata queries 
 			// match the version we are using.  We don't want to do this for lower 
@@ -556,10 +563,6 @@ public	class DD_Version implements	Formatable
 			// SPSes won't be restored.
 			if (fromVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_5)
 				bootingDictionary.updateMetadataSPSes(tc);
-			//Following make sure that the stored plans (including the ones for
-			//triggers) will get cleared during upgrade and hence we will not
-			//hold on to stale plans.
-			bootingDictionary.clearSPSPlans();
 
 			DD_Version lastRun;
 			

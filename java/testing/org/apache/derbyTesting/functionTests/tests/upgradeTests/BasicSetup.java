@@ -1947,4 +1947,15 @@ public class BasicSetup extends UpgradeChange {
         s.executeUpdate("DELETE FROM D5289TABLE3");
         commit();  
     }
+
+    /**
+     * Regression test case for DERBY-6314, which caused upgrade to fail if a
+     * metadata query had been executed with the old version of the database.
+     */
+    public void testDERBY6314() throws SQLException {
+        // Simply execute a metadata query. The query itself did not use to
+        // fail, but it caused PhaseChanger to fail when moving to the
+        // PH_SOFT_UPGRADE phase or the PH_HARD_UPGRADE phase.
+        JDBC.assertDrainResults(getConnection().getMetaData().getSchemas());
+    }
 }
