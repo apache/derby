@@ -61,6 +61,36 @@ public abstract class JVMInfo
     public static final int J2SE_17 = 8; // Java SE 7
     public static final int J2SE_18 = 9;
 
+
+    public static int jdbcMajorVersion()
+    { 
+        switch (JDK_ID)
+        { 
+        case J2SE_14: return 3; 
+        case J2SE_142: return 3; 
+        case J2SE_15: return 3; 
+        case J2SE_16: return 4; 
+        case J2SE_17: return 4; 
+        case J2SE_18: 
+        default: return 4;
+        }
+    }
+
+    public static int jdbcMinorVersion()
+    {
+        switch (JDK_ID)
+        { 
+        case J2SE_14: return 0; 
+        case J2SE_142: return 0; 
+        case J2SE_15: return 0; 
+        case J2SE_16: return 0; 
+        case J2SE_17: return 1; 
+        case J2SE_18: 
+        default: return 2; 
+        }
+    } 
+
+
 	public static final boolean J2ME;
 
 	static 
@@ -175,14 +205,15 @@ public abstract class JVMInfo
 	*/
 	public static String derbyVMLevel()
 	{
+		String jdbcVersion = jdbcMajorVersion() + "." + jdbcMinorVersion();
 		switch (JDK_ID)
 		{
-		case J2SE_14: return J2ME ? "J2ME - JDBC for CDC/FP 1.1" : "J2SE 1.4 - JDBC 3.0";
-		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
-		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
-        case J2SE_16: return "Java SE 6 - JDBC 4.1";
-        case J2SE_17: return "Java SE 7 - JDBC 4.1";
-        case J2SE_18: return "Java SE 8 - JDBC 4.1";
+		case J2SE_14: return J2ME ? "J2ME - JDBC for CDC/FP 1.1" : "J2SE 1.4 - JDBC " + jdbcVersion;
+		case J2SE_142: return "J2SE 1.4.2 - JDBC " + jdbcVersion;
+		case J2SE_15: return "J2SE 5.0 - JDBC " + jdbcVersion;
+        case J2SE_16: return "Java SE 6 - JDBC " + jdbcVersion;
+        case J2SE_17: return "Java SE 7 - JDBC " + jdbcVersion;
+        case J2SE_18: return "Java SE 8 - JDBC " + jdbcVersion;
 		default: return "?-?";
 		}
 	}

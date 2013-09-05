@@ -24,6 +24,7 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 // Note:
 //   Tag members using the strictest visibility.
@@ -2275,7 +2276,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     public int getJDBCMinorVersion() throws SQLException {
         checkForClosedConnection();
-        return 0;
+        return JVMInfo.jdbcMinorVersion();
     }
 
     public int getSQLStateType() throws SQLException {

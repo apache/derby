@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDatabaseMetaData {
     
@@ -51,7 +52,8 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
      */
     public int getJDBCMinorVersion() throws SQLException {
         checkForClosedConnection();
-        return 1;
+        //return 1;
+        return JVMInfo.jdbcMinorVersion();
     }
 
     /**

@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     
@@ -46,7 +47,7 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
      * @return JDBC version minor number
      */
     public int getJDBCMinorVersion() {
-        return 1;
+        return JVMInfo.jdbcMinorVersion();
     }
 
     public RowIdLifetime getRowIdLifetime() throws SQLException {
