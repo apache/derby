@@ -41,6 +41,7 @@ public class _Suite extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("largedata suite");
 
+        suite.addTest(Derby6317Test.suite());
         // DERBY-5624, currently this runs out of file descriptors on unix
         // systems with 1024 limit per user.  Setting to run only on windows
         // until solution for unix is found.
