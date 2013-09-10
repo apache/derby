@@ -593,6 +593,21 @@ public class BTreeCostController extends OpenBTree
 
             float estimated_row_count = input_row_count * ret_fraction;
 
+            // DERBY-6317
+            // In the case of unique indexes we always estimate a return of
+            // 1 row for a equality term. To be consistent always insure
+            // that this estimate at least returns at least 1 row, even
+            // though the reality may be that the row does not exist.  In the
+            // case of DERBY-6317 a table with 43 million rows, the existing
+            // calculation for the search which in reality was exactly 1 row 
+            // was rounding down to 0 rows.  This in turn led calling 
+            // optimizer to pick a full scan plan on the 43 million row which
+            // was discounted by multiplying the 0 row count, rather than 
+            // pick an obviously useful index.
+            if (estimated_row_count < 1)
+                estimated_row_count = 1;
+
+
             // first the base cost of positioning on the first row in the scan.
             double cost = 
                 getFetchFromFullKeyCost(scanColumnList, access_type);
@@ -642,7 +657,6 @@ public class BTreeCostController extends OpenBTree
             // return the cost
             cost_result.setEstimatedCost(cost);
 
-            // RESOLVE - should we make sure this number is > 0?
             cost_result.setEstimatedRowCount(Math.round(estimated_row_count));
         }
         finally
