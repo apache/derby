@@ -495,7 +495,7 @@ public	class	DDUtils
 			** of cycles , all the nodes in the cycle have same type of
 			** referential action.
 			**/
-			cycleString = cycleString.append(refActionType);
+			cycleString.append(refActionType);
 		}
 
 
@@ -553,7 +553,7 @@ public	class	DDUtils
 				//check for this is non self referencing cycles case
 				//In cases of cycle, whole cycle should have the same refAction
 				// value. Other wise we should throw an exception
-				cycleString = cycleString.append(raDeleteRule);
+				cycleString.append(raDeleteRule);
 				boolean isFormingCycle = (nextRefTd.getUUID().equals(actualTd.getUUID()));
 				if(isFormingCycle)
 				{
