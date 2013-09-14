@@ -223,19 +223,6 @@ class CorruptFile implements StorageFile {
 	}
 
 
-    /**
-     * Returns the length of the named file if it is not a directory. 
-     *
-     * The return value is not specified if the file is a directory.
-     *
-     * @return The length, in bytes, of the named file if it exists and is not 
-     *         a directory, 0 if the file does not exist, or any value if the 
-     *         named file is a directory.
-     */
-    public long length()
-	{
-		return realFile.length();
-	}
 
     /**
      * Make the named file or directory read-only. 

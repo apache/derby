@@ -269,27 +269,6 @@ abstract class InputStreamFile implements StorageFile
     }
 
     /**
-     * Returns the length of the named file if it is not a directory. The return value is not specified
-     * if the file is a directory.
-     *
-     * @return The length, in bytes, of the named file if it exists and is not a directory,
-     *         0 if the file does not exist, or any value if the named file is a directory.
-     */
-    public long length()
-    {
-        try
-        {
-            InputStream is = getInputStream();
-            if( is == null)
-                return 0;
-            long len = is.available();
-            is.close();
-            return len;
-        }
-        catch( IOException e){ return 0;}
-    } // end of length
-
-    /**
      * Get the name of the parent directory if this name includes a parent.
      *
      * @return An StorageFile denoting the parent directory of this StorageFile, if it has a parent, null if
