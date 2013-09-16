@@ -92,6 +92,16 @@ public class TriggerTest extends BaseJDBCTestCase {
     
     protected void setUp() throws Exception
     {
+        //DERBY-5866( testFiringConstraintOrder(
+        // org.apache.derbyTesting.functionTests.tests.lang.TriggerTest)
+        // junit.framework.AssertionFailedError: 
+        // matching triggers need to be fired in order creation:
+        // 1,NO CASCADE BEFORE,DELETE,ROW )
+        //Do the cleanup here rather than in tearDown. This way, if a test
+        // fixture fails, we will have the left over wombat database with
+        // the schema and data used by the failing fixture.
+        JDBC.dropSchema(getConnection().getMetaData(),
+                getTestConfiguration().getUserName());
         Statement s = createStatement();
         s.executeUpdate("CREATE PROCEDURE TRIGGER_LOG_INFO(" +
                 "O VARCHAR(255)) " +
@@ -101,16 +111,13 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.close();
 
     }
-    
+
     protected void tearDown() throws Exception
     {
         TRIGGER_INFO.set(null);
-        JDBC.dropSchema(getConnection().getMetaData(),
-                getTestConfiguration().getUserName());
-
         super.tearDown();
     }
-    
+
     /**
      * Test that invalidating stored statements marks the statement invalid
      *  in SYS.SYSSTATEMENTS. And when one of those invalid statements is
