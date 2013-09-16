@@ -100,8 +100,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         // 1,NO CASCADE BEFORE,DELETE,ROW )
         //Do the cleanup here rather than in tearDown. This way, if a test
         // fixture fails, we will have the left over wombat database with
-        // the schema and data used by the failing fixture.  
-        TRIGGER_INFO.set(null);
+        // the schema and data used by the failing fixture.
         JDBC.dropSchema(getConnection().getMetaData(),
                 getTestConfiguration().getUserName());
         Statement s = createStatement();
@@ -113,7 +112,13 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.close();
 
     }
-    
+
+    protected void tearDown() throws Exception
+    {
+        TRIGGER_INFO.set(null);
+        super.tearDown();
+    }
+
     /**
      * Test that invalidating stored statements marks the statement invalid
      *  in SYS.SYSSTATEMENTS. And when one of those invalid statements is
