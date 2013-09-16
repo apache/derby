@@ -163,8 +163,6 @@ public interface Conglomerate extends Storable, DataValueDescriptor
      * containerid.
      *
 	 * @return The containerid.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     long getContainerid();
 
@@ -176,8 +174,6 @@ public interface Conglomerate extends Storable, DataValueDescriptor
      * and segment id.
      *
 	 * @return The ContainerKey.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     ContainerKey getId();
 

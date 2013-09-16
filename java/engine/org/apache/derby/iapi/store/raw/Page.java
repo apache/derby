@@ -133,8 +133,6 @@ public interface Page
      * <p>
      *
 	 * @return an invalid record handle.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
 	public RecordHandle getInvalidRecordHandle();
 
@@ -268,9 +266,8 @@ public interface Page
      *
      * @return A RecordHandle representing the new record.
      *
-     * @exception StandardException	Standard Derby error policy
-     * @exception StandardException The container was not opened in update mode.
-     * @exception StandardException Row cannot fit on the page or row is null.
+     * @exception StandardException	if the container was not opened in update
+     * mode, or if the row cannot fit on the page, or if the row is null
      **/
 	RecordHandle insert(
     Object[]            row, 
@@ -485,9 +482,8 @@ public interface Page
      * @return A RecordHandle representing the new record, or null if the row 
      *         will not fit on a non-empty page.
      *
-     * @exception StandardException	Standard Derby error policy
-     * @exception StandardException The container was not opened in update mode.
-     * @exception StandardException The row cannot fit on the page
+     * @exception StandardException	if the container was not opened in update
+     * mode, or if the row cannot fit on the page, or if the row is null
      *
      * @see LogicalUndo
      * @see LogicalUndoable
@@ -723,7 +719,8 @@ public interface Page
 		                                the slot is not on the page, or if the 
                                         record is deleted, or if the fieldId 
                                         is not on the record and (fieldId - 1)
-                                        does not exist.
+                                        does not exist, or if the container was
+                                        not opened in update mode.
 
 		@exception StandardException 
 		The container was not opened in update mode.
@@ -787,15 +784,10 @@ public interface Page
      *                  the access code where the logical undo logic resides.
      *                  Null if logical undo is not necessary.
      * 
-     * @exception StandardException	Standard Derby error policy
-     * @exception StandardException The container was not opened in update mode.
-     * @exception StandardException A statement level exception is thrown when 
-     *                              trying to delete an already deleted record,
-     *                              or undelete a not deleted record.
-     *
-     * @exception StandardException A statement level exception is thrown if 
-     *                              the slot is not on the page.
-     *
+     * @exception StandardException if the container was not opened in update
+     * mode, or if an attempt was made to delete an already deleted record or
+     * undelete a not deleted record, or if the slot is not on the page     *
+     * 
      * @see LockingPolicy
      * @see LogicalUndo
      * @see LogicalUndoable
@@ -947,9 +939,8 @@ public interface Page
 		@param validColumns a bit map of which columns in the row is valid.
 		ValidColumns will not be changed by RawStore.
 
-		@exception StandardException	Standard Derby error policy
-		@exception StandardException The container was not opened in update mode.
-		@exception StandardException if the slot is not on the page.
+		@exception StandardException the container was not opened in update
+		    mode, or the slot is not on the page
 
 	*/
 	RecordHandle updateAtSlot(

@@ -99,7 +99,7 @@ public interface StorageRandomAccessFile extends DataInput, DataOutput
      * does not survive a restart, then the sync method implementation need not do anything.
      *
      *
-     * @exception SyncFailedException if a possibly recoverable error occurs.
+     * @exception java.io.SyncFailedException if a possibly recoverable error occurs.
      * @exception IOException If an IO error occurs.
      */
     public void sync() throws IOException;

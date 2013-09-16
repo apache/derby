@@ -251,7 +251,7 @@ public class LogicalConnection40
      *
      * @param name a property key <code>String</code>
      * @param value a property value <code>String</code>
-     * @exception SQLException if an error occurs
+     * @exception SQLClientInfoException if an error occurs
      */
     public void setClientInfo(String name, String value)
         throws SQLClientInfoException {

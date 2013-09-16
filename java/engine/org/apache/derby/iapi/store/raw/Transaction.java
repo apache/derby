@@ -162,7 +162,7 @@ public interface Transaction {
         transaction is then aborted and then an exception of Transaction
 		severity is thrown nesting the original exception.
 
-		@exception StandardException Any exception more severe than a
+		Any exception more severe than a
         Transaction exception is not caught and the transaction is not aborted.
         The transaction will be aborted by the standard context mechanism.
 
@@ -187,7 +187,7 @@ public interface Transaction {
         transaction is then aborted and then an exception of Transaction
 		severity is thrown nesting the original exception.
 
-		@exception StandardException Any exception more severe than a
+		Any exception more severe than a
         Transaction exception is not caught and the transaction is not aborted.
         The transaction will be aborted by the standard context mechanism.
 	*/
@@ -215,7 +215,6 @@ public interface Transaction {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Derby error policy
 		@exception StandardException A transaction level exception is 
         thrown if the transaction is not idle.
 
@@ -228,7 +227,6 @@ public interface Transaction {
 
 		@see RawStoreFactory#startTransaction
 
-		@exception StandardException Standard Derby error policy
 		@exception StandardException A transaction level exception is 
         thrown if the transaction is not idle.
 
@@ -251,7 +249,6 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if a savepoint already 
         exists in the current transaction with the same name.
@@ -272,7 +269,6 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if a savepoint already
         exists in the current transaction with the same name.
@@ -295,7 +291,6 @@ public interface Transaction {
                     A JDBC Savepoint object value for kindOfSavepoint would mean it is JDBC savepoint
 
 		@return returns total number of savepoints in the stack.
-		@exception StandardException  Standard Derby exception policy
 		@exception StandardException
         A statement level exception is thrown if no savepoint exists with 
         the given name.

@@ -389,7 +389,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *                      one passed in.
      * @param utflen the byte length of the value, or {@code 0} if unknown
      *
-	 * @exception  StandardException  Standard exception policy.
+	 * @exception  IOException  if an I/O error happens
      **/
     public final int readDerbyUTF(char[][] rawData_array, int utflen)
         throws IOException
@@ -558,7 +558,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      * 4 byte- 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx val > 16383 && <= MAX_INT
      * </PRE>
      *
-	 * @exception  StandardException  Standard exception policy.
+	 * @exception  IOException  if an I/O error happens
      **/
     public final int readCompressedInt()
         throws IOException

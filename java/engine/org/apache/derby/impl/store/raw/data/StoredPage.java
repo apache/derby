@@ -1374,8 +1374,6 @@ public class StoredPage extends CachedPage
      *
      * @return true if the record will fit on this page, after being given a
      *         new record id as the next id on this page.
-     *
-     * @exception  StandardException  Standard exception policy.
      **/
     protected boolean spaceForCopy(
     int spaceNeeded, 
@@ -2538,8 +2536,6 @@ public class StoredPage extends CachedPage
      * @return The record header for the specific slot.
      *
      * @param slot   return record header of this slot.
-     *
-     * @exception  StandardException  Standard exception policy.
      **/
     public StoredRecordHeader recordHeaderOnDemand(int slot)
     {

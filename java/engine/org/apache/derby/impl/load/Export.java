@@ -174,7 +174,7 @@ public class Export extends ExportAbstract{
 	 * @param columnDelimeter  Delimiter that seperates columns in the output file
 	 * @param characterDelimeter  Delimiter that is used to quoate non-numeric types
 	 * @param codeset           Codeset that should be used to write  the data to  the file
- 	 * @exception SQL Exception on errors
+ 	 * @exception SQLException on errors
 	 */
 
 	public static void exportTable(Connection con, String schemaName, 
@@ -211,7 +211,7 @@ public class Export extends ExportAbstract{
      *                           write the data to the file/
      * @param lobsFileName       Name of the file to which large object 
      *                           data has to be exported.
-     * @exception SQL Exception on errors
+     * @exception SQLException on errors
      */
 
     public static void exportTable(Connection con, String schemaName, 
@@ -238,7 +238,7 @@ public class Export extends ExportAbstract{
 	 * @param columnDelimeter  Delimiter that seperates columns in the output file
 	 * @param characterDelimeter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset that should be used to write  the data to  the file
- 	 * @exception SQL Exception on errors
+ 	 * @exception SQLException on errors
 	 */
 	public static void exportQuery(Connection con, String selectStatement,
 							  String outputFileName, String columnDelimeter, 
@@ -270,7 +270,7 @@ public class Export extends ExportAbstract{
      * @param codeset Codeset that should be used to write the data to the file
      * @param lobsFileName Name of the file to which 
      *                     large object data has to be exported.
-     * @exception SQL Exception on errors
+     * @exception SQLException on errors
      */
     public static void exportQuery(Connection con, String selectStatement,
                                    String outputFileName, String columnDelimeter, 

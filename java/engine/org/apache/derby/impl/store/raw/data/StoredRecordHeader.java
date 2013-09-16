@@ -304,8 +304,6 @@ public final class StoredRecordHeader
      * rows, so calls to CompressNumber have been hand inlined.
      *
      * @return The length of the record header.
-     *
-     * @exception  StandardException  Standard exception policy.
      **/
     public int size() 
     {

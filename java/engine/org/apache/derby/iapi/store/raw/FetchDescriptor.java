@@ -114,8 +114,6 @@ public final class FetchDescriptor
      * parameters work together to describe a "row".
      *
 	 * @return The column list bit map.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     public final FormatableBitSet getValidColumns()
     {
@@ -158,8 +156,6 @@ public final class FetchDescriptor
      * A null qualifier array means there are no qualifiers.
      *
 	 * @return The qualifier array, it may be null.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     public final Qualifier[][] getQualifierList()
     {

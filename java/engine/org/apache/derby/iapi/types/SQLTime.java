@@ -384,7 +384,8 @@ public final class SQLTime extends DataType
      *<li>JIS & current ISO: hh:mm[:ss]
      *</ol>
      * 
-     * @exception Standard exception if the syntax is invalid or the value is out of range.
+     * @exception StandardException if the syntax is invalid or the value is
+     *     out of range.
      */
     public SQLTime( String timeStr, boolean isJdbcEscape, LocaleFinder localeFinder)
         throws StandardException
@@ -400,7 +401,8 @@ public final class SQLTime extends DataType
      *<li>JIS & current ISO: hh:mm[:ss]
      *</ol>
      * 
-     * @exception Standard exception if the syntax is invalid or the value is out of range.
+     * @exception StandardException if the syntax is invalid or the value is
+     *     out of range.
      */
     public SQLTime( String timeStr, boolean isJdbcEscape, LocaleFinder localeFinder, Calendar cal)
         throws StandardException

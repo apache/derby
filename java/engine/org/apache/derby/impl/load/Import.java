@@ -58,7 +58,7 @@ public class Import extends ImportAbstract{
 	/**
 	 * Constructior to Invoke Import from a select statement 
 	 * @param inputFileName	 The URL of the ASCII file from which import will happen
-	 * @exception Exception on error 
+	 * @exception SQLException on error 
 	 */
 	public Import(String inputFileName, String columnDelimiter,
                   String characterDelimiter,  String codeset, 
@@ -112,7 +112,7 @@ public class Import extends ImportAbstract{
 	 *                         appended.(0 - append , > 0 Replace the data)
      * @param lobsInExtFile true, if the lobs data is stored in an external file,
      *                      and the reference to it is stored in the main import file.
- 	 * @exception SQL Exception on errors
+ 	 * @exception SQLException on errors
 	 */
 
 	public static void importTable(Connection connection, String schemaName, 
@@ -150,7 +150,7 @@ public class Import extends ImportAbstract{
 	 *                         appended.(0 - append , > 0 Replace the data)
      * @param lobsInExtFile true, if the lobs data is stored in an external file,
      *                      and the reference is stored in the main import file.
- 	 * @exception SQL Exception on errors
+ 	 * @exception SQLException on errors
 	 */
 	public static void importData(Connection connection, String schemaName,
                                   String tableName, String insertColumnList, 

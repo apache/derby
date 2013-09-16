@@ -311,8 +311,6 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
      * <p>
      * Close this stream file, and all streams associated with it.
      * <p>
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
 	protected void close()
     {

@@ -109,16 +109,11 @@ public final class LimitReader extends Reader implements Limit
         or skipped in the stream.
         Any attempt to read more than length characters will
 		result in an EOFException
-
-		@exception IOException IOException from some underlying stream
-		@exception EOFException The set limit would exceed
-		the available data in the stream.
 	*/
 	public void setLimit(int length) 
 	{
 		remainingCharacters = length;
 		limitInPlace = true;
-		return;
 	}
     
     /**

@@ -396,7 +396,7 @@ public final class StoredFieldHeader
      * @param offset    the offset in the array where the field begin, ie. 
      *                  the status byte is at data[offset].
      *
-	 * @exception  StandardException  Standard exception policy.
+	 * @exception  IOException  if an I/O error occurs
      **/
 	public static final int readTotalFieldLength(
     byte[]      data,

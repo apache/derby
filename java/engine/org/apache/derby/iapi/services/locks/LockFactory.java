@@ -75,14 +75,13 @@ public interface LockFactory extends PropertySetCallback {
 		@return true if the lock was obtained, false if timeout is equal to LockFactory.NO_WAIT and the lock
 		could not be granted.
 
-		@exception org.apache.derby.iapi.error.StandardException A deadlock has occured (message id will be LockFactory.Deadlock)
-		@exception org.apache.derby.iapi.error.StandardException The wait for the lock timed out (message id will be LockFactory.TimeOut).
-		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
-		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
-		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Derby error policy.
-
-	*/
+        @exception StandardException if a deadlock has occurred (message id
+            will be LockFactory.Deadlock), or if the wait for the lock timed
+            out (message id will be LockFactory.TimeOut), or if another thread
+            interrupted this thread while it was waiting for the lock (this will
+            be a StandardException with a nested InterruptedException, and the
+            message id will be LockFactory.InterruptedExceptionId), or if
+            any other error occurs when locking the object	*/
 	public boolean lockObject(CompatibilitySpace compatibilitySpace,
 							  Object group, Lockable ref, Object qualifier,
 							  int timeout)
@@ -170,13 +169,13 @@ public interface LockFactory extends PropertySetCallback {
 		@return true if the lock was obtained, false if timeout is equal to LockFactory.NO_WAIT and the lock
 		could not be granted.
 
-		@exception org.apache.derby.iapi.error.StandardException A deadlock has occured (message id will be LockFactory.Deadlock)
-		@exception org.apache.derby.iapi.error.StandardException The wait for the lock timed out (message id will be LockFactory.TimeOut).
-		@exception org.apache.derby.iapi.error.StandardException Another thread interupted this thread while
-		it was waiting for the lock. This will be a StandardException with a nested java.lang.InterruptedException exception,
-		(message id will be LockFactory.InterruptedExceptionId)
-		@exception StandardException Standard Derby error policy.
-
+        @exception StandardException if a deadlock has occurred (message id
+            will be LockFactory.Deadlock), or if the wait for the lock timed
+            out (message id will be LockFactory.TimeOut), or if another thread
+            interrupted this thread while it was waiting for the lock (this will
+            be a StandardException with a nested InterruptedException, and the
+            message id will be LockFactory.InterruptedExceptionId), or if
+            any other error occurs when locking the object
 	*/
 	public boolean zeroDurationlockObject(CompatibilitySpace compatibilitySpace,
 										  Lockable ref, Object qualifier,

@@ -189,7 +189,6 @@ public interface ContainerHandle
 
 		@see Page#unlatch
 
-		@exception StandardException	Standard Derby error policy
 		@exception StandardException If a page could not be allocated.
 	*/
 	public Page addPage() throws StandardException;

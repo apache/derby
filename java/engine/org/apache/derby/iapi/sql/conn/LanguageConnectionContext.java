@@ -565,8 +565,6 @@ public interface LanguageConnectionContext extends Context {
 	 * which we compile against.
 	 *
 	 * @return the compiler context
-	 *
-	 * @exception StandardException thrown on failure
 	 */
 	public	CompilerContext pushCompilerContext();
 
@@ -578,8 +576,6 @@ public interface LanguageConnectionContext extends Context {
 	 * @param sd the default schema 
 	 *
 	 * @return the compiler context
-	 *
-	 * @exception StandardException thrown on failure
 	 */
 	public	CompilerContext pushCompilerContext(SchemaDescriptor sd);
 

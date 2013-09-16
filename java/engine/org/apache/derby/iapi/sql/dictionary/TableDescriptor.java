@@ -1147,8 +1147,6 @@ public class TableDescriptor extends TupleDescriptor
 	 * for the table.
 	 *
 	 * @return	A ConglomerateDescriptor[] for looping through the table's conglomerates
-	 *
-	 * @exception StandardException		Thrown on failure
 	 */
 	public ConglomerateDescriptor[]	getConglomerateDescriptors()
 	{

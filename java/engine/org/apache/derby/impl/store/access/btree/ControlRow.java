@@ -1218,8 +1218,6 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 	@param partialKeyOrder what to return on a partial key match.
 	@param ascOrDesc column sort order information
 	@throws StandardException if lower levels have a problem.
-
-    @exception StandardException Standard exception policy.
 	**/
 	public static int compareIndexRowFromPageToKey(
     ControlRow              indexpage,

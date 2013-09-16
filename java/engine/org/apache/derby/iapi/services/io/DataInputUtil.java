@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.services.io;
 
 import java.io.DataInput;
+
 import java.io.IOException;
 
 /**
@@ -31,7 +32,7 @@ public final class DataInputUtil {
 
     /**
      * Skips requested number of bytes,
-     * throws EOFException if there is too few bytes in the DataInput.
+     * throws java.io.EOFException if there is too few bytes in the DataInput.
      * @param in
      *      DataInput to be skipped.
      * @param skippedBytes

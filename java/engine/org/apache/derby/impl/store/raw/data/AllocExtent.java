@@ -602,8 +602,6 @@ public class AllocExtent implements Externalizable
      * 1) the truncate of pages greater than new_highest_page happened before
      *    the abort took place.  W
      * 2) 
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     protected void undoCompressPages(
     int        new_highest_page,
@@ -766,8 +764,6 @@ public class AllocExtent implements Externalizable
      * <p>
      *
 	 * @return The page number of this "bit" in the extent map.
-     *
-	 * @exception  StandardException  Standard exception policy.
      **/
     protected long getPagenum(int bit_pos)
     {
