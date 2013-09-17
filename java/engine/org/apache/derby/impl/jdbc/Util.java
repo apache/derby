@@ -328,9 +328,13 @@ public abstract class Util  {
                 next = javaException(cause);
             }
         }
-		return newEmbedSQLException(SQLState.JAVA_EXCEPTION,
+		SQLException    result = newEmbedSQLException(SQLState.JAVA_EXCEPTION,
                 new Object[] {name, msg}, next,
                 ExceptionSeverity.NO_APPLICABLE_SEVERITY, t);
+
+    	if ( result.getErrorCode() >= logSeverityLevel ) { logSQLException( result ); }
+        
+        return result;
 	}
 
 
