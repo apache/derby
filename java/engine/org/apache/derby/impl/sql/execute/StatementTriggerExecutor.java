@@ -77,15 +77,16 @@ class StatementTriggerExecutor extends GenericTriggerExecutor
 		tec.setTrigger(triggerd);
 		tec.setBeforeResultSet(brs);
 		tec.setAfterResultSet(ars);
-		
-		try
-		{
-			executeSPS(getAction());
-		}
-		finally
-		{
-			clearSPS();
-			tec.clearTrigger();	
-		}
+
+        // Execute the trigger action only if the WHEN clause returns
+        // TRUE or there is no WHEN clause.
+        if (executeWhenClause()) {
+            try {
+                executeSPS(getAction(), false);
+            } finally {
+                clearSPS();
+                tec.clearTrigger();
+            }
+        }
 	}
 }

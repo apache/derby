@@ -11113,6 +11113,9 @@ triggerDefinition() throws StandardException :
     ResultColumnList    triggerColumns =
                         new ResultColumnList(getContextManager());
     List<TriggerReferencingStruct> refClause = null;
+    ValueNode whenClause = null;
+    Token whenOpen = null;
+    Token whenClose = null;
 }
 {
 	<TRIGGER> triggerName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -11122,6 +11125,7 @@ triggerDefinition() throws StandardException :
 		[ refClause = triggerReferencingClause() ]		// REFERENCING OLD/NEW AS 	
 		[ <FOR> <EACH> isRow = rowOrStatement() ]
 		[ <MODE> <DB2SQL> ]
+        [ <WHEN> whenOpen = <LEFT_PAREN> whenClause = valueExpression() whenClose = <RIGHT_PAREN> ]
 		//we are not top level statement
 		actionNode = proceduralStatement(tokenHolder)
 		// the trigger body
@@ -11145,6 +11149,11 @@ triggerDefinition() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_TRIGGER_ACTION);
 		}
 
+        String whenText = (whenClause == null)
+            ? null
+            : StringUtil.slice(statementSQLText, whenOpen.endOffset + 1,
+                               whenClose.beginOffset - 1, true);
+
         return new CreateTriggerNode(
 								triggerName, 
 								tableName,
@@ -11154,13 +11163,12 @@ triggerDefinition() throws StandardException :
                                 isRow.booleanValue(),
                                 true,        // enabled
                                 refClause,   // referencing clause
-                                null,        // when clause node
-                                null,        // when clause text
-                                0,           // when clause begin offset
+                                whenClause,  // when clause node
+                                whenText,    // when clause text
 								actionNode,
 								StringUtil.slice(statementSQLText,
 									actionBegin,
-									actionEnd,false),
+									actionEnd, true),
                                 actionBegin,
 								getContextManager());
 	}

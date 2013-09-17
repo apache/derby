@@ -97,6 +97,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SubqueryFlatteningTest.suite());
         suite.addTest(TimeHandlingTest.suite());
         suite.addTest(TriggerTest.suite());
+        suite.addTest(TriggerWhenClauseTest.suite());
         suite.addTest(TruncateTableTest.suite());
         suite.addTest(VTITest.suite());
         suite.addTest(SysDiagVTIMappingTest.suite());

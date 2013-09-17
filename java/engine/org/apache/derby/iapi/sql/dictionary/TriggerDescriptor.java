@@ -413,7 +413,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public SPSDescriptor getWhenClauseSPS()
 		throws StandardException
 	{
-		if (whenSPS == null)
+        if (whenSPSId != null && whenSPS == null)
 		{
 			whenSPS = getDataDictionary().getSPSDescriptor(whenSPSId);
 		}

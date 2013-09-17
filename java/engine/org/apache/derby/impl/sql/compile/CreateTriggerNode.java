@@ -227,7 +227,6 @@ class CreateTriggerNode extends DDLStatementNode
 	 * @param refClause				the referencing clause
 	 * @param whenClause			the WHEN clause tree
 	 * @param whenText				the text of the WHEN clause
-	 * @param whenOffset			offset of start of WHEN clause
 	 * @param actionNode			the trigger action tree
 	 * @param actionText			the text of the trigger action
 	 * @param actionOffset			offset of start of action clause
@@ -247,7 +246,6 @@ class CreateTriggerNode extends DDLStatementNode
         List<TriggerReferencingStruct> refClause,
         ValueNode       whenClause,
         String          whenText,
-        int             whenOffset,
         StatementNode   actionNode,
         String          actionText,
         int             actionOffset,
@@ -265,10 +263,10 @@ class CreateTriggerNode extends DDLStatementNode
         this.isEnabled = isEnabled;
         this.refClause = refClause;
         this.whenClause = whenClause;
-        this.whenText = (whenText == null) ? null : whenText.trim();
+        this.whenText = (whenText == null) ? null : ("VALUES " + whenText);
         this.actionNode = actionNode;
         this.originalActionText = actionText;
-        this.actionText = (actionText == null) ? null : actionText.trim();
+        this.actionText = (actionText == null) ? null : actionText;
         this.actionOffset = actionOffset;
         this.implicitCreateSchema = true;
 	}

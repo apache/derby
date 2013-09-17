@@ -26,12 +26,15 @@ import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
-
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A trigger executor is an object that executes
@@ -50,8 +53,12 @@ abstract class GenericTriggerExecutor
 	private SPSDescriptor	whenClause; 
 	private SPSDescriptor	action;
 
-	private ExecPreparedStatement	ps;
-	private Activation 				spsActivation;
+    // Cached prepared statement and activation for WHEN clause and
+    // trigger action.
+    private ExecPreparedStatement   whenPS;
+    private Activation              spsWhenActivation;
+    private ExecPreparedStatement   actionPS;
+    private Activation              spsActionActivation;
 
 	/**
 	 * Constructor
@@ -95,7 +102,7 @@ abstract class GenericTriggerExecutor
 		int[]	colsReadFromTable
 	) throws StandardException;
 
-	protected SPSDescriptor getWhenClause() throws StandardException
+    private SPSDescriptor getWhenClause() throws StandardException
 	{
 		if (!whenClauseRetrieved)
 		{
@@ -120,11 +127,27 @@ abstract class GenericTriggerExecutor
 	 * just grab the prepared statement from the spsd,
 	 * get a new activation holder and let er rip.
 	 *
+     * @param sps the SPS to execute
+     * @param isWhen {@code true} if the SPS is for the WHEN clause,
+     *               {@code false} otherwise
+     * @return {@code true} if the SPS is for a WHEN clause and it evaluated
+     *         to {@code TRUE}, {@code false} otherwise
 	 * @exception StandardException on error
 	 */
-	protected void executeSPS(SPSDescriptor sps) throws StandardException
+    final boolean executeSPS(SPSDescriptor sps, boolean isWhen)
+            throws StandardException
 	{
 		boolean recompile = false;
+        boolean whenClauseWasTrue = false;
+
+        // The prepared statement and the activation may already be available
+        // if the trigger has been fired before in the same statement. (Only
+        // happens with row triggers that are triggered by a statement that
+        // touched multiple rows.) The WHEN clause and the trigger action have
+        // their own prepared statement and activation. Fetch the correct set.
+        ExecPreparedStatement ps = isWhen ? whenPS : actionPS;
+        Activation spsActivation = isWhen
+                ? spsWhenActivation : spsActionActivation;
 
 		while (true) {
 			/*
@@ -153,6 +176,16 @@ abstract class GenericTriggerExecutor
 				*/
 				ps.setSource(sps.getText());
 				ps.setSPSAction();
+
+                // Cache the prepared statement and activation in case the
+                // trigger fires multiple times.
+                if (isWhen) {
+                    whenPS = ps;
+                    spsWhenActivation = spsActivation;
+                } else {
+                    actionPS = ps;
+                    spsActionActivation = spsActivation;
+                }
 			}
 
 			// save the active statement context for exception handling purpose
@@ -175,7 +208,32 @@ abstract class GenericTriggerExecutor
                 // timeout to its parent statement's timeout settings.
 				ResultSet rs = ps.executeSubStatement
 					(activation, spsActivation, false, 0L);
-                if( rs.returnsRows())
+
+                if (isWhen)
+                {
+                    // This is a WHEN clause. Expect a single BOOLEAN value
+                    // to be returned.
+                    ExecRow row = rs.getNextRow();
+                    if (SanityManager.DEBUG && row.nColumns() != 1) {
+                        SanityManager.THROWASSERT(
+                            "Expected WHEN clause to have exactly "
+                            + "one column, found: " + row.nColumns());
+                    }
+
+                    DataValueDescriptor value = row.getColumn(1);
+                    if (SanityManager.DEBUG) {
+                        SanityManager.ASSERT(value instanceof SQLBoolean);
+                    }
+
+                    whenClauseWasTrue =
+                            !value.isNull() && value.getBoolean();
+
+                    if (SanityManager.DEBUG) {
+                        SanityManager.ASSERT(rs.getNextRow() == null,
+                                "WHEN clause returned more than one row");
+                    }
+                }
+                else if (rs.returnsRows())
                 {
                     // Fetch all the data to ensure that functions in the select list or values statement will
                     // be evaluated and side effects will happen. Why else would the trigger action return
@@ -238,22 +296,50 @@ abstract class GenericTriggerExecutor
 			}
 
 			/* Done with execution without any recompiles */
-			break;
+            return whenClauseWasTrue;
 		}
 	}
 
 	/**
-	 * Cleanup after executing an sps.
+     * Cleanup after executing the SPS for the trigger action.
 	 *
 	 * @exception StandardException on error
 	 */
 	protected void clearSPS() throws StandardException
 	{
-		if (spsActivation != null)
-		{
-			spsActivation.close();
-		}
-		ps = null;
-		spsActivation = null;
+        if (spsActionActivation != null) {
+            spsActionActivation.close();
+        }
+        actionPS = null;
+        spsActionActivation = null;
 	}
+
+    /**
+     * Evaluate the WHEN clause, if there is one, and return whether the
+     * trigger action should be executed.
+     *
+     * @return {@code true} if the trigger action should be executed (that is,
+     *   if there is no WHEN clause or if the WHEN clause evaluates to TRUE),
+     *   {@code false} otherwise
+     * @throws StandardException if an error happens when executing the
+     *   WHEN clause
+     */
+    final boolean executeWhenClause() throws StandardException {
+        SPSDescriptor whenClauseDescriptor = getWhenClause();
+
+        if (whenClauseDescriptor == null) {
+            // Always execute the trigger action if there is no WHEN clause.
+            return true;
+        }
+
+        try {
+            return executeSPS(whenClauseDescriptor, true);
+        } finally {
+            if (spsWhenActivation != null) {
+                spsWhenActivation.close();
+            }
+            whenPS = null;
+            spsWhenActivation = null;
+        }
+    }
 } 

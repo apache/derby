@@ -288,6 +288,10 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 
 		actionSPSId = (actionSPSId == null) ? 
 			dd.getUUIDFactory().createUUID() : actionSPSId;
+
+        if (whenSPSId == null && whenText != null) {
+            whenSPSId = dd.getUUIDFactory().createUUID();
+        }
  
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
@@ -306,7 +310,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									isRow,
 									isEnabled,
 									triggerTable,
-									whenspsd == null ? null : whenspsd.getUUID(),
+                                    whenSPSId,
 									actionSPSId,
 									creationTimestamp == null ? new Timestamp(System.currentTimeMillis()) : creationTimestamp,
 									referencedCols,
