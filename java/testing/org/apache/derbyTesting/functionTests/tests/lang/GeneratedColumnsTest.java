@@ -5574,6 +5574,65 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
 
+    // Derby 6346
+    public void test_derby_6346()
+        throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+        (
+            conn,
+            "create table t1_6346( c1 int, c2 int generated always as ( -c1 ) )"
+        );
+        goodStatement
+        (
+            conn,
+            "create table t2_6346( c1 int )"
+        );
+        goodStatement
+        (
+            conn,
+            "create table t3_6346( c1 int, c2 int )"
+        );
+        goodStatement
+        (
+            conn,
+            "insert into t1_6346( c1 ) values ( 2 ), ( 20 )"
+        );
+        goodStatement
+        (
+            conn,
+            "insert into t3_6346( c1, c2 ) values ( 2, -2 ), ( 20, -20 )"
+        );
+        goodStatement
+        (
+            conn,
+            "insert into t2_6346( c1 ) values ( 2 ), ( 200 )"
+        );
+
+        String[][]  expectedResults = new String[][]
+        {
+            { "2", "2", "-2" },     
+            { "200", null, null },
+        };
+        
+        assertResults
+            (
+             conn,
+             "select * from t2_6346 left join t3_6346 on t3_6346.c1 = t2_6346.c1 order by t2_6346.c1",
+             expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t2_6346 left join t1_6346 on t1_6346.c1 = t2_6346.c1 order by t2_6346.c1",
+             expectedResults,
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
