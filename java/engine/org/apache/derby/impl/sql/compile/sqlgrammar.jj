@@ -3656,7 +3656,7 @@ matchingClauseList() throws StandardException :
     ArrayList<MatchingClauseNode>   matchingClauses = new ArrayList<MatchingClauseNode>();
 }
 {
-    matchingClause( matchingClauses ) ( <COMMA> matchingClause( matchingClauses ) ) *
+    matchingClause( matchingClauses ) ( matchingClause( matchingClauses ) ) *
 	{
         return matchingClauses;
 	}
