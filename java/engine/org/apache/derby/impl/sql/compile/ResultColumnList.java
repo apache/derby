@@ -1350,9 +1350,20 @@ public class ResultColumnList extends QueryTreeNodeVector
             // method, which (like CHECK CONSTRAINTS) is explicitly called by
             // InsertResultSet and UpdateResultSet.
             //
+            // For LEFT JOINs, we may need to stuff a NULL into the generated column slot,
+            // just as we do for non-generated columns in a LEFT JOIN. We look at the source
+            // expression for the ResultColumn to determine whether this ResultColumnList
+            // represents an INSERT/UPDATE vs. a SELECT. If this ResultColumnList represents a
+            // LEFT JOIN, then the source expression will be a VirtualColumnNode.
+            // See DERBY-6346.
+            //
 			if ( rc.hasGenerationClause() )
             {
-                continue;
+                ValueNode   expr = rc.getExpression();
+                if ( (expr != null) && !(expr instanceof VirtualColumnNode) )
+                {
+                    continue;
+                }
             }
             
 			// we need the expressions to be Columns exactly.
