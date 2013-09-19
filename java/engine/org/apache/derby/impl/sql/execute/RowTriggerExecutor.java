@@ -110,11 +110,7 @@ class RowTriggerExecutor extends GenericTriggerExecutor
 				if (event.isAfter()) 
 					tec.updateAICounters();
 
-                // Execute the trigger action only if the WHEN clause returns
-                // TRUE or there is no WHEN clause.
-                if (executeWhenClause()) {
-                    executeSPS(getAction(), false);
-                }
+                executeWhenClauseAndAction();
 				
 				/*
 				  For BEFORE ROW triggers, update the ai values after the SPS

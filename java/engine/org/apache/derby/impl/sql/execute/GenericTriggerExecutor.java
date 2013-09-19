@@ -112,7 +112,7 @@ abstract class GenericTriggerExecutor
 		return whenClause;
 	}
 
-	protected SPSDescriptor getAction() throws StandardException
+    private SPSDescriptor getAction() throws StandardException
 	{
 		if (!actionRetrieved)
 		{
@@ -134,7 +134,7 @@ abstract class GenericTriggerExecutor
      *         to {@code TRUE}, {@code false} otherwise
 	 * @exception StandardException on error
 	 */
-    final boolean executeSPS(SPSDescriptor sps, boolean isWhen)
+    private boolean executeSPS(SPSDescriptor sps, boolean isWhen)
             throws StandardException
 	{
 		boolean recompile = false;
@@ -301,7 +301,7 @@ abstract class GenericTriggerExecutor
 	}
 
 	/**
-     * Cleanup after executing the SPS for the trigger action.
+     * Cleanup after executing the SPS for the WHEN clause and trigger action.
 	 *
 	 * @exception StandardException on error
 	 */
@@ -312,34 +312,32 @@ abstract class GenericTriggerExecutor
         }
         actionPS = null;
         spsActionActivation = null;
+
+        if (spsWhenActivation != null) {
+            spsWhenActivation.close();
+        }
+        whenPS = null;
+        spsWhenActivation = null;
 	}
 
     /**
-     * Evaluate the WHEN clause, if there is one, and return whether the
-     * trigger action should be executed.
+     * <p>
+     * Execute the WHEN clause SPS and the trigger action SPS.
+     * </p>
      *
-     * @return {@code true} if the trigger action should be executed (that is,
-     *   if there is no WHEN clause or if the WHEN clause evaluates to TRUE),
-     *   {@code false} otherwise
-     * @throws StandardException if an error happens when executing the
-     *   WHEN clause
+     * <p>
+     * If there is no WHEN clause, the trigger action should always be
+     * executed. If there is a WHEN clause, the trigger action should only
+     * be executed if the WHEN clause returns TRUE.
+     * </p>
+     *
+     * @throws StandardException if trigger execution fails
      */
-    final boolean executeWhenClause() throws StandardException {
+    final void executeWhenClauseAndAction() throws StandardException {
         SPSDescriptor whenClauseDescriptor = getWhenClause();
-
-        if (whenClauseDescriptor == null) {
-            // Always execute the trigger action if there is no WHEN clause.
-            return true;
-        }
-
-        try {
-            return executeSPS(whenClauseDescriptor, true);
-        } finally {
-            if (spsWhenActivation != null) {
-                spsWhenActivation.close();
-            }
-            whenPS = null;
-            spsWhenActivation = null;
+        if (whenClauseDescriptor == null ||
+                executeSPS(whenClauseDescriptor, true)) {
+            executeSPS(getAction(), false);
         }
     }
 } 
