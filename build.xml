@@ -1569,7 +1569,6 @@
   <target name="make-locale-classpath-manifest">
       <manifest file="${manifest.file}" mode="${manifest.mode}">
           <attribute name="Class-Path" value="derbyLocale_cs.jar derbyLocale_de_DE.jar derbyLocale_es.jar derbyLocale_fr.jar derbyLocale_hu.jar derbyLocale_it.jar derbyLocale_ja_JP.jar derbyLocale_ko_KR.jar derbyLocale_pl.jar derbyLocale_pt_BR.jar derbyLocale_ru.jar derbyLocale_zh_CN.jar derbyLocale_zh_TW.jar"/>
-      <attribute name="Profile" value="compact2"/>
       </manifest>
   </target>
 
@@ -1580,7 +1579,6 @@
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
       <attribute name="Bundle-ManifestVersion" value="2"/>
-      <attribute name="Profile" value="compact2"/>
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/impl/tools/sysinfo/">
     	  <attribute name="Sealed" value="false"/>
@@ -1714,7 +1712,6 @@
     <manifest file="${derby.jar.dir}/lists/smfnet.mf">
       <attribute name="Main-Class" value="org.apache.derby.drda.NetworkServerControl"/>
       <attribute name="Class-Path" value="derby.jar"/>
-      <attribute name="Profile" value="compact2"/>
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/impl/drda/">
     	  <attribute name="Sealed" value="false"/>
@@ -1794,7 +1791,6 @@
       <attribute name="Bundle-SymbolicName" value="derbyclient"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
-      <attribute name="Profile" value="compact2"/>
       <!-- See DERBY-4669. -->
       <section name="org/apache/derby/shared/common/sanity/">
         <attribute name="Sealed" value="false"/>
@@ -1849,7 +1845,6 @@
     
     <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
       <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
-      <attribute name="Profile" value="compact2"/>
       <attribute name="Class-Path" value="derby.jar derbyclient.jar derbytools.jar derbynet.jar"/>
     </manifest> 
  	
@@ -1955,14 +1950,9 @@
       <param name="info.file" value="${out.dir}/org/apache/derby/info/locale_${locale.iname}.properties"/>
     </antcall>   
 
-    <manifest file="${derby.jar.dir}/lists/smflocale.mf">
-      <attribute name="Profile" value="compact2"/>
-    </manifest>
-
     <jar destfile="${derby.jar.dir}/derbyLocale_${locale.iname}.jar"
          compress="true"
-	 filesonly="true"
-	 manifest="${derby.jar.dir}/lists/smflocale.mf">
+	 filesonly="true">
       <fileset dir="${out.dir}"
 	       includes="org/apache/derby/info/*_${locale.iname}.properties,
 	                 org/apache/derby/loc/*_${locale.iname}.properties,
