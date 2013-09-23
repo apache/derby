@@ -19,6 +19,8 @@
 
 package org.apache.derbyTesting.junit;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.TimeZone;
 import junit.framework.Test;
 
@@ -56,15 +58,27 @@ public class TimeZoneTestSetup extends BaseTestSetup {
      */
     protected void setUp() {
         savedDefault = TimeZone.getDefault();
-        TimeZone.setDefault(requestedDefault);
+        setDefault(requestedDefault);
     }
 
     /**
      * Reset the timezone.
      */
     protected void tearDown() {
-        TimeZone.setDefault(savedDefault);
+        setDefault(savedDefault);
         savedDefault = null;
         requestedDefault = null;
+    }
+    
+    private void setDefault(final TimeZone tz) throws SecurityException{
+        if (tz== null) {
+            throw new IllegalArgumentException("tz cannot be <null>");
+        }
+        AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() throws SecurityException {
+                        TimeZone.setDefault(tz);
+                        return null;
+                    }});
     }
 }
