@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
@@ -39,6 +40,13 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         return TestConfiguration.defaultSuite(TriggerWhenClauseTest.class);
+    }
+
+    @Override
+    protected void initializeConnection(Connection conn) throws SQLException {
+        // Run the test cases with auto-commit off so that all changes to
+        // the database can be rolled back in tearDown().
+        conn.setAutoCommit(false);
     }
 
     public void testBasicSyntax() throws SQLException {
@@ -89,6 +97,21 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 { "Executed tr3", "1" },
                 { "Executed tr7", "1" },
             });
+    }
+
+    /**
+     * A row trigger whose WHEN clause contains a subquery, could cause a
+     * NullPointerException. This test case is disabled until the bug is fixed.
+     */
+    public void xtestSubqueryInWhenClauseNPE() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x int)");
+        s.execute("create trigger tr1 after insert on t1 for each row "
+                + "when ((values true)) insert into t2 values 1");
+
+        // This statement results in a NullPointerException.
+        s.execute("insert into t1 values 1,2,3");
     }
 
 }
