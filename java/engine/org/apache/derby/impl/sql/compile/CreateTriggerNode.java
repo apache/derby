@@ -602,7 +602,6 @@ class CreateTriggerNode extends DDLStatementNode
 			for (int i = 0; i < tabs.size(); i++)
 			{
 				FromBaseTable fromTable = tabs.get(i);
-				String refTableName = fromTable.getTableName().getTableName();
 				String baseTableName = fromTable.getBaseTableName();
 				if ((baseTableName == null) ||
 					((oldTableName == null || !oldTableName.equals(baseTableName)) &&
@@ -628,7 +627,7 @@ class CreateTriggerNode extends DDLStatementNode
 				** pick it up automatically; otherwise, supply
 				** the default.
 				*/
-				if (refTableName.equals(baseTableName))
+                if (fromTable.getCorrelationName() == null)
 				{
 					newText.append(baseTableName).append(" ");
 				}

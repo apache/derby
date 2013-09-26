@@ -1738,4 +1738,64 @@ public class TriggerTest extends BaseJDBCTestCase {
     public static void derby4610proc(String str) {
         // do nothing
     }
+
+    /**
+     * Regression test case for DERBY-6351, where CREATE TRIGGER would fail
+     * with a syntax error if the triggered SQL statement referenced a
+     * transition table using a correlation name, and that correlation name
+     * was equal to the transition table name.
+     */
+    public void testDerby6351TransitionTableCorrelation() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x varchar(10), y int)");
+
+        // The correlation name is equal to the name of the transition table.
+        // This used to fail with a syntax error.
+        s.execute("create trigger tr1 after insert on t1 "
+                + "referencing new table as n "
+                + "insert into t2 select 'tr1', x from n n");
+        s.execute("create trigger tr2 after update on t1 "
+                + "referencing old table as o "
+                + "insert into t2 select 'tr2', x from o o");
+
+        // For completeness, also verify that no correlation name and a
+        // distinct correlation name work as expected.
+        s.execute("create trigger tr3 after insert on t1 "
+                + "referencing new table as n "
+                + "insert into t2 select 'tr3', x from n");
+        s.execute("create trigger tr4 after update on t1 "
+                + "referencing old table as o "
+                + "insert into t2 select 'tr4', x from o");
+        s.execute("create trigger tr5 after insert on t1 "
+                + "referencing new table as n "
+                + "insert into t2 select 'tr5', n1.x from n n1");
+        s.execute("create trigger tr6 after update on t1 "
+                + "referencing old table as o "
+                + "insert into t2 select 'tr6', o1.x from o o1");
+
+        // Fire the insert triggers and verify that they worked.
+        s.execute("insert into t1 values 1,2");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t2 order by x, y"),
+                new String[][] {
+                    { "tr1", "1" },
+                    { "tr1", "2" },
+                    { "tr3", "1" },
+                    { "tr3", "2" },
+                    { "tr5", "1" },
+                    { "tr5", "2" },
+                });
+
+        // Fire the update triggers and verify that they worked.
+        s.execute("delete from t2"); // clean up first
+        s.execute("update t1 set x = x + 1 where x = 1");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t2 order by x, y"),
+                new String[][] {
+                    { "tr2", "1" },
+                    { "tr4", "1" },
+                    { "tr6", "1" },
+                });
+    }
 }
