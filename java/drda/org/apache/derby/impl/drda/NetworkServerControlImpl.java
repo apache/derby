@@ -578,7 +578,9 @@ public final class NetworkServerControlImpl {
                 e.printStackTrace(lw);
             }
         }
-        else
+        // DERBY-5610 - If there is no log writer, only print
+        // exception to System.out if derby.drda.debug=true
+        else if (debugOutput)
         {
             e.printStackTrace();
         }
