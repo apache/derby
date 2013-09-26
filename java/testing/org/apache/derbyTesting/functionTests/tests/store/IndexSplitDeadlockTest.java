@@ -649,9 +649,14 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         });
 
         // Give the other thread a little while to start and obtain the
-        // lock on the last record.
-        Thread.sleep(1000);
-
+        // lock on the last record. We expect two locks in the lock table
+        // when the other thread is ready. Don't wait more than a minute
+        // as something must have gone wrong.
+        int totalWait = 0;
+        do {
+            totalWait += 500;
+            Thread.sleep(500);
+        } while (numlocks() < 2 && totalWait < 60000);
         // The last record should be locked now, so this call will have to
         // wait initially. This statement used to cause an assert failure in
         // debug builds before DERBY-4193.
@@ -661,6 +666,20 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
                 "4");
     }
 
+    /**
+     * Get the number of locks in the lock table 
+     * @return number of locks
+     * @throws SQLException
+     */
+    private int numlocks() throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("SELECT count(*) from syscs_diag.lock_table");
+        rs.next();
+        int num = rs.getInt(1);
+        rs.close();
+        return num;
+    }
+    
     /**
      * Test that a forward scan works even in the case that it has to wait
      * for the previous key lock more than once. This used to cause an assert
