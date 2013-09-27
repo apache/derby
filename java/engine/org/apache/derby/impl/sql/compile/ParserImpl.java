@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.io.StringReader;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -126,8 +127,27 @@ public class ParserImpl implements Parser
 	public Visitable parseStatement(String statementSQLText, Object[] paramDefaults)
 		throws StandardException
 	{
+        return parseStatementOrSearchCondition(
+                statementSQLText, paramDefaults, true);
+    }
 
-		java.io.Reader sqlText = new java.io.StringReader(statementSQLText);
+    /**
+     * Parse a full SQL statement or a fragment that represents a
+     * {@code <search condition>}.
+     *
+     * @param sql the SQL statement or fragment to parse
+     * @param paramDefaults parameter defaults to pass on to the parser
+     *   in the case where {@code sql} is a full SQL statement
+     * @param isStatement {@code true} if {@code sql} is a full SQL statement,
+     *   {@code false} if it is a fragment
+     * @return parse tree for the SQL
+     * @throws StandardException if an error happens during parsing
+     */
+    private Visitable parseStatementOrSearchCondition(
+            String sql, Object[] paramDefaults, boolean isStatement)
+        throws StandardException
+    {
+        StringReader sqlText = new StringReader(sql);
 
 		/* Get a char stream if we don't have one already */
 		if (charStream == null)
@@ -140,12 +160,15 @@ public class ParserImpl implements Parser
 		}
 
 		/* remember the string that we're parsing */
-		SQLtext = statementSQLText;
+        SQLtext = sql;
 
 		/* Parse the statement, and return the QueryTree */
 		try
 		{
-		    return getParser().Statement(statementSQLText, paramDefaults);
+            SQLParser p = getParser();
+            return isStatement
+                    ? p.Statement(sql, paramDefaults)
+                    : p.SearchCondition(sql);
 		}
 		catch (ParseException e)
 		{
@@ -165,6 +188,12 @@ public class ParserImpl implements Parser
 		    throw StandardException.newException(SQLState.LANG_LEXICAL_ERROR, e.getMessage());
 		}
 	}
+
+    @Override
+    public Visitable parseSearchCondition(String sqlFragment)
+            throws StandardException {
+        return parseStatementOrSearchCondition(sqlFragment, null, false);
+    }
 
 	/**
 	 * Returns the current SQL text string that is being parsed.

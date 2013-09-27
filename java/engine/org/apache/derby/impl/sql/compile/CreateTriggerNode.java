@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -32,6 +33,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -63,8 +65,10 @@ class CreateTriggerNode extends DDLStatementNode
 	private	String				whenText;
 	private	StatementNode		actionNode;
 	private	String				actionText;
-	private	String				originalActionText; // text w/o trim of spaces
-	private	int					actionOffset;
+    private final String        originalWhenText;
+    private final String        originalActionText;
+    private final int           whenOffset;
+    private final int           actionOffset;
 
 	private SchemaDescriptor	triggerSchemaDescriptor;
 	private SchemaDescriptor	compSchemaDescriptor;
@@ -227,6 +231,7 @@ class CreateTriggerNode extends DDLStatementNode
 	 * @param refClause				the referencing clause
 	 * @param whenClause			the WHEN clause tree
 	 * @param whenText				the text of the WHEN clause
+     * @param whenOffset            offset of start of WHEN clause
 	 * @param actionNode			the trigger action tree
 	 * @param actionText			the text of the trigger action
 	 * @param actionOffset			offset of start of action clause
@@ -246,6 +251,7 @@ class CreateTriggerNode extends DDLStatementNode
         List<TriggerReferencingStruct> refClause,
         ValueNode       whenClause,
         String          whenText,
+        int             whenOffset,
         StatementNode   actionNode,
         String          actionText,
         int             actionOffset,
@@ -263,10 +269,12 @@ class CreateTriggerNode extends DDLStatementNode
         this.isEnabled = isEnabled;
         this.refClause = refClause;
         this.whenClause = whenClause;
-        this.whenText = (whenText == null) ? null : ("VALUES " + whenText);
+        this.originalWhenText = whenText;
+        this.whenText = (whenText == null) ? null : whenText.trim();
+        this.whenOffset = whenOffset;
         this.actionNode = actionNode;
         this.originalActionText = actionText;
-        this.actionText = (actionText == null) ? null : actionText;
+        this.actionText = (actionText == null) ? null : actionText.trim();
         this.actionOffset = actionOffset;
         this.implicitCreateSchema = true;
 	}
@@ -384,12 +392,13 @@ class CreateTriggerNode extends DDLStatementNode
 					
 			actionNode.bindStatement();
 
-			/* when clause is always null
 			if (whenClause != null)
 			{
-				whenClause.bind();
+                ContextManager cm = getContextManager();
+                whenClause = whenClause.bindExpression(
+                        new FromList(cm), new SubqueryList(cm),
+                        new ArrayList<AggregateNode>(0));
 			}
-			*/
 		}
 		finally
 		{
@@ -470,7 +479,7 @@ class CreateTriggerNode extends DDLStatementNode
 	**
 	** 1) validate the referencing clause (if any)
 	**
-	** 2) convert trigger action text.  e.g. 
+    ** 2) convert trigger action text and WHEN clause text.  e.g.
 	**	DELETE FROM t WHERE c = old.c
 	** turns into
 	**	DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
@@ -515,7 +524,7 @@ class CreateTriggerNode extends DDLStatementNode
         if ( isBefore ) { forbidActionsOnGenCols(); }
 
 		String transformedActionText;
-		int start = 0;
+        String transformedWhenText = null;
 		if (triggerCols != null && triggerCols.size() != 0) {
 			//If the trigger is defined on speific columns, then collect
 			//their column positions and ensure that those columns do
@@ -576,6 +585,17 @@ class CreateTriggerNode extends DDLStatementNode
 					triggerEventMask,
 					true
 					);			
+
+            // If there is a WHEN clause, we need to transform its text too.
+            if (whenClause != null) {
+                transformedWhenText =
+                    getDataDictionary().getTriggerActionString(
+                            whenClause, oldTableName, newTableName,
+                            originalWhenText, referencedColInts,
+                            referencedColsInTriggerAction, whenOffset,
+                            triggerTableDescriptor, triggerEventMask, true);
+            }
+
 			//Now that we know what columns we need for REFERENCEd columns in
 			//trigger action, we can get rid of -1 entries for the remaining 
 			//columns from trigger table. This information will be saved in
@@ -587,63 +607,12 @@ class CreateTriggerNode extends DDLStatementNode
 		else
 		{
 			//This is a table level trigger	        
-			//Total Number of columns in the trigger table
-			int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
-            StringBuilder newText = new StringBuilder();
-			/*
-			** For a statement trigger, we find all FromBaseTable nodes.  If
-			** the from table is NEW or OLD (or user designated alternates
-			** REFERENCING), we turn them into a trigger table VTI.
-			*/
-			CollectNodesVisitor<FromBaseTable> visitor = new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
-			actionNode.accept(visitor);
-			List<FromBaseTable> tabs = visitor.getList();
-			Collections.sort(tabs, OFFSET_COMPARATOR);
-			for (int i = 0; i < tabs.size(); i++)
-			{
-				FromBaseTable fromTable = tabs.get(i);
-				String baseTableName = fromTable.getBaseTableName();
-				if ((baseTableName == null) ||
-					((oldTableName == null || !oldTableName.equals(baseTableName)) &&
-					(newTableName == null || !newTableName.equals(baseTableName))))
-				{
-					continue;
-				}
-				int tokBeginOffset = fromTable.getTableNameField().getBeginOffset();
-				int tokEndOffset = fromTable.getTableNameField().getEndOffset();
-				if (tokBeginOffset == -1)
-				{
-					continue;
-				}
-
-				checkInvalidTriggerReference(baseTableName);
-
-				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
-				newText.append(baseTableName.equals(oldTableName) ?
-								"new org.apache.derby.catalog.TriggerOldTransitionRows() " :
-								"new org.apache.derby.catalog.TriggerNewTransitionRows() ");
-				/*
-				** If the user supplied a correlation, then just
-				** pick it up automatically; otherwise, supply
-				** the default.
-				*/
-                if (fromTable.getCorrelationName() == null)
-				{
-					newText.append(baseTableName).append(" ");
-				}
-				start=tokEndOffset-actionOffset+1;
-				//If we are dealing with statement trigger, then we will read 
-				//all the columns from the trigger table since trigger will be
-				//fired for any of the columns in the trigger table.
-				referencedColInts= new int[numberOfColsInTriggerTable];
-				for (int j=0; j < numberOfColsInTriggerTable; j++)
-					referencedColInts[j]=j+1;
-			}
-			if (start < originalActionText.length())
-			{
-				newText.append(originalActionText.substring(start));
-			}
-			transformedActionText = newText.toString();
+            transformedActionText = transformStatementTriggerText(
+                    actionNode, originalActionText, actionOffset);
+            if (whenClause != null) {
+                transformedWhenText = transformStatementTriggerText(
+                        whenClause, originalWhenText, whenOffset);
+            }
 		}
 
 		if (referencedColsInTriggerAction != null)
@@ -661,6 +630,12 @@ class CreateTriggerNode extends DDLStatementNode
 			actionText = transformedActionText;
 			actionNode = parseStatement(actionText, true);
 		}
+
+        if (whenClause != null && !transformedWhenText.equals(whenText)) {
+            regenNode = true;
+            whenText = transformedWhenText;
+            whenClause = parseSearchCondition(whenText, true);
+        }
 
 		return regenNode;
 	}
@@ -692,6 +667,89 @@ class CreateTriggerNode extends DDLStatementNode
 		} else
 			return null;
 	}
+
+    /**
+     * Transform the WHEN clause or the triggered SQL statement of a
+     * statement trigger from its original shape to internal syntax where
+     * references to transition tables are replaced with VTIs that return
+     * the before or after image of the changed rows.
+     *
+     * @param node the syntax tree of the WHEN clause or the triggered
+     *   SQL statement
+     * @param originalText the original text of the WHEN clause or the
+     *   triggered SQL statement
+     * @param offset the offset of the WHEN clause or the triggered SQL
+     *   statement within the CREATE TRIGGER statement
+     * @return internal syntax for accessing before or after image of
+     *   the changed rows
+     * @throws StandardException if an error happens while performing the
+     *   transformation
+     */
+    private String transformStatementTriggerText(
+            Visitable node, String originalText, int offset)
+        throws StandardException
+    {
+        int start = 0;
+        StringBuilder newText = new StringBuilder();
+
+        // For a statement trigger, we find all FromBaseTable nodes. If
+        // the from table is NEW or OLD (or user designated alternates
+        // REFERENCING), we turn them into a trigger table VTI.
+        CollectNodesVisitor<FromBaseTable> visitor =
+                new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
+        node.accept(visitor);
+        List<FromBaseTable> tabs = visitor.getList();
+        Collections.sort(tabs, OFFSET_COMPARATOR);
+        for (FromBaseTable fromTable : tabs) {
+            String baseTableName = fromTable.getBaseTableName();
+            if (baseTableName == null
+                    || (!baseTableName.equals(oldTableName)
+                            && !baseTableName.equals(newTableName))) {
+                // baseTableName is not the NEW or OLD table, so no need
+                // to do anything. Skip this table.
+                continue;
+            }
+
+            int tokBeginOffset = fromTable.getTableNameField().getBeginOffset();
+            int tokEndOffset = fromTable.getTableNameField().getEndOffset();
+            if (tokBeginOffset == -1) {
+                // Unknown offset. Skip this table.
+                continue;
+            }
+
+            // Check if this transition table is allowed in this trigger type.
+            checkInvalidTriggerReference(baseTableName);
+
+            // Replace the transition table name with a VTI.
+            newText.append(originalText, start, tokBeginOffset - offset);
+            newText.append(baseTableName.equals(oldTableName)
+                ? "new org.apache.derby.catalog.TriggerOldTransitionRows() "
+                : "new org.apache.derby.catalog.TriggerNewTransitionRows() ");
+
+            // If the user supplied a correlation, then just
+            // pick it up automatically; otherwise, supply
+            // the default.
+            if (fromTable.getCorrelationName() == null) {
+                newText.append(baseTableName).append(' ');
+            }
+
+            start = tokEndOffset - offset + 1;
+
+            // If we are dealing with statement trigger, then we will read
+            // all the columns from the trigger table since trigger will be
+            // fired for any of the columns in the trigger table.
+            int numberOfColsInTriggerTable =
+                    triggerTableDescriptor.getNumberOfColumns();
+            referencedColInts = new int[numberOfColsInTriggerTable];
+            for (int j = 0; j < numberOfColsInTriggerTable; j++) {
+                referencedColInts[j] = j + 1;
+            }
+        }
+
+        newText.append(originalText, start, originalText.length());
+
+        return newText.toString();
+    }
 
     /*
      * Forbid references to generated columns in the actions of BEFORE triggers.
@@ -872,6 +930,7 @@ class CreateTriggerNode extends DDLStatementNode
 											(Timestamp)null,	// creation time
 											referencedColInts,
 											referencedColsInTriggerAction,
+                                            originalWhenText,
 											originalActionText,
 											oldTableInReferencingClause,
 											newTableInReferencingClause,

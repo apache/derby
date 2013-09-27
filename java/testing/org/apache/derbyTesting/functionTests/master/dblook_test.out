@@ -2104,6 +2104,7 @@ false
 false
 null
 null
+null
 ----
 <systemid>
 REFTRIG
@@ -2122,6 +2123,7 @@ true
 false
 OLDTABLE
 null
+null
 ----
 <systemid>
 TRIG2
@@ -2138,6 +2140,7 @@ null
 values (1), (2)
 false
 false
+null
 null
 null
 ----
@@ -2158,6 +2161,7 @@ true
 true
 OLD
 NEW
+null
 ----
 <systemid>
 TRIGONE
@@ -2176,6 +2180,7 @@ false
 false
 null
 null
+null
 ----
 <systemid>
 TrigThree
@@ -2192,6 +2197,7 @@ null
 select c from bar."tWithKeys"
 false
 false
+null
 null
 null
 ----
@@ -4369,6 +4375,7 @@ false
 false
 null
 null
+null
 ----
 <systemid>
 REFTRIG
@@ -4387,6 +4394,7 @@ true
 false
 OLDTABLE
 null
+null
 ----
 <systemid>
 TRIG2
@@ -4403,6 +4411,7 @@ null
 values (1), (2)
 false
 false
+null
 null
 null
 ----
@@ -4423,6 +4432,7 @@ true
 true
 OLD
 NEW
+null
 ----
 <systemid>
 TRIGONE
@@ -4441,6 +4451,7 @@ false
 false
 null
 null
+null
 ----
 <systemid>
 TrigThree
@@ -4457,6 +4468,7 @@ null
 select c from bar."tWithKeys"
 false
 false
+null
 null
 null
 ----
@@ -5105,6 +5117,7 @@ true
 false
 OLDTABLE
 null
+null
 ----
 ========== SYSVIEWS ==========
 ========== SYSROLES ==========
@@ -5716,6 +5729,7 @@ false
 false
 null
 null
+null
 ----
 ========== SYSVIEWS ==========
 V2
@@ -5892,6 +5906,7 @@ null
 values(8)
 false
 false
+null
 null
 null
 ----

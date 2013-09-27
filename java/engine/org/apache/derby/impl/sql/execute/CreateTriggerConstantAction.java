@@ -75,6 +75,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	private String					whenText;
 	private UUID					actionSPSId;
 	private String					actionText;
+    private final String            originalWhenText;
 	private String					originalActionText;
 	private String					oldReferencingName;
 	private String					newReferencingName;
@@ -108,6 +109,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	 * @param referencedColsInTriggerAction	what columns does the trigger 
 	 *						action reference through old/new transition variables
 	 *						(may be null)
+     * @param originalWhenText The original user text of the WHEN clause (may be null)
 	 * @param originalActionText The original user text of the trigger action
 	 * @param referencingOld whether or not OLD appears in REFERENCING clause
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
@@ -131,6 +133,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		Timestamp			creationTimestamp,
 		int[]				referencedCols,
 		int[]				referencedColsInTriggerAction,
+        String              originalWhenText,
 		String				originalActionText,
 		boolean				referencingOld,
 		boolean				referencingNew,
@@ -155,6 +158,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		this.referencedCols = referencedCols;
 		this.referencedColsInTriggerAction = referencedColsInTriggerAction;
 		this.originalActionText = originalActionText;
+        this.originalWhenText = originalWhenText;
 		this.referencingOld = referencingOld;
 		this.referencingNew = referencingNew;
 		this.oldReferencingName = oldReferencingName;
@@ -319,7 +323,8 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									referencingOld,
 									referencingNew,
 									oldReferencingName,
-									newReferencingName);
+                                    newReferencingName,
+                                    originalWhenText);
 
 
 		dd.addDescriptor(triggerd, triggerSd,
@@ -332,8 +337,11 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		*/
 		if (whenText != null)
 		{
+            // The WHEN clause is just a search condition and not a full
+            // SQL statement. Turn in into a VALUES statement.
+            String whenValuesStmt = "VALUES " + whenText;
 			whenspsd = createSPS(lcc, ddg, dd, tc, tmpTriggerId, triggerSd,
-						whenSPSId, spsCompSchemaId, whenText, true, triggerTable);
+                whenSPSId, spsCompSchemaId, whenValuesStmt, true, triggerTable);
 		}
 
 		/*

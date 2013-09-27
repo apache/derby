@@ -75,6 +75,7 @@ import java.io.IOException;
  * <li> public SPSDescriptor getActionSPS();
  * <li>	public UUID getWhenClauseId();
  * <li>	public SPSDescriptor getWhenClauseSPS()
+ * <li> public String getWhenClauseText();
  * <li>	public TableDescriptor getTableDescriptor()
  * <li> public ReferencedColumns getReferencedColumnsDescriptor()
  * <li> public int[] getReferencedCols();
@@ -123,6 +124,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	private	Timestamp			creationTimestamp;
 	private UUID				triggerSchemaId;
 	private UUID				triggerTableId;
+    private String              whenClauseText;
 
 
 	/**
@@ -154,6 +156,8 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
 	 * @param oldReferencingName old referencing table name, if any, that appears in REFERCING clause
 	 * @param newReferencingName new referencing table name, if any, that appears in REFERCING clause
+     * @param whenClauseText the SQL text of the WHEN clause, or {@code null}
+     *                       if there is no WHEN clause
 	 */
     TriggerDescriptor
 	(
@@ -175,7 +179,8 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		boolean				referencingOld,
 		boolean				referencingNew,
 		String				oldReferencingName,
-		String				newReferencingName
+        String              newReferencingName,
+        String              whenClauseText
 	)
 	{
 		super(dataDictionary);
@@ -197,6 +202,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		this.referencingNew = referencingNew;
 		this.oldReferencingName = oldReferencingName;
 		this.newReferencingName = newReferencingName;
+        this.whenClauseText = whenClauseText;
 		triggerSchemaId = sd.getUUID();
 		triggerTableId = td.getUUID();
 	}	
@@ -402,6 +408,15 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	{
 		return whenSPSId;
 	}
+
+    /**
+     * Get the SQL text of the WHEN clause.
+     * @return SQL text for the WHEN clause, or {@code null} if there is
+     *   no WHEN clause
+     */
+    public String getWhenClauseText() {
+        return whenClauseText;
+    }
 
 	/**
 	 * Get the trigger when clause sps 
@@ -859,6 +874,16 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public void readExternal(ObjectInput in)
 		 throws IOException, ClassNotFoundException
 	{
+        readExternal_v10_10(in);
+        whenClauseText = (String) in.readObject();
+    }
+
+    /**
+     * {@code readExternal()} method to be used if the data dictionary
+     * version is 10.10 or lower.
+     */
+    void readExternal_v10_10(ObjectInput in)
+            throws IOException, ClassNotFoundException {
 		id = (UUID)in.readObject();
 		name = (String)in.readObject();
 		triggerSchemaId = (UUID)in.readObject();
@@ -923,6 +948,15 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public void writeExternal( ObjectOutput out )
 		 throws IOException
 	{
+        writeExternal_v10_10(out);
+        out.writeObject(whenClauseText);
+    }
+
+    /**
+     * {@code writeExternal()} method to be used if the data dictionary
+     * version is 10.10 or lower.
+     */
+    void writeExternal_v10_10(ObjectOutput out) throws IOException {
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(triggerSchemaId != null,
@@ -976,7 +1010,9 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 *
 	 *	@return	the formatID of this class
 	 */
-	public	int	getTypeFormatId()	{ return StoredFormatIds.TRIGGER_DESCRIPTOR_V01_ID; }
+    public int getTypeFormatId() {
+        return StoredFormatIds.TRIGGER_DESCRIPTOR_V02_ID;
+    }
 
 	/** @see TupleDescriptor#getDescriptorType */
 	public String getDescriptorType()

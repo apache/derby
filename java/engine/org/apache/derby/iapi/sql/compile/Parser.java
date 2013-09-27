@@ -58,6 +58,16 @@ public interface Parser
 	public Visitable parseStatement(String statementSQLText)
 		throws StandardException;
 
+    /**
+     * Parse an SQL fragment that represents a {@code <search condition>}.
+     *
+     * @param sqlFragment the SQL fragment to parse
+     * @return a parse tree representing the search condition
+     * @throws StandardException if the SQL fragment could not be parsed
+     */
+    public Visitable parseSearchCondition(String sqlFragment)
+        throws StandardException;
+
 	/**
 	 * Returns the current SQL text string that is being parsed.
 	 *

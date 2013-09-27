@@ -508,6 +508,16 @@ public	class DD_Version implements	Formatable
             bootingDictionary.create_10_10_system_procedures( tc, newlyCreatedRoutines );
         }
 
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_10)
+        {
+            // On upgrade from versions before 10.11, add a column to the
+            // SYSTRIGGERS table in order to support the WHEN clause.
+            bootingDictionary.upgrade_addColumns(
+              bootingDictionary.getNonCoreTIByNumber(
+                DataDictionary.SYSTRIGGERS_CATALOG_NUM).getCatalogRowFactory(),
+                new int[] { 18 }, tc);
+        }
+
         // Grant PUBLIC access to some system routines
         bootingDictionary.grantPublicAccessToSystemRoutines(newlyCreatedRoutines, tc, aid);
 	}

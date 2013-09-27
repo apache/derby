@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
@@ -81,8 +80,9 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	public	static	final	int		SYSTRIGGERS_REFERENCINGNEW = 15;
 	public	static	final	int		SYSTRIGGERS_OLDREFERENCINGNAME = 16;
 	public	static	final	int		SYSTRIGGERS_NEWREFERENCINGNAME = 17;
+    public  static  final   int     SYSTRIGGERS_WHENCLAUSETEXT = 18;
 
-	public	static	final	int		SYSTRIGGERS_COLUMN_COUNT = SYSTRIGGERS_NEWREFERENCINGNAME;
+    public  static  final   int     SYSTRIGGERS_COLUMN_COUNT = SYSTRIGGERS_WHENCLAUSETEXT;
 
 	public  static final int		SYSTRIGGERS_INDEX1_ID = 0;
 	public  static final int		SYSTRIGGERS_INDEX2_ID = 1;
@@ -110,14 +110,22 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		,"c013800d-00d7-c025-480d-000a0a411200"	// SYSTRIGGERS_INDEX3
 	};
 
+    private final DataDictionary dataDictionary;
+
 	/////////////////////////////////////////////////////////////////////////////
 	//
 	//	CONSTRUCTORS
 	//
 	/////////////////////////////////////////////////////////////////////////////
-	SYSTRIGGERSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
+    SYSTRIGGERSRowFactory(
+            DataDictionary dd,
+            UUIDFactory uuidf,
+            ExecutionFactory ef,
+            DataValueFactory dvf)
+        throws StandardException
 	{
 		super(uuidf,ef,dvf);
+        this.dataDictionary = dd;
 		initInfo(SYSTRIGGERS_COLUMN_COUNT, TABLENAME_STRING, 
 				 indexColumnPositions,  uniqueness, uuids);
 	}
@@ -134,13 +142,33 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	 *
 	 * @exception   StandardException thrown on failure
 	 */
-
+    @Override
 	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
 		throws StandardException
 	{
-		DataTypeDescriptor		dtd;
-		ExecRow    				row;
-		DataValueDescriptor		col;
+        return makeRow(td, getHeapColumnCount());
+    }
+
+    @Override
+    public ExecRow makeEmptyRowForCurrentVersion() throws StandardException {
+        return makeRow(null, SYSTRIGGERS_COLUMN_COUNT);
+    }
+
+    /**
+     * Helper method that contains common logic for {@code makeRow()} and
+     * {@code makeEmptyRowForCurrentVersion()}. Creates a row for the
+     * SYSTRIGGERS conglomerate.
+     *
+     * @param td the {@code TriggerDescriptor} to create a row from (can be
+     *   {@code null} if the returned row should be empty)
+     * @param columnCount the number of columns in the returned row (used for
+     *   trimming off columns in soft upgrade mode to match the format in
+     *   the old dictionary version)
+     * @return a row for the SYSTRIGGERS conglomerate
+     * @throws StandardException if an error happens when creating the row
+     */
+    private ExecRow makeRow(TupleDescriptor td, int columnCount)
+            throws StandardException {
 		String					name = null;
 		UUID					uuid = null;	
 		UUID					suuid = null;			// schema	
@@ -158,6 +186,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		ReferencedColumns rcd = null;
 		boolean					referencingOld = false;
 		boolean					referencingNew = false;
+        String                  whenClauseText = null;
 
 		if (td != null)
 		{
@@ -185,10 +214,11 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 			referencingNew = triggerDescriptor.getReferencingNew();
 			oldReferencingName = triggerDescriptor.getOldReferencingName();
 			newReferencingName = triggerDescriptor.getNewReferencingName();
+            whenClauseText = triggerDescriptor.getWhenClauseText();
 		}
 
 		/* Build the row to insert */
-		row = getExecutionFactory().getValueRow(SYSTRIGGERS_COLUMN_COUNT);
+        ExecRow row = getExecutionFactory().getValueRow(columnCount);
 
 		/* 1st column is TRIGGERID */
 		row.setColumn(1, new SQLChar((uuid == null) ? null : uuid.toString()));
@@ -243,6 +273,13 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		/* 17th column is NEWREFERENCINGNAME */
 		row.setColumn(17, new SQLVarchar(newReferencingName));
 
+        /* 18th column is WHENCLAUSETEXT */
+        if (row.nColumns() >= 18) {
+            // This column is present only if the data dictionary version is
+            // 10.11 or higher.
+            row.setColumn(18, dvf.getLongvarcharDataValue(whenClauseText));
+        }
+
 		return row;
 	}
 
@@ -296,7 +333,15 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(row.nColumns() == SYSTRIGGERS_COLUMN_COUNT, 
+            // The expected number of columns depends on the version of the
+            // data dictionary. The WHENCLAUSETEXT column was added in version
+            // 10.11 (DERBY-534).
+            int expectedCols =
+                dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, null)
+                    ? SYSTRIGGERS_COLUMN_COUNT
+                    : (SYSTRIGGERS_COLUMN_COUNT - 1);
+
+            SanityManager.ASSERT(row.nColumns() == expectedCols,
 								 "Wrong number of columns for a SYSTRIGGERS row");
 		}
 
@@ -372,7 +417,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		col = row.getColumn(12);
 		rcd = (ReferencedColumns) col.getObject();
 		
-		// 13th column is TRIGGERDEFINITION (longvarhar)
+        // 13th column is TRIGGERDEFINITION (longvarchar)
 		col = row.getColumn(13);
 		triggerDefinition = col.getString();
 
@@ -392,6 +437,15 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		col = row.getColumn(17);
 		newReferencingName = col.getString();
 
+        // 18th column is WHENCLAUSETEXT (longvarchar)
+        String whenClauseText = null;
+        if (row.nColumns() >= 18) {
+            // This column is present only if the data dictionary version is
+            // 10.11 or higher.
+            col = row.getColumn(18);
+            whenClauseText = col.getString();
+        }
+
         descriptor = ddg.newTriggerDescriptor(
 									dd.getSchemaDescriptor(suuid, null),
 									uuid, 
@@ -410,7 +464,8 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 									referencingOld,
 									referencingNew,
 									oldReferencingName,
-									newReferencingName
+                                    newReferencingName,
+                                    whenClauseText
 									);
 
 		return descriptor;
@@ -450,7 +505,8 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
             SystemColumnImpl.getColumn("REFERENCINGNEW", Types.BOOLEAN, true),
             SystemColumnImpl.getIdentifierColumn("OLDREFERENCINGNAME", true),
             SystemColumnImpl.getIdentifierColumn("NEWREFERENCINGNAME", true),
-            
+            SystemColumnImpl.getColumn("WHENCLAUSETEXT",
+                    Types.LONGVARCHAR, true, Integer.MAX_VALUE),
            };
 	}
 
@@ -474,4 +530,16 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 			return true;
 		}
 	}
+
+    @Override
+    public int getHeapColumnCount() throws StandardException {
+        // The WHEN clause (DERBY-534) is only supported if the dictionary
+        // version is 10.11 or higher. Older versions of the dictionary don't
+        // include the WHENCLAUSETEXT column, so adjust the column count
+        // accordingly.
+        boolean supportsWhenClause = dataDictionary
+                .checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, null);
+        int heapCols = super.getHeapColumnCount();
+        return supportsWhenClause ? heapCols : (heapCols - 1);
+    }
 }

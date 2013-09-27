@@ -737,6 +737,44 @@ public abstract class QueryTreeNode implements Visitable
 	*/
 	StatementNode parseStatement(String sql, boolean internalSQL) throws StandardException
 	{
+        return (StatementNode)
+                parseStatementOrSearchCondition(sql, internalSQL, true);
+    }
+
+    /**
+     * Parse an SQL fragment that represents a {@code <search condition>}.
+     *
+     * @param sql a fragment of an SQL statement
+     * @param internalSQL {@code true} if the SQL fragment is allowed to
+     *   contain internal syntax, {@code false} otherwise
+     * @return a {@code ValueNode} representing the parse tree of the
+     *   SQL fragment
+     * @throws StandardException if an error happens while parsing
+     */
+    ValueNode parseSearchCondition(String sql, boolean internalSQL)
+        throws StandardException
+    {
+        return (ValueNode)
+                parseStatementOrSearchCondition(sql, internalSQL, false);
+    }
+
+    /**
+     * Parse a full SQL statement or a fragment representing a {@code <search
+     * condition>}. This is a worker method that contains common logic for
+     * {@link #parseStatement} and {@link #parseSearchCondition}.
+     *
+     * @param sql the SQL statement or fragment to parse
+     * @param internalSQL {@code true} if it is allowed to contain internal
+     *   syntax, {@code false} otherwise
+     * @param isStatement {@code true} if {@code sql} is a full SQL statement,
+     *   {@code false} if it is a fragment
+     * @return a parse tree
+     * @throws StandardException if an error happens while parsing
+     */
+    private Visitable parseStatementOrSearchCondition(
+            String sql, boolean internalSQL, boolean isStatement)
+        throws StandardException
+    {
 		/*
 		** Get a new compiler context, so the parsing of the text
 		** doesn't mess up anything in the current context 
@@ -749,7 +787,9 @@ public abstract class QueryTreeNode implements Visitable
 		try
 		{
 			Parser p = newCC.getParser();
-			return (StatementNode) p.parseStatement(sql);
+            return isStatement
+                    ? p.parseStatement(sql)
+                    : p.parseSearchCondition(sql);
 		}
 
 		finally

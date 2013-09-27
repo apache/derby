@@ -33,7 +33,6 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * Superclass of all row factories.
@@ -294,7 +293,7 @@ public abstract	class CatalogRowFactory
 	 *
 	 * @return The number of columns in the heap.
 	 */
-	public final int getHeapColumnCount()
+    public int getHeapColumnCount() throws StandardException
 	{
 		return columnCount;
 	}
@@ -306,6 +305,28 @@ public abstract	class CatalogRowFactory
 	{
  		return	this.makeRow(null, null);
 	}
+
+    /**
+     * <p>
+     * Create an empty row for this conglomerate, in the format that would
+     * be used in a database that was created with, or hard upgraded to,
+     * the currently running version. That is, even if the database is only
+     * soft-upgraded, this method should return a row in the new format.
+     * </p>
+     *
+     * <p>
+     * This method is for use in code that creates the catalogs, or that
+     * upgrades the format of the catalogs to the newest version. Other code
+     * should call {@link #makeEmptyRow()}, which returns a row in the format
+     * used in the old database version if the database is soft-upgraded.
+     * </p>
+     *
+     * @return an empty row
+     * @throws StandardException if an error happens when creating the row
+     */
+    public ExecRow makeEmptyRowForCurrentVersion() throws StandardException {
+        return makeEmptyRow();
+    }
 
 	/**
 	 * most subclasses should provide this method. One or two oddball cases in

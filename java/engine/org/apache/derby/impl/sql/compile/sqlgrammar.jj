@@ -2873,6 +2873,26 @@ Statement( String statementSQLText, Object[] paramDefaults) throws StandardExcep
 	}
 }
 
+/**
+ * Parse a search condition.
+ *
+ * @param sqlFragment a fragment of an SQL statement, representing a
+ *                    search condition
+ * @return a {@code ValueNode} representing the search condition
+ */
+ValueNode
+SearchCondition(String sqlFragment) throws StandardException :
+{
+    ValueNode valueNode;
+    initStatement(sqlFragment, null);
+}
+{
+    valueNode = valueExpression() <EOF>
+    {
+        return valueNode;
+    }
+}
+
 StatementNode 
 proceduralStatement(Token[] tokenHolder) throws StandardException : 
 {
@@ -11149,10 +11169,19 @@ triggerDefinition() throws StandardException :
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_TRIGGER_ACTION);
 		}
 
-        String whenText = (whenClause == null)
-            ? null
-            : StringUtil.slice(statementSQLText, whenOpen.endOffset + 1,
-                               whenClose.beginOffset - 1, true);
+        String actionText = StringUtil.slice(
+                statementSQLText, actionBegin, actionEnd, false);
+
+        String whenText = null;
+        int whenOffset = 0;
+        if (whenClause != null) {
+            // The WHEN clause is only supported if the dictionary version is
+            // 10.11 or higher.
+            checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "WHEN");
+            whenOffset = whenOpen.endOffset + 1;
+            whenText = StringUtil.slice(statementSQLText,
+                    whenOffset, whenClose.beginOffset - 1, false);
+        }
 
         return new CreateTriggerNode(
 								triggerName, 
@@ -11165,10 +11194,9 @@ triggerDefinition() throws StandardException :
                                 refClause,   // referencing clause
                                 whenClause,  // when clause node
                                 whenText,    // when clause text
+                                whenOffset,
 								actionNode,
-								StringUtil.slice(statementSQLText,
-									actionBegin,
-									actionEnd, true),
+                                actionText,
                                 actionBegin,
 								getContextManager());
 	}

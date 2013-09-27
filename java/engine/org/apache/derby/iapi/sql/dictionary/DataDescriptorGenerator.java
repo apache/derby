@@ -350,6 +350,8 @@ public class DataDescriptorGenerator
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
 	 * @param oldReferencingName old referencing table name, if any, that appears in REFERCING clause
 	 * @param newReferencingName new referencing table name, if any, that appears in REFERCING clause
+     * @param whenClauseText the SQL text of the WHEN clause (may be null)
+     * @return a trigger descriptor
 	 *
 	 * @exception StandardException on error
 	 */
@@ -372,10 +374,16 @@ public class DataDescriptorGenerator
 		boolean				referencingOld,
 		boolean				referencingNew,
 		String				oldReferencingName,
-		String				newReferencingName
+        String              newReferencingName,
+        String              whenClauseText
 	) throws StandardException
 	{
-		return new TriggerDescriptor(
+        if (dataDictionary.checkVersion(
+                DataDictionary.DD_VERSION_DERBY_10_11, null)) {
+            // The dictionary version is recent enough to support the WHEN
+            // clause (DERBY-534). Create a descriptor that uses the new
+            // format.
+            return new TriggerDescriptor(
 					dataDictionary,
 					sd,
 					uuid,
@@ -394,8 +402,34 @@ public class DataDescriptorGenerator
 					referencingOld,
 					referencingNew,
 					oldReferencingName,
-					newReferencingName
+                    newReferencingName,
+                    whenClauseText
 					);
+        }
+
+        // This is a soft-upgraded database whose dictionary version is 10.10
+        // or lower. Create a descriptor that uses the legacy format so that
+        // it can be read by older database versions.
+        return new TriggerDescriptor_v10_10(
+                dataDictionary,
+                sd,
+                uuid,
+                name,
+                eventMask,
+                isBefore,
+                isRow,
+                isEnabled,
+                td,
+                whenSPSId,
+                actionSPSId,
+                creationTimestamp,
+                referencedCols,
+                referencedColsInTriggerAction,
+                triggerDefinition,
+                referencingOld,
+                referencingNew,
+                oldReferencingName,
+                newReferencingName);
 	}
 		
 	/*

@@ -56,46 +56,75 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
 
         // Create after triggers that should always be executed. Create row
         // trigger, statement trigger and implicit statement trigger.
-        s.execute("create trigger tr1 after insert on t1 for each row "
-                + "when (true) insert into t2 values 'Executed tr1'");
-        s.execute("create trigger tr2 after insert on t1 for each statement "
-                + "when (true) insert into t2 values 'Executed tr2'");
-        s.execute("create trigger tr3 after insert on t1 "
-                + "when (true) insert into t2 values 'Executed tr3'");
+        s.execute("create trigger tr01 after insert on t1 for each row "
+                + "when (true) insert into t2 values 'Executed tr01'");
+        s.execute("create trigger tr02 after insert on t1 for each statement "
+                + "when (true) insert into t2 values 'Executed tr02'");
+        s.execute("create trigger tr03 after insert on t1 "
+                + "when (true) insert into t2 values 'Executed tr03'");
 
         // Create corresponding triggers that should never fire (their WHEN
         // clause is false).
-        s.execute("create trigger tr4 after insert on t1 for each row "
-                + "when (false) insert into t2 values 'Executed tr4'");
-        s.execute("create trigger tr5 after insert on t1 for each statement "
-                + "when (false) insert into t2 values 'Executed tr5'");
-        s.execute("create trigger tr6 after insert on t1 "
-                + "when (false) insert into t2 values 'Executed tr6'");
+        s.execute("create trigger tr04 after insert on t1 for each row "
+                + "when (false) insert into t2 values 'Executed tr04'");
+        s.execute("create trigger tr05 after insert on t1 for each statement "
+                + "when (false) insert into t2 values 'Executed tr05'");
+        s.execute("create trigger tr06 after insert on t1 "
+                + "when (false) insert into t2 values 'Executed tr06'");
 
         // Create triggers with EXISTS subqueries in the WHEN clause. The
         // first returns TRUE and the second returns FALSE.
-        s.execute("create trigger tr7 after insert on t1 "
+        s.execute("create trigger tr07 after insert on t1 "
                 + "when (exists (select * from sysibm.sysdummy1)) "
-                + "insert into t2 values 'Executed tr7'");
-        s.execute("create trigger tr8 after insert on t1 "
+                + "insert into t2 values 'Executed tr07'");
+        s.execute("create trigger tr08 after insert on t1 "
                 + "when (exists "
                 + "(select * from sysibm.sysdummy1 where ibmreqd <> 'Y')) "
-                + "insert into t2 values 'Executed tr8'");
+                + "insert into t2 values 'Executed tr08'");
 
         // WHEN clause returns NULL, trigger should not be fired.
-        s.execute("create trigger tr9 after insert on t1 "
+        s.execute("create trigger tr09 after insert on t1 "
                 + "when (cast(null as boolean))"
-                + "insert into t2 values 'Executed tr9'");
+                + "insert into t2 values 'Executed tr09'");
+
+        // WHEN clause contains reference to a transition variable.
+        s.execute("create trigger tr10 after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (new.x <> 2) insert into t2 values 'Executed tr10'");
+
+        // WHEN clause contains reference to a transition table.
+        s.execute("create trigger tr11 after insert on t1 "
+                + "referencing new table as new "
+                + "when (exists (select * from new where x > 5)) "
+                + "insert into t2 values 'Executed tr11'");
 
         // Now fire the triggers and verify the results.
         assertUpdateCount(s, 3, "insert into t1 values 1, 2, 3");
         JDBC.assertFullResultSet(
             s.executeQuery("select y, count(*) from t2 group by y order by y"),
             new String[][] {
-                { "Executed tr1", "3" },
-                { "Executed tr2", "1" },
-                { "Executed tr3", "1" },
-                { "Executed tr7", "1" },
+                { "Executed tr01", "3" },
+                { "Executed tr02", "1" },
+                { "Executed tr03", "1" },
+                { "Executed tr07", "1" },
+                { "Executed tr10", "2" },
+            });
+
+        // Empty t2 before firing the triggers again.
+        s.execute("delete from t2");
+
+        // Insert more rows with different values and see that a slightly
+        // different set of triggers get fired.
+        assertUpdateCount(s, 2, "insert into t1 values 2, 6");
+        JDBC.assertFullResultSet(
+            s.executeQuery("select y, count(*) from t2 group by y order by y"),
+            new String[][] {
+                { "Executed tr01", "2" },
+                { "Executed tr02", "1" },
+                { "Executed tr03", "1" },
+                { "Executed tr07", "1" },
+                { "Executed tr10", "1" },
+                { "Executed tr11", "1" },
             });
     }
 

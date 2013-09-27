@@ -987,6 +987,7 @@ public class GenericConstantActionFactory
 	 * @param referencedColsInTriggerAction	what columns does the trigger 
 	 *						action reference through old/new transition variables
 	 *						(may be null)
+     * @param originalWhenText The original user text of the WHEN clause (may be null)
 	 * @param originalActionText The original user text of the trigger action
 	 * @param referencingOld whether or not OLD appears in REFERENCING clause
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
@@ -1010,6 +1011,7 @@ public class GenericConstantActionFactory
 		Timestamp			creationTimestamp,
 		int[]				referencedCols,
 		int[]				referencedColsInTriggerAction,
+        String              originalWhenText,
 		String				originalActionText,
 		boolean				referencingOld,
 		boolean				referencingNew,
@@ -1020,7 +1022,8 @@ public class GenericConstantActionFactory
 		return new CreateTriggerConstantAction(triggerSchemaName, triggerName, 
 				eventMask, isBefore, isRow, isEnabled, triggerTable, whenSPSId,
 				whenText, actionSPSId, actionText, spsCompSchemaId, creationTimestamp,
-				referencedCols, referencedColsInTriggerAction, originalActionText,
+                referencedCols, referencedColsInTriggerAction,
+                originalWhenText, originalActionText,
 				referencingOld, referencingNew, oldReferencingName, newReferencingName);
 	}
 

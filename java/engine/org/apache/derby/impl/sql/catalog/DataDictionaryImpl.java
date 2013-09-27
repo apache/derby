@@ -121,7 +121,6 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
@@ -4747,34 +4746,6 @@ public final class	DataDictionaryImpl
 		return list;
 	}
 
-	/**
-	 * Get every trigger in this database.
-	 * Note that this list of TriggerDescriptors is
-	 * not going to be the same objects that are typically
-	 * cached off of the table descriptors, so this will
-	 * most likely instantiate some duplicate objects.
-	 *
-	 * @return the list of descriptors
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-    private TriggerDescriptorList getAllTriggerDescriptors()
-		throws StandardException
-	{
-		TabInfoImpl					ti = getNonCoreTI(SYSTRIGGERS_CATALOG_NUM);
-
-        TriggerDescriptorList list = new TriggerDescriptorList();
-
-		getDescriptorViaHeap(
-                        null,
-						(ScanQualifier[][]) null,
-						ti,
-						(TupleDescriptor) null,
-                        list,
-                        TriggerDescriptor.class);
-		return list;
-	}
-
     /**
      * Comparator that can be used for sorting lists of column references
      * on the position they have in the SQL query string.
@@ -5456,11 +5427,6 @@ public final class	DataDictionaryImpl
 		throws StandardException
 	{
         TriggerDescriptorList   gdl;
-
-		if (td == null)
-		{
-			return getAllTriggerDescriptors();
-		}
 
 		/* Build the TableDescriptor's TDL if it is currently empty */
 		gdl = td.getTriggerDescriptorList();
@@ -8396,7 +8362,7 @@ public final class	DataDictionaryImpl
 			createConglomerate(
 				ti.getTableName(),
 				tc,
-				ti.getCatalogRowFactory().makeEmptyRow(),
+                ti.getCatalogRowFactory().makeEmptyRowForCurrentVersion(),
 				heapProperties
 				)
 			);
@@ -8464,7 +8430,7 @@ public final class	DataDictionaryImpl
 		SystemColumn		currentColumn;
 
 		SystemColumn[]		columns = rowFactory.buildColumnList();
-		ExecRow				templateRow = rowFactory.makeEmptyRow();
+        ExecRow templateRow = rowFactory.makeEmptyRowForCurrentVersion();
 		int					columnCount = newColumnIDs.length;
 		SchemaDescriptor	sd = getSystemSchemaDescriptor();
 		TableDescriptor		td;
@@ -8508,7 +8474,7 @@ public final class	DataDictionaryImpl
 			columnID = newColumnIDs[ix];
 			currentColumn = columns[ columnID - 1 ];	// from 1 to 0 based
 
-			cdArray[ix] = makeColumnDescriptor( currentColumn, ix + 1, td );
+            cdArray[ix] = makeColumnDescriptor(currentColumn, columnID, td);
 		}
 		addDescriptorArray(cdArray, td, SYSCOLUMNS_CATALOG_NUM, false, tc);
 
@@ -8531,7 +8497,7 @@ public final class	DataDictionaryImpl
     )
 		throws StandardException
 	{
-		ExecRow				templateRow = rowFactory.makeEmptyRow();
+        ExecRow templateRow = rowFactory.makeEmptyRowForCurrentVersion();
 		SchemaDescriptor	sd = getSystemSchemaDescriptor( );
 		long				conglomID = getTableDescriptor( rowFactory.getCatalogName(), sd, tc ).getHeapConglomerateId();
 
@@ -8926,7 +8892,7 @@ public final class	DataDictionaryImpl
 		// create an index row template
 		indexableRow = irg.getIndexRowTemplate();
 
-		baseRow = rf.makeEmptyRow();
+        baseRow = rf.makeEmptyRowForCurrentVersion();
 
 		// Get a RowLocation template
 		cc = tc.openConglomerate(
@@ -9848,7 +9814,7 @@ public final class	DataDictionaryImpl
 
 			  case SYSTRIGGERS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSTRIGGERSRowFactory(
-												luuidFactory, exFactory, dvf));
+                                          this, luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSSTATISTICS_CATALOG_NUM:

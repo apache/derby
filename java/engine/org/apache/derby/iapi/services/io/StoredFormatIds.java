@@ -374,7 +374,15 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 320);
 
     /**
-    class org.apache.derby.impl.sql.catalog.TriggerDescriptorFinder
+     * Class org.apache.derby.impl.sql.catalog.TriggerDescriptor, used for
+     * trigger descriptors if the dictionary version is 10.11 or higher.
+     */
+    static public final int TRIGGER_DESCRIPTOR_V02_ID =
+            (MIN_ID_2 + 315);
+
+    /**
+     * Class org.apache.derby.impl.sql.catalog.TriggerDescriptor_v10_10, used
+     * for trigger descriptors if the dictionary version is 10.10 or lower.
      */
     static public final int TRIGGER_DESCRIPTOR_V01_ID =
             (MIN_ID_2 + 316);
@@ -1110,18 +1118,6 @@ public interface StoredFormatIds {
     static public final int UNUSED_2_289    =
             (MIN_ID_2 + 289);
     
-    /**
-    class org.apache.derby.impl.sql.execute.CreateTriggerConstantAction
-     */
-    static public final int CREATE_TRIGGER_CONSTANT_ACTION_V01_ID   =
-            (MIN_ID_2 + 314);
-    
-    /**
-    class org.apache.derby.impl.sql.execute.DropTriggerConstantAction
-     */
-    static public final int DROP_TRIGGER_CONSTANT_ACTION_V01_ID     =
-            (MIN_ID_2 + 315);
-
     /**
     class org.apache.derby.impl.sql.execute.TriggerInfo
      */
