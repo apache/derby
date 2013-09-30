@@ -24,6 +24,10 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -33,6 +37,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Tests for the WHEN clause in CREATE TRIGGER statements, added in DERBY-534.
  */
 public class TriggerWhenClauseTest extends BaseJDBCTestCase {
+
+    /**
+     * List that tracks calls to {@code intProcedure()}. It is used to verify
+     * that triggers have fired.
+     */
+    private static List<Integer> procedureCalls;
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -47,6 +57,29 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         // Run the test cases with auto-commit off so that all changes to
         // the database can be rolled back in tearDown().
         conn.setAutoCommit(false);
+    }
+
+    @Override
+    protected void setUp() {
+        procedureCalls = Collections.synchronizedList(new ArrayList<Integer>());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        procedureCalls = null;
+        super.tearDown();
+    }
+
+    /**
+     * A procedure that takes an {@code int} argument and adds it to the
+     * {@link #procedureCalls} list. Can be used as a stored procedure to
+     * verify that a trigger has been called. Particularly useful in BEFORE
+     * triggers, as they are not allowed to modify SQL data.
+     *
+     * @param i an integer
+     */
+    public static void intProcedure(int i) {
+        procedureCalls.add(i);
     }
 
     public void testBasicSyntax() throws SQLException {
@@ -143,4 +176,85 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         s.execute("insert into t1 values 1,2,3");
     }
 
+    /**
+     * Test generated columns referenced from WHEN clauses. In particular,
+     * test that references to generated columns are disallowed in the NEW
+     * transition variable of BEFORE triggers. See DERBY-3948.
+     *
+     * @see GeneratedColumnsTest#test_024_beforeTriggers()
+     */
+    public void testGeneratedColumns() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int, y int, "
+                + "z int generated always as (x+y))");
+        s.execute("create table t2(x int)");
+        s.execute("create procedure int_proc(i int) language java "
+                + "parameter style java external name '"
+                + getClass().getName() + ".intProcedure' no sql");
+
+        // BEFORE INSERT trigger without generated column in WHEN clause, OK.
+        s.execute("create trigger btr1 no cascade before insert on t1 "
+                + "referencing new as new for each row when (new.x < new.y) "
+                + "call int_proc(1)");
+
+        // BEFORE INSERT trigger with generated column in WHEN clause, fail.
+        assertCompileError(GeneratedColumnsHelper.BAD_BEFORE_TRIGGER,
+                "create trigger btr2 no cascade before insert on t1 "
+                + "referencing new as new for each row when (new.x < new.z) "
+                + "select * from sysibm.sysdummy1");
+
+        // BEFORE UPDATE trigger without generated column in WHEN clause, OK.
+        s.execute("create trigger btr3 no cascade before update on t1 "
+                + "referencing new as new old as old for each row "
+                + "when (new.x < old.x) call int_proc(3)");
+
+        // BEFORE UPDATE trigger with generated column in WHEN clause. OK,
+        // since the generated column is in the OLD transition variable.
+        s.execute("create trigger btr4 no cascade before update on t1 "
+                + "referencing old as old for each row when (old.x < old.z) "
+                + "call int_proc(4)");
+
+        // BEFORE UPDATE trigger with generated column in NEW transition
+        // variable, fail.
+        assertCompileError(GeneratedColumnsHelper.BAD_BEFORE_TRIGGER,
+                "create trigger btr5 no cascade before update on t1 "
+                + "referencing new as new for each row when (new.x < new.z) "
+                + "select * from sysibm.sysdummy1");
+
+        // BEFORE DELETE trigger without generated column in WHEN clause, OK.
+        s.execute("create trigger btr6 no cascade before delete on t1 "
+                + "referencing old as old for each row when (old.x < 3) "
+                + "call int_proc(6)");
+
+        // BEFORE DELETE trigger with generated column in WHEN clause. OK,
+        // since the generated column is in the OLD transition variable.
+        s.execute("create trigger btr7 no cascade before delete on t1 "
+                + "referencing old as old for each row when (old.x < old.z) "
+                + "call int_proc(7)");
+
+        // References to generated columns in AFTER triggers should always
+        // be allowed.
+        s.execute("create trigger atr1 after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (new.x < new.z) insert into t2 values 1");
+        s.execute("create trigger atr2 after update on t1 "
+                + "referencing new as new old as old for each row "
+                + "when (old.z < new.z) insert into t2 values 2");
+        s.execute("create trigger atr3 after delete on t1 "
+                + "referencing old as old for each row "
+                + "when (old.x < old.z) insert into t2 values 3");
+
+        // Finally, fire the triggers.
+        s.execute("insert into t1(x, y) values (1, 2), (4, 3)");
+        s.execute("update t1 set x = y");
+        s.execute("delete from t1");
+
+        // Verify that the before triggers were executed as expected.
+        assertEquals(Arrays.asList(1, 3, 4, 4, 6, 7, 7), procedureCalls);
+
+        // Verify that the after triggers were executed as expected.
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t2 order by x"),
+                new String[][]{{"1"}, {"1"}, {"2"}, {"3"}, {"3"}});
+    }
 }

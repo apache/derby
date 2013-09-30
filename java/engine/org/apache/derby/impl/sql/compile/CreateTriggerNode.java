@@ -777,6 +777,10 @@ class CreateTriggerNode extends DDLStatementNode
 
         actionNode.accept( visitor );
 
+        if (whenClause != null) {
+            whenClause.accept(visitor);
+        }
+
         for (ColumnReference cr : visitor.getList())
         {
             String  colRefName = cr.getColumnName();

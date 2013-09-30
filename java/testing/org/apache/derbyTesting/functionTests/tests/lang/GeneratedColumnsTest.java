@@ -4500,6 +4500,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
      * <p>
      * Test that the NEW variables of BEFORE triggers do not mention generated columns.
      * </p>
+     * @see TriggerWhenClauseTest#testGeneratedColumns()
      */
     public  void    test_024_beforeTriggers()
         throws Exception
