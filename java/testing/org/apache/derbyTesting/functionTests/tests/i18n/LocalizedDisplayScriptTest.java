@@ -22,12 +22,12 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import java.nio.charset.Charset;
 import java.util.Properties;
-import java.util.TimeZone;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.TimeZoneTestSetup;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -43,8 +43,6 @@ import junit.framework.TestSuite;
  *
  */
 public final class LocalizedDisplayScriptTest extends ScriptTestCase {
-
-    private static TimeZone defaultTimeZone;
 
     /** The character encoding used in the script. */
     private static final String ENCODING = "EUC_JP";
@@ -117,6 +115,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * Return a localized test based on the script name. 
      * The test is surrounded in a decorator that sets up the
      * desired properties which is wrapped in a decorator
+     * which sets up the timezone wrapped in a decorator
      * that cleans the database.
      */
     private static Test getSuite() {
@@ -124,24 +123,10 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         Properties uiProps = new Properties();
         uiProps.put("derby.ui.locale","es_AR");
         uiProps.put("derby.ui.codeset", ENCODING);
-        suite.addTest(new SystemPropertyTestSetup(
-                new LocalizedDisplayScriptTest("LocalizedDisplay"), uiProps));
+        suite.addTest(new TimeZoneTestSetup(new SystemPropertyTestSetup(
+                new LocalizedDisplayScriptTest("LocalizedDisplay"), uiProps), 
+                "America/Los_Angeles"));
         return getIJConfig(suite);
     }
     
-    /**
-     * Set up the test environment.
-     */
-    protected void setUp() {
-        super.setUp();
-        // the canon contains time columns, which would display localized -
-        // and so cause errors. Thus, run this with timezone PST.
-        defaultTimeZone = TimeZone.getDefault(); 
-        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles")); 
-    }
-    
-    public void tearDown() throws Exception {
-        TimeZone.setDefault(defaultTimeZone); 
-        super.tearDown();
-    }    
 }
