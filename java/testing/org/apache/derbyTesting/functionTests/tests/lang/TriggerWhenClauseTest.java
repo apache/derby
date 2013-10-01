@@ -44,6 +44,8 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
      */
     private static List<Integer> procedureCalls;
 
+    private static final String REFERENCES_SESSION_SCHEMA = "XCL51";
+
     public TriggerWhenClauseTest(String name) {
         super(name);
     }
@@ -256,5 +258,22 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(
                 s.executeQuery("select * from t2 order by x"),
                 new String[][]{{"1"}, {"1"}, {"2"}, {"3"}, {"3"}});
+    }
+
+    /**
+     * Test that CREATE TRIGGER fails if the WHEN clause references a table
+     * in the SESSION schema.
+     */
+    public void testSessionSchema() throws SQLException {
+        Statement s = createStatement();
+        s.execute("declare global temporary table temptable (x int) "
+                + "not logged");
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x int)");
+
+        assertCompileError(REFERENCES_SESSION_SCHEMA,
+                "create trigger tr1 after insert on t1 "
+                + "when (exists (select * from session.temptable)) "
+                + "insert into t2 values 1");
     }
 }

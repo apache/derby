@@ -437,10 +437,11 @@ class CreateTriggerNode extends DDLStatementNode
 			}
 		}
 
-		//If attempting to reference a SESSION schema table (temporary or permanent) in the trigger action, throw an exception
-		if (actionNode.referencesSessionSchema())
+        // Throw an exception if the WHEN clause or the triggered SQL
+        // statement references a table in the SESSION schema.
+        if (referencesSessionSchema()) {
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
-
+        }
 	}
 
 	/**
@@ -456,7 +457,9 @@ class CreateTriggerNode extends DDLStatementNode
 	{
 		//If create trigger is part of create statement and the trigger is defined on or it references SESSION schema tables,
 		//it will get caught in the bind phase of trigger and exception will be thrown by the trigger bind. 
-		return (isSessionSchema(triggerTableDescriptor.getSchemaName()) || actionNode.referencesSessionSchema());
+        return isSessionSchema(triggerTableDescriptor.getSchemaName())
+                || actionNode.referencesSessionSchema()
+                || (whenClause != null && whenClause.referencesSessionSchema());
 	}
 
     /**
