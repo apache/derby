@@ -143,6 +143,10 @@ public class RowResultSetNode extends FromTable
 		}
 	}
 
+    public boolean referencesSessionSchema() throws StandardException {
+        return subquerys != null && subquerys.referencesSessionSchema();
+    }
+
 	/**
 	 * Modify the RCL of this node to match the target of the insert.
 	 */

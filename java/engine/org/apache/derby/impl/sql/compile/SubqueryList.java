@@ -167,7 +167,7 @@ public class SubqueryList extends QueryTreeNodeVector
 
 			subqueryNode = (SubqueryNode) elementAt(index);
 
-			if (subqueryNode.getResultSet().referencesSessionSchema())
+            if (subqueryNode.referencesSessionSchema())
 			{
 				return true;
 			}

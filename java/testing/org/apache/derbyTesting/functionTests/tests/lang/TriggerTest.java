@@ -1797,4 +1797,48 @@ public class TriggerTest extends BaseJDBCTestCase {
                     { "tr6", "1" },
                 });
     }
+
+    /**
+     * Verify that CREATE TRIGGER fails if a temporary table is referenced.
+     * Regression test case for DERBY-6357.
+     */
+    public void testDerby6357TempTable() throws SQLException {
+        Statement s = createStatement();
+        s.execute("declare global temporary table temptable(x int) not logged");
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(i int, b boolean)");
+
+        assertCompileError("XCL51",
+                "create trigger tr1 after insert on session.temptable "
+                + "referencing new table as new "
+                + "insert into t1(i) select x from new");
+
+        assertCompileError("XCL51",
+                "create trigger tr2 after insert on t1 "
+                + "insert into t2(i) select x from session.temptable");
+
+        assertCompileError("XCL51",
+                "create trigger tr3 after insert on t1 "
+                + "insert into session.temptable values 1");
+
+        // Used to fail
+        assertCompileError("XCL51",
+                "create trigger tr4 after insert on t1 "
+                + "insert into t2(b) values exists("
+                + "select * from session.temptable)");
+
+        // Used to fail
+        assertCompileError("XCL51",
+                "create trigger tr5 after insert on t1 "
+                + "insert into t2(i) values case when "
+                + "exists(select * from session.temptable) then 1 else 2 end");
+
+        // Used to fail
+        assertCompileError("XCL51",
+                "create trigger tr6 after insert on t1 "
+                + "insert into t2(b) values "
+                + "(select count(*) from session.temptable) = "
+                + "(select count(*) from sysibm.sysdummy1)");
+
+    }
 }
