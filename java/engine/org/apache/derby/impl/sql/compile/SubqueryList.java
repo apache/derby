@@ -151,7 +151,7 @@ class SubqueryList extends QueryTreeNodeVector<SubqueryNode>
 	{
         for (SubqueryNode sqn : this)
 		{
-            if (sqn.getResultSet().referencesSessionSchema())
+            if (sqn.referencesSessionSchema())
 			{
 				return true;
 			}

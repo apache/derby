@@ -395,6 +395,11 @@ class SubqueryNode extends ValueNode
   		parentComparisonOperator = parent;
   	}
 
+    @Override
+    public boolean referencesSessionSchema() throws StandardException {
+        return resultSet.referencesSessionSchema();
+    }
+
 	/**
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.
