@@ -398,6 +398,9 @@ class CreateTriggerNode extends DDLStatementNode
                 whenClause = whenClause.bindExpression(
                         new FromList(cm), new SubqueryList(cm),
                         new ArrayList<AggregateNode>(0));
+
+                // The WHEN clause must be a BOOLEAN expression.
+                whenClause.checkIsBoolean();
 			}
 		}
 		finally

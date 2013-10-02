@@ -44,7 +44,10 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
      */
     private static List<Integer> procedureCalls;
 
+    private static final String SYNTAX_ERROR = "42X01";
     private static final String REFERENCES_SESSION_SCHEMA = "XCL51";
+    private static final String NOT_BOOLEAN = "42X19";
+    private static final String HAS_PARAMETER = "42Y27";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -133,6 +136,32 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 + "when (exists (select * from new where x > 5)) "
                 + "insert into t2 values 'Executed tr11'");
 
+        // Scalar subqueries are allowed in the WHEN clause, but they need an
+        // extra set of parantheses.
+        //
+        // The first set of parantheses is required by the WHEN clause syntax
+        // itself: WHEN ( <search condition> )
+        //
+        // The second set of parantheses is required by <search condition>.
+        // Follow this path through the SQL standard's syntax rules:
+        //    <search condition> -> <boolean value expression>
+        //      -> <boolean term> -> <boolean factor> -> <boolean test>
+        //      -> <boolean primary> -> <boolean predicand>
+        //      -> <nonparenthesized value expression primary>
+        //      -> <scalar subquery> -> <subquery> -> <left paren>
+        assertCompileError(SYNTAX_ERROR,
+                "create trigger tr12 after insert on t1 "
+                + "when (values true) insert into t2 values 'Executed tr12'");
+        assertCompileError(SYNTAX_ERROR,
+                "create trigger tr13 after insert on t1 "
+                + "when (select true from sysibm.sysdummy1) "
+                + "insert into t2 values 'Executed tr13'");
+        s.execute("create trigger tr12 after insert on t1 "
+                + "when ((values true)) insert into t2 values 'Executed tr12'");
+        s.execute("create trigger tr13 after insert on t1 "
+                + "when ((select true from sysibm.sysdummy1)) "
+                + "insert into t2 values 'Executed tr13'");
+
         // Now fire the triggers and verify the results.
         assertUpdateCount(s, 3, "insert into t1 values 1, 2, 3");
         JDBC.assertFullResultSet(
@@ -143,6 +172,8 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 { "Executed tr03", "1" },
                 { "Executed tr07", "1" },
                 { "Executed tr10", "2" },
+                { "Executed tr12", "1" },
+                { "Executed tr13", "1" },
             });
 
         // Empty t2 before firing the triggers again.
@@ -160,6 +191,8 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 { "Executed tr07", "1" },
                 { "Executed tr10", "1" },
                 { "Executed tr11", "1" },
+                { "Executed tr12", "1" },
+                { "Executed tr13", "1" },
             });
     }
 
@@ -261,19 +294,58 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Test that CREATE TRIGGER fails if the WHEN clause references a table
-     * in the SESSION schema.
+     * Test various illegal WHEN clauses.
      */
-    public void testSessionSchema() throws SQLException {
+    public void testIllegalWhenClauses() throws SQLException {
         Statement s = createStatement();
         s.execute("declare global temporary table temptable (x int) "
                 + "not logged");
         s.execute("create table t1(x int)");
         s.execute("create table t2(x int)");
+        s.execute("create procedure int_proc(i int) language java "
+                + "parameter style java external name '"
+                + getClass().getName() + ".intProcedure' no sql");
 
+        // CREATE TRIGGER should fail if the WHEN clause references a table
+        // in the SESSION schema.
         assertCompileError(REFERENCES_SESSION_SCHEMA,
                 "create trigger tr1 after insert on t1 "
                 + "when (exists (select * from session.temptable)) "
                 + "insert into t2 values 1");
+
+        // The WHEN clause expression must be BOOLEAN.
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr after insert on t1 "
+                + "when (1) insert into t2 values 1");
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr after update on t1 "
+                + "when ('abc') insert into t2 values 1");
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr after delete on t1 "
+                + "when ((values 1)) insert into t2 values 1");
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr no cascade before insert on t1 "
+                + "when ((select ibmreqd from sysibm.sysdummy1)) "
+                + "call int_proc(1)");
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr no cascade before insert on t1 "
+                + "when ((select ibmreqd from sysibm.sysdummy1)) "
+                + "call int_proc(1)");
+        assertCompileError(NOT_BOOLEAN,
+                "create trigger tr no cascade before update on t1 "
+                + "referencing old as old for each row "
+                + "when (old.x) call int_proc(1)");
+
+        // Dynamic parameters (?) are not allowed in the WHEN clause.
+        assertCompileError(HAS_PARAMETER,
+                "create trigger tr no cascade before delete on t1 "
+                + "when (?) call int_proc(1)");
+        assertCompileError(HAS_PARAMETER,
+                "create trigger tr after insert on t1 "
+                + "when (cast(? as boolean)) call int_proc(1)");
+        assertCompileError(HAS_PARAMETER,
+                "create trigger tr after delete on t1 "
+                + "when ((select true from sysibm.sysdummy where ibmreqd = ?)) "
+                + "call int_proc(1)");
     }
 }

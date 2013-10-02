@@ -397,7 +397,7 @@ false
 ij> -- negative testing
 -- non boolean where clauses
 select * from s where 1;
-ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
+ERROR 42X19: The WHERE, WHEN or HAVING clause or CHECK CONSTRAINT definition is a 'INTEGER' expression.  It must be a BOOLEAN expression.
 ij> select * from s where 1 and (1=1);
 ERROR 42Y94: An AND or OR has a non-boolean operand. The operands of AND and OR must evaluate to TRUE, FALSE, or UNKNOWN.  
 ij> select * from s where (1=1) and 1;

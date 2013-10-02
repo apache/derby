@@ -1663,7 +1663,7 @@ Guide.
 
             <msg>
                 <name>42X19.S.1</name>
-                <text>The WHERE or HAVING clause or CHECK CONSTRAINT definition is a '{0}' expression.  It must be a BOOLEAN expression.</text>
+                <text>The WHERE, WHEN or HAVING clause or CHECK CONSTRAINT definition is a '{0}' expression.  It must be a BOOLEAN expression.</text>
                 <arg>dataType</arg>
             </msg>
 

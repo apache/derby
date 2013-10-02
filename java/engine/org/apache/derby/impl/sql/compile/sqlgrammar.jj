@@ -11164,6 +11164,9 @@ triggerDefinition() throws StandardException :
 		// no params in trigger action
  		HasNodeVisitor visitor = new HasNodeVisitor(ParameterNode.class);
 		actionNode.accept(visitor);
+        if (whenClause != null) {
+            whenClause.accept(visitor);
+        }
 		if (visitor.hasNode())
 		{
 			throw StandardException.newException(SQLState.LANG_NO_PARAMS_IN_TRIGGER_ACTION);
