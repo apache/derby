@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -347,5 +348,44 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 "create trigger tr after delete on t1 "
                 + "when ((select true from sysibm.sysdummy where ibmreqd = ?)) "
                 + "call int_proc(1)");
+    }
+
+    /**
+     * Verify that the SPS of a WHEN clause is invalidated when one of its
+     * dependencies is changed in a way that requires recompilation.
+     */
+    public void testWhenClauseInvalidation() throws SQLException {
+        // Statement that checks the validity of the WHEN clause SPS.
+        PreparedStatement spsValid = prepareStatement(
+                "select valid from sys.sysstatements "
+                + "where stmtname like 'TRIGGERWHEN%'");
+
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x int)");
+        s.execute("create table t3(x int)");
+        s.execute("insert into t1 values 1");
+
+        s.execute("create trigger tr after insert on t2 "
+                + "referencing new as new for each row "
+                + "when (exists (select * from t1 where x = new.x)) "
+                + "insert into t3 values new.x");
+
+        // SPS is initially valid.
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+
+        // Compressing the table referenced in the WHEN clause should
+        // invalidate the SPS.
+        PreparedStatement compress = prepareStatement(
+                "call syscs_util.syscs_compress_table(?, 'T1', 1)");
+        compress.setString(1, TestConfiguration.getCurrent().getUserName());
+        compress.execute();
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "false");
+
+        // Invoking the trigger should recompile the SPS.
+        s.execute("insert into t2 values 0,1,2");
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t3"), "1");
     }
 }
