@@ -2139,6 +2139,50 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                 "values case when 1 or 2 then 1 else 0 end");
     }
     
+    /**
+     * Some BOOLEAN expressions used to be transformed to non-equivalent
+     * IN lists. Verify that they now return the correct results.
+     * Regression test case for DERBY-6363.
+     */
+    public void test_6363() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table d6363(a int, b char)");
+        s.execute("insert into d6363 values (1, 'a'), (2, 'b'), (3, 'a'), "
+                + "(4, 'b'), (5, 'a'), (6, 'b')");
+
+        JDBC.assertFullResultSet(s.executeQuery(
+            "select a, ((b = 'a' or b = 'b') and a < 4), "
+                    + "((b = 'a' or b = 'c' or b = 'b') and a < 4), "
+                    + "((b = 'a' or (b = 'c' or b = 'b')) and a < 4), "
+                    + "((b = 'a' or b in ('c', 'b')) and a < 4), "
+                    + "(a < 4 and (b = 'a' or b = 'b')) "
+                    + "from d6363 order by a"),
+            new String[][] {
+                { "1", "true", "true", "true", "true", "true" },
+                { "2", "true", "true", "true", "true", "true" },
+                { "3", "true", "true", "true", "true", "true" },
+                { "4", "false", "false", "false", "false", "false" },
+                { "5", "false", "false", "false", "false", "false" },
+                { "6", "false", "false", "false", "false", "false" },
+            });
+
+        JDBC.assertFullResultSet(s.executeQuery(
+            "select a, b, "
+            + "case when ((b = 'a' or b = 'b') and a < 4) "
+            + "then 'x' else '-' end, "
+            + "case when (a < 4 and (b = 'a' or b = 'b')) "
+            + "then 'y' else '-' end "
+            + "from d6363 order by a"),
+            new String[][] {
+                { "1", "a", "x", "y" },
+                { "2", "b", "x", "y" },
+                { "3", "a", "x", "y" },
+                { "4", "b", "-", "-" },
+                { "5", "a", "-", "-" },
+                { "6", "b", "-", "-" },
+            });
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
