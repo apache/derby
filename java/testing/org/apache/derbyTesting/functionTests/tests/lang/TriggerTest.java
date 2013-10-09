@@ -1842,4 +1842,78 @@ public class TriggerTest extends BaseJDBCTestCase {
                 + "(select count(*) from sysibm.sysdummy1)");
 
     }
+
+    /**
+     * Verify the fix for DERBY-6371. The dependency checking done when
+     * dropping a column used the wrong compilation schema and sometimes
+     * incorrectly reported that a trigger depended on the column.
+     */
+    public void testDerby6371DropColumn() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create schema d6371_s1");
+        s.execute("create schema d6371_s2");
+        s.execute("create table d6371_s1.t1(x int, y int)");
+        s.execute("create table d6371_s1.t2(x int, y int)");
+        s.execute("set schema 'D6371_S1'");
+
+        commit();
+
+        s.execute("create trigger d6371_s2.tr1 after update of x on t1 "
+                + "for each row insert into t2(x) select x from t1");
+
+        // Should not be allowed to drop column X, which is referenced by
+        // the trigger.
+        assertStatementError("X0Y25", s,
+                             "alter table t1 drop column x restrict");
+        assertStatementError("X0Y25", s,
+                             "alter table t2 drop column x restrict");
+
+        // Now drop a column that is not referenced from the trigger. Used
+        // to fail with a message saying the trigger TR1 depended on it.
+        s.execute("alter table t1 drop column y restrict");
+        s.execute("alter table t2 drop column y restrict");
+
+        // Verify that the trigger still works.
+        s.execute("insert into t1 values 1");
+        s.execute("update t1 set x = x + 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "2");
+
+        // Go back to a clean set of tables.
+        rollback();
+
+        /* ---- End of the regression test case for the actual bug. ---- */
+
+        // Extra check for a new code path that could be taken after the
+        // fix. If the trigger is created by a user that has no schema, and
+        // no explicit schema has been set in the connection, the trigger's
+        // compilation schema will be NULL. Make sure that such a trigger
+        // doesn't get into trouble during dependency validation. In
+        // particular, we would like to avoid problems such as those in
+        // DERBY-6361.
+        Connection c2 =
+                openDefaultConnection("D6371_USER_WITHOUT_SCHEMA", "secret");
+        Statement s2 = c2.createStatement();
+        s2.execute("create trigger d6371_s1.tr2 "
+                + "after update of x on d6371_s1.t1 for each row "
+                + "insert into d6371_s1.t2(x) select x from d6371_s1.t1");
+        s2.close();
+        c2.commit();
+        c2.close();
+
+        // Now exercise the dependency checking, both with columns that are
+        // referenced by the trigger and columns that are not referenced.
+        assertStatementError("X0Y25", s,
+                             "alter table t1 drop column x restrict");
+        assertStatementError("X0Y25", s,
+                             "alter table t2 drop column x restrict");
+        s.execute("alter table t1 drop column y restrict");
+        s.execute("alter table t2 drop column y restrict");
+
+        // And verify that the trigger works.
+        s.execute("insert into t1 values 1");
+        s.execute("update t1 set x = x + 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "2");
+    }
 }
