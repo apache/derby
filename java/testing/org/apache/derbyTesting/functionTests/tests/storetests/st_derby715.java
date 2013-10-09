@@ -40,7 +40,7 @@ import org.apache.derby.tools.ij;
 
 The purpose of this test is to reproduce JIRA DERBY-715:
 
-Sometimes a deadlock would be incorrectly reported as a deadlock.  The
+Sometimes a deadlock would be incorrectly reported as a timeout.  The
 bug seemed to always reproduce at least once if the following test
 was run (at least one of the iterations in the loop would get an
 incorrect timeout vs. a deadlock).
@@ -129,7 +129,7 @@ public class st_derby715 extends BaseTest
                     System.out.println("Thread 1 after all next.");
 
                 // give thread 2 a chance to catch up.
-                Thread.sleep(500);
+                waitForLocks(conn, 2);
 
                 if (verbose)
                     System.out.println("Thread 1 before inserting into a...");
@@ -204,10 +204,8 @@ public class st_derby715 extends BaseTest
 
                 if (verbose)
                     System.out.println("Thread 2 after all next.");
+                waitForLocks(conn,2);
 
-
-                Thread.sleep(500);
-                
                 if (verbose)
                     System.out.println("Thread 2 before inserting into b");
 
@@ -245,7 +243,34 @@ public class st_derby715 extends BaseTest
         }
     }
     
-
+    /**
+     * Wait for a specified number of locks before continuing
+     *
+     * @param conn Connection to use for lock query
+     * @param num  Number of locks to check for
+     */
+    private static void waitForLocks(Connection conn, int num) throws InterruptedException, SQLException {
+        int totalWait = 0;
+        do {
+            totalWait += 500;
+            Thread.sleep(500);
+        } while (numlocks(conn) < num && totalWait < 60000);
+       
+    }
+    /**
+     * Get the number of locks in the lock table 
+     * @return number of locks
+     * @throws SQLException
+     */
+    private static int numlocks(Connection conn) throws SQLException {
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("SELECT count(*) from syscs_diag.lock_table");
+        rs.next();
+        int num = rs.getInt(1);
+        rs.close();
+        return num;
+    }
+    
     public void testList(Connection conn)
         throws SQLException
     {
