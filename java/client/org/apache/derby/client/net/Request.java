@@ -41,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Hashtable;
+import org.apache.derby.iapi.error.ExceptionUtil;
 
 
 class Request {
@@ -315,16 +316,36 @@ class Request {
                 try {
                     bytesRead =
                         in.read(buffer.array(), buffer.position(), bytesToRead);
-                } catch (Exception e) {
+                } catch (IOException ioe) {
+                    if (netAgent_.getOutputStream() == null) {
+                        // The exception has taken down the connection, so we 
+                        // check if it was caused by attempting to 
+                        // read the stream from our own connection...
+                        for (Throwable t = ioe; t != null; t = t.getCause()) {
+                            if (t instanceof SqlException
+                                    && ((SqlException) t).getSQLState().equals(ExceptionUtil.getSQLStateFromIdentifier(SQLState.NET_WRITE_CHAIN_IS_DIRTY))) {
+                                throw new SqlException(netAgent_.logWriter_,
+                                        new ClientMessageId(SQLState.NET_LOCATOR_STREAM_PARAMS_NOT_SUPPORTED),
+                                        ioe, parameterIndex);
+                            }
+                        }
+                        // Something else has killed the connection, fast forward to despair...
+                        throw new SqlException(netAgent_.logWriter_,
+                                new ClientMessageId(SQLState.NET_DISCONNECT_EXCEPTION_ON_READ),
+                                ioe, parameterIndex, ioe.getMessage());
+                    }
+                    // The OutPutStream is still intact so try to finish request
+                    // with what we managed to read
+
                     status = DRDAConstants.STREAM_READ_ERROR;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
                     // set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
                     netAgent_.accumulateReadException(
-                        new SqlException(
+                            new SqlException(
                             netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-                            e, parameterIndex, e.getMessage()));
+                            ioe, parameterIndex, ioe.getMessage()));
 
                     return;
                 }
@@ -1176,6 +1197,7 @@ class Request {
     private void sendBytes(OutputStream socketOutputStream)
             throws IOException {
         try {
+            netAgent_.markWriteChainAsDirty();
             socketOutputStream.write(buffer.array(), 0, buffer.position());
             socketOutputStream.flush();
         } finally {

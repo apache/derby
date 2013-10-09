@@ -1082,18 +1082,22 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         long dlen = rs.getLong(2);
         assertEquals("FAIL - MISMATCH LENGTHS GOT " + l + " expected "
                 + dlen + " for row in CLOBTBL with ID=" + id, dlen, l);
-        // DERBY-5317 cannot use setCharacterStream with value from
-        // Clob.getCharacterStream because server will try to stream
-        // lob to and from server at the same time. setClob can be
-        // used as a work around.
-        if (!usingDerbyNetClient()) {
-            PreparedStatement psUpd =
-                    prepareStatement("update CLOBTBL set content=?, " +
-                            "dlen =? where id = ?");
-            psUpd.setCharacterStream(1, value.getCharacterStream(), (int) l);
-            psUpd.setLong(2, l);
-            psUpd.setInt(3, updateId);
-
+                
+        PreparedStatement psUpd =
+                prepareStatement("update CLOBTBL set content=?, "
+                + "dlen =? where id = ?");
+        psUpd.setCharacterStream(1, value.getCharacterStream(), (int) l);
+        psUpd.setLong(2, l);
+        psUpd.setInt(3, updateId);
+        if (usingDerbyNetClient()) {
+            // DERBY-5317 cannot use setCharacterStream with value from
+            // Clob.getCharacterStream because server will try to stream
+            // lob to and from server at the same time. setClob can be
+            // used as a work around.
+            // Verify that new error is thrown 
+            assertPreparedStatementError("XN023", psUpd);
+            return;
+        } else {
             assertUpdateCount(psUpd, 1);
         }
         commit();
