@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,8 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String REFERENCES_SESSION_SCHEMA = "XCL51";
     private static final String NOT_BOOLEAN = "42X19";
     private static final String HAS_PARAMETER = "42Y27";
+    private static final String HAS_DEPENDENTS = "X0Y25";
+    private static final String TABLE_DOES_NOT_EXIST = "42X05";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -387,5 +390,148 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
         JDBC.assertSingleValueResultSet(
                 s.executeQuery("select * from t3"), "1");
+    }
+
+    /**
+     * Test that dropping objects referenced from the WHEN clause will
+     * detect that the trigger depends on the object.
+     */
+    public void testDependencies() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int, y int, z int)");
+        s.execute("create table t2(x int, y int, z int)");
+
+        Savepoint sp = getConnection().setSavepoint();
+
+        // Dropping columns referenced via the NEW transition variable in
+        // a WHEN clause should fail.
+        s.execute("create trigger tr after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (new.x < new.y) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        s.execute("alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // Dropping columns referenced via the OLD transition variable in
+        // a WHEN clause should fail.
+        s.execute("create trigger tr no cascade before delete on t1 "
+                + "referencing old as old for each row "
+                + "when (old.x < old.y) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        s.execute("alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // Dropping columns referenced via either the OLD or the NEW
+        // transition variable referenced in the WHEN clause should fail.
+        s.execute("create trigger tr no cascade before update on t1 "
+                + "referencing old as old new as new for each row "
+                + "when (old.x < new.y) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        s.execute("alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // Dropping columns referenced either in the WHEN clause or in the
+        // triggered SQL statement should fail.
+        s.execute("create trigger tr no cascade before insert on t1 "
+                + "referencing new as new for each row "
+                + "when (new.x < 5) values new.y");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        s.execute("alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // Dropping any column in a statement trigger with a NEW transition
+        // table fails, even if the column is not referenced in the WHEN clause
+        // or in the triggered SQL text.
+        s.execute("create trigger tr after update of x on t1 "
+                + "referencing new table as new "
+                + "when (exists (select 1 from new where x < y)) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        // Z is not referenced, but the transition table depends on all columns.
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // Dropping any column in a statement trigger with an OLD transition
+        // table fails, even if the column is not referenced in the WHEN clause
+        // or in the triggered SQL text.
+        s.execute("create trigger tr after delete on t1 "
+                + "referencing old table as old "
+                + "when (exists (select 1 from old where x < y)) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        // Z is not referenced, but the transition table depends on all columns.
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // References to columns in other ways than via transition variables
+        // or transition tables should also be detected.
+        s.execute("create trigger tr after delete on t1 "
+                + "referencing old table as old "
+                + "when (exists (select 1 from t1 where x < y)) values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t1 drop column y restrict");
+        s.execute("alter table t1 drop column z restrict");
+        getConnection().rollback(sp);
+
+        // References to columns in another table than the trigger table
+        // should prevent them from being dropped.
+        s.execute("create trigger tr after insert on t1 "
+                + "when (exists (select * from t2 where x < y)) "
+                + "values 1");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t2 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t2 drop column y restrict");
+        s.execute("alter table t2 drop column z restrict");
+
+        // Because of DERBY-2041, dropping the whole table silently succeeds
+        // and leaves the trigger around. It should have caused a warning and
+        // dropped the trigger.
+        s.execute("drop table t2");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select triggername from sys.systriggers"), "TR");
+        // The trigger wasn't dropped, but it is now invalid and causes the
+        // triggering insert to fail.
+        assertStatementError(TABLE_DOES_NOT_EXIST, s,
+                "insert into t1 values (1, 2, 3)");
+        getConnection().rollback(sp);
+
+        // Test references to columns in both the WHEN clause and the
+        // triggered SQL statement.
+        s.execute("create trigger tr after update on t1 "
+                + "when (exists (select * from t2 where x < 5)) "
+                + "select y from t2");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t2 drop column x restrict");
+        assertStatementError(HAS_DEPENDENTS, s,
+                "alter table t2 drop column y restrict");
+        s.execute("alter table t2 drop column z restrict");
+
+        // Again, because of DERBY-2041, DROP TABLE fails to cascade and
+        // drop the trigger.
+        s.execute("drop table t2");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select triggername from sys.systriggers"), "TR");
+        getConnection().rollback(sp);
     }
 }

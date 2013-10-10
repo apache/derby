@@ -43,6 +43,7 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -1770,8 +1771,28 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						// depends on the column being dropped, it will be
 						// caught here.
 						TriggerDescriptor trdToBeDropped  = dd.getTriggerDescriptor(depsTriggerDesc.getUUID());
-						columnDroppedAndTriggerDependencies(trdToBeDropped,
-								cascade, columnName);
+
+                        // First check for dependencies in the trigger's WHEN
+                        // clause, if there is one.
+                        UUID whenClauseId = trdToBeDropped.getWhenClauseId();
+                        boolean gotDropped = false;
+                        if (whenClauseId != null) {
+                            gotDropped = columnDroppedAndTriggerDependencies(
+                                    trdToBeDropped, whenClauseId, true,
+                                    cascade, columnName);
+                        }
+
+                        // If no dependencies were found in the WHEN clause,
+                        // we have to check if the triggered SQL statement
+                        // depends on the column being dropped. But if there
+                        // were dependencies and the trigger has already been
+                        // dropped, there is no point in looking for more
+                        // dependencies.
+                        if (!gotDropped) {
+                            columnDroppedAndTriggerDependencies(trdToBeDropped,
+                                    trdToBeDropped.getActionId(), false,
+                                    cascade, columnName);
+                        }
 					}
 				}
 			}
@@ -1792,7 +1813,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	// the trigger action sql may not be valid anymore. To establish
 	// that, we need to regenerate the internal representation of that 
 	// sql and bind it again.
-	private void columnDroppedAndTriggerDependencies(TriggerDescriptor trd,
+    //
+    // This method is called both on the WHEN clause (if one exists) and the
+    // triggered SQL statement of the trigger action.
+    //
+    // Return true if the trigger was dropped by this method (if cascade is
+    // true and it turns out the trigger depends on the column being dropped),
+    // or false otherwise.
+    private boolean columnDroppedAndTriggerDependencies(TriggerDescriptor trd,
+            UUID spsUUID, boolean isWhenClause,
 			boolean cascade, String columnName)
 	throws StandardException {
 		dd.dropTriggerDescriptor(trd, tc);
@@ -1800,11 +1829,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Here we get the trigger action sql and use the parser to build
 		// the parse tree for it.
         SchemaDescriptor compSchema = dd.getSchemaDescriptor(
-                dd.getSPSDescriptor(trd.getActionId()).getCompSchemaId(),
+                dd.getSPSDescriptor(spsUUID).getCompSchemaId(),
                 null);
 		CompilerContext newCC = lcc.pushCompilerContext(compSchema);
 		Parser	pa = newCC.getParser();
-		StatementNode stmtnode = (StatementNode)pa.parseStatement(trd.getTriggerDefinition());
+        String originalSQL = isWhenClause ? trd.getWhenClauseText()
+                                          : trd.getTriggerDefinition();
+        Visitable node = isWhenClause ? pa.parseSearchCondition(originalSQL)
+                                      : pa.parseStatement(originalSQL);
 		lcc.popCompilerContext(newCC);
 		// Do not delete following. We use this in finally clause to 
 		// determine if the CompilerContext needs to be popped.
@@ -1832,20 +1864,29 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			//    FOR EACH ROW 
 			//    SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT
 
-			SPSDescriptor triggerActionSPSD = trd.getActionSPS(lcc);
+            SPSDescriptor sps = isWhenClause ? trd.getWhenClauseSPS()
+                                             : trd.getActionSPS(lcc);
 			int[] referencedColsInTriggerAction = new int[td.getNumberOfColumns()];
 			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
-			triggerActionSPSD.setText(dd.getTriggerActionString(stmtnode, 
+            String newText = dd.getTriggerActionString(node,
 				trd.getOldReferencingName(),
 				trd.getNewReferencingName(),
-				trd.getTriggerDefinition(),
+                originalSQL,
 				trd.getReferencedCols(),
 				referencedColsInTriggerAction,
 				0,
 				trd.getTableDescriptor(),
 				trd.getTriggerEventMask(),
-				true
-				));
+                true);
+
+            if (isWhenClause) {
+                // The WHEN clause is not a full SQL statement, just a search
+                // condition, so we need to turn it into a statement in order
+                // to create an SPS.
+                newText = "VALUES " + newText;
+            }
+
+            sps.setText(newText);
 			
 			// Now that we have the internal format of the trigger action sql, 
 			// bind that sql to make sure that we are not using colunm being
@@ -1862,9 +1903,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			newCC = lcc.pushCompilerContext(compSchema);
 		    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
 			pa = newCC.getParser();
-			stmtnode = (StatementNode)pa.parseStatement(triggerActionSPSD.getText());
+            StatementNode stmtnode = (StatementNode) pa.parseStatement(newText);
 			// need a current dependent for bind
-			newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+            newCC.setCurrentDependent(sps.getPreparedStatement());
 			stmtnode.bindStatement();
 		} catch (StandardException se)
 		{
@@ -1914,7 +1955,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						StandardException.newWarning(
                             SQLState.LANG_TRIGGER_DROPPED, 
                             trd.getName(), td.getName()));
-					return;
+                    return true;
 				}
 				else
 				{	// we'd better give an error if don't drop it,
@@ -1944,6 +1985,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		dd.addDescriptor(trd, sd,
 				 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
 				 false, tc);
+
+        return false;
     }
 
     private void modifyColumnType(int ix)
