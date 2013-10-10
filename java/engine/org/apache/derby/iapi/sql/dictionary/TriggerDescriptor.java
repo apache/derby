@@ -374,14 +374,13 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					isRow &&
 					usesReferencingClause)
 		{
-			SchemaDescriptor compSchema;
-			compSchema = getDataDictionary().getSchemaDescriptor(triggerSchemaId, null);
-			CompilerContext newCC = lcc.pushCompilerContext(compSchema);
+            CompilerContext newCC = lcc.pushCompilerContext(
+                    dd.getSchemaDescriptor(actionSPS.getCompSchemaId(), null));
 			Parser	pa = newCC.getParser();
 			Visitable stmtnode = pa.parseStatement(triggerDefinition);
 			lcc.popCompilerContext(newCC);
 					
-			actionSPS.setText(getDataDictionary().getTriggerActionString(stmtnode, 
+            actionSPS.setText(dd.getTriggerActionString(stmtnode,
 					oldReferencingName,
 					newReferencingName,
 					triggerDefinition,
