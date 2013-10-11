@@ -333,18 +333,38 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public SPSDescriptor getActionSPS(LanguageConnectionContext lcc)
 		throws StandardException
 	{
-		if (actionSPS == null)
-		{
+        return getSPS(lcc, false /* isWhenClause */);
+    }
+
+    /**
+     * Get the SPS for the triggered SQL statement or the WHEN clause.
+     *
+     * @param lcc the LanguageConnectionContext to use
+     * @param isWhenClause {@code true} if the SPS for the WHEN clause is
+     *   requested, {@code false} if it is the triggered SQL statement
+     * @return the requested SPS
+     * @throws StandardException if an error occurs
+     */
+    private SPSDescriptor getSPS(LanguageConnectionContext lcc,
+                                 boolean isWhenClause)
+            throws StandardException
+    {
+        DataDictionary dd = getDataDictionary();
+        SPSDescriptor sps = isWhenClause ? whenSPS : actionSPS;
+        UUID spsId = isWhenClause ? whenSPSId : actionSPSId;
+        String originalSQL = isWhenClause ? whenClauseText : triggerDefinition;
+
+        if (sps == null) {
 			//bug 4821 - do the sysstatement look up in a nested readonly
 			//transaction rather than in the user transaction. Because of
 			//this, the nested compile transaction which is attempting to
 			//compile the trigger will not run into any locking issues with
 			//the user transaction for sysstatements.
 			lcc.beginNestedTransaction(true);
-			actionSPS = getDataDictionary().getSPSDescriptor(actionSPSId);
+            sps = dd.getSPSDescriptor(spsId);
 			lcc.commitNestedTransaction();
 		}
-		
+
 		//We need to regenerate the trigger action sql if 
 		//1)the trigger is found to be invalid, 
 		//2)the trigger is defined at row level (that is the only kind of 
@@ -363,39 +383,49 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		//To fix varchar(30) in trigger action sql to varchar(64), we need
 		//to regenerate the trigger action sql. This new trigger action sql
 		//will then get updated into SYSSTATEMENTS table.
-		DataDictionary dd = getDataDictionary();
 		boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
 		boolean usesReferencingClause = (in10_9_orHigherVersion) ? 
 				referencedColsInTriggerAction != null :
 					(referencingOld || referencingNew);
 
-		if((!actionSPS.isValid() ||
-				 (actionSPS.getPreparedStatement() == null)) && 
+        if ((!sps.isValid() ||
+                (sps.getPreparedStatement() == null)) &&
 					isRow &&
 					usesReferencingClause)
 		{
             CompilerContext newCC = lcc.pushCompilerContext(
-                    dd.getSchemaDescriptor(actionSPS.getCompSchemaId(), null));
+                    dd.getSchemaDescriptor(sps.getCompSchemaId(), null));
 			Parser	pa = newCC.getParser();
-			Visitable stmtnode = pa.parseStatement(triggerDefinition);
+            Visitable stmtnode =
+                    isWhenClause ? pa.parseSearchCondition(originalSQL)
+                                 : pa.parseStatement(originalSQL);
 			lcc.popCompilerContext(newCC);
-					
-            actionSPS.setText(dd.getTriggerActionString(stmtnode,
+
+            String newText = dd.getTriggerActionString(stmtnode,
 					oldReferencingName,
 					newReferencingName,
-					triggerDefinition,
+                    originalSQL,
 					referencedCols,
 					referencedColsInTriggerAction,
 					0,
 					td,
 					-1,
-					false
-					));
+                    false);
+
+            if (isWhenClause) {
+                // The WHEN clause is not a full SQL statement, just a search
+                // condition, so we need to turn it into a statement in order
+                // to create an SPS.
+                newText = "VALUES " + newText;
+            }
+
+            sps.setText(newText);
+
 			//By this point, we are finished transforming the trigger action if
 			//it has any references to old/new transition variables.
 		}
-		
-		return actionSPS;
+
+        return sps;
 	}
 
 	/**
@@ -420,18 +450,20 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	/**
 	 * Get the trigger when clause sps 
 	 *
+     * @param lcc the LanguageConnectionContext to use
 	 * @return the sps of the when clause
 	 *
 	 * @exception StandardException on error
 	 */
-	public SPSDescriptor getWhenClauseSPS()
+    public SPSDescriptor getWhenClauseSPS(LanguageConnectionContext lcc)
 		throws StandardException
 	{
-        if (whenSPSId != null && whenSPS == null)
-		{
-			whenSPS = getDataDictionary().getSPSDescriptor(whenSPSId);
-		}
-		return whenSPS;
+        if (whenSPSId == null) {
+            // This trigger doesn't have a WHEN clause.
+            return null;
+        }
+
+        return getSPS(lcc, true /* isWhenClause */);
 	}
 
 	/**

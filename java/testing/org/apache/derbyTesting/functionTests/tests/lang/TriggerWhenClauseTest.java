@@ -52,6 +52,7 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String HAS_PARAMETER = "42Y27";
     private static final String HAS_DEPENDENTS = "X0Y25";
     private static final String TABLE_DOES_NOT_EXIST = "42X05";
+    private static final String TRUNCATION = "22001";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -533,5 +534,65 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(
             s.executeQuery("select triggername from sys.systriggers"), "TR");
         getConnection().rollback(sp);
+    }
+
+    /**
+     * Verify that DERBY-4874, which was fixed before support for the WHEN
+     * clause was implemented, does not affect the WHEN clause.
+     * The first stab at the WHEN clause implementation did suffer from it.
+     */
+    public void testDerby4874() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t(x varchar(3))");
+        s.execute("create trigger tr after update of x on t "
+                + "referencing new as new for each row "
+                + "when (new.x < 'abc') values 1");
+        s.execute("insert into t values 'aaa'");
+
+        // Updating X to something longer than 3 characters should fail,
+        // since it's a VARCHAR(3).
+        assertStatementError(TRUNCATION, s, "update t set x = 'aaaa'");
+
+        // Change the type of X to VARCHAR(4) and try again. This time it
+        // should succeed, but it used to fail because the trigger hadn't
+        // been recompiled and still thought the max length was 3.
+        s.execute("alter table t alter x set data type varchar(4)");
+        assertUpdateCount(s, 1, "update t set x = 'aaaa'");
+
+        // Updating it to a longer value should still fail.
+        assertStatementError(TRUNCATION, s, "update t set x = 'aaaaa'");
+    }
+
+    /**
+     * Verify that Cloudscape bug 4821, which was fixed long before support
+     * for the WHEN clause was implemented, does not affect the WHEN clause.
+     * The first stab at the WHEN clause implementation did suffer from it.
+     */
+    public void testCloudscapeBug4821() throws SQLException {
+        // First create a trigger, and immediately perform an ALTER TABLE
+        // statement on the trigger table to make sure the trigger's SPS is
+        // invalid and must be recompiled the first time it's fired.
+        Statement s = createStatement();
+        s.execute("create table cs4821.t(x int)");
+        s.execute("create trigger cs4821.tr after insert on cs4821.t "
+                + "when (true) values 1");
+        s.execute("alter table cs4821.t add column y int");
+        commit();
+
+        // Fire the trigger and leave the transaction open afterwards.
+        s.execute("insert into cs4821.t(x) values 1");
+
+        // Now try to read all rows from the SYS.SYSSTATEMENTS table from
+        // another transaction. Used to time out because the transaction
+        // that recompiled the trigger kept the lock on the system table.
+        Connection c2 = openDefaultConnection();
+        Statement s2 = c2.createStatement();
+        JDBC.assertDrainResults(
+                s2.executeQuery("select * from sys.sysstatements"));
+        s2.close();
+        JDBC.cleanup(c2);
+
+        // Remove all tables and triggers created by this test case.
+        JDBC.dropSchema(getConnection().getMetaData(), "CS4821");
     }
 }

@@ -107,7 +107,7 @@ abstract class GenericTriggerExecutor
 		if (!whenClauseRetrieved)
 		{
 			whenClauseRetrieved = true;
-			whenClause = triggerd.getWhenClauseSPS();
+            whenClause = triggerd.getWhenClauseSPS(lcc);
 		}
 		return whenClause;
 	}

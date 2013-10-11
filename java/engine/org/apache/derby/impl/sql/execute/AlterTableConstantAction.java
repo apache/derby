@@ -1864,7 +1864,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			//    FOR EACH ROW 
 			//    SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT
 
-            SPSDescriptor sps = isWhenClause ? trd.getWhenClauseSPS()
+            SPSDescriptor sps = isWhenClause ? trd.getWhenClauseSPS(lcc)
                                              : trd.getActionSPS(lcc);
 			int[] referencedColsInTriggerAction = new int[td.getNumberOfColumns()];
 			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
