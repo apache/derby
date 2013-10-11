@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -53,13 +54,19 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String HAS_DEPENDENTS = "X0Y25";
     private static final String TABLE_DOES_NOT_EXIST = "42X05";
     private static final String TRUNCATION = "22001";
+    private static final String NOT_AUTHORIZED = "42504";
+    private static final String NO_TABLE_PERMISSION = "42500";
+    private static final String USER_EXCEPTION = "38000";
+    private static final String JAVA_EXCEPTION = "XJ001";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return TestConfiguration.defaultSuite(TriggerWhenClauseTest.class);
+        return TestConfiguration.sqlAuthorizationDecorator(
+            new CleanDatabaseTestSetup(
+                TestConfiguration.embeddedSuite(TriggerWhenClauseTest.class)));
     }
 
     @Override
@@ -594,5 +601,146 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
 
         // Remove all tables and triggers created by this test case.
         JDBC.dropSchema(getConnection().getMetaData(), "CS4821");
+    }
+
+    /**
+     * When SQL authorization is enabled, the trigger action (including the
+     * WHEN clause) should execute with definer's rights. Verify that it is
+     * so.
+     */
+    public void testGrantRevoke() throws SQLException {
+        Connection c1 = openDefaultConnection("u1", "dummy");
+        c1.setAutoCommit(true);
+        Statement s1 = c1.createStatement();
+
+        s1.execute("create table t1(x varchar(20))");
+        s1.execute("create table t2(x varchar(200))");
+        s1.execute("create table t3(x int)");
+        s1.execute("create function is_true(s varchar(128)) returns boolean "
+                + "deterministic language java parameter style java "
+                + "external name 'java.lang.Boolean.parseBoolean' no sql");
+
+        // Trigger that fires on T1 if inserted value is 'true'.
+        s1.execute("create trigger tr1 after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (is_true(new.x)) insert into t2(x) values new.x");
+
+        // Trigger that fires on T1 on insert if T3 has more than 1 row.
+        s1.execute("create trigger tr2 after insert on t1 "
+                + "when (exists (select * from t3 offset 1 row)) "
+                + "insert into t2(x) values '***'");
+
+        // Allow U2 to insert into T1, but nothing else on U1's schema.
+        s1.execute("grant insert on table t1 to u2");
+
+        Connection c2 = openDefaultConnection("u2", "dummy");
+        c2.setAutoCommit(true);
+        Statement s2 = c2.createStatement();
+
+        // User U2 is not authorized to invoke the function IS_TRUE, but
+        // is allowed to insert into T1.
+        assertStatementError(NOT_AUTHORIZED, s2, "values u1.is_true('abc')");
+        assertUpdateCount(s2, 4,
+                "insert into u1.t1(x) values 'abc', 'true', 'TrUe', 'false'");
+
+        // Verify that the trigger fired. Since the trigger runs with
+        // definer's rights, it should be allowed to invoke IS_TRUE in the
+        // WHEN clause even though U2 isn't allowed to invoke it directly.
+        JDBC.assertFullResultSet(s1.executeQuery("select * from t2 order by x"),
+                                 new String[][] {{"TrUe"}, {"true"}});
+        s1.execute("delete from t2");
+
+        // Now test that TR1 will also fire, even though U2 isn't granted
+        // SELECT privileges on the table read by the WHEN clause.
+        s1.execute("insert into t3 values 1, 2");
+        assertUpdateCount(s2, 2, "insert into u1.t1(x) values 'x', 'y'");
+        JDBC.assertSingleValueResultSet(
+                s1.executeQuery("select * from t2 order by x"), "***");
+        s1.execute("delete from t2");
+
+        // Now invalidate the triggers and make sure they still work after
+        // recompilation.
+        s1.execute("alter table t1 alter column x set data type varchar(200)");
+        assertUpdateCount(s2, 2, "insert into u1.t1(x) values 'true', 'false'");
+        JDBC.assertFullResultSet(s1.executeQuery("select * from t2 order by x"),
+                                 new String[][] {{"***"}, {"true"}});
+        s1.execute("delete from t2");
+
+        // Revoke U2's insert privilege on T1.
+        s1.execute("revoke insert on table t1 from u2 ");
+
+        // U2 should not be allowed to insert into T1 anymore.
+        assertStatementError(NO_TABLE_PERMISSION, s2,
+                             "insert into u1.t1(x) values 'abc'");
+
+        // U1 should still be allowed to do it (since U1 owns T1), and the
+        // triggers should still be working.
+        assertUpdateCount(s1, 2, "insert into t1(x) values 'true', 'false'");
+        JDBC.assertFullResultSet(s1.executeQuery("select * from t2 order by x"),
+                                 new String[][] {{"***"}, {"true"}});
+        s1.execute("delete from t2");
+
+        // Now try to define a trigger in U2's schema that needs to invoke
+        // U1.IS_TRUE. Should fail because U2 isn't allowed to invoke it.
+        s2.execute("create table t(x varchar(200))");
+        assertStatementError(NOT_AUTHORIZED, s2,
+                             "create trigger tr after insert on t "
+                             + "referencing new as new for each row "
+                             + "when (u1.is_true(new.x)) values 1");
+
+        // Try again after granting execute permission to U2.
+        s1.execute("grant execute on function is_true to u2");
+        s2.execute("create trigger tr after insert on t "
+                + "referencing new as new for each row "
+                + "when (u1.is_true(new.x)) values 1");
+
+        // Fire trigger.
+        assertUpdateCount(s2, 3, "insert into t values 'ab', 'cd', 'ef'");
+
+        // Revoking the execute permission will fail because the trigger
+        // depends on it.
+        assertStatementError(HAS_DEPENDENTS, s1,
+                "revoke execute on function is_true from u2 restrict");
+
+        s1.close();
+        s2.close();
+
+        c1.setAutoCommit(false);
+        JDBC.dropSchema(c1.getMetaData(), "U1");
+        c2.setAutoCommit(false);
+        JDBC.dropSchema(c2.getMetaData(), "U2");
+    }
+
+    /**
+     * Test that the trigger fails gracefully if the WHEN clause throws
+     * a RuntimeException.
+     */
+    public void testRuntimeException() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create function f(x varchar(10)) returns int "
+                + "deterministic language java parameter style java "
+                + "external name 'java.lang.Integer.parseInt' no sql");
+        s.execute("create table t1(x varchar(10))");
+        s.execute("create table t2(x varchar(10))");
+        s.execute("create trigger tr after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (f(new.x) < 100) insert into t2 values new.x");
+
+        // Insert a value that causes Integer.parseInt() to throw a
+        // NumberFormatException. The NFE will be wrapped in two SQLExceptions.
+        assertStatementError(new String[] {USER_EXCEPTION, JAVA_EXCEPTION}, s,
+                "insert into t1 values '1', '2', 'hello', '3', '121'");
+
+        // The statement should be rolled back, so nothing should be in
+        // either of the tables.
+        assertTableRowCount("T1", 0);
+        assertTableRowCount("T2", 0);
+
+        // Now try again with values that don't cause exceptions.
+        assertUpdateCount(s, 4, "insert into t1 values '1', '2', '3', '121'");
+
+        // Verify that the trigger fired this time.
+        JDBC.assertFullResultSet(s.executeQuery("select * from t2 order by x"),
+                                 new String[][] {{"1"}, {"2"}, {"3"}});
     }
 }
