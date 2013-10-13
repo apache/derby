@@ -132,13 +132,6 @@ public final class TestConfiguration {
     private static ReleaseRepository releaseRepository;
 
     /**
-     * Default Derby test configuration object based
-     * upon system properties set by the old harness.
-     */
-    private static final TestConfiguration DERBY_HARNESS_CONFIG = 
-        new TestConfiguration(getSystemProperties());
-    
-    /**
      * Default configuration for standalone JUnit tests,
      * an embedded configuration.
      */
@@ -149,43 +142,14 @@ public final class TestConfiguration {
      * The default configuration.
      */
     private static final TestConfiguration DEFAULT_CONFIG;
-    
-    /**
-     * Are we running in the harness, assume so if framework
-     * was set so the 
-     */
-    private static final boolean runningInDerbyHarness;
-    
+        
     static {
-        boolean assumeHarness = false;
+        DEFAULT_CONFIG = JUNIT_CONFIG;
         
-        // In the harness if the default configuration according
-        // to system properties is not embedded.
-        if (!DERBY_HARNESS_CONFIG.getJDBCClient().isEmbedded())
-            assumeHarness = true;
-        
-        // Assume harness if database name is not default
-        if (!DERBY_HARNESS_CONFIG.getDefaultDatabaseName().equals(DEFAULT_DBNAME))
-            assumeHarness = true;
-        
-        // Assume harness if user name is not default
-        if (!DERBY_HARNESS_CONFIG.getUserName().equals(DEFAULT_USER_NAME))
-            assumeHarness = true;
-        
-        // If derby.system.home set externally at startup assume
-        // running in harness
-        if (BaseTestCase.getSystemProperty("derby.system.home") != null)
-            assumeHarness = true;
+        final   File dsh = new File("system");
 
-        DEFAULT_CONFIG = assumeHarness ? DERBY_HARNESS_CONFIG : JUNIT_CONFIG;
-        runningInDerbyHarness = assumeHarness;
-        
-        if (!assumeHarness) {
-            final   File dsh = new File("system");
-
-            BaseTestCase.setSystemProperty(
-                    "derby.system.home", dsh.getAbsolutePath());
-        }
+        BaseTestCase.setSystemProperty(
+                "derby.system.home", dsh.getAbsolutePath());
      }
     
     /**
@@ -1999,10 +1963,10 @@ public final class TestConfiguration {
      * suites to alter their behaviour based upon the
      * need to still run under the old harness.
      */
-    public static boolean runningInDerbyHarness()
-    {
-        return runningInDerbyHarness;
-    }
+    //public static boolean runningInDerbyHarness()
+    //{
+    //    return runningInDerbyHarness;
+    //}
     
     /**
      * Get a folder already created where a test can

@@ -3,25 +3,15 @@
 # DerbyNetClient.exclude when the property -DhostName is set to something else than the localhost
 #
 # excluding test   - because...
-# store/bootLock.java - this test uses local connections to make sure 
 #     a database cannot be loaded by 2 different instances.
 # derbynet/dblook_test_net because it tries to search derby.log, which is on
 #     the server machine
 # derbynet/dblook_test_net_territory because it tries to search derby.log, which is on
 #     the server machine
-# derbynet/maxthreads - tries to use NetworkServerControl statements
 # started with specific property set - DERBY928 for reference 
 # thus not suitable for remote server testing in its current form. - DERBY-928
-# derbynet/timeslice - tries to use NetworkServerControl statements
 # lang/wisconsin - optimization is quite different when running remote server.
-# junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server.
-# stress/stress.multi - attempts to connect to localhost.
 # 
-store/bootLock.java
 derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
-derbynet/maxthreads.java
-derbynet/timeslice.java
 lang/wisconsin.java
-junitTests/derbyNet/CompatibilityTest.java
-stress/stress.multi
