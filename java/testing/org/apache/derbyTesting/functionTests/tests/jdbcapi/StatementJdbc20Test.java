@@ -196,13 +196,9 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         assertEquals(rs.getFetchSize(), 250);
         assertEquals(rs.getFetchDirection(), ResultSet.FETCH_REVERSE);
         
-        // exception conditions
+        // Verify that fetch size can be set larger than maxRows
         stmt.setMaxRows(10);
-        try{
-            rs.setFetchSize(100);
-        } catch(SQLException e){
-            assertSQLState("XJ062", e);
-        }
+        rs.setFetchSize(100);
         
         //Error  testing  : set wrong values ..
         try{

@@ -2720,7 +2720,7 @@ public abstract class ClientResultSet implements ResultSet,
                     agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
                 }
                 checkForClosedResultSet("setFetchSize");
-                if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
+                if (rows < 0) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_SIZE),
                         rows).getSQLException();

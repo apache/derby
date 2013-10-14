@@ -2292,11 +2292,11 @@ public class EmbedResultSet extends ConnectionChild
 	 *            the number of rows to fetch
 	 * @exception SQLException
 	 *                if a database-access error occurs, or the condition 0 <=
-	 *                rows <= this.getMaxRows() is not satisfied.
+	 *                rows is not satisfied.
 	 */
 	public void setFetchSize(int rows) throws SQLException {
 		checkIfClosed("setFetchSize");
-		if (rows < 0 || (stmt.getMaxRows() != 0 && rows > stmt.getMaxRows())) {
+		if (rows < 0) {
 			throw Util.generateCsSQLException(SQLState.INVALID_FETCH_SIZE,
 					new Integer(rows));
 		} else if (rows > 0) // if it is zero ignore the call
