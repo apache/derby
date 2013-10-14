@@ -272,11 +272,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isAutoIncrement(10));
         assertFalse(met.isCaseSensitive(10));
         assertTrue(met.isSearchable(10));
-        // DERBY-2423 Embedded and client differ on isCurrency() for
-        // DECIMAL and NUMERIC columns. Enable for embedded once the
-        // issue is fixed
-        if (usingDerbyNetClient())
-            assertFalse(met.isCurrency(10));
+        assertFalse(met.isCurrency(10));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(10));
         assertTrue(met.isSigned(10));
         assertEquals(12, met.getColumnDisplaySize(10));

@@ -118,15 +118,15 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 	}
 
     /**
-     * Is the column a cash value?
+     * Is the column a cash value? Always returns false since there
+     * are no currency data types in Derby.
      *
      * @param column the first column is 1, the second is 2, ...
-     * @return true if so
-	 * @exception SQLException thrown on failure
+     * @return false, always
+     * @exception SQLException thrown on failure
      */
 	public final boolean isCurrency(int column) throws SQLException	{
-
-		return DataTypeUtilities.isCurrency(getColumnTypeDescriptor(column));
+		return false;
 	}
 
     /**

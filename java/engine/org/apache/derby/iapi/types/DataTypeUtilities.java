@@ -88,17 +88,6 @@ public abstract class DataTypeUtilities  {
 
 
 	/**
-		Is the data type currency.
-		@param	dtd			data type descriptor
-	*/
-	public static boolean isCurrency(DataTypeDescriptor dtd) {
-		int typeId = dtd.getTypeId().getJDBCTypeId();
-
-		// Only the NUMERIC and DECIMAL types are currency
-		return ((typeId == Types.DECIMAL) || (typeId == Types.NUMERIC));
-	}
-
-	/**
 		Is the data type case sensitive.
 		@param	dtd			data type descriptor
 	*/
