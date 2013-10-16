@@ -20,6 +20,8 @@ Apache Derby 1.0 UI and Help plug-ins for Eclipse.  Instructions
 for importing the source as an Eclipse project and packaging the
 plug-ins as a zip file are also included.
 
+Note that the Derby community no longer provides this plugin, and that the source code has not been certified to work with Eclipse versions after Juno.
+
 Contents:
 
 I. Creating the Apache Derby UI and Help Plug-in Projects
