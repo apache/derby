@@ -353,7 +353,7 @@ final class GenericStatementContext
 				}
 				for (int index = 0; index < subqueryTrackingArray.length; index++)
 				{
-					if (this.subqueryTrackingArray[index] != null)
+                    if (this.materializedSubqueries[index] != null)
 					{
 						subqueryTrackingArray[index] = this.materializedSubqueries[index];
 					}

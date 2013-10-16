@@ -58,6 +58,8 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String NO_TABLE_PERMISSION = "42500";
     private static final String USER_EXCEPTION = "38000";
     private static final String JAVA_EXCEPTION = "XJ001";
+    private static final String NOT_SINGLE_COLUMN = "42X39";
+    private static final String NON_SCALAR_QUERY = "21000";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -209,17 +211,17 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     }
 
     /**
-     * A row trigger whose WHEN clause contains a subquery, could cause a
-     * NullPointerException. This test case is disabled until the bug is fixed.
+     * A row trigger whose WHEN clause contains a subquery, used to cause a
+     * NullPointerException in some situations.
      */
-    public void xtestSubqueryInWhenClauseNPE() throws SQLException {
+    public void testSubqueryInWhenClauseNPE() throws SQLException {
         Statement s = createStatement();
         s.execute("create table t1(x int)");
         s.execute("create table t2(x int)");
         s.execute("create trigger tr1 after insert on t1 for each row "
                 + "when ((values true)) insert into t2 values 1");
 
-        // This statement results in a NullPointerException.
+        // This statement used to result in a NullPointerException.
         s.execute("insert into t1 values 1,2,3");
     }
 
@@ -358,6 +360,15 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         assertCompileError(HAS_PARAMETER,
                 "create trigger tr after delete on t1 "
                 + "when ((select true from sysibm.sysdummy where ibmreqd = ?)) "
+                + "call int_proc(1)");
+
+        // Subqueries in the WHEN clause must have a single column
+        assertCompileError(NOT_SINGLE_COLUMN,
+                "create trigger tr no cascade before insert on t1 "
+                + "when ((values (true, false))) call int_proc(1)");
+        assertCompileError(NOT_SINGLE_COLUMN,
+                "create trigger tr after update of x on t1 "
+                + "when ((select tablename, schemaid from sys.systables)) "
                 + "call int_proc(1)");
     }
 
@@ -742,5 +753,41 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         // Verify that the trigger fired this time.
         JDBC.assertFullResultSet(s.executeQuery("select * from t2 order by x"),
                                  new String[][] {{"1"}, {"2"}, {"3"}});
+    }
+
+    /**
+     * Test that scalar subqueries are allowed, and that non-scalar subqueries
+     * result in exceptions when the trigger fires.
+     */
+    public void testScalarSubquery() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x int)");
+        s.execute("create table t3(x int)");
+
+        s.execute("insert into t3 values 0,1,2,2");
+
+        s.execute("create trigger tr1 after insert on t1 "
+                + "referencing new as new for each row "
+                + "when ((select x > 0 from t3 where x = new.x)) "
+                + "insert into t2 values 1");
+
+        // Subquery returns no rows, so the trigger should not fire.
+        s.execute("insert into t1 values 42");
+        assertTableRowCount("T2", 0);
+
+        // Subquery returns a single value, which is false, so the trigger
+        // should not fire.
+        s.execute("insert into t1 values 0");
+        assertTableRowCount("T2", 0);
+
+        // Subquery returns a single value, which is true, so the trigger
+        // should fire.
+        s.execute("insert into t1 values 1");
+        assertTableRowCount("T2", 1);
+
+        // Subquery returns multiple values, so an error should be raised.
+        assertStatementError(NON_SCALAR_QUERY, s, "insert into t1 values 2");
+        assertTableRowCount("T2", 1);
     }
 }
