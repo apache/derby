@@ -22,21 +22,14 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.catalog.DefaultInfo;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -5632,6 +5625,73 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              expectedResults,
              false
              );
+    }
+
+    /**
+     * Verify that generated columns can be used even if the schema in which
+     * the generated column was added does not exist. Regression test case
+     * for DERBY-6361.
+     */
+    public void test_6361_compilationSchemaDoesNotExist() throws SQLException {
+        String user = "D6163_USER_WITHOUT_SCHEMA";
+        Connection conn = openUserConnection(user);
+        conn.setAutoCommit(false);
+
+        // Verify that the user does not have a schema.
+        JDBC.assertEmpty(conn.getMetaData().getSchemas(null, user));
+
+        Statement s = conn.createStatement();
+
+        s.execute("create table d6361.t(x int, y generated always as (-x))");
+
+        // This statement used to fail with schema does not exist.
+        s.execute("insert into d6361.t(x) values 1");
+
+        // This statement used to fail with schema does not exist.
+        s.execute("alter table d6361.t add column z generated always as (x+1)");
+
+        s.execute("insert into d6361.t(x) values 2");
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d6361.t order by x"),
+                new String[][] {{"1", "-1", "2"}, {"2", "-2", "3"}});
+
+        // Verify that the user still does not have a schema.
+        JDBC.assertEmpty(conn.getMetaData().getSchemas(null, user));
+
+        s.close();
+        JDBC.cleanup(conn);
+    }
+
+    /**
+     * Verify that generated columns work even if the compilation schema at
+     * the time of adding the generated columns is dropped. Regression test
+     * case for DERBY-6361.
+     */
+    public void test_6361_compilationSchemaDeleted() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create schema d6361_s1");
+        s.execute("create schema d6361_s2");
+
+        // Create a generated column in a table that lives in schema S1.
+        // Declare the generated column while the current schema is S2.
+        // Create generated columns both with CREATE TABLE and with ALTER
+        // TABLE so that we test both code paths.
+        s.execute("set schema d6361_s2");
+        s.execute("create table d6361_s1.t(x int, y generated always as (-x))");
+        s.execute("alter table d6361_s1.t "
+                + "add column z generated always as (x+1)");
+
+        // Then drop the schema that the generated columns were added from.
+        s.execute("set schema d6361_s1");
+        s.execute("drop schema d6361_s2 restrict");
+
+        // This statement used to fail with schema does not exist.
+        s.execute("insert into t(x) values 1");
+
+        JDBC.assertFullResultSet(s.executeQuery("select * from t"),
+                                 new String[][] {{"1", "-1", "2"}});
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
