@@ -70,7 +70,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(IndexSplitDeadlockTest.suite());
         suite.addTest(HoldCursorJDBC30Test.suite());
         suite.addTest(AccessTest.suite());
-        
+         suite.addTest(Derby5234Test.suite());
+
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {
             suite.addTest(HoldCursorExternalSortJDBC30Test.suite());
