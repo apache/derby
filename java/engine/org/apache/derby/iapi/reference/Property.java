@@ -95,6 +95,16 @@ public interface Property {
      */
 	
 	String LOG_BOOT_TRACE = "derby.stream.error.logBootTrace";
+    
+        /**
+		derby.stream.error.style=<b>The error stream error style.</b>
+        <b>rollingFile<b> is the only file currently supported.
+		Takes precendence over derby.stream.error.file.
+		Takes precendence over derby.stream.error.method.
+		Takes precendence over derby.stream.error.field
+	*/	
+	String ERRORLOG_STYLE_PROPERTY = "derby.stream.error.style";
+
         /**
 		derby.stream.error.file=<b>absolute or relative error log filename</b>
 		Takes precendence over derby.stream.error.method.
@@ -118,6 +128,66 @@ public interface Property {
 	
 	String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
 
+        /**
+		derby.stream.error.rollingfile.pattern=<b>the pattern</b>
+        A pattern consists of a string that includes the following special
+        components that will be replaced at runtime:
+        <UL>
+        <LI>    "/"    the local pathname separator 
+        <LI>     "%t"   the system temporary directory
+        <LI>     "%h"   the value of the "user.home" system property
+        <LI>     "%d"   the value of the "derby.system.home" system property
+        <LI>     "%g"   the generation number to distinguish rotated logs
+        <LI>     "%u"   a unique number to resolve conflicts
+        <LI>     "%%"   translates to a single percent sign "%"
+        </UL>
+        If no "%g" field has been specified and the file count is greater
+        than one, then the generation number will be added to the end of
+        the generated filename, after a dot.
+        <P> 
+        Thus for example a pattern of "%t/java%g.log" with a count of 2
+        would typically cause files to be written on Solaris to 
+        /var/tmp/java0.log and /var/tmp/java1.log whereas on Windows 95 they
+        would be typically written to C:\TEMP\java0.log and C:\TEMP\java1.log
+        <P> 
+        Generation numbers follow the sequence 0, 1, 2, etc.
+        <P>
+        Normally the "%u" unique field is set to 0.  However, if the <tt>FileHandler</tt>
+        tries to open the filename and finds the file is currently in use by
+        another process it will increment the unique number field and try
+        again.  This will be repeated until <tt>FileHandler</tt> finds a file name that
+        is  not currently in use. If there is a conflict and no "%u" field has
+        been specified, it will be added at the end of the filename after a dot.
+        (This will be after any automatically added generation number.)
+        <P>
+        Thus if three processes were all trying to output to fred%u.%g.txt then 
+        they  might end up using fred0.0.txt, fred1.0.txt, fred2.0.txt as
+        the first file in their rotating sequences.
+        <P>
+        Note that the use of unique ids to avoid conflicts is only guaranteed
+        to work reliably when using a local disk file system.
+        <P>
+        The default pattern is "%d/derby-%g.log"
+	*/	
+	String ERRORLOG_ROLLINGFILE_PATTERN_PROPERTY = "derby.stream.error.rollingFile.pattern";
+
+        /**
+		derby.stream.error.rollingfile.limit=<b>the rolling file size limit</b>
+        <P>
+        The default limit is 1024000
+	*/
+	
+	String ERRORLOG_ROLLINGFILE_LIMIT_PROPERTY = "derby.stream.error.rollingFile.limit";
+
+        /**
+		derby.stream.error.rollingfile.count=<b>the rolling file count</b>
+        <P>
+        The default count is 10
+	*/
+	
+	String ERRORLOG_ROLLINGFILE_COUNT_PROPERTY = "derby.stream.error.rollingFile.count";
+
+    
 	/** 
 	derby.infolog.append={true,false}
 	<BR>

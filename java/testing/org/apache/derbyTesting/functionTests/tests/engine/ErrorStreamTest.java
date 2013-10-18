@@ -47,11 +47,18 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * logStream.java, the other test* methods are from errorStream.java.
  */
 public class ErrorStreamTest extends BaseJDBCTestCase {
-
     private static final String FILE_PROP   = "derby.stream.error.file";
     private static final String METHOD_PROP = "derby.stream.error.method";
     private static final String FIELD_PROP  = "derby.stream.error.field";
+    private static final String STYLE_PROP = "derby.stream.error.style";
 
+    private static final String ROLLING_FILE_STYLE = "rollingFile";
+    private static final String ROLLING_FILE_COUNT_PROP = "derby.stream.error.rollingFile.count";
+    private static final String ROLLING_FILE_LIMIT_PROP = "derby.stream.error.rollingFile.limit";
+    private static final String ROLLING_FILE_PATTERN_PROP = "derby.stream.error.rollingFile.pattern";
+    private static final String DERBY_0_LOG = "derby-0.log";
+    private static final String DERBYLANGUAGELOG_QUERY_PLAN = "derby.language.logQueryPlan";
+    
     /**
      * runNo keeps track of which run we are in to generate unique (within a
      * JUnit run) names for files that are used in the test. Has to be static.
@@ -87,7 +94,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      */
     private OutputStream errStream;
     private File errStreamFile;
-
+    
     public ErrorStreamTest(String name) {
         super(name);
     }
@@ -340,6 +347,237 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test the derby.stream.error.style=rollingFile property.
+     */
+    public void testStyleRollingFile() throws IOException, SQLException  {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        
+        File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
+        
+        File derby0lck = new File(getSystemProperty("derby.system.home"),
+              "derby-0.log.lck");
+        
+        bootDerby();
+        
+        assertIsExisting(derby0log);
+        assertNotDirectory(derby0log);
+        assertNotEmpty(derby0log);
+
+        assertIsExisting(derby0lck);
+        assertNotDirectory(derby0lck);
+        assertIsEmpty(derby0lck);
+
+        println("Shutdown database");
+        getTestConfiguration().shutdownDatabase();
+
+        assertIsExisting(derby0log);
+        assertNotDirectory(derby0log);
+        assertNotEmpty(derby0log);
+
+        assertIsExisting(derby0lck);
+        assertNotDirectory(derby0lck);
+        assertIsEmpty(derby0lck);
+
+        println("Shutdown engine");
+        getTestConfiguration().shutdownEngine();
+
+        assertNotExisting(derby0lck);
+        
+        boolean deleted = deleteFile(derby0log);
+        assertTrue("File " + derby0log + " could not be deleted", deleted);
+    }
+
+    /**
+     * Test the derby.stream.error.style property with wrong style.
+     */
+    public void testWrongStyle() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, "unknownStyle");
+        
+        File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
+        
+        bootDerby();
+        getTestConfiguration().shutdownEngine();
+
+        closeStreams();
+
+        assertNotExisting(derby0log);
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertNotEmpty(errStreamFile);
+    }
+
+    /**
+     * Test the derby.stream.error.style=rollingFile property with default config
+     */
+    public void testDefaultRollingDefaultConfig() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        
+        // This is set so that we can get enough output into the log files
+        setSystemProperty(DERBYLANGUAGELOG_QUERY_PLAN, "true");
+                
+        bootDerby();
+        
+        // This will generate enough output to roll through all 10 log files
+        for (int i = 0; i < 3699; i++) {
+            checkAllConsistency(getConnection());
+        }
+        // Make sure we remove the system property that is logging the query plan
+        removeSystemProperty(DERBYLANGUAGELOG_QUERY_PLAN);
+        getTestConfiguration().shutdownEngine();
+        
+        closeStreams();
+        
+        // There should be derb-0.log .. derby-9.log files present
+        for (int i = 0; i < 10; i++) {
+            File derbyLog = new File(getSystemProperty("derby.system.home"),
+                "derby-" + i + ".log");
+            assertIsExisting(derbyLog);
+            assertNotDirectory(derbyLog);
+            assertNotEmpty(derbyLog);
+            
+            // Check the last log file to make sure that it has the default
+            //  limit 
+            if (i == 9) {
+                assertFileSize(derbyLog, 1024000);
+            }
+            
+            boolean deleted = deleteFile(derbyLog);
+            assertTrue("File " + derbyLog + " could not be deleted", deleted);
+        }
+        
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertIsEmpty(errStreamFile);
+    }   
+
+    /**
+     * Test the derby.stream.error.style=rollingFile property with user configuration.
+     */
+    public void testDefaultRollingUserConfig() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        setSystemProperty(ROLLING_FILE_PATTERN_PROP, "%d/db-%g.log");
+        setSystemProperty(ROLLING_FILE_COUNT_PROP, "3");
+        setSystemProperty(ROLLING_FILE_LIMIT_PROP, "10000");
+        
+        // This is set so that we can get enough output into the log files
+        setSystemProperty(DERBYLANGUAGELOG_QUERY_PLAN, "true");
+                
+        bootDerby();
+        
+        // This will generate enough output to roll through all 10 log files
+        for (int i = 0; i < 10; i++) {
+            checkAllConsistency(getConnection());
+        }
+        // Make sure we remove the system property that is logging the query plan
+        removeSystemProperty(DERBYLANGUAGELOG_QUERY_PLAN);
+        removeSystemProperty(ROLLING_FILE_PATTERN_PROP);
+        removeSystemProperty(ROLLING_FILE_COUNT_PROP);
+        removeSystemProperty(ROLLING_FILE_LIMIT_PROP);
+
+        getTestConfiguration().shutdownEngine();
+        
+        closeStreams();
+        
+        // There should be derb-0.log .. derby-3.log files present
+        for (int i = 0; i < 3; i++) {
+            File derbyLog = new File(getSystemProperty("derby.system.home"),
+                "db-" + i + ".log");
+            assertIsExisting(derbyLog);
+            assertNotDirectory(derbyLog);
+            assertNotEmpty(derbyLog);
+            
+            // Check the last log file to make sure that it has the correct
+            //  limit 
+            if (i == 2) {
+                assertFileSize(derbyLog, 10000);
+            }
+            
+            boolean deleted = deleteFile(derbyLog);
+            assertTrue("File " + derbyLog + " could not be deleted", deleted);
+        }
+        
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertIsEmpty(errStreamFile);
+    }   
+
+    /**
+     * Test that the derby.stream.error.style property overrides the
+     * derby.stream.error.file property.
+     */
+    public void testRollingFileStyleOverFile() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        
+        File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
+        
+        setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
+
+        bootDerby();
+        getTestConfiguration().shutdownEngine();
+
+        closeStreams();
+
+        assertNotEmpty(derby0log);
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertIsEmpty(errStreamFile);
+    }
+
+    /**
+     * Test that the derby.stream.error.style property overrides the
+     * derby.stream.error.method property.
+     */
+    public void testRollingFileStyleOverMethod() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        
+        File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
+        
+        setSystemProperty(METHOD_PROP,
+              "org.apache.derbyTesting.functionTests.tests.engine."+
+              "ErrorStreamTest.getStream");
+
+        bootDerby();
+        getTestConfiguration().shutdownEngine();
+
+        closeStreams();
+
+        assertNotEmpty(derby0log);
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertIsEmpty(errStreamFile);
+    }
+
+    /**
+     * Test that the derby.stream.error.style property overrides the
+     * derby.stream.error.field property.
+     */
+    public void testRollingFileStyleOverField() throws IOException, SQLException {
+        setSystemProperty(STYLE_PROP, ROLLING_FILE_STYLE);
+        
+        File derby0log = new File(getSystemProperty("derby.system.home"), DERBY_0_LOG);
+        
+        setSystemProperty(FIELD_PROP,
+              "org.apache.derbyTesting.functionTests.tests.engine."+
+              "ErrorStreamTest.fieldStream");
+
+        bootDerby();
+        getTestConfiguration().shutdownEngine();
+
+        closeStreams();
+
+        assertNotEmpty(derby0log);
+        assertNotExisting(fileStreamFile);
+        assertIsEmpty(methodStreamFile);
+        assertIsEmpty(fieldStreamFile);
+        assertIsEmpty(errStreamFile);
+    }
+
+    /**
      * Method getStream used by Derby when derby.stream.error.method
      * is set.  Maps to file <database>-method-<runNo>.log
      * This method has to be static.
@@ -432,6 +670,21 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         }
     }
 
+    private static void assertFileSize(final File f, final int size) throws IOException {
+        try {
+            AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<Void>() {
+                public Void run() throws IOException {
+                    assertEquals("assertFileEize failed for file " + f.getName() + ": ", size, f.length());
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            // e.getException() should be an instance of IOException.
+            throw (IOException) e.getException();
+        }
+    }
+
     private static void assertIsExisting(final File f) throws IOException {
         String path = getCanonicalPath(f);
         assertTrue(path + " doesn't exist",
@@ -495,6 +748,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         removeSystemProperty(FILE_PROP);
         removeSystemProperty(METHOD_PROP);
         removeSystemProperty(FIELD_PROP);
+        removeSystemProperty(STYLE_PROP);        
     }
 
     private void deleteStreamFiles() {

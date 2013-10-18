@@ -151,6 +151,12 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 		// to set it. choices are file, method, field, stream
 
 		String target = PropertyUtil.
+		   getSystemProperty(Property.ERRORLOG_STYLE_PROPERTY);
+		if (target != null) {
+			return makeStyleHPW(target, header);
+		}
+
+		target = PropertyUtil.
                    getSystemProperty(Property.ERRORLOG_FILE_PROPERTY);
 		if (target!=null)
 			return makeFileHPW(target, header);
@@ -158,7 +164,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 		target = PropertyUtil.
                    getSystemProperty(Property.ERRORLOG_METHOD_PROPERTY);
 		if (target!=null) 
-			return makeMethodHPW(target, header);
+			return makeMethodHPW(target, header, false);
 
 		target = PropertyUtil.
                    getSystemProperty(Property.ERRORLOG_FIELD_PROPERTY);
@@ -208,7 +214,8 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 	}
 
 	private HeaderPrintWriter makeMethodHPW(String methodInvocation,
-											PrintWriterGetHeader header) {
+											PrintWriterGetHeader header,
+                                            boolean canClose) {
 
 		int lastDot = methodInvocation.lastIndexOf('.');
 		String className = methodInvocation.substring(0, lastDot);
@@ -229,7 +236,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 				try {
 					return makeValueHPW(theMethod, theMethod.invoke((Object) null, 
-						new Object[0]), header, methodInvocation);
+						new Object[0]), header, methodInvocation, canClose);
 				} catch (IllegalAccessException iae) {
 					t = iae;
 				} catch (IllegalArgumentException iarge) {
@@ -251,6 +258,24 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 	}
 
+	private HeaderPrintWriter makeStyleHPW(String style,
+											PrintWriterGetHeader header) {
+		HeaderPrintWriter res = null;
+		if ("rollingFile".equals(style)) {
+		String className = "org.apache.derby.impl.services.stream.RollingFileStreamProvider.getOutputStream";
+			res = makeMethodHPW(className, header, true);
+		} else {            
+			try {
+				IllegalArgumentException ex = new IllegalArgumentException("unknown derby.stream.error.style: " + style);
+                throw ex;
+			} catch (IllegalArgumentException t) {
+				res = useDefaultStream(header, t);
+			} catch (Exception t) {
+				res = useDefaultStream(header, t);
+			}
+		}
+		return res;
+	}
 
 	private HeaderPrintWriter makeFieldHPW(String fieldAccess,
 											PrintWriterGetHeader header) {
@@ -275,7 +300,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 				try {
 					return makeValueHPW(theField, theField.get((Object) null), 
-						header, fieldAccess);
+						header, fieldAccess, false);
 				} catch (IllegalAccessException iae) {
 					t = iae;
 				} catch (IllegalArgumentException iarge) {
@@ -306,12 +331,12 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 	}
 
 	private HeaderPrintWriter makeValueHPW(Member whereFrom, Object value,
-		PrintWriterGetHeader header, String name) {
+		PrintWriterGetHeader header, String name, boolean canClose) {
 
 		if (value instanceof OutputStream)
-			 return new BasicHeaderPrintWriter((OutputStream) value, header, false, name);
+			 return new BasicHeaderPrintWriter((OutputStream) value, header, canClose, name);
 		else if (value instanceof Writer)
-			 return new BasicHeaderPrintWriter((Writer) value, header, false, name);
+			 return new BasicHeaderPrintWriter((Writer) value, header, canClose, name);
 		
 		HeaderPrintWriter hpw = useDefaultStream(header);
 

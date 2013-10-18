@@ -378,6 +378,11 @@ public class BaseDataFileFactory
 		
 		//Log properties related to redirection of derby.log 
 		String target = 
+			PropertyUtil.getSystemProperty(Property.ERRORLOG_STYLE_PROPERTY);
+		if (target != null)
+			logMsg(Property.ERRORLOG_STYLE_PROPERTY+"=" + target);
+        
+		target = 
 			PropertyUtil.getSystemProperty(Property.ERRORLOG_FILE_PROPERTY);
 		if (target != null)
 			logMsg(Property.ERRORLOG_FILE_PROPERTY+"=" + target);
