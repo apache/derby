@@ -1069,15 +1069,15 @@ public class AllocPage extends StoredPage
 			SanityManager.ASSERT(isLatched(), "page is not latched");
         }
 
-        int last_valid_page = extent.compress(owner, ntt, this);
+        int last_valid_page_bit = extent.compress(owner, ntt, this);
 
-        if (last_valid_page >= 0)
+        if (last_valid_page_bit >= 0)
         {
             // a non-negative return means that pages can be returned to
             // the operating system.
-            myContainer.truncatePages(extent.getPagenum(last_valid_page));
+            myContainer.truncatePages(extent.getPagenum(last_valid_page_bit));
 
-            if (last_valid_page == this.getPageNumber())
+            if (last_valid_page_bit == 0)
             {
                 // all pages of the extent have been returned to OS.
                 all_pages_compressed = true;

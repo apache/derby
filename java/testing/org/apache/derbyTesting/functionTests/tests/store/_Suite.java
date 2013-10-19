@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LiveLockTest.suite());
         suite.addTest(ClobReclamationTest.suite());
         suite.addTest(IndexSplitDeadlockTest.suite());
+        suite.addTest(Derby5234Test.suite());
 
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
