@@ -41,8 +41,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Hashtable;
-import org.apache.derby.iapi.error.ExceptionUtil;
-
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 class Request {
 
