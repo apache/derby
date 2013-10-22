@@ -223,13 +223,8 @@ class OptimizerImpl implements Optimizer
 		this.numTablesInQuery = numTablesInQuery;
 		numOptimizables = optimizableList.size();
 		proposedJoinOrder = new int[numOptimizables];
-		if (numTablesInQuery > 6)
-		{
-			permuteState = READY_TO_JUMP;
-			firstLookOrder = new int[numOptimizables];
-		}
-		else
-			permuteState = NO_JUMP;
+        if (initJumpState() == READY_TO_JUMP)
+            firstLookOrder = new int[numOptimizables];
 
 		/* Mark all join positions as unused */
 		for (int i = 0; i < numOptimizables; i++)
@@ -385,7 +380,27 @@ class OptimizerImpl implements Optimizer
 		 * phase in certain situations.  DERBY-1866.
 		 */
 		desiredJoinOrderFound = false;
-	}
+        
+        /*
+         * If we JUMPed permutations last round, it's possible that we timed out
+         * before finishing all of the jump processing (most likely we ended in
+         * the middle of a WALK_LOW). So reset the jump state here to make sure
+         * we get a clean start. Failure to do so can lead to execution of
+         * code-paths that are not expected and thus incorrect cost estimates
+         * (most notably, an uninitialized bestCost, which we should never see).
+         * DERBY-1905.
+         */
+        initJumpState();
+    }
+    
+    /**
+     * Determine if we want to try "jumping" permutations with this
+     * OptimizerImpl, and (re-)initialize the permuteState field accordingly.
+     */
+    private int initJumpState() {
+        permuteState = (numTablesInQuery >= 6 ? READY_TO_JUMP : NO_JUMP);
+        return permuteState;
+    }
 
     private  boolean tracingIsOn() { return lcc.optimizerTracingIsOn(); }
 
