@@ -5765,6 +5765,20 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Internal error: page {0} attempted latched twice.</text>
                 <arg>pageNumber</arg>
             </msg>
+
+            <msg>
+                <name>XSDAP.S</name>
+                <text>Unexpected no space error while attempting to update a row on page {0}. Values of internal fields at time of error are as follows: slot = {2}, recordId = {3}, newColumnList = {4}, nextColumn = {5}, mode = {6}, nextPortionHandle = {7}, page dump = {1}.</text>
+                <arg>pageId</arg>
+                <arg>pageDump</arg>
+                <arg>slot</arg>
+                <arg>recordId</arg>
+                <arg>columnList</arg>
+                <arg>nextColumn</arg>
+                <arg>updateMode</arg>
+                <arg>nextPortionHandle</arg>
+            </msg>
+
         </family>
 
 
@@ -7948,6 +7962,42 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
             <msg>
                 <name>D015</name>
                 <text>Could not read further because another transaction has modified the value.</text>
+            </msg>
+
+            <msg>
+                <name>D016</name>
+                <text>
+---------------------------------------------------
+page id:            {0}
+ Overflow:          {1}
+ PageVersion:       {2}
+ SlotsInUse:        {3}
+ DeletedRowCount:   {4}
+ PageStatus:        {5}
+ NextId:            {6}
+ firstFreeByte:     {7}
+ freeSpace:         {8}
+ totalSpace:        {9}
+ spareSpace:        {10}%
+ minimumRecordSize: {11}
+ PageSize:          {12}
+---------------------------------------------------
+{13}
+---------------------------------------------------</text>
+                <arg>pageId</arg>
+                <arg>overFlow</arg>
+                <arg>pageVersion</arg>
+                <arg>slotsInUse</arg>
+                <arg>deletedRowCount</arg>
+                <arg>pageStatus</arg>
+                <arg>nextId</arg>
+                <arg>firstFreeByte</arg>
+                <arg>freeSpace</arg>
+                <arg>totalSpace</arg>
+                <arg>spareSpace</arg>
+                <arg>minimumRecordSize</arg>
+                <arg>pageSize</arg>
+                <arg>hexPageDump</arg>
             </msg>
 
         </family>

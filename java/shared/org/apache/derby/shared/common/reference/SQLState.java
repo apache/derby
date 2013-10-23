@@ -490,6 +490,7 @@ public interface SQLState {
     String DATA_SQLDATA_READ_INSTANTIATION_EXCEPTION            = "XSDAM.S";
     String DATA_SQLDATA_READ_ILLEGAL_ACCESS_EXCEPTION           = "XSDAN.S";
     String DATA_DOUBLE_LATCH_INTERNAL_ERROR                     = "XSDAO.S";
+    String DATA_UNEXPECTED_NO_SPACE_ON_PAGE                     = "XSDAP.S";
 
 	/*
 	** RawStore - Data.Generic transaction exceptions
