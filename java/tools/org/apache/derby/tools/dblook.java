@@ -30,7 +30,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Timestamp;
 
 import java.util.HashMap;
@@ -519,6 +518,7 @@ public final class dblook {
 
             boolean at10_6 = atVersion( conn, 10, 6 );
             boolean at10_9 = atVersion( conn, 10, 9 );
+            boolean at10_11 = atVersion(conn, 10, 11);
 
 			// Generate DDL.
 
@@ -544,7 +544,7 @@ public final class dblook {
 			if (!skipViews)
 				DB_View.doViews(this.conn);
 
-			DB_Trigger.doTriggers(this.conn);
+            DB_Trigger.doTriggers(this.conn, at10_11);
 
 			DB_Roles.doRoles(this.conn);
 			DB_GrantRevoke.doAuthorizations(this.conn, at10_6);

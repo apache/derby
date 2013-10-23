@@ -197,6 +197,9 @@ create table x (x int);
 create table removed (x int);
 create trigger trigFour after update of x on x referencing old_table as old new_table as new for each statement insert into removed select * from old where x not in (select x from new where x < 10);
 
+-- Test trigger with WHEN clause (DERBY-534).
+create trigger trigWhen after update on t1 referencing old table as old when (exists (select * from old where i > 4)) values 1;
+
 -- ----------------------------------------------
 -- Roles
 -- ----------------------------------------------

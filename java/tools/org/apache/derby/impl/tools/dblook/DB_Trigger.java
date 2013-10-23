@@ -23,53 +23,70 @@ package org.apache.derby.impl.tools.dblook;
 
 import java.sql.Connection;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import java.util.HashMap;
-import java.util.StringTokenizer;
 
 import org.apache.derby.tools.dblook;
 
 public class DB_Trigger {
 
-	/* ************************************************
+    // Column name constants for SYS.SYSTRIGGERS
+    private static final String TRIGGERNAME = "TRIGGERNAME";
+    private static final String SCHEMAID = "SCHEMAID";
+    private static final String EVENT = "EVENT";
+    private static final String FIRINGTIME = "FIRINGTIME";
+    private static final String TYPE = "TYPE";
+    private static final String TABLEID = "TABLEID";
+    private static final String REFERENCEDCOLUMNS = "REFERENCEDCOLUMNS";
+    private static final String TRIGGERDEFINITION = "TRIGGERDEFINITION";
+    private static final String REFERENCINGOLD = "REFERENCINGOLD";
+    private static final String REFERENCINGNEW = "REFERENCINGNEW";
+    private static final String OLDREFERENCINGNAME = "OLDREFERENCINGNAME";
+    private static final String NEWREFERENCINGNAME = "NEWREFERENCINGNAME";
+    private static final String WHENCLAUSETEXT = "WHENCLAUSETEXT";
+
+    /** ************************************************
 	 * Generate the DDL for all triggers in a given
 	 * database.
 	 * @param conn Connection to the source database.
-	 * @return The DDL for the triggers has been written
-	 *  to output via Logs.java.
+     * @param supportsWhenClause Tells whether the database supports the
+     *   trigger WHEN clause.
 	 ****/
 
-	public static void doTriggers (Connection conn)
+    public static void doTriggers(Connection conn, boolean supportsWhenClause)
 		throws SQLException
 	{
 
 		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT TRIGGERNAME, SCHEMAID, " +
-			"EVENT, FIRINGTIME, TYPE, TABLEID, REFERENCEDCOLUMNS, " + 
-			"TRIGGERDEFINITION, REFERENCINGOLD, REFERENCINGNEW, OLDREFERENCINGNAME, " +
-			"NEWREFERENCINGNAME FROM SYS.SYSTRIGGERS WHERE STATE != 'D'");
+        ResultSet rs = stmt.executeQuery(
+                "SELECT * FROM SYS.SYSTRIGGERS WHERE STATE != 'D'");
 
 		boolean firstTime = true;
 		while (rs.next()) {
 
 			String trigName = dblook.addQuotes(
-				dblook.expandDoubleQuotes(rs.getString(1)));
-			String trigSchema = dblook.lookupSchemaId(rs.getString(2));
+                dblook.expandDoubleQuotes(rs.getString(TRIGGERNAME)));
+            String trigSchema = dblook.lookupSchemaId(rs.getString(SCHEMAID));
 
 			if (dblook.isIgnorableSchema(trigSchema))
 				continue;
 
 			trigName = trigSchema + "." + trigName;
-			String tableName = dblook.lookupTableId(rs.getString(6));
+            String tableName = dblook.lookupTableId(rs.getString(TABLEID));
+
+            // Get the WHEN clause text, if there is a WHEN clause. The
+            // WHENCLAUSETEXT column is only present if the data dictionary
+            // version is 10.11 or higher (DERBY-534).
+            String whenClause =
+                    supportsWhenClause ? rs.getString(WHENCLAUSETEXT) : null;
 
 			// We'll write the DDL for this trigger if either 1) it is on
 			// a table in the user-specified list, OR 2) the trigger text
 			// contains a reference to a table in the user-specified list.
 
-			if (!dblook.stringContainsTargetTable(rs.getString(8)) &&
+            if (!dblook.stringContainsTargetTable(
+                    rs.getString(TRIGGERDEFINITION)) &&
+                !dblook.stringContainsTargetTable(whenClause) &&
 				(dblook.isExcludedTable(tableName)))
 				continue;
 
@@ -80,7 +97,7 @@ public class DB_Trigger {
 			}
 
 			String createTrigString = createTrigger(trigName,
-				tableName, rs);
+                tableName, whenClause, rs);
 
 			Logs.writeToNewDDL(createTrigString);
 			Logs.writeStmtEndToNewDDL();
@@ -94,37 +111,40 @@ public class DB_Trigger {
 
 	}
 
-	/* ************************************************
+    /** ************************************************
 	 * Generate DDL for a specific trigger.
 	 * @param trigName Name of the trigger.
 	 * @param tableName Name of the table on which the trigger
 	 *  fires.
+     * @param whenClause The WHEN clause text (possibly {@code null}).
 	 * @param aTrig Information about the trigger.
 	 * @return The DDL for the current trigger is returned
 	 *  as a String.
 	 ****/
 
 	private static String createTrigger(String trigName, String tableName,
-		ResultSet aTrig) throws SQLException
+        String whenClause, ResultSet aTrig) throws SQLException
 	{
 
-		StringBuffer sb = new StringBuffer ("CREATE TRIGGER ");
+        StringBuilder sb = new StringBuilder("CREATE TRIGGER ");
 		sb.append(trigName);
 
 		// Firing time.
-		if (aTrig.getString(4).charAt(0) == 'A')
+        if (aTrig.getString(FIRINGTIME).charAt(0) == 'A') {
 			sb.append(" AFTER ");
-		else
+        } else {
 			sb.append(" NO CASCADE BEFORE ");
+        }
 
 		// Event.
-		switch (aTrig.getString(3).charAt(0)) {
+        String event = aTrig.getString(EVENT);
+        switch (event.charAt(0)) {
 			case 'I':	sb.append("INSERT");
 						break;
 			case 'D':	sb.append("DELETE");
 						break;
 			case 'U':	sb.append("UPDATE");
-						String updateCols = aTrig.getString(7);
+                        String updateCols = aTrig.getString(REFERENCEDCOLUMNS);
 						//DERBY-5839 dblook run on toursdb fails on triggers
 						//	with java.lang.StringIndexOutOfBoundsException in
 						//	dblook.log
@@ -145,12 +165,12 @@ public class DB_Trigger {
 						if (!aTrig.wasNull() && !updateCols.equals("NULL")) {
 							sb.append(" OF ");
 							sb.append(dblook.getColumnListFromDescription(
-								aTrig.getString(6), updateCols));
+                                aTrig.getString(TABLEID), updateCols));
 						}
 						break;
 			default:	// shouldn't happen.
 						Logs.debug("INTERNAL ERROR: unexpected trigger event: " + 
-							aTrig.getString(3), (String)null);
+                                   event, (String)null);
 						break;
 		}
 
@@ -159,12 +179,12 @@ public class DB_Trigger {
 		sb.append(tableName);
 
 		// Referencing...
-		char trigType = aTrig.getString(5).charAt(0);
-		String oldReferencing = aTrig.getString(11);
-		String newReferencing = aTrig.getString(12);
+        char trigType = aTrig.getString(TYPE).charAt(0);
+        String oldReferencing = aTrig.getString(OLDREFERENCINGNAME);
+        String newReferencing = aTrig.getString(NEWREFERENCINGNAME);
 		if ((oldReferencing != null) || (newReferencing != null)) {
 			sb.append(" REFERENCING");
-			if (aTrig.getBoolean(9)) {
+            if (aTrig.getBoolean(REFERENCINGOLD)) {
 				sb.append(" OLD");
 				if (trigType == 'S')
 				// Statement triggers work on tables.
@@ -174,7 +194,7 @@ public class DB_Trigger {
 					sb.append(" AS ");
 				sb.append(oldReferencing);
 			}
-			if (aTrig.getBoolean(10)) {
+            if (aTrig.getBoolean(REFERENCINGNEW)) {
 				sb.append(" NEW");
 				if (trigType == 'S')
 				// Statement triggers work on tables.
@@ -193,8 +213,15 @@ public class DB_Trigger {
 		else
 			sb.append("ROW ");
 
-		// Finally, the trigger action.
-		sb.append(dblook.removeNewlines(aTrig.getString(8)));
+        // Finally, the trigger action, which consists of an optional WHEN
+        // clause and the triggered SQL statement.
+        if (whenClause != null) {
+            sb.append("WHEN (");
+            sb.append(dblook.removeNewlines(whenClause));
+            sb.append(") ");
+        }
+        sb.append(dblook.removeNewlines(aTrig.getString(TRIGGERDEFINITION)));
+
 		return sb.toString();
 
 	}

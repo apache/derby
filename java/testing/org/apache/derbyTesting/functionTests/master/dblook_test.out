@@ -1643,6 +1643,12 @@ T3
 Table
 ----
 <systemid>
+<Trigger>APP.TRIGWHEN -> <Table>APP.T1
+Trigger
+T1
+Table
+----
+<systemid>
 <Trigger>APP.TrigThree -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
@@ -1725,6 +1731,30 @@ Conglomerate
 StoredPreparedStatement
 <systemid>
 Conglomerate
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
 ----
 ========== SYSFILES ==========
 <systemid>
@@ -1841,6 +1871,26 @@ APP
 T
 <validityflag>
 update bar.t4 set j=8 where i=2
+<systemid>
+APP
+null
+----
+<systemid>
+<systemname>
+APP
+T
+<validityflag>
+values 1
+<systemid>
+APP
+null
+----
+<systemid>
+<systemid>
+APP
+T
+<validityflag>
+VALUES exists (select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where i > 4)
 <systemid>
 APP
 null
@@ -2181,6 +2231,25 @@ false
 null
 null
 null
+----
+<systemid>
+TRIGWHEN
+APP
+<systemid>
+U
+A
+S
+E
+T1
+<systemid>
+<systemid>
+(1,2,3,4)
+values 1
+true
+false
+OLD
+null
+exists (select * from old where i > 4)
 ----
 <systemid>
 TrigThree
@@ -3920,6 +3989,12 @@ T3
 Table
 ----
 <systemid>
+<Trigger>APP.TRIGWHEN -> <Table>APP.T1
+Trigger
+T1
+Table
+----
+<systemid>
 <Trigger>APP.TrigThree -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
@@ -3996,6 +4071,30 @@ Conglomerate
 StoredPreparedStatement
 <systemid>
 Conglomerate
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
 ----
 ========== SYSFILES ==========
 <systemid>
@@ -4112,6 +4211,26 @@ APP
 T
 <validityflag>
 update bar.t4 set j=8 where i=2
+<systemid>
+APP
+null
+----
+<systemid>
+<systemname>
+APP
+T
+<validityflag>
+values 1
+<systemid>
+APP
+null
+----
+<systemid>
+<systemid>
+APP
+T
+<validityflag>
+VALUES exists (select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where i > 4)
 <systemid>
 APP
 null
@@ -4452,6 +4571,25 @@ false
 null
 null
 null
+----
+<systemid>
+TRIGWHEN
+APP
+<systemid>
+U
+A
+S
+E
+T1
+<systemid>
+<systemid>
+(1,2,3,4)
+values 1
+true
+false
+OLD
+null
+exists (select * from old where i > 4)
 ----
 <systemid>
 TrigThree
@@ -5627,6 +5765,12 @@ T1
 Table
 ----
 <systemid>
+<Trigger>APP.TRIGWHEN -> <Table>APP.T1
+Trigger
+T1
+Table
+----
+<systemid>
 <Trigger>Foo Bar.TRIG2 -> <StoredPreparedStatement>Foo Bar.<sysname>
 Trigger
 <systemid>
@@ -5643,6 +5787,30 @@ V2
 View
 T1
 ColumnsInTable
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<StoredPreparedStatement>APP.<sysname> -> <Table>APP.T1
+StoredPreparedStatement
+T1
+Table
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
+----
+<systemid>
+<Trigger>APP.TRIGWHEN -> <StoredPreparedStatement>APP.<sysname>
+Trigger
+<systemid>
+StoredPreparedStatement
 ----
 ========== SYSFILES ==========
 ========== SYSFOREIGNKEYS ==========
@@ -5664,6 +5832,26 @@ Foo Bar
 APP
 ----
 ========== SYSSTATEMENTS ==========
+<systemid>
+<systemid>
+APP
+T
+<validityflag>
+VALUES exists (select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where i > 4)
+<systemid>
+APP
+null
+----
+<systemid>
+<systemname>
+APP
+T
+<validityflag>
+values 1
+<systemid>
+APP
+null
+----
 <systemid>
 <systemname>
 Foo Bar
@@ -5730,6 +5918,25 @@ false
 null
 null
 null
+----
+<systemid>
+TRIGWHEN
+APP
+<systemid>
+U
+A
+S
+E
+T1
+<systemid>
+<systemid>
+(1,2,3,4)
+values 1
+true
+false
+OLD
+null
+exists (select * from old where i > 4)
 ----
 ========== SYSVIEWS ==========
 V2
@@ -6083,6 +6290,7 @@ SET SCHEMA "APP"
 -- DDL Statements for triggers
 -- ----------------------------------------------
 CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2
+CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from bar.t1 where i = 2
 ############## End File Contents ################
 File dblook.log was empty.
 ************
@@ -6245,6 +6453,7 @@ SET SCHEMA "APP" #
 -- DDL Statements for triggers
 -- ----------------------------------------------
 CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2 #
+CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from bar.t1 where i = 2 #
 ************
 Msg Test 5
 ************

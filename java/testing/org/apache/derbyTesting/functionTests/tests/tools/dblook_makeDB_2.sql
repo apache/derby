@@ -88,6 +88,9 @@ create synonym syn1 for bar.t1;
 
 create trigger trigOne after insert on bar.t1 for each row update bar.t1 set i = 4 where i = 2;
 
+-- trigger with WHEN clause (DERBY-534)
+create trigger trigTwo after insert on bar.t1 referencing new as new for each row when (new.i > 4) delete from bar.t1 where i = 2;
+
 -- ----------------------------------------------
 -- UDTs
 -- ----------------------------------------------
