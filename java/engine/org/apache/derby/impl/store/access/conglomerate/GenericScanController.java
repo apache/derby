@@ -800,7 +800,13 @@ public abstract class GenericScanController
                     }
                     else
                     {
-                        if (hash_table.putRow(false, fetch_row))
+                        RowLocation     rowLocation =
+                            hash_table.includeRowLocations() ?
+                            makeRowLocation( scan_position ) : null;
+                        if (
+                            hash_table.putRow
+                            ( false, fetch_row, rowLocation )
+                            )
                         {
                             // The row was inserted into the hash table so we
                             // need to create a new row next time through.
@@ -888,6 +894,10 @@ public abstract class GenericScanController
     RowPosition     pos)
         throws StandardException
         ;
+
+    /** Make a RowLocation from a RowPosition */
+    protected abstract RowLocation makeRowLocation( RowPosition pos )
+        throws StandardException;
 
     /**************************************************************************
      * abstract protected Methods of This class:

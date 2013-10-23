@@ -695,9 +695,12 @@ class UpdateResultSet extends DMLWriteResultSet
              * Need to save a clone because when we get cached currentRow, "rl"
              * shares the same reference, so is changed at the same time.
              */
-            tableScan.past2FutureTbl.putRow(
-                false,
-                new DataValueDescriptor[] { rl.cloneValue(false) });
+            tableScan.past2FutureTbl.putRow
+                (
+                 false,
+                 new DataValueDescriptor[] { rl.cloneValue(false) },
+                 null
+                 );
 		}
 	}
 

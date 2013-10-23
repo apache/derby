@@ -993,7 +993,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		System.arraycopy(sourceRowArray, 0, hashRowArray, extraColumns, 
 				sourceRowArray.length);
 
-		ht.putRow(true, hashRowArray);
+		ht.putRow(true, hashRowArray, null);
 
 		numToHashTable++;
 	}
@@ -1014,9 +1014,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 
 		// Get the row from the hash table
 		positionInHashTable.setValue(position);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-				ht.get(positionInHashTable);
-
+		DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 
 		if (SanityManager.DEBUG)
 		{
@@ -1069,8 +1067,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		throws StandardException
 	{
 		positionInHashTable.setValue(position);
-		final DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-			ht.get(positionInHashTable);
+		final DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 		
 		// Copy out the Object[] without the position.
 		final DataValueDescriptor[] resultRowArray = new 
@@ -1088,8 +1085,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	private void positionInLastFetchedRow() throws StandardException {
 		if (positionInSource > 0) {
 			positionInHashTable.setValue(positionInSource);
-			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-					ht.get(positionInHashTable);
+			DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 			RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
 			((NoPutResultSet)target).positionScanAtRowLocation(rowLoc);
 			currentPosition = positionInSource;
@@ -1117,8 +1113,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		}
 
 		positionInHashTable.setValue(currentPosition);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[])
-				ht.get(positionInHashTable);
+		DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
 
 		// Maps from each selected column to underlying base table column
@@ -1192,8 +1187,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	 */
 	public void markRowAsDeleted() throws StandardException  {
 		positionInHashTable.setValue(currentPosition);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-				ht.get(positionInHashTable);
+		DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
 		ht.remove(new SQLInteger(currentPosition));
 		((SQLBoolean)hashRowArray[POS_ROWDELETED]).setValue(true);
@@ -1202,7 +1196,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			hashRowArray[i].setToNull();
 		}
 
-		ht.putRow(true, hashRowArray);
+		ht.putRow(true, hashRowArray, null);
 	}
 
 	/**
@@ -1216,8 +1210,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	public boolean isDeleted() throws StandardException  {
 		if (currentPosition <= positionInSource && currentPosition > 0) {
 			positionInHashTable.setValue(currentPosition);
-			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-					ht.get(positionInHashTable);
+			DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 			return hashRowArray[POS_ROWDELETED].getBoolean();
 		}
 		return false;
@@ -1234,8 +1227,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	public boolean isUpdated() throws StandardException {
 		if (currentPosition <= positionInSource && currentPosition > 0) {
 			positionInHashTable.setValue(currentPosition);
-			DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
-					ht.get(positionInHashTable);
+			DataValueDescriptor[] hashRowArray = getCurrentRowFromHashtable();
 			return hashRowArray[POS_ROWUPDATED].getBoolean();
 		}
 		return false;
@@ -1244,5 +1236,12 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	public boolean isForUpdate() {
 		return source.isForUpdate();
 	}
+
+    /** Get the column array from the current position in the hash table */
+    private DataValueDescriptor[]   getCurrentRowFromHashtable()
+        throws StandardException
+    {
+        return unpackHashValue( ht.get(positionInHashTable) );
+    }
 
 }

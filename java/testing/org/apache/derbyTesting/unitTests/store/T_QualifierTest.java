@@ -1017,7 +1017,8 @@ public class T_QualifierTest
                 -1,             // use default load factor
                 false,          // don't maintain runtime statistics
                 false,          // don't skip null key columns
-                false);         // don't keep after commit
+                false,          // don't keep after commit
+                false);         // don't include row locations
 
         // make sure the expected result set is the same as the actual result
         // set.
@@ -1106,7 +1107,8 @@ public class T_QualifierTest
                 -1,             // use default load factor
                 false,         // don't maintain runtime statistics
 				false,			// don't skip null key columns
-                false);         // don't keep after commit
+                false,          // don't keep after commit
+                false);         // don't include row locations
 
         Object removed_obj;
         for (numrows = 0; numrows < expect_numrows; numrows++)

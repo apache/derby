@@ -44,6 +44,7 @@ import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 import org.apache.derby.iapi.store.access.RowSource;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.LocatedRow;
 import org.apache.derby.iapi.types.Orderable;
 import org.apache.derby.iapi.types.RowLocation;
 
@@ -555,5 +556,14 @@ extends BasicNoPutResultSetImpl
 		// is a no-op
 	}
 
+    /**
+     * Get all of the columns out of a value stored in a BackingStoreHashtable.
+     */
+    protected DataValueDescriptor[]   unpackHashValue( Object hashValue )
+    {
+        if ( hashValue == null ) { return null; }
+        else if ( hashValue instanceof DataValueDescriptor[] ) { return (DataValueDescriptor[]) hashValue; }
+        else { return ((LocatedRow) hashValue).flatten(); }
+    }
 
 }

@@ -130,6 +130,12 @@ class HeapScan
         }
     }
 
+    protected RowLocation makeRowLocation( RowPosition pos )
+        throws StandardException
+    {
+        return new HeapRowLocation( pos.current_rh );
+    }
+
     protected void setRowLocationArray(
     RowLocation[]   rowloc_array,
     int             index,

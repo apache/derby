@@ -89,6 +89,7 @@ public class HashScanResultSet extends ScanResultSet
 	private boolean sameStartStopPosition;
 	private boolean skipNullKeyColumns;
 	private boolean keepAfterCommit;
+    private boolean includeRowLocations = false;
 
 	protected BackingStoreHashtable hashtable;
 	protected boolean eliminateDuplicates;		// set to true in DistinctScanResultSet
@@ -273,8 +274,8 @@ public class HashScanResultSet extends ScanResultSet
                     loadFactor,         // in memory Hashtable load factor
                     runTimeStatisticsOn,
 					skipNullKeyColumns,
-					keepAfterCommit);
-
+					keepAfterCommit,
+					includeRowLocations);
 
 			if (runTimeStatisticsOn)
 			{
@@ -424,26 +425,23 @@ public class HashScanResultSet extends ScanResultSet
 					{
 						entryVector = (List) hashEntry;
 						entryVectorSize = entryVector.size();
-						columns = 
-                            (DataValueDescriptor[]) entryVector.get(0);
+						columns = unpackHashValue( entryVector.get( 0 ) );
 					}
 					else
 					{
 						entryVector = null;
 						entryVectorSize = 0;
-						columns = (DataValueDescriptor[]) hashEntry;
+						columns = unpackHashValue( hashEntry );
 					}
 				}
 				else if (numFetchedOnNext < entryVectorSize)
 				{
 					// We are walking a list and there are more rows left.
-					columns = (DataValueDescriptor[]) 
-                        entryVector.get(numFetchedOnNext);
+					columns = unpackHashValue( entryVector.get( numFetchedOnNext ) );
 				}
 
 				if (columns != null)
 				{
-
 					// See if the entry satisfies all of the other qualifiers
 
 					/* We've already "evaluated" the 1st keyColumns qualifiers 

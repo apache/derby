@@ -155,7 +155,8 @@ class NoOpTransaction implements TransactionController {
             boolean remove_duplicates, long estimated_rowcnt,
             long max_inmemory_rowcnt, int initialCapacity, float loadFactor,
             boolean collect_runtimestats, boolean skipNullKeyColumns,
-            boolean keepAfterCommit)
+            boolean keepAfterCommit,
+            boolean includeRowLocations)
             throws StandardException {
         // Auto-generated method stub
         return null;

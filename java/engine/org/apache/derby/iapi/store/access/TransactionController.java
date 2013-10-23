@@ -934,8 +934,10 @@ public interface TransactionController
      *                              BackingStoreHashtable.getRuntimeStats().
 	 * @param skipNullKeyColumns	Whether or not to skip rows with 1 or more null key columns
      *
-     * @param keepAfterCommit       If true then the hash table is kept after a
-     *                              commit
+     * @param keepAfterCommit If true then keep hash table after commit
+     *
+     * @param includeRowLocations If true then rows should include RowLocations.
+     *
      * @see BackingStoreHashtable
      * @see TransactionController#openScan
      *
@@ -961,7 +963,8 @@ public interface TransactionController
     float                   loadFactor,
     boolean                 collect_runtimestats,
     boolean		            skipNullKeyColumns,
-    boolean                 keepAfterCommit)
+    boolean                 keepAfterCommit,
+    boolean                 includeRowLocations)
         throws StandardException;
 
 

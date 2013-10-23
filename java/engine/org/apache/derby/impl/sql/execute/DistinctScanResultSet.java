@@ -112,7 +112,7 @@ class DistinctScanResultSet extends HashScanResultSet
 
 			if (element.hasMoreElements())
 			{
-                DataValueDescriptor[] columns = (DataValueDescriptor[]) element.nextElement();
+                DataValueDescriptor[] columns = unpackHashValue( element.nextElement() );
 
 				setCompatRow(compactRow, columns);
 

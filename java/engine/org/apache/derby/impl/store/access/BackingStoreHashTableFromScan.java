@@ -58,6 +58,7 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
      **************************************************************************
      */
     private ScanManager             open_scan;
+    private boolean                     includeRowLocations;
 
     /**************************************************************************
      * Constructors for This class:
@@ -84,7 +85,8 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
         float                   loadFactor,
         boolean                 collect_runtimestats,
 		boolean					skipNullKeyColumns,
-        boolean                 keepAfterCommit)
+        boolean                 keepAfterCommit,
+        boolean                 includeRowLocations )
             throws StandardException
     {
 
@@ -99,6 +101,7 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
             loadFactor,
 			skipNullKeyColumns,
             keepAfterCommit);
+        this.includeRowLocations = includeRowLocations;
 
         open_scan =  (ScanManager)
             tc.openScan(
@@ -136,6 +139,9 @@ class BackingStoreHashTableFromScan extends BackingStoreHashtable
      * Public Methods of This class:
      **************************************************************************
      */
+
+    @Override
+    public  boolean includeRowLocations() { return includeRowLocations; }
 
     /**
      * Close the BackingStoreHashtable.

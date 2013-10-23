@@ -1328,7 +1328,8 @@ public class RAMTransaction
     float                   loadFactor,
     boolean                 collect_runtimestats,
     boolean		            skipNullKeyColumns,
-    boolean                 keepAfterCommit)
+    boolean                 keepAfterCommit,
+    boolean                 includeRowLocations )
         throws StandardException
     {
         return (
@@ -1353,7 +1354,8 @@ public class RAMTransaction
                 loadFactor,
                 collect_runtimestats,
 				skipNullKeyColumns,
-                keepAfterCommit));
+                keepAfterCommit,
+                includeRowLocations));
     }
 
 

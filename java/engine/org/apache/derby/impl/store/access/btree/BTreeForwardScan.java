@@ -86,6 +86,13 @@ public class BTreeForwardScan extends BTreeScan
     int[]                   key_column_numbers)
         throws StandardException
 	{
+        if (SanityManager.DEBUG)
+        {
+            // RowLocations in the BTree itself are unstable and should
+            // not be put in long-lived structures like persistent hash tables.
+            SanityManager.ASSERT
+                ( (hash_table == null) || !hash_table.includeRowLocations() );
+        }
 
         int                     ret_row_count     = 0;
         DataValueDescriptor[]   fetch_row         = null;
@@ -443,7 +450,7 @@ public class BTreeForwardScan extends BTreeScan
 
                     if (hash_table != null)
                     {
-                        if (hash_table.putRow(false, fetch_row))
+                        if (hash_table.putRow(false, fetch_row, null))
                             fetch_row = null;
                     }
                     else
