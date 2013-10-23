@@ -81,6 +81,14 @@ public final class MessageService {
         return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4, a5});
     }
 
+    // 14 arg message
+    //     note that new vararg JAVA syntax is used in releases after 10.10, 
+    //     so not going to add 6 arg through 13 arg versions in these old 
+    //     releases, unless actually needed.
+    public static String getTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7, Object a8, Object a9, Object a10, Object a11, Object a12, Object a13, Object a14) {
+        return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14});
+    }
+
 	/**
 	  Transform the message from messageID to the actual error, warning, or
 	  info message using the correct locale.

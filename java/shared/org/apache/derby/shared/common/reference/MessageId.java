@@ -88,12 +88,13 @@ public interface MessageId {
     String STORE_REMOVED_BACKUP             = "D011";
     String STORE_BACKUP_COMPLETED           = "D012";
     String STORE_DURABILITY_TESTMODE_NO_SYNC = "D013"; // for derby.system.durability is 
-                                                       // set to test
+
     /**
      * When the specified overflow page isn't found while streaming from a
      * page overflow chain (large data values, typically BLOB or CLOB).
      */
     String STORE_STREAM_OVERFLOW_PAGE_NOT_FOUND = "D015";
+    String STORE_PAGE_DUMP                  = "D016";
 
 	/*
 	** ClassManager

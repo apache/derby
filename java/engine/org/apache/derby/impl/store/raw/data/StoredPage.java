@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.zip.CRC32;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
 import org.apache.derby.iapi.services.io.CompressedNumber;
@@ -8185,6 +8187,27 @@ public class StoredPage extends CachedPage
         }
     }
 
+    String getPageDumpString()
+    {
+        return(
+            MessageService.getTextMessage(
+                MessageId.STORE_PAGE_DUMP,
+                getIdentity(),
+                new Boolean(isOverflowPage),
+                new Long(getPageVersion()),
+                new Integer(slotsInUse),
+                new Integer(deletedRowCount),
+                new Integer(getPageStatus()),
+                new Integer(nextId),
+                new Integer(firstFreeByte),
+                new Integer(freeSpace),
+                new Integer(totalSpace),
+                new Integer(spareSpace),
+                new Integer(minimumRecordSize),
+                new Integer(getPageSize()),
+                pagedataToHexDump(pageData)));
+    }
+
     private String recordToString(int slot)
     {
         if (SanityManager.DEBUG)
@@ -8773,6 +8796,25 @@ slotScan:
                         hitLongColumn = true;
 
                     }
+                    catch (NoSpaceOnPage nsop)
+                    {
+                        // DERBY-4923
+                        //
+                        // The actionUpdate() call should not generate a 
+                        // NoSpaceOnPage error.  
+
+                        throw StandardException.newException(
+                                SQLState.DATA_UNEXPECTED_NO_SPACE_ON_PAGE,
+                                nsop,
+                                ((PageKey) curPage.getIdentity()).toString(),
+                                getPageDumpString(),
+                                new Integer(slot),
+                                new Integer(id),
+                                validColumns.toString(),
+                                new Integer(realStartColumn),
+                                new Integer(0),
+                                headRowHandle);
+                    }
 
                 } while (hitLongColumn);
 
@@ -8930,17 +8972,53 @@ slotScan:
                     // However, the insert log record do not have the head 
                     // row's page number so the rollback cannot put that
                     // information into the post commit work.
-                    RecordHandle portionHandle =
-                        op.insertAllowOverflow(
-                            0, newRow, newColumnList, nextColumn, mode, 100, 
-                            nextPortionHandle);
+
+                    RecordHandle portionHandle;
+
+                    try 
+                    {
+                        portionHandle =
+                            op.insertAllowOverflow(
+                                0, newRow, newColumnList, nextColumn, mode, 100,
+                                nextPortionHandle);
+
+                    }
+                    catch (NoSpaceOnPage nsop)
+                    {
+                        // DERBY-6319, intermittently application is getting
+                        // an unexpected NoSpaceOnPage error from the 
+                        // insertAllowOverflow() call.  The code expects that
+                        // the latched page returned by the above 
+                        // getOverflowPageForInsert() call should always have
+                        // at least enough space to insert with allowing 
+                        // overflow.
+                        // Not sure what is causing this and have not been able
+                        // to repro outside of the application, so catching the 
+                        // error and raising a new error with more information 
+                        // to be printed to the log.
+                        //
+
+                        throw StandardException.newException(
+                                SQLState.DATA_UNEXPECTED_NO_SPACE_ON_PAGE,
+                                nsop,
+                                ((PageKey) op.getIdentity()).toString(),
+                                getPageDumpString(),
+                                new Integer(slot),
+                                new Integer(id),
+                                newColumnList.toString(),
+                                new Integer(nextColumn),
+                                new Integer(mode),
+                                nextPortionHandle);
+                    }
 
                     // Update the previous record header to point to new portion
                     if (curPage == this)
                         updateOverflowDetails(this, handle, portionHandle);
                     else
                         updateOverflowDetails(handle, portionHandle);
+
                     op.unlatch();
+
                 } 
                 else 
                 {
