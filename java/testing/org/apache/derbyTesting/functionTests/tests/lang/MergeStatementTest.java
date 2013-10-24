@@ -554,28 +554,26 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
 
         // Using a trigger transition table as a source table is probably ok.
-        /*
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        goodStatement
+            ( dboConnection,
               "create trigger trig3 after update on t2\n" +
               "referencing old table as old_cor new table as new_cor\n" +
               "for each statement\n" +
               "merge into t1\n" +
               "using new_cor\n" +
               "on t1.c1 = new_cor.c1\n" +
-              "when not matched then insert ( c2 ) values ( new_cor.c2 )\n"
+              "when matched then delete\n"
               );
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        goodStatement
+            ( dboConnection,
               "create trigger trig4 after update on t2\n" +
               "referencing old table as old_cor new table as new_cor\n" +
               "for each statement\n" +
               "merge into t1\n" +
               "using old_cor\n" +
               "on t1.c1 = old_cor.c1\n" +
-              "when not matched then insert ( c2 ) values ( old_cor.c2 )\n"
+              "when matched then delete\n"
               );
-        */
 
         // it's probably ok to specify default values for generated columns in MATCHED ... THEN UPDATE
         expectCompilationError
@@ -596,6 +594,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1" );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+
     /**
      * <p>
      * Test the delete action.
@@ -693,6 +693,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+
     /**
      * <p>
      * Test delete action involving subsequent cascaded deletes.
@@ -817,6 +819,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+
     /**
      * <p>
      * Test delete action involving before and after statement triggers.
@@ -980,6 +984,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+
     /**
      * <p>
      * Test delete action involving before and after row triggers.
@@ -1159,6 +1165,165 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test delete action whose source table is a trigger transition table.
+     * </p>
+     */
+    public  void    test_006_deleteWithTransitionTableSource()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            ( dboConnection,
+              "create table t1_006( c1 int, c2 int, c3 int generated always as ( c1 + c2 ), c1_4 int )" );
+        goodStatement
+            ( dboConnection,
+              "create table t2_006( c1 int, c2 int, c3 int, c4 int, c5 varchar( 5 ) )" );
+        
+        //
+        // New transition table as source.
+        // No matching refinement.
+        //
+        vet_006
+            (
+             dboConnection,
+             "create trigger trig1_006 after update on t2_006\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_006\n" +
+             "using new_cor\n" +
+             "on 2 * t1_006.c2 = 2 * new_cor.c2\n" +
+             "when matched then delete\n",
+             new String[][]
+             {
+                 { "2", "2", "4", "200" },
+                 { "4", "4", "8", "400" }, 
+             }
+             );
+
+        //
+        // New transition table as source.
+        // With matching refinement.
+        //
+        vet_006
+            (
+             dboConnection,
+             "create trigger trig1_006 after update on t2_006\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_006\n" +
+             "using new_cor\n" +
+             "on 2 * t1_006.c2 = 2 * new_cor.c2\n" +
+             "when matched and c1_4 = 300 then delete\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "2", "2", "4", "200" },
+                 { "4", "4", "8", "400" }, 
+             }
+             );
+
+        //
+        // Old transition table as source.
+        // No matching refinement.
+        //
+        vet_006
+            (
+             dboConnection,
+             "create trigger trig1_006 after update on t2_006\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_006\n" +
+             "using old_cor\n" +
+             "on 2 * t1_006.c2 = 2 * old_cor.c2\n" +
+             "when matched then delete\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "3", "3", "6", "300" }, 
+             }
+             );
+
+        //
+        // Old transition table as source.
+        // With matching refinement.
+        //
+        vet_006
+            (
+             dboConnection,
+             "create trigger trig1_006 after update on t2_006\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_006\n" +
+             "using old_cor\n" +
+             "on 2 * t1_006.c2 = 2 * old_cor.c2\n" +
+             "when matched and c1_4 = 200 then delete\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "3", "3", "6", "300" }, 
+                 { "4", "4", "8", "400" }, 
+             }
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_006" );
+        goodStatement( dboConnection, "drop table t1_006" );
+    }
+    private void    vet_006
+        (
+         Connection conn,
+         String triggerDefinition,
+         String[][] expectedT1Results
+         )
+        throws Exception
+    {
+        vet_006( conn, triggerDefinition, expectedT1Results, false );
+        vet_006( conn, triggerDefinition, expectedT1Results, true );
+    }
+    private void    vet_006
+        (
+         Connection conn,
+         String triggerDefinition,
+         String[][] expectedT1Results,
+         boolean    useHashJoinStrategy
+         )
+        throws Exception
+    {
+        if ( useHashJoinStrategy ) { triggerDefinition = makeHashJoinMerge( triggerDefinition ); }
+
+        goodStatement( conn, triggerDefinition );
+        populate_006( conn );
+        goodStatement( conn, "update t2_006 set c2 = -c2" );
+        assertResults( conn, "select * from t1_006 order by c1", expectedT1Results, false );
+        
+        goodStatement( conn, "drop trigger trig1_006" );
+    }
+    private void    populate_006( Connection conn )
+        throws Exception
+    {
+        goodStatement( conn, "delete from t2_006" );
+        goodStatement( conn, "delete from t1_006" );
+
+        goodStatement
+            ( conn,
+              "insert into t1_006( c1, c2, c1_4 ) values ( 1, 1, 100 ), ( 2, 2, 200 ), ( 3, 3, 300 ), ( 4, 4, 400 )"
+              );
+        goodStatement
+            ( conn,
+              "insert into t2_006( c1, c2, c3, c4, c5 ) values ( 1, -1, -10, -100, 'one' ), ( 2, 2, -2, -200, 'two' ), ( 3, -3, -30, -300, 'three' ), ( 4, 4, -40, -400, 'four' )"
+              );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

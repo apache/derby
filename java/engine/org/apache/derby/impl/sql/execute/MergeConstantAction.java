@@ -67,6 +67,9 @@ public class MergeConstantAction implements ConstantAction, Formatable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** 0-arg constructor needed by Formatable machinery */
+    public  MergeConstantAction() {}
+
     /**
      * Construct from thin air.
      *

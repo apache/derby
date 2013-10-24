@@ -89,6 +89,9 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** 0-arg constructor needed by Formatable machinery */
+    public  MatchingClauseConstantAction() {}
+
     /**
      * Construct from thin air.
      *
@@ -277,10 +280,10 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
         int oldVersion = in.readInt();
 
         _clauseType = in.readInt();
-        _matchRefinementName = in.readUTF();
+        _matchRefinementName = (String) in.readObject();
         _thenColumnOffsets = ArrayUtil.readIntArray( in );
-        _resultSetFieldName = in.readUTF();
-        _actionMethodName = in.readUTF();
+        _resultSetFieldName = (String) in.readObject();
+        _actionMethodName = (String) in.readObject();
         _thenAction = (ConstantAction) in.readObject();
 	}
 
@@ -297,10 +300,10 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
 		out.writeInt( FIRST_VERSION );
 
         out.writeInt( _clauseType );
-        out.writeUTF( _matchRefinementName );
+        out.writeObject( _matchRefinementName );
         ArrayUtil.writeIntArray( out, _thenColumnOffsets );
-        out.writeUTF( _resultSetFieldName );
-        out.writeUTF( _actionMethodName );
+        out.writeObject( _resultSetFieldName );
+        out.writeObject( _actionMethodName );
         out.writeObject( _thenAction );
 	}
  
