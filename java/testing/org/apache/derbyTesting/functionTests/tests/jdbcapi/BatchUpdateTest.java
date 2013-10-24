@@ -32,6 +32,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -357,6 +358,38 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         stmt.close();
 
         commit();
+    }
+
+    /**
+     * Regression test case for DERBY-6373.
+     */
+    public void testMultipleStatementsBatchWithWarnings() throws SQLException {
+        Statement s = createStatement();
+        s.execute("insert into t1 values 1");
+
+        // Execute a batch of three deletes. All of them should get a warning
+        // because no rows matched the WHERE clause.
+        s.addBatch("delete from t1 where c1 in (select 0 from t1)");
+        s.addBatch("delete from t1 where c1 in (select 0 from t1)");
+        s.addBatch("delete from t1 where c1 in (select 0 from t1)");
+        s.executeBatch();
+
+        // Used to fail with NullPointerException on the client.
+        SQLWarning w = s.getWarnings();
+
+        // Expect one warning per delete on the client. Embedded gives only
+        // a single warning.
+        assertSQLState("02000", w);
+        w = w.getNextWarning();
+        if (usingEmbedded()) {
+            assertNull(w);
+        } else {
+            assertSQLState("02000", w);
+            w = w.getNextWarning();
+            assertSQLState("02000", w);
+            w = w.getNextWarning();
+            assertNull(w);
+        }
     }
 
     // try executing a batch with 1000 statements in it.

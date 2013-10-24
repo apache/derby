@@ -104,17 +104,9 @@ public class SqlWarning extends SqlException implements Diagnosable {
         // Set up the nextException chain
         if ( nextWarning_ != null )
         {
-            // The exception chain gets constructed automatically through 
+            // The warning chain gets constructed automatically through
             // the beautiful power of recursion
-            //
-            // We have to use the right method to convert the next exception
-            // depending upon its type.  Luckily with all the other subclasses
-            // of SQLException we don't have to make our own matching 
-            // subclasses because 
-            sqlw.setNextException(
-                nextException_ instanceof SqlWarning ?
-                    ((SqlWarning)nextException_).getSQLWarning() :
-                    nextException_.getSQLException());
+            sqlw.setNextWarning(nextWarning_.getSQLWarning());
         }
         
         return sqlw;
