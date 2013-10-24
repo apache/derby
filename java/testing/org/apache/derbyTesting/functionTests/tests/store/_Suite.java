@@ -84,6 +84,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Derby5234Test.suite());
         suite.addTest(KeepDisposableStatsPropertyTest.suite());
         suite.addTest(StoreScriptsTest.suite());
+        suite.addTest(Derby4923Test.suite());
 
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {
