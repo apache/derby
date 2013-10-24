@@ -415,12 +415,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "when not matched then insert ( c2 ) values ( t2.c2, t2.c3 )\n"
               );
 
-        // Trigger tansition tables may not be used as target tables.
-        // XXX ??? FIXME This needs to be revisited. We're getting an Assert here
-        // because the code thinks that the target table is a FromVTI
-        /**
+        // Trigger transition tables may not be used as target tables.
         expectCompilationError
-            ( dboConnection, MISSING_TABLE,
+            ( dboConnection, TARGET_MUST_BE_BASE,
               "create trigger trig1 after update on t1\n" +
               "referencing old table as old_cor new table as new_cor\n" +
               "for each statement\n" +
@@ -430,7 +427,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "when not matched then insert ( c2 ) values ( t2.c2 )\n"
               );
         expectCompilationError
-            ( dboConnection, MISSING_TABLE,
+            ( dboConnection, TARGET_MUST_BE_BASE,
               "create trigger trig2 after update on t1\n" +
               "referencing old table as old_cor new table as new_cor\n" +
               "for each statement\n" +
@@ -439,7 +436,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "on old_cor.c1 = t2.c1\n" +
               "when not matched then insert ( c2 ) values ( t2.c2 )\n"
               );
-        */
 
         // Columns may not be SET twice in a MATCHED ... THEN UPDATE clause
         expectCompilationError
