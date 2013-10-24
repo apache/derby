@@ -70,8 +70,11 @@ class BulkTableScanResultSet extends TableScanResultSet
 	implements CursorResultSet
 {
 	private DataValueDescriptor[][] rowArray;
+    private RowLocation[]   rowLocations;
 	private int curRowPosition;
 	private int numRowsInArray;
+    private int         baseColumnCount;
+    private int         resultColumnCount;
 
 	private static int OUT_OF_ROWS = 0;
 
@@ -154,6 +157,41 @@ class BulkTableScanResultSet extends TableScanResultSet
 					"rowsPerRead = " + rowsPerRead);
 			}
 		}
+
+        // determine whether we should fetch row locations
+        setRowLocationsState();
+
+        //
+        // The following code block was introduced to support the driving left join
+        // of the MERGE statement. If we are executing a MERGE statement, we need
+        // to fetch the row location of every row in the target table. If we are in this
+        // situation, then the last column in the candidate row will be a RowLocation template
+        // and the highest bit in accessedCols will be set. We want to smudge out this
+        // information before we ask the Store for rows. The Store will be confused if we ask
+        // for the RowLocation in the same row array as the actual base columns.
+        //
+        if ( fetchRowLocations )
+        {
+            resultColumnCount = accessedCols == null ? candidate.nColumns() : accessedCols.getNumBitsSet();
+            baseColumnCount = candidate.nColumns() - 1;
+            candidate.setRowArray( lopOffRowLocation() );
+
+            // remove the RowLocation from the accessed column map
+            if ( accessedCols == null )
+            {
+                accessedCols = new FormatableBitSet( baseColumnCount );
+                for ( int i = 0; i < baseColumnCount; i++ ) { accessedCols.set( i ); }
+            }
+            else
+            {
+                FormatableBitSet    newCols = new FormatableBitSet( baseColumnCount );
+                for ( int i = 0; i < baseColumnCount; i++ )
+                {
+                    if ( accessedCols.isSet( i ) ) { newCols.set( i ); }
+                }
+                accessedCols = newCols;
+            }
+        }
     }
 
     /**
@@ -253,6 +291,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 		*/
 		beginTime = getCurrentTimeMillis();
 		rowArray = new DataValueDescriptor[rowsPerRead][];
+        if ( fetchRowLocations ) { rowLocations = new RowLocation[ rowsPerRead ]; }
 
 		// we only allocate the first row -- the
 		// store clones as needed for the rest
@@ -263,6 +302,23 @@ class BulkTableScanResultSet extends TableScanResultSet
 		
 		openTime += getElapsedMillis(beginTime);
 	}
+
+    /**
+     * Get a blank row by cloning the candidate row and lopping off
+     * the trailing RowLocation column for scans done on
+     * behalf of MERGE statements.
+     */
+    private DataValueDescriptor[]   lopOffRowLocation()
+        throws StandardException
+    {
+        DataValueDescriptor[]   temp = candidate.getRowArrayClone();
+
+        int     count = temp.length - 1;
+        DataValueDescriptor[]   result = new DataValueDescriptor[ count ] ;
+        for ( int i = 0; i < count; i++ ) { result[ i ] = temp[ i ]; }
+
+        return result;
+    }
 
 	/**
 	 * Reopen the result set.  Delegate
@@ -336,6 +392,17 @@ outer:		for (;;)
 					}
 
 					result = currentRow;
+                    if ( fetchRowLocations )
+                    {
+                        result = new ValueRow( resultColumnCount );
+                        int     idx = 1;
+
+                        for ( ; idx < resultColumnCount; idx++ )
+                        {
+                            result.setColumn( idx, currentRow.getColumn( idx ) );
+                        }
+                        result.setColumn( idx, rowLocations[ curRowPosition ] );
+                    }
 					break outer;
 				}
 			}
@@ -355,11 +422,11 @@ outer:		for (;;)
 		curRowPosition = -1;
 		numRowsInArray =
 				((GroupFetchScanController) scanController).fetchNextGroup(
-                                               rowArray, (RowLocation[]) null);
+                                               rowArray, rowLocations);
 
 		return numRowsInArray;
-
 	}
+
 	/**
 	 * If the result set has been opened,
 	 * close the open scan.  Delegate most
@@ -378,6 +445,7 @@ outer:		for (;;)
 		numRowsInArray = -1;
 		curRowPosition = -1;
 		rowArray = null;
+        rowLocations = null;
 	}
 
 	/**

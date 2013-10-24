@@ -143,6 +143,21 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         ps.close();
     }
     
+    /**
+     * Run a good update statement with an expected row count.
+     * @throws SQLException 
+     */
+    protected void    goodUpdate( Connection conn, String update, int expectedRowCount ) throws SQLException
+    {
+        PreparedStatement    ps = chattyPrepare( conn, update );
+
+        int actualRowCount = ps.executeUpdate();
+        ps.close();
+
+        println( "Expecting to touch " + expectedRowCount + " rows." );
+        assertEquals( expectedRowCount, actualRowCount );
+    }
+    
 	protected	static	ResultSet	executeQuery( Statement stmt, String text )
 		throws SQLException
 	{
@@ -260,6 +275,15 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         throws Exception
     {
         expectExecutionWarnings( conn, new String[] { sqlState }, query );
+    }
+
+    /**
+     * Assert that the statement text, when executed, raises no warnings.
+     */
+    protected void    expectNoWarning( Connection conn, String query )
+        throws Exception
+    {
+        expectExecutionWarnings( conn, new String[] { }, query );
     }
 
     /**

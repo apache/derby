@@ -78,8 +78,6 @@ public final class UpdateNode extends DMLModStatementNode
 	protected FormatableBitSet 			readColsBitSet;
 	protected boolean 			positionedUpdate;
 
-    private     boolean         inMatchedClause;
-
 	/* Column name for the RowLocation in the ResultSet */
     static final String COLUMNNAME = "###RowLocationToUpdate";
 
@@ -88,17 +86,19 @@ public final class UpdateNode extends DMLModStatementNode
 	 *
 	 * @param targetTableName	The name of the table to update
      * @param resultSet         The ResultSet that we will generate
-     * @param inMatchedClause   True if this UPDATE is part of a MATCHED ... THEN UPDATE clause of a MERGE statement.
+     * @param matchingClause   Non-null if this DML is part of a MATCHED clause of a MERGE statement.
      * @param cm                The context manager
 	 */
-    UpdateNode(TableName targetTableName,
-               ResultSetNode resultSet,
-               boolean  inMatchedClause,
-               ContextManager cm)
+    UpdateNode
+        (
+         TableName targetTableName,
+         ResultSetNode resultSet,
+         MatchingClauseNode matchingClause,
+         ContextManager cm
+         )
 	{
-        super(resultSet, cm);
+        super( resultSet, matchingClause, cm );
         this.targetTableName = targetTableName;
-        this.inMatchedClause = inMatchedClause;
 	}
 
 	/**
@@ -1341,7 +1341,7 @@ public final class UpdateNode extends DMLModStatementNode
              * statement. If we clear the table name, then we will not be able to
              * resolve which table (target or source) holds the column.
 			 */
-			if ( !inMatchedClause ) { column.clearTableName(); }
+			if ( !inMatchingClause() ) { column.clearTableName(); }
 		}
 	}
 
@@ -1402,6 +1402,9 @@ public final class UpdateNode extends DMLModStatementNode
         {
             ResultColumn rc = targetRCL.elementAt( i );
 
+            // defaults may already have been substituted for MERGE statements
+            if ( rc.wasDefaultColumn() ) { continue; }
+            
             if ( rc.hasGenerationClause() )
             {
                 ValueNode   resultExpression =

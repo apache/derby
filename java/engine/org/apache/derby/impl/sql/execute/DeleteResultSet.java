@@ -346,8 +346,8 @@ class DeleteResultSet extends DMLWriteResultSet
 
 		while ( row != null )
 		{
-			/* By convention, the last column for a delete contains a SQLRef
-			 * containing the RowLocation of the row to be deleted.  If we're
+			/* By convention, the last column for a delete contains a data value
+			 * wrapping the RowLocation of the row to be deleted.  If we're
 			 * doing a deferred delete, store the RowLocations in the
 			 * temporary conglomerate.  If we're not doing a deferred delete,
 			 * just delete the rows immediately.
@@ -406,7 +406,7 @@ class DeleteResultSet extends DMLWriteResultSet
 				baseRowLocation = 
 					(RowLocation) (rlColumn).getObject();
 
-				if (SanityManager.DEBUG)
+                if (SanityManager.DEBUG)
 				{
 					SanityManager.ASSERT(baseRowLocation != null,
 							"baseRowLocation is null");

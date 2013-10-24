@@ -98,7 +98,7 @@ public class HeapRowLocation extends DataType implements RowLocation
 	}
 
 	public Object getObject() {
-		return null;
+		return this;
 	}
 
 	public DataValueDescriptor cloneValue(boolean forceMaterialization) {

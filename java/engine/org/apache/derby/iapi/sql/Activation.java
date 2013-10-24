@@ -544,6 +544,19 @@ public interface Activation extends Dependent
 	 */
 	public java.sql.ResultSet getTargetVTI();
 
+    /**
+     * Push a ConstantAction to be returned by getConstantAction().
+     * Returns the newConstantAction.
+     */
+    public  ConstantAction    pushConstantAction( ConstantAction newConstantAction );
+
+    /**
+     * Pop the ConstantAction stack, returning the element which was just popped
+     * off the stack.
+     */
+    public  ConstantAction    popConstantAction();
+
+    /** Get the top ConstantAction on the stack without changing the stack. */
 	public ConstantAction	getConstantAction();
 
 	//store a reference to the parent table result sets

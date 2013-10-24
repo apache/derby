@@ -69,6 +69,9 @@ public final class CurrentOfNode extends FromTable {
 	private TableName 				baseTableName;
 	private CostEstimate 			singleScanCostEstimate;
 
+    // dummy variables for compiling a CurrentOfNode in the DELETE action of a MERGE statement
+    private FromBaseTable       dummyTargetTable;
+
 	//
 	// initializers
 	//
@@ -80,6 +83,25 @@ public final class CurrentOfNode extends FromTable {
         super(correlationName, tableProperties, cm);
         cursorName = cursor;
 	}
+
+    /**
+     * <p>
+     * Construct a dummy CurrentOfNode just for compiling the DELETE action of a MERGE
+     * statement.
+     * </p>
+     */
+    static  CurrentOfNode   makeForMerge
+        (
+         String cursorName,
+         FromBaseTable  dummyTargetTable,
+         ContextManager cm
+         )
+    {
+        CurrentOfNode   node = new CurrentOfNode( null, cursorName, null, cm );
+        node.dummyTargetTable = dummyTargetTable;
+
+        return node;
+    }
 
 	/*
 	 * Optimizable interface
@@ -263,6 +285,10 @@ public final class CurrentOfNode extends FromTable {
     @Override
     ResultColumn getMatchingColumn(ColumnReference columnReference)
 						throws StandardException {
+
+        // if this is a dummy CurrentOfNode cooked up to compile a DELETE action
+        // of a MERGE statement, then short-circuit the matching column lookup
+        if ( dummyTargetTable != null ) { return dummyTargetTable.getMatchingColumn( columnReference ); }
 
 		ResultColumn	resultColumn = null;
 		TableName		columnsTableName;
@@ -511,6 +537,10 @@ public final class CurrentOfNode extends FromTable {
     @Override
     String  getExposedName()
 	{
+        // short-circuit for dummy CurrentOfNode cooked up to support
+        // the DELETE action of a MERGE statement
+        if ( dummyTargetTable != null ) { return dummyTargetTable.getExposedName(); }
+        
 		return exposedTableName.getFullTableName();
 	}
 

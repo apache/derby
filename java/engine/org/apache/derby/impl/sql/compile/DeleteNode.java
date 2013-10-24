@@ -84,13 +84,19 @@ class DeleteNode extends DMLModStatementNode
 	 * @param targetTableName	The name of the table to delete from
 	 * @param queryExpression	The query expression that will generate
 	 *				the rows to delete from the given table
+     * @param matchingClause   Non-null if this DML is part of a MATCHED clause of a MERGE statement.
      * @param cm                The context manager
 	 */
 
-    DeleteNode(TableName targetTableName,
-               ResultSetNode queryExpression,
-               ContextManager cm) {
-        super(queryExpression, cm);
+    DeleteNode
+        (
+         TableName targetTableName,
+         ResultSetNode queryExpression,
+         MatchingClauseNode matchingClause,
+         ContextManager cm
+         )
+    {
+        super( queryExpression, matchingClause, cm );
         this.targetTableName = targetTableName;
 	}
 
@@ -130,9 +136,10 @@ class DeleteNode extends DMLModStatementNode
 			CurrentRowLocationNode		rowLocationNode;
 			TableName					cursorTargetTableName = null;
 			CurrentOfNode       		currentOfNode = null;
-		
+
 			DataDictionary dataDictionary = getDataDictionary();
-			super.bindTables(dataDictionary);
+            // for DELETE clause of a MERGE statement, the tables have already been bound
+			if ( !inMatchingClause() ) { super.bindTables(dataDictionary); }
 
 			// wait to bind named target table until the underlying
 			// cursor is bound, so that we can get it from the
@@ -149,7 +156,8 @@ class DeleteNode extends DMLModStatementNode
 			{
 				currentOfNode = (CurrentOfNode) targetTable;
 
-				cursorTargetTableName = currentOfNode.getBaseCursorTargetTableName();
+				cursorTargetTableName = inMatchingClause() ?
+                    targetTableName : currentOfNode.getBaseCursorTargetTableName();
 				// instead of an assert, we might say the cursor is not updatable.
 				if (SanityManager.DEBUG)
 					SanityManager.ASSERT(cursorTargetTableName != null);
@@ -191,9 +199,11 @@ class DeleteNode extends DMLModStatementNode
 			verifyTargetTable();
 
 			/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
-			if (SanityManager.DEBUG)
+			if ( SanityManager.DEBUG )
+            {
 				SanityManager.ASSERT((resultSet.resultColumns == null),
 							  "resultColumns is expected to be null until bind time");
+            }
 
 
 			if (targetTable instanceof FromVTI)
@@ -207,6 +217,7 @@ class DeleteNode extends DMLModStatementNode
 			}
 			else
 			{
+            
 				/*
 				** Start off assuming no columns from the base table
 				** are needed in the rcl.
@@ -256,7 +267,13 @@ class DeleteNode extends DMLModStatementNode
 				/* Force the added columns to take on the table's correlation name, if any */
 				correlateAddedColumns( resultColumnList, targetTable );
 			
-				/* Set the new result column list in the result set */
+                /* Add the new result columns to the driving result set */
+                ResultColumnList    originalRCL = resultSet.resultColumns;
+                if ( originalRCL != null )
+                {
+                    originalRCL.appendResultColumns( resultColumnList, false );
+                    resultColumnList = originalRCL;
+                }
 				resultSet.setResultColumns(resultColumnList);
 			}
 
@@ -490,7 +507,6 @@ class DeleteNode extends DMLModStatementNode
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
 	{
-
 		// If the DML is on the temporary table, generate the code to
 		// mark temporary table as modified in the current UOW. After
 		// DERBY-827 this must be done in execute() since
@@ -503,7 +519,16 @@ class DeleteNode extends DMLModStatementNode
 
 		acb.pushGetResultSetFactoryExpression(mb); 
 		acb.newRowLocationScanResultSetName();
-		resultSet.generate(acb, mb); // arg 1
+
+        // arg 1
+        if ( inMatchingClause() )
+        {
+            matchingClause.generateResultSetField( acb, mb );
+        }
+        else
+        {
+            resultSet.generate( acb, mb );
+        }
 
 		String resultSetGetter;
 		int argCount;
@@ -565,7 +590,6 @@ class DeleteNode extends DMLModStatementNode
 			mb.setField(arrayField);
 			for(int index=0 ; index <  dependentNodes.length ; index++)
 			{
-
 				dependentNodes[index].setRefActionInfo(fkIndexConglomNumbers[index],
 													   fkColArrays[index],
 													   parentResultSetId,
@@ -728,7 +752,6 @@ class DeleteNode extends DMLModStatementNode
     private DeleteNode getEmptyDeleteNode(String schemaName, String targetTableName)
         throws StandardException
     {
-
         ValueNode whereClause = null;
 
         TableName tableName =
@@ -759,8 +782,7 @@ class DeleteNode extends DMLModStatementNode
                                        null, /* optimizer override plan */
                                        getContextManager());
 
-        return new DeleteNode(tableName, rs, getContextManager());
-
+        return new DeleteNode(tableName, rs, null, getContextManager());
     }
 
 
@@ -803,8 +825,7 @@ class DeleteNode extends DMLModStatementNode
                                               null, /* optimizer override plan */
                                               getContextManager());
 
-        return new UpdateNode(tableName, sn, false, getContextManager());
-
+        return new UpdateNode(tableName, sn, null, getContextManager());
     }
 
 
@@ -845,7 +866,7 @@ class DeleteNode extends DMLModStatementNode
 			}
 		}
 
-		super.optimizeStatement();
+        super.optimizeStatement();
 	}
 
     /**

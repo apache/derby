@@ -191,6 +191,9 @@ class FromBaseTable extends FromTable
     // true if we are running with sql authorization and this is the SYSUSERS table
     private boolean authorizeSYSUSERS;
 
+    // non-null if we need to return a row location column
+    private String  rowLocationColumnName;
+
 	/**
      * Constructor for a table in a FROM list. Parameters are as follows:
 	 *
@@ -235,6 +238,12 @@ class FromBaseTable extends FromTable
 		setOrigTableName(this.tableName);
 		templateColumns = resultColumns;
 	}
+
+    /** Set the name of the row location column */
+    void    setRowLocationColumnName( String rowLocationColumnName )
+    {
+        this.rowLocationColumnName = rowLocationColumnName;
+    }
 
     /**
 	 * no LOJ reordering for base table.
@@ -2794,7 +2803,11 @@ class FromBaseTable extends FromTable
                 columnReference.setColumnNumber(
                     resultColumn.getColumnPosition());
 
-				if (tableDescriptor != null)
+                // set the column-referenced bit if this is not the row location column
+				if (
+                    (tableDescriptor != null) &&
+                    ( (rowLocationColumnName == null) || !(rowLocationColumnName.equals( columnReference.getColumnName() )) )
+                    )
 				{
 					FormatableBitSet referencedColumnMap = tableDescriptor.getReferencedColumnMap();
 					if (referencedColumnMap == null)
@@ -3324,7 +3337,12 @@ class FromBaseTable extends FromTable
     @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
 							throws StandardException
-	{        
+	{
+        if ( rowLocationColumnName != null )
+        {
+            resultColumns.conglomerateId = tableDescriptor.getHeapConglomerateId();
+        }
+
 		generateResultSet( acb, mb );
 
 		/*
@@ -3873,6 +3891,18 @@ class FromBaseTable extends FromTable
 			/* Build the ResultColumnList to return */
 			rcList.addResultColumn(resultColumn);
 		}
+
+        // add a row location column as necessary
+        if ( rowLocationColumnName != null )
+        {
+            CurrentRowLocationNode  rowLocationNode = new CurrentRowLocationNode( getContextManager() );
+            ResultColumn    rowLocationColumn = new ResultColumn
+                ( rowLocationColumnName, rowLocationNode, getContextManager() );
+            rowLocationColumn.markGenerated();
+            rowLocationNode.bindExpression( null, null, null );
+            rowLocationColumn.bindResultColumnToExpression();
+            rcList.addResultColumn( rowLocationColumn );
+        }
 
 		return rcList;
 	}

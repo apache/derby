@@ -114,6 +114,17 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new DeleteResultSet(source, activation );
 	}
 
+	/**
+		@see ResultSetFactory#getMergeResultSet
+		@exception StandardException thrown on error
+	 */
+	public ResultSet getMergeResultSet(NoPutResultSet drivingLeftJoin)
+        throws StandardException
+    {
+		Activation activation = drivingLeftJoin.getActivation();
+		getAuthorizer( activation ).authorize( activation, Authorizer.SQL_WRITE_OP );
+		return new MergeResultSet( drivingLeftJoin, activation );
+    }
 
 	/**
 		@see ResultSetFactory#getDeleteCascadeResultSet

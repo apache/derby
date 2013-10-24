@@ -103,7 +103,7 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 		 * which case we do the objectifying in UpdateResultSet.  Beetle 4896.  Related bug entries:
 		 * 2432, 3383.
 		 */
-		needToObjectifyStream = (this.constantAction.getTriggerInfo() != null);
+        needToObjectifyStream = (this.constantAction.getTriggerInfo() != null);
 	}
 
     @Override

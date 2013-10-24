@@ -31,6 +31,7 @@ import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.transaction.TransactionControl;
+import org.apache.derby.iapi.types.RowLocation;
 
 /**
  * Abstract <code>ResultSet</code> class for <code>NoPutResultSet</code>s which
@@ -88,7 +89,10 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      * need to be pulled from the underlying object to be scanned.
      * Set from the PreparedStatement's saved objects, if it exists.
      */
-    protected final FormatableBitSet accessedCols;
+    protected FormatableBitSet accessedCols;
+
+    /** true if the scan should pick up row locations */
+    protected boolean fetchRowLocations = false;
 
 	public String tableName;
 	public String indexName;
@@ -187,6 +191,18 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
         } else {
             return TransactionController.MODE_RECORD;
         }
+    }
+
+    /** Determine whether this scan should return row locations */
+    protected   void    setRowLocationsState()
+        throws StandardException
+    {
+        fetchRowLocations =
+            (
+             (indexName == null) &&
+             (candidate.nColumns() > 0) &&
+             ( candidate.getColumn( candidate.nColumns() ) instanceof RowLocation )
+             );
     }
 
     /**

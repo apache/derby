@@ -1392,6 +1392,13 @@ public abstract class QueryTreeNode implements Visitable
                 break;
             }
 		}
+        else if (
+                 (getCompilerContext().getReliability() & fragmentBitMask & CompilerContext.SQL_IN_ROUTINES_ILLEGAL)
+                 != 0
+                 )
+        {
+            sqlState = SQLState.LANG_ROUTINE_CANT_PERMIT_SQL;
+        }
 		else
 		{
             sqlState = SQLState.LANG_UNRELIABLE_QUERY_FRAGMENT;

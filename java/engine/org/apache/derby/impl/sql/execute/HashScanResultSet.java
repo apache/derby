@@ -89,7 +89,6 @@ public class HashScanResultSet extends ScanResultSet
 	private boolean sameStartStopPosition;
 	private boolean skipNullKeyColumns;
 	private boolean keepAfterCommit;
-    private boolean includeRowLocations = false;
 
 	protected BackingStoreHashtable hashtable;
 	protected boolean eliminateDuplicates;		// set to true in DistinctScanResultSet
@@ -188,6 +187,9 @@ public class HashScanResultSet extends ScanResultSet
 		runTimeStatisticsOn = 
             getLanguageConnectionContext().getRunTimeStatisticsMode();
 
+        // determine whether we should fetch row locations
+        setRowLocationsState();
+        
 		compactRow =
 				getCompactRow(candidate, accessedCols, false);
 		recordConstructorTime();
@@ -275,7 +277,7 @@ public class HashScanResultSet extends ScanResultSet
                     runTimeStatisticsOn,
 					skipNullKeyColumns,
 					keepAfterCommit,
-					includeRowLocations);
+					fetchRowLocations);
 
 			if (runTimeStatisticsOn)
 			{

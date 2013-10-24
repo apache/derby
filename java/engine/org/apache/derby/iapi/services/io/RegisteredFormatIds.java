@@ -534,6 +534,8 @@ private static final    String[] TwoByte = {
         /* 473 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 474 */       "org.apache.derby.catalog.types.UDTAliasInfo",
         /* 475 */       "org.apache.derby.catalog.types.AggregateAliasInfo",
+        /* 476 */       "org.apache.derby.impl.sql.execute.MatchingClauseConstantAction",
+        /* 477 */       "org.apache.derby.impl.sql.execute.MergeConstantAction",
 };
 
     /** Return the number of two-byte format ids */

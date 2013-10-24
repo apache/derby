@@ -41,6 +41,13 @@ import org.apache.derby.catalog.UUID;
 
 public interface ConstantAction
 {
+    /** clauseType for WHEN NOT MATCHED ... THEN INSERT */
+    public  static  final   int WHEN_NOT_MATCHED_THEN_INSERT = 0;
+    /** clauseType for WHEN MATCHED ... THEN UPDATE */
+    public  static  final   int WHEN_MATCHED_THEN_UPDATE = 1;
+    /** clauseType for WHEN MATCHED ... THEN DELETE */
+    public  static  final   int WHEN_MATCHED_THEN_DELETE = 2;
+
 	/**
 	 *	Run the ConstantAction.
 	 *

@@ -103,12 +103,21 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	protected  boolean isDependentTable;
 	protected int[][] fkColArrays; 
 	protected TableName synonymTableName;
+    protected   MatchingClauseNode  matchingClause;
+
 
     /** Set of dependent tables for cascading deletes. */
     Set<String> dependentTables;
 
-    DMLModStatementNode(ResultSetNode resultSet, ContextManager cm) {
+    DMLModStatementNode
+        (
+         ResultSetNode resultSet,
+         MatchingClauseNode matchingClause,
+         ContextManager cm
+         )
+    {
         super(resultSet, cm);
+        this.matchingClause = matchingClause;
         statementType = getStatementType();
     }
 
@@ -117,17 +126,26 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @param resultSet	A ResultSetNode for the result set of the
 	 *			DML statement
+     * @param matchingClause   Non-null if this DML is part of a MATCHED clause of a MERGE statement.
 	 * @param statementType used by nodes that allocate a DMLMod directly
 	 *			(rather than inheriting it).
      * @param cm        The context manager
 	 */
-    DMLModStatementNode(ResultSetNode resultSet,
-                        int statementType,
-                        ContextManager cm)
+    DMLModStatementNode
+        (
+         ResultSetNode resultSet,
+         MatchingClauseNode matchingClause,
+         int statementType,
+         ContextManager cm
+         )
 	{
         super(resultSet, cm);
+        this.matchingClause = matchingClause;
         this.statementType = statementType;
 	}
+
+    /** Returns true if this DMLModStatement a [ NOT ] MATCHED action of a MERGE statement */
+    public  boolean inMatchingClause() { return matchingClause != null; }
 
 	void setTarget(QueryTreeNode targetName)
 	{
@@ -1624,8 +1642,17 @@ abstract class DMLModStatementNode extends DMLStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
-		/* First optimize the query */
-		super.optimizeStatement();
+        //
+        // If this is the INSERT/UPDATE/DELETE action of a MERGE statement,
+        // then we don't need to optimize the dummy driving result set, which
+        // is never actually run.
+        //
+        // don't need to optimize the dummy SELECT, which is never actually run
+        if ( !inMatchingClause() )
+        {
+            /* First optimize the query */
+            super.optimizeStatement();
+        }
 
 		/* In language we always set it to row lock, it's up to store to
 		 * upgrade it to table lock.  This makes sense for the default read

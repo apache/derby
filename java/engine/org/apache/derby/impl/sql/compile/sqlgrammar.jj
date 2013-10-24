@@ -725,7 +725,7 @@ public class SQLParser
                                               getContextManager());
 
         StatementNode retval =
-            new DeleteNode(tableName, resultSet, getContextManager());
+            new DeleteNode(tableName, resultSet, null, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -758,7 +758,7 @@ public class SQLParser
                                               getContextManager());
 
         StatementNode retval =
-            new UpdateNode(tableName, resultSet, false, getContextManager());
+            new UpdateNode(tableName, resultSet, null, getContextManager());
 
 		setUpAndLinkParameters();
 
@@ -8510,6 +8510,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 							targetTable,
 							columnList,
 							queryExpression,
+							null,
 							targetProperties,
 							orderCols,
                             offsetClauses[ OFFSET_CLAUSE ],

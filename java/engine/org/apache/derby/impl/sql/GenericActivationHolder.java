@@ -772,6 +772,16 @@ final public class GenericActivationHolder implements Activation
 		return ac.isCursorActivation();
 	}
 
+    public  ConstantAction    pushConstantAction( ConstantAction newConstantAction )
+    {
+        return ac.pushConstantAction( newConstantAction );
+    }
+
+    public  ConstantAction    popConstantAction()
+    {
+        return ac.popConstantAction();
+    }
+
 	public ConstantAction getConstantAction() {
 		return ac.getConstantAction();
 	}

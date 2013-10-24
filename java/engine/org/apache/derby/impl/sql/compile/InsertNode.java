@@ -98,6 +98,7 @@ public final class InsertNode extends DMLModStatementNode
 	 *			it out.
      * @param queryExpression    The query expression that will generate
      *                           the rows to insert into the given table
+     * @param matchingClause   Non-null if this DML is part of a MATCHED clause of a MERGE statement.
      * @param targetProperties   The properties specified on the target table
      * @param orderByList        The order by list for the source result set,
      *                           null if no order by list
@@ -112,6 +113,7 @@ public final class InsertNode extends DMLModStatementNode
             QueryTreeNode    targetName,
             ResultColumnList insertColumns,
             ResultSetNode    queryExpression,
+            MatchingClauseNode matchingClause,
             Properties       targetProperties,
             OrderByList      orderByList,
             ValueNode        offset,
@@ -123,7 +125,7 @@ public final class InsertNode extends DMLModStatementNode
 		 * any properties, so we've kludged the code to get the
 		 * right statementType for a bulk insert replace.
 		 */
-        super(queryExpression, getStatementType(targetProperties), cm);
+        super(queryExpression, matchingClause, getStatementType(targetProperties), cm);
         setTarget(targetName);
         targetColumnList = insertColumns;
         this.targetProperties = targetProperties;

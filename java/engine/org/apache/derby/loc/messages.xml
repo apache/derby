@@ -2166,7 +2166,7 @@ Guide.
 
             <msg>
                 <name>42XA5</name>
-                <text>Routine '{0}' may issue SQL and therefore cannot appear in a Generation Clause.</text>
+                <text>Routine '{0}' may issue SQL and therefore cannot appear in this context.</text>
                 <arg>routineName</arg>
             </msg>
 

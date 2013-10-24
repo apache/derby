@@ -169,6 +169,20 @@ public interface ResultSetFactory {
 							throws StandardException;
 
 	/**
+		A MERGE result set simply reports that it completed, and
+		the number of rows that it INSERTed/UPDATEd/DELETEdd.  It does not return rows.
+		The delete has been completed once the
+		MERGE result set is available.
+
+		@param drivingLeftJoin the result set from which to take rows to
+			be drive the INSERT/UPDATE/DELETE operations.
+		@return the MERGE operation as a result set.
+		@exception StandardException thrown when unable to perform the work
+	 */
+	ResultSet getMergeResultSet(NoPutResultSet drivingLeftJoin)
+							throws StandardException;
+
+	/**
 		A delete Cascade result set simply reports that it completed, and
 		the number of rows deleted.  It does not return rows.
 		The delete has been completed once the

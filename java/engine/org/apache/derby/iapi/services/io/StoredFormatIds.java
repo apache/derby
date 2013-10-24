@@ -952,6 +952,18 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 39);
 
     /**
+        class org.apache.derby.impl.sql.execute.MatchingClauseConstantAction
+     */
+    static public final int MATCHING_CLAUSE_CONSTANT_ACTION_V01_ID =
+            (MIN_ID_2 + 476);
+
+    /**
+        class org.apache.derby.impl.sql.execute.MatchingClauseConstantAction
+     */
+    static public final int MERGE_CONSTANT_ACTION_V01_ID =
+            (MIN_ID_2 + 477);
+
+    /**
      */
     static public final int UNUSED_2_204 =
             (MIN_ID_2 + 204);
@@ -1679,7 +1691,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 475);
+            (MIN_ID_2 + 477);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =
