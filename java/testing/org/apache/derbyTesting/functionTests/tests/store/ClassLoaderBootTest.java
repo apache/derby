@@ -98,7 +98,10 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         p.setProperty("derby.infolog.append", "true");
                                    
         setup = new SystemPropertyTestSetup(setup,p);
+        // DERBY-2813 prevents test from running with security manager
+        // on. Have to run without security manager for now.
         return SecurityManagerSetup.noSecurityManager(setup);
+        //return setup;
     }
 
 
@@ -109,7 +112,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     protected void setUp() throws Exception
     {
         URL[] urls = new URL[]{derbyClassLocation};
-        mainLoader = java.lang.Thread.currentThread().getContextClassLoader();
+        mainLoader = getThreadLoader();
 
         loader_1 = createDerbyClassLoader(urls);
         loader_2 = createDerbyClassLoader(urls);
@@ -127,11 +130,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
 
 
     /**
-     * Given a loaded class, this
-     * routine asks the class's class loader for information about where the
-     * class was loaded from. Typically, this is a file, which might be
-     * either a class file or a jar file. The routine figures that out, and
-     * returns the name of the file. If it can't figure it out, it returns null
+     * Create a new DerbyURLClassLoader inside a priv block.
      */
     private DerbyURLClassLoader createDerbyClassLoader(final URL[] urls) 
         throws Exception 
@@ -169,10 +168,14 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
 
         setThreadLoader(loader_1);
         DataSource ds_1 = JDBCDataSource.getDataSource();
+        assertEquals(loader_1, getThreadLoader());
+        assertEquals(loader_1, ds_1.getClass().getClassLoader());
         Connection conn1 = ds_1.getConnection();
         // now attemp to boot using another class loader.
         setThreadLoader(loader_2);
         DataSource ds_2 = JDBCDataSource.getDataSource();
+        assertEquals(loader_2, getThreadLoader());
+        assertEquals(loader_2, ds_2.getClass().getClassLoader());
         try {
             ds_2.getConnection();
             fail("booted database that was already booted by another CLR");
@@ -199,12 +202,14 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
 
         setThreadLoader(loader_1);
         DataSource ds_1 = JDBCDataSource.getDataSource();
+        assertEquals(loader_1, ds_1.getClass().getClassLoader());
         Connection conn1 = ds_1.getConnection();
         //shutdown the database.
         JDBCDataSource.shutdownDatabase(ds_1);
-        // now attemp to boot using another class loader.
+        // now attempt to boot using another class loader.
         setThreadLoader(loader_2);
         DataSource ds_2 = JDBCDataSource.getDataSource();
+        assertEquals(loader_2, ds_2.getClass().getClassLoader());
         ds_2.getConnection();
         // shutdown the engine for both the class loaders.
         JDBCDataSource.shutEngine(ds_2);
@@ -220,6 +225,13 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         });
     }
 
+    private ClassLoader getThreadLoader() {
+        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>(){
+            public ClassLoader run()  {
+                return java.lang.Thread.currentThread().getContextClassLoader();
+            }
+        });
+    }
 
 	private static void assertPreventDualBoot(SQLException ne) {
 		assertNotNull(ne);
