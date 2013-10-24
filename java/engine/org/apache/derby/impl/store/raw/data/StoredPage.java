@@ -4147,8 +4147,20 @@ public class StoredPage extends CachedPage
                 {
                     // The current row has filled the page.
 
-                    if (spaceAvailable <= OVERFLOW_POINTER_SIZE) 
+                    if (spaceAvailable < OVERFLOW_POINTER_SIZE) 
                     {
+                        // DERBY-4923 
+                        // The fix for DERBY-4923 was to change the above
+                        // check from <= to <.  The test case for DERBY-4923
+                        // got the system into a state where it needed to
+                        // exactly write an overflow field pointer and it
+                        // had exactly OVERFLOW_POINTER_SIZE spaceAvailable,
+                        // but was off by one in its check.
+                        // The system insures all rows on an overflow page
+                        // have at least OVERFLOW_POINTER_SIZE, so updating
+                        // them should check for exactly OVERFLOW_POINTER_SIZE
+                        // not <=.
+
                         if ((i == startColumn) || 
                             (lastColumnPositionAllowOverflow < 0))  
                         {
@@ -4174,6 +4186,12 @@ public class StoredPage extends CachedPage
                                             lastColumnPositionAllowOverflow +
                                         "; spaceAvailable = " + 
                                             spaceAvailable +
+                                        "; lastSpaceAvailable = " + 
+                                            lastSpaceAvailable +
+                                        "; insertFlag = " + 
+                                            insertFlag +
+                                        "; Page.INSERT_FOR_SPLIT = " + 
+                                            Page.INSERT_FOR_SPLIT +
                                         "; isOverflowPage() = " + 
                                             isOverflowPage() +
                                         "; OVERFLOW_POINTER_SIZE = " + 
