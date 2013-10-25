@@ -378,12 +378,7 @@ public class DataDescriptorGenerator
         String              whenClauseText
 	) throws StandardException
 	{
-        if (dataDictionary.checkVersion(
-                DataDictionary.DD_VERSION_DERBY_10_11, null)) {
-            // The dictionary version is recent enough to support the WHEN
-            // clause (DERBY-534). Create a descriptor that uses the new
-            // format.
-            return new TriggerDescriptor(
+        return new TriggerDescriptor(
 					dataDictionary,
 					sd,
 					uuid,
@@ -405,31 +400,6 @@ public class DataDescriptorGenerator
                     newReferencingName,
                     whenClauseText
 					);
-        }
-
-        // This is a soft-upgraded database whose dictionary version is 10.10
-        // or lower. Create a descriptor that uses the legacy format so that
-        // it can be read by older database versions.
-        return new TriggerDescriptor_v10_10(
-                dataDictionary,
-                sd,
-                uuid,
-                name,
-                eventMask,
-                isBefore,
-                isRow,
-                isEnabled,
-                td,
-                whenSPSId,
-                actionSPSId,
-                creationTimestamp,
-                referencedCols,
-                referencedColsInTriggerAction,
-                triggerDefinition,
-                referencingOld,
-                referencingNew,
-                oldReferencingName,
-                newReferencingName);
 	}
 		
 	/*

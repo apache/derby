@@ -374,15 +374,7 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 320);
 
     /**
-     * Class org.apache.derby.impl.sql.catalog.TriggerDescriptor, used for
-     * trigger descriptors if the dictionary version is 10.11 or higher.
-     */
-    static public final int TRIGGER_DESCRIPTOR_V02_ID =
-            (MIN_ID_2 + 315);
-
-    /**
-     * Class org.apache.derby.impl.sql.catalog.TriggerDescriptor_v10_10, used
-     * for trigger descriptors if the dictionary version is 10.10 or lower.
+     * Class org.apache.derby.impl.sql.catalog.TriggerDescriptor.
      */
     static public final int TRIGGER_DESCRIPTOR_V01_ID =
             (MIN_ID_2 + 316);

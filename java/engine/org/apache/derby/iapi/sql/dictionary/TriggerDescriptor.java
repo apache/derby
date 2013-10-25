@@ -905,16 +905,6 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public void readExternal(ObjectInput in)
 		 throws IOException, ClassNotFoundException
 	{
-        readExternal_v10_10(in);
-        whenClauseText = (String) in.readObject();
-    }
-
-    /**
-     * {@code readExternal()} method to be used if the data dictionary
-     * version is 10.10 or lower.
-     */
-    void readExternal_v10_10(ObjectInput in)
-            throws IOException, ClassNotFoundException {
 		id = (UUID)in.readObject();
 		name = (String)in.readObject();
 		triggerSchemaId = (UUID)in.readObject();
@@ -948,7 +938,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		referencingNew = in.readBoolean();
 		oldReferencingName = (String)in.readObject();
 		newReferencingName = (String)in.readObject();
-		
+        whenClauseText = (String) in.readObject();
 	}
 
 	protected DataDictionary getDataDictionary()
@@ -979,15 +969,6 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	public void writeExternal( ObjectOutput out )
 		 throws IOException
 	{
-        writeExternal_v10_10(out);
-        out.writeObject(whenClauseText);
-    }
-
-    /**
-     * {@code writeExternal()} method to be used if the data dictionary
-     * version is 10.10 or lower.
-     */
-    void writeExternal_v10_10(ObjectOutput out) throws IOException {
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(triggerSchemaId != null,
@@ -1034,6 +1015,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		out.writeBoolean(referencingNew);
 		out.writeObject(oldReferencingName);
 		out.writeObject(newReferencingName);
+        out.writeObject(whenClauseText);
 	}
  
 	/**
@@ -1042,7 +1024,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 	 *	@return	the formatID of this class
 	 */
     public int getTypeFormatId() {
-        return StoredFormatIds.TRIGGER_DESCRIPTOR_V02_ID;
+        return StoredFormatIds.TRIGGER_DESCRIPTOR_V01_ID;
     }
 
 	/** @see TupleDescriptor#getDescriptorType */

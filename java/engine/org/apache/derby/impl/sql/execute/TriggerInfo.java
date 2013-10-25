@@ -137,12 +137,6 @@ public final class TriggerInfo implements Formatable
 	public void writeExternal(ObjectOutput out) throws IOException
 	{
 		ArrayUtil.writeArray(out, triggerArray);
-
-        // Used to write an array of changed column numbers and an array
-        // with the names of the columns, but they are not used anymore.
-        // Write dummy values to preserve the format.
-        ArrayUtil.writeIntArray(out, (int[]) null);
-        ArrayUtil.writeArray(out, (String[]) null);
 	}
 
 	/**
@@ -158,10 +152,6 @@ public final class TriggerInfo implements Formatable
 	{
 		triggerArray = new TriggerDescriptor[ArrayUtil.readArrayLength(in)];
 		ArrayUtil.readArrayItems(in, triggerArray);
-
-        // Discard fields that are no longer used.
-        ArrayUtil.readIntArray(in);
-        ArrayUtil.readStringArray(in);
 	}
 	
 	/**
