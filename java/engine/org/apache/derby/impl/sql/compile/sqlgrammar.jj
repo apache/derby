@@ -1818,7 +1818,7 @@ public class SQLParser
         }
     }
 
-    private static boolean hasSelectSuffixClause(
+    private static boolean hasQueryExpressionSuffix(
         OrderByList orderBy, ValueNode[] offsetClauses)
     {
         return
@@ -5114,11 +5114,12 @@ nonJoinQueryPrimary() throws StandardException :
     hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	<RIGHT_PAREN>
 	{
-        if (hasSelectSuffixClause(orderCols, offsetClauses)) {
+        if (hasQueryExpressionSuffix(orderCols, offsetClauses)) {
             if (primary instanceof SelectNode ||
                 primary instanceof UnionNode || // table value constructor
                 primary instanceof RowResultSetNode) {
 
+                primary.pushQueryExpressionSuffix();
                 primary.pushOrderByList(orderCols);
                 primary.pushOffsetFetchFirst(
                     offsetClauses[OFFSET_CLAUSE],
@@ -8217,7 +8218,9 @@ nullOrdering(OrderByColumn orderCol) :
  */
 boolean
 offsetFetchFirstClause( ValueNode[] clauses ) throws StandardException :
-{}
+{
+    boolean result = false;
+}
 {
     LOOKAHEAD ( { getToken(1).kind == OFFSET || getToken(1).kind == FETCH } )
     sqlStandardOffsetFetchFirst( clauses )
@@ -8228,9 +8231,12 @@ offsetFetchFirstClause( ValueNode[] clauses ) throws StandardException :
     [
         LOOKAHEAD ( { getToken(1).kind == LEFT_BRACE } )
         jdbcLimitOffset( clauses )
+        {
+            result = true;
+        }
     ]
     {
-        return true;
+        return result;
     }
 }
 

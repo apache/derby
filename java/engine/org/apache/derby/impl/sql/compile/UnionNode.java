@@ -463,18 +463,22 @@ class UnionNode extends SetOperatorNode
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
-        for (int i=0; i < orderByLists.length; i++) {
-            if (orderByLists[i] != null)
+        for (int i=0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if (obl != null)
             {
                 treeTop = new OrderByNode(treeTop,
-                                          orderByLists[i],
+                                          obl,
                                           tableProperties,
                                           getContextManager());
             }
 
             // Do this only after the main ORDER BY; any extra added by
-            // IntersectOrExceptNode should sit on top of us.
-            if (i == 0 && (offset != null || fetchFirst != null)) {
+            final ValueNode offset = qec.getOffset(i);
+            final ValueNode fetchFirst = qec.getFetchFirst(i);
+
+            if (offset != null || fetchFirst != null) {
                 ResultColumnList newRcl =
                         treeTop.getResultColumns().copyListAndObjects();
                 newRcl.genVirtualColumnNodes(treeTop,
@@ -485,7 +489,7 @@ class UnionNode extends SetOperatorNode
                         newRcl,
                         offset,
                         fetchFirst,
-                        hasJDBClimitClause,
+                        qec.getHasJDBCLimitClause()[i].booleanValue(),
                         getContextManager());
             }
         }

@@ -578,6 +578,7 @@ public class CursorNode extends DMLStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+        resultSet.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
 		if (orderByList != null)
 		{
@@ -592,7 +593,9 @@ public class CursorNode extends DMLStatementNode
 			orderByList = null;
 		}
 
-        resultSet.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
+        resultSet.pushOffsetFetchFirst(offset, fetchFirst, hasJDBClimitClause);
+        offset = null;
+        fetchFirst = null;
 
         super.optimizeStatement();
 

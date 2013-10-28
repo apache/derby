@@ -29,7 +29,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
@@ -43,6 +42,7 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A SelectNode represents the result set for any of the basic DML
@@ -104,20 +104,9 @@ class SelectNode extends ResultSetNode
 	 */
 	private boolean wasGroupBy;
 	
-    /**
-     * List of columns in ORDER BY list. Usually size 1, if size 2, we
-     * are a VALUES top node UNION node and element 2 has been passed
-     * from InterceptOrExceptNode to prepare for merge implementation
-     * of intersect or except.
-     */
-    OrderByList[] orderByLists = new OrderByList[1];
-
 	boolean		orderByQuery ;
 
-    ValueNode   offset;  // OFFSET n ROWS, if given
-    ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY, if given
-    boolean   hasJDBClimitClause; //  were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
-
+    QueryExpressionClauses qec = new QueryExpressionClauses();
 
 	/* PredicateLists for where clause */
 	PredicateList wherePredicates;
@@ -346,27 +335,7 @@ class SelectNode extends ResultSetNode
 				havingClause.treePrint(depth + 1);
 			}
 
-            if (orderByLists != null)
-            {
-                for (int i = 0; i < orderByLists.length; i++)
-                {
-                    if ( orderByLists[i] != null )
-                    {
-                        printLabel(depth, "orderByLists[" + i + "]:");
-                        orderByLists[i].treePrint(depth + 1);
-                    }
-                }
-			}
-
-            if (offset != null) {
-                printLabel(depth, "offset:");
-                offset.treePrint(depth + 1);
-            }
-
-            if (fetchFirst != null) {
-                printLabel(depth, "fetch first/next:");
-                fetchFirst.treePrint(depth + 1);
-            }
+            printQueryExpressionSuffixClauses(depth, qec);
 
 			if (preJoinFL != null)
 			{
@@ -552,12 +521,17 @@ class SelectNode extends ResultSetNode
 		int fromListSize = fromList.size();
 		int numDistinctAggs;
 
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(fromList != null && resultColumns != null,
-			"Both fromList and resultColumns are expected to be non-null");
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(fromList != null && resultColumns != null,
+                "Both fromList and resultColumns are expected to be non-null");
+        }
 
-        if (orderByLists[0] != null) {
-            orderByLists[0].pullUpOrderByColumns(this);
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if (obl != null) {
+                obl.pullUpOrderByColumns(this);
+            }
         }
 
 		/* NOTE - a lot of this code would be common to bindTargetExpression(),
@@ -727,11 +701,15 @@ class SelectNode extends ResultSetNode
 			throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_MULTIPLE_DISTINCTS);
 		}
 
-        if (orderByLists[0] != null) {
-            orderByLists[0].bindOrderByColumns(this);
-        }
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
 
-        bindOffsetFetch(offset, fetchFirst);
+            if (obl != null) {
+                obl.bindOrderByColumns(this);
+            }
+
+            bindOffsetFetch(qec.getOffset(i), qec.getFetchFirst(i));
+        }
     }
 
 	/**
@@ -964,6 +942,11 @@ class SelectNode extends ResultSetNode
 		fromList.rejectParameters();
 	}
 
+    @Override
+    public void pushQueryExpressionSuffix() {
+        qec.push();
+    }
+
 	/**
 	 * Push the order by list down from the cursor node
 	 * into its child result set so that the optimizer
@@ -975,34 +958,7 @@ class SelectNode extends ResultSetNode
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
-        if (orderByLists[0] != null) {
-            // A push down of an internal ordering from IntersectOrExceptNode
-            // on a SELECT that already has an ORDER BY. The following sanity
-            // check helps verify that this is indeed the case.
-            if (SanityManager.DEBUG) {
-                SanityManager.ASSERT(
-                    orderByList.size() == resultColumns.visibleSize());
-                OrderByColumn obc = orderByList.elementAt(0);
-                SanityManager.ASSERT(
-                    obc.getExpression() instanceof NumericConstantNode);
-                try {
-                    SanityManager.ASSERT(
-                            ((NumericConstantNode)obc.getExpression()).
-                            value.getInt() == 1);
-                } catch (Exception e) {
-                    SanityManager.THROWASSERT(e);
-                }
-            }
-
-            // Possible optimization: check to see if this extra ordering can
-            // be eliminated, i.e. the two orderings are the same.
-            OrderByList[] newOrderByLists = {
-                orderByLists[0],
-                orderByList};
-            orderByLists = newOrderByLists;
-        } else {
-            orderByLists[0] = orderByList;
-        }
+        qec.setOrderByList(orderByList);
 		// remember that there was an order by list
 		orderByQuery = true;
 	}
@@ -1017,9 +973,9 @@ class SelectNode extends ResultSetNode
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
-        this.offset = offset;
-        this.fetchFirst = fetchFirst;
-        this.hasJDBClimitClause = hasJDBClimitClause;
+        qec.setOffset(offset);
+        qec.setFetchFirst(fetchFirst);
+        qec.setHasJDBCLimitClause(Boolean.valueOf(hasJDBClimitClause));
     }
 
 
@@ -1177,21 +1133,23 @@ class SelectNode extends ResultSetNode
 				performTransitiveClosure(numTables);
 			}
 
-            for (int i = 0; i < orderByLists.length; i++) {
-                if (orderByLists[i] != null)
+
+            for (int i = 0; i < qec.size(); i++) {
+                final OrderByList obl = qec.getOrderByList(i);
+                if (obl != null)
                 {
                     // Remove constant columns from order by list.  Constant
                     // columns are ones that have equality comparisons with
                     // constant expressions (e.g. x = 3)
-                    orderByLists[i].removeConstantColumns(wherePredicates);
+                    obl.removeConstantColumns(wherePredicates);
                     /*
                      ** It's possible for the order by list to shrink to
                      ** nothing as a result of removing constant columns.  If
                      ** this happens, get rid of the list entirely.
                      */
-                    if (orderByLists[i].size() == 0)
+                    if (obl.size() == 0)
                     {
-                        orderByLists[i] = null;
+                        qec.setOrderByList(i, null);
                         resultColumns.removeOrderByColumns();
                     }
                 }
@@ -1247,7 +1205,7 @@ class SelectNode extends ResultSetNode
 				}
 			}
 
-            for (int i = 0; i < orderByLists.length; i++) {
+            for (int i = 0; i < qec.size(); i++) {
                 /* If we were unable to eliminate the distinct and we have
                  * an order by then we can consider eliminating the sort for
                  * the order by.  All of the columns in the order by list must
@@ -1263,15 +1221,16 @@ class SelectNode extends ResultSetNode
                  *      above the select so that the shape of the result set
                  *      is as expected.
                  */
-                if (isDistinct && orderByLists[i] != null &&
-                    orderByLists[i].allAscending())
+                final OrderByList obl = qec.getOrderByList(i);
+
+                if (isDistinct && obl != null && obl.allAscending())
                 {
                     /* Order by list currently restricted to columns in select
                      * list, so we will always eliminate the order by here.
                      */
-                    if (orderByLists[i].isInOrderPrefix(resultColumns))
+                    if (obl.isInOrderPrefix(resultColumns))
                     {
-                        orderByLists[i] = null;
+                        qec.setOrderByList(i, null);
                     }
                     else
                     {
@@ -1282,11 +1241,10 @@ class SelectNode extends ResultSetNode
                          * order.
                          */
                         newTop = genProjectRestrictForReordering();
-                        orderByLists[i].resetToSourceRCs();
-                        resultColumns =
-                            orderByLists[i].reorderRCL(resultColumns);
+                        obl.resetToSourceRCs();
+                        resultColumns = obl.reorderRCL(resultColumns);
                         newTop.getResultColumns().removeOrderByColumns();
-                        orderByLists[i] = null;
+                        qec.setOrderByList(i, null);
                     }
                     orderByAndDistinctMerged = true;
                 }
@@ -1321,7 +1279,7 @@ class SelectNode extends ResultSetNode
 		}
 
 
-        if (orderByLists[0] != null) { // only relevant for first one
+        if (qec.getOrderByList(0) != null) { // only relevant for first one
 
 			// Collect window function calls and in-lined window definitions
 			// contained in them from the orderByList.
@@ -1329,7 +1287,7 @@ class SelectNode extends ResultSetNode
             CollectNodesVisitor<WindowFunctionNode> cnvw =
                 new CollectNodesVisitor<WindowFunctionNode>(
                     WindowFunctionNode.class);
-            orderByLists[0].accept(cnvw);
+            qec.getOrderByList(0).accept(cnvw);
 
             for (WindowFunctionNode wfn : cnvw.getList()) {
 				windowFuncCalls.add(wfn);
@@ -1502,18 +1460,18 @@ class SelectNode extends ResultSetNode
 			return false;
 		}
 
-		/* Don't flatten if selectNode now has an order by */
-        if ((orderByLists[0] != null) &&
-             (orderByLists[0].size() > 0))
-		{
-			return false;
-		}
+        for (int i = 0; i < qec.size(); i++) {
+            // Don't flatten if selectNode now has an order by or offset/fetch
+            // clause
+            if ((qec.getOrderByList(i) != null) &&
+                (qec.getOrderByList(i).size() > 0)) {
+                return false;
+            }
 
-        /* Don't flatten if selectNode has OFFSET or FETCH */
-        if ((offset     != null) ||
-            (fetchFirst != null))
-        {
-            return false;
+            if ((qec.getOffset(i) != null) ||
+               (qec.getFetchFirst(i) != null)) {
+                return false;
+            }
         }
 
 		return true;
@@ -1533,7 +1491,7 @@ class SelectNode extends ResultSetNode
     ResultSetNode genProjectRestrict(int origFromListSize)
 				throws StandardException
 	{
-        boolean[] eliminateSort = new boolean[orderByLists.length];
+        boolean[] eliminateSort = new boolean[qec.size()];
 
 		ResultSetNode		prnRSN;
 
@@ -1677,13 +1635,13 @@ class SelectNode extends ResultSetNode
 		 * the order by.
 		 */
 
-        for (int i=0; i < orderByLists.length; i++) {
-            if (orderByLists[i] != null)
-            {
-                if (orderByLists[i].getSortNeeded())
+        for (int i=0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+            if (obl != null) {
+                if (obl.getSortNeeded())
                 {
                     prnRSN = new OrderByNode(prnRSN,
-                                             orderByLists[i],
+                                             obl,
                                              null,
                                              getContextManager());
                     prnRSN.costEstimate = costEstimate.cloneMe();
@@ -1723,7 +1681,10 @@ class SelectNode extends ResultSetNode
 
             // Do this only after the main ORDER BY; any extra added by
             // IntersectOrExceptNode should sit on top of us.
-            if (i == 0 && (offset != null || fetchFirst != null)) {
+            ValueNode offset = qec.getOffset(i);
+            ValueNode fetchFirst = qec.getFetchFirst(i);
+
+            if (offset != null || fetchFirst != null) {
                 // Keep the same RCL on top, since there may be references to
                 // its result columns above us.
                 ResultColumnList topList = prnRSN.getResultColumns();
@@ -1735,7 +1696,7 @@ class SelectNode extends ResultSetNode
                         topList,
                         offset,
                         fetchFirst,
-                        hasJDBClimitClause,
+                        qec.getHasJDBCLimitClause()[i].booleanValue(),
                         getContextManager());
             }
         }
@@ -1779,9 +1740,10 @@ class SelectNode extends ResultSetNode
 						getContextManager());
 		}
 
-        for (int i=0; i < orderByLists.length; i++) {
-            if (!(orderByLists[i] != null && orderByLists[i].getSortNeeded()) &&
-                orderByQuery)
+        for (int i=0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if (!(obl != null && obl.getSortNeeded()) && orderByQuery)
             {
                 // Remember whether or not we can eliminate the sort.
                 eliminateSort[i] = true;
@@ -1794,7 +1756,7 @@ class SelectNode extends ResultSetNode
              */
             if (eliminateSort[i])
             {
-                prnRSN.adjustForSortElimination(orderByLists[i]);
+                prnRSN.adjustForSortElimination(obl);
             }
 
             /* Set the cost of this node in the generated node */
@@ -1900,15 +1862,18 @@ class SelectNode extends ResultSetNode
 		/* Optimize any subquerys before optimizing the underlying result set */
 
 		/* selectSubquerys is always allocated at bind() time */
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(selectSubquerys != null,
-			"selectSubquerys is expected to be non-null");
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(selectSubquerys != null,
+                    "selectSubquerys is expected to be non-null");
+        }
 
         // If we have more than 1 ORDERBY columns, we may be able to
         // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
-        for (int i=0; i < orderByLists.length; i++) {
-            if (orderByLists[i] != null && orderByLists[i].size() > 1) {
-                orderByLists[i].removeDupColumns();
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if (obl != null && obl.size() > 1) {
+                obl.removeDupColumns();
             }
         }
 
@@ -1990,10 +1955,10 @@ class SelectNode extends ResultSetNode
 		}
 
         opt = getOptimizer(fromList,
-								wherePredicates,
-								dataDictionary,
-                                orderByLists[0], // use first one
-                                overridingPlan);
+                wherePredicates,
+                dataDictionary,
+                qec.getOrderByList(0), // use first one
+                overridingPlan);
         opt.setOuterRows(outerRows);
 
 		/* Optimize this SelectNode */
@@ -2595,25 +2560,26 @@ class SelectNode extends ResultSetNode
                 groupByList = (GroupByList) groupByList.accept( v );
             }
         
-            if (orderByLists != null)
-            {
-                for (int i = 0; i < orderByLists.length; i++)
-                {
-                    if ( orderByLists[ i ] != null )
-                    {
-                        orderByLists[i] = (OrderByList) orderByLists[ i ].accept( v );
-                    }
+            for (int i = 0; i < qec.size(); i++) {
+                final OrderByList obl = qec.getOrderByList(i);
+
+                if (obl != null) {
+                    qec.setOrderByList(i,  (OrderByList)obl.accept(v));
+                }
+
+                final ValueNode offset = qec.getOffset(i);
+
+                if (offset != null) {
+                    qec.setOffset(i, (ValueNode)offset.accept(v));
+                }
+
+                final ValueNode fetchFirst = qec.getFetchFirst(i);
+
+                if (fetchFirst != null) {
+                    qec.setFetchFirst(i, (ValueNode)fetchFirst.accept(v));
                 }
             }
 
-            if (offset != null) {
-                offset = (ValueNode) offset.accept( v );
-            }
-            
-            if (fetchFirst != null) {
-                fetchFirst = (ValueNode) fetchFirst.accept( v );
-            }
-            
             if (preJoinFL != null)
             {
                 preJoinFL = (FromList) preJoinFL.accept( v );
@@ -2677,4 +2643,9 @@ class SelectNode extends ResultSetNode
         throws StandardException
     {
     }
+
+    boolean hasOffsetFetchFirst() {
+        return qec.hasOffsetFetchFirst();
+    }
+
 }

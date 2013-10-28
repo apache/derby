@@ -1085,9 +1085,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
             //
             // Similarly, don't push if we have OFFSET and/or FETCH FROM.
             //
-            if ((childSelect.hasWindows() ||
-                 childSelect.fetchFirst != null ||
-                 childSelect.offset != null)){
+            if (childSelect.hasWindows() ||
+                childSelect.hasOffsetFetchFirst()) {
             } else {
                 pushPList.pushExpressionsIntoSelect((SelectNode) childResult,
                                                     false);
@@ -1844,6 +1843,12 @@ class ProjectRestrictNode extends SingleChildResultSetNode
     void setRestriction(ValueNode restriction) {
 		this.restriction = restriction;
 	}
+
+    @Override
+    public void pushQueryExpressionSuffix() {
+        childResult.pushQueryExpressionSuffix();
+    }
+
 
 	/**
 	 * Push the order by list down from InsertNode into its child result set so

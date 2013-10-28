@@ -840,6 +840,7 @@ public final class InsertNode extends DMLModStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+        resultSet.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
 		if (orderByList != null)
 		{

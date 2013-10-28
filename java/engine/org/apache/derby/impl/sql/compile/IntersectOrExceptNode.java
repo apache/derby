@@ -136,22 +136,27 @@ public class IntersectOrExceptNode extends SetOperatorNode
         intermediateOrderByColumns = new int[ getResultColumns().size()];
         intermediateOrderByDirection = new int[ intermediateOrderByColumns.length];
         intermediateOrderByNullsLow = new boolean[ intermediateOrderByColumns.length];
-        /* If there is an order by on the result of the intersect then use that because we know that doing so
-         * will avoid a sort.  If the output of the intersect/except is small relative to its inputs then in some
-         * cases it would be better to sort the inputs on a different sequence of columns, but it is hard to analyze
-         * the input query expressions to see if a sort can be avoided.
+
+        /* If there is an order by on the result of the intersect then use
+         * that because we know that doing so will avoid a sort.  If the
+         * output of the intersect/except is small relative to its inputs then
+         * in some cases it would be better to sort the inputs on a different
+         * sequence of columns, but it is hard to analyze the input query
+         * expressions to see if a sort can be avoided.
          */
-        if( orderByLists[0] != null)
+        final OrderByList obl = qec.getOrderByList(0);
+
+        if( obl != null)
         {
             BitSet colsOrdered = new BitSet( intermediateOrderByColumns.length);
-            int orderByListSize = orderByLists[0].size();
+            int orderByListSize = obl.size();
             int intermediateOrderByIdx = 0;
             for( int i = 0; i < orderByListSize; i++)
             {
                 if( colsOrdered.get(i))
                     continue;
                 OrderByColumn orderByColumn =
-                    orderByLists[0].getOrderByColumn(i);
+                    obl.getOrderByColumn(i);
                 intermediateOrderByDirection[intermediateOrderByIdx] = orderByColumn.isAscending() ? 1 : -1;
                 intermediateOrderByNullsLow[intermediateOrderByIdx] = orderByColumn.isNullsOrderedLow();
                 int columnIdx = orderByColumn.getResultColumn().getColumnPosition() - 1;
@@ -169,7 +174,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                     intermediateOrderByIdx++;
                 }
             }
-            orderByLists[0] = null; // It will be pushed down.
+            qec.setOrderByList(0, null); // It will be pushed down.
         }
         else // The output of the intersect/except does not have to be ordered
         {
@@ -216,6 +221,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
             orderByList.addOrderByColumn( orderByColumn);
         }
         orderByList.bindOrderByColumns( rsn);
+        rsn.pushQueryExpressionSuffix();
         rsn.pushOrderByList( orderByList);
     } // end of pushOrderingDown
                                                             
@@ -321,28 +327,37 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
         ResultSetNode treeTop = this;
 
-        if( orderByLists[0] != null) {
-            // Generate an order by node on top of the intersect/except
-            treeTop = new OrderByNode(
-                treeTop,
-                orderByLists[0],
-                tableProperties,
-                getContextManager());
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if(obl != null) {
+                // Generate an order by node on top of the intersect/except
+                treeTop = new OrderByNode(
+                        treeTop,
+                        obl,
+                        tableProperties,
+                        getContextManager());
+            }
+
+            final ValueNode offset = qec.getOffset(i);
+            final ValueNode fetchFirst = qec.getFetchFirst(i);
+
+            if (offset != null || fetchFirst != null) {
+                ResultColumnList newRcl =
+                    treeTop.getResultColumns().copyListAndObjects();
+                newRcl.genVirtualColumnNodes(
+                    treeTop, treeTop.getResultColumns());
+
+                treeTop = new RowCountNode(
+                        treeTop,
+                        newRcl,
+                        offset,
+                        fetchFirst,
+                        qec.getHasJDBCLimitClause()[i].booleanValue(),
+                        getContextManager());
+            }
         }
 
-        if (offset != null || fetchFirst != null) {
-            ResultColumnList newRcl =
-                treeTop.getResultColumns().copyListAndObjects();
-            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
-
-            treeTop = new RowCountNode(
-                treeTop,
-                newRcl,
-                offset,
-                fetchFirst,
-                hasJDBClimitClause,
-                getContextManager());
-        }
         return treeTop;
 
     } // end of addNewNodes

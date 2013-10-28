@@ -21,24 +21,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.sql.PreparedStatement;
-import java.sql.ParameterMetaData ;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Test <result offset clause> and <fetch first clause>.
+ * Test {@code <result offset clause>} and {@code <fetch first clause>}.
  */
 public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
@@ -82,6 +80,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         return new CleanDatabaseTestSetup(
             new TestSuite(OffsetFetchNextTest.class,
                           suiteName)) {
+            @Override
             protected void decorateSQL(Statement s)
                     throws SQLException {
                 createSchemaObjects(s);
@@ -94,8 +93,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      * Creates tables used by the tests (never modified, we use rollback after
      * changes).
      */
-    private static void createSchemaObjects(Statement st)
-            throws SQLException
+    private static void createSchemaObjects(Statement st) throws SQLException
     {
         // T1 (no indexes)
         st.executeUpdate("create table t1 (a int, b bigint)");
@@ -116,9 +114,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Negative tests. Test various invalid OFFSET and FETCH NEXT clauses.
+     *
+     * @throws java.sql.SQLException
      */
-    public void testErrors()
-            throws Exception
+    public void testErrors() throws SQLException
     {
         Statement st = createStatement();
 
@@ -148,10 +147,11 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests. Check that the new keyword OFFSET introduced is not
-     * reserved so we don't risk breaking existing apps.
+     * reserved so we don't risk breaking existing applications.
+     *
+     * @throws java.sql.SQLException
      */
-    public void testNewKeywordNonReserved()
-            throws Exception
+    public void testNewKeywordNonReserved() throws SQLException
     {
         setAutoCommit(false);
         prepareStatement("select a,b as offset from t1 offset 0 rows");
@@ -194,9 +194,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests.
+     *
+     * @throws java.sql.SQLException
      */
-    public void testOffsetFetchFirstReadOnlyForwardOnlyRS()
-            throws Exception
+    public void testOffsetFetchFirstReadOnlyForwardOnlyRS() throws SQLException
     {
         Statement stm = createStatement();
 
@@ -412,9 +413,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests.
+     *
+     * @throws java.sql.SQLException
      */
-    public void testOffsetFetchFirstUpdatableForwardOnlyRS()
-            throws Exception
+    public void testOffsetFetchFirstUpdatableForwardOnlyRS() throws SQLException
     {
         Statement stm = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                         ResultSet.CONCUR_UPDATABLE);
@@ -427,9 +429,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 0 rows (a no-op), update a row and verify result
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "0", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next();
             rs.next(); // at row 2
             rs.updateInt(1, -rs.getInt(1));
@@ -449,9 +451,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 1 rows, update a row and verify result
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "1", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for ( String variant : variants )
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next(); // at row 1, but row 2 of underlying rs
 
             rs.updateInt(1, -rs.getInt(1));
@@ -473,9 +475,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests with scrollable read-only.
+     *
+     * @throws java.sql.SQLException
      */
-    public void testOffsetFetchFirstReadOnlyScrollableRS()
-            throws Exception
+    public void testOffsetFetchFirstReadOnlyScrollableRS() throws SQLException
     {
         Statement stm = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                         ResultSet.CONCUR_READ_ONLY);
@@ -486,9 +489,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 0 rows (a no-op), update a row and verify result
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "0", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for ( String variant : variants )
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next();
             rs.next(); // at row 2
             assertTrue(rs.getInt(2) == 2);
@@ -499,9 +502,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 1 rows, fetch 3 row, check that we have the right ones
          */
         variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "1", "3" );
-        for ( int i = 0; i < variants.length; i++ )
+        for ( String variant : variants )
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next();
             rs.next(); // at row 2, but row 3 of underlying rs
 
@@ -527,9 +530,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests with SUR (Scrollable updatable result set).
+     *
+     * @throws java.sql.SQLException
      */
-    public void testOffsetFetchFirstUpdatableScrollableRS()
-            throws Exception
+    public void testOffsetFetchFirstUpdatableScrollableRS() throws SQLException
     {
         Statement stm = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                         ResultSet.CONCUR_UPDATABLE);
@@ -543,9 +547,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * also try the "for update" syntax so we see that it still works
          */
         variants = makeVariants( "select * from t1 % for update", FIRST_ROWS_ONLY, "0", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next();
             rs.next(); // at row 2
             rs.updateInt(1, -rs.getInt(1));
@@ -565,9 +569,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 1 rows, fetch 3 row, update some rows and verify result
          */
         variants = makeVariants( "select * from t1 %", NEXT_ROWS_ONLY, "1", "3" );
-        for ( int i = 0; i < variants.length; i++ )
+        for ( String variant : variants )
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             rs.next();
             rs.next(); // at row 2, but row 3 of underlying rs
 
@@ -615,9 +619,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         
         // Test with projection
         variants = makeVariants( "select * from t1 where a + 1 < b%", NEXT_ROWS_ONLY, "1", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            rs = stm.executeQuery( variants[ i ] );
+            rs = stm.executeQuery( variant );
             // should yield 2 rows
             rs.absolute(2);
             assertTrue(rs.getInt(2) == 5);
@@ -637,7 +641,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     }
 
 
-    public void testValues() throws Exception
+    public void testValues() throws SQLException
     {
         Statement stm = createStatement();
 
@@ -658,17 +662,19 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Positive tests, result set metadata
+     *
+     * @throws java.sql.SQLException
      */
-    public void testMetadata() throws Exception
+    public void testMetadata() throws SQLException
     {
         Statement stm = createStatement();
         ResultSet   rs;
         String[]    variants;
 
         variants = makeVariants( "select * from t1%", NEXT_ROWS_ONLY, "1", null );
-        for ( int j = 0; j < variants.length; j++ )
+        for (String variant : variants)
         {
-            rs = stm.executeQuery( variants[ j ] );
+            rs = stm.executeQuery( variant );
             ResultSetMetaData rsmd= rs.getMetaData();
             int cnt = rsmd.getColumnCount();
 
@@ -692,21 +698,23 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Test that we see correct traces of the filtering in the statistics
+     *
+     * @throws java.sql.SQLException
      */
-    public void testRunTimeStatistics() throws Exception
+    public void testRunTimeStatistics() throws SQLException
     {
         Statement stm = createStatement();
         ResultSet   rs;
         String[]    variants;
 
         variants = makeVariants( "select a,b from t1%", NEXT_ROWS_ONLY, "2", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
             stm.executeUpdate( "call syscs_util.syscs_set_runtimestatistics(1)" );
 
             queryAndCheck(
                           stm,
-                          variants[ i ],
+                          variant,
                           new String [][] {
                               {"1","3"}, {"1","4"},{"1","5"}});
 
@@ -731,8 +739,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Test against a bigger table
+     *
+     * @throws java.sql.SQLException
      */
-    public void testBigTable() throws Exception
+    public void testBigTable() throws SQLException
     {
         Statement stm = createStatement();
 
@@ -772,17 +782,18 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     /**
      * Test that the values of offset and fetch first are not forgotten if
      * a {@code PreparedStatement} is executed multiple times (DERBY-4212).
+     *
+     * @throws java.sql.SQLException
      */
-    public void testRepeatedExecution() throws Exception
+    public void testRepeatedExecution() throws SQLException
     {
         PreparedStatement ps;
-        ResultSet   rs;
         String[]    variants;
 
         variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "2", "2" );
-        for ( int j = 0; j < variants.length; j++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ j ] );
+            ps = prepareStatement( variant );
             String[][] expected = {{"1", "3"}, {"1", "4"}};
             for (int i = 0; i < 10; i++) {
                 JDBC.assertFullResultSet(ps.executeQuery(), expected);
@@ -792,8 +803,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Test dynamic arguments
+     *
+     * @throws java.sql.SQLException
      */
-    public void testDynamicArgs() throws Exception
+    public void testDynamicArgs() throws SQLException
     {
         PreparedStatement ps;
         String[]    variants;
@@ -801,9 +814,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
         // Check look-ahead also for ? in grammar since offset is not reserved
         variants = makeVariants( "select * from t1%", NEXT_ROWS_ONLY, "?", null );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ i ] );
+            ps = prepareStatement( variant );
         }
         
         
@@ -869,35 +882,35 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         
         // Mix of prepared and not
         variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "?", "3" );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ i ] );
+            ps = prepareStatement( variant );
             ps.setLong(1, 1L);
             JDBC.assertFullResultSet(ps.executeQuery(), expected);
         }
 
         variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "4", "?" );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ i ] );
+            ps = prepareStatement( variant );
             ps.setLong(1, 1L);
             JDBC.assertFullResultSet(ps.executeQuery(), new String[][]{{"1", "5"}});
         }
 
         // Mix of other dyn args and ours:
         variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "?", "3" );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ i ] );
+            ps = prepareStatement( variant );
             ps.setInt(1, 1);
             ps.setLong(2, 1L);
             JDBC.assertFullResultSet(ps.executeQuery(), expected);
         }
 
         variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "1", "?" );
-        for ( int i = 0; i < variants.length; i++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ i ] );
+            ps = prepareStatement( variant );
             ps.setInt(1, 1);
             ps.setLong(2, 2L);
             expected = new String[][]{{"1", "2"}, {"1", "3"}};
@@ -927,8 +940,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Test dynamic arguments
+     *
+     * @throws java.sql.SQLException
      */
-    public void testDynamicArgsMetaData() throws Exception
+    public void testDynamicArgsMetaData() throws SQLException
     {
 
     	//since there is no getParameterMetaData() call available in JSR169 
@@ -939,9 +954,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         String[]    variants;
 
         variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "?", "?" );
-        for ( int j = 0; j < variants.length; j++ )
+        for (String variant : variants)
         {
-            ps = prepareStatement( variants[ j ] );
+            ps = prepareStatement( variant );
             
             ParameterMetaData pmd = ps.getParameterMetaData();
             int[] expectedTypes = { Types.INTEGER, Types.BIGINT, Types.BIGINT };
@@ -960,8 +975,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     /**
      * Test some additional corner cases in JDBC limit/offset syntax.
+     *
+     * @throws java.sql.SQLException
      */
-    public  void    testJDBCLimitOffset()   throws Exception
+    public void testJDBCLimitOffset() throws SQLException
     {
         // LIMIT 0 is allowed. It means: everything from the OFFSET forward
         PreparedStatement   ps = prepareStatement( "select a from t2 order by a { limit ? }" );
@@ -1005,14 +1022,12 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     private void    vetStatement
         ( Statement stmt, String sqlState, String stub, String fetchFormat, String offset, String fetchFirst, String[][] expectedResults )
-        throws Exception
+        throws SQLException
     {
         String[]    variants = makeVariants( stub, fetchFormat, offset, fetchFirst );
 
-        for ( int i = 0; i < variants.length; i++ )
+        for (String text : variants)
         {
-            String  text = variants[ i ];
-            
             if ( sqlState != null )
             {
                 assertStatementError( sqlState, stmt, text );
@@ -1030,7 +1045,6 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     private String[]    makeVariants
         ( String stub, String fetchFormat, String offset, String fetchFirst )
-        throws Exception
     {
         String[]    result = new String[ VARIANT_COUNT ];
 
@@ -1045,7 +1059,6 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     private String  makeSQLStandardText
         ( String stub, String fetchFormat, String offset, String fetchFirst )
-        throws Exception
     {
         String  sqlStandardText = "";
 
@@ -1069,7 +1082,6 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      */
     private String  makeJDBCText
         ( String stub, String offset, String fetchFirst )
-        throws Exception
     {
         String  jdbcText = "";
 
@@ -1093,13 +1105,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         return jdbcText;
     }
 
-    private String  substitute( String stub, String token, int replacement )
-        throws Exception
-    {
-        return substitute( stub, token, Integer.toString( replacement ) );
-    }
     private String  substitute( String stub, String token, String replacement )
-        throws Exception
     {
         int substitutionIndex = stub.indexOf( token );
         if ( substitutionIndex < 0 ) { fail( "Bad stub: " + stub + ". Can't find token: " + token ); }

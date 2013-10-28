@@ -668,6 +668,12 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 								   dependentScan);
 	}
 
+    @Override
+    public void pushQueryExpressionSuffix() {
+        childResult.pushQueryExpressionSuffix();
+    }
+
+
 	/**
 	 * Push the order by list down from InsertNode into its child result set so
 	 * that the optimizer has all of the information that it needs to consider

@@ -54,10 +54,8 @@ class RowResultSetNode extends FromTable
 {
 	SubqueryList subquerys;
     private List<AggregateNode> aggregates;
-	OrderByList	 orderByList;
-    ValueNode    offset; // OFFSET n ROWS
-    ValueNode    fetchFirst; // FETCH FIRST n ROWS ONLY
-    boolean   hasJDBClimitClause; //  were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
+
+    QueryExpressionClauses qec = new QueryExpressionClauses();
 
 	/**
      * Constructor for a RowResultSetNode.
@@ -75,27 +73,6 @@ class RowResultSetNode extends FromTable
         if (resultColumns != null) {
 			resultColumns.markInitialSize();
         }
-	}
-
-	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
-    @Override
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			return 	"orderByList: " + 
-				(orderByList != null ? orderByList.toString() : "null") + "\n" +
-				super.toString();
-		}
-		else
-		{
-			return "";
-		}
 	}
 
     String statementToString()
@@ -122,21 +99,7 @@ class RowResultSetNode extends FromTable
 				subquerys.treePrint(depth + 1);
 			}
 
-            if (orderByList != null) {
-                printLabel(depth, "orderByList:");
-                orderByList.treePrint(depth + 1);
-            }
-
-            if (offset != null) {
-                printLabel(depth, "offset:");
-                offset.treePrint(depth + 1);
-            }
-
-            if (fetchFirst != null) {
-                printLabel(depth, "fetch first/next:");
-                fetchFirst.treePrint(depth + 1);
-            }
-
+            printQueryExpressionSuffixClauses(depth, qec);
 		}
 	}
 
@@ -273,12 +236,16 @@ class RowResultSetNode extends FromTable
 
 		SelectNode.checkNoWindowFunctions(resultColumns, "VALUES");
 
-        if (orderByList != null) {
-            orderByList.pullUpOrderByColumns(this);
-            orderByList.bindOrderByColumns(this);
-        }
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
 
-        bindOffsetFetch(offset, fetchFirst);
+            if (obl != null) {
+                obl.pullUpOrderByColumns(this);
+                obl.bindOrderByColumns(this);
+            }
+
+            bindOffsetFetch(qec.getOffset(i), qec.getFetchFirst(i));
+        }
     }
 
 	/**
@@ -388,6 +355,11 @@ class RowResultSetNode extends FromTable
 	{
 	}
 
+    @Override
+    public void pushQueryExpressionSuffix() {
+        qec.push();
+    }
+
 	/**
 	 * Push the order by list down from the cursor node
 	 * into its child result set so that the optimizer
@@ -399,7 +371,7 @@ class RowResultSetNode extends FromTable
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
-		this.orderByList = orderByList;
+        qec.setOrderByList(orderByList);
 	}
 
     /**
@@ -412,9 +384,9 @@ class RowResultSetNode extends FromTable
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
-        this.offset = offset;
-        this.fetchFirst = fetchFirst;
-        this.hasJDBClimitClause = hasJDBClimitClause;
+        qec.setOffset(offset);
+        qec.setFetchFirst(fetchFirst);
+        qec.setHasJDBCLimitClause(hasJDBClimitClause);
     }
 
 
@@ -469,8 +441,13 @@ class RowResultSetNode extends FromTable
         // Well, not very likely here, since we're here:
         //     VALUES x followed by ORDER BY 1,1,2
         // but for completeness...
-        if (orderByList != null && orderByList.size() > 1) {
-            orderByList.removeDupColumns();
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+
+            if (obl != null && obl.size() > 1) {
+                obl.removeDupColumns();
+            }
         }
 
         return this;
@@ -664,26 +641,33 @@ class RowResultSetNode extends FromTable
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
-		if (orderByList != null)
-		{
-            treeTop = new OrderByNode(treeTop,
-                                      orderByList,
-                                      tableProperties,
-                                      getContextManager());
-		}
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+            if (obl != null) {
+                treeTop = new OrderByNode(treeTop,
+                        obl,
+                        tableProperties,
+                        getContextManager());
+            }
 
-        if (offset != null || fetchFirst != null) {
-            ResultColumnList newRcl =
-                treeTop.getResultColumns().copyListAndObjects();
-            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
+            final ValueNode offset = qec.getOffset(i);
+            final ValueNode fetchFirst = qec.getFetchFirst(i);
+            Boolean hasJDBClimitClause = qec.getHasJDBCLimitClause()[i];
 
-            treeTop = new RowCountNode(
-                treeTop,
-                newRcl,
-                offset,
-                fetchFirst,
-                hasJDBClimitClause,
-                getContextManager());
+            if (offset != null || fetchFirst != null) {
+                ResultColumnList newRcl =
+                    treeTop.getResultColumns().copyListAndObjects();
+                newRcl.genVirtualColumnNodes(
+                    treeTop, treeTop.getResultColumns());
+
+                treeTop = new RowCountNode(
+                        treeTop,
+                        newRcl,
+                        offset,
+                        fetchFirst,
+                        hasJDBClimitClause.booleanValue(),
+                        getContextManager());
+            }
         }
 
 		return treeTop;

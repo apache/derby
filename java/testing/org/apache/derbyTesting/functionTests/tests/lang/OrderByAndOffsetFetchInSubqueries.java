@@ -21,18 +21,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for DERBY-4397 Allow {@code ORDER BY} in subqueries
@@ -74,6 +74,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
     {
         return new CleanDatabaseTestSetup(
             new TestSuite(OrderByAndOffsetFetchInSubqueries.class)) {
+                @Override
                 protected void decorateSQL(Statement s)
                         throws SQLException {
                     getConnection().setAutoCommit(false);
@@ -123,6 +124,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * Test {@code INSERT INTO t SELECT .. FROM .. ORDER BY}.
+     *
+     * @throws java.sql.SQLException
      */
     public void testInsertSelectOrderBy() throws SQLException {
         //
@@ -130,7 +133,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
         //
         setAutoCommit(false);
         Statement s = createStatement();
-        ResultSet rs = null;
+        ResultSet rs;
 
         s.execute("insert into temp1 values 'x','a','c','b','a'");
         s.execute("insert into temp2(s) select s from temp1 order by s");
@@ -336,6 +339,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * <p/>
      * This test is a variant made my modifying {@code testInsertSelectOrderBy}
      * with suitable {@code OFFSET/FETCH FIRST} clauses.
+     *
+     * @throws java.sql.SQLException
      */
     public void testInsertSelectOrderByOffsetFetch() throws SQLException {
         //
@@ -343,7 +348,6 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
         //
         setAutoCommit(false);
         Statement s = createStatement();
-        ResultSet rs = null;
 
         s.execute("insert into temp1 values 'x','a','c','b','a'");
         s.execute("insert into temp2b(s) select s from temp1 order by s " +
@@ -365,7 +369,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
             "insert into temp2b(s) select * from temp1 order by s " +
             "    offset 1 rows fetch next 4 rows only");
 
-        rs = s.executeQuery("select * from temp2b");
+        ResultSet rs = s.executeQuery("select * from temp2b");
         JDBC.assertFullResultSet(rs, new String[][]{
                 {"1", "a"},
                 {"2", "b"},
@@ -511,6 +515,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * {@code SELECT} subqueries with {@code ORDER BY}
+     *
+     * @throws java.sql.SQLException
      */
     public void testSelectSubqueriesOrderBy() throws SQLException {
         setAutoCommit(false);
@@ -652,6 +658,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * This test is a variant made my modifying {@code
      * testSelectSubqueriesOrderBy} with suitable {@code OFFSET/FETCH FIRST}
      * clauses.
+     *
+     * @throws java.sql.SQLException
      */
     public void testSelectSubqueriesOrderByAndOffsetFetch()
             throws SQLException {
@@ -858,6 +866,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * Test JOIN with delimited subqueries
+     *
+     * @throws java.sql.SQLException
      */
     public void testJoinsWithOffsetFetch() throws SQLException {
 
@@ -897,6 +907,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * Test {@code ORDER BY} in a view definition
+     *
+     * @throws java.sql.SQLException
      */
     public void testView() throws SQLException {
 
@@ -929,6 +941,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * <p/>
      * This test is a variant made my modifying {@code testView} with suitable
      * {@code OFFSET/FETCH FIRST} clauses.
+     *
+     * @throws java.sql.SQLException
      */
     public void testViewFetchOffset() throws SQLException {
 
@@ -962,6 +976,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * {@code SELECT} subqueries with {@code ORDER BY} - negative tests
+     *
+     * @throws java.sql.SQLException
      */
     public void testSelectSubqueriesOrderByNegative() throws SQLException {
         setAutoCommit(false);
@@ -1005,6 +1021,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
     /**
      * {@code SELECT} subqueries with {@code ORDER BY} - check sort avoidance
+     *
+     * @throws java.sql.SQLException
      */
     public void testSelectSubqueriesSortAvoidance() throws SQLException {
         setAutoCommit(false);
@@ -1038,6 +1056,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
     /**
      * Prevent pushing of where predicates into selects with fetch
      * and/or offset (DERBY-5911). Similarly, for windowed selects.
+     *
+     * @throws java.sql.SQLException
      */
     public void testPushAvoidance() throws SQLException {
         setAutoCommit(false);
@@ -1094,7 +1114,10 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * </pre>
      * The corresponding production in {@code sqlgrammar.jj} is
      * {@code nonJoinQueryPrimary}.
+     *
      * Cf. DERBY-6008.
+     *
+     * @throws java.sql.SQLException
      */
     public void testNestingInsideSetOperation() throws SQLException {
         setAutoCommit(false);
@@ -1230,4 +1253,88 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
         rollback();
     }
+
+    /**
+     * Nested query expression body, with each level contributing to the set of
+     * ORDER BY and/or OFFSET/FETCH FIRST clauses.
+     *
+     * Cf. these productions in SQL 2011, section 7.11:
+     *
+     * <pre>
+     * <query expression> ::=
+     *    [ <with clause> ] <query expression body>
+     *    [ <order by clause> ] [ <result offset clause> ]
+     *    [ <fetch first clause> ]
+     *
+     * <query expression body> ::=
+     *     <query term> ...
+     * </pre>
+     *
+     * One of the productions of {@code <query expression body>}, is
+     *
+     * <pre>
+     *    <left paren> <query expression body
+     *    [ <order by clause> ] [ <result offset clause> ]
+     *    [ <fetch first clause> ] <right paren>
+     * </pre>
+     * so our clauses nests to arbitrary depth given enough parentheses,
+     * including ORDER BY and OFFSET/FETCH FIRST clauses. This nesting
+     * did not work correctly, cf. DERBY-6378.
+     *
+     * The corresponding productions in {@code sqlgrammar.jj} is
+     * {@code queryExpression} and {@code nonJoinQueryPrimary}.
+     *
+     * @throws Exception
+     */
+    public void testDerby6378() throws Exception
+    {
+        setAutoCommit(false);
+        Statement stm = createStatement();
+        stm.executeUpdate("create table t1 (a int, b bigint)");
+        stm.executeUpdate("delete from t1");
+        stm.executeUpdate("insert into t1 values " +
+                "(1,-10), (2,-11), (3,-9), (4,-20), (5,-1)");
+
+        queryAndCheck(stm,
+                "(select * from t1 offset 1 row fetch first 1 row only)",
+                new String [][] {{"2","-11"}});
+
+        queryAndCheck(stm,
+                "(select * from t1 order by a desc fetch first 3 rows only) " +
+                "     offset 1 row fetch first 1 row only",
+                new String [][] {{"4","-20"}});
+
+        queryAndCheck(stm,
+                "((select * from t1 order by a desc) " +
+                "     fetch first 3 rows only)",
+                new String [][] {{"5","-1"}, {"4","-20"}, {"3","-9"}});
+
+        queryAndCheck(stm,
+                "((((select * from t1 order by a desc) " +
+                "        fetch first 3 rows only)) " +
+                "    order by b) " +
+                "fetch first 1 row only",
+                new String [][] {{"4","-20"},});
+
+        queryAndCheck(
+            stm,
+            "(((((values (1,-10), (2,-11), (3,-9), (4,-20), (5,-1))" +
+            "            order by 1 desc) " +
+            "        fetch first 3 rows only)) " +
+            "    order by 2) " +
+            "fetch first 1 row only",
+            new String [][] {{"4","-20"},});
+        rollback();
+        stm.close();
+    }
+
+    private void queryAndCheck(
+        Statement stm,
+        String queryText,
+        String [][] expectedRows) throws SQLException {
+
+        ResultSet rs = stm.executeQuery(queryText);
+        JDBC.assertFullResultSet(rs, expectedRows);
+    }
+
 }

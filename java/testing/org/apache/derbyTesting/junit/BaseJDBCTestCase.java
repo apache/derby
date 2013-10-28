@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -1597,6 +1598,70 @@ public abstract class BaseJDBCTestCase
         s.close();
 
         conn.commit();
+    }
+
+    protected static void dumpRs(ResultSet s, PrintStream out)
+            throws SQLException
+    {
+        if (s == null) {
+            out.println("<NULL>");
+            return;
+        }
+
+        ResultSetMetaData rsmd = s.getMetaData();
+
+        // Get the number of columns in the result set
+        int numCols = rsmd.getColumnCount();
+
+        if (numCols <= 0) {
+            out.println("(no columns!)");
+            return;
+        }
+
+        StringBuilder heading = new StringBuilder("\t ");
+        StringBuilder underline = new StringBuilder("\t ");
+
+        int len;
+        // Display column headings
+        for (int i=1; i<=numCols; i++) {
+            if (i > 1) {
+                heading.append(",");
+                underline.append(" ");
+            }
+
+            len = heading.length();
+            heading.append(rsmd.getColumnLabel(i));
+            len = heading.length() - len;
+
+            for (int j = len; j > 0; j--) {
+                underline.append("-");
+            }
+        }
+
+        out.println(heading.toString());
+        out.println(underline.toString());
+
+
+        StringBuilder row = new StringBuilder();
+        // Display data, fetching until end of the result set
+        while (s.next()) {
+            row.append("\t{");
+            // Loop through each column, getting the
+            // column data and displaying
+            for (int i=1; i<=numCols; i++) {
+                if (i > 1) row.append(",");
+                row.append(s.getString(i));
+            }
+
+            row.append("}\n");
+        }
+
+        out.println(row.toString());
+        s.close();
+    }
+
+    protected static void dumpRs(ResultSet s) throws SQLException {
+        dumpRs(s, System.out);
     }
 } // End class BaseJDBCTestCase
 

@@ -390,6 +390,7 @@ class FromSubquery extends FromTable
 									FromList fromList)
 								throws StandardException
 	{
+        subquery.pushQueryExpressionSuffix();
 		// Push the order by list down to the ResultSet
 		if (orderByList != null)
 		{

@@ -853,6 +853,8 @@ class SubqueryNode extends ValueNode
 			}
 		}
 
+        resultSet.pushQueryExpressionSuffix();
+
 		// Push the order by list down to the ResultSet
 		if (orderByList != null) {
 			// If we have more than 1 ORDERBY columns, we may be able to

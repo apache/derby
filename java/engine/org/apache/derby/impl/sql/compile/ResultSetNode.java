@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
@@ -29,16 +30,12 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
-import org.apache.derby.iapi.sql.compile.OptimizableList;
-import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
-import org.apache.derby.iapi.sql.compile.OptimizerPlan;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -51,6 +48,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A ResultSetNode represents a result set, that is, a set of rows.  It is
@@ -1588,7 +1586,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * Push the order by list down from the cursor node
 	 * into its child result set so that the optimizer
 	 * has all of the information that it needs to 
-	 * consider sort avoidance.
+     * consider sort avoidance. Presumes a new level
+     * has been initialized by {@link #pushQueryExpressionSuffix()}.
 	 *
 	 * @param orderByList	The order by list
 	 */
@@ -1604,7 +1603,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 
     /**
      * Push down the offset and fetch first parameters, if any. This method
-     * should be overridden by the result sets that need this.
+     * should be overridden by the result sets that need this. Presumes a new
+     * level has been initialized by {@link #pushQueryExpressionSuffix()}.
      *
      * @param offset    the OFFSET, if any
      * @param fetchFirst the OFFSET FIRST, if any
@@ -1837,4 +1837,173 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		return null;
 	}
+
+    /**
+     * For ease of pushing order by, offset and fetch first/next clauses into
+     * nodes. Clauses on the same nesting level have the same index in the
+     * lists, so at any level, any of the lists' elements may be empty. For
+     * example,
+     *
+     * {@code (select * from t order by a fetch next 5 rows only) order by b}
+     *
+     * would have
+     * <pre>
+     *            obl[0] = "order by a",
+     *            offset[0] = null,
+     *            fetchFirst[0] = "next 5 rows"
+     * </pre>
+     * and
+     * <pre>
+     *            obl[1] = "order by b",
+     *            offset[1] = null
+     *            fetchFirst[1] = null
+     * </pre>
+     *
+     * When starting pushing clauses for a new level, always remember to do a
+     * {@link #push} before adding the clauses via {@link #setOffset}, {@link
+     * #setFetchFirst}, {@link #setOrderByList} and {@link
+     * #setHasJDBCLimitClause}.
+     */
+    static class QueryExpressionClauses {
+        private final List<OrderByList> obl = new ArrayList<OrderByList>();
+        private final List<ValueNode> offset = new ArrayList<ValueNode>();
+        private final List<ValueNode> fetchFirst = new ArrayList<ValueNode>();
+        private final List<Boolean> hasJDBCLimitClause = new ArrayList<Boolean>();
+
+        public QueryExpressionClauses() {
+            // Push one level initially; that way we won't get out-of-range
+            // errors when checking in cases where we have no clauses.
+            // When pushing, we reuse unused levels anyway.
+            push();
+        }
+
+        int size() {
+            return obl.size();
+        }
+
+        void push() {
+            int s = size();
+
+            if (s > 0 &&
+                 obl.get(s-1) == null &&
+                 offset.get(s-1) == null &&
+                 fetchFirst.get(s-1) == null) {
+                // Reuse this level's holders since no clauses are present
+                // here "hasJDBCLimitClause" implies offset or fetchFirst are
+                // not null, so we don't need to check that.
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(hasJDBCLimitClause.get(s-1) == null);
+                }
+            } else {
+                // Push holders for a new level
+                obl.add(null);
+                offset.add(null);
+                fetchFirst.add(null);
+                hasJDBCLimitClause.add(null);
+            }
+        }
+
+        void setOrderByList(OrderByList obl) {
+            this.obl.set(size() - 1, obl);
+        }
+
+        void setOffset(ValueNode v) {
+            this.offset.set(size() - 1, v);
+        }
+
+        void setFetchFirst(ValueNode v) {
+            this.fetchFirst.set(size() - 1, v);
+        }
+
+        void setHasJDBCLimitClause(Boolean b) {
+            this.hasJDBCLimitClause.set(size() - 1, b);
+        }
+
+        OrderByList getOrderByList(int i) {
+            return obl.get(i);
+        }
+
+        void setOrderByList(int i, OrderByList obl) {
+            this.obl.set(i, obl);
+        }
+
+        ValueNode getOffset(int i) {
+            return offset.get(i);
+        }
+
+        void setOffset(int i, ValueNode v) {
+            this.offset.set(i, v);
+        }
+
+        ValueNode getFetchFirst(int i) {
+            return fetchFirst.get(i);
+        }
+
+        void setFetchFirst(int i, ValueNode v) {
+            this.fetchFirst.set(i, v);
+        }
+
+
+        Boolean[] getHasJDBCLimitClause() {
+            return hasJDBCLimitClause.toArray(new Boolean[1]);
+        }
+
+        boolean hasOffsetFetchFirst() {
+            for (ValueNode o : offset) {
+                if (o != null) {
+                    return true;
+                }
+            }
+
+            for (ValueNode ff : fetchFirst) {
+                if (ff != null) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Set up a new level for order by and fetch/offset clauses.
+     * See Javadoc for {@link #QueryExpressionClauses}.
+     * Overridden by implementors of pushOrderByNode, pushOffsetFetchFirst.
+     */
+    void pushQueryExpressionSuffix() {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
+
+    void printQueryExpressionSuffixClauses(
+        int depth,
+        QueryExpressionClauses qec) {
+
+        for (int i = 0; i < qec.size(); i++) {
+            OrderByList obl = qec.getOrderByList(i);
+            if ( obl != null ) {
+                printLabel(depth, "orderByLists[" + i + "]:");
+                obl.treePrint(depth + 1);
+            }
+
+            ValueNode offset = qec.getOffset(i);
+            if (offset != null) {
+                printLabel(depth, "offset:");
+                offset.treePrint(depth + 1);
+            }
+
+            ValueNode fetchFirst = qec.getFetchFirst(i);
+            if (fetchFirst != null) {
+                printLabel(depth, "fetch first/next:");
+                fetchFirst.treePrint(depth + 1);
+            }
+
+            Boolean hasJDBCLimitClause = qec.getHasJDBCLimitClause()[i];
+            if (hasJDBCLimitClause != null) {
+                printLabel(depth,
+                           "hasJDBCLimitClause:" + hasJDBCLimitClause + "\n");
+            }
+        }
+    }
 }

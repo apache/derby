@@ -52,17 +52,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	*/
 	boolean			all;
 
-    /**
-     * List of columns in ORDER BY list. Usually size 1, if size 2, we
-     * are a VALUES top node UNION node and element 2 has been passed
-     * from InterceptOrExceptNode to prepare for merge implementation
-     * of intersect or except.
-     */
-    OrderByList[] orderByLists = new OrderByList[1];
+    QueryExpressionClauses qec = new QueryExpressionClauses();
 
-    ValueNode   offset; // OFFSET n ROWS
-    ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY
-    boolean   hasJDBClimitClause; // were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
 	// List of scoped predicates for pushing during optimization.
 	private PredicateList leftOptPredicates;
 	private PredicateList rightOptPredicates;
@@ -547,22 +538,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		{
 			super.printSubNodes(depth);
 
-            if (orderByLists[0] != null) {
-                for (int i = 0; i < orderByLists.length; i++) {
-                    printLabel(depth, "orderByLists[" + i + "]:");
-                    orderByLists[i].treePrint(depth + 1);
-                }
-			}
-
-            if (offset != null) {
-                printLabel(depth, "offset:");
-                offset.treePrint(depth + 1);
-            }
-
-            if (fetchFirst != null) {
-                printLabel(depth, "fetch first/next:");
-                fetchFirst.treePrint(depth + 1);
-            }
+            printQueryExpressionSuffixClauses(depth, qec);
 		}
 	}
 	/**
@@ -782,12 +758,17 @@ abstract class SetOperatorNode extends TableOperatorNode
     public void bindExpressions(FromList fromList) throws StandardException {
         // Actions for UnionNode qua top node of a multi-valued table value
         // constructor
-        if (orderByLists[0] != null) {
-            orderByLists[0].bindOrderByColumns(this);
-            orderByLists[0].pullUpOrderByColumns(this);
+        for (int i = 0; i < qec.size(); i++) {
+            final OrderByList obl = qec.getOrderByList(i);
+
+            if (obl != null) {
+                obl.bindOrderByColumns(this);
+                obl.pullUpOrderByColumns(this);
+            }
+
+            bindOffsetFetch(qec.getOffset(i), qec.getFetchFirst(i));
         }
 
-        bindOffsetFetch(offset, fetchFirst);
         super.bindExpressions(fromList);
     }
 
@@ -808,6 +789,11 @@ abstract class SetOperatorNode extends TableOperatorNode
 		rightResultSet.bindTargetExpressions(fromListParam);
 	}
 
+    @Override
+    public void pushQueryExpressionSuffix() {
+        qec.push();
+    }
+
 	/**
 	 * Push the order by list down from the cursor node
 	 * into its child result set so that the optimizer
@@ -819,32 +805,7 @@ abstract class SetOperatorNode extends TableOperatorNode
     @Override
 	void pushOrderByList(OrderByList orderByList)
 	{
-        if (this.orderByLists[0] != null) {
-            // Presumably a push down order by from IntersectOrExceptNode
-            // on a VALUES clause that already has an ORDER BY.
-            if (SanityManager.DEBUG) {
-                SanityManager.ASSERT(
-                    orderByList.size() == resultColumns.visibleSize());
-                OrderByColumn obc = orderByList.elementAt(0);
-                SanityManager.ASSERT(
-                    obc.getExpression() instanceof NumericConstantNode);
-                try {
-                    SanityManager.ASSERT(
-                            ((NumericConstantNode)obc.getExpression())
-                            .value.getInt() == 1);
-                } catch (Exception e) {
-                    SanityManager.THROWASSERT(e);
-                }
-            }
-
-            // FIXME: Check to see if this extra ordering can be eliminated
-            OrderByList[] newOrderByLists = new OrderByList[2];
-            newOrderByLists[0] = orderByLists[0];
-            newOrderByLists[1] = orderByList;
-            this.orderByLists = newOrderByLists;
-        } else {
-            this.orderByLists[0] = orderByList;
-        }
+        qec.setOrderByList(orderByList);
 	}
 
     /**
@@ -857,9 +818,9 @@ abstract class SetOperatorNode extends TableOperatorNode
     @Override
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
-        this.offset = offset;
-        this.fetchFirst = fetchFirst;
-        this.hasJDBClimitClause = hasJDBClimitClause;
+        qec.setOffset(offset);
+        qec.setFetchFirst(fetchFirst);
+        qec.setHasJDBCLimitClause(hasJDBClimitClause);
     }
 
 
@@ -918,16 +879,19 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 *		above the select so that the shape of the result set
 		 *		is as expected.
 		 */
-        for (int i = 0; i < orderByLists.length; i++) {
-            if ((! all) && orderByLists[i] != null &&
-                orderByLists[i].allAscending())
+        for (int i = 0; i < qec.size(); i++) {
+            OrderByList obl = qec.getOrderByList(i);
+
+            if ((! all) && obl != null &&
+                obl.allAscending())
             {
                 /* Order by list currently restricted to columns in select
                  * list, so we will always eliminate the order by here.
                  */
-                if (orderByLists[i].isInOrderPrefix(resultColumns))
+                if (obl.isInOrderPrefix(resultColumns))
                 {
-                    orderByLists[i] = null;
+                    obl = null;
+                    qec.setOrderByList(i, null);
                 }
                 /* RESOLVE - We currently only eliminate the order by if it is
                  * a prefix of the select list.  We do not currently do the
@@ -946,8 +910,8 @@ abstract class SetOperatorNode extends TableOperatorNode
             // UnionNode qua top of table value constructor with ordering
             // If we have more than 1 ORDERBY columns, we may be able to
             // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
-            if (orderByLists[i] != null && orderByLists[i].size() > 1) {
-                orderByLists[i].removeDupColumns();
+            if (obl != null && obl.size() > 1) {
+                obl.removeDupColumns();
             }
         }
 
