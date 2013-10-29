@@ -550,7 +550,10 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertIsEmpty(methodStreamFile);
         assertIsEmpty(fieldStreamFile);
         assertIsEmpty(errStreamFile);
-    }
+
+        boolean deleted = deleteFile(derby0log);
+        assertTrue("File " + derby0log + " could not be deleted", deleted);    
+     }
 
     /**
      * Test that the derby.stream.error.style property overrides the
@@ -575,6 +578,9 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertIsEmpty(methodStreamFile);
         assertIsEmpty(fieldStreamFile);
         assertIsEmpty(errStreamFile);
+
+        boolean deleted = deleteFile(derby0log);
+        assertTrue("File " + derby0log + " could not be deleted", deleted);    
     }
 
     /**
