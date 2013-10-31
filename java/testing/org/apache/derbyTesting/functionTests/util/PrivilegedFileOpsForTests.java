@@ -162,6 +162,37 @@ public class PrivilegedFileOpsForTests {
     }
 
     /**
+     * Create a directory.
+     * @param dir the directory to create
+     * @return {@code true} if and only if the directory was created
+     */
+    public static boolean mkdir(final File dir) {
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return dir.mkdir();
+            }
+        });
+    }
+
+    /**
+     * Set the read permission for a file.
+     * @param file      the file to set the read permission for
+     * @param readable  {@code true} to allow read, {@code false} to deny it
+     * @param ownerOnly {@code true} if it should be set for the owner only,
+     *                  {@code false} if it should be set for everyone
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public static boolean setReadable(final File file,
+                                      final boolean readable,
+                                      final boolean ownerOnly) {
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            public Boolean run() {
+                return file.setReadable(readable, ownerOnly);
+            }
+        });
+    }
+
+    /**
      * Obtains a reader for the specified file.
      *
      * @param file the file to obtain a reader for
@@ -193,7 +224,6 @@ public class PrivilegedFileOpsForTests {
      *
      * @param file the file to obtain a writer for
      * @return An writer for the specified file.
-     * @throws IOException 
      * @throws IOException if the file cannot be opened
      * @throws SecurityException if the required permissions to write to the file,
      *      or the path it is in, are missing

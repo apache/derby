@@ -54,6 +54,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ModuleLoadingTest.suite());
         suite.addTest(ReadMeFilesTest.suite());
         suite.addTest(ShutdownWithoutDeregisterPermissionTest.suite());
+        suite.addTest(Derby6396Test.suite());
 
         return suite;
     }
