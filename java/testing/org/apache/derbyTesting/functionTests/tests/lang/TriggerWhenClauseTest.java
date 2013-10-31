@@ -60,6 +60,7 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String JAVA_EXCEPTION = "XJ001";
     private static final String NOT_SINGLE_COLUMN = "42X39";
     private static final String NON_SCALAR_QUERY = "21000";
+    private static final String TRIGGER_RECURSION = "54038";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -789,5 +790,91 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         // Subquery returns multiple values, so an error should be raised.
         assertStatementError(NON_SCALAR_QUERY, s, "insert into t1 values 2");
         assertTableRowCount("T2", 1);
+    }
+
+    /**
+     * Test that a WHEN clause can call the CURRENT_USER function.
+     */
+    public void testCurrentUser() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x varchar(10))");
+
+        // Create one trigger that should only fire when current user is U2,
+        // and one that should only fire when current user is different from
+        // U2.
+        s.execute("create trigger tr01 after insert on t1 "
+                + "when (current_user = 'U2') "
+                + "insert into t2 values 'TR01'");
+        s.execute("create trigger tr02 after insert on t1 "
+                + "when (current_user <> 'U2') "
+                + "insert into t2 values 'TR02'");
+        s.execute("grant insert on t1 to u2");
+
+        commit();
+
+        // Used to get an assert failure or a NullPointerException here before
+        // DERBY-6348. Expect it to succeed, and expect TR02 to have fired.
+        s.execute("insert into t1 values 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "TR02");
+
+        rollback();
+
+        // Now try the same insert as user U2.
+        Connection c2 = openUserConnection("u2");
+        c2.setAutoCommit(true);
+        Statement s2 = c2.createStatement();
+        s2.execute("insert into "
+            + JDBC.escape(TestConfiguration.getCurrent().getUserName(), "T1")
+            + " values 1");
+        s2.close();
+        c2.close();
+
+        // Since the insert was performed by user U2, expect TR01 to have fired.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "TR01");
+
+        // Cleanup.
+        dropTable("T1");
+        dropTable("T2");
+        commit();
+    }
+
+    /**
+     * Test that a trigger with a WHEN clause can be recursive.
+     */
+    public void testRecursiveTrigger() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t(x int)");
+        s.execute("create trigger tr1 after insert on t "
+                + "referencing new as new for each row "
+                + "when (new.x > 0) insert into t values new.x - 1");
+
+        // Now fire the trigger. This used to cause an assert failure or a
+        // NullPointerException before DERBY-6348.
+        s.execute("insert into t values 15, 1, 2");
+
+        // The row trigger will fire three times, so that the above statement
+        // will insert the values { 15, 14, 13, ... , 0 }, { 1, 0 } and
+        // { 2, 1, 0 }.
+        String[][] expectedRows = {
+            {"0"}, {"0"}, {"0"}, {"1"}, {"1"}, {"1"}, {"2"}, {"2"}, {"3"},
+            {"4"}, {"5"}, {"6"}, {"7"}, {"8"}, {"9"}, {"10"}, {"11"},
+            {"12"}, {"13"}, {"14"}, {"15"}
+        };
+
+        JDBC.assertFullResultSet(s.executeQuery("select * from t order by x"),
+                                 expectedRows);
+
+        // Now fire the trigger with a value so that the maximum trigger
+        // recursion depth (16) is exceeded, and verify that we get the
+        // expected error.
+        assertStatementError(TRIGGER_RECURSION, s, "insert into t values 16");
+
+        // The contents of the table should not have changed, since the
+        // above statement failed and was rolled back.
+        JDBC.assertFullResultSet(s.executeQuery("select * from t order by x"),
+                                 expectedRows);
     }
 }
