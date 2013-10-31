@@ -1967,7 +1967,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
     /**
      * Set up a new level for order by and fetch/offset clauses.
-     * See Javadoc for {@link #QueryExpressionClauses}.
+     * See Javadoc for {@link QueryExpressionClauses}.
      * Overridden by implementors of pushOrderByNode, pushOffsetFetchFirst.
      */
     void pushQueryExpressionSuffix() {
