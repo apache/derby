@@ -538,10 +538,9 @@ class CreateTriggerNode extends DDLStatementNode
 			referencedColInts = new int[triggerCols.size()];
 
 			//This is the most interesting case for us. If we are here, 
-			//then it means that the trigger is defined at the row level
-			//and a set of trigger columns are specified in the CREATE
-			//TRIGGER statement. This can only happen for an UPDATE
-			//trigger.
+			//then it means that a set of trigger columns are specified
+			//in the CREATE TRIGGER statement. This can only happen for
+			//an UPDATE trigger.
 			//eg
 			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
 			//    REFERENCING OLD AS oldt NEW AS newt
@@ -740,16 +739,6 @@ class CreateTriggerNode extends DDLStatementNode
             }
 
             start = tokEndOffset - offset + 1;
-
-            // If we are dealing with statement trigger, then we will read
-            // all the columns from the trigger table since trigger will be
-            // fired for any of the columns in the trigger table.
-            int numberOfColsInTriggerTable =
-                    triggerTableDescriptor.getNumberOfColumns();
-            referencedColInts = new int[numberOfColsInTriggerTable];
-            for (int j = 0; j < numberOfColsInTriggerTable; j++) {
-                referencedColInts[j] = j + 1;
-            }
         }
 
         newText.append(originalText, start, originalText.length());
