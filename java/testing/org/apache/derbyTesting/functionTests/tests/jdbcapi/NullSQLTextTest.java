@@ -319,4 +319,40 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
      */
     public static void zeroArg () {
     }
+    
+    private static String SQLSTATE_SYNTAX_ERROR = "42X01";
+    public void testExecuteEmptyString() throws SQLException {
+        try {
+            createStatement().execute("");
+            fail("Statement expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState(SQLSTATE_SYNTAX_ERROR, sqle);
+        }
+    }
+    
+    public void testExecuteUpdateEmptyString() {
+        try {
+            createStatement().executeUpdate("");
+            fail("Statement expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState(SQLSTATE_SYNTAX_ERROR, sqle);
+        }       
+    }
+    
+    public void testExecuteQueryEmptyString() {
+        try {
+            createStatement().executeQuery("");
+            fail("Statement expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState(SQLSTATE_SYNTAX_ERROR, sqle);
+        }        
+    }
+    public void testPrepareEmptyString() {
+        try {
+            prepareStatement("");
+            fail("Statement expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState(SQLSTATE_SYNTAX_ERROR, sqle);
+        }        
+    }
 }

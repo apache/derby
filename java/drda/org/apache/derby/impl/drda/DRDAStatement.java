@@ -1413,6 +1413,9 @@ class DRDAStatement
     {
         java.util.StringTokenizer tokenizer = new java.util.StringTokenizer
             (sql, "\t\n\r\f=? (");
+        if (!tokenizer.hasMoreTokens()) {
+            return false;
+        }
          String firstToken = tokenizer.nextToken();
          if (StringUtil.SQLEqualsIgnoreCase(firstToken, 
                                             "call")) // captures CALL...and ?=CALL...

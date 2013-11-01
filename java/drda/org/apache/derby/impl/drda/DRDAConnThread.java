@@ -5920,7 +5920,9 @@ class DRDAConnThread extends Thread {
         String ccsidMBCEncoding = currentStatement.ccsidMBCEncoding;
 
         if (length == 0) {
-            return null;
+            // Can't return null here as that will indicate that the cp is 
+            // missing, when it in fact was present, but contained an empty string
+            return ""; 
         }
         byte [] byteStr = reader.readBytes(length);
         if (ccsidMBCEncoding != null)
