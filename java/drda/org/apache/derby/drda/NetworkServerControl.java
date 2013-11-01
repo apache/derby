@@ -26,7 +26,9 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.CodeSource;
 import java.security.PrivilegedExceptionAction;
+import java.security.ProtectionDomain;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -690,12 +692,12 @@ public class NetworkServerControl{
 
         System.setSecurityManager( securityManager );
 
-        //
         // Report success.
-        //
-        String  successMessage = server.localizeMessage( "DRDA_SecurityInstalled.I", null );
-        
-        server.consoleMessage( successMessage, true );
+        if (securityManager.equals(System.getSecurityManager())) {
+            String successMessage = server.localizeMessage(
+                    "DRDA_SecurityInstalled.I", null);
+            server.consoleMessage(successMessage, true);
+        }
     }
 
     /**
@@ -782,8 +784,21 @@ public class NetworkServerControl{
     private static  String  getCodeSourcePrefix( NetworkServerControlImpl server )
         throws Exception
     {
-        String  derbyNetURL = NetworkServerControl.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
-        int         idx = derbyNetURL.indexOf( DERBYNET_JAR );
+        // Note: This method is expected to run only when no security manager
+        //       has been installed, hence no use of privileged blocks.
+        ProtectionDomain pd = NetworkServerControl.class.getProtectionDomain();
+        CodeSource cs = pd.getCodeSource();
+        if (cs == null) {
+            return null;
+        }
+        URL url = cs.getLocation();
+        if (url == null) {
+            return null;
+        }
+        // Replace in "file://some", but not in "file:///some".
+        String extForm = url.toExternalForm().replaceFirst(
+                "^file://([^/].*)", "file:////$1");
+        int idx = extForm.indexOf(DERBYNET_JAR);
 
         //
         // If the customer isn't running against jar files, our Basic policy
@@ -800,7 +815,7 @@ public class NetworkServerControl{
         //
         // Otherwise, we have the directory prefix for our url.
         //
-        String  directoryPrefix = derbyNetURL.substring( 0, idx );
+        String directoryPrefix = extForm.substring(0, idx);
 
         return directoryPrefix;
     }
