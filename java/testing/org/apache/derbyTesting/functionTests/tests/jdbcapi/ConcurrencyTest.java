@@ -421,11 +421,12 @@ public class ConcurrencyTest extends SURBaseTest {
             ps2.executeUpdate();
             con2.commit();
             
-            ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?)");
+            ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?,?)");
             ps2.setInt(1, firstKey);
             ps2.setInt(2, -1);
             ps2.setInt(3, -1);
             ps2.setString(4, "UPDATED TUPLE");
+            ps2.setString(5, "UPDATED CLOB");
             assertEquals("Expected one record to be inserted", 1, 
                          ps2.executeUpdate());
             println("T4: Inserted record (" + firstKey + ",-1,-1)" );
@@ -505,11 +506,12 @@ public class ConcurrencyTest extends SURBaseTest {
             con2.commit();
             println("T3: commit");
             
-            ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?)");
+            ps2 = con2.prepareStatement("insert into t1 values(?,?,?,?,?)");
             ps2.setInt(1, firstKey);
             ps2.setInt(2, valA);
             ps2.setInt(3, valB);
             ps2.setString(4, "UPDATE TUPLE " + firstKey);
+            ps2.setString(5, "UPDATED CLOB " + firstKey);
             assertEquals("Expected one record to be inserted", 1, 
                          ps2.executeUpdate());
             println("T4: Inserted record (" + firstKey + "," + valA + "," + 

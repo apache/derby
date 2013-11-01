@@ -473,7 +473,7 @@ public class HoldabilityTest extends SURBaseTest {
         
         // Now reinsert the tuples:
         PreparedStatement ps = 
-            prepareStatement("insert into t1 values (?,?,?,?)");
+            prepareStatement("insert into t1 values (?,?,?,?,?)");
         
         for (int i=0; i<recordCount*2; i++) {
             int recordId = i + recordCount + 1000;
@@ -481,6 +481,7 @@ public class HoldabilityTest extends SURBaseTest {
             ps.setInt(2, recordId);
             ps.setInt(3, recordId *2 + 17);
             ps.setString(4, "m" + recordId);
+            ps.setString(5, "c"+recordId);
             ps.addBatch();
         }
         ps.executeBatch();
@@ -544,7 +545,7 @@ public class HoldabilityTest extends SURBaseTest {
         
         // Now reinsert the tuples:
         PreparedStatement ps = 
-            prepareStatement("insert into t1 values (?,?,?,?)");
+            prepareStatement("insert into t1 values (?,?,?,?,?)");
         
         for (int i=0; i<recordCount*2; i++) {
             int recordId = i + recordCount + 1000;
@@ -552,6 +553,7 @@ public class HoldabilityTest extends SURBaseTest {
             ps.setInt(2, recordId);
             ps.setInt(3, recordId *2 + 17);
             ps.setString(4, "m" + recordId);
+            ps.setString(5, "c" + recordId);
             ps.addBatch();
         }
         ps.executeBatch();

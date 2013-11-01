@@ -270,7 +270,10 @@ public abstract class Sqlca {
         synchronized (connection_) {
             try {
                 cs = connection_.prepareMessageProc("call SYSIBM.SQLCAMESSAGE(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-
+                // Cannot let this statement commit the transaction. Otherwise, 
+                // calling getWarnings while navigating a ResultSet will 
+                // release and invalidate locators used by the cursor.
+                cs.isAutoCommittableStatement_ = false;
                 String errmc = null;
                 String sqlState = null;
 
