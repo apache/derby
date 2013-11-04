@@ -281,11 +281,21 @@ class DirFile extends File implements StorageFile
      */
     public boolean deleteAll()
     {
-        if( !exists())
+        // Nothing to do if the file doesn't exist.
+        if (!exists()) {
             return false;
-        if( isDirectory())
+        }
+
+        // If the file is a directory, delete its contents recursively.
+        // File.list() will return null if it is not a directory, or if the
+        // contents of the directory cannot be read. Skip the recursive step
+        // in both of those cases. If it turns out that the file in fact is a
+        // directory, and we couldn't delete its contents, the delete() call
+        // at the end of this method will return false to notify the caller
+        // that the directory could not be deleted.
+        String[] childList = super.list();
+        if (childList != null)
         {
-            String[] childList = super.list();
             String parentName = getPath();
             for( int i = 0; i < childList.length; i++)
             {
@@ -296,6 +306,9 @@ class DirFile extends File implements StorageFile
                     return false;
             }
         }
+
+        // Finally, attempt to delete the file (or directory) and return
+        // whether or not we succeeded.
         return delete();
     } // end of deleteAll
 
