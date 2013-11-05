@@ -292,6 +292,13 @@ public class RunTest
                 spacedJvmFlags = spaceJvmFlags(jvmflags);   
             }
             
+            if (!(timeoutStr.isEmpty()) && !(timeoutStr==null) && (timeout >= 0)) {
+                if  (spacedJvmFlags != null)
+                    spacedJvmFlags = "-Dtimeout=" + timeoutStr + " " + spacedJvmFlags;
+                else
+                    spacedJvmFlags = "-Dtimeout=" + timeoutStr + " ";
+            }
+            
             System.out.println("Initialize for framework: "+ framework );
             if (jvmnet && framework.startsWith("DerbyNet"))
             {

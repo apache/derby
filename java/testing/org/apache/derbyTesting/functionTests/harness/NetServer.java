@@ -44,6 +44,7 @@ public class NetServer
     String jvmflags;
     String framework;
 	String appsRequiredPassword;
+	int timeout=60;
     static String hostName;
     
     Object[] frameworkInfo;
@@ -132,6 +133,18 @@ public class NetServer
         this.javaCmd = javaCmd;
         this.jvmflags = jvmflags;
 	this.framework = framework;
+	
+    if (jvmflags != null && jvmflags.length() > 0)
+    {
+        int start=jvmflags.indexOf("-Dtimeout");
+        if (start >= 0) {
+            String timeoutStr = jvmflags.substring(start);
+            String[] tokens = timeoutStr.split(" ");
+            timeoutStr = tokens[0];
+            timeoutStr = timeoutStr.substring(10);
+            timeout = Integer.parseInt(timeoutStr.trim());
+        }
+    }
 
 	    // if authentication is required to shutdown server we need password
 	    // for user APP (the dbo).
@@ -322,7 +335,7 @@ public class NetServer
 		Process prconn = Runtime.getRuntime().exec(connCmd);
 		// Give the server sixty seconds to shutdown.
 		TimedProcess tp = new TimedProcess(prconn);
-		tp.waitFor(60);
+		tp.waitFor(timeout);
 		
 		String[] stopcmd2 = (String[]) frameworkInfo[STOP_CMD2_POS];
 		if (stopcmd2 != null)
@@ -343,7 +356,7 @@ public class NetServer
 		// Try a TimedProcess as Phil did for the WLServer
 		tp = new TimedProcess(pr);
 		// In case the Server didn't shut down, force it to ...
-		tp.waitFor(60);
+		tp.waitFor(timeout);
 		
 		// Finish and close the redirected out and err files
 		outSaver.finish();
