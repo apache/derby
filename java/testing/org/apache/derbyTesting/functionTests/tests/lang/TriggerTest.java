@@ -119,6 +119,71 @@ public class TriggerTest extends BaseJDBCTestCase {
     }
 
     /**
+     * DERBY-6383(Update trigger defined on one column fires on update 
+     * of other columns). This regression is caused by DERBY-4874(Trigger 
+     * does not recognize new size of VARCHAR column expanded with 
+     * ALTER TABLE. It fails with ERROR 22001: A truncation error was 
+     * encountered trying to shrink VARCHAR)
+     *  The regression is for Statement level triggers. The trigger
+     *  gets fired for any column update rather than just the column
+     *  specified in the UPDATE of column clause. Following test
+     *  confirms that fix for DERBY-6383 fixes the issue.
+     * 
+     * @throws SQLException 
+     * 
+     */
+    public void testDerby6383StatementTriggerBug() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB1 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB2 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("INSERT INTO  DERBY_6368_TAB1 VALUES(1, 2)");
+        //Create statement trigger on a specific column "X" on DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t1 AFTER UPDATE OF x "+
+            "ON DERBY_6368_TAB1 REFERENCING old table AS old " +
+            "INSERT INTO DERBY_6368_TAB2 SELECT * FROM old");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+        
+        //Following should not fire the trigger since following UPDATE is on
+        // column "Y" whereas trigger is defined on column "X"
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+
+        //Create row trigger on a specific column "X" on DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t2 AFTER UPDATE OF x "+
+            "ON DERBY_6368_TAB1 REFERENCING old AS old_row " +
+            "for each row " +
+            "INSERT INTO DERBY_6368_TAB2 values(old_row.x, old_row.y)");
+
+        //Following should not fire any trigger since following UPDATE is on
+        // column "Y" whereas triggers are defined on column "X"
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+
+        //Following should fire both triggers since following UPDATE is on
+        // column "X" which has two triggers defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 2);
+
+        //drop statement trigger
+        s.executeUpdate("drop TRIGGER T1");
+
+        //Following should not fire any trigger since following UPDATE is on
+        // column "Y" whereas trigger is defined on column "X"
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 2);
+
+        //Following should fire trigger since following UPDATE is on
+        // column "X" which has row trigger defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 3);
+
+        //clean up after the test
+        s.executeUpdate("drop table DERBY_6368_TAB1");
+        s.executeUpdate("drop table DERBY_6368_TAB2");
+    }
+
+    /**
      * Test that invalidating stored statements marks the statement invalid
      *  in SYS.SYSSTATEMENTS. And when one of those invalid statements is
      *  executed next, it is recompiled and as part of that process, it gets

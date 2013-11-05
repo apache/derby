@@ -528,10 +528,9 @@ public class CreateTriggerNode extends DDLStatementNode
 			ResultColumn rc;
 			ColumnDescriptor cd;
 			//This is the most interesting case for us. If we are here, 
-			//then it means that the trigger is defined at the row level
-			//and a set of trigger columns are specified in the CREATE
-			//TRIGGER statement. This can only happen for an UPDATE
-			//trigger.
+			//then it means that a set of trigger columns are specified
+			//in the CREATE TRIGGER statement. This can only happen for
+			//an UPDATE trigger.
 			//eg
 			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
 			//    REFERENCING OLD AS oldt NEW AS newt
@@ -591,8 +590,7 @@ public class CreateTriggerNode extends DDLStatementNode
 		else
 		{
 			//This is a table level trigger	        
-			//Total Number of columns in the trigger table
-			int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
+
 			StringBuffer newText = new StringBuffer();
 			/*
 			** For a statement trigger, we find all FromBaseTable nodes.  If
@@ -636,12 +634,6 @@ public class CreateTriggerNode extends DDLStatementNode
 					newText.append(baseTableName).append(" ");
 				}
 				start=tokEndOffset-actionOffset+1;
-				//If we are dealing with statement trigger, then we will read 
-				//all the columns from the trigger table since trigger will be
-				//fired for any of the columns in the trigger table.
-				referencedColInts= new int[numberOfColsInTriggerTable];
-				for (int j=0; j < numberOfColsInTriggerTable; j++)
-					referencedColInts[j]=j+1;
 			}
 			if (start < originalActionText.length())
 			{
