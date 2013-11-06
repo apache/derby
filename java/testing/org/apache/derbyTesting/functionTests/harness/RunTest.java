@@ -292,7 +292,7 @@ public class RunTest
                 spacedJvmFlags = spaceJvmFlags(jvmflags);   
             }
             
-            if (!(timeoutStr.isEmpty()) && !(timeoutStr==null) && (timeout >= 0)) {
+            if (!(timeoutStr==null) && (timeout >= 0)) {
                 if  (spacedJvmFlags != null)
                     spacedJvmFlags = "-Dtimeout=" + timeoutStr + " " + spacedJvmFlags;
                 else
