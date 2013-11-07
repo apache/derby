@@ -172,7 +172,7 @@ class NetResultSet extends ClientResultSet {
         try {
             agent_.beginWriteChain(statement_);
 
-            writeScrollableFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+            writeScrollableFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     fetchSize_ - rowsReceivedInCurrentRowset_,
                     scrollOrientation_relative__,
                     1,
@@ -267,7 +267,7 @@ class NetResultSet extends ClientResultSet {
     void flowFetch() throws DisconnectException, SqlException {
         agent_.beginWriteChain(statement_);
         writeFetch_((generatedSection_ == null) ?
-                statement_.section_ :
+                statement_.getSection() :
                 generatedSection_);
         agent_.flow(statement_);
         readFetch_();

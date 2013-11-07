@@ -1187,8 +1187,7 @@ public abstract class ClientConnection
             // cached isolation level to TRANSACTION_UNKNOWN which will trigger
             // a refresh from the server.
             if (getTransactionIsolationPrepStmt == null  || 
-                    !(getTransactionIsolationPrepStmt.openOnClient_ &&
-                            getTransactionIsolationPrepStmt.openOnServer_)) {
+                    !getTransactionIsolationPrepStmt.openOnClient_) {
             	getTransactionIsolationPrepStmt =
                         prepareStatementX(
                                 "VALUES CURRENT ISOLATION",

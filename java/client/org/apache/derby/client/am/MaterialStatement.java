@@ -61,8 +61,6 @@ public interface MaterialStatement {
 
     public abstract void readPrepare_() throws SqlException;
 
-    public abstract void markClosedOnServer_();
-
     public abstract void writeSetSpecialRegister_(
         Section section, ArrayList sqlsttList) throws SqlException;
 

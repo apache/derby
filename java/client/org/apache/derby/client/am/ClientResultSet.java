@@ -501,7 +501,7 @@ public abstract class ClientResultSet implements ResultSet,
         // close cursor if autoCommit is true.
         autoCommitted_ = false;
         if (generatedSection_ == null) { // none call statement result set case
-            writeCursorClose_(statement_.section_);
+            writeCursorClose_(statement_.getSection());
         } else { // call statement result set(s) case
             writeCursorClose_(generatedSection_);
         }
@@ -519,7 +519,7 @@ public abstract class ClientResultSet implements ResultSet,
         // close cursor if autoCommit is true.
         autoCommitted_ = false;
         if (generatedSection_ == null) { // none call statement result set case
-            writeCursorClose_(statement_.section_);
+            writeCursorClose_(statement_.getSection());
         } else { // call statement result set(s) case
             writeCursorClose_(generatedSection_);
         }
@@ -1948,7 +1948,7 @@ public abstract class ClientResultSet implements ResultSet,
                     return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
                 }
                 if (statement_.cursorName_ == null) {// cursor name is not assigned yet
-                    statement_.cursorName_ = statement_.section_.getServerCursorName();
+                    statement_.cursorName_ = statement_.getSection().getServerCursorName();
                 }
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getCursorName", statement_.cursorName_);
@@ -4054,7 +4054,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         // if rowToFetch is zero, already positioned on the current row
         if (rowToFetch != 0) {
-            writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+            writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     rowToFetch);
             // adjust the absolute position on the client
@@ -4072,7 +4072,7 @@ public abstract class ClientResultSet implements ResultSet,
         try {
             agent_.beginWriteChain(statement_);
 
-            writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+            writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation,
                     rowToFetch);
 
@@ -4096,15 +4096,9 @@ public abstract class ClientResultSet implements ResultSet,
         if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
-            writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+            writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     currentRowPosRelativeToAbsoluteRowPos);
-        }
-
-        // re-prepare the update statement if repreparing is needed after a commit.
-        if (!preparedStatementForUpdate_.openOnServer_) {
-            preparedStatementForUpdate_.materialPreparedStatement_.writePrepare_(preparedStatementForUpdate_.sql_,
-                    preparedStatementForUpdate_.section_);
         }
         
         try {
@@ -4127,10 +4121,6 @@ public abstract class ClientResultSet implements ResultSet,
             listenToUnitOfWork();
         }
 
-        // read prepare replies if the update statement is re-prepared after a commit.
-        if (!preparedStatementForUpdate_.openOnServer_) {
-            preparedStatementForUpdate_.materialPreparedStatement_.readPrepare_();
-        }
         readUpdateRow();
 
         agent_.endReadChain();
@@ -4138,13 +4128,6 @@ public abstract class ClientResultSet implements ResultSet,
 
     private void insert() throws SqlException {
         agent_.beginWriteChain(statement_);
-
-        // re-prepare the insert statement if repreparing is needed after a commit.
-        if (!preparedStatementForInsert_.openOnServer_) {
-            preparedStatementForInsert_.materialPreparedStatement_.writePrepare_(
-                    preparedStatementForInsert_.sql_,
-                    preparedStatementForInsert_.section_);
-        }
 
         try {
             writeInsertRow(false);
@@ -4154,11 +4137,6 @@ public abstract class ClientResultSet implements ResultSet,
 
         agent_.flow(statement_);
 
-        // read prepare replies if the update statement is re-prepared after a commit.
-        if (!preparedStatementForInsert_.openOnServer_) {
-            preparedStatementForInsert_.materialPreparedStatement_.readPrepare_();
-        }
-
         readInsertRow();
 
         agent_.endReadChain();
@@ -4167,12 +4145,6 @@ public abstract class ClientResultSet implements ResultSet,
     
     private void update() throws SqlException {
         agent_.beginWriteChain(statement_);
-
-        // re-prepare the update statement if repreparing is needed after a commit.
-        if (!preparedStatementForUpdate_.openOnServer_) {
-            preparedStatementForUpdate_.materialPreparedStatement_.writePrepare_(preparedStatementForUpdate_.sql_,
-                    preparedStatementForUpdate_.section_);
-        }
 
         if (isRowsetCursor_) {
             try {
@@ -4194,11 +4166,6 @@ public abstract class ClientResultSet implements ResultSet,
 
         agent_.flow(statement_);
 
-        // read prepare replies if the update statement is re-prepared after a commit.
-        if (!preparedStatementForUpdate_.openOnServer_) {
-            preparedStatementForUpdate_.materialPreparedStatement_.readPrepare_();
-        }
-
         readUpdateRow();
 
         if (chainAutoCommit) {
@@ -4218,15 +4185,9 @@ public abstract class ClientResultSet implements ResultSet,
         if (resultSetType_ != ResultSet.TYPE_FORWARD_ONLY &&
                 (currentRowPosRelativeToAbsoluteRowPos != 0 ||
                 (currentRowPosRelativeToAbsoluteRowPos == 0 && cursorUnpositionedOnServer_))) {
-            writePositioningFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+            writePositioningFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                     scrollOrientation_relative__,
                     currentRowPosRelativeToAbsoluteRowPos);
-        }
-
-        // re-prepare the update statement if repreparing is needed after a commit.
-        if (!preparedStatementForDelete_.openOnServer_) {
-            preparedStatementForDelete_.materialPreparedStatement_.writePrepare_(preparedStatementForDelete_.sql_,
-                    preparedStatementForDelete_.section_);
         }
 
         try {
@@ -4248,10 +4209,6 @@ public abstract class ClientResultSet implements ResultSet,
             listenToUnitOfWork();
         }
 
-        // read prepare replies if the update statement is re-prepared after a commit.
-        if (!preparedStatementForDelete_.openOnServer_) {
-            preparedStatementForDelete_.materialPreparedStatement_.readPrepare_();
-        }
         readDeleteRow();
 
         agent_.endReadChain();
@@ -4261,12 +4218,6 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             agent_.beginWriteChain(statement_);
-
-            // re-prepare the update statement if repreparing is needed after a commit.
-            if (!preparedStatementForDelete_.openOnServer_) {
-                preparedStatementForDelete_.materialPreparedStatement_.writePrepare_(preparedStatementForDelete_.sql_,
-                        preparedStatementForDelete_.section_);
-            }
 
             if (isRowsetCursor_) {
                 preparedStatementForDelete_.setInt(1, (int) (currentRowInRowset_ + 1));
@@ -4280,10 +4231,6 @@ public abstract class ClientResultSet implements ResultSet,
 
             agent_.flow(statement_);
 
-            // read prepare replies if the update statement is re-prepared after a commit.
-            if (!preparedStatementForDelete_.openOnServer_) {
-                preparedStatementForDelete_.materialPreparedStatement_.readPrepare_();
-            }
             readDeleteRow();
             if (connection_.autoCommit_) {
                 connection_.readAutoCommit();
@@ -4349,7 +4296,7 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             preparedStatementForInsert_.materialPreparedStatement_.writeExecute_(
-                    preparedStatementForInsert_.section_,
+                    preparedStatementForInsert_.getSection(),
                     preparedStatementForInsert_.parameterMetaData_,
                     preparedStatementForInsert_.parameters_,
                     (preparedStatementForInsert_.parameterMetaData_ == null ? 0 : 
@@ -4367,7 +4314,7 @@ public abstract class ClientResultSet implements ResultSet,
             throws SQLException {
         try
         {
-            preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.section_,
+            preparedStatementForUpdate_.materialPreparedStatement_.writeExecute_(preparedStatementForUpdate_.getSection(),
                     preparedStatementForUpdate_.parameterMetaData_,
                     preparedStatementForUpdate_.parameters_,
                     preparedStatementForUpdate_.parameterMetaData_.getColumnCount(),
@@ -4384,14 +4331,14 @@ public abstract class ClientResultSet implements ResultSet,
         try
         {
             if (isRowsetCursor_) {
-                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
+                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.getSection(),
                         preparedStatementForDelete_.parameterMetaData_,
                         preparedStatementForDelete_.parameters_,
                         preparedStatementForDelete_.parameterMetaData_.getColumnCount(),
                         false, // false means we're not expecting output
                         false);  // false means we don't chain anything after the execute
             } else {
-                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.section_,
+                preparedStatementForDelete_.materialPreparedStatement_.writeExecute_(preparedStatementForDelete_.getSection(),
                         null, // do not need parameterMetaData since there is no input
                         null, // no inputs
                         0, // number of input columns is 0 for positioned delete
@@ -4709,7 +4656,7 @@ public abstract class ClientResultSet implements ResultSet,
     }
 
     private String getServerCursorName() throws SqlException {
-        return statement_.section_.getServerCursorName();
+        return statement_.getSection().getServerCursorName();
     }
 
     private void getPreparedStatementForInsert() throws SqlException {
@@ -4734,7 +4681,7 @@ public abstract class ClientResultSet implements ResultSet,
         }
         preparedStatementForUpdate_ =
                 statement_.connection_.preparePositionedUpdateStatement(updateString,
-                        statement_.section_.getPositionedUpdateSection());
+                        statement_.getSection().getPositionedUpdateSection());
 
     }
 
@@ -4744,7 +4691,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         preparedStatementForDelete_ =
                 statement_.connection_.preparePositionedUpdateStatement(deleteString,
-                        statement_.section_.getPositionedUpdateSection()); // update section
+                        statement_.getSection().getPositionedUpdateSection()); // update section
     }
 
     private final void resetUpdatedColumnsForInsert() {
@@ -5002,7 +4949,7 @@ public abstract class ClientResultSet implements ResultSet,
 
         agent_.beginWriteChain(statement_);
 
-        Section section = (generatedSection_ == null) ? statement_.section_ : generatedSection_;
+        Section section = (generatedSection_ == null) ? statement_.getSection() : generatedSection_;
 
         // send the first CNTQRY to place cursor after last to retrieve the rowCount_.
         writePositioningFetch_(section, scrollOrientation_after__, 0);
@@ -5039,7 +4986,7 @@ public abstract class ClientResultSet implements ResultSet,
         cursor_.resetDataBuffer();
         agent_.beginWriteChain(statement_);
         
-        writeScrollableFetch_((generatedSection_ == null) ? statement_.section_ : generatedSection_,
+        writeScrollableFetch_((generatedSection_ == null) ? statement_.getSection() : generatedSection_,
                 fetchSize_,
                 orientation,
                 rowNumber,
