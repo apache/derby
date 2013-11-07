@@ -119,6 +119,13 @@ public final class TestConfiguration {
     private final static String KEY_VERBOSE = "derby.tests.debug";    
     private final static String KEY_LOGIN_TIMEOUT = "derby.tests.login.timeout";    
     private final static String KEY_TRACE = "derby.tests.trace";
+
+    /**
+     * derby.tests.stopAfterFirstFail - debugging property to exit after 
+     * first failure. Can be useful for debugging cascading failures or errors
+     * that lead to hang scenario.
+     */
+    private final static String KEY_STOP_AFTER_FIRST_FAIL = "derby.tests.stopAfterFirstFail";
     private final static String KEY_SSL = "ssl";
     private final static String KEY_JMX_PORT = "jmxPort";
     
@@ -1128,7 +1135,9 @@ public final class TestConfiguration {
         this.doTrace = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_TRACE)).
             booleanValue();
-        
+        this.stopAfterFirstFail = Boolean.valueOf(
+                getSystemProperties().getProperty(KEY_STOP_AFTER_FIRST_FAIL)).
+                booleanValue();
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
         this.jmxPort = getNextAvailablePort();
@@ -1945,6 +1954,9 @@ public final class TestConfiguration {
         return doTrace;
     }
 
+    public boolean stopAfterFirstFail() {
+        return stopAfterFirstFail;
+    }
 	/**
 	 * <p>
 	 * Return true if we classes are being loaded from jar files. For the time
@@ -2053,6 +2065,7 @@ public final class TestConfiguration {
     private final int jmxPort;
     private boolean isVerbose;
     private boolean doTrace;
+    private boolean stopAfterFirstFail;
     private String ssl;
 
     /**
