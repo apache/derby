@@ -22,7 +22,9 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -61,6 +63,7 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     private static final String NOT_SINGLE_COLUMN = "42X39";
     private static final String NON_SCALAR_QUERY = "21000";
     private static final String TRIGGER_RECURSION = "54038";
+    private static final String PROC_USED_AS_FUNC = "42Y03";
 
     public TriggerWhenClauseTest(String name) {
         super(name);
@@ -876,5 +879,169 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         // above statement failed and was rolled back.
         JDBC.assertFullResultSet(s.executeQuery("select * from t order by x"),
                                  expectedRows);
+    }
+
+    /**
+     * The WHEN clause text is stored in a LONG VARCHAR column in the
+     * SYS.SYSTRIGGERS table. This test case verifies that the WHEN clause
+     * is not limited to the usual LONG VARCHAR maximum length (32700
+     * characters).
+     */
+    public void testVeryLongWhenClause() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(x int)");
+
+        // Construct a WHEN clause that is more than 32700 characters.
+        StringBuilder sb = new StringBuilder("(values /* a very");
+        for (int i = 0; i < 10000; i++) {
+            sb.append(", very");
+        }
+        sb.append(" long comment */ true)");
+
+        String when = sb.toString();
+        assertTrue(when.length() > 32700);
+
+        s.execute("create trigger very_long_trigger after insert on t1 "
+                + "when (" + when + ") insert into t2 values 1");
+
+        // Verify that the WHEN clause was stored in SYS.SYSTRIGGERS.
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select whenclausetext from sys.systriggers "
+                         + "where triggername = 'VERY_LONG_TRIGGER'"),
+            when);
+
+        // Verify that the trigger fires.
+        s.execute("insert into t1 values 1");
+        assertTableRowCount("T1", 1);
+        assertTableRowCount("T2", 1);
+    }
+
+    /**
+     * Test a WHEN clause that invokes a function declared with READ SQL DATA.
+     */
+    public void testFunctionReadsSQLData() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create function f(x varchar(10)) returns boolean "
+                + "language java parameter style java external name '"
+                + getClass().getName() + ".tableIsEmpty' reads sql data");
+
+        s.execute("create table t1(x varchar(10))");
+        s.execute("create table t2(x varchar(10))");
+        s.execute("create table t3(x int)");
+        s.execute("create table t4(x int)");
+        s.execute("insert into t3 values 1");
+
+        s.execute("create trigger tr after insert on t1 "
+                + "referencing new as new for each row "
+                + "when (f(new.x)) insert into t2 values new.x");
+
+        s.execute("insert into t1 values 'T3', 'T4', 'T3', 'T4', 'T3', 'T4'");
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select x, count(x) from t2 group by x"),
+                new String[][] {{"T4", "3"}});
+    }
+
+    /**
+     * Stored function used by {@link #testFunctionReadsSQLData()}. It
+     * checks whether the given table is empty.
+     *
+     * @param table the table to check
+     * @return {@code true} if the table is empty, {@code false} otherwise
+     */
+    public static boolean tableIsEmpty(String table) throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+        ResultSet rs = s.executeQuery("select * from " + JDBC.escape(table));
+        boolean empty = !rs.next();
+
+        rs.close();
+        s.close();
+        c.close();
+
+        return empty;
+    }
+
+    /**
+     * <p>
+     * SQL:2011, part 2, 11.49 &lt;trigger definition&gt;, syntax rule 11
+     * says that the WHEN clause shall not contain routines that possibly
+     * modifies SQL data. Derby does not currently allow functions to be
+     * declared as MODIFIES SQL DATA. It does allow procedures to be declared
+     * as MODIFIES SQL DATA, but the current grammar does not allow procedures
+     * to be invoked from a WHEN clause. So there's currently no way to
+     * invoke routines that possibly modifies SQL data from a WHEN clause.
+     * </p>
+     *
+     * <p>
+     * This test case verifies that it is not possible to declare a function
+     * as MODIFIES SQL DATA, and that it is not possible to call a procedure
+     * from a WHEN clause. If support for any of those features is added,
+     * this test case will start failing as a reminder that code must be
+     * added to prevent routines that possibly modifies SQL data from being
+     * invoked from a WHEN clause.
+     * </p>
+     */
+    public void testRoutineModifiesSQLData() throws SQLException {
+        // Functions cannot be declared as MODIFIES SQL DATA currently.
+        // Expect a syntax error.
+        assertCompileError(SYNTAX_ERROR,
+            "create function f(x int) returns int language java "
+            + "parameter style java external name 'java.lang.Math.abs' "
+            + "modifies sql data");
+
+        // Declare a procedure as MODIFIES SQL DATA.
+        Statement s = createStatement();
+        s.execute("create procedure p(i int) language java "
+                + "parameter style java external name '"
+                + getClass().getName() + ".intProcedure' no sql");
+
+        // Try to call that procedure from a WHEN clause. Expect it to fail
+        // because procedure invocations aren't allowed in a WHEN clause.
+        s.execute("create table t(x int)");
+        assertCompileError(SYNTAX_ERROR,
+            "create trigger tr after insert on t when (call p(1)) values 1");
+        assertCompileError(PROC_USED_AS_FUNC,
+            "create trigger tr after insert on t when (p(1)) values 1");
+    }
+
+    /**
+     * Verify that aggregates (both built-in and user-defined) can be used
+     * in a WHEN clause.
+     */
+    public void testAggregates() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int)");
+        s.execute("create table t2(y varchar(10))");
+        s.execute("create derby aggregate mode_int for int "
+                + "external name '" + ModeAggregate.class.getName() + "'");
+
+        s.execute("create trigger tr1 after insert on t1 "
+                + "referencing new table as new "
+                + "when ((select max(x) from new) between 0 and 3) "
+                + "insert into t2 values 'tr1'");
+
+        s.execute("create trigger tr2 after insert on t1 "
+                + "referencing new table as new "
+                + "when ((select count(x) from new) between 0 and 3) "
+                + "insert into t2 values 'tr2'");
+
+        s.execute("create trigger tr3 after insert on t1 "
+                + "referencing new table as new "
+                + "when ((select mode_int(x) from new) between 0 and 3) "
+                + "insert into t2 values 'tr3'");
+
+        s.execute("insert into t1 values 2, 4, 4");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2 order by y"),
+                "tr2");
+
+        s.execute("delete from t2");
+
+        s.execute("insert into t1 values 2, 2, 3, 1, 0");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t2 order by y"),
+                new String[][] {{"tr1"}, {"tr3"}});
     }
 }
