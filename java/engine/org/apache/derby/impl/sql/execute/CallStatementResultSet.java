@@ -106,7 +106,7 @@ class CallStatementResultSet extends NoRowsResultSetImpl
      */
     public void close() throws StandardException
     {
-        super.close();
+        close( false );
         
         
         

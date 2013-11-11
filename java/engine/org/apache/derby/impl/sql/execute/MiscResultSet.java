@@ -62,7 +62,8 @@ class MiscResultSet extends NoRowsResultSetImpl
 		close();
 	}
 
-	// Does not override close() (no action required)
+	public  void    close() throws StandardException    { close( false ); }
+    
 	// Does not override finish() (no action required)
 
 	/**

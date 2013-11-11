@@ -464,6 +464,7 @@ public class GenericConstantActionFactory
 	 *	@param baseRowReadMap		BaseRowReadMap[heapColId]->ReadRowColumnId.
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 *
 	 *  @exception StandardException		Thrown on failure
 	 */
@@ -494,7 +495,8 @@ public class GenericConstantActionFactory
 								int					numColumns,
 								UUID				dependencyId,
 								boolean				singleRowSource,
-								ConstantAction[]	dependentConstantActions
+								ConstantAction[]	dependentConstantActions,
+								boolean				underMerge
 	)
 			throws StandardException
 	{
@@ -516,7 +518,8 @@ public class GenericConstantActionFactory
 										numColumns,
 										singleRowSource,
 										resultDescription,
-										dependentConstantActions
+										dependentConstantActions,
+										underMerge
 										);
 	}
 
@@ -759,6 +762,7 @@ public class GenericConstantActionFactory
 	 *  @param singleRowSource	Whether or not source is a single row source
 	 *  @param autoincRowLocation array of row locations into syscolumns for
 	                              autoincrement columns
+	 *  @param underMerge   True if this is an INSERT action of a MERGE statement.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -785,7 +789,8 @@ public class GenericConstantActionFactory
 								Object[]			stageControl,
 								Object[]			ddlList,
 								boolean				singleRowSource,
-								RowLocation[]		autoincRowLocation
+								RowLocation[]		autoincRowLocation,
+								boolean		underMerge
 							)
 			throws StandardException
 	{
@@ -805,7 +810,8 @@ public class GenericConstantActionFactory
 										streamStorableHeapColIds,
 										indexedCols,
 										singleRowSource,
-										autoincRowLocation
+										autoincRowLocation,
+										underMerge
 										);
 	}
 
@@ -906,6 +912,7 @@ public class GenericConstantActionFactory
 	 *  @param numColumns			The number of columns being read.
 	 *	@param positionedUpdate		is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 *
 	 *  @exception StandardException Thrown on failure
 	 */
@@ -931,7 +938,8 @@ public class GenericConstantActionFactory
 								int[]				streamStorableHeapColIds,
 								int					numColumns,
 								boolean				positionedUpdate,
-								boolean				singleRowSource
+								boolean				singleRowSource,
+								boolean				underMerge
 							)
 			throws StandardException
 	{
@@ -953,7 +961,8 @@ public class GenericConstantActionFactory
 										streamStorableHeapColIds,
 										numColumns,
 										positionedUpdate,
-										singleRowSource
+										singleRowSource,
+										underMerge
 										);
 	}
 
@@ -1121,6 +1130,8 @@ public class GenericConstantActionFactory
 	(
          int    clauseType,
          String matchRefinementName,
+         ResultDescription  thenColumnSignature,
+         String rowMakingMethodName,
          int[]  thenColumns,
          String resultSetFieldName,
          String actionMethodName,
@@ -1128,7 +1139,16 @@ public class GenericConstantActionFactory
      )
 	{
 		return new MatchingClauseConstantAction
-            ( clauseType, matchRefinementName, thenColumns, resultSetFieldName, actionMethodName, thenAction );
+            (
+             clauseType,
+             matchRefinementName,
+             thenColumnSignature,
+             rowMakingMethodName,
+             thenColumns,
+             resultSetFieldName,
+             actionMethodName,
+             thenAction
+             );
 	}
 
 	/**

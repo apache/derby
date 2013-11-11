@@ -260,6 +260,12 @@ class InsertVTIResultSet extends DMLVTIResultSet
 		super.cleanUp();
 	} // end of cleanUp
 
+    @Override
+    public void close() throws StandardException
+    {
+        close( false );
+    }
+                               
 	// Class implementation
 
 	public void finish() throws StandardException {

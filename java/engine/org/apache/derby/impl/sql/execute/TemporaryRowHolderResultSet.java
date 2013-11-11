@@ -675,7 +675,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 */
 	public int resultSetNumber()
 	{
-		return 0;
+		return TEMPORARY_RESULT_SET_NUMBER;
 	}
 
 	/**

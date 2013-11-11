@@ -344,9 +344,11 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	/**
      * Dump the stat if not already done so. Close all of the open subqueries.
 	 *
+	 * @param underMerge    True if this is part of an action of a MERGE statement.
+	 *
 	 * @exception StandardException thrown on error
 	 */
-	public void	close() throws StandardException
+	public void	close( boolean underMerge ) throws StandardException
 	{ 
 		if (!isOpen)
 			return;
@@ -412,7 +414,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 
 		isOpen = false;
 
-		if (activation.isSingleExecution())
+		if (activation.isSingleExecution() && !underMerge)
 			activation.close();
 	}
 
@@ -635,6 +637,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
             //
             try {
                 source.setCurrentRow( newRow );
+                activation.setCurrentRow( newRow, source.resultSetNumber() );
                 generationClauses.invoke(activation);
 
                 //

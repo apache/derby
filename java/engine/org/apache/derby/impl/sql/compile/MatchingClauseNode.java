@@ -24,18 +24,26 @@ package	org.apache.derby.impl.sql.compile;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 /**
  * Node representing a WHEN MATCHED or WHEN NOT MATCHED clause
@@ -74,12 +82,13 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /** the columns in the temporary conglomerate which drives the INSERT/UPDATE/DELETE */
     private ResultColumnList        _thenColumns;
-    private int[]                           _thenColumnOffsets;
+    private int[]                           _deleteColumnOffsets;
 
     // Filled in at generate() time
     private int                             _clauseNumber;
     private String                          _actionMethodName;
     private String                          _resultSetFieldName;
+    private String                          _rowMakingMethodName;
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -98,6 +107,7 @@ public class MatchingClauseNode extends QueryTreeNode
          ResultColumnList   insertValues,
          ContextManager     cm
          )
+        throws StandardException
     {
         super( cm );
         
@@ -114,6 +124,7 @@ public class MatchingClauseNode extends QueryTreeNode
          ResultColumnList   updateColumns,
          ContextManager     cm
          )
+        throws StandardException
     {
         return new MatchingClauseNode( matchingRefinement, updateColumns, null, null, cm );
     }
@@ -124,6 +135,7 @@ public class MatchingClauseNode extends QueryTreeNode
          ValueNode  matchingRefinement,
          ContextManager     cm
          )
+        throws StandardException
     {
         return new MatchingClauseNode( matchingRefinement, null, null, null, cm );
     }
@@ -136,6 +148,7 @@ public class MatchingClauseNode extends QueryTreeNode
          ResultColumnList   insertValues,
          ContextManager     cm
          )
+        throws StandardException
     {
         return new MatchingClauseNode( matchingRefinement, null, insertColumns, insertValues, cm );
     }
@@ -180,13 +193,11 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
-        bindExpressions( mergeNode, fullFromList, targetTable );
-        
+        _thenColumns = new ResultColumnList( getContextManager() );
+
         if ( isDeleteClause() ) { bindDelete( dd, fullFromList, targetTable ); }
         if ( isUpdateClause() ) { bindUpdate( dd, fullFromList, targetTable ); }
         if ( isInsertClause() ) { bindInsert( dd, mergeNode, fullFromList, targetTable ); }
-
-        bindExpressions( _thenColumns, fullFromList );
     }
 
     /** Bind the optional refinement condition in the MATCHED clause */
@@ -198,32 +209,12 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
 
-    /** Bind the expressions in this MATCHED clause */
-    private void    bindExpressions
-        (
-         MergeNode mergeNode,
-         FromList fullFromList,
-         FromTable targetTable
-         )
-        throws StandardException
+    /** Re-bind various clauses and lists once we have ResultSet numbers for the driving left join */
+    void    bindResultSetNumbers( MergeNode mergeNode, FromList fullFromList ) throws StandardException
     {
-        _thenColumns = new ResultColumnList( getContextManager() );
-
-        if ( isUpdateClause() )
-        {
-            // needed to make the UpdateNode bind
-            _updateColumns.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _updateColumns, true );
-
-            bindExpressions( _updateColumns, fullFromList );
-        }
-        else if ( isInsertClause() )
-        {
-            // needed to make the SelectNode bind
-            _insertValues.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
-            bindExpressions( _insertValues, fullFromList );
-        }
+        bindRefinement( mergeNode, fullFromList );
     }
-    
+
     /** Collect the columns mentioned by expressions in this MATCHED clause */
     void    getColumnsInExpressions
         (
@@ -255,6 +246,8 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
     
+    ////////////////////// UPDATE ///////////////////////////////
+
     /** Bind a WHEN MATCHED ... THEN UPDATE clause */
     private void    bindUpdate
         (
@@ -264,6 +257,8 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        bindSetClauses( fullFromList, targetTable );
+        
         SelectNode  selectNode = new SelectNode
             (
              _updateColumns,
@@ -280,6 +275,22 @@ public class MatchingClauseNode extends QueryTreeNode
         _dml.bindStatement();
     }
     
+    /** Bind the SET clauses of an UPDATE action */
+    private void    bindSetClauses
+        (
+         FromList fullFromList,
+         FromTable targetTable
+         )
+        throws StandardException
+    {
+        // needed to make the UpdateNode bind
+        _updateColumns.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _updateColumns, true );
+
+        bindExpressions( _updateColumns, fullFromList );
+    }
+
+    ////////////////////// DELETE ///////////////////////////////
+
     /** Bind a WHEN MATCHED ... THEN DELETE clause */
     private void    bindDelete
         (
@@ -308,10 +319,22 @@ public class MatchingClauseNode extends QueryTreeNode
 
         _dml.bindStatement();
 
-        ResultColumnList    deleteSignature = _dml.resultSet.resultColumns;
-        for ( int i = 0; i < deleteSignature.size(); i++ )
+        buildThenColumnsForDelete();
+    }
+
+    /**
+     * <p>
+     * Construct the signature of the temporary table which drives the
+     * INSERT/UPDATE/DELETE action.
+     * </p>
+     */
+    private void    buildThenColumnsForDelete()
+        throws StandardException
+    {
+        ResultColumnList    dmlSignature = _dml.resultSet.resultColumns;
+        for ( int i = 0; i < dmlSignature.size(); i++ )
         {
-            ResultColumn    origRC = deleteSignature.elementAt( i );
+            ResultColumn    origRC = dmlSignature.elementAt( i );
             ResultColumn    newRC;
             ValueNode       expression = origRC.getExpression();
 
@@ -328,6 +351,35 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
 
+    /**
+     * <p>
+     * Calculate the 1-based offsets which define the rows which will be buffered up
+     * for a DELETE action at run-time. The rows are constructed
+     * from the columns in the SELECT list of the driving left joins. This method
+     * calculates an array of offsets into the SELECT list. The columns at those
+     * offsets will form the row which is buffered up for the DELETE
+     * action.
+     * </p>
+     */
+    void    bindDeleteThenColumns( ResultColumnList selectList )
+        throws StandardException
+    {
+        int     bufferedCount = _thenColumns.size();
+        int     selectCount = selectList.size();
+        
+        _deleteColumnOffsets = new int[ bufferedCount ];
+
+        for ( int bidx = 0; bidx < bufferedCount; bidx++ )
+        {
+            ResultColumn    bufferedRC = _thenColumns.elementAt( bidx );
+            ValueNode       bufferedExpression = bufferedRC.getExpression();
+
+            _deleteColumnOffsets[ bidx ] = getSelectListOffset( selectList, bufferedExpression );
+        }
+    }
+
+    ////////////////////// INSERT ///////////////////////////////
+
     /** Bind a WHEN NOT MATCHED ... THEN INSERT clause */
     private void    bindInsert
         (
@@ -338,6 +390,8 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        bindInsertValues( fullFromList, targetTable );
+        
         // the VALUES clause may not mention columns in the target table
         FromList    targetTableFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
         targetTableFromList.addElement( fullFromList.elementAt( 0 ) );
@@ -373,7 +427,161 @@ public class MatchingClauseNode extends QueryTreeNode
              );
 
         _dml.bindStatement();
+
+        buildInsertThenColumns( targetTable );
     }
+
+    /**  Bind the values in the INSERT list */
+    private void    bindInsertValues
+        (
+         FromList fullFromList,
+         FromTable targetTable
+         )
+        throws StandardException
+    {
+        if ( _insertColumns.size() != _insertValues.size() )
+        {
+            throw StandardException.newException( SQLState.LANG_DB2_INVALID_COLS_SPECIFIED ); 
+        }
+        
+        TableDescriptor td = targetTable.getTableDescriptor();
+
+        // forbid illegal values for identity columns
+        for ( int i = 0; i <_insertValues.size(); i++ )
+        {
+            ResultColumn    rc = _insertValues.elementAt( i );
+            String          columnName = _insertColumns.elementAt( i ).exposedName;
+            ValueNode       expr = rc.getExpression();
+            ColumnDescriptor    cd = td.getColumnDescriptor( columnName );
+
+            // if the column isn't in the table, this will be sorted out when we bind
+            // the InsertNode
+            if ( cd == null ) { continue; }
+
+            // DEFAULT is the only value allowed for a GENERATED ALWAYS AS IDENTITY column
+            if ( cd.isAutoincAlways() && !(expr instanceof DefaultNode) )
+            {
+                throw StandardException.newException( SQLState.LANG_AI_CANNOT_MODIFY_AI, columnName );
+            }
+
+            // NULL is illegal as the value for any identity column
+            if ( cd.isAutoincrement() && (expr instanceof UntypedNullConstantNode) )
+            {
+                throw StandardException.newException( SQLState.LANG_NULL_INTO_NON_NULL, columnName );
+            }
+        }
+        
+        // needed to make the SelectNode bind
+        _insertValues.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
+        bindExpressions( _insertValues, fullFromList );
+    }
+    
+    /** Construct the row in the temporary table which drives an INSERT action */
+    private void    buildInsertThenColumns( FromTable targetTable )
+        throws StandardException
+    {
+        TableDescriptor td = targetTable.getTableDescriptor();
+
+        _thenColumns = _dml.resultSet.resultColumns.copyListAndObjects();
+
+        //
+        // Here we set up for the evaluation of expressions in the temporary table
+        // which drives the INSERT action. If we were actually generating the dummy SELECT
+        // for the DML action, the work would normally be done there. But we don't generate
+        // that SELECT. So we do the following here:
+        //
+        // 1) If a column has a value specified in the WHEN [ NOT ] MATCHED clause, then we use it.
+        //     There is some special handling to make the DEFAULT value work for identity columns.
+        //
+        // 2) Otherwise, if the column has a default, then we plug it in.
+        //
+        for ( int i = 0; i < _thenColumns.size(); i++ )
+        {
+            ColumnDescriptor    cd = td.getColumnDescriptor( i + 1 );
+            ResultColumn    origRC = _thenColumns.elementAt( i );
+            String              columnName = origRC.getName();
+            
+            boolean         changed = false;
+
+            //
+            // VirtualColumnNodes are skipped at code-generation time. This can result in
+            // NPEs when evaluating generation expressions. Replace VirtualColumnNodes with
+            // UntypedNullConstantNodes, except for identity columns, which require special
+            // handling below.
+            //
+            if ( !origRC.isAutoincrement() && (origRC.getExpression() instanceof VirtualColumnNode) )
+            {
+                origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+            }
+
+            for ( int ic = 0; ic < _insertColumns.size(); ic++ )
+            {
+                ResultColumn    icRC = _insertColumns.elementAt( ic );
+
+                if ( columnName.equals( icRC.getName() ) )
+                {
+                    ResultColumn    newRC = null;
+                    
+                    // replace DEFAULT for a generated or identity column
+                    ResultColumn    insertRC =_insertValues.elementAt( ic );
+
+                    if ( insertRC.wasDefaultColumn() || (insertRC.getExpression() instanceof UntypedNullConstantNode ) )
+                    {
+                       if ( !cd.isAutoincrement() )
+                        {
+                            //
+                            // Eliminate column references under identity columns. They
+                            // will mess up the code generation.
+                            //
+                            ValueNode   expr = origRC.getExpression();
+                            if ( expr instanceof ColumnReference )
+                            {
+                                origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+                            }
+                            continue;
+                        }
+
+                        ColumnReference autoGenCR = new ColumnReference( columnName, targetTable.getTableName(), getContextManager() );
+                        ResultColumn    autoGenRC = new ResultColumn( autoGenCR, null, getContextManager() );
+                        VirtualColumnNode autoGenVCN = new VirtualColumnNode( targetTable, autoGenRC, i + 1, getContextManager() );
+
+                        newRC = new ResultColumn( autoGenCR, autoGenVCN, getContextManager() );
+
+                        // set the type so that buildThenColumnSignature() will function correctly
+                        newRC.setType( origRC.getTypeServices() );
+                    }
+                    else
+                    {
+                        newRC = insertRC.cloneMe();
+                        newRC.setType( origRC.getTypeServices() );
+                    }
+
+                    newRC.setVirtualColumnId( origRC.getVirtualColumnId() );
+                    _thenColumns.setElementAt( newRC, i  );
+                    changed = true;
+                    break;
+                }
+            }
+
+            // plug in defaults if we haven't done so already
+            if ( !changed )
+            {
+                DefaultInfoImpl     defaultInfo = (DefaultInfoImpl) cd.getDefaultInfo();
+
+				if ( (defaultInfo != null) && !defaultInfo.isGeneratedColumn() && !cd.isAutoincrement() )
+				{
+                    _thenColumns.setDefault( origRC, cd, defaultInfo );
+                    changed = true;
+				}
+            }
+
+            // set the result column name correctly for buildThenColumnSignature()
+            ResultColumn    finalRC = _thenColumns.elementAt( i );
+            finalRC.setName( cd.getColumnName() );
+        }   // end loop through _thenColumns
+    }
+
+    ////////////////////// bind() MINIONS ///////////////////////////////
 
     /** Boilerplate for binding a list of ResultColumns against a FromList */
     private void bindExpressions( ResultColumnList rcl, FromList fromList )
@@ -401,67 +609,68 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
-     * Calculate the 1-based offsets which define the rows which will be buffered up
-     * for this INSERT/UPDATE/DELETE action at run-time. The rows are constructed
-     * from the columns in the SELECT list of the driving left joins. This method
-     * calculates an array of offsets into the SELECT list. The columns at those
-     * offsets will form the row which is buffered up for the INSERT/UPDATE/DELETE
-     * action.
+     * Bind the row which will go into the temporary table at run-time.
      * </p>
      */
     void    bindThenColumns( ResultColumnList selectList )
         throws StandardException
     {
-        int     bufferedCount = _thenColumns.size();
-        int     selectCount = selectList.size();
-        
-        _thenColumnOffsets = new int[ bufferedCount ];
-
-        for ( int bidx = 0; bidx < bufferedCount; bidx++ )
+        if ( isDeleteClause() ) { bindDeleteThenColumns( selectList ); }
+        else if ( isUpdateClause() )
         {
-            ResultColumn    bufferedRC = _thenColumns.elementAt( bidx );
-            ValueNode       bufferedExpression = bufferedRC.getExpression();
-            int                     offset = -1;    // start out undefined
+            throw StandardException.newException( SQLState.NOT_IMPLEMENTED, "MERGE" );
+        }
+    }
 
-            if ( bufferedExpression instanceof ColumnReference )
+    /**
+     * <p>
+     * Find a column reference in the SELECT list of the driving left join
+     * and return its 1-based offset into that list.  Returns -1 if the column
+     * can't be found.
+     * </p>
+     */
+    private int getSelectListOffset( ResultColumnList selectList, ValueNode bufferedExpression )
+        throws StandardException
+    {
+        int                 selectCount = selectList.size();
+
+        if ( bufferedExpression instanceof ColumnReference )
+        {
+            ColumnReference bufferedCR = (ColumnReference) bufferedExpression;
+            String              tableName = bufferedCR.getTableName();
+            String              columnName = bufferedCR.getColumnName();
+
+            // loop through the SELECT list to find this column reference
+            for ( int sidx = 0; sidx < selectCount; sidx++ )
             {
-                ColumnReference bufferedCR = (ColumnReference) bufferedExpression;
-                String              tableName = bufferedCR.getTableName();
-                String              columnName = bufferedCR.getColumnName();
+                ResultColumn    selectRC = selectList.elementAt( sidx );
+                ValueNode       selectExpression = selectRC.getExpression();
+                ColumnReference selectCR = selectExpression instanceof ColumnReference ?
+                    (ColumnReference) selectExpression : null;
 
-                // loop through the SELECT list to find this column reference
-                for ( int sidx = 0; sidx < selectCount; sidx++ )
+                if ( selectCR != null )
                 {
-                    ResultColumn    selectRC = selectList.elementAt( sidx );
-                    ValueNode       selectExpression = selectRC.getExpression();
-                    ColumnReference selectCR = selectExpression instanceof ColumnReference ?
-                        (ColumnReference) selectExpression : null;
-
-                    if ( selectCR != null )
+                    if (
+                        tableName.equals( selectCR.getTableName() ) &&
+                        columnName.equals( selectCR.getColumnName() )
+                        )
                     {
-                        if (
-                            tableName.equals( selectCR.getTableName() ) &&
-                            columnName.equals( selectCR.getColumnName() )
-                            )
-                        {
-                            offset = sidx + 1;
-                            break;
-                        }
+                        return sidx + 1;
                     }
                 }
             }
-            else if ( bufferedExpression instanceof CurrentRowLocationNode )
-            {
-                //
-                // There is only one RowLocation in the SELECT list, the row location for the
-                // tuple from the target table. The RowLocation is always the last column in
-                // the SELECT list.
-                //
-                offset = selectCount;
-            }
-
-            _thenColumnOffsets[ bidx ] = offset;
         }
+        else if ( bufferedExpression instanceof CurrentRowLocationNode )
+        {
+            //
+            // There is only one RowLocation in the SELECT list, the row location for the
+            // tuple from the target table. The RowLocation is always the last column in
+            // the SELECT list.
+            //
+            return selectCount;
+        }
+
+        return -1;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -508,7 +717,9 @@ public class MatchingClauseNode extends QueryTreeNode
             (
              getClauseType(),
              refinementName,
-             _thenColumnOffsets,
+             buildThenColumnSignature(),
+             _rowMakingMethodName,
+             _deleteColumnOffsets,
              _resultSetFieldName,
              _actionMethodName,
              _dml.makeConstantAction()
@@ -523,14 +734,36 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
+     * Build the signature of the row which will go into the temporary table.
+     * </p>
+     */
+    private ResultDescription    buildThenColumnSignature()
+        throws StandardException
+    {
+        ResultColumnDescriptor[]  cells = _thenColumns.makeResultDescriptors();
+
+        return getLanguageConnectionContext().getLanguageFactory().getResultDescription( cells, "MERGE" );
+    }
+
+    /**
+     * <p>
      * Generate a method to invoke the INSERT/UPDATE/DELETE action. This method
      * will be called at runtime by MatchingClauseConstantAction.executeConstantAction().
      * </p>
      */
-    void    generate( ActivationClassBuilder acb, int clauseNumber )
+    void    generate
+        (
+         ActivationClassBuilder acb,
+         ResultColumnList selectList,
+         HalfOuterJoinNode  hojn,
+         int    clauseNumber
+         )
         throws StandardException
     {
         _clauseNumber = clauseNumber;
+
+        if ( isInsertClause() ) { generateInsertRow( acb, selectList, hojn ); }
+        
         _actionMethodName = "mergeActionMethod_" + _clauseNumber;
         
         MethodBuilder mb = acb.getClassBuilder().newMethodBuilder
@@ -541,11 +774,43 @@ public class MatchingClauseNode extends QueryTreeNode
              );
         mb.addThrownException(ClassName.StandardException);
 
+        remapConstraints();
+
         // now generate the action into this method
         _dml.generate( acb, mb );
         
         mb.methodReturn();
         mb.complete();
+    }
+
+    /**
+     * <p>
+     * Re-map ColumnReferences in constraints to point into the row from the
+     * temporary table. This is where the row will be stored when constraints
+     * are being evaluated.
+     * </p>
+     */
+    private void    remapConstraints()
+        throws StandardException
+    {
+        if( !isInsertClause() ) { return; }
+        else
+        {
+            CollectNodesVisitor<ColumnReference> getCRs =
+                new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+
+            ValueNode   checkConstraints = ((InsertNode) _dml).checkConstraints;
+
+            if ( checkConstraints != null )
+            {
+                checkConstraints.accept(getCRs);
+                List<ColumnReference> colRefs = getCRs.getList();
+                for ( ColumnReference cr : colRefs )
+                {
+                    cr.getSource().setResultSetNumber( NoPutResultSet.TEMPORARY_RESULT_SET_NUMBER );
+                }
+            }            
+        }
     }
 
     /**
@@ -571,6 +836,64 @@ public class MatchingClauseNode extends QueryTreeNode
         // of the actual INSERT/UPDATE/DELETE action.
         //
         mb.getField( resultSetField );
+    }
+    
+    /**
+     * <p>
+     * Generate a method to build a row for the temporary table for INSERT actions.
+     * The method stuffs each column in the row with the result of the corresponding
+     * expression built out of columns in the current row of the driving left join.
+     * The method returns the stuffed row.
+     * </p>
+     */
+    void    generateInsertRow
+        (
+         ActivationClassBuilder acb,
+         ResultColumnList selectList,
+         HalfOuterJoinNode  hojn
+         )
+        throws StandardException
+    {
+        // point expressions in the temporary row at the columns in the
+        // result column list of the driving left join.
+        adjustThenColumns( selectList, hojn );
+        
+        _rowMakingMethodName = "mergeRowMakingMethod_" + _clauseNumber;
+        
+        MethodBuilder mb = acb.getClassBuilder().newMethodBuilder
+            (
+             Modifier.PUBLIC,
+             ClassName.ExecRow,
+             _rowMakingMethodName
+             );
+        mb.addThrownException(ClassName.StandardException);
+
+        _thenColumns.generateEvaluatedRow( acb, mb, false, true );
+    }
+
+    /**
+     * <p>
+     * Point the column references in the temporary row at corresponding
+     * columns returned by the driving left join.
+     * </p>
+     */
+    void    adjustThenColumns
+        (
+         ResultColumnList selectList,
+         HalfOuterJoinNode  hojn
+         )
+        throws StandardException
+    {
+        ResultColumnList    leftJoinResult = hojn.resultColumns;
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
+        _thenColumns.accept( getCRs );
+
+        for ( ColumnReference cr : getCRs.getList() )
+        {
+            ResultColumn    leftJoinRC = leftJoinResult.elementAt( getSelectListOffset( selectList, cr ) - 1 );
+            cr.setSource( leftJoinRC );
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

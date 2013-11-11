@@ -1607,6 +1607,21 @@ abstract class DMLModStatementNode extends DMLStatementNode
             userExprFun.dup();       // instance (current row)
             userExprFun.push(i + 1); // arg1
 
+            // poke our result set number into all column references in this generation expression
+            // if we're an action of a MERGE statement. that is because the dummy SELECT was not
+            // actually optimized so column references still need result set numbers
+            if ( inMatchingClause() )
+            {
+                CollectNodesVisitor<ColumnReference> getCRs =
+                    new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
+                rc.accept( getCRs );
+
+                for ( ColumnReference cr : getCRs.getList() )
+                {
+                    cr.getSource().setResultSetNumber( rsNumber );
+                }
+            }
+
             rc.generateExpression(ecb, userExprFun);
             userExprFun.cast(ClassName.DataValueDescriptor);
                 

@@ -97,6 +97,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param numColumns	Number of columns being read.
 	 *  @param positionedUpdate	is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 */
     UpdateConstantAction(
 								long				conglomId,
@@ -116,7 +117,8 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 								int[]               streamStorableHeapColIds,
 								int					numColumns,
 								boolean				positionedUpdate,
-								boolean				singleRowSource)
+								boolean				singleRowSource,
+								boolean				underMerge)
 	{
 		super(
 			conglomId,
@@ -134,7 +136,8 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 			baseRowReadList,
 			baseRowReadMap,
 			streamStorableHeapColIds,
-			singleRowSource
+			singleRowSource,
+			underMerge
 			);
 
 		this.changedColumnIds = changedColumnIds;

@@ -791,7 +791,8 @@ public final class InsertNode extends DMLModStatementNode
 				  null,
 				  null,
 				  resultSet.isOneRowResultSet(), 
-				  autoincRowLocation
+				  autoincRowLocation,
+				  inMatchingClause()
 				  );
 		}
 		else
@@ -928,7 +929,14 @@ public final class InsertNode extends DMLModStatementNode
 			acb.pushGetResultSetFactoryExpression(mb);
 
 			// arg 1
-			resultSet.generate(acb, mb);
+            if ( inMatchingClause() )
+            {
+                matchingClause.generateResultSetField( acb, mb );
+            }
+            else
+            {
+                resultSet.generate( acb, mb );
+            }
 
 			// arg 2 generate code to evaluate generation clauses
 			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), false, acb, mb );

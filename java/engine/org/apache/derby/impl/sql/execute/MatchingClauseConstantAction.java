@@ -72,14 +72,16 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     // constructor args
     private int _clauseType;
     private String  _matchRefinementName;
-    private int[]   _thenColumnOffsets;
+    private ResultDescription   _thenColumnSignature;
+    private String  _rowMakingMethodName;
+    private int[]   _deleteColumnOffsets;
     private String  _resultSetFieldName;
     private String  _actionMethodName;
     private ConstantAction  _thenAction;
 
     // faulted in or built at run-time
     private transient   GeneratedMethod _matchRefinementMethod;
-	private transient   TemporaryRowHolderImpl	_thenRows;
+    private transient   GeneratedMethod _rowMakingMethod;
     private transient   ResultSet           _actionRS;
 
 
@@ -97,6 +99,7 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
      *
      * @param   clauseType  WHEN_NOT_MATCHED_THEN_INSERT, WHEN_MATCHED_THEN_UPDATE, WHEN_MATCHED_THEN_DELETE
      * @param   matchRefinementName Name of the method which evaluates the boolean expression in the WHEN clause.
+     * @param   thenColumnSignature The shape of the row which goes into the temporary table.
      * @param   thenColumns Column positions (1-based) from the driving left join which are needed to execute the THEN clause.
      * @param   resultSetFieldName  Name of the field which will be stuffed at runtime with the temporary table of relevant rows.
      * @param   actionMethodName    Name of the method which invokes the INSERT/UPDATE/DELETE action.
@@ -106,6 +109,8 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
         (
          int    clauseType,
          String matchRefinementName,
+         ResultDescription  thenColumnSignature,
+         String rowMakingMethodName,
          int[]  thenColumns,
          String resultSetFieldName,
          String actionMethodName,
@@ -114,7 +119,9 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     {
         _clauseType = clauseType;
         _matchRefinementName = matchRefinementName;
-        _thenColumnOffsets = ArrayUtil.copy( thenColumns );
+        _thenColumnSignature = thenColumnSignature;
+        _rowMakingMethodName = rowMakingMethodName;
+        _deleteColumnOffsets = ArrayUtil.copy( thenColumns );
         _resultSetFieldName = resultSetFieldName;
         _actionMethodName = actionMethodName;
         _thenAction = thenAction;
@@ -137,11 +144,15 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
 
 	public void	executeConstantAction( Activation activation )
         throws StandardException
+    {}
+    
+	public void	executeConstantAction( Activation activation, TemporaryRowHolderImpl thenRows )
+        throws StandardException
     {
         // nothing to do if no rows qualified
-        if ( _thenRows == null ) { return; }
+        if ( thenRows == null ) { return; }
 
-        CursorResultSet sourceRS = _thenRows.getResultSet();
+        CursorResultSet sourceRS = thenRows.getResultSet();
         GeneratedMethod actionGM = ((BaseActivation) activation).getMethod( _actionMethodName );
 
         //
@@ -159,6 +170,8 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
                 //
                 Field   resultSetField = activation.getClass().getField( _resultSetFieldName );
                 resultSetField.set( activation, sourceRS );
+
+                Activation  cursorActivation = sourceRS.getActivation();
 
                 //
                 // Now execute the generated method which creates an InsertResultSet,
@@ -184,6 +197,17 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Initialize this constant action, nulling out any transient state left over from
+     * a previous use.
+     * </p>
+     */
+    void    init()  throws StandardException
+    {
+        _actionRS = null;
+    }
+    
     /**
      * <p>
      * Run the matching refinement clause associated with this WHEN [ NOT ] MATCHED clause.
@@ -215,24 +239,78 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
      * of the MERGE statement's driving left join.
      * </p>
      */
-    void    bufferThenRow
+    TemporaryRowHolderImpl  bufferThenRow
         (
          Activation activation,
-         ResultDescription selectDescription,
+         TemporaryRowHolderImpl thenRows,
          ExecRow selectRow
          ) throws StandardException
     {
-        int             thenRowLength = _thenColumnOffsets.length;
+        if ( thenRows == null ) { thenRows = createThenRows( activation ); }
+
+        ExecRow thenRow;
+
+        switch( _clauseType )
+        {
+        case WHEN_MATCHED_THEN_DELETE:
+            thenRow = bufferThenRowForDelete( activation, selectRow );
+            break;
+
+        default:
+            thenRow = bufferThenRow( activation );
+            break;
+        }
+
+        thenRows.insert( thenRow );
+
+        return thenRows;
+    }
+    
+    /**
+     * <p>
+     * Construct and buffer a row for the DELETE
+     * action corresponding to this MATCHED clause. The buffered row
+     * is built from columns in the passed-in row. The passed-in row is the SELECT list
+     * of the MERGE statement's driving left join.
+     * </p>
+     */
+    ExecRow    bufferThenRowForDelete
+        (
+         Activation activation,
+         ExecRow selectRow
+         )
+        throws StandardException
+    {
+        int             thenRowLength = _thenColumnSignature.getColumnCount();
         ValueRow    thenRow = new ValueRow( thenRowLength );
         for ( int i = 0; i < thenRowLength; i++ )
         {
-            thenRow.setColumn( i + 1, selectRow.getColumn( _thenColumnOffsets[ i ] ) );
+            thenRow.setColumn( i + 1, selectRow.getColumn( _deleteColumnOffsets[ i ] ) );
         }
 
-        if ( _thenRows == null ) { createThenRows( activation, selectDescription ); }
-        _thenRows.insert( thenRow );
+        return thenRow;
     }
 
+    /**
+     * <p>
+     * Construct and buffer a row for the INSERT/UPDATE/DELETE
+     * action corresponding to this [ NOT ] MATCHED clause.
+     * </p>
+     */
+    ExecRow    bufferThenRow
+        (
+         Activation activation
+         )
+        throws StandardException
+    {
+        if ( _rowMakingMethod == null )
+        {
+            _rowMakingMethod = ((BaseActivation) activation).getMethod( _rowMakingMethodName );
+        }
+
+        return (ExecRow) _rowMakingMethod.invoke( activation );
+    }
+    
     /**
      * <p>
      * Release resources at the end.
@@ -240,8 +318,14 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
      */
     void    cleanUp()   throws StandardException
     {
-        if ( _actionRS != null ) { _actionRS.close(); }
-        if ( _thenRows != null ) { _thenRows.close(); }
+        if ( _actionRS != null )
+        {
+            _actionRS.close();
+            _actionRS = null;
+        }
+
+        _matchRefinementMethod = null;
+        _rowMakingMethod = null;
     }
 
     /**
@@ -250,13 +334,10 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
      * for bulk-processing after the driving left join completes.
      * </p>
      */
-    private void    createThenRows( Activation activation, ResultDescription selectDescription )
+    private TemporaryRowHolderImpl  createThenRows( Activation activation )
         throws StandardException
     {
-        ResultDescription   thenDescription = activation.getLanguageConnectionContext().getLanguageFactory().getResultDescription
-            ( selectDescription, _thenColumnOffsets );
-
-        _thenRows = new TemporaryRowHolderImpl( activation, new Properties(), thenDescription );
+        return new TemporaryRowHolderImpl( activation, new Properties(), _thenColumnSignature );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -281,10 +362,12 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
 
         _clauseType = in.readInt();
         _matchRefinementName = (String) in.readObject();
-        _thenColumnOffsets = ArrayUtil.readIntArray( in );
-        _resultSetFieldName = (String) in.readObject();
+        _thenColumnSignature = (ResultDescription) in.readObject();
+        _rowMakingMethodName = (String) in.readObject();
+        _deleteColumnOffsets = ArrayUtil.readIntArray( in );
+        _resultSetFieldName = (String) in.readObject(); 
         _actionMethodName = (String) in.readObject();
-        _thenAction = (ConstantAction) in.readObject();
+       _thenAction = (ConstantAction) in.readObject();
 	}
 
 	/**
@@ -301,7 +384,9 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
 
         out.writeInt( _clauseType );
         out.writeObject( _matchRefinementName );
-        ArrayUtil.writeIntArray( out, _thenColumnOffsets );
+        out.writeObject( _thenColumnSignature );
+        out.writeObject( _rowMakingMethodName );
+        ArrayUtil.writeIntArray( out, _deleteColumnOffsets );
         out.writeObject( _resultSetFieldName );
         out.writeObject( _actionMethodName );
         out.writeObject( _thenAction );

@@ -171,4 +171,10 @@ class DeleteVTIResultSet extends DMLVTIResultSet
 			// rowHolder kept across opens
 		}
     } // end of openCore
+    
+    @Override
+    public void close() throws StandardException
+    {
+        close( false );
+    }
 }

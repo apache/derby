@@ -470,7 +470,8 @@ class DeleteNode extends DMLModStatementNode
 					  readColsBitSet.getNumBitsSet(),			
 				  (UUID) null,
 				  resultSet.isOneRowResultSet(),
-				  dependentConstantActions);
+				  dependentConstantActions,
+                  inMatchingClause());
 		}
 		else
 		{

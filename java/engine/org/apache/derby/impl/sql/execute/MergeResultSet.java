@@ -58,6 +58,7 @@ class MergeResultSet extends NoRowsResultSetImpl
 
     private ExecRow                 _row;
     private long                        _rowCount;
+    private TemporaryRowHolderImpl[]    _thenRows;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -78,6 +79,7 @@ class MergeResultSet extends NoRowsResultSetImpl
         super( activation );
         _drivingLeftJoin = drivingLeftJoin;
         _constants = (MergeConstantAction) activation.getConstantAction();
+        _thenRows = new TemporaryRowHolderImpl[ _constants.matchingClauseCount() ];
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +105,7 @@ class MergeResultSet extends NoRowsResultSetImpl
         int         clauseCount = _constants.matchingClauseCount();
         for ( int i = 0; i < clauseCount; i++ )
         {
-            _constants.getMatchingClause( i ).executeConstantAction( activation );
+            _constants.getMatchingClause( i ).executeConstantAction( activation, _thenRows[ i ] );
         }
 
         cleanUp();
@@ -115,6 +117,12 @@ class MergeResultSet extends NoRowsResultSetImpl
     {
         super.setup();
 
+        int         clauseCount = _constants.matchingClauseCount();
+        for ( int i = 0; i < clauseCount; i++ )
+        {
+            _constants.getMatchingClause( i ).init();
+        }
+
         _rowCount = 0L;
         _drivingLeftJoin.openCore();
     }
@@ -124,7 +132,7 @@ class MergeResultSet extends NoRowsResultSetImpl
      */
     public void close() throws StandardException
     {
-        super.close();
+        close( false );
     }
 
     public void cleanUp() throws StandardException
@@ -132,6 +140,13 @@ class MergeResultSet extends NoRowsResultSetImpl
         int         clauseCount = _constants.matchingClauseCount();
         for ( int i = 0; i < clauseCount; i++ )
         {
+            TemporaryRowHolderImpl  thenRows = _thenRows[ i ];
+            if ( thenRows != null )
+            {
+                thenRows.close();
+                _thenRows[ i ] = null;
+            }
+            
             _constants.getMatchingClause( i ).cleanUp();
         }
     }
@@ -182,9 +197,10 @@ class MergeResultSet extends NoRowsResultSetImpl
             // find the first clause which applies to this row
             MatchingClauseConstantAction    matchingClause = null;
             int         clauseCount = _constants.matchingClauseCount();
-            for ( int i = 0; i < clauseCount; i++ )
+            int         clauseIdx = 0;
+            for ( ; clauseIdx < clauseCount; clauseIdx++ )
             {
-                MatchingClauseConstantAction    candidate = _constants.getMatchingClause( i );
+                MatchingClauseConstantAction    candidate = _constants.getMatchingClause( clauseIdx );
                 boolean isWhenMatchedClause = false;
                 
                 switch ( candidate.clauseType() )
@@ -209,7 +225,7 @@ class MergeResultSet extends NoRowsResultSetImpl
 
             if ( matchingClause != null )
             {
-                matchingClause.bufferThenRow( activation, _drivingLeftJoin.getResultDescription(), _row );
+                _thenRows[ clauseIdx ] = matchingClause.bufferThenRow( activation, _thenRows[ clauseIdx ], _row );
                 _rowCount++;
             }
         }

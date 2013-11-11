@@ -128,7 +128,7 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
         if( null != sourceResultSet)
             sourceResultSet.close();
 		numOpens = 0;
-		super.close();
+		close( false );
 	} // end of cleanUp
 
 	public void finish() throws StandardException

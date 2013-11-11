@@ -179,6 +179,12 @@ class UpdateVTIResultSet extends DMLVTIResultSet
 		}
 	} // end of openCore
 
+    @Override
+    public void close() throws StandardException
+    {
+        close( false );
+    }
+
 	private void updateVTI(ResultSet target, ExecRow row)
 		throws StandardException
 	{

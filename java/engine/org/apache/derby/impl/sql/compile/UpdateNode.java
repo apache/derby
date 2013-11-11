@@ -710,7 +710,8 @@ public final class UpdateNode extends DMLModStatementNode
 				  targetTableDescriptor.getNumberOfColumns() :
 				  readColsBitSet.getNumBitsSet(),			
 			  positionedUpdate,
-			  resultSet.isOneRowResultSet()
+			  resultSet.isOneRowResultSet(),
+			  inMatchingClause()
 			  );
 	}
 

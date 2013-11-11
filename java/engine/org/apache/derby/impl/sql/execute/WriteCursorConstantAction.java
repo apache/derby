@@ -83,6 +83,9 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	private int[] streamStorableHeapColIds;
 	boolean singleRowSource;
 
+    /** True if this is an action of a MERGE statement */
+    private boolean underMerge;
+
 
 	// CONSTRUCTORS
 
@@ -110,6 +113,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *  @param baseRowReadMap	BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param underMerge   True if this action is under a MERGE statement
 	 */
 	public	WriteCursorConstantAction(
 								long				conglomId,
@@ -127,7 +131,8 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 								FormatableBitSet				baseRowReadList,
 								int[]               baseRowReadMap,
 								int[]               streamStorableHeapColIds,
-								boolean				singleRowSource
+								boolean				singleRowSource,
+								boolean				underMerge
 								)
 	{
 		this.conglomId = conglomId;
@@ -147,6 +152,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 		this.streamStorableHeapColIds = streamStorableHeapColIds;
 		this.singleRowSource = singleRowSource;
 		this.indexNames = indexNames;
+        this.underMerge = underMerge;
 		if (SanityManager.DEBUG)
 		{
 			if (fkInfo != null)
@@ -240,6 +246,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 		streamStorableHeapColIds = ArrayUtil.readIntArray(in); 
 		singleRowSource = in.readBoolean();
 		indexNames = ArrayUtil.readStringArray(in);
+        underMerge = in.readBoolean();
 	}
 
 	/**
@@ -282,9 +289,13 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 		// Added for Mulan (Track Bug# 3322)
 		ArrayUtil.writeArray(out, indexNames);
 		
+        out.writeBoolean( underMerge );
 	}
 
 	// ACCESSORS
+
+    /** Return true if this is an action of a MERGE statement */
+    public  boolean underMerge() { return underMerge; }
 
 	/**
 	 * Get the conglomerate id for the changed heap.

@@ -83,7 +83,8 @@ public class UpdatableVTIConstantAction extends WriteCursorConstantAction
 			  null,
 			  null,
 			  // singleRowSource, irrelevant
-			  false
+			  false,
+			  false // not under a MERGE statement
 			  );
         this.statementType = statementType;
         this.changedColumnIds = changedColumnIds;

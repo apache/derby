@@ -1022,11 +1022,17 @@ class UpdateResultSet extends DMLWriteResultSet
 			// cache riChecker across open()s
 		}
 
-		super.close();
+		close();
 
 		endTime = getCurrentTimeMillis();
 	}
 
+    @Override
+    public void close() throws StandardException
+    {
+        close( constants.underMerge() );
+    }
+                               
 	void rowChangerFinish() throws StandardException
 	{
 		rowChanger.finish();

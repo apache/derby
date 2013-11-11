@@ -1186,6 +1186,43 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
    		// this sets up the method and the static field.
    		MethodBuilder userExprFun = acb.newUserExprFun();
 
+        generateEvaluatedRow( acb, userExprFun, genNulls, false );
+
+        // what we return is the access of the field, i.e. the pointer to the method.
+   	    acb.pushMethodReference(mb, userExprFun);
+	}
+
+	/**
+     * <p>
+	 * Generate the code for a method (userExprFun) which creates a row
+     * and, column by column, stuffs it with the evaluated
+     * expressions of our ResultColumns. The method returns the
+     * stuffed row.
+     * </p>
+	 *
+	 * This is the method that does the work.
+	 */
+	void generateEvaluatedRow
+        (
+         ExpressionClassBuilder acb,
+         MethodBuilder userExprFun,
+         boolean genNulls,
+         boolean forMatchingClause
+         ) 
+			throws StandardException
+	{
+   		// generate the function and initializer:
+		// private ExecRow fieldX;
+		// In the constructor:
+		//	 fieldX = getExecutionFactory().getValueRow(# cols);
+   		// private ExecRow exprN()
+   		// { 
+   		//   fieldX.setColumn(1, col(1).generateColumn(ps)));
+   		//   ... and so on for each column ...
+   		//   return fieldX;
+   		// }
+   		// static Method exprN = method pointer to exprN;
+
 		/* Declare the field */
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecRow);
 
@@ -1211,7 +1248,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			{
 				ValueNode sourceExpr = rc.getExpression();
 
-				if (sourceExpr instanceof VirtualColumnNode && ! ( ((VirtualColumnNode) sourceExpr).getCorrelated()))
+				if ( sourceExpr instanceof VirtualColumnNode && ! ( ((VirtualColumnNode) sourceExpr).getCorrelated()) )
 				{
 					continue;
 				}
@@ -1300,10 +1337,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 					continue;
 				}
 
-				if (sourceExpr instanceof ColumnReference && ! ( ((ColumnReference) sourceExpr).getCorrelated()))
-				{
-					continue;
-				}
+                if ( !forMatchingClause )
+                {
+                    if (sourceExpr instanceof ColumnReference && ! ( ((ColumnReference) sourceExpr).getCorrelated()))
+                    {
+                        continue;
+                    }
+                }
 			}
 
 
@@ -1422,9 +1462,6 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 
 		// we are now done modifying userExprFun
 		userExprFun.complete();
-
-        // what we return is the access of the field, i.e. the pointer to the method.
-   	    acb.pushMethodReference(mb, userExprFun);
 	}
 
 	/**
@@ -3919,15 +3956,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                 //
 				if ( (defaultInfo != null) && !defaultInfo.isGeneratedColumn() )
 				{
-					/* Query is dependent on the DefaultDescriptor */
-					DefaultDescriptor defaultDescriptor = cd.getDefaultDescriptor(getDataDictionary());
-					getCompilerContext().createDependency(defaultDescriptor);
-
-					rc.setExpression(
-						DefaultNode.parseDefault(
-							defaultInfo.getDefaultText(),
-							getLanguageConnectionContext(),
-							getCompilerContext()));
+                    setDefault( rc, cd, defaultInfo );
 				}
 				else
 				{
@@ -3939,6 +3968,25 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 			}
 		}
 	}
+
+    /** Set the default in a ResultColumn */
+    void    setDefault( ResultColumn rc, ColumnDescriptor cd, DefaultInfoImpl defaultInfo )
+        throws StandardException
+    {
+        /* Query is dependent on the DefaultDescriptor */
+        DefaultDescriptor defaultDescriptor = cd.getDefaultDescriptor(getDataDictionary());
+        getCompilerContext().createDependency(defaultDescriptor);
+
+        rc.setExpression
+            (
+             DefaultNode.parseDefault
+             (
+              defaultInfo.getDefaultText(),
+              getLanguageConnectionContext(),
+              getCompilerContext()
+              )
+             );
+    }
 
 	/**
 	 * Walk the RCL and check for DEFAULTs.  DEFAULTs

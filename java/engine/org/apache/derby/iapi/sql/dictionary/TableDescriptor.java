@@ -1127,7 +1127,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	}
 
 	/**
-	 * @param columnNumber	The ordinal position of the column in the table
+	 * @param columnNumber	The ordinal (1-based) position of the column in the table
 	 *
 	 * @return	A ColumnDescriptor describing the column
 	 */

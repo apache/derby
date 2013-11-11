@@ -630,9 +630,15 @@ class DeleteResultSet extends DMLWriteResultSet
 		if (rc != null) {
 			rc.close();
 		}
-		super.close();
+		close();
 	}
 
+    @Override
+    public void close() throws StandardException
+    {
+        close( constants.underMerge() );
+    }
+                               
     @Override
 	public void finish() throws StandardException {
 		if (source != null)

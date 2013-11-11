@@ -90,6 +90,7 @@ public class DeleteConstantAction extends WriteCursorConstantAction
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param numColumns	Number of columns to read.
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 */
     DeleteConstantAction(
 								long				conglomId,
@@ -108,7 +109,8 @@ public class DeleteConstantAction extends WriteCursorConstantAction
 								int					numColumns,
 								boolean				singleRowSource,
 								ResultDescription   resultDescription,
-								ConstantAction[] dependentCActions)
+								ConstantAction[] dependentCActions,
+								boolean underMerge)
 	{
 		super( conglomId, 
 			   heapSCOCI,
@@ -123,7 +125,8 @@ public class DeleteConstantAction extends WriteCursorConstantAction
 			   baseRowReadList,
 			   baseRowReadMap,
 			   streamStorableHeapColIds,
-			   singleRowSource
+			   singleRowSource,
+			   underMerge
 			   );
 
 		this.numColumns = numColumns;
