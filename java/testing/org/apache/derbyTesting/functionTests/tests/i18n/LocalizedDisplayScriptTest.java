@@ -20,6 +20,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -123,13 +125,25 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         // the canon contains time columns, which would display localized -
         // and so cause errors. Thus, run this with timezone PST.
         defaultTimeZone = TimeZone.getDefault(); 
-        TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles")); 
+        setDefault(TimeZone.getTimeZone("America/Los_Angeles")); 
         LocalizedResource.resetLocalizedResourceCache();
     }
     
     public void tearDown() throws Exception {
-        TimeZone.setDefault(defaultTimeZone); 
+        setDefault(defaultTimeZone); 
         LocalizedResource.resetLocalizedResourceCache();
         super.tearDown();
     }    
+
+    private void setDefault(final TimeZone tz) throws SecurityException{
+        if (tz== null) {
+            throw new IllegalArgumentException("tz cannot be <null>");
+        }
+        AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() throws SecurityException {
+                        TimeZone.setDefault(tz);
+                        return null;
+                    }});
+    }
 }
