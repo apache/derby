@@ -23,6 +23,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
@@ -89,7 +90,8 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         suite.addTest(
             TestConfiguration.defaultSuite(XMLTypeAndOpsTest.class, false));
 
-        return (new XMLTestSetup(suite));
+        // run without security manager, see DERBY-6413
+        return SecurityManagerSetup.noSecurityManager(new XMLTestSetup(suite));
     }
 
     /**

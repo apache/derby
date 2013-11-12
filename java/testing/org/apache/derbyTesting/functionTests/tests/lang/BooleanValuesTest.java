@@ -32,6 +32,7 @@ import java.sql.Types;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.XML;
@@ -97,7 +98,8 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     {
         Test result = (TestSuite) TestConfiguration.defaultSuite(BooleanValuesTest.class);
 
-        return result;
+        // run without SecurityManager; see DERBY-6413
+        return SecurityManagerSetup.noSecurityManager(result);
     }
 
     protected void    setUp()
