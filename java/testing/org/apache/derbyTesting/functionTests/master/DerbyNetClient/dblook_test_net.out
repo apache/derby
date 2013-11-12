@@ -2093,7 +2093,7 @@ E
 T8
 null
 <systemid>
-(1,2)
+null
 select * from oldtable
 true
 false
