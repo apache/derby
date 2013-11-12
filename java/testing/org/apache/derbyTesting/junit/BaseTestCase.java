@@ -92,6 +92,7 @@ public abstract class BaseTestCase
     public void runBare() throws Throwable {
         TestConfiguration config = getTestConfiguration();
         boolean trace = config.doTrace();
+        boolean stopAfterFirstFail = config.stopAfterFirstFail();
         long startTime = 0;
         if ( trace )
         {
@@ -155,6 +156,14 @@ public abstract class BaseTestCase
                 if (stackOut != null) {
                     stackOut.close();
                 }
+                if (stopAfterFirstFail) {
+                    // if run with -Dderby.tests.stopAfterFirstFail=true
+                    // exit after reporting failure. Useful for debugging
+                    // cascading failures or errors that lead to hang.
+                    running.printStackTrace(out);
+                    System.exit(1);
+                }
+                else
                 throw running;
             }
         }
