@@ -27,10 +27,12 @@ import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -355,6 +357,34 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 				referencesSessionSchema = true;
 			setElementAt(newNode, index);
 		}
+
+        // DERBY-4191: We must have some SELECT privilege on every table
+        // that we read from, even if we don't actually read any column
+        // values from it (for example if we do SELECT COUNT(*) FROM T).
+        // We ask for MIN_SELECT_PRIV requirement of the first column in
+        // the table. The first column is just a place holder. What we
+        // really do at execution time when we see we are looking for
+        // MIN_SELECT_PRIV privilege is as follows:
+        //
+        // 1) We will look for SELECT privilege at table level.
+        // 2) If not found, we will look for SELECT privilege on
+        //    ANY column, not necessarily the first column. But since
+        //    the constructor for column privilege requires us to pass
+        //    a column descriptor, we just choose the first column for
+        //    MIN_SELECT_PRIV requirement.
+        final CompilerContext cc = getCompilerContext();
+        cc.pushCurrentPrivType(Authorizer.MIN_SELECT_PRIV);
+        for (int index = 0; index < size; index++) {
+            fromTable = (FromTable) elementAt(index);
+            if (fromTable.isPrivilegeCollectionRequired() &&
+                    fromTable.isBaseTable() && !fromTable.forUpdate()) {
+                // This is a base table in the FROM list of a SELECT statement.
+                // Make sure we check for minimum SELECT privilege on it.
+                cc.addRequiredColumnPriv(
+                    fromTable.getTableDescriptor().getColumnDescriptor(1));
+            }
+        }
+        cc.popCurrentPrivType();
 	}
 
 	/**

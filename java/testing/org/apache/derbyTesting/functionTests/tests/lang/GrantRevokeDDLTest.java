@@ -10172,12 +10172,36 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         user2St.execute("update user1.t4191_table3 "+
         		"set c31 = ( select 1 from user1.view_t4191_table3 )");
 
-        //none of following selects will work because there is no select
-        //privilege available to user2 yet.
-        assertStatementError("42500", user2St, "select count(*) from user1.t4191");
-        assertStatementError("42500", user2St, "select count(1) from user1.t4191");
+        // None of following selects will work because there is no select
+        // privilege available to user2 yet. Each row in the array contains
+        // a statement and the expected results or update count if the
+        // minimum select privilege had been granted.
+        Object[][] requireMinimumSelectPrivilege = {
+            { "select count(*) from user1.t4191",          new String[][] {{"0"}} },
+            { "select count(1) from user1.t4191",          new String[][] {{"0"}} },
+            { "select 1 from user1.t4191",                 new String[0][] },
+            { "select 1 from user1.t4191 for update",      new String[0][] },
+            { "select 1 from user1.t4191 union values 2",  new String[][] {{"2"}} },
+            { "values 1 union select 1 from user1.t4191",  new String[][] {{"1"}} },
+            { "values (select count(*) from user1.t4191)", new String[][] {{"0"}} },
+            { "values (select count(1) from user1.t4191)", new String[][] {{"0"}} },
+            { "values ((select 1 from user1.t4191))",      new String[][] {{null}} },
+            // DERBY-6408: Next two queries should have returned FALSE.
+            { "values exists(select 1 from user1.t4191)",  new String[][] {{null}} },
+            { "values exists(select * from user1.t4191)",  new String[][] {{null}} },
+            { "select count(*) from (select 1 from user1.t4191) s", new String[][] {{"0"}} },
+            { "insert into user1.t4191_table3 select 1, 2 from user1.t4191", new Integer(0) },
+            { "update user1.t4191_table3 set c31 = 1 where exists (select * from user1.t4191)", new Integer(0) },
+            { "delete from user1.t4191_table3 where exists (select * from user1.t4191)", new Integer(0) },
+        };
+
+        for (int i = 0; i < requireMinimumSelectPrivilege.length; i++) {
+            String sql = (String) requireMinimumSelectPrivilege[i][0];
+            assertStatementError("42500", user2St, sql);
+        }
+
+        // Should fail because there is no select privilege on column Y.
         assertStatementError("42502", user2St, "select count(y) from user1.t4191");
-        assertStatementError("42500", user2St, "select 1 from user1.t4191");
         //update below should fail because user2 does not have update 
         //privileges on user1.t4191
         assertStatementError("42502", user2St, "update user1.t4191 set x=0");
@@ -10187,19 +10211,22 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertStatementError("42502", user2St, "update user1.t4191 set x=" +
 		" ( select z from user1.t4191_table2 )");
 
-        //grant select on user1.t4191(x) to user2 and now the above select 
-        //statements will work
+        // Grant select on user1.t4191(x) to user2 and now the above
+        // statements, which previously failed because they didn't have
+        // the minimum select privilege on the table, will work.
         user1St.execute("grant select(x) on t4191 to user2");
-        String[][] expRS = new String [][]
-                              {
-                                  {"0"}
-                              };
-        rs = user2St.executeQuery("select count(*) from user1.t4191");
-        JDBC.assertFullResultSet(rs, expRS, true);
-        rs = user2St.executeQuery("select count(1) from user1.t4191");
-        JDBC.assertFullResultSet(rs, expRS, true);
-        rs = user2St.executeQuery("select 1 from user1.t4191");
-        JDBC.assertEmpty(rs);
+
+        for (int i = 0; i < requireMinimumSelectPrivilege.length; i++) {
+            String sql = (String) requireMinimumSelectPrivilege[i][0];
+            Object expectedResult = requireMinimumSelectPrivilege[i][1];
+            if (expectedResult instanceof Integer) {
+                assertUpdateCount(
+                    user2St, ((Integer) expectedResult).intValue(), sql);
+            } else {
+                JDBC.assertFullResultSet(user2St.executeQuery(sql),
+                                         (String[][]) expectedResult);
+            }
+        }
 
         //user2 does not have select privilege on 2nd column from user1.t4191
         assertStatementError("42502", user2St, "select count(y) from user1.t4191");
@@ -10272,13 +10299,13 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         //following queries will still work because there is still a 
         //select privilege on user1.t4191 available to user2
         rs = user2St.executeQuery("select count(*) from user1.t4191");
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "0");
         rs = user2St.executeQuery("select count(1) from user1.t4191");
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "0");
         rs = user2St.executeQuery("select 1 from user1.t4191");
         JDBC.assertEmpty(rs);
         rs = user2St.executeQuery("select count(y) from user1.t4191");
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertSingleValueResultSet(rs, "0");
         //grant select privilege on user1.t4191(x) back to user2 so following
         //update can succeed
         user1St.execute("grant select(x) on t4191 to user2");

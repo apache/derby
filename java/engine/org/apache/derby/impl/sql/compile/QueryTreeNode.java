@@ -107,7 +107,7 @@ public abstract class QueryTreeNode implements Visitable
 	 * and then it is turned off while we process the query underlying the view
 	 * v1.             
 	 */
-	boolean isPrivilegeCollectionRequired = true;
+    private boolean isPrivilegeCollectionRequired = true;
 
     QueryTreeNode(ContextManager cm) {
         this.cm = cm;

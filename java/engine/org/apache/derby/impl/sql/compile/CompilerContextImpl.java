@@ -745,18 +745,18 @@ public class CompilerContextImpl extends ContextImpl
 
 		//DERBY-4191
 		if( currPrivType == Authorizer.MIN_SELECT_PRIV){
-			//If we are here for MIN_SELECT_PRIV requirement, then first
-			//check if there is already a SELECT privilege requirement on any 
-			//of the columns in the table. If yes, then we do not need to add 
-			//MIN_SELECT_PRIV requirement for the table because that 
-			//requirement is already getting satisfied with the already
-			//existing SELECT privilege requirement
+            // If we are here for MIN_SELECT_PRIV requirement, then first
+            // check if there is already a SELECT privilege requirement on any
+            // of the columns in the table, or on the table itself. If yes,
+            // then we do not need to add MIN_SELECT_PRIV requirement for the
+            // table because that requirement is already getting satisfied with
+            // the already existing SELECT privilege requirement.
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.SELECT_PRIV);
-			StatementColumnPermission tableColumnPrivileges
-			  = requiredColumnPrivileges.get( key);
-			if( tableColumnPrivileges != null)
+            if (requiredColumnPrivileges.containsKey(key) ||
+                    requiredTablePrivileges.containsKey(key)) {
 				return;
+            }
 		}
 		if( currPrivType == Authorizer.SELECT_PRIV){
 			//If we are here for SELECT_PRIV requirement, then first check
@@ -766,10 +766,7 @@ public class CompilerContextImpl extends ContextImpl
 			//that, remove the MIN_SELECT_PRIV privilege requirement
 			StatementTablePermission key = new StatementTablePermission( 
 					tableUUID, Authorizer.MIN_SELECT_PRIV);
-			StatementColumnPermission tableColumnPrivileges
-			  = requiredColumnPrivileges.get( key);
-			if( tableColumnPrivileges != null)
-				requiredColumnPrivileges.remove(key);
+            requiredColumnPrivileges.remove(key);
 		}
 		
 		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
@@ -808,10 +805,7 @@ public class CompilerContextImpl extends ContextImpl
 			//that, remove the MIN_SELECT_PRIV privilege requirement
 			StatementTablePermission key = new StatementTablePermission( 
 					table.getUUID(), Authorizer.MIN_SELECT_PRIV);
-			StatementColumnPermission tableColumnPrivileges
-			  = requiredColumnPrivileges.get( key);
-			if( tableColumnPrivileges != null)
-				requiredColumnPrivileges.remove(key);
+            requiredColumnPrivileges.remove(key);
 		}
 
 		StatementTablePermission key = new StatementTablePermission( table.getUUID(), currPrivType);
