@@ -23,6 +23,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -90,7 +91,8 @@ public final class XMLMissingClassesTest extends BaseJDBCTestCase {
                 XMLMissingClassesTest.class));
         }
 
-        return suite;
+        // run without security manager, see DERBY-6413
+        return SecurityManagerSetup.noSecurityManager(suite);
     }
 
     /**

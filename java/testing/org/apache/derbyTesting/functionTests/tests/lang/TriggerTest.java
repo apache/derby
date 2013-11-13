@@ -49,6 +49,7 @@ import org.apache.derbyTesting.functionTests.util.streams.StringReaderWithLength
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
 
@@ -75,8 +76,10 @@ public class TriggerTest extends BaseJDBCTestCase {
      * embedded. 
      */
     public static Test suite() {
-        return new CleanDatabaseTestSetup(
-                TestConfiguration.embeddedSuite(TriggerTest.class));
+        // run without security Manager, see DERBY-6413
+        return SecurityManagerSetup.noSecurityManager(
+            new CleanDatabaseTestSetup(
+                TestConfiguration.embeddedSuite(TriggerTest.class)));
         
     }
     
