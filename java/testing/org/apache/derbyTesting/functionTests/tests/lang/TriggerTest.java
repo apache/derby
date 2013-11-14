@@ -1622,4 +1622,195 @@ public class TriggerTest extends BaseJDBCTestCase {
     public static void derby4610proc(String str) {
         // do nothing
     }
+
+    /**
+     * DERBY-6383(Update trigger defined on one column fires on update 
+     * of other columns). This regression is caused by DERBY-4874(Trigger 
+     * does not recognize new size of VARCHAR column expanded with 
+     * ALTER TABLE. It fails with ERROR 22001: A truncation error was 
+     * encountered trying to shrink VARCHAR)
+     *  The regression is for Statement level triggers. The trigger
+     *  gets fired for any column update rather than just the column
+     *  specified in the UPDATE of column clause. Following test
+     *  confirms that fix for DERBY-6383 fixes the issue.
+     * 
+     * @throws SQLException 
+     * 
+     */
+    public void testDerby6383StatementTriggerBugTst1() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB1 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB2 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("INSERT INTO  DERBY_6368_TAB1 VALUES(1, 2)");
+        //Create statement trigger on a specific column "X" on DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t1 AFTER UPDATE OF x "+
+            "ON DERBY_6368_TAB1 REFERENCING old table AS old " +
+            "INSERT INTO DERBY_6368_TAB2 SELECT * FROM old");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+        
+        //Following should not fire the trigger since following UPDATE is on
+        // column "Y" whereas trigger is defined on column "X"
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+
+        //Create row trigger on a specific column "X" on DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t2 AFTER UPDATE OF x "+
+            "ON DERBY_6368_TAB1 REFERENCING old AS old_row " +
+            "for each row " +
+            "INSERT INTO DERBY_6368_TAB2(x) values(old_row.x)");
+
+        //Following should not fire any trigger since following UPDATE is on
+        // column "Y" whereas triggers are defined on column "X"
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+
+        //Following should fire both triggers since following UPDATE is on
+        // column "X" which has two triggers defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 2);
+
+        //Create statement trigger at table level for DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t3 AFTER UPDATE "+
+                "ON DERBY_6368_TAB1 REFERENCING old table AS old " +
+                "INSERT INTO DERBY_6368_TAB2 SELECT * FROM old");
+
+        //Following should fire trigger t3 which is supposed to fire for
+        // any column update
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 3);
+
+        //Following should fire all the triggers since following UPDATE is on
+        // column "X" which has two triggers defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 6);
+        
+        //Add a new column to table
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB1 ADD COLUMN Z int");
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB2 ADD COLUMN Z int");
+        
+        //Following should fire trigger t3 since any column update should fire
+        // trigger t3
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET z = z + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 7);
+        
+        //Following should fire trigger t3 since any column update should fire
+        // trigger t3
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 8);
+
+        //Following should fire all the triggers since following UPDATE is on
+        // column "X" which has two triggers defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 11);
+
+        //drop statement trigger defined on specific column
+        s.executeUpdate("drop TRIGGER T1");
+
+        //Following should only fire trigger t3 since any column update should
+        // fire trigger t3
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 12);
+
+        //Following should fire triggers t2 and t3 since following UPDATE is on
+        // column "X" which has row trigger defined on it and a statement 
+        // trigger(at table level) defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 14);
+        
+        //Following should fire trigger t3 since any column update should fire
+        // trigger t3
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET z = z + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 15);
+
+        //Drop a column from the table. Following should drop trigger t3
+        // because it depends on column being dropped. And trigger t2
+        // will remain intact since it does not have dependency on
+        // column being dropped. So only trigger left at this point
+        // should be t2 after the following column drop. But because
+        // of DERBY-6417(Dropping a column in 10.7 release when there 
+        // is a trigger with REFERENCING OLD clause defined on the table 
+        // gives error "ERROR 42X05: Table/View 'OLD' does not exist.")
+        // following will result in an exception. Because of that, the
+        // following test is commented out in 10.7
+/*        s.executeUpdate("ALTER TABLE DERBY_6368_TAB1 DROP COLUMN Y");
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB2 DROP COLUMN Y");
+
+        //Following should fire triggers t2 since following UPDATE is on
+        // column "X" which has row trigger defined on it
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 16);
+        
+        //Following should not fire trigger t2
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET z = z + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 16);
+*/
+        //clean up after the test
+        s.executeUpdate("drop table DERBY_6368_TAB1");
+        s.executeUpdate("drop table DERBY_6368_TAB2");
+    }
+
+    /**
+     * DERBY-6383(Update trigger defined on one column fires on update 
+     * of other columns). This regression is caused by DERBY-4874(Trigger 
+     * does not recognize new size of VARCHAR column expanded with 
+     * ALTER TABLE. It fails with ERROR 22001: A truncation error was 
+     * encountered trying to shrink VARCHAR)
+     * After an update statement level trigger is defined at the table level,
+     *  when a new column is added, trigger should fire on update of that
+     *  newly added column
+     */
+    public void testDerby6383StatementTriggerBugTst2() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB1 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("CREATE TABLE DERBY_6368_TAB2 (X INTEGER, Y INTEGER)");
+        s.executeUpdate("INSERT INTO  DERBY_6368_TAB1 VALUES(1, 2)");
+
+        //Create statement trigger at table level for DERBY_6368_TAB1
+        s.executeUpdate("CREATE TRIGGER t1 AFTER UPDATE "+
+            "ON DERBY_6368_TAB1 REFERENCING old table AS old " +
+            "INSERT INTO DERBY_6368_TAB2 SELECT * FROM old");
+        assertTableRowCount("DERBY_6368_TAB2", 0);
+
+        //Following should fire trigger since any column update should fire
+        // trigger t1
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET x = x + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 1);
+
+        //Following should fire trigger since any column update should fire
+        // trigger t1
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET y = y + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 2);
+
+        //Add a new column to table
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB1 ADD COLUMN Z int");
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB2 ADD COLUMN Z int");
+        //Following should fire trigger since any column update should fire
+        // trigger t1
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET z = z + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 3);
+        
+        //Drop a column from the table. Following should drop trigger t3
+        // because it depends on column being dropped. And trigger t2
+        // will remain intact since it does not have dependency on
+        // column being dropped. So only trigger left at this point
+        // should be t2 after the following column drop.
+        //Drop a column from the table. this should drop the statement
+        // trigger defined at the table level for DERBY_6368_TAB1. But 
+        // because of DERBY-6417(Dropping a column in 10.7 release when  
+        // there is a trigger with REFERENCING OLD clause defined on the 
+        // table gives error "ERROR 42X05: Table/View 'OLD' does not exist.")
+        // following will result in an exception. Because of that, the
+        // following test is commented out in 10.7
+/*        s.executeUpdate("ALTER TABLE DERBY_6368_TAB1 DROP COLUMN X");
+        s.executeUpdate("ALTER TABLE DERBY_6368_TAB2 DROP COLUMN X");
+        //No triggers left to fire
+        s.executeUpdate("UPDATE DERBY_6368_TAB1 SET z = z + 1");
+        assertTableRowCount("DERBY_6368_TAB2", 3);
+*/
+        //clean up after the test
+        s.executeUpdate("drop table DERBY_6368_TAB1");
+        s.executeUpdate("drop table DERBY_6368_TAB2");
+    }
 }
