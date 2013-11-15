@@ -286,23 +286,14 @@ public class CursorNode extends DMLStatementNode
 							+ fromList.size()
 							+ " on return from RS.bindExpressions()");
 			}
-			
-			//DERBY-4191 Make sure that we have minimum select privilege on 
-			//each of the tables in the query.
-			getCompilerContext().pushCurrentPrivType(Authorizer.MIN_SELECT_PRIV);
-			FromList resultSetFromList = resultSet.getFromList();
-			for (int index = 0; index < resultSetFromList.size(); index++) {
-                Object fromTable = resultSetFromList.elementAt(index);
-                if (fromTable instanceof FromBaseTable) {
-                    collectTablePrivsAndStats((FromBaseTable)fromTable);
-                }
-            }
-			getCompilerContext().popCurrentPrivType();
 		}
 		finally
 		{
 			getCompilerContext().popCurrentPrivType();
 		}
+
+        // Collect tables whose indexes we'll want to check for staleness.
+        collectTablesWithPossiblyStaleStats();
 
 		// bind the order by
 		if (orderByList != null)
@@ -395,39 +386,30 @@ public class CursorNode extends DMLStatementNode
 	}
 
     /**
-     * Collects required privileges for all types of tables, and table
-     * descriptors for base tables whose index statistics we want to check for
-     * staleness (or to create).
-     *
-     * @param fromTable the table
+     * Collects table descriptors for base tables whose index statistics we
+     * want to check for staleness (or to create).
      */
-    private void collectTablePrivsAndStats(FromBaseTable fromTable) {
-        TableDescriptor td = fromTable.getTableDescriptor();
-        if (fromTable.isPrivilegeCollectionRequired()) {
-            // We ask for MIN_SELECT_PRIV requirement of the first column in
-            // the table. The first column is just a place holder. What we
-            // really do at execution time when we see we are looking for
-            // MIN_SELECT_PRIV privilege is as follows:
-            //
-            // 1) We will look for SELECT privilege at table level.
-            // 2) If not found, we will look for SELECT privilege on
-            //    ANY column, not necessarily the first column. But since
-            //    the constructor for column privilege requires us to pass
-            //    a column descriptor, we just choose the first column for
-            //    MIN_SELECT_PRIV requirement.
-            getCompilerContext().addRequiredColumnPriv(
-                    td.getColumnDescriptor(1));
+    private void collectTablesWithPossiblyStaleStats() throws StandardException {
+        if (!checkIndexStats) {
+            return;
         }
+
         // Save a list of base tables to check the index statistics for at a
         // later time. We want to compute statistics for base user tables only,
         // not for instance system tables or VTIs (see TableDescriptor for a
         // list of all available "table types").
-        if (checkIndexStats &&
-                td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
-            if (statsToUpdate == null) {
-                statsToUpdate = new ArrayList();
+        FromList fromList = resultSet.getFromList();
+        for (int i = 0; i < fromList.size(); i++) {
+            FromTable fromTable = (FromTable) fromList.elementAt(i);
+            if (fromTable.isBaseTable()) {
+                TableDescriptor td = fromTable.getTableDescriptor();
+                if (td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
+                    if (statsToUpdate == null) {
+                        statsToUpdate = new ArrayList();
+                    }
+                    statsToUpdate.add(td);
+                }
             }
-            statsToUpdate.add(td);
         }
     }
 
