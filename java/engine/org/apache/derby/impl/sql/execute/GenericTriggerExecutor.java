@@ -134,6 +134,12 @@ public abstract class GenericTriggerExecutor
 			*/
 			if (ps == null || recompile)
 			{
+                // The SPS activation will set its parent activation from
+                // the statement context. Reset it to the original parent
+                // activation first so that it doesn't use the activation of
+                // the previously executed SPS as parent. DERBY-6348.
+                lcc.getStatementContext().setActivation(activation);
+
 				/*
 				** We need to clone the prepared statement so we don't
 				** wind up marking that ps that is tied to sps as finished

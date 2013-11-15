@@ -2017,4 +2017,34 @@ public class TriggerTest extends BaseJDBCTestCase {
                 + "(select count(*) from sysibm.sysdummy1)");
 
     }
+
+    public void testDerby6348() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6348(x int)");
+        s.execute("insert into d6348 values 1");
+        s.execute("create trigger d6348_tr1 after update on d6348 values 1");
+        s.execute("create trigger d6348_tr2 after update on d6348 "
+                + "for each row update d6348 set x = x + 1 where x < 3");
+
+        // Used to fail with assert failure or NullPointerException before
+        // DERBY-6348.
+        s.execute("update d6348 set x = x + 1");
+
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from d6348"),
+                "3");
+
+        rollback();
+
+        s.execute("create table d6348(x int)");
+        s.execute("create trigger d6348_tr1 after insert on d6348 "
+                + "values current_user");
+        s.execute("create trigger d6348_tr2 after insert on d6348 "
+                + "values current_user");
+
+        // Used to fail with assert failure or NullPointerException before
+        // DERBY-6348.
+        s.execute("insert into d6348 values 1");
+    }
 }
