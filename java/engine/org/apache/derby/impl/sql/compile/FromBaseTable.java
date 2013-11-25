@@ -2796,7 +2796,7 @@ class FromBaseTable extends FromTable
             }
             
 			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
-			/* Did we find a match? */
+            /* Did we find a match? */
 			if (resultColumn != null)
 			{
 				columnReference.setTableNumber(tableNumber);
@@ -3805,7 +3805,7 @@ class FromBaseTable extends FromTable
 	 *
 	 * @exception StandardException  Thrown on error
 	 */
-	private TableName getExposedTableName() throws StandardException  
+	TableName getExposedTableName() throws StandardException  
 	{
 		if (correlationName != null)
 			return makeTableName(null, correlationName);

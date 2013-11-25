@@ -1662,11 +1662,25 @@ abstract class DMLModStatementNode extends DMLStatementNode
         // then we don't need to optimize the dummy driving result set, which
         // is never actually run.
         //
-        // don't need to optimize the dummy SELECT, which is never actually run
+        // don't need to fully optimize the dummy SELECT, which is never actually run
         if ( !inMatchingClause() )
         {
             /* First optimize the query */
             super.optimizeStatement();
+        }
+        else if ( this instanceof UpdateNode )
+        {
+            //
+            // However, for UPDATE actions of MERGE statements, we do preprocess the driving SELECT.
+            // This is where the virtual column ids in CHECK constraints are re-mapped to
+            // refer to column positions in the SELECT list rather than in the base table.
+            //
+            resultSet = resultSet.preprocess
+                (
+                 getCompilerContext().getNumTables(),
+                 null,
+                 (FromList) null
+                 );
         }
 
 		/* In language we always set it to row lock, it's up to store to

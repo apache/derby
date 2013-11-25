@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
@@ -44,6 +45,8 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * Node representing a WHEN MATCHED or WHEN NOT MATCHED clause
@@ -230,10 +233,19 @@ public class MatchingClauseNode extends QueryTreeNode
 
         if ( isUpdateClause() )
         {
-            // get all columns mentioned on the right side of SET operators in WHEN MATCHED ... THEN UPDATE clauses
+            TableName   targetTableName = mergeNode.getTargetTable().getTableName();
+
+            //
+            // Get all columns mentioned on both sides of SET operators in WHEN MATCHED ... THEN UPDATE clauses.
+            // We need the left side because UPDATE needs before and after images of columns.
+            // We need the right side because there may be columns in the expressions there.
+            //
             for ( ResultColumn rc : _updateColumns )
             {
                 mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression() );
+
+                ColumnReference leftCR = new ColumnReference( rc.exposedName, targetTableName, getContextManager() );
+                mergeNode.addColumn( drivingColumnMap, leftCR );
             }
         }
         else if ( isInsertClause() )
@@ -273,6 +285,59 @@ public class MatchingClauseNode extends QueryTreeNode
         _dml = new UpdateNode( targetTable.getTableName(), selectNode, this, getContextManager() );
 
         _dml.bindStatement();
+
+        //
+        // Split the update row into its before and after images.
+        //
+        ResultColumnList    beforeColumns = new ResultColumnList( getContextManager() );
+        ResultColumnList    afterColumns = new ResultColumnList( getContextManager() );
+        ResultColumnList    fullUpdateRow = getBoundSelectUnderUpdate().resultColumns;
+        
+        // the full row is the before image, the after image, and a row location
+        int     rowSize = fullUpdateRow.size() / 2;
+
+        for ( int i = 0; i < rowSize; i++ )
+        {
+            ResultColumn    origBeforeRC = fullUpdateRow.elementAt( i );
+            ResultColumn    origAfterRC = fullUpdateRow.elementAt( i + rowSize );
+            ResultColumn    beforeRC = origBeforeRC.cloneMe();
+            ResultColumn    afterRC = origAfterRC.cloneMe();
+
+            beforeColumns.addResultColumn( beforeRC );
+            afterColumns.addResultColumn( afterRC );
+        }
+
+        buildThenColumnsForUpdate( fullFromList, targetTable, fullUpdateRow, beforeColumns, afterColumns );
+    }
+
+    /**
+     * <p>
+     * Get the bound SELECT node under the dummy UPDATE node.
+     * This may not be the source result set of the UPDATE node. That is because a ProjectRestrictResultSet
+     * may have been inserted on top of it by DEFAULT handling. This method
+     * exists to make the UPDATE actions of MERGE statement behave like ordinary
+     * UPDATE statements in this situation. The behavior is actually wrong. See
+     * DERBY-6414. Depending on how that bug is addressed, we may be able
+     * to remove this method eventually.
+     * </p>
+     */
+    private ResultSetNode    getBoundSelectUnderUpdate()
+        throws StandardException
+    {
+        ResultSetNode   candidate = _dml.resultSet;
+
+        while ( candidate != null )
+        {
+            if ( candidate instanceof SelectNode ) { return candidate; }
+            else if ( candidate instanceof SingleChildResultSetNode )
+            {
+                candidate = ((SingleChildResultSetNode) candidate).getChildResult();
+            }
+            else    { break; }
+        }
+        
+        // don't understand what's going on
+        throw StandardException.newException( SQLState.NOT_IMPLEMENTED );
     }
     
     /** Bind the SET clauses of an UPDATE action */
@@ -288,6 +353,253 @@ public class MatchingClauseNode extends QueryTreeNode
 
         bindExpressions( _updateColumns, fullFromList );
     }
+
+    /**
+     * <p>
+     * Construct the row in the temporary table which drives an UPDATE action.
+     * Unlike a DELETE, whose temporary row is just a list of copied columns, the
+     * temporary row for UPDATE may contain complex expressions which must
+     * be code-generated later on.
+     * </p>
+     */
+    private void    buildThenColumnsForUpdate
+        (
+         FromList fullFromList,
+         FromTable targetTable,
+         ResultColumnList   fullRow,
+         ResultColumnList beforeRow,
+         ResultColumnList afterValues
+         )
+        throws StandardException
+    {
+        TableDescriptor td = targetTable.getTableDescriptor();
+        HashSet<String> changedColumns = getChangedColumnNames();
+        HashSet<String> changedGeneratedColumns = getChangedGeneratedColumnNames( td, changedColumns );
+
+        _thenColumns = fullRow.copyListAndObjects();
+
+        //
+        // Here we set up for the evaluation of expressions in the temporary table
+        // which drives the INSERT action. If we were actually generating the dummy SELECT
+        // for the DML action, the work would normally be done there. But we don't generate
+        // that SELECT. So we do the following here:
+        //
+        // 1) If a column has a value specified in the WHEN [ NOT ] MATCHED clause, then we use it.
+        //     There is some special handling to make the DEFAULT value work for identity columns.
+        //
+        // 2) Otherwise, if the column has a default, then we plug it in.
+        //
+        for ( int i = 0; i < _thenColumns.size(); i++ )
+        {
+            ResultColumn    origRC = _thenColumns.elementAt( i );
+
+            boolean isAfterColumn = (i >= beforeRow.size());
+
+            // skip the final RowLocation column of an UPDATE
+            boolean isRowLocation = isRowLocation( origRC );
+            ValueNode   origExpr = origRC.getExpression();
+
+            if ( isRowLocation ) { continue; }
+
+            String              columnName = origRC.getName();
+            ColumnDescriptor    cd = td.getColumnDescriptor( columnName );
+            boolean         changed = false;
+
+            //
+            // This handles the case that a GENERATED BY DEFAULT identity column is being
+            // set to the keyword DEFAULT. This causes the UPDATE action of a MERGE statement
+            // to have the same wrong behavior as a regular UPDATE statement. See derby-6414.
+            //
+            if ( cd.isAutoincrement() && (origRC.getExpression() instanceof NumericConstantNode) )
+            {
+                DataValueDescriptor numericValue = ((NumericConstantNode) origRC.getExpression()).getValue();
+                
+                if ( numericValue == null )
+                {
+                    ResultColumn    newRC = makeAutoGenRC( targetTable, origRC, i+1 );
+                    newRC.setVirtualColumnId( origRC.getVirtualColumnId() );
+                    _thenColumns.setElementAt( newRC, i  );
+
+                    continue;
+                }
+            }
+
+            //
+            // VirtualColumnNodes are skipped at code-generation time. This can result in
+            // NPEs when evaluating generation expressions. Replace VirtualColumnNodes with
+            // UntypedNullConstantNodes, except for identity columns, which require special
+            // handling below.
+            //
+            if ( !origRC.isAutoincrement() && (origRC.getExpression() instanceof VirtualColumnNode) )
+            {
+                origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+            }
+
+            //
+            // Generated columns need special handling. The value needs to be recalculated
+            // under the following circumstances:
+            //
+            // 1) It's the after image of the column
+            //
+            // 2) AND the statement causes the value to change.
+            //
+            // Otherwise, the value should be set to whatever is in the row coming out
+            // of the driving left join.
+            //
+            if ( cd.hasGenerationClause() )
+            {
+                if ( isAfterColumn && changedGeneratedColumns.contains( columnName ) )
+                {
+                    // Set the expression to something that won't choke ResultColumnList.generateEvaluatedRow().
+                    // The value will be a Java null at execution time, which will cause the value
+                    // to be re-generated.
+                    origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+                }
+                else
+                {
+                    ColumnReference cr = new ColumnReference
+                        ( columnName, targetTable.getTableName(), getContextManager() );
+                    origRC.setExpression( cr );
+
+                    // remove the column descriptor in order to turn off hasGenerationClause()
+                    origRC.columnDescriptor = null;
+                }
+                
+                continue;
+            }
+
+            if ( isAfterColumn )
+            {
+                for ( int ic = 0; ic < beforeRow.size(); ic++ )
+                {
+                    ResultColumn    icRC = beforeRow.elementAt( ic );
+
+                    if ( columnName.equals( icRC.getName() ) )
+                    {
+                        ResultColumn    newRC = null;
+                    
+                        // replace DEFAULT for a generated or identity column
+                        ResultColumn    valueRC = afterValues.elementAt( ic );
+
+                        if ( valueRC.wasDefaultColumn() || (valueRC.getExpression() instanceof UntypedNullConstantNode ) )
+                        {
+                            if ( !cd.isAutoincrement() )
+                            {
+                                //
+                                // Eliminate column references under identity columns. They
+                                // will mess up the code generation.
+                                //
+                                ValueNode   expr = origRC.getExpression();
+                                if ( expr instanceof ColumnReference )
+                                {
+                                    origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+                                }
+                                continue;
+                            }
+
+                            newRC = makeAutoGenRC( targetTable, origRC, i+1 );
+                        }
+                        else
+                        {
+                            newRC = valueRC.cloneMe();
+                            newRC.setType( origRC.getTypeServices() );
+                        }
+
+                        newRC.setVirtualColumnId( origRC.getVirtualColumnId() );
+                        _thenColumns.setElementAt( newRC, i  );
+                        changed = true;
+                        break;
+                    }
+                }
+            }
+
+            // plug in defaults if we haven't done so already
+            if ( !changed )
+            {
+                DefaultInfoImpl     defaultInfo = (DefaultInfoImpl) cd.getDefaultInfo();
+
+				if ( (defaultInfo != null) && !defaultInfo.isGeneratedColumn() && !cd.isAutoincrement() )
+				{
+                    _thenColumns.setDefault( origRC, cd, defaultInfo );
+                    changed = true;
+				}
+            }
+
+            // set the result column name correctly for buildThenColumnSignature()
+            ResultColumn    finalRC = _thenColumns.elementAt( i );
+            finalRC.setName( cd.getColumnName() );
+            
+            //
+            // Turn off the autogenerated bit for identity columns so that
+            // ResultColumnList.generateEvaluatedRow() doesn't try to compile
+            // code to generate values for the before images in UPDATE rows.
+            // This logic will probably need to be revisited as part of fixing derby-6414.
+            //
+            finalRC.resetAutoincrementGenerated();
+        }   // end loop through _thenColumns
+    }
+
+    /** Get the names of the columns explicitly changed by SET clauses */
+    private HashSet<String> getChangedColumnNames()
+        throws StandardException
+    {
+        HashSet<String> result = new HashSet<String>();
+
+        for ( int i = 0; i < _updateColumns.size(); i++ )
+        {
+            String  columnName = _updateColumns.elementAt( i ).getName();
+            result.add( columnName );
+        }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Get the names of the generated columns which are changed
+     * by the UPDATE statement. These are the generated columns which
+     * match one of the following conditions:
+     * </p>
+     *
+     * <ul>
+     * <li>Are explicitly mentioned on the left side of a SET clause.</li>
+     * <li>Are built from other columns which are explicitly mentioned on the left side of a SET clause.</li>
+     * </ul>
+     */
+    private HashSet<String> getChangedGeneratedColumnNames
+        (
+         TableDescriptor    targetTableDescriptor,
+         HashSet<String>    changedColumnNames  // columns which are explicitly mentioned on the left side of a SET clause
+         )
+        throws StandardException
+    {
+        HashSet<String> result = new HashSet<String>();
+
+        for ( ColumnDescriptor cd : targetTableDescriptor.getColumnDescriptorList() )
+        {
+            if ( !cd.hasGenerationClause() ) { continue; }
+
+            if ( changedColumnNames.contains( cd.getColumnName() ) )
+            {
+                result.add( cd.getColumnName() );
+                continue;
+            }
+
+            String[]    referencedColumns = cd.getDefaultInfo().getReferencedColumnNames();
+
+            for ( String referencedColumnName : referencedColumns )
+            {
+                if ( changedColumnNames.contains( referencedColumnName ) )
+                {
+                    result.add( referencedColumnName );
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
 
     ////////////////////// DELETE ///////////////////////////////
 
@@ -428,7 +740,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
         _dml.bindStatement();
 
-        buildInsertThenColumns( targetTable );
+        buildThenColumnsForInsert( fullFromList, targetTable, _dml.resultSet.resultColumns, _insertColumns, _insertValues );
     }
 
     /**  Bind the values in the INSERT list */
@@ -476,13 +788,27 @@ public class MatchingClauseNode extends QueryTreeNode
         bindExpressions( _insertValues, fullFromList );
     }
     
-    /** Construct the row in the temporary table which drives an INSERT action */
-    private void    buildInsertThenColumns( FromTable targetTable )
+    /**
+     * <p>
+     * Construct the row in the temporary table which drives an INSERT action.
+     * Unlike a DELETE, whose temporary row is just a list of copied columns, the
+     * temporary row for INSERT may contain complex expressions which must
+     * be code-generated later on.
+     * </p>
+     */
+    private void    buildThenColumnsForInsert
+        (
+         FromList fullFromList,
+         FromTable targetTable,
+         ResultColumnList   fullRow,
+         ResultColumnList insertColumns,
+         ResultColumnList insertValues
+         )
         throws StandardException
     {
         TableDescriptor td = targetTable.getTableDescriptor();
 
-        _thenColumns = _dml.resultSet.resultColumns.copyListAndObjects();
+        _thenColumns = fullRow.copyListAndObjects();
 
         //
         // Here we set up for the evaluation of expressions in the temporary table
@@ -497,10 +823,10 @@ public class MatchingClauseNode extends QueryTreeNode
         //
         for ( int i = 0; i < _thenColumns.size(); i++ )
         {
-            ColumnDescriptor    cd = td.getColumnDescriptor( i + 1 );
             ResultColumn    origRC = _thenColumns.elementAt( i );
+
             String              columnName = origRC.getName();
-            
+            ColumnDescriptor    cd = td.getColumnDescriptor( columnName );
             boolean         changed = false;
 
             //
@@ -514,20 +840,26 @@ public class MatchingClauseNode extends QueryTreeNode
                 origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
             }
 
-            for ( int ic = 0; ic < _insertColumns.size(); ic++ )
+            if ( cd.hasGenerationClause() )
             {
-                ResultColumn    icRC = _insertColumns.elementAt( ic );
+                origRC.setExpression( new UntypedNullConstantNode( getContextManager() ) );
+                continue;
+            }
+
+            for ( int ic = 0; ic < insertColumns.size(); ic++ )
+            {
+                ResultColumn    icRC = insertColumns.elementAt( ic );
 
                 if ( columnName.equals( icRC.getName() ) )
                 {
                     ResultColumn    newRC = null;
                     
                     // replace DEFAULT for a generated or identity column
-                    ResultColumn    insertRC =_insertValues.elementAt( ic );
+                    ResultColumn    valueRC = insertValues.elementAt( ic );
 
-                    if ( insertRC.wasDefaultColumn() || (insertRC.getExpression() instanceof UntypedNullConstantNode ) )
+                    if ( valueRC.wasDefaultColumn() || (valueRC.getExpression() instanceof UntypedNullConstantNode ) )
                     {
-                       if ( !cd.isAutoincrement() )
+                        if ( !cd.isAutoincrement() )
                         {
                             //
                             // Eliminate column references under identity columns. They
@@ -541,18 +873,11 @@ public class MatchingClauseNode extends QueryTreeNode
                             continue;
                         }
 
-                        ColumnReference autoGenCR = new ColumnReference( columnName, targetTable.getTableName(), getContextManager() );
-                        ResultColumn    autoGenRC = new ResultColumn( autoGenCR, null, getContextManager() );
-                        VirtualColumnNode autoGenVCN = new VirtualColumnNode( targetTable, autoGenRC, i + 1, getContextManager() );
-
-                        newRC = new ResultColumn( autoGenCR, autoGenVCN, getContextManager() );
-
-                        // set the type so that buildThenColumnSignature() will function correctly
-                        newRC.setType( origRC.getTypeServices() );
+                        newRC = makeAutoGenRC( targetTable, origRC, i+1 );
                     }
                     else
                     {
-                        newRC = insertRC.cloneMe();
+                        newRC = valueRC.cloneMe();
                         newRC.setType( origRC.getTypeServices() );
                     }
 
@@ -578,8 +903,38 @@ public class MatchingClauseNode extends QueryTreeNode
             // set the result column name correctly for buildThenColumnSignature()
             ResultColumn    finalRC = _thenColumns.elementAt( i );
             finalRC.setName( cd.getColumnName() );
+
         }   // end loop through _thenColumns
+
     }
+
+    /**
+     * <p>
+     * Make a ResultColumn for an identity column which is being set to the DEFAULT
+     * value. This special ResultColumn will make it through code generation so that it
+     * will be calculated when the INSERT/UPDATE action is run.
+     * </p>
+     */
+    private ResultColumn    makeAutoGenRC
+        (
+         FromTable targetTable,
+         ResultColumn   origRC,
+         int    virtualColumnID
+         )
+        throws StandardException
+    {
+        String              columnName = origRC.getName();
+        ColumnReference autoGenCR = new ColumnReference( columnName, targetTable.getTableName(), getContextManager() );
+        ResultColumn    autoGenRC = new ResultColumn( autoGenCR, null, getContextManager() );
+        VirtualColumnNode autoGenVCN = new VirtualColumnNode( targetTable, autoGenRC, virtualColumnID, getContextManager() );
+        ResultColumn    newRC = new ResultColumn( autoGenCR, autoGenVCN, getContextManager() );
+
+        // set the type so that buildThenColumnSignature() will function correctly
+        newRC.setType( origRC.getTypeServices() );
+
+        return newRC;
+    }
+
 
     ////////////////////// bind() MINIONS ///////////////////////////////
 
@@ -616,10 +971,6 @@ public class MatchingClauseNode extends QueryTreeNode
         throws StandardException
     {
         if ( isDeleteClause() ) { bindDeleteThenColumns( selectList ); }
-        else if ( isUpdateClause() )
-        {
-            throw StandardException.newException( SQLState.NOT_IMPLEMENTED, "MERGE" );
-        }
     }
 
     /**
@@ -755,6 +1106,7 @@ public class MatchingClauseNode extends QueryTreeNode
         (
          ActivationClassBuilder acb,
          ResultColumnList selectList,
+         ResultSetNode  generatedScan,
          HalfOuterJoinNode  hojn,
          int    clauseNumber
          )
@@ -762,7 +1114,7 @@ public class MatchingClauseNode extends QueryTreeNode
     {
         _clauseNumber = clauseNumber;
 
-        if ( isInsertClause() ) { generateInsertRow( acb, selectList, hojn ); }
+        if ( isInsertClause() || isUpdateClause() ) { generateInsertUpdateRow( acb, selectList, generatedScan, hojn ); }
         
         _actionMethodName = "mergeActionMethod_" + _clauseNumber;
         
@@ -793,13 +1145,15 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    remapConstraints()
         throws StandardException
     {
-        if( !isInsertClause() ) { return; }
+        if( isDeleteClause()) { return; }
         else
         {
             CollectNodesVisitor<ColumnReference> getCRs =
                 new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
-            ValueNode   checkConstraints = ((InsertNode) _dml).checkConstraints;
+            ValueNode   checkConstraints = isInsertClause() ?
+                ((InsertNode) _dml).checkConstraints :
+                ((UpdateNode) _dml).checkConstraints;
 
             if ( checkConstraints != null )
             {
@@ -840,23 +1194,24 @@ public class MatchingClauseNode extends QueryTreeNode
     
     /**
      * <p>
-     * Generate a method to build a row for the temporary table for INSERT actions.
+     * Generate a method to build a row for the temporary table for INSERT/UPDATE actions.
      * The method stuffs each column in the row with the result of the corresponding
      * expression built out of columns in the current row of the driving left join.
      * The method returns the stuffed row.
      * </p>
      */
-    void    generateInsertRow
+    void    generateInsertUpdateRow
         (
          ActivationClassBuilder acb,
          ResultColumnList selectList,
+         ResultSetNode  generatedScan,
          HalfOuterJoinNode  hojn
          )
         throws StandardException
     {
         // point expressions in the temporary row at the columns in the
         // result column list of the driving left join.
-        adjustThenColumns( selectList, hojn );
+        adjustThenColumns( selectList, generatedScan, hojn );
         
         _rowMakingMethodName = "mergeRowMakingMethod_" + _clauseNumber;
         
@@ -873,18 +1228,19 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
-     * Point the column references in the temporary row at corresponding
+     * Point the column references in the temporary row at the corresponding
      * columns returned by the driving left join.
      * </p>
      */
     void    adjustThenColumns
         (
          ResultColumnList selectList,
+         ResultSetNode  generatedScan,
          HalfOuterJoinNode  hojn
          )
         throws StandardException
     {
-        ResultColumnList    leftJoinResult = hojn.resultColumns;
+        ResultColumnList    leftJoinResult = generatedScan.resultColumns;
         CollectNodesVisitor<ColumnReference> getCRs =
             new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
         _thenColumns.accept( getCRs );
@@ -894,6 +1250,40 @@ public class MatchingClauseNode extends QueryTreeNode
             ResultColumn    leftJoinRC = leftJoinResult.elementAt( getSelectListOffset( selectList, cr ) - 1 );
             cr.setSource( leftJoinRC );
         }
+
+        //
+        // For an UPDATE action, the final column in the temporary row is the
+        // RowLocation. Point it at the last column in the row returned by the left join.
+        //
+        int                 lastRCSlot = _thenColumns.size() - 1;
+        ResultColumn    lastRC = _thenColumns.elementAt( lastRCSlot );
+
+        if ( isRowLocation( lastRC ) )
+        {
+            ResultColumn    lastLeftJoinRC = leftJoinResult.elementAt( leftJoinResult.size() - 1 );
+            ValueNode       value = lastLeftJoinRC.getExpression();
+            String              columnName = lastLeftJoinRC.exposedName;
+            ColumnReference rowLocationCR = new ColumnReference
+                ( columnName, hojn.getTableName(), getContextManager() );
+
+            rowLocationCR.setSource( lastLeftJoinRC );
+            
+            ResultColumn    rowLocationRC = new ResultColumn( columnName, rowLocationCR, getContextManager() );
+
+            _thenColumns.removeElementAt( lastRCSlot );
+            _thenColumns.addResultColumn( rowLocationRC );
+        }
+    }
+
+    /** Return true if the ResultColumn represents a RowLocation */
+    private boolean isRowLocation( ResultColumn rc ) throws StandardException
+    {
+        if ( rc.getExpression() instanceof CurrentRowLocationNode ) { return true; }
+
+        DataTypeDescriptor  dtd = rc.getTypeServices();
+        if ( (dtd != null) && (dtd.getTypeId().isRefTypeId()) ) { return true; }
+
+        return false;
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

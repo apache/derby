@@ -51,7 +51,6 @@ class DeleteResultSet extends DMLWriteResultSet
 {
 	private TransactionController   	tc;
 	DeleteConstantAction		constants;
-    protected ResultDescription 				resultDescription;
 	protected  NoPutResultSet			source;
 	NoPutResultSet			savedSource;
 	int 							numIndexes;
@@ -80,16 +79,6 @@ class DeleteResultSet extends DMLWriteResultSet
 	protected  boolean cascadeDelete;
 	ExecRow		deferredRLRow = null;
 	int	numberOfBaseColumns = 0;
-
-	/**
-     * Returns the description of the deleted rows.
-     * REVISIT: Do we want this to return NULL instead?
-	 */
-    @Override
-	public ResultDescription getResultDescription()
-	{
-	    return resultDescription;
-	}
 
     /*
      * class interface

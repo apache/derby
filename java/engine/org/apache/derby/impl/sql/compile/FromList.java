@@ -572,24 +572,40 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	}
 
 	/**
+     * <p>
 	 * Bind a column reference to one of the tables in this FromList.  The column name
 	 * must be unique within the tables in the FromList.  An exception is thrown
-	 * if a column name is not unique.
+	 * if a column name is not unique. This method fills in various fields
+     * in the column reference.
+     * </p>
 	 *
+     * <p>
 	 * NOTE: Callers are responsible for ordering the FromList by nesting level,
 	 * with tables at the deepest (current) nesting level first.  We will try to 
 	 * match against all FromTables at a given nesting level.  If no match is
 	 * found at a nesting level, then we proceed to the next level.  We stop
 	 * walking the list when the nesting level changes and we have found a match.
+     * </p>
 	 *
+     * <p>
 	 * NOTE: If the ColumnReference is qualified, then we will stop the search
 	 * at the first nesting level where there is a match on the exposed table name.
-	 * For example, s (a, b, c), t (d, e, f)
+	 * For example,
+     * <p>
+     *
+     * <pre>
+     *s (a, b, c), t (d, e, f)
 	 *		select * from s where exists (select * from t s where s.c = a)
+     * </pre>
+     *
+     * <p>
 	 * will not find a match for s.c, which is the expected ANSI behavior.
+     * </p>
 	 *
+     * <p>
 	 * bindTables() must have already been called on this FromList before
 	 * calling this method.
+     * </p>
 	 *
 	 * @param columnReference	The ColumnReference describing the column to bind
 	 *
@@ -603,7 +619,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	{
 		boolean			columnNameMatch = false;
 		boolean			tableNameMatch = false;
-		FromTable		fromTable;
+		FromTable		fromTable = null;
+		FromTable		matchingTable = null;
         int             currentLevel;
 		int				previousLevel = -1;
 		ResultColumn	matchingRC = null;
@@ -640,7 +657,6 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 			previousLevel = currentLevel;
 
 			resultColumn = fromTable.getMatchingColumn(columnReference);
-
 			if (resultColumn != null)
 			{
 				if (! columnNameMatch)
@@ -661,7 +677,11 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 					columnNameMatch = true;
 
 					if (fromTable.isPrivilegeCollectionRequired())
-						getCompilerContext().addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());						
+                    {
+						getCompilerContext().addRequiredColumnPriv( resultColumn.getTableColumnDescriptor());
+                    }
+
+                    matchingTable = fromTable;
 				}
 				else
 				{
@@ -678,6 +698,21 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 						 crTableName.equals(fromTable.getExposedName()) );
 		}
 
+        // fill in the table name
+        if ( (matchingTable != null) && (matchingRC != null) && (columnReference.getTableName() == null) )
+        {
+            TableName   crtn = matchingTable.getTableName();
+            if ( matchingTable instanceof FromBaseTable )
+            {
+                FromBaseTable   fbt = (FromBaseTable) matchingTable;
+                if ( fbt.getExposedTableName() !=  null )
+                {
+                    crtn = fbt.getExposedTableName();
+                }
+            }
+            columnReference.setTableNameNode( crtn );
+        }
+        
 		return matchingRC;
 	}
 
@@ -1619,8 +1654,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		{
 			if (size() != 1)
 			{
-				SanityManager.THROWASSERT(
-					"size() expected to be 1");
+				SanityManager.THROWASSERT
+                    ( "size() is " + size() + " but should be 1");
 			}
 		}
         return elementAt(0).updateTargetLockMode();

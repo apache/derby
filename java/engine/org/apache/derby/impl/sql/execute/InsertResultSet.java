@@ -102,7 +102,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 	// divined at run time
 
-    private	ResultDescription 		resultDescription;
 	private RowChanger 				rowChanger;
 
 	private	TransactionController 	tc;
@@ -171,22 +170,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private long					identityVal;  //support of IDENTITY_LOCAL_VAL function
 	private boolean					setIdentity;
 	
-    /**
-     * This array contains data value descriptors that can be used (and reused)
-     * to hold the normalized column values.
-     */
-    private DataValueDescriptor[] cachedDestinations;
-
-
-	/**
-     * Returns the description of the inserted rows.
-     * REVISIT: Do we want this to return NULL instead?
-	 */
-	public ResultDescription getResultDescription()
-	{
-	    return resultDescription;
-	}
-
 	// TargetResultSet interface
 
 	/**
@@ -1248,7 +1231,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	{
 		ExecRow row = super.getNextRowCore( source );
 
-        if ( (row != null) && constants.underMerge() ) { row = processMergeRow( row ); }
+        if ( (row != null) && constants.underMerge() ) { row = processMergeRow( source, row ); }
 
         return row;
 	}
@@ -1258,7 +1241,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
      * Special handling if this is an INSERT action of a MERGE statement.
      * </p>
      */
-	private ExecRow processMergeRow( ExecRow row )
+	private ExecRow processMergeRow( NoPutResultSet sourceRS, ExecRow row )
 		throws StandardException
 	{
         //
@@ -1293,49 +1276,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             }
         }
 
-        //
-        // Make sure that the evaluated expressions fit in the base table row.
-        //
-        int count = resultDescription.getColumnCount();
-        if ( cachedDestinations == null )
-        {
-            cachedDestinations = new DataValueDescriptor[ count ];
-            for ( int i = 0; i < count; i++)
-            {
-                int         position = i + 1;
-                ResultColumnDescriptor  colDesc = resultDescription.getColumnDescriptor( position );
-                cachedDestinations[ i ] = colDesc.getType().getNull();
-            }
-        }
-
-        for ( int i = 0; i < count; i++ )
-        {
-            int         position = i + 1;
-            DataTypeDescriptor  dtd = resultDescription.getColumnDescriptor( position ).getType();
-
-            if ( row.getColumn( position ) == null )
-            {
-                row.setColumn( position, dtd.getNull() );
-            }
-
-            row.setColumn
-                (
-                 position,
-                 NormalizeResultSet.normalizeColumn
-                 (
-                  dtd,
-                  row,
-                  position,
-                  cachedDestinations[ i ],
-                  resultDescription
-                  )
-                 );
-        }
-
-        // put the row where expressions in constraints can access it
-        activation.setCurrentRow( row, sourceResultSet.resultSetNumber() );
-
-        return row;
+        return normalizeRow( sourceRS, row );
 	}
 
 

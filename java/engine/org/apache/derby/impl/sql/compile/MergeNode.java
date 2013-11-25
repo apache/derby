@@ -234,14 +234,6 @@ public final class MergeNode extends DMLModStatementNode
         {
             mcn.bindResultSetNumbers( this, _leftJoinFromList );
         }
-        
-        for ( MatchingClauseNode mcn : _matchingClauses )
-        {
-            if ( mcn.isUpdateClause() )
-            {
-                throw StandardException.newException( SQLState.NOT_IMPLEMENTED, "MERGE" );
-            }
-        }
 	}
 
     /** Get the exposed name of a FromTable */
@@ -294,9 +286,9 @@ public final class MergeNode extends DMLModStatementNode
             {
                 mcn.bindRefinement( this, _leftJoinFromList );
             }
-        
-            ResultColumnList    selectList = buildSelectList();
 
+            ResultColumnList    selectList = buildSelectList();
+            
             // save a copy so that we can remap column references when generating the temporary rows
             _selectList = selectList.copyListAndObjects();
 
@@ -341,6 +333,9 @@ public final class MergeNode extends DMLModStatementNode
             cc.setReliability( previousReliability );
         }
     }
+
+    /** Get the target table for the MERGE statement */
+    FromBaseTable   getTargetTable() { return _targetTable; }
 
     /** Throw a "not base table" exception */
     private void    notBaseTable()  throws StandardException
@@ -516,14 +511,11 @@ public final class MergeNode extends DMLModStatementNode
         ( HashMap<String,ColumnReference> map, ResultColumnList rcl )
         throws StandardException
     {
-        ArrayList<ColumnReference>  colRefs = new ArrayList<ColumnReference>();
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
 
-        for ( int i = 0; i < rcl.size(); i++ )
-        {
-            ResultColumn    rc = rcl.elementAt( i );
-            ColumnReference cr = rc.getReference();
-            if ( cr != null ) { colRefs.add( cr ); }
-        }
+        rcl.accept( getCRs );
+        List<ColumnReference> colRefs = getCRs.getList();
 
         getColumnsFromList( map, colRefs );
     }
@@ -535,18 +527,29 @@ public final class MergeNode extends DMLModStatementNode
     {
         for ( ColumnReference cr : colRefs )
         {
-            if ( cr.getTableName() == null )
-            {
-                ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
-                TableName       tableName = new TableName( null, rc.getTableName(), getContextManager() );
-                cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
-            }
+            addColumn( map, cr );
+        }
+    }
 
-            String  key = makeDCMKey( cr.getTableName(), cr.getColumnName() );
-            if ( map.get( key ) == null )
-            {
-                map.put( key, cr );
-            }
+    /** Add a column to the evolving map of referenced columns */
+    void    addColumn
+        (
+         HashMap<String,ColumnReference> map,
+         ColumnReference    cr
+         )
+        throws StandardException
+    {
+        if ( cr.getTableName() == null )
+        {
+            ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
+            TableName       tableName = new TableName( null, rc.getTableName(), getContextManager() );
+            cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
+        }
+
+        String  key = makeDCMKey( cr.getTableName(), cr.getColumnName() );
+        if ( map.get( key ) == null )
+        {
+            map.put( key, cr );
         }
     }
 
@@ -615,14 +618,6 @@ public final class MergeNode extends DMLModStatementNode
     void generate( ActivationClassBuilder acb, MethodBuilder mb )
 							throws StandardException
 	{
-        for ( MatchingClauseNode mcn : _matchingClauses )
-        {
-            if ( mcn.isUpdateClause() )
-            {
-                throw StandardException.newException( SQLState.NOT_IMPLEMENTED, "MERGE" );
-            }
-        }
-
         int     clauseCount = _matchingClauses.size();
 
 		/* generate the parameters */
@@ -633,12 +628,16 @@ public final class MergeNode extends DMLModStatementNode
         // arg 1: the driving left join 
         _leftJoinCursor.generate( acb, mb );
 
+        // dig up the actual result set which was generated and which will drive the MergeResultSet
+        ScrollInsensitiveResultSetNode  sirs = (ScrollInsensitiveResultSetNode) _leftJoinCursor.resultSet;
+        ResultSetNode   generatedScan = sirs.getChildResult();
+
         ConstantAction[]    clauseActions = new ConstantAction[ clauseCount ];
         for ( int i = 0; i < clauseCount; i++ )
         {
             MatchingClauseNode  mcn = _matchingClauses.get( i );
 
-            mcn.generate( acb, _selectList, _hojn, i );
+            mcn.generate( acb, _selectList, generatedScan, _hojn, i );
             clauseActions[ i ] = mcn.makeConstantAction( acb );
         }
         _constantAction = getGenericConstantActionFactory().getMergeConstantAction( clauseActions );

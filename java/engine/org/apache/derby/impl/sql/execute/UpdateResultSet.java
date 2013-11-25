@@ -61,7 +61,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow 					deferredSparseRow;
 	UpdateConstantAction		constants;
 	
-    private ResultDescription 		resultDescription;
 	private NoPutResultSet			source;
 	NoPutResultSet			savedSource;
 	private RowChanger				rowChanger;
@@ -98,15 +97,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	int lockMode;
 	boolean deferred;
 	boolean beforeUpdateCopyRequired = false;
-
-	/**
-     * Returns the description of the updated rows.
-     * REVISIT: Do we want this to return NULL instead?
-	 */
-	public ResultDescription getResultDescription()
-	{
-	    return resultDescription;
-	}
 
     /*
      * class interface
@@ -437,6 +427,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		boolean rowsFound = false;
 		row = getNextRowCore(source);
+
 		if (row!=null)
 			rowsFound = true;
 		else
@@ -587,6 +578,33 @@ class UpdateResultSet extends DMLWriteResultSet
 		}
 
 		return rowsFound;
+	}
+
+    @Override
+	protected ExecRow getNextRowCore( NoPutResultSet source )
+		throws StandardException
+	{
+		ExecRow row = super.getNextRowCore( source );
+
+        if ( (row != null) && constants.underMerge() ) { row = processMergeRow( source, row ); }
+
+        return row;
+	}
+
+    /**
+     * <p>
+     * Special handling if this is an UPDATE action of a MERGE statement.
+     * </p>
+     */
+	private ExecRow processMergeRow( NoPutResultSet sourceRS, ExecRow row )
+		throws StandardException
+	{
+        //
+        // After we fix derby-6414, we will need to handle the DEFAULT keyword
+        // for identity columns, just as we do in InsertResultSet.processMergeRow().
+        // For the moment, we just allow the bad behavior described by derby-6414.
+        //
+        return normalizeRow( sourceRS, row );
 	}
 
 	/* beetle 3865, updateable cursor use index. If the row we are updating has new value that

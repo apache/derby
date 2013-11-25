@@ -27,6 +27,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -34,6 +36,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.transaction.TransactionControl;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -50,6 +53,15 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 
 
 	public long rowCount;
+
+	// divined at run time
+    protected   ResultDescription 		resultDescription;
+
+    /**
+     * This array contains data value descriptors that can be used (and reused)
+     * to hold the normalized column values.
+     */
+    protected DataValueDescriptor[] cachedDestinations;
 
 
 	/**
@@ -109,6 +121,14 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
     @Override
 	public final long	modifiedRowCount() { return rowCount + RowUtil.getRowCountBase(); }
 
+	/**
+     * Returns the description of the inserted rows.
+     * REVISIT: Do we want this to return NULL instead?
+	 */
+	public ResultDescription getResultDescription()
+	{
+	    return resultDescription;
+	}
 
 	/**
 	 * Get next row from the source result set.
@@ -278,4 +298,60 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 	{
 		return this.constantAction.getIndexNameFromCID(indexCID);
 	}
+
+    /**
+     * <p>
+     * Normalize a row as part of the INSERT/UPDATE action of a MERGE statement.
+     * This applies logic usually found in a NormalizeResultSet, which is missing for
+     * the MERGE statement.
+     * </p>
+     */
+    protected   ExecRow normalizeRow( NoPutResultSet sourceResultSet, ExecRow row )
+        throws StandardException
+    {
+        //
+        // Make sure that the evaluated expressions fit in the base table row.
+        //
+        int count = resultDescription.getColumnCount();
+        if ( cachedDestinations == null )
+        {
+            cachedDestinations = new DataValueDescriptor[ count ];
+            for ( int i = 0; i < count; i++)
+            {
+                int         position = i + 1;
+                ResultColumnDescriptor  colDesc = resultDescription.getColumnDescriptor( position );
+                cachedDestinations[ i ] = colDesc.getType().getNull();
+            }
+        }
+
+        for ( int i = 0; i < count; i++ )
+        {
+            int         position = i + 1;
+            DataTypeDescriptor  dtd = resultDescription.getColumnDescriptor( position ).getType();
+
+            if ( row.getColumn( position ) == null )
+            {
+                row.setColumn( position, dtd.getNull() );
+            }
+
+            row.setColumn
+                (
+                 position,
+                 NormalizeResultSet.normalizeColumn
+                 (
+                  dtd,
+                  row,
+                  position,
+                  cachedDestinations[ i ],
+                  resultDescription
+                  )
+                 );
+        }
+
+        // put the row where expressions in constraints can access it
+        activation.setCurrentRow( row, sourceResultSet.resultSetNumber() );
+
+        return row;
+    }
+    
 }

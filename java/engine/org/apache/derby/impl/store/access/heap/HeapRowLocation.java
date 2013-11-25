@@ -36,6 +36,7 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 
 import org.apache.derby.iapi.types.DataType;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RefDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 
 import java.io.ObjectOutput;
@@ -63,7 +64,7 @@ import java.io.IOException;
  *     record id(CompressedNumber.writeInt())
  **/
 
-public class HeapRowLocation extends DataType implements RowLocation
+public class HeapRowLocation extends DataType implements RowLocation, RefDataValue
 {
 	/**
 	The HeapRowLocation simply maintains a raw store record handle.
@@ -195,6 +196,13 @@ public class HeapRowLocation extends DataType implements RowLocation
 		else
 			return 1;
 	}
+
+    public  void    setValue( RowLocation rowLocation )
+    {
+        HeapRowLocation hrl = (HeapRowLocation) rowLocation;
+
+        setFrom( hrl.rh );
+    }
 
 	/*
 	** Methods of HeapRowLocation

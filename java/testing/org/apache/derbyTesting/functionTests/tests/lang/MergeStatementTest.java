@@ -526,26 +526,22 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "when matched then delete\n"
               );
         
-        //
-        // The following syntax is actually good, but the compiler rejects these
-        // statements because we haven't finished implementing MERGE.
-        //
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
               "merge into t1\n" +
               "using t2\n" +
               "on t1.c1 = t2.c1\n" +
               "when matched then update set c2 = t2.c3\n"
               );
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
               "merge into t1\n" +
               "using t2\n" +
               "on t1.c1 = t2.c1\n" +
               "when matched and t1.c2 = t2.c2 then update set c2 = t2.c3\n"
               );
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
               "merge into t1\n" +
               "using t2\n" +
               "on t1.c1 = t2.c1\n" +
@@ -576,8 +572,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               );
 
         // it's probably ok to specify default values for generated columns in MATCHED ... THEN UPDATE
-        expectCompilationError
-            ( dboConnection, NOT_IMPLEMENTED,
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
               "merge into t1\n" +
               "using t2\n" +
               "on t1.c1 = t2.c1\n" +
@@ -2338,6 +2334,1193 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test basic update action.
+     * </p>
+     */
+    public  void    test_014_basicUpdate()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_014\n" +
+             "(\n" +
+             "    c1 int generated always as identity,\n" +
+             "    c2 int,\n" +
+             "    c3 int generated always as ( c1 + c2 ),\n" +
+             "    c1_4 int,\n" +
+             "    c5 int default 1000\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_014( c1 int generated always as identity, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_014( c2, c1_4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_014( c2, c3, c4, c5 ) values\n" +
+             "( -1, -101, -100, 'one' ), ( 2, -201, -200, 'two' ), ( -3, -301, -300, 'three' ), ( 4, -401, -400, 'four' )\n"
+             );
+
+        //
+        // This case tracks a bug in which bind() wasn't poking the table name
+        // into resolved column references. This resulted in an NPE.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_014\n" +
+             "using t2_014\n" +
+             "on t1_014.c2 = t2_014.c2\n" +
+             "when matched then update set c1_4 = (2 * c1_4) / 2\n",
+             2
+             );
+
+        //
+        // Update with a matching refinement. Don't touch the generated column.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_014\n" +
+             "using t2_014\n" +
+             "on t1_014.c2 = t2_014.c2\n" +
+             "when matched and c1_4 = 200 then update set c5 = 10 * t2_014.c1\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_014 order by c1",
+             new String[][]
+             {
+                 { "1", "1", "2", "100", "1000" },
+                 { "2", "2", "4", "200", "20" },
+                 { "3", "3", "6", "300", "1000" },
+                 { "4", "4", "8", "400", "1000" },
+             },
+             false
+             );
+
+        //
+        // Update with a default for the generated column.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_014\n" +
+             "using t2_014\n" +
+             "on t1_014.c1 = t2_014.c1\n" +
+             "when matched and t1_014.c2 != t2_014.c2 then update set c3 = default, c2 = t2_014.c2\n",
+             2
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_014 order by c1",
+             new String[][]
+             {
+                 { "1", "-1", "0", "100", "1000" },
+                 { "2", "2", "4", "200", "20" },
+                 { "3", "-3", "0", "300", "1000" },
+                 { "4", "4", "8", "400", "1000" },
+             },
+             false
+             );
+
+        //
+        // Update with a default for the generated column and the column which has an explicit default.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_014\n" +
+             "using t2_014\n" +
+             "on t1_014.c2 = t2_014.c2\n" +
+             "when matched then update set c3 = default, c2 = 10 * t2_014.c2, c5 = default\n",
+             4
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_014 order by c1",
+             new String[][]
+             {
+                 { "1", "-10", "-9", "100", "1000" },
+                 { "2", "20", "22", "200", "1000" },
+                 { "3", "-30", "-27", "300", "1000" },
+                 { "4", "40", "44", "400", "1000" },
+             },
+             false
+             );
+
+        //
+        // The following statement fails because of derby-6414. Revisit this
+        // case when that bug is fixed.
+        //
+        expectCompilationError
+            ( dboConnection, CANT_MODIFY_IDENTITY,
+              "merge into t1_014\n" +
+              "using t2_014\n" +
+              "on t1_014.c2 = t2_014.c2\n" +
+              "when matched then update set c1 = default, c3 = default, c2 = 2 * t2_014.c2, c5 = default\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_014" );
+        goodStatement( dboConnection, "drop table t1_014" );
+    }
+    
+    /**
+     * <p>
+     * Verify that the UPDATE actions of MERGE statements behave like ordinary UPDATE statements
+     * in their treatment of DEFAULT values for identity columns. Derby's behavior here is wrong but
+     * we would like it to be consistent. We need to correct the MERGE behavior when we correct
+     * the behavior for standalone UPDATE statements.
+     * </p>
+     */
+    public  void    test_015_bug_6414()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_bug_6414( a int generated always as identity, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_bug_6414( a int generated by default as identity, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_bug_6414( a int generated always as identity, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_bug_6414( a, b ) values ( default, 100 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_bug_6414( a, b ) values ( default, 100 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t3_bug_6414( a, b ) values ( default, 100 )"
+             );
+
+        //
+        // Derby, incorrectly, won't let you update a GENERATED ALWAYS identity
+        // column to the next DEFAULT value, i.e., the next value from the
+        // sequence generator.
+        //
+        expectCompilationError
+            ( dboConnection, CANT_MODIFY_IDENTITY,
+              "update t1_bug_6414 set a = default, b = -b"
+              );
+        expectCompilationError
+            ( dboConnection, CANT_MODIFY_IDENTITY,
+              "merge into t1_bug_6414\n" +
+              "using t3_bug_6414\n" +
+              "on t1_bug_6414.a = t3_bug_6414.a\n" +
+              "when matched then update set a = default, b = -t3_bug_6414.b\n"
+              );
+
+
+        //
+        // Derby, incorrectly, won't let you update a GENERATED BY DEFAULT identity
+        // column to the next DEFAULT value, i.e., the next value from the
+        // sequence generator.
+        //
+        expectExecutionError
+            ( dboConnection, NOT_NULL_VIOLATION,
+              "update t2_bug_6414 set a = default, b = -b\n"
+              );
+        expectExecutionError
+            ( dboConnection, NOT_NULL_VIOLATION,
+              "merge into t2_bug_6414\n" +
+              "using t3_bug_6414\n" +
+              "on t2_bug_6414.a = t3_bug_6414.a\n" +
+              "when matched then update set a = default, b = -t3_bug_6414.b\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t3_bug_6414" );
+        goodStatement( dboConnection, "drop table t2_bug_6414" );
+        goodStatement( dboConnection, "drop table t1_bug_6414" );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test before and after statement level triggers fired by MERGE statements.
+     * </p>
+     */
+    public  void    test_016_updateWithStatementTriggers()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_016( c1 int, c2 int, c3 int )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_016( c1 int generated always as identity, c2 int )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure sumColumn_016\n" +
+             "(\n" +
+             "    candidateName varchar( 20 ),\n" +
+             "    columnName varchar( 20 ),\n" +
+             "    actionString varchar( 20 )\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.sumColumn'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_016()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_016()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_016_upd_before\n" +
+             "no cascade before update on t1_016\n" +
+             "for each statement\n" +
+             "call sumColumn_016( 't1_016', 'c3', 'before' )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_016_upd_after\n" +
+             "after update on t1_016\n" +
+             "for each statement\n" +
+             "call sumColumn_016( 't1_016', 'c3', 'after' )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_016()\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_016( c1, c2, c3 ) values ( 1, 10, 100 ), ( 2, 20, 200 ), ( 3, 30, 300 ), ( 4, 40, 400 ), ( 5, 50, 500 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_016( c2 ) values ( 10 ), ( 20 ), ( 40 ), ( 50 ), ( 60 ), ( 70 )\n"
+             );
+
+        //
+        // UPDATE without matching refinement.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_016\n" +
+             "using t2_016\n" +
+             "on   t1_016.c2 =   t2_016.c2\n" +
+             "when matched then update set c3 = -100\n",
+             4
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_016 order by c1",
+             new String[][]
+             {
+                 { "1", "10", "-100" },
+                 { "2", "20", "-100" },
+                 { "3", "30", "300" },
+                 { "4", "40", "-100" },
+                 { "5", "50", "-100" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_016() ) s",
+             new String[][]
+             {
+                 { "before", "1500" },
+                 { "after", "-100" },
+             },
+             false
+             );
+
+        //
+        // UPDATE with matching refinement.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "update t1_016 set c3 = 100 * c1"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_016()"
+             );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_016\n" +
+             "using t2_016\n" +
+             "on   t1_016.c2 =   t2_016.c2\n" +
+             "when matched and c3 = 200 then update set c3 = -200\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_016 order by c1",
+             new String[][]
+             {
+                 { "1", "10", "100" },
+                 { "2", "20", "-200" },
+                 { "3", "30", "300" },
+                 { "4", "40", "400" },
+                 { "5", "50", "500" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_016() ) s",
+             new String[][]
+             {
+                 { "before", "1500" },
+                 { "after", "1100" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_016" );
+        goodStatement( dboConnection, "drop table t2_016" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_016" );
+        goodStatement( dboConnection, "drop procedure sumColumn_016" );
+        goodStatement( dboConnection, "drop function history_016" );
+        truncateTriggerHistory();
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test before and after row level triggers fired by MERGE statements.
+     * </p>
+     */
+    public  void    test_017_updateWithRowTriggers()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_017( c1 int, c2 int, c3 int )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_017( c1 int generated always as identity, c2 int )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_017\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_017()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_017()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_017_upd_before\n" +
+             "no cascade before update on t1_017\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_017( 'before', old.c1 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_017_upd_after\n" +
+             "after update on t1_017\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_017( 'after', old.c1 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_017( c1, c2, c3 ) values ( 1, 10, 100 ), ( 2, 20, 200 ), ( 3, 30, 300 ), ( 4, 40, 400 ), ( 5, 50, 500 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_017( c2 ) values ( 10 ), ( 20 ), ( 40 ), ( 50 ), ( 60 ), ( 70 )\n"
+             );
+
+        //
+        // UPDATE without matching refinement.
+        //
+        goodStatement
+            ( dboConnection,
+              "call truncateTriggerHistory_017()"
+              );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_017\n" +
+             "using t2_017\n" +
+             "on t1_017.c2 = t2_017.c2\n" +
+             "when matched then update set c3 = -100\n",
+             4
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_017 order by c1",
+             new String[][]
+             {
+                 { "1", "10", "-100" },
+                 { "2", "20", "-100" },
+                 { "3", "30", "300" },
+                 { "4", "40", "-100" },
+                 { "5", "50", "-100" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_017() ) s",
+             new String[][]
+             {
+                 { "before", "1" },
+                 { "before", "2" },
+                 { "before", "4" },
+                 { "before", "5" },
+                 { "after", "1" },
+                 { "after", "2" },
+                 { "after", "4" },
+                 { "after", "5" },
+             },
+             false
+             );
+
+        //
+        // UPDATE with matching refinement.
+        //
+        goodStatement
+            ( dboConnection,
+              "update t1_017 set c3 = 100 * c1"
+              );
+        goodStatement
+            ( dboConnection,
+              "call truncateTriggerHistory_017()"
+              );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_017\n" +
+             "using t2_017\n" +
+             "on t1_017.c2 = t2_017.c2\n" +
+             "when matched and c3 = 200 then update set c3 = -200\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_017 order by c1",
+             new String[][]
+             {
+                 { "1", "10", "100" },
+                 { "2", "20", "-200" },
+                 { "3", "30", "300" },
+                 { "4", "40", "400" },
+                 { "5", "50", "500" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_017() ) s",
+             new String[][]
+             {
+                 { "before", "2" },
+                 { "after", "2" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_017" );
+        goodStatement( dboConnection, "drop table t2_017" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_017" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_017" );
+        goodStatement( dboConnection, "drop function history_017" );
+        truncateTriggerHistory();
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test MERGE statements with UPDATE actions whose source tables are
+     * trigger transition tables.
+     * </p>
+     */
+    public  void    test_018_updateFromTriggerTransitionTables()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_018( c1 int, c2 int, c3 int generated always as ( c1 + c2 ), c1_4 int )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_018( c1 int, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+
+        //
+        // Source table is new transition table. No matching refinement.
+        //
+        vet_018
+            (
+             dboConnection,
+             "create trigger trig1_018 after update on t2_018\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_018\n" +
+             "using new_cor\n" +
+             "on t1_018.c2 = new_cor.c2\n" +
+             "when matched then update set c1_4 = 2 * c1_4\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "200" },
+                 { "2", "2", "4", "200" },
+                 { "3", "3", "6", "600" },
+                 { "4", "4", "8", "400" },
+             }
+             );
+
+        //
+        // Source table is new transition table. With matching refinement.
+        //
+        vet_018
+            (
+             dboConnection,
+             "create trigger trig1_018 after update on t2_018\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_018\n" +
+             "using new_cor\n" +
+             "on   t1_018.c2 =   new_cor.c2\n" +
+             "when matched and c1_4 = 300 then update set c1_4 = 2 * c1_4\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "2", "2", "4", "200" },
+                 { "3", "3", "6", "600" },
+                 { "4", "4", "8", "400" },
+             }
+             );
+
+        //
+        // Source table is old transition table. No matching refinement.
+        //
+        vet_018
+            (
+             dboConnection,
+             "create trigger trig1_018 after update on t2_018\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_018\n" +
+             "using old_cor\n" +
+             "on t1_018.c2 = old_cor.c2\n" +
+             "when matched then update set c1_4 = 2 * c1_4\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "2", "2", "4", "400" },
+                 { "3", "3", "6", "300" },
+                 { "4", "4", "8", "800" },
+             }
+             );
+
+        //
+        // Source table is old transition table. With matching refinement.
+        //
+        vet_018
+            (
+             dboConnection,
+             "create trigger trig1_018 after update on t2_018\n" +
+             "referencing old table as old_cor new table as new_cor\n" +
+             "for each statement\n" +
+             "merge into t1_018\n" +
+             "using old_cor\n" +
+             "on t1_018.c2 = old_cor.c2\n" +
+             "when matched and c1_4 = 200 then update set c1_4 = 2 * c1_4\n",
+             new String[][]
+             {
+                 { "1", "1", "2", "100" },
+                 { "2", "2", "4", "400" },
+                 { "3", "3", "6", "300" },
+                 { "4", "4", "8", "400" },
+             }
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_018" );
+        goodStatement( dboConnection, "drop table t2_018" );
+    }
+    private void    vet_018
+        (
+         Connection conn,
+         String triggerDefinition,
+         String[][] expectedResults
+         )
+        throws Exception
+    {
+        populate_018( conn );
+        goodStatement( conn, triggerDefinition );
+        goodUpdate( conn, "update t2_018 set c2 = -c2", 4 );
+        assertResults( conn, "select * from t1_018 order by c1", expectedResults, false );
+        goodStatement( conn, "drop trigger trig1_018" );
+    }
+    private void    populate_018( Connection conn )
+        throws Exception
+    {
+        goodStatement( conn, "delete from t2_018" );
+        goodStatement( conn, "delete from t1_018" );
+
+        goodStatement
+            ( conn,
+              "insert into t1_018( c1, c2, c1_4 ) values ( 1, 1, 100 ), ( 2, 2, 200 ), ( 3, 3, 300 ), ( 4, 4, 400 )\n"
+              );
+        goodStatement
+            ( conn,
+"insert into t2_018( c1, c2, c3, c4, c5 ) values ( 1, -1, -10, -100, 'one' ), ( 2, 2, -2, -200, 'two' ), ( 3, -3, -30, -300, 'three' ), ( 4, 4, -40,    -400, 'four' )\n"
+              );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test combined insert, update, delete actions.
+     * </p>
+     */
+    public  void    test_019_insertUpdateDelete()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_019\n" +
+             "(\n" +
+             "    c1 int,\n" +
+             "    c2 int,\n" +
+             "    c3 int generated always as ( c1 + c2 ),\n" +
+             "    c1_4 int,\n" +
+             "    c5 int default 1000\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_019( c1 int generated always as identity, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_019( c2, c3, c4, c5 ) values\n" +
+             "( -1, -101, -100, 'one' ), ( 2, -201, -200, 'two' ), ( -3, -301, -300, 'three' ), ( 4, -401, -400, 'four' )\n"
+             );
+
+        //
+        // Try the WHEN [ NOT ] MATCHED clauses in various orders.
+        //
+        vet_019
+            (
+             dboConnection,
+             "merge into t1_019\n" +
+             "using t2_019\n" +
+             "on t1_019.c2 = t2_019.c2\n" +
+             "when not matched then insert ( c2, c1_4 ) values ( 10 * t2_019.c2, t2_019.c3 )\n" +
+             "when matched and c1_4 = 200 then delete\n" +
+             "when matched and c1_4 = 400 then update set c1_4 = t2_019.c4, c5 = 2 * t2_019.c1\n"
+             );
+        vet_019
+            (
+             dboConnection,
+             "merge into t1_019\n" +
+             "using t2_019\n" +
+             "on t1_019.c2 = t2_019.c2\n" +
+             "when matched and c1_4 = 200 then delete\n" +
+             "when matched and c1_4 = 400 then update set c1_4 = t2_019.c4, c5 = 2 * t2_019.c1\n" +
+             "when not matched then insert ( c2, c1_4 ) values ( 10 * t2_019.c2, t2_019.c3 )\n"
+             );
+        vet_019
+            (
+             dboConnection,
+             "merge into t1_019\n" +
+             "using t2_019\n" +
+             "on t1_019.c2 = t2_019.c2\n" +
+             "when matched and c1_4 = 400 then update set c1_4 = t2_019.c4, c5 = 2 * t2_019.c1\n" +
+             "when not matched then insert ( c2, c1_4 ) values ( 10 * t2_019.c2, t2_019.c3 )\n" +
+             "when matched and c1_4 = 200 then delete\n"
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_019" );
+        goodStatement( dboConnection, "drop table t1_019" );
+    }
+    private void    vet_019
+        (
+         Connection conn,
+         String mergeStatement
+         )
+        throws Exception
+    {
+        populate_019( conn );
+        goodUpdate( conn, mergeStatement, 4 );
+        assertResults
+            (
+             conn,
+             "select * from t1_019 order by c2",
+             new String[][]
+             {
+                 { null, "-30", null, "-301", "1000" },
+                 { null, "-10", null, "-101", "1000" },
+                 { "1", "1", "2", "100", "1000" },
+                 { "3", "3", "6", "300", "1000" },
+                 { "4", "4", "8", "-400", "8" },
+                 { "5", "5", "10", "500", "1000" },
+             },
+             false
+             );
+    }
+    private void    populate_019( Connection conn ) throws Exception
+    {
+        goodStatement( conn, "delete from t1_019" );
+        goodStatement
+            (
+             conn,
+             "insert into t1_019( c1, c2, c1_4 ) values ( 1, 1, 100 ), ( 2, 2, 200 ), ( 3, 3, 300 ), ( 4, 4, 400 ), ( 5, 5, 500 )\n"
+             );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test check constraints fired by UPDATE actions.
+     * </p>
+     */
+    public  void    test_020_updateWithCheckConstraint()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_020\n" +
+             "(\n" +
+             "    c1 int generated always as identity,\n" +
+             "    c2 int,\n" +
+             "    c3 int generated always as ( c1 + c2 ),\n" +
+             "    c1_4 int,\n" +
+             "    c5 int default 1000,\n" +
+             "    check( c1_4 > 2 * c3 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_020( c1 int generated always as identity, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_020( c2, c1_4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_020( c2, c3, c4, c5 ) values\n" +
+             "( -1, -101, -100, 'one' ), ( 2, -201, -200, 'two' ), ( -3, -301, -300, 'three' ), ( 4, -401, -400, 'four' )\n"
+             );
+
+        //
+        // Fail the constraint.
+        //
+        expectExecutionError
+            ( dboConnection, CONSTRAINT_VIOLATION,
+              "merge into t1_020\n" +
+              "using t2_020\n" +
+              "on t1_020.c2 = t2_020.c2\n" +
+              "when matched then update set c1_4 = -c1_4\n"
+              );
+
+        //
+        // Pass the constraint.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_020\n" +
+             "using t2_020\n" +
+             "on t1_020.c2 = t2_020.c2\n" +
+             "when matched then update set c1_4 = 2 * c1_4\n",
+             2
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_020 order by c1",
+             new String[][]
+             {
+                 { "1", "1", "2", "100", "1000" },
+                 { "2", "2", "4", "400", "1000" },
+                 { "3", "3", "6", "300", "1000" },
+                 { "4", "4", "8", "800", "1000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_020" );
+        goodStatement( dboConnection, "drop table t1_020" );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test foreign key constraints with check constraints fired by UPDATE actions.
+     * The CHECK constraint is satisfied but the foreign key is not.
+     * </p>
+     */
+    public  void    test_021_updateWithForeignAndCheckConstraint()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_021\n" +
+             "(\n" +
+             "    c2 int,\n" +
+             "    c4 int,\n" +
+             "    primary key( c2, c4 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_021\n" +
+             "(\n" +
+             "    c1 int generated always as identity,\n" +
+             "    c2 int,\n" +
+             "    c3 int generated always as ( c1 + c2 ),\n" +
+             "    c1_4 int,\n" +
+             "    c5 int default 1000,\n" +
+             "    check( c1_4 > 2 * c3 ),\n" +
+             "    foreign key ( c2, c1_4 ) references t3_021( c2, c4 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_021( c1 int generated always as identity, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t3_021( c2, c4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 ), ( 4, 500 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_021( c2, c1_4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_021( c2, c3, c4, c5 ) values\n" +
+             "( -1, -101, -100, 'one' ), ( 2, -201, -200, 'two' ), ( -3, -301, -300, 'three' ), ( 4, -401, -400, 'four' )\n"
+             );
+
+        //
+        // Foreign key violation.
+        //
+        expectExecutionError
+            ( dboConnection, FOREIGN_KEY_VIOLATION,
+              "merge into t1_021\n" +
+              "using t2_021\n" +
+              "on t1_021.c2 = t2_021.c2\n" +
+              "when matched and c1_4 = 400 then update set c1_4 = 600\n"
+              );
+
+        //
+        // Successful update.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_021\n" +
+             "using t2_021\n" +
+             "on t1_021.c2 = t2_021.c2\n" +
+             "when matched and c1_4 = 400 then update set c1_4 = 500\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_021 order by c1",
+             new String[][]
+             {
+                 { "1", "1", "2", "100", "1000" },
+                 { "2", "2", "4", "200", "1000" },
+                 { "3", "3", "6", "300", "1000" },
+                 { "4", "4", "8", "500", "1000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_021" );
+        goodStatement( dboConnection, "drop table t1_021" );
+        goodStatement( dboConnection, "drop table t3_021" );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test primary key constraints with check constraints fired by UPDATE actions.
+     * The CHECK constraint is satisfied but the foreign key is not.
+     * </p>
+     */
+    public  void    test_021_updateWithForeignPrimaryAndCheckConstraint()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_022\n" +
+             "(\n" +
+             "    c2 int,\n" +
+             "    c4 int,\n" +
+             "    primary key( c2, c4 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_022\n" +
+             "(\n" +
+             "    c1 int generated always as identity,\n" +
+             "    c2 int,\n" +
+             "    c3 int generated always as ( c1 + c2 ),\n" +
+             "    c1_4 int primary key,\n" +
+             "    c5 int default 1000,\n" +
+             "    check( c1_4 > 2 * c3 ),\n" +
+             "    foreign key ( c2, c1_4 ) references t3_022( c2, c4 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_022( c1 int generated always as identity, c2 int, c3 int, c4 int, c5 varchar( 5 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t3_022( c2, c4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 ), ( 4, 300 ), ( 4, 500 ), ( 5, 500 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_022( c2, c1_4 ) values ( 1, 100 ), (2, 200 ), ( 3, 300 ), ( 4, 400 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_022( c2, c3, c4, c5 ) values\n" +
+             "( -1, -101, -100, 'one' ), ( 2, -201, -200, 'two' ), ( -3, -301, -300, 'three' ), ( 4, -401, -400, 'four' )\n"
+             );
+
+        //
+        // Violate primary key but not foreign key or CHECK constraint.
+        //
+        expectExecutionError
+            ( dboConnection, ILLEGAL_DUPLICATE,
+              "merge into t1_022\n" +
+              "using t2_022\n" +
+              "on t1_022.c2 = t2_022.c2\n" +
+              "when matched and c1_4 = 400 then update set c1_4 = 300\n"
+              );
+
+        //
+        // Successfully update primary key.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_022\n" +
+             "using t2_022\n" +
+             "on t1_022.c2 = t2_022.c2\n" +
+             "when matched and c1_4 = 400 then update set c1_4 = 500\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_022 order by c1",
+             new String[][]
+             {
+                 { "1", "1", "2", "100", "1000" },
+                 { "2", "2", "4", "200", "1000" },
+                 { "3", "3", "6", "300", "1000" },
+                 { "4", "4", "8", "500", "1000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_022" );
+        goodStatement( dboConnection, "drop table t1_022" );
+        goodStatement( dboConnection, "drop table t3_022" );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
     //
@@ -2393,6 +3576,33 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         selectRS.close();
 
         addHistoryRow( actionString, rowCount );
+    }
+
+    /**
+     * <p>
+     * Trigger-called procedure for summing a column in a candidate table and then inserting
+     * the result in a history table. The history table has the following shape:
+     * </p>
+     *
+     * <ul>
+     * <li>id</li>
+     * <li>actionString</li>
+     * <li>rowCount</li>
+     * </ul>
+     */
+    public  static  void    sumColumn
+        ( String candidateName, String columnName, String actionString )
+        throws SQLException
+    {
+        Connection  conn = getNestedConnection();
+        
+        String  selectSum = "select sum( " + columnName + " ) from " + candidateName;
+        ResultSet   selectRS = conn.prepareStatement( selectSum ).executeQuery();
+        selectRS.next();
+        int sum = selectRS.getInt( 1 );
+        selectRS.close();
+
+        addHistoryRow( actionString, sum );
     }
 
     /** Procedure for adding trigger history */

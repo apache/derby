@@ -424,11 +424,18 @@ public final class UpdateNode extends DMLModStatementNode
 
 		changedColumnIds = getChangedColumnIds(resultSet.getResultColumns());
 
+        //
+        // Trigger transition tables are implemented as VTIs. This short-circuits some
+        // necessary steps if the source table of a MERGE statement is a trigger
+        // transition table. The following boolean is meant to prevent that short-circuiting.
+        //
+        boolean needBaseColumns = (targetVTI == null) || inMatchingClause();
+        
 		/*
 		** We need to add in all the columns that are needed
 		** by the constraints on this table.  
 		*/
-		if (!allColumns && targetVTI == null)
+		if (!allColumns && needBaseColumns)
 		{
 			getCompilerContext().pushCurrentPrivType( Authorizer.NULL_PRIV);
 			try
@@ -472,7 +479,7 @@ public final class UpdateNode extends DMLModStatementNode
 
         ValueNode rowLocationNode;
 
-		if (targetVTI == null)
+		if (needBaseColumns)
 		{
 			/* Append the list of "after" columns to the list of "before" columns,
 			 * preserving the afterColumns list.  (Necessary for binding
@@ -552,7 +559,7 @@ public final class UpdateNode extends DMLModStatementNode
 			}
 		}
 
-        if( null != targetVTI)
+        if( null != targetVTI && !inMatchingClause() )
 		{
             deferred = VTIDeferModPolicy.deferIt( DeferModification.UPDATE_STATEMENT,
                                                   targetVTI,
@@ -598,7 +605,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 		getCompilerContext().popCurrentPrivType();		
 
-	} // end of bind()
+    } // end of bind()
 
     @Override
 	int getPrivType()
@@ -634,7 +641,7 @@ public final class UpdateNode extends DMLModStatementNode
 		** Updates are also deferred if they update a column in the index
 		** used to scan the table being updated.
 		*/
-		if (! deferred )
+		if ( !deferred && !inMatchingClause() )
 		{
 			ConglomerateDescriptor updateCD =
 										targetTable.
@@ -666,7 +673,8 @@ public final class UpdateNode extends DMLModStatementNode
 						deferred, changedColumnIds);
 		}
 
-        int lckMode = resultSet.updateTargetLockMode();
+        int lckMode = inMatchingClause() ?
+            TransactionController.MODE_RECORD : resultSet.updateTargetLockMode();
 		long heapConglomId = targetTableDescriptor.getHeapConglomerateId();
 		TransactionController tc = 
 			getLanguageConnectionContext().getTransactionCompile();
@@ -794,9 +802,18 @@ public final class UpdateNode extends DMLModStatementNode
 		*/
 
 		acb.pushGetResultSetFactoryExpression(mb);
-		resultSet.generate(acb, mb); // arg 1
 
-        if( null != targetVTI)
+        // arg 1
+        if ( inMatchingClause() )
+        {
+            matchingClause.generateResultSetField( acb, mb );
+        }
+        else
+        {
+            resultSet.generate( acb, mb );
+        }
+
+        if( null != targetVTI && !inMatchingClause() )
         {
 			targetVTI.assignCostEstimate(resultSet.getNewCostEstimate());
             mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUpdateVTIResultSet", ClassName.ResultSet, 1);
