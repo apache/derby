@@ -989,7 +989,7 @@ I
 1          
 ij> drop trigger tt;
 0 rows inserted/updated/deleted
-ij> -- dropping and recreating a table which the trigger references
+ij> -- dropping a table which the trigger references, should fail (DERBY-2041)
 create table t3 (i int);
 0 rows inserted/updated/deleted
 ij> create table t4 (i int);
@@ -1003,16 +1003,13 @@ I
 -----------
 1          
 ij> drop table t4;
-0 rows inserted/updated/deleted
-ij> insert into t3 values 1;
-ERROR 42X05: Table/View 'T4' does not exist.
-ij> create table t4 (i int);
-0 rows inserted/updated/deleted
+ERROR X0Y25: Operation 'DROP TABLE' cannot be performed on object 'T4' because TRIGGER 'TT2' is dependent on that object.
 ij> insert into t3 values 1;
 1 row inserted/updated/deleted
 ij> select * from t4;
 I          
 -----------
+1          
 1          
 ij> -- dropping a function which the trigger references
 create function max_value(x int, y int) returns int language java parameter style java external name 'java.lang.Math.max';
@@ -1023,13 +1020,13 @@ ij> create trigger test_trigger AFTER insert on test FOR EACH ROW values max_val
 0 rows inserted/updated/deleted
 ij> insert into test values(1);
 1 row inserted/updated/deleted
-ij> --- drop function and again do inserts. these should not work as the trigger would be invalid
+ij> --- drop function should fail (DERBY-2041)
 drop function max_value;
-0 rows inserted/updated/deleted
+ERROR X0Y25: Operation 'DROP ROUTINE' cannot be performed on object 'MAX_VALUE' because TRIGGER 'TEST_TRIGGER' is dependent on that object.
 ij> insert into test values(2);
-ERROR 42Y03: 'MAX_VALUE' is not recognized as a function or procedure.
+1 row inserted/updated/deleted
 ij> insert into test values(1);
-ERROR 42Y03: 'MAX_VALUE' is not recognized as a function or procedure.
+1 row inserted/updated/deleted
 ij> -- dropping a view which the trigger references
 create table t11TriggerTest (c111 int not null primary key, c112 int);
 0 rows inserted/updated/deleted
@@ -1060,20 +1057,21 @@ select * from t32TriggerTest;
 C321       
 -----------
 1          
-ij> -- drop the view used by the trigger.
+ij> -- drop the view used by the trigger. should fail after DERBY-2041.
 drop view v21ViewTest;
-0 rows inserted/updated/deleted
-ij> -- try an insert which would cause insert trigger to fire. The insert trigger should have failed because view doesn't
--- exist anymore.
+ERROR X0Y25: Operation 'DROP VIEW' cannot be performed on object 'V21VIEWTEST' because TRIGGER 'TR31T31TRIGGERTEST' is dependent on that object.
+ij> -- try an insert which would cause insert trigger to fire.
 insert into t31TriggerTest values(1);
-ERROR 42X05: Table/View 'V21VIEWTEST' does not exist.
+1 row inserted/updated/deleted
 ij> select * from t31TriggerTest;
 C311       
 -----------
 1          
+1          
 ij> select * from t32TriggerTest;
 C321       
 -----------
+1          
 1          
 ij> -- DERBY-630 
 -- NPE in CREATE TRIGGER when compilation schema is other than APP.

@@ -60,6 +60,11 @@ import org.apache.derbyTesting.junit.XML;
  *
  */
 public class TriggerTest extends BaseJDBCTestCase {
+
+    private static final String SYNTAX_ERROR = "42X01";
+    private static final String HAS_DEPENDENT_SPS = "X0Y24";
+    private static final String HAS_DEPENDENT_TRIGGER = "X0Y25";
+    private static final String TRIGGER_DROPPED = "01502";
    
     /**
      * Thread local that a trigger can access to
@@ -783,7 +788,6 @@ public class TriggerTest extends BaseJDBCTestCase {
      * Test for DERBY-3718 NPE when a trigger is fired
      * 
      * @throws SQLException
-     * @throws IOException
      */
     public void testNPEinTriggerFire() throws SQLException
     {
@@ -2121,5 +2125,203 @@ public class TriggerTest extends BaseJDBCTestCase {
         // Used to fail with assert failure or NullPointerException before
         // DERBY-6348.
         s.execute("insert into d6348 values 1");
+    }
+
+    /**
+     * Test that DROP operations detect if there are triggers depending on
+     * the object being dropped, and either fail (if RESTRICT semantics) or
+     * drop the trigger (if CASCADE semantics).
+     */
+    public void testDerby2041DropDependencies() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t1(x int, y int, z int)");
+        s.execute("create table t2(x int, y int, z int)");
+        s.execute("create table syn_table(x int, y int, z int)");
+        s.execute("create table view_table(x int, y int, z int)");
+
+        s.execute("create function f(x int) returns int language java "
+                + "parameter style java external name 'java.lang.Math.abs'");
+        s.execute("create procedure p() language java parameter style java "
+                + "external name '" + getClass().getName()
+                + ".dummyProc' no sql");
+        s.execute("create function tf() returns table (x int) "
+                + "language java parameter style derby_jdbc_result_set "
+                + "external name '" + getClass().getName()
+                + ".dummyTableFunction' no sql");
+        s.execute("create derby aggregate intmode for int external name '"
+                + ModeAggregate.class.getName() + "'");
+        s.execute("create sequence seq");
+        s.execute("create synonym syn for syn_table");
+        s.execute("create view v(x) as select x from view_table");
+        s.execute("create type tp external name 'java.util.List' language java");
+
+        s.execute("create trigger tr_t2 after insert on t1 select x from t2");
+        s.execute("create trigger tr_f after insert on t1 values f(1)");
+        s.execute("create trigger tr_p after insert on t1 call p()");
+        s.execute("create trigger tr_tf after insert on t1 "
+                + "select * from table(tf()) t");
+        s.execute("create trigger tr_intmode after insert on t1 "
+                + "select intmode(x) from (values 1,2,3) v(x)");
+        s.execute("create trigger tr_seq after insert on t1 "
+                + "values next value for seq");
+        s.execute("create trigger tr_syn after insert on t1 select * from syn");
+        s.execute("create trigger tr_v after insert on t1 select * from v");
+        s.execute("create trigger tr_tp after insert on t1 "
+                + "values cast(null as tp)");
+
+        PreparedStatement checkTrigger = prepareStatement(
+            "select triggername from sys.systriggers join sys.sysschemas "
+            + "using (schemaid) where triggername = ? and schemaname = ?");
+        checkTrigger.setString(2, getTestConfiguration().getUserName());
+
+        // DROP TABLE should fail because T2 is used in TR_T2.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop table t2");
+        checkTrigger.setString(1, "TR_T2");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_T2");
+
+        // DROP FUNCTION should fail because F is used in TR_F.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop function f");
+        checkTrigger.setString(1, "TR_F");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_F");
+
+        // DROP PROCEDURE should fail because P is used in TR_P.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop procedure p");
+        checkTrigger.setString(1, "TR_P");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_P");
+
+        // DROP FUNCTION should fail because the table function TF is
+        // used in TR_TF.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop function tf");
+        checkTrigger.setString(1, "TR_TF");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_TF");
+
+        // DROP DERBY AGGREGATE only supports RESTRICT for now.
+        assertStatementError(SYNTAX_ERROR, s,
+                             "drop derby aggregate intmode cascade");
+        assertStatementError(HAS_DEPENDENT_SPS, s,
+                             "drop derby aggregate intmode restrict");
+        checkTrigger.setString(1, "TR_INTMODE");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(),
+                                        "TR_INTMODE");
+
+        // DROP SEQUENCE only supports RESTRICT for now.
+        assertStatementError(SYNTAX_ERROR, s, "drop sequence seq cascade");
+        assertStatementError(HAS_DEPENDENT_SPS, s, "drop sequence seq restrict");
+        checkTrigger.setString(1, "TR_SEQ");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_SEQ");
+
+        // DROP SYNONYM should fail because SYN is used in TR_SYN.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop synonym syn");
+        checkTrigger.setString(1, "TR_SYN");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_SYN");
+
+        // DROP VIEW should fail because V is used in TR_V.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop view v");
+        checkTrigger.setString(1, "TR_V");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_V");
+
+        // DROP TYPE only supports RESTRICT for now.
+        assertStatementError(SYNTAX_ERROR, s, "drop type tp cascade");
+        assertStatementError(HAS_DEPENDENT_SPS, s, "drop type tp restrict");
+        checkTrigger.setString(1, "TR_TP");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_TP");
+
+        // DROP COLUMN should fail because TR_T2 uses column X.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s,
+                             "alter table t2 drop column x restrict");
+        checkTrigger.setString(1, "TR_T2");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_T2");
+
+        // DROP COLUMN should succeed in this case, since no trigger uses
+        // column Y.
+        s.execute("alter table t2 drop column y restrict");
+        assertNull(s.getWarnings());
+        checkTrigger.setString(1, "TR_T2");
+        JDBC.assertSingleValueResultSet(checkTrigger.executeQuery(), "TR_T2");
+        JDBC.assertColumnNames(s.executeQuery("select * from t2"),
+                               new String[] {"X", "Z"});
+
+        // DROP COLUMN should succeed because CASCADE is specified. Should
+        // also remove the dependent trigger and produce a warning.
+        s.execute("alter table t2 drop column x cascade");
+        assertSQLState(TRIGGER_DROPPED, s.getWarnings());
+        checkTrigger.setString(1, "TR_T2");
+        JDBC.assertEmpty(checkTrigger.executeQuery());
+        JDBC.assertColumnNames(s.executeQuery("select * from t2"),
+                               new String[] {"Z"});
+    }
+
+    /**
+     * Test that the fix for DERBY-2041 isn't too strict. Verify that some
+     * operations only cause the dependent triggered statement to get
+     * recompiled, and don't fail or cascade.
+     */
+    public void testDerby2041RecompileOnly() throws SQLException {
+        Statement s = createStatement();
+
+        PreparedStatement spsValid = prepareStatement("select valid from "
+            + "sys.sysschemas join sys.systriggers using (schemaid) "
+            + "join sys.sysstatements on stmtid = actionstmtid "
+            + "where schemaname = ? and triggername = ?");
+        spsValid.setString(1, getTestConfiguration().getUserName());
+        spsValid.setString(2, "TR");
+
+        // Dropping an index used by a trigger should not fail, and the
+        // trigger should not be dropped.
+        s.execute("create table t1(x int not null)");
+        s.execute("create table t2(x int not null)");
+        s.execute("create index idx on t2(x)");
+        s.execute("create trigger tr after insert on t1 "
+                + "insert into t2 values 1");
+        // SPS should be valid before index is dropped.
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+        s.execute("drop index idx");
+        // SPS should be invalid after index is dropped, but the trigger
+        // should still exist and work.
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "false");
+        s.execute("insert into t1 values 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "1");
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+
+        // Truncating a table referenced by a trigger should also be OK.
+        s.execute("truncate table t2");
+        assertTableRowCount("T2", 0);
+        // SPS should be invalid after truncation, but the trigger should
+        // still exist and work.
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "false");
+        s.execute("insert into t1 values 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t2"), "1");
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+
+        // Now create a table T3 that has a foreign key constraint referencing
+        // T2. Create a trigger on T1 that deletes from T2. The triggered
+        // statement depends on T3 because it needs to check that the foreign
+        // key constraint is not violated when rows are deleted from T2. Since
+        // the trigger doesn't reference T3 directly, it should be possible to
+        // drop T3 and simply recompile the triggered statement. Currently,
+        // dropping the table fails because of the triggered statement's
+        // dependency.
+        s.execute("drop trigger tr");
+        s.execute("alter table t2 add constraint t2_pk primary key (x)");
+        s.execute("create table t3(x int, "
+                + "y int references t2 on delete cascade)");
+        s.execute("create trigger tr after delete on t1 delete from t2");
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+        // Ideally, dropping T3 should be allowed, and the triggered
+        // statement should have been marked as not valid (needs recompile).
+        // Currently, it fails.
+        assertStatementError(HAS_DEPENDENT_TRIGGER, s, "drop table t3");
+        JDBC.assertSingleValueResultSet(spsValid.executeQuery(), "true");
+    }
+
+    /** Used as stored procedure in testDerby2041DropDependencies(). */
+    public static void dummyProc() {
+    }
+
+    /** Used as table function in testDerby2041DropDependencies(). */
+    public static ResultSet dummyTableFunction() {
+        return null;
     }
 }

@@ -29,6 +29,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -202,13 +203,17 @@ public class RenameTableTest extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery("select * from t7");
         rs.next();
         rs.close();
-        s.executeUpdate("rename table t6 to t6r");
-        assertStatementError("42X05", s, "insert into t7 values(3)");
-        rs = s.executeQuery("select * from t6r");
+        // DERBY-2041: Rename of table referenced in a trigger action
+        // should fail and leave trigger intact.
+        assertStatementError("X0Y25", s, "rename table t6 to t6r");
+        s.execute("insert into t7 values(3)");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t6 order by c61"),
+                new String[][] {{"1"}, {"3"}});
         assertStatementError("42X05", s, "select * from t7r");
         // Clean Up
-        s.executeUpdate("drop table t6r");
         s.executeUpdate("drop table t7");
+        s.executeUpdate("drop table t6");
     }
 
     /**

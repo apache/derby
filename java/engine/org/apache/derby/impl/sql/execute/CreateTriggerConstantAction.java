@@ -34,18 +34,14 @@ import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
-import org.apache.derby.iapi.types.DataValueFactory;
-
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
 
 import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -83,6 +79,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	private Timestamp				creationTimestamp;
 	private int[]					referencedCols;
 	private int[]					referencedColsInTriggerAction;
+    private final ProviderInfo[]    providerInfo;
 
 	// CONSTRUCTORS
 
@@ -115,6 +112,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
 	 * @param oldReferencingName old referencing table name, if any, that appears in REFERENCING clause
 	 * @param newReferencingName new referencing table name, if any, that appears in REFERENCING clause
+     * @param providerInfo  array of providers that the trigger depends on
 	 */
 	CreateTriggerConstantAction
 	(
@@ -138,7 +136,8 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		boolean				referencingOld,
 		boolean				referencingNew,
 		String				oldReferencingName,
-		String				newReferencingName
+        String              newReferencingName,
+        ProviderInfo[]      providerInfo
 	)
 	{
 		super(triggerTable.getUUID());
@@ -163,6 +162,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		this.referencingNew = referencingNew;
 		this.oldReferencingName = oldReferencingName;
 		this.newReferencingName = newReferencingName;
+        this.providerInfo = providerInfo;
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(triggerSchemaName != null, "triggerSchemaName sd is null");
@@ -359,6 +359,15 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		}
 		dm.addDependency(triggerd, actionspsd, lcc.getContextManager());
 		dm.addDependency(triggerd, triggerTable, lcc.getContextManager());
+
+        // Make the TriggerDescriptor dependent on all objects referenced
+        // from the triggered statement or the WHEN clause.
+        for (ProviderInfo info : providerInfo) {
+            Provider provider = (Provider) info.getDependableFinder()
+                    .getDependable(dd, info.getObjectId());
+            dm.addDependency(triggerd, provider, lcc.getContextManager());
+        }
+
 		//store trigger's dependency on various privileges in the dependeny system
 		storeViewTriggerDependenciesOnPrivileges(activation, triggerd);		
 	}

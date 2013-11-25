@@ -527,16 +527,14 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 "alter table t2 drop column y restrict");
         s.execute("alter table t2 drop column z restrict");
 
-        // Because of DERBY-2041, dropping the whole table silently succeeds
-        // and leaves the trigger around. It should have caused a warning and
-        // dropped the trigger.
-        s.execute("drop table t2");
+        // Dropping a table referenced in a WHEN clause should fail and leave
+        // the trigger intact. Before DERBY-2041, DROP TABLE would succeed
+        // and leave the trigger in an invalid state so that subsequent
+        // INSERT statements would fail when trying to fire the trigger.
+        assertStatementError(HAS_DEPENDENTS, s, "drop table t2");
         JDBC.assertSingleValueResultSet(
             s.executeQuery("select triggername from sys.systriggers"), "TR");
-        // The trigger wasn't dropped, but it is now invalid and causes the
-        // triggering insert to fail.
-        assertStatementError(TABLE_DOES_NOT_EXIST, s,
-                "insert into t1 values (1, 2, 3)");
+        s.executeUpdate("insert into t1 values (1, 2, 3)");
         getConnection().rollback(sp);
 
         // Test references to columns in both the WHEN clause and the
@@ -550,9 +548,9 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
                 "alter table t2 drop column y restrict");
         s.execute("alter table t2 drop column z restrict");
 
-        // Again, because of DERBY-2041, DROP TABLE fails to cascade and
-        // drop the trigger.
-        s.execute("drop table t2");
+        // DROP TABLE should fail because of the dependencies (didn't before
+        // DERBY-2041).
+        assertStatementError(HAS_DEPENDENTS, s, "drop table t2");
         JDBC.assertSingleValueResultSet(
             s.executeQuery("select triggername from sys.systriggers"), "TR");
         getConnection().rollback(sp);
@@ -720,10 +718,10 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
         s1.close();
         s2.close();
 
-        c1.setAutoCommit(false);
-        JDBC.dropSchema(c1.getMetaData(), "U1");
         c2.setAutoCommit(false);
         JDBC.dropSchema(c2.getMetaData(), "U2");
+        c1.setAutoCommit(false);
+        JDBC.dropSchema(c1.getMetaData(), "U1");
     }
 
     /**

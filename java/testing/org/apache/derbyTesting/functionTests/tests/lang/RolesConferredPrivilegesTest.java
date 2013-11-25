@@ -1603,9 +1603,9 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         s.execute("revoke h from DonaldDuck");
         s.execute("revoke insert on t from DonaldDuck");
         setRole(dboConn, "none");
-        s.execute("drop table trackCreds");
         s.execute("drop table t");
         s.execute("drop table strange");
+        s.execute("drop table trackCreds");
         s.close();
 
         c.close();

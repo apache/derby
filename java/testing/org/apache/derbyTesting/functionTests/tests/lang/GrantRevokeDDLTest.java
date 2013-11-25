@@ -4122,7 +4122,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
+
+        st_mamta2.executeUpdate(
+            " drop trigger tr21t21TriggerTest");
+
         st_mamta1.executeUpdate(
             " drop table t11TriggerTest");
         
@@ -4961,6 +4964,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         st_mamta2.executeUpdate(
+            " drop trigger tr11t11");
+
+        st_mamta2.executeUpdate(
             " drop table t21TriggerRevokeTest");
         
         // set connection mamta1
@@ -5124,7 +5130,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
+
+        st_mamta2.executeUpdate(
+            " drop trigger tr11t11");
+
         st_mamta2.executeUpdate(
             " drop table t21TriggerRevokeTest");
         
@@ -6481,7 +6490,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st.executeUpdate("DROP VIEW MAMTA2.V28");
         st.executeUpdate("DROP VIEW MAMTA3.V21VIEWTEST");
         st.executeUpdate("DROP FUNCTION MAMTA1.SELECTFROMSPECIFICSCHEMA");
-        st.executeUpdate("DROP TRIGGER MAMTA2.TR21T21TRIGGERTEST");
         st.executeUpdate("DROP TABLE MAMTA4.T41TRIGGERTEST");
         st.executeUpdate("DROP TABLE MAMTA3.D1589T31CONSTRAINTTEST");
         st.executeUpdate("DROP TABLE MAMTA3.T31");
@@ -9955,8 +9963,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st.executeUpdate("DROP PROCEDURE USER1.REVOKE_SELECT_PROC2");
         st.executeUpdate("DROP PROCEDURE USER1.REVOKE_SELECT_PROC3");
         st.executeUpdate("DROP PROCEDURE USER1.REVOKE_SELECT_PROC4");
-        st.executeUpdate("DROP FUNCTION USER1.F_ABS1");
-        st.executeUpdate("DROP FUNCTION USER1.F_ABS2");
         st.executeUpdate("DROP TRIGGER USER2.TT1");
         st.executeUpdate("DROP TRIGGER USER2.TT2");
         st.executeUpdate("DROP TRIGGER USER2.TT3");
@@ -9964,6 +9970,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st.executeUpdate("DROP TRIGGER USER2.TT8");
         st.executeUpdate("DROP TRIGGER USER5.TT9");
         st.executeUpdate("DROP TRIGGER USER5.TT10");
+        st.executeUpdate("DROP FUNCTION USER1.F_ABS1");
+        st.executeUpdate("DROP FUNCTION USER1.F_ABS2");
         st.executeUpdate("DROP VIEW USER4.VSHARED4");
         st.executeUpdate("DROP VIEW USER4.VSHARED3");
         st.executeUpdate("DROP VIEW USER4.VSHARED2");

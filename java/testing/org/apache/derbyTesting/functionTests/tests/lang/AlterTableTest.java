@@ -1594,41 +1594,32 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "create trigger renc_5_tr1 after update of c2, c3, " +
                 "c6 on renc_4 for each row mode db2sql insert into " +
-                "renc_5 (c6) values (1)");
+                "renc_5 (unq_c5, c6) values (1, 2)");
 
         // This fails, because the tigger is dependent on it:
         assertStatementError(
                 "X0Y25", st,
                 "rename column renc_4.c6 to some_name");
 
-        // This succeeds, because the trigger is not dependent on 
-        // renc_5.c6. DERBY-2041 requests that triggers should be 
-        // marked as dependent on tables and columns in their body. 
-        // If that improvement is made, this test will need to be 
-        // changed, as the next rename would fail, and the insert 
-        // after it would then succeed.
-
-        st.executeUpdate(
+        // This also fails because a trigger action references renc_5.c6.
+        // It didn't fail before DERBY-2041.
+        assertStatementError(
+                "X0Y25", st,
                 "rename column renc_5.c6 to new_name");
-
-        // The update statement will fail, because column c6 no 
-        // longer exists. See DERBY-2041 for a discussion of this 
-        // topic.
 
         st.executeUpdate(
                 "insert into renc_4 values(1, 2, 3, 4, 5, 6)");
 
-        assertStatementError(
-                "42X14", st, "update renc_4 set c6 = 92");
+        st.executeUpdate("update renc_4 set c6 = 92");
 
+        // Verify that the update caused renc_5_tr1 to fire.
         rs = st.executeQuery("select * from renc_5");
-
         JDBC.assertColumnNames(rs,
                 new String[]{"C1",
-                    "C2", "C3", "C4", "UNQ_C5", "NEW_NAME"
+                    "C2", "C3", "C4", "UNQ_C5", "C6"
                 });
-        JDBC.assertDrainResults(rs,
-                0);
+        JDBC.assertFullResultSet(rs,
+                new String[][] {{null, null, null, null, "1", "2"}});
 
         // Rename a column which has a granted privilege, show 
         // that the grant is properly processed and now applies to 
@@ -1838,7 +1829,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         int sysdependsRowCountBeforeTestStart;
 
         sysdependsRowCountBeforeTestStart = numberOfRowsInSysdepends(st);
-        //Following trigger will add 5 rows to sysdepends. Trigger creation
+        // Following trigger will add 7 rows to sysdepends. Trigger creation
         // will send CREATE TRIGGER invalidation to trigger table but there
         // are no other persistent dependents on trigger table at this point.
         st.executeUpdate(
@@ -1847,9 +1838,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "old_table as old for each statement insert into " +
                 "Derby5120_tab_bkup1 select * from old");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+                sysdependsRowCountBeforeTestStart + 7,
+                numberOfRowsInSysdepends(st));
 
-        //Following trigger will add 5 rows to sysdepends. Trigger creation
+        // Following trigger will add 7 rows to sysdepends. Trigger creation
         // will send CREATE TRIGGER invalidation to trigger table which will
         // invalidate trigger created earlier (Derby5120_tr1). Because of
         // this, when Derby5120_tr1 trigger fires next, it will be recompiled.
@@ -1859,21 +1851,24 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "old as oldrow for each row insert into  " +
                 "Derby5120_tab_bkup2(c211) values (oldrow.c11)");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+                sysdependsRowCountBeforeTestStart + 14,
+                numberOfRowsInSysdepends(st));
 
         //Following will fire the 2 triggers created above. During the firing,
         // we will find that Derby5120_tr1 has been marked invalid. As a result
         // we will recompile it's trigger action.
         st.executeUpdate("update Derby5120_tab set c11=2");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+                sysdependsRowCountBeforeTestStart + 14,
+                numberOfRowsInSysdepends(st));
 
         //Following alter table on trigger table will mark the two triggers 
         // created above invalid. As a result, when they are fired next
         // time, their trigger action sps will be regenerated.
         st.executeUpdate("alter table Derby5120_tab add column c113 int");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+                sysdependsRowCountBeforeTestStart + 14,
+                numberOfRowsInSysdepends(st));
 
         //Following will cause the 2 triggers to fire because they were marked
         // invalid by alter table. During the trigger action sps regeneration
@@ -1887,12 +1882,14 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         //Drop the errorneous trigger
         st.executeUpdate("drop trigger Derby5120_tr1");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS will be less",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+                sysdependsRowCountBeforeTestStart + 7,
+                numberOfRowsInSysdepends(st));
 
         //Following update will succeed this time
         st.executeUpdate("update Derby5120_tab set c11=2");
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+                sysdependsRowCountBeforeTestStart + 7,
+                numberOfRowsInSysdepends(st));
     }
     
     //A test for ALTER TABLE DROP COLUMN with synonyms and trigger combination.
@@ -2728,10 +2725,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             	{"ATDC_13_TAB1_TRIGGER_4"}});
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
         		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
-        st.executeUpdate("drop table ATDC_13_TAB1_BACKUP");
         st.executeUpdate("drop table ATDC_13_TAB1");
         st.executeUpdate("drop table ATDC_13_TAB2");
         st.executeUpdate("drop table ATDC_13_TAB3");
+        st.executeUpdate("drop table ATDC_13_TAB1_BACKUP");
         
         // Start of another test for DERBY-5044. Test INSERT/DELETE/UPDATE
         // inside the trigger action from base tables

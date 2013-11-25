@@ -534,15 +534,13 @@ insert into t1 values 1;
 select * from t2;
 drop trigger tt;
 
--- dropping and recreating a table which the trigger references
+-- dropping a table which the trigger references, should fail (DERBY-2041)
 create table t3 (i int);
 create table t4 (i int);
 create trigger tt2 after insert on t3 for each statement insert into t4 values 1;
 insert into t3 values 1;
 select * from t4;
 drop table t4;
-insert into t3 values 1;
-create table t4 (i int);
 insert into t3 values 1;
 select * from t4;
 
@@ -553,7 +551,7 @@ create trigger test_trigger AFTER insert on test FOR EACH ROW values max_value(2
 
 insert into test values(1);
 
---- drop function and again do inserts. these should not work as the trigger would be invalid
+--- drop function should fail (DERBY-2041)
 drop function max_value;
 insert into test values(2);
 insert into test values(1);
@@ -579,11 +577,10 @@ select * from t31TriggerTest;
 -- we know the trigger got fired if there is one row in t32TriggerTest
 select * from t32TriggerTest;
 
--- drop the view used by the trigger.
+-- drop the view used by the trigger. should fail after DERBY-2041.
 drop view v21ViewTest;
 
--- try an insert which would cause insert trigger to fire. The insert trigger should have failed because view doesn't
--- exist anymore.
+-- try an insert which would cause insert trigger to fire.
 insert into t31TriggerTest values(1);
 select * from t31TriggerTest;
 select * from t32TriggerTest;

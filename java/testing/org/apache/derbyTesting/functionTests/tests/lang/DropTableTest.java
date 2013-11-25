@@ -210,15 +210,19 @@ public final class DropTableTest extends BaseJDBCTestCase {
             " create trigger t2trig after insert on t2 for each "
             + "row insert into t1 values(1)");
         
-        // this should work
-        
-        st.executeUpdate( "drop table t1");
-        
-        // the following should get an error when trying to 
-        // recompile the trigger action
-        
-        assertStatementError("42X05", st, "insert into t2 values(1)");
+        // this should fail because t2trig depends on t1 (used to work
+        // before DERBY-2041)
+        assertStatementError("X0Y25", st, "drop table t1");
+
+        // trigger should still work
+        st.executeUpdate("insert into t2 values(1)");
+        JDBC.assertSingleValueResultSet(
+                st.executeQuery("select * from t1"), "1");
+        JDBC.assertSingleValueResultSet(
+                st.executeQuery("select * from t2"), "1");
+
         st.executeUpdate( " drop table t2");
+        st.executeUpdate( " drop table t1");
     }
     
     public void testDropTableDropView() throws SQLException{

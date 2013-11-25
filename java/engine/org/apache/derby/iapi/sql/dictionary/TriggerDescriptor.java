@@ -773,7 +773,8 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		switch (action)
 		{
 			/*
-			** We are only dependent on the underlying table, and our spses and 
+            ** We are dependent on the underlying table, our SPSs, any tables
+            ** or other SQL objects that are referenced from the trigger, and
 			** privileges on various objects.  (we should be dropped before our 
 			** table is dropped. Also, we should be dropped before revoke 
 			** RESTRICT privilege is issued otherwise revoke RESTRICT will  
@@ -791,8 +792,10 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 		    case DependencyManager.DROP_TABLE:
 		    case DependencyManager.DROP_SYNONYM:
 		    case DependencyManager.DROP_SPS:
+            case DependencyManager.DROP_VIEW:
 		    case DependencyManager.RENAME:
 		    case DependencyManager.REVOKE_PRIVILEGE_RESTRICT:
+            case DependencyManager.DROP_METHOD_ALIAS:
 				DependencyManager dm = getDataDictionary().getDependencyManager();
 				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT, 
 									dm.getActionString(action), 

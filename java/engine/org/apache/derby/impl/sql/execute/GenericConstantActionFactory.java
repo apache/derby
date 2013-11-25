@@ -1002,6 +1002,7 @@ public class GenericConstantActionFactory
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
 	 * @param oldReferencingName old referencing table name, if any, that appears in REFERCING clause
 	 * @param newReferencingName new referencing table name, if any, that appears in REFERCING clause
+     * @param providerInfo array of providers that the trigger depends on
 	 */
 	public ConstantAction getCreateTriggerConstantAction
 	(
@@ -1025,7 +1026,8 @@ public class GenericConstantActionFactory
 		boolean				referencingOld,
 		boolean				referencingNew,
 		String				oldReferencingName,
-		String				newReferencingName
+        String              newReferencingName,
+        ProviderInfo[]      providerInfo
 	)
 	{
 		return new CreateTriggerConstantAction(triggerSchemaName, triggerName, 
@@ -1033,7 +1035,8 @@ public class GenericConstantActionFactory
 				whenText, actionSPSId, actionText, spsCompSchemaId, creationTimestamp,
                 referencedCols, referencedColsInTriggerAction,
                 originalWhenText, originalActionText,
-				referencingOld, referencingNew, oldReferencingName, newReferencingName);
+                referencingOld, referencingNew,
+                oldReferencingName, newReferencingName, providerInfo);
 	}
 
 	/**

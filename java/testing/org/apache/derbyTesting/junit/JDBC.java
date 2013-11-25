@@ -300,7 +300,20 @@ public class JDBC {
 		Connection conn = dmd.getConnection();
 		Assert.assertFalse(conn.getAutoCommit());
 		Statement s = dmd.getConnection().createStatement();
-        
+
+        // Triggers
+        PreparedStatement pstr = conn.prepareStatement(
+                "SELECT TRIGGERNAME FROM SYS.SYSSCHEMAS S, SYS.SYSTRIGGERS T "
+                + "WHERE S.SCHEMAID = T.SCHEMAID AND SCHEMANAME = ?");
+        pstr.setString(1, schema);
+        ResultSet trrs = pstr.executeQuery();
+        while (trrs.next()) {
+            String trigger = trrs.getString(1);
+            s.execute("DROP TRIGGER " + JDBC.escape(schema, trigger));
+        }
+        trrs.close();
+        pstr.close();
+
         // Functions - not supported by JDBC meta data until JDBC 4
         // Need to use the CHAR() function on A.ALIASTYPE
         // so that the compare will work in any schema.

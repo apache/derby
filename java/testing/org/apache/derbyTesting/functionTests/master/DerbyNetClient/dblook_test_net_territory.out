@@ -1632,16 +1632,34 @@ tee""Hee
 Table
 -----
 <systemid>
+<Trigger>APP.TRIGFOUR -> <Conglomerate>APP.<sysname>
+Trigger
+<systemid>
+Conglomerate
+-----
+<systemid>
 <Trigger>APP.TRIGFOUR -> <StoredPreparedStatement>APP.<sysname>
 Trigger
 <systemid>
 StoredPreparedStatement
 -----
 <systemid>
+<Trigger>APP.TRIGFOUR -> <Table>APP.REMOVED
+Trigger
+REMOVED
+Table
+-----
+<systemid>
 <Trigger>APP.TRIGFOUR -> <Table>APP.X
 Trigger
 X
 Table
+-----
+<systemid>
+<Trigger>APP.TRIGONE -> <ColumnsInTable>BAR.T4
+Trigger
+T4
+ColumnsInTable
 -----
 <systemid>
 <Trigger>APP.TRIGONE -> <StoredPreparedStatement>APP.<sysname>
@@ -1660,6 +1678,12 @@ Table
 Trigger
 T1
 Table
+-----
+<systemid>
+<Trigger>APP.TrigThree -> <ColumnsInTable>BAR.tWithKeys
+Trigger
+tWithKeys
+ColumnsInTable
 -----
 <systemid>
 <Trigger>APP.TrigThree -> <StoredPreparedStatement>APP.<sysname>

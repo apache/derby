@@ -36,6 +36,9 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
+import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -69,6 +72,7 @@ class CreateTriggerNode extends DDLStatementNode
     private final String        originalActionText;
     private final int           whenOffset;
     private final int           actionOffset;
+    private ProviderInfo[]      providerInfo;
 
 	private SchemaDescriptor	triggerSchemaDescriptor;
 	private SchemaDescriptor	compSchemaDescriptor;
@@ -370,9 +374,15 @@ class CreateTriggerNode extends DDLStatementNode
 		*/
 		boolean needInternalSQL = bindReferencesClause(dd);
 
+        ProviderList prevAPL =
+                compilerContext.getCurrentAuxiliaryProviderList();
+        ProviderList apl = new ProviderList();
+
 		lcc.pushTriggerTable(triggerTableDescriptor);
 		try
 		{	
+            compilerContext.setCurrentAuxiliaryProviderList(apl);
+
 			/*
 			** Bind the trigger action and the trigger
 			** when clause to make sure that they are
@@ -406,6 +416,7 @@ class CreateTriggerNode extends DDLStatementNode
 		finally
 		{
 			lcc.popTriggerTable(triggerTableDescriptor);
+            compilerContext.setCurrentAuxiliaryProviderList(prevAPL);
 		}
 
 		/* 
@@ -445,6 +456,11 @@ class CreateTriggerNode extends DDLStatementNode
         if (referencesSessionSchema()) {
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
         }
+
+        DependencyManager dm = dd.getDependencyManager();
+        providerInfo = dm.getPersistentProviderInfos(apl);
+        dm.clearColumnInfoInProviders(apl);
+
 	}
 
 	/**
@@ -934,7 +950,8 @@ class CreateTriggerNode extends DDLStatementNode
 											oldTableInReferencingClause,
 											newTableInReferencingClause,
 											oldReferencingName,
-											newReferencingName
+                                            newReferencingName,
+                                            providerInfo
 											);
 	}
 

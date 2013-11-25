@@ -72,23 +72,23 @@ insert  into t1 values 2;
 select * from t1;
 
 -- clean up
-drop table t17;
-drop table t16;
-drop table t15;
-drop table t14;
-drop table t13;
-drop table t12;
-drop table t11;
-drop table t10;
-drop table t9;
-drop table t8;
-drop table t7;
-drop table t6;
-drop table t5;
-drop table t4;
-drop table t3;
-drop table t2;
 drop table t1;
+drop table t2;
+drop table t3;
+drop table t4;
+drop table t5;
+drop table t6;
+drop table t7;
+drop table t8;
+drop table t9;
+drop table t10;
+drop table t11;
+drop table t12;
+drop table t13;
+drop table t14;
+drop table t15;
+drop table t16;
+drop table t17;
 
 -- DERBY-2195
 -- Nested triggers not working properly after maximum trigger count exception is thrown

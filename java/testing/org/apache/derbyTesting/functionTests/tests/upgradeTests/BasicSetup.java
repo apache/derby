@@ -677,8 +677,8 @@ public class BasicSetup extends UpgradeChange {
         Statement s = createStatement();
         boolean modeDb2SqlOptional = oldAtLeast(10, 3);
 
-        dropTable("BKUP1_5044_5120");
         dropTable("TAB1_5044_5120");
+        dropTable("BKUP1_5044_5120");
         s.execute("create table TAB1_5044_5120(c11 int, c12 int)");
         s.execute("insert into TAB1_5044_5120 values (1,11)");
         s.execute("create table BKUP1_5044_5120(c111 int, c112 int)");

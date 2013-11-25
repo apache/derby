@@ -157,10 +157,10 @@ select * from t1;
 select * from t2;
 select * from t3;
 
-drop table t4;
 drop table t3;
 drop table t2;
 drop table t1;
+drop table t4;
 
 
 --test for multiple fkeys on the same table referrring to
@@ -325,10 +325,10 @@ select * from t1;
 select * from t2;
 select * from t3;
 
-drop table t4;
 drop table t3;
 drop table t2;
 drop table t1;
+drop table t4;
 
 
 --test for multiple fkeys on the same table referrring to
@@ -393,16 +393,22 @@ insert into t2 values(2, 3);
 -- parent row can not be deleted because of a dependent relationship from another table
 delete from t1 where a =1;
 
+drop trigger trig_delete;
 drop table t2;
 
 --do the same case as above with RESTRICT
 --we should get error, because RESTRICT rules are checked before firing triggers
 create table t2(x int references t1(a) ON DELETE RESTRICT , y int);
+create trigger trig_delete after DELETE on t1
+referencing old as deletedrow
+for each row
+delete from t2 where x = deletedrow.a;
 insert into t2 values(1, 2);
 insert into t2 values(2, 3);
 
 --following delete should throw constraint violations error
 delete from t1 where a =1;
+drop trigger trig_delete;
 drop table t2;
 drop table t1;
 
@@ -428,11 +434,15 @@ update t1 set b = 7 where a =1;
 select * from t1 ;
 select * from t2 ;
 rollback;
+drop trigger trig_update;
 drop table t2;
 commit;
 --do the same case as above with RESTRICT
 --we should get error, because RESTRICT is check before firing triggers
 create table t2(x int references t1(a) ON UPDATE RESTRICT , y int);
+create trigger trig_update after UPDATE on t1
+referencing old as old for each  row
+update t2 set x = 2 where x = old.a;
 insert into t2 values(1, 2);
 insert into t2 values(2, 3);
 commit;
@@ -441,6 +451,7 @@ update t1 set a = 7 where a =1;
 select * from t1 ;
 select * from t2;
 autocommit on;
+drop trigger trig_update;
 drop table t2;
 drop table t1;
 
@@ -468,10 +479,10 @@ select * from t1;
 select * from t2;
 select * from t3;
 
-drop table t4;
 drop table t3;
 drop table t2;
 drop table t1;
+drop table t4;
 
 
 --After Statement triggers on the  dependen tables
@@ -497,10 +508,10 @@ select * from t1;
 select * from t2;
 select * from t3;
 
-drop table t4;
 drop table t3;
 drop table t2;
 drop table t1;
+drop table t4;
 
 
 --After triggers on a self referencing table
@@ -612,10 +623,10 @@ select * from t2;
 select * from t1temp;
 
 
-drop table t1temp;
 alter table t1 drop constraint c1;
 drop table t2;
 drop table t1;
+drop table t1temp;
 
 -- triggers on a cyclic referential actions
 create table t1(a int not null primary key, b int not null unique);
@@ -664,10 +675,10 @@ select * from t2;
 select * from t1temp;
 
 
-drop table t1temp;
 alter table t1 drop constraint c1;
 drop table t2;
 drop table t1;
+drop table t1temp;
 
 
 --ROW triggers on a cyclic referential actions
@@ -720,10 +731,10 @@ select * from t1;
 select * from t2;
 select * from t1temp;
 
-drop table t1temp;
 alter table t1 drop constraint c1;
 drop table t2;
 drop table t1;
+drop table t1temp;
 
 --SET NULL UPDATE  STETEMENT triggers on a self referencing table
 
@@ -1210,6 +1221,8 @@ select * from t1 ;
 select * from t2 ;
 select * from t3;
 
+drop trigger trig_delete;
+drop trigger trig_delete1;
 drop table t3;
 drop table t2;
 drop table t1;
@@ -1254,6 +1267,8 @@ select * from t1 ;
 select * from t2 ;
 select * from t3;
 
+drop trigger trig_delete;
+drop trigger trig_delete1;
 drop table t3;
 drop table t2;
 drop table t1;
@@ -1358,10 +1373,10 @@ insert into t3 values(2, 3) ;
 
 delete from t1 where c1 = 1 ;
 select * from t4 ;
-drop table t4;
 drop table t3;
 drop table t2;
 drop table t1;
+drop table t4;
 
 ---multiple foreign keys pointing to the same table and has  dependens
 -- first foreign key path has zero rows qualified(bug 5197 from webshphere)

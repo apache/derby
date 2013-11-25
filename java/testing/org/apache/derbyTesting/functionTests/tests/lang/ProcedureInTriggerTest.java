@@ -57,12 +57,8 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         checkAndResetZeroArgCount(1);
         ResultSet rs = s.executeQuery("SELECT * FROM T2");
         JDBC.assertFullResultSet(rs, new String[][] {{"1","2"},{"2","4"}});
-        //--- check that trigger firing and database event fail if the procedure referred
-        //--- in the triggered sql statement is dropped
-        s.execute("drop procedure proc_no_sql");
-        assertStatementError("42Y03",s,"insert into t2 values (1,2), (2,4)");
-        //--- after recreating the procedure, the trigger should work
-        s.execute("create procedure proc_no_sql() parameter style java language java NO SQL external name 'org.apache.derbyTesting.functionTests.tests.lang.ProcedureInTriggerTest.zeroArg'");
+        // Check that a procedure used by a trigger cannot be dropped.
+        assertStatementError("X0Y25", s, "drop procedure proc_no_sql");
         s.execute("insert into t2 values (3,6)");
         checkAndResetZeroArgCount(1);
         rs = s.executeQuery("SELECT * FROM T2");  
@@ -81,13 +77,8 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         checkAndResetZeroArgCount(1);
         rs = s.executeQuery("select * from t2");
         JDBC.assertFullResultSet(rs, new String[][] {{"1","2"},{"2","4"}});
-        //--- check that trigger firing and database event fail if the procedure referred
-        //--- in the triggered sql statement is dropped
-        s.execute("drop procedure proc_no_sql");
-        // --- should fail
-        assertStatementError("42Y03",s,"insert into t2 values (1,2), (2,4)");
-        //after recreating the procedure, the trigger should work
-        s.execute("create procedure proc_no_sql() parameter style java language java NO SQL external name 'org.apache.derbyTesting.functionTests.tests.lang.ProcedureInTriggerTest.zeroArg'");
+        // Check that a procedure used by a trigger cannot be dropped.
+        assertStatementError("X0Y25", s, "drop procedure proc_no_sql");
         s.execute("insert into t2 values (3,6)");
         checkAndResetZeroArgCount(1);
         // check inserts are successful
