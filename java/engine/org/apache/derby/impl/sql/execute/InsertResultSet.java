@@ -50,6 +50,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
@@ -60,6 +61,7 @@ import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
+import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
@@ -1447,6 +1449,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		// Update all indexes
 		if (constants.irgs.length > 0)
 		{
+//            MEN VI HAR MANGE SORTS, EN PR INDEX: alle blir droppet, hvordan
+//                    assossiere alle med nye indekser som tildeles inni her???
+//                            FIXME!!
 			updateAllIndexes(newHeapConglom, constants, td, dd, fullTemplate);
 		}
 
@@ -1815,30 +1820,70 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			 * wrapper that is still in use in another sort.
 			 */
 			boolean reuseWrappers = (numIndexes == 1);
-			if (cd.getIndexDescriptor().isUnique())
-			{
-				numColumnOrderings = baseColumnPositions.length;
-				String[] columnNames = getColumnNames(baseColumnPositions);
+            final IndexRowGenerator indDes = cd.getIndexDescriptor();
+            Properties sortProperties = null;
+            String indexOrConstraintName = cd.getConglomerateName();
+            boolean deferred = false;
+            boolean deferrable = false;
 
-				String indexOrConstraintName = cd.getConglomerateName();
-				if (cd.isConstraint()) 
-				{
-                    // so, the index is backing up a constraint
+            if (cd.isConstraint())
+            {
+                // so, the index is backing up a constraint
 
-					ConstraintDescriptor conDesc = 
+                ConstraintDescriptor conDesc =
                         dd.getConstraintDescriptor(td, cd.getUUID());
 
-					indexOrConstraintName = conDesc.getConstraintName();
-				}
+                indexOrConstraintName = conDesc.getConstraintName();
+                deferred = lcc.isEffectivelyDeferred(
+                        activation, cd.getConglomerateNumber());
+                deferrable = conDesc.deferrable();
+            }
+
+            if (indDes.isUnique() || indDes.isUniqueDeferrable())
+            {
+                numColumnOrderings =
+                        indDes.isUnique() ? baseColumnPositions.length :
+                        baseColumnPositions.length + 1;
+
+                String[] columnNames = getColumnNames(baseColumnPositions);
+
 				sortObserver = 
                     new UniqueIndexSortObserver(
+                            tc,
+                            lcc,
+                            cd.getConglomerateNumber(),
                             false, // don't clone rows
-                            cd.isConstraint(), 
+                            deferrable,
+                            deferred,
                             indexOrConstraintName,
                             indexRows[index],
                             reuseWrappers,
                             td.getName());
-			}
+            } else if (indDes.isUniqueWithDuplicateNulls())
+            {
+                numColumnOrderings = baseColumnPositions.length + 1;
+
+                // tell transaction controller to use the unique with
+                // duplicate nulls sorter, when making createSort() call.
+                sortProperties = new Properties();
+                sortProperties.put(
+                   AccessFactoryGlobals.IMPL_TYPE,
+                   AccessFactoryGlobals.SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL);
+                //use sort operator which treats nulls unequal
+                sortObserver =
+                        new UniqueWithDuplicateNullsIndexSortObserver(
+                        tc,
+                        lcc,
+                        cd.getConglomerateNumber(),
+                        true,
+                        deferrable,
+                        deferred,
+                        indexOrConstraintName,
+                        indexRows[index],
+                        true,
+                        td.getName());
+
+            }
 			else
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
@@ -1866,7 +1911,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			// create the sorters
 			sortIds[index] = 
                 tc.createSort(
-                    (Properties)null, 
+                    sortProperties,
                     indexRows[index].getRowArrayClone(),
                     ordering[index],
                     sortObserver,
@@ -1961,8 +2006,14 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			if(cd.getIndexDescriptor().isUniqueWithDuplicateNulls())
 			{
 				properties.put(
-	                    "uniqueWithDuplicateNulls", Boolean.toString(true));
+                    "uniqueWithDuplicateNulls", Boolean.toString(true));
 			}
+
+            if (cd.getIndexDescriptor().hasDeferrableChecking()) {
+                properties.put(
+                    "hasDeferrableChecking", Boolean.toString(true));
+            }
+
 			properties.put("rowLocationColumn", 
 							Integer.toString(indexRowLength - 1));
 			properties.put("nKeyFields", Integer.toString(indexRowLength));
@@ -2024,6 +2075,12 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 			// Drop the old conglomerate
 			tc.dropConglomerate(constants.indexCIDS[index]);
+
+            // We recreated the index, so any old deferred constraints
+            // information supported by the dropped index needs to be updated
+            // with the new index.
+            DeferredDuplicates.updateIndexCID(
+                    lcc, constants.indexCIDS[index], newIndexCongloms[index]);
 
 			indexConversionTable.put(new Long(constants.indexCIDS[index]),
 									new Long(newIndexCongloms[index]));
@@ -2329,23 +2386,38 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			boolean[] isAscending = constants.irgs[index].isAscending();
 			int numColumnOrderings;
 			SortObserver sortObserver = null;
-			if (cd.getIndexDescriptor().isUnique())
+            final IndexRowGenerator indDes = cd.getIndexDescriptor();
+
+            if (indDes.isUnique() || indDes.isUniqueDeferrable())
 			{
-				numColumnOrderings = baseColumnPositions.length;
+                numColumnOrderings =
+                        indDes.isUnique() ? baseColumnPositions.length :
+                        baseColumnPositions.length + 1;
+
 				String[] columnNames = getColumnNames(baseColumnPositions);
 
 				String indexOrConstraintName = cd.getConglomerateName();
+                boolean deferred = false;
+                boolean uniqueDeferrable = false;
+
 				if (cd.isConstraint()) 
 				{
                     // so, the index is backing up a constraint
 					ConstraintDescriptor conDesc = 
                         dd.getConstraintDescriptor(td, cd.getUUID());
 					indexOrConstraintName = conDesc.getConstraintName();
+                    deferred = lcc.isEffectivelyDeferred(activation,
+                            cd.getConglomerateNumber());
+                    uniqueDeferrable = conDesc.deferrable();
 				}
 				sortObserver = 
                     new UniqueIndexSortObserver(
+                            tc,
+                            lcc,
+                            cd.getConglomerateNumber(),
                             false, // don't clone rows
-                            cd.isConstraint(), 
+                            uniqueDeferrable,
+                            deferred,
                             indexOrConstraintName,
                             indexRows[index],
                             true,
@@ -2439,9 +2511,15 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			if(cd.getIndexDescriptor().isUniqueWithDuplicateNulls())
 			{
 				properties.put(
-	                    "uniqueWithDuplicateNulls", Boolean.toString(true));
+                    "uniqueWithDuplicateNulls", Boolean.toString(true));
 			}
-			properties.put("rowLocationColumn", 
+
+            if (cd.getIndexDescriptor().hasDeferrableChecking()) {
+                properties.put(
+                    "hasDeferrableChecking", Boolean.toString(true));
+            }
+
+            properties.put("rowLocationColumn",
 							Integer.toString(indexRowLength - 1));
 			properties.put("nKeyFields", Integer.toString(indexRowLength));
 

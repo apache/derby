@@ -21,16 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.io.Storable;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.store.access.SortObserver;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -40,29 +36,38 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 class UniqueIndexSortObserver extends BasicSortObserver 
 {
-	private boolean		isConstraint;
-	private String		indexOrConstraintName;
-	private String 		tableName;
+    private final boolean                   deferrable;
+    private final boolean                   deferred;
+    private final String                    indexOrConstraintName;
+    private final String                    tableName;
+    private final TransactionController     tc;
+    private final LanguageConnectionContext lcc;
+    private final long                      indexCID;
+    private BackingStoreHashtable           deferredRowsHashTable;
 
-	public UniqueIndexSortObserver(boolean doClone, boolean isConstraint, 
-				String indexOrConstraintName, ExecRow execRow, 
-				boolean reuseWrappers, String tableName)
+    public UniqueIndexSortObserver(
+            TransactionController tc,
+            LanguageConnectionContext lcc,
+            long indexCID,
+            boolean doClone,
+            boolean deferrable,
+            boolean deferred,
+            String indexOrConstraintName,
+            ExecRow execRow,
+            boolean reuseWrappers,
+            String tableName)
 	{
-		super(doClone, true, execRow, reuseWrappers);
-		this.isConstraint = isConstraint;
+        super(doClone, !deferred, execRow, reuseWrappers);
+        this.tc = tc;
+        this.lcc = lcc;
+        this.indexCID = indexCID;
+        this.deferrable = deferrable;
+        this.deferred = deferred;
 		this.indexOrConstraintName = indexOrConstraintName;
 		this.tableName = tableName;
 	}
 
-	/*
-	 * Overridden from BasicSortObserver
-	 */
-
-	/**
-	 * @see AggregateSortObserver#insertDuplicateKey
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
+    @Override
 	public DataValueDescriptor[] insertDuplicateKey(
     DataValueDescriptor[]   in, 
     DataValueDescriptor[]   dup)
@@ -73,5 +78,26 @@ class UniqueIndexSortObserver extends BasicSortObserver
 				SQLState.LANG_DUPLICATE_KEY_CONSTRAINT, indexOrConstraintName, tableName);
 		throw se;
 	}
+
+    @Override
+    public boolean deferred() {
+        return deferred;
+    }
+
+    @Override
+    public boolean deferrable() {
+        return deferrable;
+    }
+
+    @Override
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException {
+        deferredRowsHashTable = DeferredDuplicates.rememberDuplicate(
+                    tc,
+                    indexCID,
+                    deferredRowsHashTable,
+                    lcc,
+                    row);
+    }
 
 }

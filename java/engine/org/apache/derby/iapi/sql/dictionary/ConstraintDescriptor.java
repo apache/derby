@@ -715,24 +715,21 @@ public abstract class ConstraintDescriptor
             // Bug 4307
             // We need to get the conglomerate descriptors from the 
             // dd in case we dropped other constraints in a cascade operation. 
-             ConglomerateDescriptor[]conglomDescs =
-                 dd.getConglomerateDescriptors(getConglomerateId());
+            ConglomerateDescriptor[]conglomDescs =
+                    dd.getConglomerateDescriptors(getConglomerateId());
 
-            if (conglomDescs.length != 0)
-            {
-                // Typically there is only one ConglomerateDescriptor
-                // for a given UUID, but due to an old bug
-                // there may be more than one. If there is more
-                // than one then which one is remvoed does not
-                // matter since they will all have the same critical
-                // information since they point to the same physical index.
-                for (int i = 0; i < conglomDescs.length; i++)
-                {
-                    if (conglomDescs[i].isConstraint())
-                    {
-                        newBackingConglomCD = conglomDescs[i].drop(lcc, table);
-                        break;
-                    }
+            // Typically there is only one ConglomerateDescriptor
+            // for a given UUID, but due to an old bug
+            // there may be more than one. If there is more
+            // than one then which one is remvoed does not
+            // matter since they will all have the same critical
+            // information since they point to the same physical index.
+            for (ConglomerateDescriptor cd : conglomDescs) {
+                if (cd.isConstraint()) {
+                    lcc.invalidateDeferredConstraintsData(
+                            cd.getConglomerateNumber());
+                    newBackingConglomCD = cd.drop(lcc, table);
+                    break;
                 }
             }
         }

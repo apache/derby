@@ -21,17 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-
-import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
@@ -105,7 +98,7 @@ public abstract class GenericRIChecker
 	 * The scan is set up to return no columns.
 	 * NOTE: We only need an instantaneous lock on the
 	 * table that we are probing as we are just checking
-	 * for the existance of a row.  All updaters, whether
+     * for the existence of a row.  All updaters, whether
 	 * to the primary or foreign key tables, will hold an
 	 * X lock on the table that they are updating and will
 	 * be probing the other table, so instantaneous locks
@@ -118,7 +111,10 @@ public abstract class GenericRIChecker
 	 *
 	 * @param conglomNumber		the particular conglomerate we 
 	 *							are interested in
+     * @param scoci
+     * @param dcoci
 	 * @param searchRow			the row to match
+     * @return                  scan controller
 	 *
 	 * @exception StandardException on error
 	 */
@@ -236,7 +232,7 @@ public abstract class GenericRIChecker
 	 * the RI check.
 	 *
 	 * NOTE: The level will eventually be instantaneous
-	 * locking once the implemenation changes.
+     * locking once the implementation changes.
 	 *
 	 * @return The isolation level for the scan for
 	 * the RI check.

@@ -116,7 +116,7 @@ public class ForeignKeyRIChecker extends GenericRIChecker
 	 * the RI check.
 	 *
 	 * NOTE: The level will eventually be instantaneous
-	 * locking once the implemenation changes.
+     * locking once the implementation changes.
 	 *
 	 * @return The isolation level for the scan for
 	 * the RI check.

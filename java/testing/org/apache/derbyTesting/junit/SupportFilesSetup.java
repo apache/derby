@@ -260,7 +260,7 @@ public class SupportFilesSetup extends TestSetup {
     
     /**
      * Obtain a File for the local copy of a read-write resource.
-     * @param name Base name for the resouce.
+     * @param name Base name for the resource.
      */
     public static File getReadWrite(String name)
     {

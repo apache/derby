@@ -56,7 +56,7 @@ public class Import extends ImportAbstract{
     private String inputFileName;
 
 	/**
-	 * Constructior to Invoke Import from a select statement 
+     * Constructor to Invoke Import from a select statement
 	 * @param inputFileName	 The URL of the ASCII file from which import will happen
      * @exception SQLException on error
 	 */

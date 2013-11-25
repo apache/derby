@@ -38,6 +38,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -843,13 +844,13 @@ class StaticMethodCallNode extends MethodCallNode
 	 * procedure or function which needs a nested SQL session
 	 * context (only needed for those which can contain SQL).
 	 *
-	 * The generated code calls setupNestedSessionContext.
-	 * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#setupNestedSessionContext
+     * The generated code calls pushNestedSessionContext.
+     * @see LanguageConnectionContext#pushNestedSessionContext
 	 *
 	 * @param acb activation class builder
 	 * @param mb  method builder
 	 */
-    private void generateSetupNestedSessionContext(
+    private void generatePushNestedSessionContext(
         ActivationClassBuilder acb,
         MethodBuilder mb,
         boolean hadDefinersRights,
@@ -857,7 +858,7 @@ class StaticMethodCallNode extends MethodCallNode
 
 		// Generates the following Java code:
 		// ((Activation)this).getLanguageConnectionContext().
-		//       setupNestedSessionContext((Activation)this);
+        //       pushNestedSessionContext((Activation)this);
 
 		acb.pushThisAsActivation(mb);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
@@ -867,7 +868,7 @@ class StaticMethodCallNode extends MethodCallNode
         mb.push(hadDefinersRights);
         mb.push(definer);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
-					  "setupNestedSessionContext",
+                      "pushNestedSessionContext",
                       "void", 3);
 	}
 
@@ -1145,7 +1146,7 @@ class StaticMethodCallNode extends MethodCallNode
 			// If no SQL, there is no need to setup a nested session
 			// context.
 			if (sqlAllowed != RoutineAliasInfo.NO_SQL) {
-                generateSetupNestedSessionContext(
+                generatePushNestedSessionContext(
                     (ActivationClassBuilder) acb,
                     mb,
                     routineInfo.hasDefinersRights(),

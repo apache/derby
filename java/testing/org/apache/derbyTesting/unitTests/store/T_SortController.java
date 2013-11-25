@@ -50,6 +50,7 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
 import java.io.File;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 
@@ -888,6 +889,21 @@ class T_DummySortObserver implements SortObserver
 		}
 		return template.getRowArrayClone();
 	}
+
+    public boolean deferred() {
+        return false;
+    }
+
+    public boolean deferrable() {
+        return false;
+    }
+
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 }
 
 class T_DuplicateEliminator extends T_DummySortObserver
@@ -962,5 +978,20 @@ class T_SumForIntCol implements SortObserver
 	{
 		return null;
 	}
+
+    public boolean deferred() {
+        return false;
+    }
+
+    public boolean deferrable() {
+        return false;
+    }
+
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 }
 

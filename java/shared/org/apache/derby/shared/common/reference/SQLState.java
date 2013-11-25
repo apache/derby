@@ -739,6 +739,8 @@ public interface SQLState {
 	
 	String LANG_NULL_INTO_NON_NULL                                     = "23502";
 	String LANG_DUPLICATE_KEY_CONSTRAINT                               = "23505";
+    String LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T                    = "23506.T.1";
+    String LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_S                    = "23507.S.1";
 	String LANG_FK_VIOLATION                                           = "23503";
 	String LANG_CHECK_CONSTRAINT_VIOLATED                              = "23513";
 
@@ -1400,7 +1402,7 @@ public interface SQLState {
 	String LANG_UNKNOWN_TOOL_NAME                                = "X0Y88.S";
 	String LANG_BAD_OPTIONAL_TOOL_ARGS                                = "X0Y89.S";
 	String LANG_CANT_INSTANTIATE_CLASS                                = "X0Y90.S";
-
+    String LANG_SET_CONSTRAINT_NOT_DEFERRABLE                         = "X0Y91.S";
 
 	// TEMPORARY EXECUTION RESTRICTIONS
 

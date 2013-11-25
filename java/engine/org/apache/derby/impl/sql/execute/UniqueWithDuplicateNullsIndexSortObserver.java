@@ -22,7 +22,10 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -33,33 +36,47 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
  */
 public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver {
     
-    private boolean		isConstraint;
-    private String		indexOrConstraintName;
-    private String 		tableName;
-    
+    private final String                    indexOrConstraintName;
+    private final String                    tableName;
+    private final boolean                   deferrable;
+    private final boolean                   deferred;
+    private final TransactionController     tc;
+    private final LanguageConnectionContext lcc;
+    private final long                      indexCID;
+    private BackingStoreHashtable           deferredRowsHashTable;
     /**
      * Constructs an object of UniqueWithDuplicateNullsIndexSortObserver
      * 
-     * 
-     * 
+     * @param tc      Transaction controller
+     * @param lcc     Language Connection context
+     * @param indexCID Conglomerate id if the index
      * @param doClone If true, then rows that are retained
      * 		by the sorter will be cloned.  This is needed
      * 		if language is reusing row wrappers.
-     * @param isConstraint is this part of a constraint
+     * @param deferrable deferrable constraint
+     * @param deferred constraint mode is deferred
      * @param indexOrConstraintName name of index of constraint
      * @param execRow	ExecRow to use as source of clone for store.
      * @param reuseWrappers	Whether or not we can reuse the wrappers
      * @param tableName name of the table
      */
     public UniqueWithDuplicateNullsIndexSortObserver(
-    boolean doClone, 
-    boolean isConstraint,
-    String  indexOrConstraintName, 
-    ExecRow execRow,
-    boolean reuseWrappers, 
-    String  tableName) {
+            TransactionController tc,
+            LanguageConnectionContext lcc,
+            long indexCID,
+            boolean doClone,
+            boolean deferrable,
+            boolean deferred,
+            String  indexOrConstraintName,
+            ExecRow execRow,
+            boolean reuseWrappers,
+            String  tableName) {
         super(doClone, false, execRow, reuseWrappers);
-        this.isConstraint = isConstraint;
+        this.tc = tc;
+        this.lcc = lcc;
+        this.indexCID = indexCID;
+        this.deferrable = deferrable;
+        this.deferred = deferred;
         this.indexOrConstraintName = indexOrConstraintName;
         this.tableName = tableName;
     }
@@ -70,9 +87,10 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      * @param in new key
      * @param dup the new key is duplicate of this key
      * @return DVD [] if there is at least one null in
-     * the key else thorws StandardException
+     * the key else throws StandardException
      * @throws StandardException is the duplicate key has all non null parts
      */
+    @Override
     public DataValueDescriptor[] insertDuplicateKey(DataValueDescriptor[] in,
             DataValueDescriptor[] dup) throws StandardException {
         for (int i = 0; i < in.length; i++) {
@@ -86,4 +104,26 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
                 indexOrConstraintName, tableName);
         throw se;
     }
+
+    @Override
+    public boolean deferred() {
+        return deferred;
+    }
+
+    @Override
+    public boolean deferrable() {
+        return deferrable;
+    }
+
+    @Override
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException {
+        deferredRowsHashTable = DeferredDuplicates.rememberDuplicate(
+                    tc,
+                    indexCID,
+                    deferredRowsHashTable,
+                    lcc,
+                    row);
+    }
+
 }

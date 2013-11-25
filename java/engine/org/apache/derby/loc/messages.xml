@@ -873,6 +873,20 @@ Guide.
             </msg>
 
             <msg>
+                <name>23506.T.1</name>
+                <text>The transaction was aborted because of a deferred constraint violation: Duplicate in unique or primary key constraint identified by '{0}' defined on '{1}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>23507.S.1</name>
+                <text>Deferred constraint violation: Duplicate in unique or primary key constraint identified by '{0}' defined on '{1}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
                 <name>23513</name>
                 <text>The check constraint '{1}' was violated while performing an INSERT or UPDATE on table '{0}'.</text>
                 <arg>tableName</arg>
@@ -3683,6 +3697,12 @@ Guide.
                 <arg>className</arg>
             </msg>
 
+            <msg>
+                <name>X0Y91.S</name>
+                <text>Cannot change constraint mode of {0}. It is not a deferrable constraint.</text>
+                <arg>constraintName</arg>
+            </msg>
+X0Y91
         </family>
 
 

@@ -270,7 +270,10 @@ class CreateIndexNode extends DDLStatementNode
 		return getGenericConstantActionFactory().getCreateIndexConstantAction(
                     false, // not for CREATE TABLE
                     unique,
-                    false, //its not a UniqueWithDuplicateNulls Index
+                    false, // it's not a UniqueWithDuplicateNulls Index
+                    false, // it's not a constraint, so its checking
+                           // is not deferrable
+                    false, // initialltDeferred: N/A
                     indexType,
                     sd.getSchemaName(),
                     indexName.getTableName(),

@@ -36,7 +36,7 @@ final class UniqueWithDuplicateNullsMergeSort extends MergeSort {
      * Compares two keys. 
      *
      * If all the parts of the keys are not null then the leading 
-     * (keys.length - 1) parts are compared, else if no part of the key
+     * (keys.length - 1) parts are compared, else if a part of the key
      * is null then all parts of the key are compared (keys.length).
      *
      * This behavior is useful for implementing unique constraints where
@@ -50,6 +50,7 @@ final class UniqueWithDuplicateNullsMergeSort extends MergeSort {
      *
      * @return 0 for duplicates non zero for distinct keys 
      */
+    @Override
     protected int compare(DataValueDescriptor[] r1, DataValueDescriptor[] r2)
     throws StandardException {
         // Get the number of columns we have to compare.
@@ -71,8 +72,13 @@ final class UniqueWithDuplicateNullsMergeSort extends MergeSort {
             //location too.  This is used to provide proper sorting of
             //duplicate keys with nulls, they must be ordered properly 
             //according to the last field also.
-            if (i == colsToCompare - 1 && nonull)
-                return 0;
+            if (i == colsToCompare - 1 && nonull) {
+                if (sortObserver.deferred()) {
+                    sortObserver.rememberDuplicate(r1);
+                } else {
+                    return 0;
+                }
+            }
 
             // Get columns to compare.
             int colid = columnOrderingMap[i];

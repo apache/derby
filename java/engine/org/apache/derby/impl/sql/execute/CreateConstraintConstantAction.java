@@ -292,9 +292,12 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 
         for (int i=0; i < characteristics.length; i++) {
             if (characteristics[i] != defaults[i]) {
+                dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
+                                "DEFERRED CONSTRAINTS");
+
                 // Remove when feature DERBY-532 is completed
-                if (!PropertyUtil.getSystemProperty("derby.constraintsTesting",
-                        tableName).equals("true")) {
+                if (!PropertyUtil.getSystemProperty(
+                        "derby.constraintsTesting", "false").equals("true")) {
                     throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
                             "non-default constraint characteristics");
                 }

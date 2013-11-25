@@ -2579,8 +2579,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if(cd.getIndexDescriptor().isUniqueWithDuplicateNulls())
 		{
 			properties.put(
-                    "uniqueWithDuplicateNulls", Boolean.toString(true));
+                "uniqueWithDuplicateNulls", Boolean.toString(true));
 		}
+
+        if (cd.getIndexDescriptor().hasDeferrableChecking())
+        {
+            properties.put(
+                "hasDeferrableChecking", Boolean.toString(true));
+        }
 
 		properties.put(
             "rowLocationColumn", Integer.toString(indexRowLength - 1));

@@ -245,13 +245,15 @@ public class SQLParser
 		upgraded to the required level to use this functionality. Used to
 		disallow SQL statements that would leave on-disk formats that would
 		not be understood by a engine that matches the current upgrade level
-		of the database. Throws an exception if the database is not a the required level.
+        of the database. Throws an exception if the database is not at
+        the required level.
 		<P>
 		Typically used for CREATE statements at the parser level. Called usually just
 		before the node is created, or can be called in just a partial syntax fragment
 		
 		@param version Data Dictionary major version (DataDictionary.DD_ constant)
 		@param feature SQL Feature name, for error text.
+        @throws If the database is not at the required level.
 	*/
 	private boolean checkVersion(int version, String feature) throws StandardException
 	{
@@ -3144,6 +3146,8 @@ setConstraintsStatement() throws StandardException :
         }
     )
     {
+        checkVersion(
+            DataDictionary.DD_VERSION_DERBY_10_11, "DEFERRED CONSTRAINTS");
         return new SetConstraintsNode(constraints, initiallyDeferred, cm);
     }
 }

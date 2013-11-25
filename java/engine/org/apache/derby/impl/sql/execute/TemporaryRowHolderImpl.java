@@ -332,7 +332,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 
 		}else
 		{
-			status = cc.insert(inputRow.getRowArray());
+            status = cc.insert(inputRow.getRowArray());
 			if (isVirtualMemHeap)
 				state = STATE_INSERT;
 		}
@@ -400,7 +400,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			uniqueIndexRow[1] = baseRowLocation;
 			// Insert the row into the secondary index.
 			int status;
-			if ((status = uniqueIndex_cc.insert(uniqueIndexRow))!= 0)
+            if ((status = uniqueIndex_cc.insert(uniqueIndexRow))!= 0)
 			{
 				if(status == ConglomerateController.ROWISDUPLICATE)
 				{
@@ -468,7 +468,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		positionIndexRow[0] = position_sqllong;
 		positionIndexRow[1] = rl;
 		//insert the row location to position index
-		positionIndex_cc.insert(positionIndexRow);
+        positionIndex_cc.insert(positionIndexRow);
 	}
 
 	/**

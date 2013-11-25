@@ -253,7 +253,7 @@ class MaterializedResultSet extends NoPutResultSetImpl
                         TransactionController.MODE_TABLE,
                         TransactionController.ISOLATION_SERIALIZABLE);
 			}
-			materializedCC.insert(sourceRow.getRowArray());
+            materializedCC.insert(sourceRow.getRowArray());
 
 			createTCTime += getElapsedMillis(beginTCTime);
 		}

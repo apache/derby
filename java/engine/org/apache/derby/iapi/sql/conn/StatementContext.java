@@ -261,7 +261,8 @@ public interface StatementContext extends Context {
 
 
 	/**
-	 * Get the current SQL session context
+     * Get the current SQL session context.
+     * @return the current SQL session context
 	 */
 	public SQLSessionContext getSQLSessionContext();
 

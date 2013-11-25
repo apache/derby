@@ -21,39 +21,23 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.impl.sql.compile.TableName;
 
 /**
  * This class describes actions that are performed for a
- * set constraint at Execution time.  
+ * set constraint at execution time.
  * <p>
  * Note that the dependency action we send is SET_CONSTRAINTS
  * rather than ALTER_TABLE.  We do this because we want
@@ -64,20 +48,20 @@ import org.apache.derby.impl.sql.compile.TableName;
 class SetConstraintsConstantAction extends DDLConstantAction
 {
 
-    final private boolean   initiallyDeferred;
-    private List<TableName> constraints;
+    final private boolean   deferred;
+    final private List<TableName> constraints;
 
 
 	// CONSTRUCTORS
     /**
-     * @param constraints               List of constraints to set; null if all.
-     * @param initiallyDeferred         Encodes IMMEDIATE (false), DEFERRED (true)
+     * @param constraints      List of constraints to set; null if all.
+     * @param deferred         Encodes IMMEDIATE (false), DEFERRED (true)
      */
     SetConstraintsConstantAction(
             List<TableName>             constraints,
-            boolean                     initiallyDeferred) {
+            boolean                     deferred) {
         this.constraints = constraints;
-        this.initiallyDeferred = initiallyDeferred;
+        this.deferred = deferred;
 	}
 
     @Override
@@ -89,7 +73,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 	}
 
 	/**
-	 *	This is the guts of the Execution-time logic for DROP CONSTRAINT.
+     *  This is the guts of the Execution-time logic for SET CONSTRAINT.
 	 *
 	 *	@see ConstantAction#executeConstantAction
 	 *
@@ -102,7 +86,6 @@ class SetConstraintsConstantAction extends DDLConstantAction
                 activation.getLanguageConnectionContext();
 
         final DataDictionary dd = lcc.getDataDictionary();
-        ConstraintDescriptorList cl = new ConstraintDescriptorList();
 
         if (constraints != null) {
             for (TableName c : constraints) {
@@ -121,13 +104,44 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             c.getFullSQLName());
                 }
 
-                cl.add(cd);
+                // Remove when feature DERBY-532 is completed
+                if (!PropertyUtil.getSystemProperty(
+                        "derby.constraintsTesting", "false").equals("true")) {
+                    throw StandardException.newException(
+                        SQLState.NOT_IMPLEMENTED, "SET CONSTRAINT");
+                }
+
+                if (deferred && !cd.deferrable()) {
+                    throw StandardException.newException(
+                            SQLState.LANG_SET_CONSTRAINT_NOT_DEFERRABLE,
+                            cd.getConstraintName());
+                }
+
+                if (cd instanceof KeyConstraintDescriptor) {
+                    // Unique, primary key and foreign key
+
+                    lcc.setDeferred(activation,
+                                    ((KeyConstraintDescriptor)cd).
+                                        getIndexConglomerateDescriptor(dd).
+                                        getConglomerateNumber(),
+                                    deferred);
+                } else {
+                    // Check constraints
+                    throw StandardException.newException(
+                            SQLState.NOT_IMPLEMENTED, "SET CONSTRAINT");
+                }
             }
         } else {
-            cl = dd.getConstraintDescriptors(null); // all
+            // Remove when feature DERBY-532 is completed
+            if (!PropertyUtil.getSystemProperty(
+                    "derby.constraintsTesting", "false").equals("true")) {
+                throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
+                        "SET CONSTRAINT");
+            }
+
+            lcc.setDeferredAll(activation, deferred);
         }
 
-        throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
-                       "SET CONSTRAINT");
+
     }
 }

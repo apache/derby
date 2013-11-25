@@ -1044,6 +1044,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						forCreateTable,
 						unique,
                         uniqueWithDuplicateNulls,
+                        cChars[0], // deferrable?
+                        cChars[1], // initiallyDeferred?
 						null, constraintDN,
 						columnNames, true, tableSd, tableName,
 						constraintType, dd);
@@ -1053,6 +1055,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 					indexAction = genIndexAction(
 						forCreateTable,
 						constraintDN.requiresUniqueIndex(), false,
+                        cChars[0], // deferrable
+                        cChars[1], // initiallyDeferred?
 						null, constraintDN,
 						columnNames, true, tableSd, tableName,
 						constraintType, dd);
@@ -1176,6 +1180,10 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
      *                                      column in the key has a null value,
      *                                      no checking is done and insert will
      *                                      always succeed.
+     * @param hasDeferrableChecking         True if index is used to back a
+     *                                      deferrable constraint
+     * @param initiallyDeferred             True means the deferrable constraint
+     *                                      has deferred mode
      * @param indexName	                    The type of index (BTREE, for 
      *                                      example)
      * @param cdn
@@ -1192,6 +1200,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
     boolean                     forCreateTable,
     boolean                     isUnique,
     boolean                     isUniqueWithDuplicateNulls,
+    boolean                     hasDeferrableChecking,
+    boolean                     initiallyDeferred,
     String                      indexName,
     ConstraintDefinitionNode    cdn,
     String[]                    columnNames,
@@ -1235,6 +1245,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                     forCreateTable, 
                     isUnique, 
                     isUniqueWithDuplicateNulls,
+                    hasDeferrableChecking,
+                    initiallyDeferred,
                     "BTREE", // indexType
                     sd.getSchemaName(),
                     indexName,

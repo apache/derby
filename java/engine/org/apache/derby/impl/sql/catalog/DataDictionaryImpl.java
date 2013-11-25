@@ -8971,26 +8971,14 @@ public final class	DataDictionaryImpl
 
         IndexRowGenerator irg = null;
 
-        if (softwareVersion.checkVersion(
-                DataDictionary.DD_VERSION_DERBY_10_4,null)) 
-        {
-            irg = new IndexRowGenerator(
+        irg = new IndexRowGenerator(
                 "BTREE", ti.isIndexUnique(indexNumber),
+                false,
+                false,
                 false,
                 baseColumnPositions,
                 isAscending,
                 baseColumnPositions.length);
-        }
-        else 
-        {
-            //older version of Data Disctionary
-            //use old constructor
-            irg = new IndexRowGenerator (
-                "BTREE", ti.isIndexUnique(indexNumber),
-                baseColumnPositions,
-                isAscending,
-                baseColumnPositions.length);
-        }
 
 		// For now, assume that all index columns are ordered columns
 		ti.setIndexRowGenerator(indexNumber, irg);

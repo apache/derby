@@ -128,4 +128,34 @@ public interface SortObserver
 
 	public DataValueDescriptor[] getArrayClone()
 		throws StandardException;
+
+    /**
+     * Overridden by subclasses that observe sorters with uniqueness checking.
+     * @return true if the index's constraint is deferrable. Any SortObserver
+     * implementations that implement uniqueness checking need to keep track of
+     * this information.
+     */
+    public boolean deferrable();
+
+    /**
+     * Overridden by subclasses that observe sorters with uniqueness checking.
+     * @return true if constraint mode of the index's constraint is effectively
+     * deferred. Any SortObserver
+     * implementations that implement uniqueness checking need to keep track of
+     * this information.
+     */
+    public boolean deferred();
+
+    /**
+     * Overridden by subclasses that observe sorters with uniqueness checking.
+     * Will be called by sorters iff deferrable() and deferred() and
+     * uniqueness violation, so implementations that sometimes return
+     * true to these must implement this method to save duplicate
+     * information till commit time.
+     *
+     * @param row data of offending key
+     * @throws StandardException standard error policy
+     */
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException;
 }

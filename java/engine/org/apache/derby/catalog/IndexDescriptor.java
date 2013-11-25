@@ -30,6 +30,59 @@ package org.apache.derby.catalog;
  * the table on which the index is defined.
  * That information is available 
  * in the columns NAME and TABLEID of the table SYS.SYSCONGLOMERATES.
+ * <p>
+ * Whereas non-deferrable constraints are backed by UNIQUE indexes,
+ * deferrable constraints are backed by non-unique indexes. The duplicate
+ * checking on inserts and updates for deferrable constraints are handled at
+ * the language level, not by the store level. The following table shows
+ * the correspondence between the constraint types and the index attributes
+ * used:
+ * <ul>
+ *  <li>Non-deferrable PRIMARY KEY and UNIQUE NOT NULL on all constraint
+ *     columns
+ *  <pre>
+ *                            \  Value  | Number of index columns | Check
+ *   Attribute                 \        | in physical BTree key   | in
+ *   --------------------------------------------------------------------
+ *   unique                     | true  | N - 1 (row location     |
+ *   isUniqueWithDuplicateNulls | false |        not part of key) | Store
+ *   uniqueDeferrable           | false |                         | Btree
+ *   hasDeferrableChecking      | false |                         | code
+ *  </pre>
+ *  <li>Non-deferrable UNIQUE, where at least one constraint column is
+ *      nullable.
+ *  <pre>
+ *                            \  Value  | Number of index columns | Check
+ *   Attribute                 \        | in physical BTree key   | in
+ *   ------------------------------------------------------------ -------
+ *   unique                     | false | N                       |
+ *   isUniqueWithDuplicateNulls | true  |                         | Store
+ *   uniqueDeferrable           | false |                         | Btree
+ *   hasDeferrableChecking      | false |                         | code
+ *  </pre>
+ *  <li>Deferrable PRIMARY KEY and UNIQUE NOT NULL on all constraint
+ *     columns
+ *  <pre>
+ *                            \  Value  | Number of index columns | Check
+ *   Attribute                 \        | in physical BTree key   | in
+ *   ------------------------------------------------------------ -------
+ *   unique                     | false | N                       |
+ *   isUniqueWithDuplicateNulls | false |                         | Lang.
+ *   uniqueDeferrable           | true  |                         | code
+ *   hasDeferrableChecking      | true  |                         |
+ *  </pre>
+ *  <li>Deferrable UNIQUE, where at least one constraint column is
+ *      nullable.
+ *  <pre>
+ *                            \  Value  | Number of index columns | Check
+ *   Attribute                 \        | in physical BTree key   | in
+ *   ------------------------------------------------------------ -------
+ *   unique                     | false | N                       |
+ *   isUniqueWithDuplicateNulls | true  |                         | Lang.
+ *   uniqueDeferrable           | false |                         | code
+ *   hasDeferrableChecking      | true  |                         |
+ *  </pre>
+ *  </ul>
  */
 public interface IndexDescriptor
 {
@@ -42,6 +95,22 @@ public interface IndexDescriptor
      * This is effective only if isUnique is false.
 	 */
 	boolean			isUniqueWithDuplicateNulls();
+
+    /**
+     * The index represents a PRIMARY KEY or a UNIQUE NOT NULL constraint which
+     * is deferrable.
+     * {@code true} implies {@code isUnique() == false} and
+     * {@code isUniqueWithDuplicateNulls() == false} and
+     * {@code hasDeferrableChecking() == true}.
+
+     * @return {@code true} if the index represents such a constraint
+     */
+    boolean isUniqueDeferrable();
+
+    /**
+     * Returns true if the index is used to support a deferrable constraint.
+     */
+    boolean hasDeferrableChecking();
 
 	/**
 	 * Returns an array of column positions in the base table.  Each index

@@ -306,6 +306,10 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
                         false,          // not part of create table 
                         false,          // not unique
                         true,           // create as unique when not null index
+                        cd.getIndexDescriptor().hasDeferrableChecking(),
+                        false,          // deferred or not: shouldn't matter
+                                        // since we know we already have a
+                                        // unique index
                         cd.getIndexDescriptor().indexType(), 
                         td.getSchemaName(), 
                         cd.getConglomerateName(), td.getName(), td.getUUID(),

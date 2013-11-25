@@ -153,7 +153,7 @@ public class LockTableTest extends BaseJDBCTestCase {
      * 
      * @return String with the query
      */
-    private String getSelectLocksString() {
+    public static String getSelectLocksString() {
         String sql = 
                 "select " + 
                         "cast(username as char(8)) as username, " +

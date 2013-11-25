@@ -21,15 +21,14 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.sql.SQLException;
 import java.util.Properties;
-
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -41,6 +40,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -48,22 +48,23 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
   Perform Index maintenance associated with DML operations for a single index.
   */
 class IndexChanger
 {
-	private IndexRowGenerator irg;
+    final private IndexRowGenerator irg;
 	//Index Conglomerate ID
-	private long indexCID;
-	private DynamicCompiledOpenConglomInfo indexDCOCI;
-	private StaticCompiledOpenConglomInfo indexSCOCI;
-	private String indexName;
+    final private long indexCID;
+    final private DynamicCompiledOpenConglomInfo indexDCOCI;
+    final private StaticCompiledOpenConglomInfo indexSCOCI;
+    final private String indexName;
 	private ConglomerateController baseCC;
-	private TransactionController tc;
-	private int lockMode;
-	private FormatableBitSet baseRowReadMap;
+    final private TransactionController tc;
+    final private int lockMode;
+    final private FormatableBitSet baseRowReadMap;
 
 	private ConglomerateController indexCC = null;
 	private ScanController indexSC = null;
@@ -79,7 +80,11 @@ class IndexChanger
 	private final Activation				activation;
 	private boolean					ownIndexSC = true;
 
-	/**
+    private final boolean deferrable; // supports a deferrable constraint
+    private final LanguageConnectionContext lcc;
+    private BackingStoreHashtable deferredRowsHashTable; // cached for speed
+
+    /**
 	  Create an IndexChanger
 
 	  @param irg the IndexRowGenerator for the index.
@@ -112,6 +117,8 @@ class IndexChanger
 		 throws StandardException
 	{
 		this.irg = irg;
+        this.deferrable = irg.hasDeferrableChecking(); // cache value
+                                                       // for speed..
 		this.indexCID = indexCID;
 		this.indexSCOCI = indexSCOCI;
 		this.indexDCOCI = indexDCOCI;
@@ -124,8 +131,11 @@ class IndexChanger
 		this.activation = activation;
 		this.indexName = indexName;
 
-		// activation will be null when called from DataDictionary
-		if (activation != null && activation.getIndexConglomerateNumber() == indexCID)
+        this.lcc = (activation != null) ?
+                activation.getLanguageConnectionContext() : null;
+        // activation will be null when called from DataDictionary
+        if (activation != null &&
+                activation.getIndexConglomerateNumber() == indexCID)
 		{
 			ownIndexSC = false;
 		}
@@ -134,10 +144,9 @@ class IndexChanger
 		{
 			SanityManager.ASSERT(tc != null, 
 				"TransactionController argument to constructor is null");
-			SanityManager.ASSERT(irg != null, 
-				"IndexRowGenerator argument to constructor is null");
 		}
-	}
+
+    }
 
 	/**
 	 * Set the row holder for this changer to use.
@@ -430,16 +439,101 @@ class IndexChanger
 	 *
 	 * @param row	The row to insert
 	 *
-	 * @exception StandardException		Thrown on duplicate key error
+     * @exception StandardException     Thrown on duplicate key error unless
+     *                                  we have a deferred constraint. In that
+     *                                  index rows are saved for checking
+     *                                  on commit.
 	 */
 	private void insertAndCheckDups(ExecIndexRow row)
 				throws StandardException
 	{
 		openIndexCC();
 
-		int insertStatus = indexCC.insert(row.getRowArray());
+        int insertStatus;
 
-		if (insertStatus == ConglomerateController.ROWISDUPLICATE)
+        final DataValueDescriptor[] rowArray = row.getRowArray();
+
+        if (deferrable) {
+            insertStatus = indexCC.insert(row.getRowArray());
+
+            if (SanityManager.DEBUG) { // deferrable: we use a non-unique index
+                SanityManager.ASSERT(
+                        insertStatus != ConglomerateController.ROWISDUPLICATE);
+            }
+
+            final DataValueDescriptor [] key =
+                    new DataValueDescriptor[rowArray.length - 1];
+            System.arraycopy(rowArray, 0, key, 0, key.length);
+            ScanController idxScan = tc.openScan(
+                    indexCID,
+                    false,
+                    0, // FIXME: want NO_WAIT but not yet implemented
+                       // for row locks in BTRee scan
+                    TransactionController.MODE_RECORD,
+                    TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
+                    (FormatableBitSet)null, // retrieve all fields
+                    key,
+                    ScanController.GE, // startSearchOp
+                    null,
+                    key,
+                    ScanController.GT);
+
+            boolean duplicate = false;
+
+            try {
+                final boolean foundOne = idxScan.next();
+
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(
+                            foundOne, "IndexChanger: inserted row gone?");
+                }
+
+                duplicate = foundOne && idxScan.next();
+
+            } catch (StandardException e) {
+                if (e.getSQLState().equals(SQLState.LOCK_TIMEOUT) ||
+                    e.getSQLState().equals(SQLState.DEADLOCK)) {
+                    // Assume there is a duplicate, so we'll check again at
+                    // commit time.
+                    duplicate = true;
+                } else {
+                    throw e;
+                }
+            }
+
+            if (duplicate && irg.isUniqueWithDuplicateNulls()) {
+                int keyParts = rowArray.length - 1;
+
+                for (int i = 0; i < keyParts; i++) {
+                    // Keys with null in it are always unique
+                    if (rowArray[i].isNull()) {
+                        duplicate = false;
+                        break;
+                    }
+                }
+            }
+
+            if (duplicate) {
+                if (lcc.isEffectivelyDeferred(activation, indexCID)) {
+                    // Save duplicate row so we can check at commit time there is
+                    // no longer any duplicate.
+
+                    deferredRowsHashTable = DeferredDuplicates.rememberDuplicate(
+                            tc,
+                            indexCID,
+                            deferredRowsHashTable,
+                            lcc,
+                            row.getRowArray());
+                } else { // the constraint is not deferred, so throw
+                    insertStatus = ConglomerateController.ROWISDUPLICATE;
+                }
+            }
+
+        } else { // not a deferred constraint
+            insertStatus = indexCC.insert(row.getRowArray());
+        }
+
+        if (insertStatus == ConglomerateController.ROWISDUPLICATE)
 		{
 			/*
 			** We have a duplicate key error. 
@@ -467,16 +561,14 @@ class IndexChanger
 				StandardException.newException(
 				SQLState.LANG_DUPLICATE_KEY_CONSTRAINT, indexOrConstraintName, tableName);
 			throw se;
-		}
-		if (SanityManager.DEBUG)
-		{
-			if (insertStatus != 0)
-			{
-				SanityManager.THROWASSERT("Unknown insert status " + insertStatus);
-			}
-		}
-	}
-
+        } else {
+            if (SanityManager.DEBUG) {
+                if (insertStatus != 0) {
+                    SanityManager.THROWASSERT("Unknown insert status " + insertStatus);
+                }
+            }
+        }
+    }
 
 	/**
 	 * Open the ConglomerateController for this index if it isn't open yet.
@@ -607,7 +699,9 @@ class IndexChanger
 	{
 		setOurIndexRow(newRow, baseRowLocation);
 		//defer inserts if its on unique or UniqueWhereNotNull index
-		if (irg.isUnique() || irg.isUniqueWithDuplicateNulls())
+        if (irg.isUnique() ||
+            irg.isUniqueWithDuplicateNulls() ||
+            irg.hasDeferrableChecking())
 		{
 			doDeferredInsert();
 		}

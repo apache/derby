@@ -522,8 +522,8 @@ class TabInfoImpl
 													   heapLocation,
 													   row );
 
-				insertRetCode = 
-                    indexControllers[ ictr ].insert(indexableRow.getRowArray());
+                insertRetCode = indexControllers[ ictr ].insert(
+                        indexableRow.getRowArray());
 
 				if ( insertRetCode == ConglomerateController.ROWISDUPLICATE )
 				{

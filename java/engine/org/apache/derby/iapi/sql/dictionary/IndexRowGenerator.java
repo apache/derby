@@ -44,48 +44,17 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 /**
  * This class extends IndexDescriptor for internal use by the
  * DataDictionary.
+ * <p>
+ * For a description of how deferrable and non-deferrable constraints
+ * are backed differently, including the meaning of the
+ * boolean attributes used here, see {@link
+ * org.apache.derby.catalog.IndexDescriptor}.
  */
 public class IndexRowGenerator implements IndexDescriptor, Formatable
 {
 	private IndexDescriptor	id;
 	private ExecutionFactory ef;
 
-	/**
-	 * Constructor for an IndexRowGeneratorImpl
-	 *
-	 * @param indexType		The type of index
-	 * @param isUnique		True means the index is unique
-	 * @param baseColumnPositions	An array of column positions in the base
-	 *								table.  Each index column corresponds to a
-	 *								column position in the base table.
-	 * @param isAscending	An array of booleans telling asc/desc on each
-	 *						column.
-	 * @param numberOfOrderedColumns	In the future, it will be possible
-	 *									to store non-ordered columns in an
-	 *									index.  These will be useful for
-	 *									covered queries.
-	 */
-	public IndexRowGenerator(String indexType,
-								boolean isUnique,
-								int[] baseColumnPositions,
-								boolean[] isAscending,
-								int numberOfOrderedColumns)
-	{
-		id = new IndexDescriptorImpl(
-                        indexType,
-                        isUnique, //default uniqueWithDuplicateNulls to false
-                        false,
-                        baseColumnPositions,
-                        isAscending,
-                        numberOfOrderedColumns);
-
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(baseColumnPositions != null,
-				"baseColumnPositions are null");
-		}
-	}
-        
     /**
      * Constructor for an IndexRowGeneratorImpl
      * 
@@ -93,6 +62,11 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
      * @param isUnique		True means the index is unique
      * @param isUniqueWithDuplicateNulls means the index is almost unique
      *                              i.e. unique only for non null keys
+     * @param isUniqueDeferrable    True means the index represents a PRIMARY
+     *                              KEY or a UNIQUE NOT NULL constraint which
+     *                              is deferrable.
+     * @param hasDeferrableChecking True if the index is used to back a
+     *                              deferrable constraint
      * @param baseColumnPositions	An array of column positions in the base
      * 								table.  Each index column corresponds to a
      * 								column position in the base table.
@@ -106,6 +80,8 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	public IndexRowGenerator(String indexType,
 								boolean isUnique,
 								boolean isUniqueWithDuplicateNulls,
+                                boolean isUniqueDeferrable,
+                                boolean hasDeferrableChecking,
 								int[] baseColumnPositions,
 								boolean[] isAscending,
 								int numberOfOrderedColumns)
@@ -113,6 +89,8 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 		id = new IndexDescriptorImpl(indexType,
 									isUnique,
 									isUniqueWithDuplicateNulls,
+                                    isUniqueDeferrable,
+                                    hasDeferrableChecking,
 									baseColumnPositions,
 									isAscending,
 									numberOfOrderedColumns);
@@ -304,6 +282,19 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	{
 		return id.isUniqueWithDuplicateNulls();
 	}
+
+    public boolean hasDeferrableChecking()
+    {
+        return id.hasDeferrableChecking();
+    }
+
+
+    public boolean isUniqueDeferrable()
+    {
+        return id.isUniqueDeferrable();
+    }
+
+
 	/** @see IndexDescriptor#isUnique */
 	public boolean isUnique()
 	{

@@ -47,6 +47,7 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
@@ -453,7 +454,11 @@ recompileOutOfDatePlan:
 				statementContext.clearSavePoint();
 			}
 
-			lccToUse.popStatementContext(statementContext, null);					
+            lccToUse.popStatementContext(statementContext, null);
+
+            if (activation.getSQLSessionContextForChildren() != null) {
+                lccToUse.popNestedSessionContext(activation);
+            }
 
 			if (activation.isSingleExecution() && resultSet.isClosed())
 			{

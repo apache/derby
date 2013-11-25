@@ -30,14 +30,9 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Stack;
 import java.util.Vector;
-
-import	org.apache.derby.catalog.Dependable;
-import	org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.reference.Property;
@@ -49,16 +44,20 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedByteCode;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
@@ -80,6 +79,7 @@ import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * BaseActivation
@@ -182,16 +182,16 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 *
 	 * A non-null 'parentActivation' represents the activation of the calling
 	 * statement (if we are in a nested connection of a stored routine), or the
-	 * activation of the parent statement (if we are executing a substatement)
+     * activation of the parent statement (if we are executing a sub-statement)
 	 *
 	 * 'parentActivation' is set when this activation is created (@see
-	 * GenericPreparedStatement#getActivation) based on the top of the
+     * PreparedStatement#getActivation) based on the top of the
 	 * dynamic call stack of execution, which is tracked by
 	 * StatementContext. The nested SQL session context is initialized
 	 * by code generated for the call, after parameters are evaluated
-	 * or just substatement execution starts.
-	 * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generateSetupNestedSessionContext
-	 * @see org.apache.derby.impl.sql.GenericPreparedStatement#executeSubStatement
+     * or just sub-statement execution starts.
+     * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext
+     * @see PreparedStatement#executeSubStatement
 	 *
 	 */
 	private Activation parentActivation;
@@ -301,6 +301,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
     /**
      * Create the ResultSet tree for this statement.
      * @return the root of the ResultSet tree for this statement
+     * @throws StandardException standard error policy
      */
     protected abstract ResultSet createResultSet() throws StandardException;
 
@@ -309,6 +310,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
      * execution of the statement. The default implementation does nothing.
      * Sub-classes should override this method if they need to perform
      * operations before each execution.
+     * @throws org.apache.derby.iapi.error.StandardException
      */
     protected void reinit() throws StandardException {
         // Do nothing by default. Overridden by sub-classes that need it.
@@ -349,11 +351,13 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
-		Link this activation with its PreparedStatement.
-		It can be called with null to break the link with the
-		PreparedStatement.
-
-	*/
+     * Link this activation with its PreparedStatement.
+     * It can be called with null to break the link with the
+     * PreparedStatement.
+     * @param ps prepared statement
+     * @param scrollable activation for a scrollable result set
+     * @throws StandardException standard error policy
+     */
 	public final void setupActivation(ExecPreparedStatement ps, boolean scrollable) 
 	throws StandardException {
 		preStmt = ps;
@@ -509,9 +513,10 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
-		A generated class can create its own closeActivationAction
-		method to invoke special logic when the activation is closed.
-	*/
+     * A generated class can create its own closeActivationAction
+     * method to invoke special logic when the activation is closed.
+     * @throws java.lang.Exception error
+     */
 	protected void closeActivationAction() throws Exception {
 		// no code to be added here as generated code
 		// will not call super.closeActivationAction()
@@ -1412,13 +1417,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * @see org.apache.derby.iapi.sql.Activation#getSQLSessionContextForChildren
 	 */
 	public SQLSessionContext getSQLSessionContextForChildren() {
-
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT
-				(sqlSessionContextForChildren != null,
-				 "Expected sqlSessionContextForChildren to be non-null");
-		}
-
 		return sqlSessionContextForChildren;
 	}
 

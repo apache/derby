@@ -21,34 +21,26 @@
 
 package org.apache.derby.impl.store.access.sort;
 
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.store.access.ColumnOrdering;
+import org.apache.derby.iapi.store.access.RowUtil;
+import org.apache.derby.iapi.store.access.SortController;
+import org.apache.derby.iapi.store.access.SortObserver;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.Sort;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.store.access.SortController;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.Orderable;
-
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 
@@ -487,6 +479,19 @@ class MergeSort implements Sort
 		// ordering array.
         for (int i = 0; i < colsToCompare; i++)
         {
+            if (i == colsToCompare - 1 && sortObserver.deferrable()) {
+                if (sortObserver.deferred()) {
+                    // Last column, which is RowLocation. We compared equal
+                    // this far so duplicate: remember till end of
+                    // transaction, but continue sorting on RowLocation, since
+                    // the index needs to be sorted on the column, too, for
+                    // the Btree to load.
+                    sortObserver.rememberDuplicate(r1);
+                } else {
+                    // report the duplicate
+                    break;
+                }
+            }
 			// Get columns to compare.
             int colid = this.columnOrderingMap[i];
             boolean nullsLow = this.columnOrderingNullsLowMap[i];

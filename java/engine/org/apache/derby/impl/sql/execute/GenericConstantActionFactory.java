@@ -226,6 +226,10 @@ public class GenericConstantActionFactory
      *                                  column in the key has a null value,
      *                                  no checking is done and insert will
      *                                  always succeed.
+     * @param hasDeferrableChecking True if the index is used to back a
+     *                              deferrable constraint
+     * @param initiallyDeferred  True means the deferrable constraint has
+     *                           deferred mode initially.
      * @param indexType	The type of index (BTREE, for example)
      * @param schemaName			the schema that table (and index) lives in.
      * @param indexName	Name of the index
@@ -242,6 +246,8 @@ public class GenericConstantActionFactory
         boolean forCreateTable,
 		boolean			unique,
 		boolean			uniqueWithDuplicateNulls,
+        boolean         hasDeferrableChecking,
+        boolean         initiallyDeferred,
 		String			indexType,
 		String			schemaName,
 		String			indexName,
@@ -254,11 +260,22 @@ public class GenericConstantActionFactory
 		Properties		properties
     )
 	{
-		return	new CreateIndexConstantAction
-			( forCreateTable, unique, uniqueWithDuplicateNulls, indexType, 
-				schemaName, indexName, tableName, tableId,
-			  columnNames, isAscending, isConstraint,
-			  conglomerateUUID, properties );
+        return new CreateIndexConstantAction(
+            forCreateTable,
+            unique,
+            uniqueWithDuplicateNulls,
+            hasDeferrableChecking,
+            initiallyDeferred,
+            indexType,
+            schemaName,
+            indexName,
+            tableName,
+            tableId,
+            columnNames,
+            isAscending,
+            isConstraint,
+            conglomerateUUID,
+            properties);
 	}
 
 

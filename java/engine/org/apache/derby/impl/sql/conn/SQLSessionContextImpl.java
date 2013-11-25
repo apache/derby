@@ -21,7 +21,7 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import java.lang.String;
+import java.util.HashMap;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
@@ -31,10 +31,30 @@ public class SQLSessionContextImpl implements SQLSessionContext {
     private String currentRole;
     private SchemaDescriptor currentDefaultSchema;
 
-    public SQLSessionContextImpl (SchemaDescriptor sd, String currentUser) {
+    /**
+     * Maps a conglomerate id (key) into a Boolean for deferrable constraints.
+     * There is a 1-1 correspondence for these backing indexes, they are not
+     * shared). If the Boolean value is {@code FALSE}, we have immediate
+     * checking, if it is {@code TRUE} we have deferred checking. Cf. SQL
+     * SET CONSTRAINT.
+     */
+    private HashMap<Long, Boolean> constraintModes;
+
+    /**
+     * True if all deferrable constraints are deferred in this transaction.
+     */
+    private Boolean deferredAll;
+
+    public SQLSessionContextImpl (
+            SchemaDescriptor sd,
+            String currentUser) {
         currentRole = null;
         currentDefaultSchema = sd;
         this.currentUser = currentUser;
+
+        if (constraintModes != null) {
+            this.constraintModes = new HashMap<Long,Boolean>(constraintModes);
+        }
     }
 
     public void setRole(String role) {
@@ -59,5 +79,83 @@ public class SQLSessionContextImpl implements SQLSessionContext {
 
     public SchemaDescriptor getDefaultSchema() {
         return currentDefaultSchema;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public HashMap<Long, Boolean> getConstraintModes() {
+        return constraintModes != null ?
+            new HashMap<Long, Boolean>(constraintModes) :
+            null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setConstraintModes(HashMap<Long, Boolean> hm) {
+        this.constraintModes = hm != null ?
+                new HashMap<Long, Boolean>(hm) : null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDeferred(long conglomId, boolean deferred) {
+        if (constraintModes == null) {
+            constraintModes = new HashMap<Long, Boolean>();
+        }
+
+        constraintModes.put(Long.valueOf(conglomId),
+                                Boolean.valueOf(deferred));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Boolean isDeferred(long conglomId) {
+        Boolean v = null;
+
+        if (constraintModes != null) {
+            v = constraintModes.get(Long.valueOf(conglomId));
+        }
+
+        if (v != null) {
+            return v; // Trumps ALL setting since it must have been
+                      // set later otherwise it would have been
+                      // deleted
+        } else {
+            return deferredAll;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void resetConstraintModes() {
+        if (constraintModes != null) {
+            constraintModes.clear();
+        }
+
+        deferredAll = null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDeferredAll(Boolean deferred) {
+        deferredAll = deferred;
+        // This now overrides any individual constraint setting, so
+        // clear those.
+        if (constraintModes != null) {
+            constraintModes.clear();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Boolean getDeferredAll() {
+        return deferredAll;
     }
 }

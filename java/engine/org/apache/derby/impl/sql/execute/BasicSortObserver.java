@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.util.Vector;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This is the most basic sort observer.  It
@@ -172,4 +173,19 @@ public class BasicSortObserver implements SortObserver
 
 		return newArray;
 	}
+
+    public boolean deferred() {
+        return false;
+    }
+
+    public boolean deferrable() {
+        return false;
+    }
+
+    public void rememberDuplicate(DataValueDescriptor[] row)
+            throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 }

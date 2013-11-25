@@ -30,6 +30,7 @@ import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAException;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.ExceptionUtil;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
@@ -304,7 +305,16 @@ class EmbedXAResource implements XAResource {
                     return XAResource.XA_RDONLY;
                 }
             } catch (SQLException sqle) {
-                throw wrapInXAException(sqle);
+                XAException xe = wrapInXAException(sqle);
+
+                if (sqle.getSQLState().equals(
+                      ExceptionUtil.getSQLStateFromIdentifier(
+                        SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T))) {
+                    // We are rolling back
+                    returnConnectionToResource(tranState, xid_im);
+                }
+
+                throw xe;
             }
         }
         
@@ -820,7 +830,9 @@ class EmbedXAResource implements XAResource {
         else if (sqlstate.equals(SQLState.LOCK_TIMEOUT))
             xaErrorCode = XAException.XA_RBTIMEOUT;
         else if (seErrorCode >=  ExceptionSeverity.SESSION_SEVERITY)
-            xaErrorCode = XAException.XAER_RMFAIL;            
+            xaErrorCode = XAException.XAER_RMFAIL;
+        else if (sqlstate.equals(StandardException.getSQLStateFromIdentifier(SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T)))
+            xaErrorCode = XAException.XA_RBINTEGRITY;
         else
             xaErrorCode = XAException.XAER_RMERR;
         

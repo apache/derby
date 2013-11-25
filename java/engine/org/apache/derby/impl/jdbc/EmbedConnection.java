@@ -48,10 +48,10 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.store.access.XATransactionController;
 
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
-
 import java.io.IOException;
 
 import java.security.Permission;
@@ -86,6 +86,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
+import javax.transaction.xa.XAException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.jdbc.FailedProperties40;
@@ -3005,8 +3006,12 @@ public class EmbedConnection implements EngineConnection
 
     /**
      * Do not use this method directly use XATransactionState.xa_prepare
-     * instead because it also maintains/cancels the timout task which is
+     * instead because it also maintains/cancels the timeout task which is
      * scheduled to cancel/rollback the global transaction.
+     *
+     * @return One of {@link org.apache.derby.iapi.store.access.XATransactionController#XA_OK} or
+     *         {@link org.apache.derby.iapi.store.access.XATransactionController#XA_RDONLY}
+     * @throws java.sql.SQLException
      */
 	public final int xa_prepare() throws SQLException {
 
@@ -3018,6 +3023,13 @@ public class EmbedConnection implements EngineConnection
                 LanguageConnectionContext lcc = getLanguageConnection();
 				XATransactionController tc = 
                     (XATransactionController)lcc.getTransactionExecute();
+
+                try {
+                    lcc.checkIntegrity();
+                } catch (StandardException e) {
+                    lcc.xaRollback();
+                    throw e;
+                }
 
 				int ret = tc.xa_prepare();
 

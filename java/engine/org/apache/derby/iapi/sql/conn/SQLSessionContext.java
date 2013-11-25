@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.sql.conn;
 
 import java.lang.String;
+import java.util.HashMap;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 /**
@@ -63,7 +64,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
  * context. Since the same dynamic call context is involved, this
  * seems correct.
  *
- * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#setupNestedSessionContext
+ * @see LanguageConnectionContext#pushNestedSessionContext
  */
 
 public interface SQLSessionContext {
@@ -97,4 +98,67 @@ public interface SQLSessionContext {
      * Get the schema of this SQL connection context
      */
     public SchemaDescriptor getDefaultSchema();
+
+    /**
+     * Get a handle to the session's constraint modes.
+     * The caller is responsible for any cloning needed.
+     * @return constraint modes map
+     */
+    public HashMap<Long, Boolean> getConstraintModes();
+
+    /**
+     * Initialize a inferior session context with the constraint mode map
+     * of the parent session context.
+     * @param hm constraint mode map
+     */
+    public void setConstraintModes(HashMap<Long, Boolean> hm);
+
+    /**
+     * Set the constraint mode for this constraint/index to {@code deferred}.
+     * If {@code deferred} is {@code false}, to immediate checking,
+     * if {@code true} to deferred checking.
+     *
+     * @param conglomId The conglomerate id of the backing index for the
+     *                  constraint .
+     * @param deferred  The new constraint mode
+     */
+    public void setDeferred(long conglomId, boolean deferred);
+
+    /**
+     * Return {@code Boolean.TRUE} if the constraint mode for this
+     * constraint/index has been set to deferred, {@code Boolean.FALSE} if
+     * it has been set to immediate.  Any ALL setting is considered also.
+     * If the constraint mode hasn't been set for this constraint,
+     * return {@code null}. The constraint mode is the effectively the initial
+     * constraint mode in this case.
+     */
+    public Boolean isDeferred(long conglomId);
+
+    /**
+     * Clear deferred information for this transaction.
+     */
+    public void resetConstraintModes();
+
+    /**
+     * Set the constraint mode for all deferrable constraints to
+     * {@code deferred}.
+     * If {@code deferred} is {@code false}, set to immediate checking,
+     * if {@code true} to deferred checking.
+     * {@code null} is allowed: it means no ALL setting exists.
+     *
+     * @param deferred the mode to set
+     */
+    public void setDeferredAll(Boolean deferred);
+
+    /**
+     * Get state of DEFERRED ALL setting.
+     *
+     * @return {@code True} is deferred all constraint mode has been
+     *         set for this session context.
+     *         {@code False} is deferred immediate has been set for this
+     *         session context.
+     *         {@code null} means no ALL setting has been made for this context
+     */
+    public Boolean getDeferredAll();
+
 }

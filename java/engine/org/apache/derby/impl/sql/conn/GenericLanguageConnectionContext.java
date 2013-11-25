@@ -21,76 +21,76 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import org.apache.derby.iapi.services.context.ContextImpl;
-import org.apache.derby.iapi.services.cache.CacheManager;
-
-import org.apache.derby.impl.sql.compile.CompilerContextImpl;
-import org.apache.derby.impl.sql.execute.AutoincrementCounter;
-import org.apache.derby.impl.sql.GenericPreparedStatement;
-import org.apache.derby.impl.sql.GenericStatement;
-
-import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.loader.GeneratedClass;
-import org.apache.derby.iapi.services.cache.Cacheable;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.OptimizerFactory;
-import org.apache.derby.iapi.sql.compile.OptTrace;
-import org.apache.derby.iapi.sql.compile.ASTVisitor;
-import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.ContextId;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.cache.CacheManager;
+import org.apache.derby.iapi.services.cache.Cacheable;
+import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.context.ContextImpl;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.LanguageFactory;
+import org.apache.derby.iapi.sql.ParameterValueSet;
+import org.apache.derby.iapi.sql.PreparedStatement;
+import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.compile.ASTVisitor;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.OptTrace;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
-import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
+import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.PreparedStatement;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.ParameterValueSet;
-
+import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.transaction.TransactionControl;
+import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.InterruptStatus;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.reference.Property;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.WeakHashMap;
-import java.util.Iterator;
-import java.util.Map;
-import org.apache.derby.iapi.reference.ContextId;
-import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.impl.sql.GenericPreparedStatement;
+import org.apache.derby.impl.sql.GenericStatement;
+import org.apache.derby.impl.sql.compile.CompilerContextImpl;
+import org.apache.derby.impl.sql.execute.AutoincrementCounter;
+import org.apache.derby.impl.sql.execute.DeferredDuplicates;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * LanguageConnectionContext keeps the pool of prepared statements,
@@ -219,7 +219,7 @@ public class GenericLanguageConnectionContext
      * The top SQL session context stack frame (SQL 2003, section
      * 4.37.3), is kept in topLevelSSC. For nested session contexts,
      * the SQL session context is held by the activation of the
-     * calling statement, cf. setupNestedSessionContext and it is
+     * calling statement, cf. pushNestedSessionContext and it is
      * accessible through the current statement context
      * (compile-time), or via the current activation (execution-time).
      * @see GenericLanguageConnectionContext#getTopLevelSQLSessionContext
@@ -310,6 +310,13 @@ public class GenericLanguageConnectionContext
      * operations.
      */
     private WeakHashMap<TableDescriptor,FormatableBitSet> referencedColumnMap;
+
+    /**
+     * The set of disk backed hash tables containing any index rows
+     * saved for deferred constraints in this transaction, keyed by the
+     * conglomerate id. Checked at commit time, then discarded.
+     */
+    private HashMap<Long, BackingStoreHashtable> deferredHashTables;
 
     /*
        constructor
@@ -1481,6 +1488,8 @@ public class GenericLanguageConnectionContext
                     SQLState.LANG_NO_COMMIT_IN_NESTED_CONNECTION);
         }
 
+        checkIntegrity();
+
         // Log commit to error log, if appropriate
         if (logStatementText)
         {
@@ -1723,6 +1732,8 @@ public class GenericLanguageConnectionContext
         {
             throw StandardException.newException(SQLState.LANG_NO_ROLLBACK_IN_NESTED_CONNECTION);
         }
+
+        clearDeferreds();
 
         // Log rollback to error log, if appropriate
         if (logStatementText)
@@ -2438,7 +2449,7 @@ public class GenericLanguageConnectionContext
      *
      * Inherit SQL session state a priori (statementContext will get
      * its own SQL session state if this statement executes a call,
-     * cf. setupNestedSessionContext.
+     * cf. pushNestedSessionContext.
 
      * @param isAtomic whether this statement is atomic or not
      * @param isForReadOnly whether this statement is for a read only resultset
@@ -3624,7 +3635,9 @@ public class GenericLanguageConnectionContext
      *
      * @param activation the activation
      */
-    private SQLSessionContext getCurrentSQLSessionContext(Activation activation) {
+    public SQLSessionContext getCurrentSQLSessionContext(
+        Activation activation) {
+
         SQLSessionContext curr;
 
         Activation parent = activation.getParentActivation();
@@ -3669,9 +3682,9 @@ public class GenericLanguageConnectionContext
 
 
     /**
-     * @see LanguageConnectionContext#setupNestedSessionContext(Activation a, boolean definersRights, String definer)
+     * {@inheritDoc}
      */
-    public void setupNestedSessionContext(
+    public void pushNestedSessionContext(
         Activation a,
         boolean definersRights,
         String definer) throws StandardException {
@@ -3736,6 +3749,10 @@ public class GenericLanguageConnectionContext
             sc.setDefaultSchema(getDefaultSchema(a));
         }
 
+        final SQLSessionContext ssc = getCurrentSQLSessionContext(a);
+        sc.setDeferredAll(ssc.getDeferredAll());
+        sc.setConstraintModes(ssc.getConstraintModes());
+
         StatementContext stmctx = getStatementContext();
 
         // Since the statement is an invocation (iff push=true), it will now be
@@ -3754,6 +3771,74 @@ public class GenericLanguageConnectionContext
         stmctx.setSQLSessionContext(sc);
     }
 
+    /**
+     * @param a {@inheritDoc}
+     * @throws StandardException {@inheritDoc}
+     */
+    public void popNestedSessionContext(Activation a) throws StandardException {
+        SQLSessionContext nested = a.getSQLSessionContextForChildren();
+        SQLSessionContext caller = getCurrentSQLSessionContext(a);
+
+        compareConstraintModes(nested, caller);
+    }
+
+    private void compareConstraintModes(
+            SQLSessionContext nested,
+            SQLSessionContext caller) throws StandardException {
+
+        if (deferredHashTables == null) {
+            // Nothing to do
+            return;
+        }
+
+        DataDictionary dd = getDataDictionary();
+
+        // Check all constraints that were deferred inside the routine
+        // but whose constraint mode is immediate on the outside. If
+        // any of these violate the constraints, roll back.
+        Set<Map.Entry<Long, BackingStoreHashtable>> es =
+                deferredHashTables.entrySet();
+
+        for (Map.Entry<Long, BackingStoreHashtable> e : es) {
+            final long indexCID = e.getKey().longValue();
+
+            boolean effectivelyDeferred = effectivelyDeferred(caller, indexCID);
+
+            if (effectivelyDeferred ) {
+                // the constraint is also deferred in the calling context
+                continue;
+            }
+            // The constraint must have been deferred inside the routine
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(effectivelyDeferred(nested, indexCID));
+            }
+
+            doValidateConstraint(e.getKey().longValue(), e.getValue(), true);
+        }
+    }
+
+    private boolean effectivelyDeferred(SQLSessionContext sc, long indexCID)
+            throws StandardException {
+
+        Boolean deferred = sc.isDeferred(indexCID);
+        boolean effectivelyDeferred;
+        final DataDictionary dd = getDataDictionary();
+
+        if (deferred != null) {
+            effectivelyDeferred = deferred.booleanValue();
+        } else {
+            // no explicit setting applicable, use initial constraint mode
+            final ConglomerateDescriptor cd =
+                    dd.getConglomerateDescriptor(indexCID);
+            final TableDescriptor td =
+                    dd.getTableDescriptor(cd.getTableID());
+            final ConstraintDescriptor conDesc =
+                    dd.getConstraintDescriptor(td, cd.getUUID());
+            effectivelyDeferred = conDesc.initiallyDeferred();
+        }
+
+        return effectivelyDeferred;
+    }
 
     /**
      * @see LanguageConnectionContext#setupSubStatementSessionContext(Activation a)
@@ -3784,7 +3869,7 @@ public class GenericLanguageConnectionContext
     public SQLSessionContext createSQLSessionContext() {
         return new SQLSessionContextImpl(
             getInitialDefaultSchemaDescriptor(),
-            getSessionUserId() /* a priori */);
+            getSessionUserId()); /* a priori */
     }
 
     /**
@@ -3856,5 +3941,108 @@ public class GenericLanguageConnectionContext
     public void setReferencedColumnMap(TableDescriptor td,
                                        FormatableBitSet map) {
         referencedColumnMap.put(td, map);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDeferred(Activation a, long conglomId, boolean deferred)
+            throws StandardException {
+        if (!deferred) {
+            // Moving to immediate, check whats done in this transaction first
+            validateDeferredConstraint(conglomId);
+        }
+        getCurrentSQLSessionContext(a).setDeferred(conglomId, deferred);
+    }
+
+    public boolean isEffectivelyDeferred(Activation a, long conglomId)
+            throws StandardException {
+        return effectivelyDeferred(getCurrentSQLSessionContext(a), conglomId);
+    }
+
+
+    public void checkIntegrity() throws StandardException {
+        validateDeferredConstraints(true);
+        clearDeferreds();
+    }
+
+    public void invalidateDeferredConstraintsData(long indexCID)
+            throws StandardException {
+        if (deferredHashTables != null &&
+                deferredHashTables.containsKey(Long.valueOf(indexCID))) {
+            deferredHashTables.remove(Long.valueOf(indexCID));
+        }
+    }
+
+    /**
+     * Clear deferred information for this transaction.
+     */
+    private void clearDeferreds() {
+        deferredHashTables = null;
+        getCurrentSQLSessionContext().resetConstraintModes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setDeferredAll(Activation a, boolean deferred)
+            throws StandardException {
+        if (!deferred) {
+            validateDeferredConstraints(false);
+
+            // No violations, so reset the memory
+            deferredHashTables = null;
+        }
+        getCurrentSQLSessionContext(a).setDeferredAll(
+            Boolean.valueOf(deferred));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public HashMap<Long, BackingStoreHashtable> getDeferredHashTables() {
+        if (deferredHashTables == null) {
+            deferredHashTables = new HashMap<Long, BackingStoreHashtable>();
+        }
+        return deferredHashTables;
+    }
+
+    private void validateDeferredConstraints(boolean rollbackOnError)
+            throws StandardException {
+        if (deferredHashTables == null) {
+            // Nothing to do
+            return;
+        }
+
+        Set<Map.Entry<Long, BackingStoreHashtable>> es =
+                deferredHashTables.entrySet();
+
+        for (Map.Entry<Long, BackingStoreHashtable> e : es) {
+            doValidateConstraint(e.getKey().longValue(),
+                                 e.getValue(),
+                                 rollbackOnError);
+        }
+    }
+
+
+    private void validateDeferredConstraint(long indexCID)
+            throws StandardException {
+        BackingStoreHashtable ht = null;
+
+        if (deferredHashTables == null ||
+            (ht = deferredHashTables.get(indexCID)) == null) {
+            // Nothing to do
+            return;
+        }
+        doValidateConstraint(indexCID, ht, false);
+        deferredHashTables.remove(indexCID);
+    }
+
+    private void doValidateConstraint(
+        long indexCID,
+        BackingStoreHashtable ht,
+        boolean rollbackOnError) throws StandardException {
+
+        DeferredDuplicates.validate(tran, indexCID, this, ht, rollbackOnError);
     }
 }

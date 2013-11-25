@@ -22,14 +22,12 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Properties;
-
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.StatisticsImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -59,9 +57,8 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.TypeId;
-
-// Used only to access a debug flag, will be removed or replaced.
 import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * ConstantAction to create an index either through
@@ -80,6 +77,29 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 	private boolean			unique;
 	private boolean			uniqueWithDuplicateNulls;
+
+    /**
+     * The index represents a PRIMARY KEY or a UNIQUE NOT NULL constraint which
+     * is deferrable.
+     * {@code true} implies {@code unique == false} and
+     * {@code uniqueWithDuplicateNulls == false} and
+     * {@code hasDeferrableChecking == true}.
+     */
+    private boolean         uniqueDeferrable;
+
+    /**
+     * The index duplicate checking is deferrable. {@code true} implies {@code
+     * unique == false} and {@code (uniqueDeferrable ||
+     * uniqueWithDuplicateNulls)}.
+     *
+     */
+    private final boolean   hasDeferrableChecking;
+
+    /**
+     * Used to determine sorting behavior for existing rows if any
+     */
+    private final boolean   initiallyDeferred;
+
 	private String			indexType;
 	private String[]		columnNames;
 	private boolean[]		isAscending;
@@ -123,6 +143,12 @@ class CreateIndexConstantAction extends IndexConstantAction
      *                                      column in the key has a null value,
      *                                      no checking is done and insert will
      *                                      always succeed.
+     * @param hasDeferrableChecking         True means this index backs a
+     *                                      deferrable constraint. isConstraint
+     *                                      will be true.
+     * @param initiallyDeferred             True means the index represents
+     *                                      a deferred constraint. Implies
+     *                                      hasDeferrableChecking.
      * @param indexType	                    type of index (BTREE, for example)
      * @param schemaName	                schema that table (and index) 
      *                                      lives in.
@@ -143,6 +169,8 @@ class CreateIndexConstantAction extends IndexConstantAction
             boolean         forCreateTable,
             boolean			unique,
             boolean			uniqueWithDuplicateNulls,
+            boolean         hasDeferrableChecking,
+            boolean         initiallyDeferred,
             String			indexType,
             String			schemaName,
             String			indexName,
@@ -157,8 +185,11 @@ class CreateIndexConstantAction extends IndexConstantAction
 		super(tableId, indexName, tableName, schemaName);
 
         this.forCreateTable             = forCreateTable;
-		this.unique                     = unique;
+        this.unique                     = unique && !hasDeferrableChecking;
 		this.uniqueWithDuplicateNulls   = uniqueWithDuplicateNulls;
+        this.hasDeferrableChecking      = hasDeferrableChecking;
+        this.initiallyDeferred          = initiallyDeferred;
+        this.uniqueDeferrable           = unique && hasDeferrableChecking;
 		this.indexType                  = indexType;
 		this.columnNames                = columnNames;
 		this.isAscending                = isAscending;
@@ -209,6 +240,9 @@ class CreateIndexConstantAction extends IndexConstantAction
 		IndexRowGenerator irg = srcCD.getIndexDescriptor();
 		this.unique = irg.isUnique();
 		this.uniqueWithDuplicateNulls = irg.isUniqueWithDuplicateNulls();
+        this.hasDeferrableChecking = false; // N/A such indexes are not shared
+        this.uniqueDeferrable = false;      // N/A
+        this.initiallyDeferred = false;     // N/A
 		this.indexType = irg.indexType();
 		this.columnNames = srcCD.getColumnNames();
 		this.isAscending = irg.isAscending();
@@ -410,6 +444,11 @@ class CreateIndexConstantAction extends IndexConstantAction
 		 * If so, we will use a single physical conglomerate--namely, the
 		 * one that already exists--to support both indexes. I.e. we will
 		 * *not* create a new conglomerate as part of this constant action.
+         *
+         * Deferrable constraints are backed by indexes that are *not* shared
+         * since they use physically non-unique indexes and as such are
+         * different from indexes used to represent non-deferrable
+         * constraints.
 		 */ 
 
 		// check if we have similar indices already for this table
@@ -453,9 +492,13 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 *       set to TRUE and the index being created is non-unique, OR
 			 *    c) both the existing index and the one being created are
 			 *       non-unique and have uniqueWithDuplicateNulls set to FALSE.
-			 */ 
-			boolean possibleShare = (irg.isUnique() || !unique) &&
-			    (bcps.length == baseColumnPositions.length);
+             *
+             * 4. hasDeferrableChecking is FALSE.
+             */
+            boolean possibleShare =
+                    (irg.isUnique() || !unique) &&
+                    (bcps.length == baseColumnPositions.length) &&
+                    !hasDeferrableChecking;
 
 			//check if existing index is non unique and uniqueWithDuplicateNulls
 			//is set to true (backing index for unique constraint)
@@ -517,6 +560,8 @@ class CreateIndexConstantAction extends IndexConstantAction
 				indexRowGenerator =
 					new IndexRowGenerator(
 						indexType, unique, uniqueWithDuplicateNulls,
+                        false, // uniqueDeferrable
+                        false, // deferrable indexes are not shared
 						baseColumnPositions,
 						isAscending,
 						baseColumnPositions.length);
@@ -577,7 +622,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		indexProperties.put("baseConglomerateId",
 							Long.toString(td.getHeapConglomerateId()));
         
-		if (uniqueWithDuplicateNulls) 
+        if (uniqueWithDuplicateNulls && !hasDeferrableChecking)
         {
             if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
@@ -619,6 +664,8 @@ class CreateIndexConstantAction extends IndexConstantAction
                                             indexType, 
                                             unique, 
                                             uniqueWithDuplicateNulls,
+                                            uniqueDeferrable,
+                                            hasDeferrableChecking,
                                             baseColumnPositions,
                                             isAscending,
                                             baseColumnPositions.length);
@@ -628,6 +675,9 @@ class CreateIndexConstantAction extends IndexConstantAction
 				indexRowGenerator = new IndexRowGenerator(
                                             indexType, 
                                             unique,
+                                            false,
+                                            false,
+                                            false,
                                             baseColumnPositions,
                                             isAscending,
                                             baseColumnPositions.length);
@@ -753,7 +803,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			int             numColumnOrderings;
             SortObserver    sortObserver;
             Properties      sortProperties = null;
-			if (unique || uniqueWithDuplicateNulls)
+            if (unique || uniqueWithDuplicateNulls || uniqueDeferrable)
 			{
 				// if the index is a constraint, use constraintname in 
                 // possible error message
@@ -771,14 +821,19 @@ class CreateIndexConstantAction extends IndexConstantAction
 					}
 				}
 
-				if (unique) 
+                if (unique || uniqueDeferrable)
 				{
-                    numColumnOrderings = baseColumnPositions.length;
+                    numColumnOrderings = unique ? baseColumnPositions.length :
+                            baseColumnPositions.length + 1;
 
 					sortObserver = 
                         new UniqueIndexSortObserver(
+                                tc,
+                                lcc,
+                                DeferredDuplicates.UNDEFINED_CONGLOMERATE,
                                 true, 
-                                isConstraint, 
+                                uniqueDeferrable,
+                                initiallyDeferred,
                                 indexOrConstraintName,
                                 indexTemplateRow,
                                 true,
@@ -799,8 +854,12 @@ class CreateIndexConstantAction extends IndexConstantAction
 					//use sort operator which treats nulls unequal
 					sortObserver = 
                         new UniqueWithDuplicateNullsIndexSortObserver(
+                                tc,
+                                lcc,
+                                DeferredDuplicates.UNDEFINED_CONGLOMERATE,
                                 true, 
-                                isConstraint, 
+                                hasDeferrableChecking,
+                                initiallyDeferred,
                                 indexOrConstraintName,
                                 indexTemplateRow,
                                 true,
@@ -854,7 +913,11 @@ class CreateIndexConstantAction extends IndexConstantAction
 					TransactionController.IS_DEFAULT, // not temporary
 					rowSource,
 					(long[]) null);
-			
+
+            if (initiallyDeferred) {
+                DeferredDuplicates.associateDuplicatesWithConglomerate(
+                    lcc, conglomId);
+            }
 		}
 		finally
 		{

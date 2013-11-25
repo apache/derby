@@ -37,7 +37,14 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.io.IOException;
 
-/** @see org.apache.derby.iapi.sql.dictionary.IndexRowGenerator */
+/**
+ * See also {@link org.apache.derby.iapi.sql.dictionary.IndexRowGenerator}.
+ * <p>
+ * For a description of how deferrable and non-deferrable constraints
+ * are backed differently, including the meaning of the
+ * boolean attributes used here, see {@link
+ * org.apache.derby.catalog.IndexDescriptor}.
+ */
 public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 {
 	/********************************************************
@@ -48,7 +55,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	**	also write/read them with the writeExternal()/readExternal()
 	**	methods.
 	**
-	**	If, inbetween releases, you add more fields to this class,
+    **  If, in between releases, you add more fields to this class,
 	**	then you should bump the version number emitted by the getTypeFormatId()
 	**	method.
 	**
@@ -66,6 +73,20 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
     //will act like a unique index.
 	private boolean     isUniqueWithDuplicateNulls;
 
+    /**
+     * The index represents a PRIMARY KEY or a UNIQUE NOT NULL constraint which
+     * is deferrable.
+     * {@code true} implies {@code isUnique == false} and
+     * {@code isUniqueWithDuplicateNulls == false} and
+     * {@code hasDeferrableChecking == true}.
+     */
+    private boolean     isUniqueDeferrable;
+
+    /**
+     * The index represents a constraint which is deferrable.
+     */
+    private boolean     hasDeferrableChecking;
+
 	/**
      * Constructor for an IndexDescriptorImpl
      * 
@@ -79,6 +100,11 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
      *                              isUniqueWithDuplicateNulls is set to true the
      *                              index will allow duplicate nulls but for
      *                              non null keys will act like a unique index.
+     * @param isUniqueDeferrable    True means the index represents a PRIMARY
+     *                              KEY or a UNIQUE NOT NULL constraint which
+     *                              is deferrable.
+     * @param hasDeferrableChecking True if this index supports a deferrable
+     *                              constraint.
      * @param baseColumnPositions	An array of column positions in the base
      * 								table.  Each index column corresponds to a
      * 								column position in the base table.
@@ -92,6 +118,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	public IndexDescriptorImpl(String indexType,
 								boolean isUnique,
 								boolean isUniqueWithDuplicateNulls,
+                                boolean isUniqueDeferrable,
+                                boolean hasDeferrableChecking,
 								int[] baseColumnPositions,
 								boolean[] isAscending,
 								int numberOfOrderedColumns)
@@ -99,6 +127,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		this.indexType = indexType;
 		this.isUnique = isUnique;
 		this.isUniqueWithDuplicateNulls = isUniqueWithDuplicateNulls;
+        this.isUniqueDeferrable = isUniqueDeferrable;
+        this.hasDeferrableChecking = hasDeferrableChecking;
 		this.baseColumnPositions = ArrayUtil.copy( baseColumnPositions );
 		this.isAscending = ArrayUtil.copy( isAscending );
 		this.numberOfOrderedColumns = numberOfOrderedColumns;
@@ -118,6 +148,29 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	{
 		return isUniqueWithDuplicateNulls;
 	}
+
+    /**
+     *
+     * @return  {@code true} is the index supports a deferrable constraint
+     */
+    public boolean hasDeferrableChecking()
+    {
+        return hasDeferrableChecking;
+    }
+
+    /**
+     * The index represents a PRIMARY KEY or a UNIQUE NOT NULL constraint which
+     * is deferrable.
+     * {@code true} implies {@code #isUnique() == false} and
+     * {@code #isUniqueWithDuplicateNulls() == false} and
+     * {@code #hasDeferrableChecking() == true}.
+     *
+     * @return {@code true} is the index supports such a constraint
+     */
+    public boolean isUniqueDeferrable()
+    {
+        return isUniqueDeferrable;
+    }
 
 	/** @see IndexDescriptor#isUnique */
 	public boolean isUnique()
@@ -208,10 +261,14 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	{
 		StringBuffer	sb = new StringBuffer(60);
 
-		if (isUnique)
+        if (isUnique || isUniqueDeferrable)
 			sb.append("UNIQUE ");
 		else if (isUniqueWithDuplicateNulls)
-			sb.append ("UNIQUE WITH DUPLICATE NULLS");
+            sb.append ("UNIQUE WITH DUPLICATE NULLS ");
+
+        if (hasDeferrableChecking) {
+            sb.append(" DEFERRABLE CHECKING ");
+        }
 
 		sb.append(indexType);
 
@@ -260,6 +317,22 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
                                     "isUniqueWithDuplicateNulls");
 		else
 			isUniqueWithDuplicateNulls = false;
+
+        // hasDeferrableChecking won't be present if the index
+        // was created in old versions (< 10_11).
+        if (fh.containsKey("hasDeferrableChecking")) {
+            hasDeferrableChecking = fh.getBoolean("hasDeferrableChecking");
+        } else {
+            hasDeferrableChecking = false;
+        }
+
+        // isUniqueDeferrable won't be present if the index
+        // was created in old versions (< 10_11).
+        if (fh.containsKey("isUniqueDeferrable")) {
+            isUniqueDeferrable = fh.getBoolean("isUniqueDeferrable");
+        } else {
+            isUniqueDeferrable = false;
+        }
 	}
 
 	/**
@@ -282,6 +355,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		//write the new attribut older versions will simply ignore it
 		fh.putBoolean("isUniqueWithDuplicateNulls", 
                                         isUniqueWithDuplicateNulls);
+        fh.putBoolean("hasDeferrableChecking", hasDeferrableChecking);
+        fh.putBoolean("isUniqueDeferrable", isUniqueDeferrable);
         out.writeObject(fh);
 	}
 

@@ -37,6 +37,7 @@ import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.iapi.reference.SQLState;
 import java.util.HashMap;
 import javax.transaction.xa.XAException;
+import org.apache.derby.iapi.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /** 
@@ -359,7 +360,20 @@ final class XATransactionState extends ContextImpl {
      * Prepare the global transaction for commit.
      */
     synchronized int xa_prepare() throws SQLException {
-        int retVal = conn.xa_prepare();
+        int retVal;
+
+        try {
+            retVal = conn.xa_prepare();
+        } catch (SQLException e) {
+            if (e.getSQLState().equals(
+                  ExceptionUtil.getSQLStateFromIdentifier(
+                    SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T))) {
+                // we are rolling back
+                xa_finalize();
+            }
+
+            throw e;
+        }
 
         if (retVal == XATransactionController.XA_RDONLY) {
             // Read-only transactions are implicitly committed when they are

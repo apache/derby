@@ -21,37 +21,33 @@
 
 package org.apache.derby.iapi.sql.conn;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.db.Database;
+import org.apache.derby.iapi.db.TriggerExecutionContext;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.sql.compile.OptTrace;
-import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.compile.OptimizerFactory;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.sql.compile.ASTVisitor;
-import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.CursorActivation;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ParameterValueSet;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.db.TriggerExecutionContext;
+import org.apache.derby.iapi.sql.PreparedStatement;
+import org.apache.derby.iapi.sql.compile.ASTVisitor;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.OptTrace;
+import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorActivation;
+import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-import org.apache.derby.catalog.UUID;
-
-import java.util.Map;
-import java.util.AbstractMap;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataValueFactory;
 
 /**
  * LanguageConnectionContext keeps the result sets,
@@ -1118,32 +1114,43 @@ public interface LanguageConnectionContext extends Context {
 	 * section 4.27.3, since this gives rise to a nested connection.
 	 * <p>
 	 * Called from generated code, see
-	 * {@code StaticMethodCallNode#generateSetupNestedSessionContext}.
+     * {@link org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext}.
 	 * <p>
 	 * The new SQL session context is also set in the current statement
 	 * context (of the invocation).
 	 *
-	 * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generateSetupNestedSessionContext
+     * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generatePushNestedSessionContext
 	 * @see StatementContext#getSQLSessionContext
 	 * @see #setupSubStatementSessionContext
 	 *
 	 * @param a activation of the statement which performs the call.
      * @param definersRights if the method should run with definer's rights
      * @param definer authorization id of the definer
+     * @throws StandardException standard error policy
 	 */
-    public void setupNestedSessionContext(Activation a,
-                                          boolean definersRights,
-                                          String definer)
+    public void pushNestedSessionContext(Activation a,
+                                        boolean definersRights,
+                                        String definer)
             throws StandardException;
+
+    /**
+     * If returning from a routine that can execute SQL, perform any
+     * actions needed when popping the SQL session context.
+     *
+     * @param a activation
+     * @throws StandardException standard error policy
+     */
+    public void popNestedSessionContext(Activation a) throws StandardException;
 
 	/**
 	 * Get the value of top level session context of the top level connection.
+     * @return the requested session context
 	 */
 	public SQLSessionContext getTopLevelSQLSessionContext();
 
 	/**
 	 * Used when a statement as part of its operation executes an other
-	 * statement. In contrast to setupNestedSessionContext, the activation (for
+     * statement. In contrast to pushNestedSessionContext, the activation (for
 	 * the substatement) just inherits the current session context from the
 	 * parent statements activation, it does <b>not</b> push a new copy on the
 	 * stack of session contexts.
@@ -1160,7 +1167,7 @@ public interface LanguageConnectionContext extends Context {
 	 *         and {@code deleteRow}.
 	 *     <li>During trigger body execution.
 	 * </ul>
-	 * @see #setupNestedSessionContext
+     * @see #pushNestedSessionContext
 	 */
     public void setupSubStatementSessionContext(Activation a)
             throws StandardException;
@@ -1268,4 +1275,70 @@ public interface LanguageConnectionContext extends Context {
      */
     public void setReferencedColumnMap(TableDescriptor td,
                                        FormatableBitSet map);
+
+    /**
+     * Set the constraint mode for this constraint/index to {@code deferred}.
+     * If {@code deferred} is {@code false}, to immediate checking,
+     * if {@code true} to deferred checking.
+     *
+     * @param a         Activation
+     * @param conglomId The conglomerate id of the backing index for the
+     *                  constraint .
+     * @param deferred  The new constraint mode
+     * @throws StandardException
+     */
+    public void setDeferred(Activation a, long conglomId, boolean deferred)
+            throws StandardException;
+
+    /**
+     * Get the constraint mode set, if any.
+     *
+     * @param a         Activation
+     * @param conglomId The conglomerate id of the backing index
+     * @return         {@code true} if the constraint mode
+     *                  for this constraint/index is effectively
+     *                  deferred, {@code false} if it is immediate.
+     * @throws StandardException standard error policy
+     */
+    public boolean isEffectivelyDeferred(Activation a, long conglomId)
+            throws StandardException;
+
+    /**
+     * Set the constraint mode for all deferrable constraints to
+     * {@code deferred}.
+     * If {@code deferred} is {@code false}, to immediate checking,
+     * if {@code true} to deferred checking.
+     *
+     * @param a        Activation
+     * @param deferred The new constraint mode
+     */
+    public void setDeferredAll(Activation a, boolean deferred)
+            throws StandardException;
+
+    /**
+     * Get the set of disk backed hash tables containing any index rows
+     * saved for deferred constraints in this transaction, keyed by the
+     * conglomerate id.
+     * @return the set
+     */
+    HashMap<Long, BackingStoreHashtable> getDeferredHashTables();
+
+    /**
+     * Check that deferred constraints are valid, if not roll back the
+     * transaction.
+     *
+     * @throws StandardException
+     */
+    public void checkIntegrity() throws StandardException;
+
+    /**
+     * Forget any violating rows for the deferred constraint backed by
+     * {@code indexCID}, if any. Typically used when an index gets dropped
+     * and/or recreated.
+     *
+     * @param indexCID The conglomerate identifier of the backing index
+     * @throws StandardException
+     */
+    public void invalidateDeferredConstraintsData(long indexCID)
+            throws StandardException;
 }
