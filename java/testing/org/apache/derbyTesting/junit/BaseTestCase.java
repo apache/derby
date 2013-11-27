@@ -135,6 +135,15 @@ public abstract class BaseTestCase
                 File origLog = new File(DEFAULT_DB_DIR, DERBY_LOG);
                 File newLog = new File(failPath, DERBY_LOG);
                 PrivilegedFileOpsForTests.copy(origLog, newLog);
+                // Copy some other likely files, the rolling log files
+                // These might occur if the tests are run with 
+                // derby.stream.error.style=rollingFile
+                for (int i=0; i < 10; i++) {
+                    String logName = "derby-" + i + ".log";
+                    File origRolLog = new File(DEFAULT_DB_DIR, logName);
+                    File newRolLog = new File(failPath, logName);
+                    PrivilegedFileOpsForTests.copy(origRolLog, newRolLog);
+                }
                 // Copy the database.
                 String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
                 File dbDir = new File(DEFAULT_DB_DIR, dbName );

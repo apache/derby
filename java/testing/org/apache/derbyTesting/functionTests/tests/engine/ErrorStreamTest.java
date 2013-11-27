@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -36,7 +37,9 @@ import java.sql.SQLException;
 import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 
 
 /**
@@ -58,6 +61,8 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     private static final String ROLLING_FILE_PATTERN_PROP = "derby.stream.error.rollingFile.pattern";
     private static final String DERBY_0_LOG = "derby-0.log";
     private static final String DERBYLANGUAGELOG_QUERY_PLAN = "derby.language.logQueryPlan";
+    
+    private static final String LOGFILESDIR = "logfilesdir";
     
     /**
      * runNo keeps track of which run we are in to generate unique (within a
@@ -112,7 +117,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
 
     public void tearDown() throws Exception {
         resetProps();
-        deleteStreamFiles();
+        closeStreams();
         nullFields();
         super.tearDown();
     }
@@ -580,7 +585,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertIsEmpty(errStreamFile);
 
         boolean deleted = deleteFile(derby0log);
-        assertTrue("File " + derby0log + " could not be deleted", deleted);    
+        assertTrue("File " + derby0log + " could not be deleted", deleted);
     }
 
     /**
@@ -598,14 +603,16 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
 
     private void openStreams() throws IOException{
         String systemHome = getSystemProperty("derby.system.home");
+        String logFilesHome=systemHome + File.separatorChar + LOGFILESDIR;
         makeDirIfNotExisting(systemHome);
+        makeDirIfNotExisting(logFilesHome);
 
         runNo += 1;
 
-        methodStreamFile = new File(systemHome, makeStreamFilename("method"));
-        fileStreamFile = new File(systemHome, makeStreamFilename("file"));
-        fieldStreamFile = new File(systemHome, makeStreamFilename("field"));
-        errStreamFile = new File(systemHome, makeStreamFilename("err"));
+        methodStreamFile = new File(logFilesHome, makeStreamFilename("method"));
+        fileStreamFile = new File(logFilesHome, makeStreamFilename("file"));
+        fieldStreamFile = new File(logFilesHome, makeStreamFilename("field"));
+        errStreamFile = new File(logFilesHome, makeStreamFilename("err"));
 
         methodStream = newFileOutputStream(methodStreamFile);
         fieldStream = newFileOutputStream(fieldStreamFile);
@@ -784,4 +791,67 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         getConnection().close();
     }
 
+    /**
+     * <p>
+     * Run the bare test, including {@code setUp()} and {@code tearDown()}.
+     * </p>
+     *
+     * <p>
+     * This is overriding BaseJDBCTestCase.runBareOverridable and thereby
+     * BaseJDBCTestCase.runBare(), so we can copy any log files created by this
+     * test if any of the fixtures fail. 
+     * </p>
+     */
+    public void runBareOverridable() throws Throwable {
+        PrintStream out = System.out;
+        TestConfiguration config = getTestConfiguration();
+        boolean stopAfterFirstFail = config.stopAfterFirstFail();
+        try {
+            super.runBareOverridable();   
+        }
+        // To log the exception to file, copy the derby.log file and copy
+        // the database of the failed test.
+        catch (Throwable running) {
+            PrintWriter stackOut = null;
+            try{
+                String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
+                // Copy the logfiles dir
+                File origLogFilesDir = new File(DEFAULT_DB_DIR, LOGFILESDIR);
+                File newLogFilesDir = new File (failPath, LOGFILESDIR);
+                PrivilegedFileOpsForTests.copy(origLogFilesDir,newLogFilesDir);
+                nullFields();
+                removeDirectory(origLogFilesDir);
+           }
+            catch (IOException ioe) {
+                // We need to throw the original exception so if there
+                // is an exception saving the db or derby.log we will print it
+                // and additionally try to log it to file.
+                BaseTestCase.printStackTrace(ioe);
+                if (stackOut != null) {
+                    stackOut.println("Copying derby.log or database failed:");
+                    ioe.printStackTrace(stackOut);
+                    stackOut.println();
+                }
+            }
+            finally {
+                if (stackOut != null) {
+                    stackOut.close();
+                }
+                if (stopAfterFirstFail) {
+                    // if run with -Dderby.tests.stopAfterFirstFail=true
+                    // exit after reporting failure. Useful for debugging
+                    // cascading failures or errors that lead to hang.
+                    running.printStackTrace(out);
+                    System.exit(1);
+                }
+                else
+                    throw running;
+            }
+        }
+        finally{
+            File origLogFilesDir = new File(DEFAULT_DB_DIR, LOGFILESDIR);
+            nullFields();
+            removeDirectory(origLogFilesDir);
+        }
+    }
 }
