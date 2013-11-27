@@ -39,7 +39,6 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 
 /**
@@ -387,7 +386,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         getTestConfiguration().shutdownEngine();
 
         assertNotExisting(derby0lck);
-        
+
         boolean deleted = deleteFile(derby0log);
         assertTrue("File " + derby0log + " could not be deleted", deleted);
     }
@@ -471,7 +470,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
                 
         bootDerby();
         
-        // This will generate enough output to roll through all 10 log files
+        // This will generate enough output to roll through all 3 log files
         for (int i = 0; i < 10; i++) {
             checkAllConsistency(getConnection());
         }
@@ -498,7 +497,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
             if (i == 2) {
                 assertFileSize(derbyLog, 10000);
             }
-            
+
             boolean deleted = deleteFile(derbyLog);
             assertTrue("File " + derbyLog + " could not be deleted", deleted);
         }
@@ -814,13 +813,17 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         catch (Throwable running) {
             PrintWriter stackOut = null;
             try{
-                String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
-                // Copy the logfiles dir
-                File origLogFilesDir = new File(DEFAULT_DB_DIR, LOGFILESDIR);
-                File newLogFilesDir = new File (failPath, LOGFILESDIR);
-                PrivilegedFileOpsForTests.copy(origLogFilesDir,newLogFilesDir);
+                copyFileToFail(LOGFILESDIR);
                 nullFields();
-                removeDirectory(origLogFilesDir);
+                deleteFile(LOGFILESDIR);
+                // copy files from testStyleRollingFile:
+                copyFileToFail("derby-0.log");
+                copyFileToFail("derby-0.log.lck");
+                // copy files from the testDefaultRollingUserConfig test
+                for (int i = 0; i < 3; i++) {
+                    copyFileToFail("db-" + i + ".log");
+                    deleteFile("db-" + i + ".log");
+                }
            }
             catch (IOException ioe) {
                 // We need to throw the original exception so if there
@@ -849,9 +852,29 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
             }
         }
         finally{
+            // attempt to clean up
+            // first ensure we have the engine shutdown, or some
+            // files cannot be cleaned up.
+            getTestConfiguration().shutdownEngine();
             File origLogFilesDir = new File(DEFAULT_DB_DIR, LOGFILESDIR);
             nullFields();
             removeDirectory(origLogFilesDir);
+            deleteFile("derby-0.log.lck");
+            deleteFile("derby-0.log");
+            deleteFile("derby.log");
         }
+    }
+    
+    private void copyFileToFail(String origFileName) throws IOException {
+        String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
+        File origFile = new File (DEFAULT_DB_DIR, origFileName); 
+        File newFile = new File (failPath, origFileName);
+        PrivilegedFileOpsForTests.copy(origFile,newFile);
+    }
+    
+    // delete a file - used in cleanup when we don't care about the result
+    private void deleteFile(String origFileName) throws IOException {
+        File origFile = new File (DEFAULT_DB_DIR, origFileName);
+        PrivilegedFileOpsForTests.delete(origFile);                
     }
 }
