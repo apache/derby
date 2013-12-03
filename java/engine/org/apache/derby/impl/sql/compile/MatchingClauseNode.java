@@ -186,6 +186,27 @@ public class MatchingClauseNode extends QueryTreeNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Replace references to the correlation name with the underlying table name
+     * in all ColumnReferences under all expressions. This replacement is
+     * done before the ColumnReferences are bound.
+     * </p>
+     */
+    public  void    replaceCorrelationName
+        (
+         MergeNode  parent,
+         String correlationName,
+         TableName  newTableName
+         )
+        throws StandardException
+    {
+        parent.replaceCorrelationName( correlationName, newTableName, _matchingRefinement );
+        parent.replaceCorrelationName( correlationName, newTableName, _updateColumns );
+        parent.replaceCorrelationName( correlationName, newTableName, _insertColumns );
+        parent.replaceCorrelationName( correlationName, newTableName, _insertValues );
+    }
+    
     /** Bind this WHEN [ NOT ] MATCHED clause against the parent JoinNode */
     void    bind
         (

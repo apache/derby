@@ -3421,7 +3421,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
      * The CHECK constraint is satisfied but the foreign key is not.
      * </p>
      */
-    public  void    test_021_updateWithForeignPrimaryAndCheckConstraint()
+    public  void    test_022_updateWithForeignPrimaryAndCheckConstraint()
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -3518,6 +3518,361 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t2_022" );
         goodStatement( dboConnection, "drop table t1_022" );
         goodStatement( dboConnection, "drop table t3_022" );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test correlation names in MERGE statements.
+     * </p>
+     */
+    public  void    test_023_correlationNames()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_023\n" +
+             "(\n" +
+             "    a_public int primary key,\n" +
+             "    b_select_t1_ruth int,\n" +
+             "    c_select_t1_alice int,\n" +
+             "    d_select_t1_frank int,\n" +
+             "    e_update_t1_ruth int,\n" +
+             "    f_update_t1_alice int,\n" +
+             "    g_update_t1_frank int,\n" +
+             "    h_select_t1_ruth generated always as ( a_public )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_023\n" +
+             "(\n" +
+             "    a_public int primary key,\n" +
+             "    b_select_t2_ruth int,\n" +
+             "    c_select_t2_alice int,\n" +
+             "    d_select_t2_frank int,\n" +
+             "    e_select_t2_ruth generated always as ( a_public )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_023\n" +
+             "(\n" +
+             "    a int primary key,\n" +
+             "    b int,\n" +
+             "    c int,\n" +
+             "    d int,\n" +
+             "    e int,\n" +
+             "    f int,\n" +
+             "    g int,\n" +
+             "    h generated always as ( a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t4_023\n" +
+             "(\n" +
+             "    a int primary key,\n" +
+             "    b int,\n" +
+             "    c int,\n" +
+             "    d int,\n" +
+             "    e generated always as ( a )\n" +
+             ")\n"
+             );
+
+        //
+        // Correlation names in DELETE actions
+        //
+        populate_023( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using test_dbo.t2_023 b\n" +
+             "on a.a_public = b.a_public\n" +
+             "when matched and a.b_select_t1_ruth = 11 then delete\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "10002", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+             },
+             false
+             );
+
+        //
+        // Correlation names in UPDATE actions
+        //
+        populate_023( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using test_dbo.t2_023 b\n" +
+             "on a.a_public = b.a_public\n" +
+             "when matched and a.b_select_t1_ruth = 12 then update set e_update_t1_ruth = a.g_update_t1_frank + b.c_select_t2_alice\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "1", "11", "101", "1001", "10001", "100001", "1000001", "1" },
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+             },
+             false
+             );
+
+        //
+        // Correlation names in INSERT actions
+        //
+        populate_023( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using test_dbo.t2_023 b\n" +
+             "on a.a_public = b.a_public\n" +
+             "when not matched and b.b_select_t2_ruth = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( b.a_public, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "1", "11", "101", "1001", "10001", "100001", "1000001", "1" },
+                 { "2", "12", "102", "1002", "10002", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Correlation names in all actions
+        //
+        populate_023( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using test_dbo.t2_023 b\n" +
+             "on a.a_public = b.a_public\n" +
+             "when matched and a.b_select_t1_ruth = 11 then delete\n" +
+             "when matched and a.b_select_t1_ruth = 12 then update set e_update_t1_ruth = a.g_update_t1_frank + b.c_select_t2_alice\n" +
+             "when not matched and b.b_select_t2_ruth = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( b.a_public, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Correlation names only where needed.
+        //
+        populate_023( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using test_dbo.t2_023 b\n" +
+             "on a.a_public = b.a_public\n" +
+             "when matched and b_select_t1_ruth = 11 then delete\n" +
+             "when matched and b_select_t1_ruth = 12 then update set e_update_t1_ruth = g_update_t1_frank + c_select_t2_alice\n" +
+             "when not matched and b_select_t2_ruth = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( b.a_public, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Correlation names to remove ambiguities.
+        //
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t3_023 a using test_dbo.t4_023 b\n" +
+             "on a.a = b.a\n" +
+             "when matched and a.b = 11 then delete\n" +
+             "when matched and a.b = 12 then update set e = a.g + b.c\n" +
+             "when not matched and b.b = 14 then insert\n" +
+             "(\n" +
+             "    a,\n" +
+             "    b,\n" +
+             "    c,\n" +
+             "    d,\n" +
+             "    e,\n" +
+             "    f,\n" +
+             "    g\n" +
+             ")\n" +
+             "values ( b.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t3_023 order by a",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t4_023" );
+        goodStatement( dboConnection, "drop table t3_023" );
+        goodStatement( dboConnection, "drop table t2_023" );
+        goodStatement( dboConnection, "drop table t1_023" );
+    }
+    private void    populate_023( Connection conn ) throws Exception
+    {
+        goodStatement( conn, "delete from t2_023" );
+        goodStatement( conn, "delete from t1_023" );
+
+        goodStatement
+            (
+             conn,
+             "insert into t1_023\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values\n" +
+             "( 1, 11, 101, 1001, 10001, 100001, 1000001 ),\n" +
+             "( 2, 12, 102, 1002, 10002, 100002, 1000002 ),\n" +
+             "( 3, 13, 103, 1003, 10003, 100003, 1000003 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t2_023\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t2_ruth,\n" +
+             "    c_select_t2_alice,\n" +
+             "    d_select_t2_frank\n" +
+             ")\n" +
+             "values\n" +
+             "( 1, 11, 101, 1001 ),\n" +
+             "( 2, 12, 102, 1002 ),\n" +
+             "( 3, 13, 103, 1003 ),\n" +
+             "( 4, 14, 104, 1004 )\n"
+             );
+    }
+    private void    populate_023_2( Connection conn ) throws Exception
+    {
+        goodStatement( conn, "delete from t4_023" );
+        goodStatement( conn, "delete from t3_023" );
+
+        goodStatement
+            (
+             conn,
+             "insert into t3_023\n" +
+             "(\n" +
+             "    a,\n" +
+             "    b,\n" +
+             "    c,\n" +
+             "    d,\n" +
+             "    e,\n" +
+             "    f,\n" +
+             "    g\n" +
+             ")\n" +
+             "values\n" +
+             "( 1, 11, 101, 1001, 10001, 100001, 1000001 ),\n" +
+             "( 2, 12, 102, 1002, 10002, 100002, 1000002 ),\n" +
+             "( 3, 13, 103, 1003, 10003, 100003, 1000003 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t4_023\n" +
+             "(\n" +
+             "    a,\n" +
+             "    b,\n" +
+             "    c,\n" +
+             "    d\n" +
+             ")\n" +
+             "values\n" +
+             "( 1, 11, 101, 1001 ),\n" +
+             "( 2, 12, 102, 1002 ),\n" +
+             "( 3, 13, 103, 1003 ),\n" +
+             "( 4, 14, 104, 1004 )\n"
+             );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

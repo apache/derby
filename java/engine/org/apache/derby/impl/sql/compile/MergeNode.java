@@ -198,6 +198,54 @@ public final class MergeNode extends DMLModStatementNode
 	{
         DataDictionary  dd = getDataDictionary();
 
+        // source table must be a vti or base table
+        if (
+            !(_sourceTable instanceof FromVTI) &&
+            !(_sourceTable instanceof FromBaseTable)
+            )
+        {
+            throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_VIEW_OR_VTI );
+        }
+
+        // source and target may not have the same correlation names
+        if ( getExposedName( _targetTable ).equals( getExposedName( _sourceTable ) ) )
+        {
+            throw StandardException.newException( SQLState.LANG_SAME_EXPOSED_NAME );
+        }
+
+        //
+        // Replace all references to a target correlation name with the actual
+        // resolved table name.
+        //
+        FromList    dfl = new FromList( getContextManager() );
+        dfl.addFromTable( _sourceTable );
+        dfl.addFromTable( _targetTable );
+        dfl.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
+        if ( _targetTable.correlationName != null )
+        {
+            TableName   targetTableName = _targetTable.tableName;
+            String  correlationName = _targetTable.correlationName;
+            
+            replaceCorrelationName
+                (
+                correlationName,
+                 targetTableName,
+                 _searchCondition
+                 );
+            
+            for ( MatchingClauseNode mcn : _matchingClauses )
+            {
+                mcn.replaceCorrelationName
+                    (
+                     this,
+                     correlationName,
+                     targetTableName
+                     );
+            }
+
+            _targetTable.correlationName = null;
+        }
+
         FromList    dummyFromList = new FromList( getContextManager() );
         FromBaseTable   dummyTargetTable = new FromBaseTable
             (
@@ -209,17 +257,12 @@ public final class MergeNode extends DMLModStatementNode
              );
         FromTable       dummySourceTable = cloneSourceTable();
         
-        // source and target may not have the same correlation names
-        if ( getExposedName( dummyTargetTable ).equals( getExposedName( dummySourceTable ) ) )
-        {
-            throw StandardException.newException( SQLState.LANG_SAME_EXPOSED_NAME );
-        }
-
         dummyFromList.addFromTable( dummySourceTable );
         dummyFromList.addFromTable( dummyTargetTable );
         dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
         
-        if ( !targetIsBaseTable( dummyTargetTable ) ) { notBaseTable(); }
+        // target table must be a base table
+        if ( !targetIsBaseTable( _targetTable ) ) { notBaseTable(); }
 
         for ( MatchingClauseNode mcn : _matchingClauses )
         {
@@ -235,6 +278,68 @@ public final class MergeNode extends DMLModStatementNode
             mcn.bindResultSetNumbers( this, _leftJoinFromList );
         }
 	}
+
+    /**
+     * <p>
+     * Replace references to the correlation name with the underlying table name
+     * in all ColumnReferences under the indicated list of ResultColumns. This replacement is
+     * done before the ColumnReferences are bound.
+     * </p>
+     */
+    public  void    replaceCorrelationName
+        (
+         String correlationName,
+         TableName  newTableName,
+         ResultColumnList   rcl
+         )
+        throws StandardException
+    {
+        if ( rcl == null ) { return; }
+        
+        for ( int i = 0; i < rcl.size(); i++ )
+        {
+            replaceCorrelationName( correlationName, newTableName, rcl.elementAt( i ) );
+        }
+    }
+    
+    /**
+     * <p>
+     * Replace references to the correlation name with the underlying table name
+     * in all ColumnReferences in the indicated expression. This replacement is
+     * done before the ColumnReferences are bound.
+     * </p>
+     */
+    public  void    replaceCorrelationName
+        (
+         String correlationName,
+         TableName  newTableName,
+         ValueNode  expression
+         )
+        throws StandardException
+    {
+        if ( expression == null ) { return; }
+        
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+
+        expression.accept(getCRs);
+        List<ColumnReference> colRefs = getCRs.getList();
+
+        for ( ColumnReference cr : colRefs )
+        {
+            TableName   origTableName = cr.tableName;
+            if ( origTableName != null )
+            {
+                if (
+                    (origTableName.getSchemaName() == null) &&
+                    correlationName.equals( origTableName.getTableName() )
+                    )
+                {
+                    cr.setTableNameNode( newTableName );
+                }
+            }
+        }
+    }
 
     /** Get the exposed name of a FromTable */
     private String  getExposedName( FromTable ft ) throws StandardException
