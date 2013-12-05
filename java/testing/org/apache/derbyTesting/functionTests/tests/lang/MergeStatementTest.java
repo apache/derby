@@ -3589,6 +3589,16 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              "    e generated always as ( a )\n" +
              ")\n"
              );
+        goodStatement
+            (
+             dboConnection,
+             "create function integerList_023()\n" +
+             "returns table( a int, b int, c int, d int )\n" +
+             "language java\n" +
+             "parameter style derby_jdbc_result_set\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.integerList_023'\n"
+             );
 
         //
         // Correlation names in DELETE actions
@@ -3787,8 +3797,277 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              );
 
         //
+        // No correlation names.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 using test_dbo.t4_023\n" +
+             "on a_public = a\n" +
+             "when matched and b_select_t1_ruth = 11 then delete\n" +
+             "when matched and b_select_t1_ruth = 12 then update set e_update_t1_ruth = g_update_t1_frank + c\n" +
+             "when not matched and b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // No correlation names. Columns are table-qualified, however.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 using test_dbo.t4_023\n" +
+             "on t1_023.a_public = t4_023.a\n" +
+             "when matched and t1_023.b_select_t1_ruth = 11 then delete\n" +
+             "when matched and t1_023.b_select_t1_ruth = 12 then update set e_update_t1_ruth = t1_023.g_update_t1_frank + t4_023.c\n" +
+             "when not matched and t4_023.b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( t4_023.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // No correlation names. Tables aren't schema-qualified. Columns are table-qualified, however.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_023 using t4_023\n" +
+             "on t1_023.a_public = t4_023.a\n" +
+             "when matched and t1_023.b_select_t1_ruth = 11 then delete\n" +
+             "when matched and t1_023.b_select_t1_ruth = 12 then update set e_update_t1_ruth = t1_023.g_update_t1_frank + t4_023.c\n" +
+             "when not matched and t4_023.b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( t4_023.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // With correlation names.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t3_023 a using test_dbo.t4_023 b\n" +
+             "on a.a = b.a\n" +
+             "when matched and a.b = 11 then delete\n" +
+             "when matched and a.b = 12 then update set e = a.g + b.c\n" +
+             "when not matched and b.b = 14 then insert\n" +
+             "(\n" +
+             "    a,\n" +
+             "    b,\n" +
+             "    c,\n" +
+             "    d,\n" +
+             "    e,\n" +
+             "    f,\n" +
+             "    g\n" +
+             ")\n" +
+             "values ( b.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t3_023 order by a",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Source is a table function. Column names unambiguous and unqualified.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 using table( test_dbo.integerList_023() ) i\n" +
+             "on a_public = a\n" +
+             "when matched and b = 11 then delete\n" +
+             "when matched and b = 12 then update set e_update_t1_ruth = g_update_t1_frank + c\n" +
+             "when not matched and b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Source is a table function. With correlation names. Tables are schema-qualified.
+        // Column names unambiguous but qualified.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into test_dbo.t1_023 a using table( test_dbo.integerList_023() ) i\n" +
+             "on a.a_public = i.a\n" +
+             "when matched and i.b = 11 then delete\n" +
+             "when matched and i.b = 12 then update set e_update_t1_ruth = a.g_update_t1_frank + i.c\n" +
+             "when not matched and i.b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( i.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
+        // Source is a table function. With correlation names. Tables are not schema-qualified.
+        // Column names unambiguous but qualified.
+        //
+        populate_023( dboConnection );
+        populate_023_2( dboConnection );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_023 a using table( integerList_023() ) i\n" +
+             "on a.a_public = i.a\n" +
+             "when matched and i.b = 11 then delete\n" +
+             "when matched and i.b = 12 then update set e_update_t1_ruth = a.g_update_t1_frank + i.c\n" +
+             "when not matched and i.b = 14 then insert\n" +
+             "(\n" +
+             "    a_public,\n" +
+             "    b_select_t1_ruth,\n" +
+             "    c_select_t1_alice,\n" +
+             "    d_select_t1_frank,\n" +
+             "    e_update_t1_ruth,\n" +
+             "    f_update_t1_alice,\n" +
+             "    g_update_t1_frank\n" +
+             ")\n" +
+             "values ( i.a, 18, 108, 1008, 10008, 100008, 1000008 )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_023 order by a_public",
+             new String[][]
+             {
+                 { "2", "12", "102", "1002", "1000104", "100002", "1000002", "2" },
+                 { "3", "13", "103", "1003", "10003", "100003", "1000003", "3" },
+                 { "4", "18", "108", "1008", "10008", "100008", "1000008", "4" },
+             },
+             false
+             );
+
+        //
         // drop schema
         //
+        goodStatement( dboConnection, "drop function integerList_023" );
         goodStatement( dboConnection, "drop table t4_023" );
         goodStatement( dboConnection, "drop table t3_023" );
         goodStatement( dboConnection, "drop table t2_023" );
@@ -3906,6 +4185,27 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         return new StringArrayVTI( TRIGGER_HISTORY_COLUMNS, rows );
     }
 
+    /** Table function for returning some tuples of ints */
+    public static IntegerArrayVTI integerList_023()
+    {
+        // A
+        // B
+        // C
+        // D
+        return new IntegerArrayVTI
+            (
+             new String[] { "A", "B", "C", "D" },
+             new int[][]
+             {
+                 new int[] { 1, 11, 101, 1001 },
+                 new int[] { 2, 12, 102, 1002 },
+                 new int[] { 3, 13, 103, 1003 },
+                 new int[] { 4, 14, 104, 1004 },
+                 new int[] { 5, 15, 105, 1005 },
+             }
+             );
+    }
+    
     /**
      * <p>
      * Trigger-called procedure for counting rows in a candidate table and then inserting

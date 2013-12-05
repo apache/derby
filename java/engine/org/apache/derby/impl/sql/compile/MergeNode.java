@@ -130,10 +130,10 @@ public final class MergeNode extends DMLModStatementNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static  final   int SOURCE_TABLE_INDEX = 0;
-    private static  final   int TARGET_TABLE_INDEX = 1;
+    public  static  final   int SOURCE_TABLE_INDEX = 0;
+    public  static  final   int TARGET_TABLE_INDEX = 1;
 
-	private static final String TARGET_ROW_LOCATION_NAME = "###TargetRowLocation";
+	private static  final   String  TARGET_ROW_LOCATION_NAME = "###TargetRowLocation";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -214,38 +214,27 @@ public final class MergeNode extends DMLModStatementNode
         }
 
         //
-        // Replace all references to a target correlation name with the actual
+        // Replace all references to correlation names with the actual
         // resolved table name.
         //
         FromList    dfl = new FromList( getContextManager() );
         dfl.addFromTable( _sourceTable );
         dfl.addFromTable( _targetTable );
         dfl.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
-        if ( _targetTable.correlationName != null )
-        {
-            TableName   targetTableName = _targetTable.tableName;
-            String  correlationName = _targetTable.correlationName;
-            
-            replaceCorrelationName
-                (
-                correlationName,
-                 targetTableName,
-                 _searchCondition
-                 );
-            
-            for ( MatchingClauseNode mcn : _matchingClauses )
-            {
-                mcn.replaceCorrelationName
-                    (
-                     this,
-                     correlationName,
-                     targetTableName
-                     );
-            }
+        
+        replaceCorrelationName( _targetTable.correlationName, _targetTable.tableName );
+        _targetTable.correlationName = null;
 
-            _targetTable.correlationName = null;
+        if ( _sourceTable instanceof FromBaseTable )
+        {
+            TableName   sourceTableName = ((FromBaseTable) _sourceTable).tableName;
+            replaceCorrelationName( _sourceTable.correlationName, sourceTableName );
+            _sourceTable.correlationName = null;
         }
 
+        //
+        // Bind the WHEN [ NOT ] MATCHED clauses.
+        //
         FromList    dummyFromList = new FromList( getContextManager() );
         FromBaseTable   dummyTargetTable = new FromBaseTable
             (
@@ -279,6 +268,42 @@ public final class MergeNode extends DMLModStatementNode
         }
 	}
 
+    /**
+     * <p>
+     * Replace references to the correlation name with the underlying table name
+     * in all ColumnReferences under all expressions. If the correlation name is null,
+     * then replace all references to the unqualified table name with the fully
+     * qualified table name. This replacement is
+     * done before the ColumnReferences are bound.
+     * </p>
+     */
+    private void    replaceCorrelationName
+        (
+         String correlationName,
+         TableName  newTableName
+         )
+        throws StandardException
+    {
+        if ( correlationName == null ) { correlationName = newTableName.getTableName(); }
+
+        replaceCorrelationName
+            (
+             correlationName,
+             newTableName,
+             _searchCondition
+             );
+            
+        for ( MatchingClauseNode mcn : _matchingClauses )
+        {
+            mcn.replaceCorrelationName
+                (
+                 this,
+                 correlationName,
+                 newTableName
+                 );
+        }
+    }
+    
     /**
      * <p>
      * Replace references to the correlation name with the underlying table name

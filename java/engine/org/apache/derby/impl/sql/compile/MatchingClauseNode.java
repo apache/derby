@@ -229,7 +229,19 @@ public class MatchingClauseNode extends QueryTreeNode
     {
         if ( _matchingRefinement != null )
         {
-            mergeNode.bindExpression( _matchingRefinement, fullFromList );
+            FromList    fromList = fullFromList;
+
+            //
+            // For an INSERT action, the WHEN NOT MATCHED refinement can only
+            // mention columns in the source table.
+            //
+            if ( isInsertClause() )
+            {
+                fromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
+                fromList.addElement( fullFromList.elementAt( MergeNode.SOURCE_TABLE_INDEX ) );
+            }
+
+            mergeNode.bindExpression( _matchingRefinement, fromList );
         }
     }
 
@@ -726,13 +738,9 @@ public class MatchingClauseNode extends QueryTreeNode
         bindInsertValues( fullFromList, targetTable );
         
         // the VALUES clause may not mention columns in the target table
-        FromList    targetTableFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
-        targetTableFromList.addElement( fullFromList.elementAt( 0 ) );
-        bindExpressions( _insertValues, targetTableFromList );
-        if ( _matchingRefinement != null )
-        {
-            mergeNode.bindExpression( _matchingRefinement, targetTableFromList );
-        }
+        FromList    sourceTableFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
+        sourceTableFromList.addElement( fullFromList.elementAt( MergeNode.SOURCE_TABLE_INDEX ) );
+        bindExpressions( _insertValues, sourceTableFromList );
         
         SelectNode  selectNode = new SelectNode
             (
