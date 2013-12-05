@@ -28,6 +28,8 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 
 import junit.framework.Test;
@@ -48,7 +50,6 @@ public class UDTTest  extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     public static final String OBJECT_EXISTS = "X0Y68";
-    public static final String SYNTAX_ERROR = "42X01";
     public static final String VIEW_DEPENDS_ON_TYPE = "X0Y23";
     public static final String TRIGGER_DEPENDS_ON_TYPE = "X0Y24";
 
@@ -1217,6 +1218,25 @@ public class UDTTest  extends GeneratedColumnsHelper
         cs.close();
 
         assertEquals( "[ 0, 0 ]", obj.toString() );
+    }
+
+    /**
+     * Verify that you can cast a value to an UDT in a generation clause or
+     * a CHECK constraint. Regression test case for DERBY-6421.
+     */
+    public void test_18_derby6421() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create type d6421_type external name 'java.util.ArrayList' "
+                + "language java");
+        s.execute("create table d6421_table "
+                + "(x generated always as (cast(null as d6421_type)), "
+                + "check (cast(null as d6421_type) is null))");
+
+        // This insert used to cause assert failure (in sane builds) or
+        // NullPointerException (in insane builds).
+        s.execute("insert into d6421_table values default");
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
