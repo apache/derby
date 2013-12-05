@@ -81,10 +81,7 @@ public class TableName extends QueryTreeNode
         int tokEndOffset,
         ContextManager cm)
 	{
-        super(cm);
-        hasSchema = schemaName != null;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        this(schemaName, tableName, cm);
         this.setBeginOffset(tokBeginOffset);
         this.setEndOffset(tokEndOffset);
 	}

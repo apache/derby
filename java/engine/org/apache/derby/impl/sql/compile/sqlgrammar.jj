@@ -179,6 +179,7 @@ public class SQLParser
 	*/	
 	private Token	lastIdentifierToken;
 	private Token	nextToLastIdentifierToken;
+    private Token   thirdToLastIdentifierToken;
 
 	static final String SINGLEQUOTES = "\'\'";
 	static final String DOUBLEQUOTES = "\"\"";
@@ -4902,6 +4903,7 @@ qualifiedName(int id_length_limit) throws StandardException :
 	String	qualifiedId;
 	String	firstName = null;
 	String	secondName = null;
+    Token firstNameToken = null;
 }
 {
 	firstName = identifier(Limits.MAX_IDENTIFIER_LENGTH, false)
@@ -4918,11 +4920,13 @@ qualifiedName(int id_length_limit) throws StandardException :
 		if (secondName == null)
 		{
 			qualifiedId = firstName;
+            firstNameToken = lastIdentifierToken;
 		}
 		else
 		{
 			schemaName = firstName;
 			qualifiedId = secondName;
+            firstNameToken = nextToLastIdentifierToken;
 		}
 
 		//limit the qualifiedId to the id length limit passed to this method
@@ -4933,7 +4937,7 @@ qualifiedName(int id_length_limit) throws StandardException :
         return new TableName(
             schemaName,
             qualifiedId,
-            lastIdentifierToken.beginOffset,
+            firstNameToken.beginOffset,
             lastIdentifierToken.endOffset,
             getContextManager());
 	}
@@ -6257,8 +6261,6 @@ escapedSYSFUNFunction() throws StandardException :
         TableName functionName = new TableName(
                                 SchemaDescriptor.IBM_SYSTEM_FUN_SCHEMA_NAME,
 								sysFunName,
-                                Integer.valueOf(0),
-                                Integer.valueOf(0),
 								getContextManager());
 	   
         MethodCallNode methodNode = new StaticMethodCallNode(
@@ -7980,8 +7982,10 @@ columnNameForInvocation() throws StandardException :
             tabName = new TableName(
                     schemaName,
                     tableName,
-                    Integer.valueOf(nextToLastIdentifierToken.beginOffset),
-                    Integer.valueOf(nextToLastIdentifierToken.endOffset),
+                    (thirdName == null
+                         ? nextToLastIdentifierToken
+                         : thirdToLastIdentifierToken).beginOffset,
+                    nextToLastIdentifierToken.endOffset,
                     getContextManager());
 		}
 
@@ -8068,8 +8072,10 @@ columnReference() throws StandardException :
             tabName = new TableName(
                 schemaName,
                 tableName,
-                Integer.valueOf(nextToLastIdentifierToken.beginOffset),
-                Integer.valueOf(nextToLastIdentifierToken.endOffset),
+                (thirdName == null
+                     ? nextToLastIdentifierToken
+                     : thirdToLastIdentifierToken).beginOffset,
+                nextToLastIdentifierToken.endOffset,
                 getContextManager());
 		}
 
@@ -14374,6 +14380,7 @@ internalIdentifier( int id_length_limit, boolean checkLength) throws StandardExc
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
         lastTokenDelimitedIdentifier = false;
+        thirdToLastIdentifierToken = nextToLastIdentifierToken;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 		return str;
@@ -14423,6 +14430,7 @@ delimitedIdentifier() :
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
         lastTokenDelimitedIdentifier = true;
+        thirdToLastIdentifierToken = nextToLastIdentifierToken;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 
@@ -14869,6 +14877,7 @@ nonReservedKeyword()  :
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
         lastTokenDelimitedIdentifier = false;
+        thirdToLastIdentifierToken = nextToLastIdentifierToken;
 		nextToLastIdentifierToken = lastIdentifierToken;
 		lastIdentifierToken = tok;
 		return tok.image;
