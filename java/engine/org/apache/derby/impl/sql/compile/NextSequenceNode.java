@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 
@@ -187,5 +188,14 @@ class NextSequenceNode extends ValueNode {
 
     boolean isEquivalent(ValueNode other) throws StandardException {
         return false;
+    }
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (sequenceName != null) {
+            sequenceName = (TableName) sequenceName.accept(v);
+        }
     }
 }

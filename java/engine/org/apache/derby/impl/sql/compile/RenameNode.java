@@ -27,6 +27,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -455,4 +456,13 @@ class RenameNode extends DDLStatementNode
 										   parent.getDescriptorType(),
 										   parent.getDescriptorName());
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (newTableName != null) {
+            newTableName = (TableName) newTableName.accept(v);
+        }
+    }
 }

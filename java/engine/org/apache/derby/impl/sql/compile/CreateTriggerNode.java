@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -997,4 +998,16 @@ class CreateTriggerNode extends DDLStatementNode
 		}
 	}
 
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (triggerName != null) {
+            triggerName = (TableName) triggerName.accept(v);
+        }
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
+    }
 }

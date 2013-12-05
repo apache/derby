@@ -29,6 +29,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -351,5 +352,14 @@ class PrivilegeNode extends QueryTreeNode
     private StandardException unimplementedFeature()
     {
         return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+    }
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (objectName != null) {
+            objectName = (TableName) objectName.accept(v);
+        }
     }
 }

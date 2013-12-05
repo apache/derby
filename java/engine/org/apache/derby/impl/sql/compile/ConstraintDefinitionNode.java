@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
@@ -500,4 +501,13 @@ public class ConstraintDefinitionNode extends TableElementNode
 		}
 		return	uuidFactory;
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (constraintName != null) {
+            constraintName = (TableName) constraintName.accept(v);
+        }
+    }
 }

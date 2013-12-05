@@ -39,6 +39,7 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.*;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
@@ -1522,4 +1523,17 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	{
 		return this.origTableName;
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (origTableName != null) {
+            origTableName = (TableName) origTableName.accept(v);
+        }
+
+        if (corrTableName != null) {
+            corrTableName = (TableName) corrTableName.accept(v);
+        }
+    }
 }

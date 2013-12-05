@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -1441,4 +1442,13 @@ class StaticMethodCallNode extends MethodCallNode
 	{
 		return Authorizer.EXECUTE_PRIV;
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (procedureName != null) {
+            procedureName = (TableName) procedureName.accept(v);
+        }
+    }
 }

@@ -4890,6 +4890,10 @@ class FromBaseTable extends FromTable
 		if (requalificationRestrictionList != null) {
 			requalificationRestrictionList.accept(v);
 		}
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
 	}
 
     /**

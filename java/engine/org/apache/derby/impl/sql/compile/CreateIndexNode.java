@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -322,4 +323,17 @@ class CreateIndexNode extends DDLStatementNode
 			}
 		}
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (indexName != null) {
+            indexName = (TableName) indexName.accept(v);
+        }
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
+    }
 }

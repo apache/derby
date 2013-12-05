@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -80,5 +81,14 @@ class AllResultColumn extends ResultColumn
     @Override
     public TableName getTableNameObject() {
         return tableName;
+    }
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
     }
 }

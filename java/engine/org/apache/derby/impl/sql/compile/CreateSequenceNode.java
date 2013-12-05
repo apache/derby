@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.TypeId;
 
 
@@ -248,5 +249,12 @@ class CreateSequenceNode extends DDLStatementNode
                         _cycle);
     }
 
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
 
+        if (_sequenceName != null) {
+            _sequenceName = (TableName) _sequenceName.accept(v);
+        }
+    }
 }

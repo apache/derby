@@ -26,6 +26,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -161,4 +162,13 @@ public final class FKConstraintDefinitionNode extends ConstraintDefinitionNode
 	{
 		return Authorizer.REFERENCES_PRIV;
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (refTableName != null) {
+            refTableName = (TableName) refTableName.accept(v);
+        }
+    }
 }

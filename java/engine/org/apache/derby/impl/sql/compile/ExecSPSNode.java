@@ -27,6 +27,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -311,4 +312,13 @@ class ExecSPSNode extends StatementNode
 	{
 		return "EXECUTE STATEMENT";
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (name != null) {
+            name = (TableName) name.accept(v);
+        }
+    }
 }

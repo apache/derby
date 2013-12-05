@@ -1856,6 +1856,10 @@ class FromVTI extends FromTable implements VTIEnvironment
 		{
 			methodCall = (MethodCallNode) methodCall.accept(v);
 		}
+
+        if (exposedName != null) {
+            exposedName = (TableName) exposedName.accept(v);
+        }
 	}
 
 	/**

@@ -22,7 +22,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.apache.derby.catalog.DefaultInfo;
@@ -1980,9 +1979,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		if (targetTableName != null)
 		{
-			targetTableName.accept(v);
+            targetTableName = (TableName) targetTableName.accept(v);
 		}
+
+        if (synonymTableName != null) {
+            synonymTableName = (TableName) synonymTableName.accept(v);
+        }
 	}
 }
-
-

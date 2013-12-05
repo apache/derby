@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -733,4 +734,12 @@ class AggregateNode extends UnaryOperatorNode
         return uad instanceof UserAggregateDefinition;
     }
 
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (userAggregateName != null) {
+            userAggregateName = (TableName) userAggregateName.accept(v);
+        }
+    }
 }

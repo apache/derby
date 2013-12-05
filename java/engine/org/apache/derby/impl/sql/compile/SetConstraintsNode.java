@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
@@ -122,4 +123,14 @@ class SetConstraintsNode extends MiscellaneousStatementNode
         }
     }
 
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (constraints != null) {
+            for (int i = 0; i < constraints.size(); i++) {
+                constraints.set(i, (TableName) constraints.get(i).accept(v));
+            }
+        }
+    }
 }

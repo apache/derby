@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -1248,4 +1249,13 @@ public class ColumnReference extends ValueNode
 		void setColName(String cName) { colName = cName; }
 		void setSource(ResultColumn rc) { source = rc; }
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
+    }
 }

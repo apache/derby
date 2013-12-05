@@ -26,6 +26,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -178,4 +179,13 @@ class LockTableNode extends MiscellaneousStatementNode
 						conglomerateNumber,
 						exclusiveMode);
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (tableName != null) {
+            tableName = (TableName) tableName.accept(v);
+        }
+    }
 }

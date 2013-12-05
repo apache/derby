@@ -34,8 +34,8 @@ import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -593,4 +593,17 @@ public final class CurrentOfNode extends FromTable {
 
 		return activation.getPreparedStatement();
 	}
+
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+        super.acceptChildren(v);
+
+        if (exposedTableName != null) {
+            exposedTableName = (TableName) exposedTableName.accept(v);
+        }
+
+        if (baseTableName != null) {
+            baseTableName = (TableName) baseTableName.accept(v);
+        }
+    }
 }
