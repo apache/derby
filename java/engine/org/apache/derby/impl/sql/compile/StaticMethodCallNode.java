@@ -301,7 +301,13 @@ class StaticMethodCallNode extends MethodCallNode
 				throw StandardException.newException(
                         SQLState.LANG_NO_SUCH_METHOD_ALIAS, procedureName);
 			}
-	
+
+            if (noSchema) {
+                // If no schema was specified, register where we found the
+                // routine.
+                procedureName.setSchemaName(sd.getSchemaName());
+            }
+
             if ( !routineInfo.isDeterministic() )
             {
                 checkReliability( getMethodName(), CompilerContext.NON_DETERMINISTIC_ILLEGAL );

@@ -655,6 +655,9 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 			 * starts with a clean list.
 			 */
 			rcl.clearColumnReferences();
+
+            // Make sure all names are schema qualified (DERBY-6362)
+            cdn.qualifyNames();
 		}
 	}
 

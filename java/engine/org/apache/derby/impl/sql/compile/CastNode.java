@@ -87,6 +87,17 @@ class CastNode extends ValueNode
      */
     private boolean assignmentSemantics = false;
 
+    /**
+     * The name of the target type if it's a UDT. It is partly redundant, as
+     * the name can also be retrieved from the type descriptor. Additionally,
+     * it contains information about the location of the UDT name in the
+     * query text, which is useful if the query text needs to be rewritten.
+     * (Useful for example when rewriting a CHECK constraint definition to
+     * have fully qualified names before storing it in the dictionary.) This
+     * field is only set for <b>explicit</b> casts to a UDT.
+     */
+    private TableName udtTargetName;
+
 	/**
      * Constructor for a CastNode
 	 *
@@ -402,6 +413,12 @@ class CastNode extends ValueNode
 
 			verifyClassExist(className);
 		}
+
+        // Set the schema name of the UDT target type.
+        if (udtTargetName != null) {
+            udtTargetName.setSchemaName(
+                    getTypeId().getBaseTypeId().getSchemaName());
+        }
 
         // Obviously the type of a parameter that
         // requires its type from context (a parameter)
@@ -1005,6 +1022,11 @@ class CastNode extends ValueNode
 		{
 			castOperand = (ValueNode)castOperand.accept(v);
 		}
+
+        if (udtTargetName != null)
+        {
+            udtTargetName = (TableName) udtTargetName.accept(v);
+        }
 	}
 
 	/** This method gets called by the parser to indiciate that this CAST node 
@@ -1053,6 +1075,12 @@ class CastNode extends ValueNode
 
 		return false;
 	}
+
+    /**
+     * Set the target type name if this is a cast to a UDT.
+     * @param name the name of the target type
+     */
+    void setTargetUDTName(TableName name) {
+        udtTargetName = name;
+    }
 }
-
-

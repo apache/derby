@@ -932,4 +932,88 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         }
         rs.close();
     }
+
+    /**
+     * Test that CHECK constraint works if it contains unqualified names and
+     * the current schema when the constraint is defined is different from the
+     * schema in which the table lives. Regression test case for DERBY-6362.
+     */
+    public void testDerby6362() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create schema d6362_s1");
+        s.execute("create schema d6362_s2");
+
+        s.execute("set schema d6362_s1");
+        s.execute("create function f(x int) returns int deterministic "
+                + "language java  parameter style java external name "
+                + "'java.lang.Math.abs' no sql");
+        s.execute("create type typ "
+                + "external name 'java.util.ArrayList' language java");
+
+        // Create the table with the constraints in a different schema than
+        // the current schema. Before DERBY-6362, unqualified names would be
+        // resolved to the current schema at definition time and to the
+        // table's schema during execution, which made them behave unreliably
+        // if the schemas differed.
+        s.execute("create table d6362_s2.t(x int, "
+                + "constraint c001 check(f(x) < 3))");
+        s.execute("alter table d6362_s2.t "
+                + "add constraint c002 check(f(x) >= 0)");
+        s.execute("alter table d6362_s2.t "
+                + "add constraint c003 check(cast(null as typ) is null)");
+
+        // Use a function that lives in the SYSFUN schema.
+        s.execute("alter table d6362_s2.t add constraint c004 "
+                + "check(f(x) > cos(pi()))");
+
+        // ABS is an operator, not a function, so it will not be qualified.
+        s.execute("alter table d6362_s2.t add constraint c005 "
+                + "check(abs(f(x)) < pi())");
+
+        // Add some constraints that reference the table. See that table
+        // names are qualified. Unqualified column names will not be qualified
+        // with schema and table.
+        s.execute("set schema d6362_s2");
+        s.execute("alter table t add constraint c101 check(x < 3)");
+        s.execute("alter table t add constraint c102 check(t.x < 4)");
+        s.execute("alter table t add constraint c103 "
+                + "check(x <= d6362_s1.f(t.x))");
+
+        // Add some fully qualified names to see that they still work.
+        s.execute("alter table t add constraint c201 check(d6362_s2.t.x < 5)");
+        s.execute("alter table t add constraint c202 check(d6362_s1.f(x) < 5)");
+        s.execute("alter table t add constraint c203 "
+                + "check(cast(null as d6362_s1.typ) is null)");
+
+        // Verify that the constraints were stored with fully qualified names.
+        String[][] expectedConstraints = {
+            {"C001", "(\"D6362_S1\".\"F\"(x) < 3)"},
+            {"C002", "(\"D6362_S1\".\"F\"(x) >= 0)"},
+            {"C003", "(cast(null as \"D6362_S1\".\"TYP\") is null)"},
+            {"C004", "(\"D6362_S1\".\"F\"(x) > \"SYSFUN\".\"COS\"(\"SYSFUN\".\"PI\"()))"},
+            {"C005", "(abs(\"D6362_S1\".\"F\"(x)) < \"SYSFUN\".\"PI\"())"},
+            {"C101", "(x < 3)"},
+            {"C102", "(\"D6362_S2\".\"T\".x < 4)"},
+            {"C103", "(x <= \"D6362_S1\".\"F\"(\"D6362_S2\".\"T\".x))"},
+            {"C201", "(\"D6362_S2\".\"T\".x < 5)"},
+            {"C202", "(\"D6362_S1\".\"F\"(x) < 5)"},
+            {"C203", "(cast(null as \"D6362_S1\".\"TYP\") is null)"},
+        };
+
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select constraintname, checkdefinition from sys.syschecks "
+                + "natural join sys.sysconstraints natural join sys.sysschemas "
+                + "where schemaname = 'D6362_S2' and type = 'C' "
+                + "order by constraintname"),
+            expectedConstraints);
+
+        // Verify that constraints can be executed. Used to fail because
+        // unqualified functions and types were resolved to the table's schema
+        // instead of the current schema at the time the constraint was defined.
+        s.execute("insert into t values 1,2");
+        assertStatementError("23513", s, "insert into t values -10");
+        assertStatementError("23513", s, "insert into t values 10");
+    }
 }

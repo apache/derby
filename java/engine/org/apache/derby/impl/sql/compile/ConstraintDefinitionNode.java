@@ -510,4 +510,33 @@ public class ConstraintDefinitionNode extends TableElementNode
             constraintName = (TableName) constraintName.accept(v);
         }
     }
+
+    /**
+     * Qualify all SQL object names in a CHECK constraint with schema name.
+     * @throws StandardException if an error occurs
+     */
+    void qualifyNames() throws StandardException {
+        // Get all references to SQL object names in the CHECK constraint,
+        // ordered as they appear in the constraint definition.
+        OffsetOrderVisitor<TableName> visitor =
+                new OffsetOrderVisitor<TableName>(TableName.class,
+                        checkCondition.getBeginOffset(),
+                        checkCondition.getEndOffset() + 1);
+        checkCondition.accept(visitor);
+
+        StringBuilder sb = new StringBuilder();
+        int pos = 0;
+        int offset = checkCondition.getBeginOffset();
+
+        // Replace all names with fully qualified names.
+        for (TableName tableName : visitor.getNodes()) {
+            sb.append(constraintText, pos, tableName.getBeginOffset() - offset);
+            sb.append(tableName.getFullSQLName());
+            pos = tableName.getEndOffset() + 1 - offset;
+        }
+
+        sb.append(constraintText, pos, constraintText.length());
+
+        constraintText = sb.toString();
+    }
 }

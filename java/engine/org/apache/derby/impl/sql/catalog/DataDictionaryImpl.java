@@ -32,7 +32,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -44,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.DependableFinder;
@@ -152,8 +152,8 @@ import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
 import org.apache.derby.impl.services.locks.Timeout;
-import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
 import org.apache.derby.impl.sql.compile.ColumnReference;
+import org.apache.derby.impl.sql.compile.OffsetOrderVisitor;
 import org.apache.derby.impl.sql.compile.TableName;
 import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 import org.apache.derby.impl.sql.execute.JarUtil;
@@ -4746,19 +4746,6 @@ public final class	DataDictionaryImpl
 		return list;
 	}
 
-    /**
-     * Comparator that can be used for sorting lists of column references
-     * on the position they have in the SQL query string.
-     */
-    private static final Comparator<ColumnReference> OFFSET_COMPARATOR = new Comparator<ColumnReference>() {
-        public int compare(ColumnReference o1, ColumnReference o2) {
-            // Return negative int, zero, or positive int if the first column
-            // reference has an offset which is smaller than, equal to, or
-            // greater than the offset of the second column reference.
-            return o1.getBeginOffset() - o2.getBeginOffset();
-        }
-    };
-
 	/**
 	 * Get the trigger action string associated with the trigger after the
 	 * references to old/new transition tables/variables in trigger action
@@ -4888,12 +4875,14 @@ public final class	DataDictionaryImpl
 			}
 		}
 
-		CollectNodesVisitor<ColumnReference> visitor = new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
-		actionStmt.accept(visitor);
-		List<ColumnReference> refs = visitor.getList();
 		/* we need to sort on position in string, beetle 4324
 		 */
-		Collections.sort(refs, OFFSET_COMPARATOR);
+        OffsetOrderVisitor<ColumnReference> visitor =
+                new OffsetOrderVisitor<ColumnReference>(ColumnReference.class,
+                        actionOffset,
+                        actionOffset + triggerDefinition.length());
+        actionStmt.accept(visitor);
+        SortedSet<ColumnReference> refs = visitor.getNodes();
 		
 		if (createTriggerTime) {
 			//The purpose of following array(triggerActionColsOnly) is to
@@ -4951,33 +4940,8 @@ public final class	DataDictionaryImpl
 			//in next version of 10.7 and 10.8. In 10.9, DERBY-1482 was
 			//reimplemented correctly and we started doing the collection and
 			//usage of trigger action columns again in 10.9
-			for (int i = 0; i < refs.size(); i++)
+            for (ColumnReference ref : refs)
 			{
-				ColumnReference ref = (ColumnReference) refs.get(i);
-				/*
-				** Only occurrences of those OLD/NEW transition tables/variables 
-				** are of interest here.  There may be intermediate nodes in the 
-				** parse tree that have its own RCL which contains copy of 
-				** column references(CR) from other nodes. e.g.:  
-				**
-				** CREATE TRIGGER tt 
-				** AFTER INSERT ON x
-				** REFERENCING NEW AS n 
-				** FOR EACH ROW
-				**    INSERT INTO y VALUES (n.i), (999), (333);
-				** 
-				** The above trigger action will result in InsertNode that 
-				** contains a UnionNode of RowResultSetNodes.  The UnionNode
-				** will have a copy of the CRs from its left child and those CRs 
-				** will not have its beginOffset set which indicates they are 
-				** not relevant for the conversion processing here, so we can 
-				** safely skip them. 
-				*/
-				if (ref.getBeginOffset() == -1) 
-				{
-					continue;
-				}
-
 				TableName tableName = ref.getTableNameNode();
 				if ((tableName == null) ||
 					((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&
@@ -5067,33 +5031,8 @@ public final class	DataDictionaryImpl
 		// turns into
 		//	DELETE FROM t WHERE c in 
 		//		(SELECT c FROM new TriggerOldTransitionTable OLD)
-		for (int i = 0; i < refs.size(); i++)
+        for (ColumnReference ref : refs)
 		{
-			ColumnReference ref = (ColumnReference) refs.get(i);
-			/*
-			** Only occurrences of those OLD/NEW transition tables/variables 
-			** are of interest here.  There may be intermediate nodes in the 
-			** parse tree that have its own RCL which contains copy of 
-			** column references(CR) from other nodes. e.g.:  
-			**
-			** CREATE TRIGGER tt 
-			** AFTER INSERT ON x
-			** REFERENCING NEW AS n 
-			** FOR EACH ROW
-			**    INSERT INTO y VALUES (n.i), (999), (333);
-			** 
-			** The above trigger action will result in InsertNode that 
-			** contains a UnionNode of RowResultSetNodes.  The UnionNode
-			** will have a copy of the CRs from its left child and those CRs 
-			** will not have its beginOffset set which indicates they are 
-			** not relevant for the conversion processing here, so we can 
-			** safely skip them. 
-			*/
-			if (ref.getBeginOffset() == -1) 
-			{
-				continue;
-			}
-			
 			TableName tableName = ref.getTableNameNode();
 			if ((tableName == null) ||
 				((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&

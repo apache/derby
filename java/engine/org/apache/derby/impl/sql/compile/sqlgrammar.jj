@@ -4049,7 +4049,7 @@ dataTypeDDL() throws StandardException :
 	}
 |
     LOOKAHEAD ( { getToken(1).kind != GENERATED } )
-	typeDescriptor = javaType()
+    typeDescriptor = javaType(new TableName[1])
 	{
 		return typeDescriptor;
 	}
@@ -4076,7 +4076,7 @@ catalogType() throws StandardException :
  * <A NAME="dataTypeCast">dataTypeCast</A>
  */
 DataTypeDescriptor
-dataTypeCast() throws StandardException :
+dataTypeCast(TableName[] udtName) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 }
@@ -4089,7 +4089,7 @@ dataTypeCast() throws StandardException :
 		return typeDescriptor;
 	}
 |
-	typeDescriptor = javaType()
+    typeDescriptor = javaType(udtName)
 	{
 		return typeDescriptor;
 	}
@@ -4604,13 +4604,14 @@ xmlDocOrContent() throws StandardException :
  * <A NAME="javaType">javaType</A>
  */
 DataTypeDescriptor
-javaType() throws StandardException :
+javaType(TableName[] udtName) throws StandardException :
 {
 	TableName	typeName;
 }
 {
 	typeName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
+        udtName[0] = typeName;
 		return getJavaClassDataTypeDescriptor(typeName);
 	}
 }
@@ -9741,20 +9742,26 @@ ValueNode
 castSpecification() throws StandardException :
 {
 	DataTypeDescriptor dts;
-	ValueNode		 treeTop;
 	ValueNode		 value;
 	int				 charType;
 	int				 length = -1;
+    TableName[]      udtName = new TableName[1];
 }
 {
-	<CAST> <LEFT_PAREN> value = castOperand() <AS> dts = dataTypeCast() <RIGHT_PAREN>
+    <CAST> <LEFT_PAREN> value = castOperand() <AS> dts = dataTypeCast(udtName) <RIGHT_PAREN>
 	{
-        treeTop = new CastNode(value, dts, getContextManager());
-		((CastNode) treeTop).setForExternallyGeneratedCASTnode();
+        CastNode castNode = new CastNode(value, dts, getContextManager());
+        castNode.setForExternallyGeneratedCASTnode();
+
+        // Register the name token if it's a UDT in case we need to
+        // rewrite the original statement text later (for example when
+        // storing a CHECK constraint).
+        castNode.setTargetUDTName(udtName[0]);
 
 		/* We need to generate a SQL->Java conversion tree above us if
 		 * the dataTypeCast is a user type.
 		 */
+        ValueNode treeTop = castNode;
 		if (dts.getTypeId().userType())
 		{
             treeTop = new JavaToSQLValueNode(
