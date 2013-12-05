@@ -1874,13 +1874,28 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     {
         int col = rs.getInt("ORDINAL_POSITION");
         Version dataVersion = getDataVersion( getConnection() );
-        
-        assertEquals("RSMD.getCatalogName",
-                rsmdt.getCatalogName(col), rs.getString("TABLE_CAT"));
-        assertEquals("RSMD.getSchemaName",
-                rsmdt.getSchemaName(col), rs.getString("TABLE_SCHEM"));
-        assertEquals("RSMD.getTableName",
-                rsmdt.getTableName(col), rs.getString("TABLE_NAME"));
+
+        String catalogName = rs.getString("TABLE_CAT");
+        String schemaName = rs.getString("TABLE_SCHEM");
+        String tableName = rs.getString("TABLE_NAME");
+
+        // Check that the catalog/schema/table names reported by the
+        // ResultSetMetaData are correct. Note that for views, RSMD will
+        // return data for the underlying table, not for the view itself.
+        // Therefore, skip the check for views.
+        ResultSet views =
+            rs.getStatement().getConnection().getMetaData().getTables(
+                    catalogName, schemaName, tableName, JDBC.GET_TABLES_VIEW);
+        boolean isView = JDBC.assertDrainResults(views) > 0;
+
+        if (!isView) {
+            assertEquals("RSMD.getCatalogName",
+                         catalogName, rsmdt.getCatalogName(col));
+            assertEquals("RSMD.getSchemaName",
+                         schemaName, rsmdt.getSchemaName(col));
+            assertEquals("RSMD.getTableName",
+                         tableName, rsmdt.getTableName(col));
+        }
         
         assertEquals("COLUMN_NAME",
                 rsmdt.getColumnName(col), rs.getString("COLUMN_NAME"));
