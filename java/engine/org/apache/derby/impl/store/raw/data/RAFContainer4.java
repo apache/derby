@@ -307,6 +307,10 @@ class RAFContainer4 extends RAFContainer {
         if (SanityManager.DEBUG) {
             // getEmbryonicPage only
             if (pageNumber == -1) {
+                if (!holdsThis) {
+                    // Remove when DERBY-6354 is closed:
+                    new Throwable().printStackTrace(SanityManager.GET_DEBUG_STREAM());
+                }
                 SanityManager.ASSERT(holdsThis);
             }
             if (holdsThis) {
