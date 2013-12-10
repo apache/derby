@@ -151,7 +151,8 @@ import org.xml.sax.SAXException;
  * 
  * select * from optTrace
  * where stmtID = 6 and complete
- * order by estimatedCost * </pre>
+ * order by estimatedCost;
+ * </pre>
  */
 public  class   XmlVTI  extends StringColumnVTI
 {
