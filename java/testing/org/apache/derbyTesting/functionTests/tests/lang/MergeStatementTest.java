@@ -70,6 +70,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      DUPLICATE_SET_COLUMNS = "42X16";
     private static  final   String      MISSING_TABLE = "42X05";
     private static  final   String      NO_ROWS_AFFECTED = "02000";
+    private static  final   String      NO_DML_IN_BEFORE_TRIGGERS = "42Z9D";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -4152,6 +4153,150 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              "( 3, 13, 103, 1003 ),\n" +
              "( 4, 14, 104, 1004 )\n"
              );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Verify that BEFORE triggers can't fire MERGE statements.
+     * </p>
+     */
+    public  void    test_024_mergeNotAllowedInBeforeTriggers()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_024( c1 int, c2 int, c3 int generated always as ( c1 + c2 ), c1_4 int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_024( c1 int, c2 int, c3 int, c4 int, c5 varchar( 5 ) )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_024( a int )"
+             );
+
+        //
+        // BEFORE DELETE triggers can't fire DML statements.
+        //
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_del_insert_before\n" +
+              "no cascade before delete on t3_024\n" +
+              "for each statement\n" +
+              "insert into t1_024( c1, c2 ) values ( 1, 2 )\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_del_update_before\n" +
+              "no cascade before delete on t3_024\n" +
+              "for each statement\n" +
+              "update t1_024 set c1 = 1\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_del_delete_before\n" +
+              "no cascade before delete on t3_024\n" +
+              "for each statement\n" +
+              "delete from t1_024\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_del_merge_before\n" +
+              "no cascade before delete on t3_024\n" +
+              "for each statement\n" +
+              "merge into t1_024\n" +
+              "using t2_024\n" +
+              "on t1_024.c1 = t2_024.c1\n" +
+              "when matched then delete\n"
+              );
+
+        //
+        // BEFORE INSERT triggers can't fire DML statements.
+        //
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_ins_insert_before\n" +
+              "no cascade before insert on t3_024\n" +
+              "for each statement\n" +
+              "insert into t1_024( c1, c2 ) values ( 1, 2 )\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_ins_update_before\n" +
+              "no cascade before insert on t3_024\n" +
+              "for each statement\n" +
+              "update t1_024 set c1 = 1\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_ins_delete_before\n" +
+              "no cascade before insert on t3_024\n" +
+              "for each statement\n" +
+              "delete from t1_024\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_ins_merge_before\n" +
+              "no cascade before insert on t3_024\n" +
+              "for each statement\n" +
+              "merge into t1_024\n" +
+              "using t2_024\n" +
+              "on t1_024.c1 = t2_024.c1\n" +
+              "when matched then delete\n"
+              );
+        
+        //
+        // BEFORE UPDATE triggers can't fire DML statements.
+        //
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_upd_insert_before\n" +
+              "no cascade before update on t3_024\n" +
+              "for each statement\n" +
+              "insert into t1_024( c1, c2 ) values ( 1, 2 )\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_upd_update_before\n" +
+              "no cascade before update on t3_024\n" +
+              "for each statement\n" +
+              "update t1_024 set c1 = 1\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_upd_delete_before\n" +
+              "no cascade before update on t3_024\n" +
+              "for each statement\n" +
+              "delete from t1_024\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DML_IN_BEFORE_TRIGGERS,
+              "create trigger t3_024_upd_merge_before\n" +
+              "no cascade before update on t3_024\n" +
+              "for each statement\n" +
+              "merge into t1_024\n" +
+              "using t2_024\n" +
+              "on t1_024.c1 = t2_024.c1\n" +
+              "when matched then delete\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t3_024" );
+        goodStatement( dboConnection, "drop table t2_024" );
+        goodStatement( dboConnection, "drop table t1_024" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
