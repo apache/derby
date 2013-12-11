@@ -384,8 +384,8 @@ public final class TransactionResourceImpl
      * @return true if this is a login failure exception
      */
     private boolean isLoginException(Throwable thrownException) {
-       if (thrownException instanceof StandardException) {
-           ((StandardException) thrownException).getSQLState().equals(SQLState.LOGIN_FAILED);
+       if ((thrownException instanceof StandardException) &&
+           ((StandardException) thrownException).getSQLState().equals(SQLState.LOGIN_FAILED)) {
            return true;
        }
        return false;
