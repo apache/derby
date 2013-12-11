@@ -2048,8 +2048,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
                     //check if the backing index was created when the column
                     //not null ie is backed by unique index
-                    if (!desc.getIndexDescriptor().isUnique())
+                    if (! (desc.getIndexDescriptor().isUnique() ||
+                           desc.getIndexDescriptor().hasDeferrableChecking())) {
                         break;
+                    }
 
                     // replace backing index with a unique when not null index.
                     recreateUniqueConstraintBackingIndexAsUniqueWhenNotNull(

@@ -47,7 +47,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -94,6 +93,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         systemProperties.setProperty("derby.locks.waitTimeout", "2");
         TestSuite s = new TestSuite("WithLenientChecking");
 
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testDropNotNullOnUniqueColumn"));
         s.addTest(new ConstraintCharacteristicsTest(
                       "testCompressTable"));
         s.addTest(new ConstraintCharacteristicsTest(
@@ -896,6 +897,40 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             }
         }
     }
+
+    // Adapted from UniqueConstraintSetNullTest which exposed an error
+    // when we ran all regressions with default deferrable: when a NOT NULL
+    // clause was dropped, the test used to drop and recreate the index to
+    // be non-unique was incomplete in the deferrable case.
+    public void testDropNotNullOnUniqueColumn() throws SQLException {
+        Statement s = createStatement();
+
+        s.executeUpdate("create table constraintest (" +
+                "val1 varchar (20) not null, " +
+                "val2 varchar (20))");
+
+        s.executeUpdate("alter table constraintest add constraint " +
+                "u_con unique (val1) deferrable initially immediate");
+
+        s.executeUpdate("alter table constraintest alter column val1 null");
+
+        s.executeUpdate("insert into constraintest(val1) values 'name1'");
+
+        try {
+            s.executeUpdate("insert into constraintest(val1) values 'name1'");
+            fail("expected duplicate error");
+        } catch (SQLException e) {
+            assertSQLState(LANG_DUPLICATE_KEY_CONSTRAINT, e);
+        }
+
+        PreparedStatement ps = prepareStatement(
+                "insert into constraintest(val1) values (?)");
+        ps.setString(1, null);
+        ps.executeUpdate();
+        ps.setString(1, null);
+        ps.executeUpdate();
+    }
+
 
     public void testDerby6374() throws SQLException {
         Statement s = createStatement();
