@@ -490,8 +490,9 @@ class IndexChanger
                 duplicate = foundOne && idxScan.next();
 
             } catch (StandardException e) {
-                if (e.getSQLState().equals(SQLState.LOCK_TIMEOUT) ||
-                    e.getSQLState().equals(SQLState.DEADLOCK)) {
+                if ((e.getSQLState().equals(SQLState.LOCK_TIMEOUT) ||
+                     e.getSQLState().equals(SQLState.DEADLOCK)) &&
+                     lcc.isEffectivelyDeferred(activation, indexCID))  {
                     // Assume there is a duplicate, so we'll check again at
                     // commit time.
                     duplicate = true;

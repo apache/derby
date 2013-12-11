@@ -109,8 +109,10 @@ public abstract class BTree extends GenericConglomerate
     public static final String PROPERTY_NUNIQUECOLUMNS  = "nUniqueColumns";
     public static final String PROPERTY_PARENTLINKS     = "maintainParentLinks";
 
-    //property key to indicate if the index will allow duplicate nulls, but
-    //otherwise insure unique keys
+    // Property key to indicate if the index will allow duplicate nulls, but
+    // otherwise ensure unique keys. Note that this is not used in the BTree for
+    // deferrable constraints: in this case it handled at the language level,
+    // cf. IndexChanger.
     public static final String PROPERTY_UNIQUE_WITH_DUPLICATE_NULLS 
                                                     = "uniqueWithDuplicateNulls";
 

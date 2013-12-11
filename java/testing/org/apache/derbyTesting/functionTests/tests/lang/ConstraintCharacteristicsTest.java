@@ -94,32 +94,34 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         systemProperties.setProperty("derby.locks.waitTimeout", "2");
         TestSuite s = new TestSuite("WithLenientChecking");
 
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testLocking"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testDatabaseMetaData"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testCreateConstraintDictionaryEncodings"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testAlterConstraintDictionaryEncodings"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testAlterConstraintInvalidation"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testBasicDeferral"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testRoutines"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testDeferredRowsInvalidation"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testImport"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testDerby6374"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testXA"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testManySimilarDuplicates"));
-       s.addTest(new ConstraintCharacteristicsTest(
-           "testAlmostRemovedAllDups"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testCompressTable"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testLocking"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testDatabaseMetaData"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testCreateConstraintDictionaryEncodings"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testAlterConstraintDictionaryEncodings"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testAlterConstraintInvalidation"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testBasicDeferral"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testRoutines"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testDeferredRowsInvalidation"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testImport"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testDerby6374"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testXA"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testManySimilarDuplicates"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testAlmostRemovedAllDups"));
 
         suite.addTest(new SystemPropertyTestSetup(s, systemProperties));
 
@@ -1004,6 +1006,46 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             xaconn.close();
         }
     }
+
+    // Exposed a bug when running regression suites with default
+    // deferrable: compress recreates the index.
+    public void testCompressTable() throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate(
+                "create table table1(" +
+                "name1 int unique deferrable initially immediate, " +
+                "name2 int unique not null, " +
+                "name3 int primary key)");
+        try {
+            stmt.execute(
+                "call syscs_util.syscs_compress_table('APP','TABLE1',1)");
+            stmt.executeUpdate(
+                "insert into table1 values(1,11,111)");
+
+            // The following should run into problem because of constraint
+            // on name1
+            assertStatementError(
+                "23505", stmt,
+                "insert into table1 values(1,22,222)");
+
+            // The following should run into problem because of constraint
+            // on name2
+            assertStatementError(
+                "23505", stmt,
+                "insert into table1 values(3,11,333)");
+
+            // The following should run into problem because of constraint
+            // on name3
+            assertStatementError(
+                "23505", stmt,
+                "insert into table1 values(4,44,111)");
+
+        } finally {
+            stmt.executeUpdate("drop table table1");
+        }
+    }
+
 
     final static long SIZE = (1024L * 1024L * 10) / 256;
     public void testManySimilarDuplicates() throws SQLException {
