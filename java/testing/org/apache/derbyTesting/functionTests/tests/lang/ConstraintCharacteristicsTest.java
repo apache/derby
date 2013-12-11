@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,10 +47,12 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XATestUtil;
 
 public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
@@ -62,14 +65,25 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                                            // import/export
     static String expImpDataWithNullsFile; // file used to perform
                                            // import/export
-    static boolean exportFilesCreated = false;
+    static boolean exportFilesCreatedEmbedded = false;
+    static boolean exportFilesCreatedClient = false;
 
     public ConstraintCharacteristicsTest(String name) {
         super(name);
     }
 
+
     public static Test suite() {
-        TestSuite suite = new TestSuite("ConstraintCharacteristicsTest");
+        String nameRoot = "ConstraintCharacteristicsTest";
+        TestSuite suite = new TestSuite(nameRoot);
+        suite.addTest(baseSuite(nameRoot + ":embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                baseSuite(nameRoot + ":client")));
+        return suite;
+    }
+
+    private static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(name);
         suite.addTest(new ConstraintCharacteristicsTest(
                           "testSyntaxAndBinding"));
 
@@ -77,11 +91,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // feature completed: remove then
         Properties systemProperties = new Properties();
         systemProperties.setProperty("derby.constraintsTesting", "true");
-
+        systemProperties.setProperty("derby.locks.waitTimeout", "2");
         TestSuite s = new TestSuite("WithLenientChecking");
 
        s.addTest(new ConstraintCharacteristicsTest(
            "testLocking"));
+       s.addTest(new ConstraintCharacteristicsTest(
+           "testDatabaseMetaData"));
        s.addTest(new ConstraintCharacteristicsTest(
            "testCreateConstraintDictionaryEncodings"));
        s.addTest(new ConstraintCharacteristicsTest(
@@ -116,12 +132,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         createStatement().
                 executeUpdate("create table referenced(i int primary key)");
 
-        if (!exportFilesCreated) {
+        if ((usingEmbedded() && !exportFilesCreatedEmbedded) ||
+            (usingDerbyNetClient() && !exportFilesCreatedClient)) {
+
+            // We have to do this once for embedded and once for client/server
+            if (usingEmbedded()) {
+                exportFilesCreatedEmbedded = true;
+            } else {
+                exportFilesCreatedClient = true;
+            }
 
             // Create a file for import that contains duplicate rows,
             // see testImport and testDerby6374.
             //
-            exportFilesCreated = true;
             expImpDataFile =
                 SupportFilesSetup.getReadWrite("t.data").getPath();
             expImpDataWithNullsFile =
@@ -289,6 +312,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testAlterConstraintInvalidation() throws SQLException {
+        if (usingDerbyNetClient()) {
+            // Skip, since we need to see inside an embedded connection here
+            return;
+        }
+
         Connection c = getConnection();
         Statement s = c.createStatement();
 
@@ -332,6 +360,24 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             "set constraints all",
             "set constraints c"};
 
+
+    public void testDatabaseMetaData() throws SQLException {
+        //
+        // Test that our index is still reported as unique even if we implement
+        // it as physically non-unique when deferrable: logically it is still a
+        // unique index.
+        Statement s = createStatement();
+        s.executeUpdate(
+            "create table t(i int not null " +
+            "    constraint c primary key deferrable initially immediate)");
+        DatabaseMetaData dbmd = s.getConnection().getMetaData();
+        ResultSet rs = dbmd.getIndexInfo(null, null, "T", false, false);
+        rs.next();
+        assertEquals("false", rs.getString("NON_UNIQUE"));
+    }
+
+
+
     public void testLocking() throws SQLException {
         Statement s = createStatement();
         s.executeUpdate(
@@ -373,6 +419,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 assertSQLState(LOCK_TIMEOUT, e);
             }
         } finally {
+            if (usingDerbyNetClient()) {
+                c2.rollback();
+            }
             c2.close();
         }
         commit();
@@ -913,11 +962,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 fail("Expected XA prepare to fail due to constraint violation");
             } catch (XAException xe) {
                 assertEquals(xe.errorCode, XAException.XA_RBINTEGRITY);
-                Throwable t = xe.getCause();
-                assertTrue(t != null && t instanceof SQLException);
-                assertSQLState(
-                        LANG_DEFERRED_CONSTRAINTS_VIOLATION,
-                        (SQLException)t);
+
+                if (!usingDerbyNetClient()) {
+                    Throwable t = xe.getCause();
+                    assertTrue(t != null && t instanceof SQLException);
+                    assertSQLState(
+                            LANG_DEFERRED_CONSTRAINTS_VIOLATION,
+                            (SQLException)t);
+                }
+
                 assertXidRolledBack(xar, xid);
             }
 
@@ -932,15 +985,22 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 fail("Expected XA commit to fail due to constraint violation");
             } catch (XAException xe) {
                 assertEquals(xe.errorCode, XAException.XA_RBINTEGRITY);
-                Throwable t = xe.getCause();
-                assertTrue(t != null && t instanceof SQLException);
-                assertSQLState(
-                        LANG_DEFERRED_CONSTRAINTS_VIOLATION,
-                        (SQLException)t);
+
+                if (!usingDerbyNetClient()) {
+                    Throwable t = xe.getCause();
+                    assertTrue(t != null && t instanceof SQLException);
+                    assertSQLState(
+                            LANG_DEFERRED_CONSTRAINTS_VIOLATION,
+                            (SQLException)t);
+                }
+
                 assertXidRolledBack(xar, xid);
             }
 
         } finally {
+            if (usingDerbyNetClient()) {
+                xaconn.getConnection().rollback();
+            }
             xaconn.close();
         }
     }
