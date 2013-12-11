@@ -46,6 +46,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
+import org.apache.derbyTesting.functionTests.tests.memorydb.MemoryDbManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
@@ -66,6 +67,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                                            // import/export
     static boolean exportFilesCreatedEmbedded = false;
     static boolean exportFilesCreatedClient = false;
+
+    // Use in memory database for speed for some tests
+    private static final MemoryDbManager dbm =
+            MemoryDbManager.getSharedInstance();
+
+    final static int WAIT_TIMEOUT_DURATION = 1;
 
     public ConstraintCharacteristicsTest(String name) {
         super(name);
@@ -89,9 +96,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Need to set a property to allow non default characteristics until
         // feature completed: remove then
         Properties systemProperties = new Properties();
-        systemProperties.setProperty("derby.constraintsTesting", "true");
-        systemProperties.setProperty("derby.locks.waitTimeout", "2");
-        TestSuite s = new TestSuite("WithLenientChecking");
+        systemProperties.setProperty(
+            "derby.constraintsTesting", "true");
+        systemProperties.setProperty(
+            "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
+        TestSuite s = new TestSuite(
+            "WithLenientChecking");
 
         s.addTest(new ConstraintCharacteristicsTest(
                       "testDropNotNullOnUniqueColumn"));
@@ -128,7 +138,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         s.addTest(new ConstraintCharacteristicsTest(
                       "testAlmostRemovedAllDups"));
 
-        suite.addTest(new SystemPropertyTestSetup(s, systemProperties));
+        suite.addTest(new SystemPropertyTestSetup(s, systemProperties, true));
 
         return new SupportFilesSetup(suite);
     }
@@ -182,17 +192,22 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         setAutoCommit(true);
         getConnection().createStatement().
                 executeUpdate("drop table referenced");
+        dbm.cleanUp();
         super.tearDown();
     }
 
     public void testSyntaxAndBinding() throws SQLException {
-        Statement s = getConnection().createStatement();
+        Connection c = dbm.createDatabase("cct");
+        c.setAutoCommit(false);
+        Statement s = c.createStatement();
+        s.executeUpdate("create table referenced(i int primary key)");
+        c.commit();
 
         /*
          * T A B L E    L E V E L    C O N S T R A I N T S
          */
 
-        assertTableLevelDefaultBehaviorAccepted(s);
+        assertTableLevelDefaultBehaviorAccepted(c, s);
         assertTableLevelFailTillFeatureImplemented(s);
 
         /*
@@ -227,13 +242,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         // Unknown constraint name
         assertStatementError( "42X94", s, "set constraints cuckoo deferred");
-        rollback();
+        c.rollback();
 
         /*
          * C O L U M N    L E V E L    C O N S T R A I N T S
          */
 
-        assertColumnLevelDefaultBehaviorAccepted(s);
+        assertColumnLevelDefaultBehaviorAccepted(c, s);
         assertColumnLevelFailTillFeatureImplemented(s);
 
         // Characteristics are not currently allowed for NOT NULL,
@@ -1088,12 +1103,21 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     final static long SIZE = (1024L * 1024L * 10) / 256;
     public void testManySimilarDuplicates() throws SQLException {
-        Statement s = createStatement();
+        if (usingDerbyNetClient()) {
+            // skip, too heavy fixture to do twice... we use
+            // in memory db in any case...
+            return;
+        }
+
+        Connection c = dbm.createDatabase("cct");
+        c.setAutoCommit(false);
+
+        Statement s = c.createStatement();
         try {
             s.executeUpdate(
                 "create table t (i varchar(256), " +
                     "constraint c primary key(i) initially deferred)");
-            PreparedStatement ps = prepareStatement("insert into t values ?");
+            PreparedStatement ps = c.prepareStatement("insert into t values ?");
             char[] value = new char[256];
             Arrays.fill(value, 'a');
             ps.setString(1, String.valueOf(value));
@@ -1102,18 +1126,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             for (long l=0; l < SIZE; l++) {
                 ps.executeUpdate();
             }
-            commit();
+            c.commit();
         } catch (SQLException e) {
             assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
             s.executeUpdate("call syscs_util.syscs_checkpoint_database()");
-        } finally {
-            // clean up resources
-            try {
-                s.executeUpdate("drop table t");
-            } catch (SQLException e) {
-                // ignore, more interested in original exception
-            }
-            commit();
         }
     }
 
@@ -1172,13 +1188,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         }
     }
 
-    private void setupTab1() throws SQLException {
-        Statement stmt = createStatement();
+    private static void setupTab1(String db) throws SQLException {
+        Connection c = dbm.getConnection(db);
+        Statement stmt = c.createStatement();
         stmt.execute(
                 "create table tab1 (i integer)");
         stmt.executeUpdate(
                 "alter table tab1 add constraint con1 unique (i) deferrable");
-        PreparedStatement ps = prepareStatement("insert into tab1 " +
+        PreparedStatement ps = c.prepareStatement("insert into tab1 " +
                 "values (?)");
 
         for (int i = 0; i < 10; i++) {
@@ -1188,15 +1205,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         ps.close();
         stmt.close();
-        commit();
+        c.commit();
     }
 
 
-    private void dropTab1() throws SQLException {
-        Statement stmt = createStatement();
+    private static void dropTab1(String db) throws SQLException {
+        Connection c = dbm.getConnection(db);
+        Statement stmt = c.createStatement();
         try {
             stmt.execute("drop table tab1");
-            commit();
+            c.commit();
         } catch (SQLException e) {
             // ignore so we get to see original exception if there is one
         }
@@ -1223,18 +1241,21 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * saw a the lock time-out error.
      */
     public void testLockingWithCommit () throws Exception {
-        setupTab1();
+        final String db = "cct";
+        dbm.createDatabase(db).close();
+        setupTab1(db);
 
         try {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     executeThreads(
-                            (int)Math.pow(2,i),
-                            (int)Math.pow(2,j), true);
+                        db,
+                        (int)Math.pow(2,i),
+                        (int)Math.pow(2,j), true);
                 }
             }
         } finally {
-            dropTab1();
+            dropTab1(db);
         }
     }
 
@@ -1245,18 +1266,21 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * See also comment for {@link #testLockingWithCommit() }.
      */
     public void testLockingWithRollback () throws Exception {
-        setupTab1();
+        final String db = "cct";
+        dbm.createDatabase(db).close();
+        setupTab1(db);
 
         try {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     executeThreads(
-                            (int)Math.pow(2,i),
-                            (int)Math.pow(2,j), false);
+                        db,
+                        (int)Math.pow(2,i),
+                        (int)Math.pow(2,j), false);
                 }
             }
         } finally {
-            dropTab1();
+            dropTab1(db);
         }
     }
 
@@ -1266,6 +1290,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * first transaction is committed or rolled back based on third
      * parameter (boolean commit).
      *
+     * @param db string of in-memory db to use
      * @param isolation1 isolation level for 1st thread
      * @param isolation2 isolation level for 2nd thread
      * @param commit whether or not to commit
@@ -1273,11 +1298,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * (Lifted from UniqueConstraintMultiThrededTest to test with deferrable
      * constraint.)
      */
-    private void executeThreads (int isolation1, int isolation2,
-            boolean commit) throws Exception {
-        Connection con1 = openDefaultConnection();
+    private static void executeThreads (
+        String db,
+        int isolation1,
+        int isolation2,
+        boolean commit) throws Exception {
+
+        Connection con1 = dbm.getConnection(db);
         con1.setTransactionIsolation(isolation1);
-        Connection con2 = openDefaultConnection();
+        Connection con2 = dbm.getConnection(db);
+
         try {
             con2.setTransactionIsolation(isolation2);
             DBOperations dbo1 = new DBOperations (con1, 5);
@@ -1285,15 +1315,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             dbo1.delete();
             Thread t = new Thread (dbo2);
             t.start();
-            //wait for 2 sec should be enough for dbo2 so on wait
-            t.sleep(2000);
+
+            t.sleep((WAIT_TIMEOUT_DURATION * 1000) / 2 );
+
             if (commit) {
                 dbo1.rollback();
                 t.join();
                 assertSQLState("isolation levels: " + isolation1
                         + " " + isolation2, "23505", dbo2.getException());
-            }
-            else {
+            } else {
                 dbo1.commit();
                 t.join();
                 assertNull("isolation levels: " + isolation1
@@ -1454,7 +1484,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
      * @throws SQLException
      */
-    private void assertTableLevelFailTillFeatureImplemented(
+    private static void assertTableLevelFailTillFeatureImplemented(
             Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
@@ -1476,7 +1506,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
      * @throws SQLException
      */
-    private void assertColumnLevelFailTillFeatureImplemented(
+    private static void assertColumnLevelFailTillFeatureImplemented(
             Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
@@ -1493,18 +1523,20 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * Assert that we accept characteristics that merely specify the default
      * behavior anyway.
      *
+     * @param c connection
      * @param s statement
      *
      * @throws SQLException
      */
-    private void assertTableLevelDefaultBehaviorAccepted (
+    private static void assertTableLevelDefaultBehaviorAccepted (
+            Connection c,
             Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : defaultCharacteristics) {
                 assertUpdateCount(s, 0,
                     "create table t(i int, constraint c " + ct + ch[0] + ")");
-                rollback();
+                c.rollback();
             }
         }
     }
@@ -1513,18 +1545,20 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * Assert that we accept characteristics that merely specify the default
      * behavior anyway.
      *
+     * @param c connection
      * @param s statement
      *
      * @throws SQLException
      */
-    private void assertColumnLevelDefaultBehaviorAccepted (
+    private static void assertColumnLevelDefaultBehaviorAccepted (
+            Connection c,
             Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
             for (String ch[] : defaultCharacteristics) {
                 assertUpdateCount(s, 0,
                     "create table t(i int " + ct + ch[0] + ")");
-                rollback();
+                c.rollback();
             }
         }
     }

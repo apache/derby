@@ -109,12 +109,17 @@ public class SystemPropertyTestSetup extends TestSetup {
     	// during the tearDown of SystemPropertyTestSetup during the 
     	// decorator's reuse.
 		this.oldValues = new Properties();
-    	// shutdown engine so static properties take effect
-        // shutdown the engine before setting the properties. this
+
+        // Shutdown engine so static properties take effect.
+        // Shutdown the engine before setting the properties. This
         // is because the properties may change authentication settings
         // to NATIVE authentication and we may be missing a credentials DB.
-    	if (staticProperties)
-    	{ TestConfiguration.getCurrent().shutdownEngine(); }
+        if (staticProperties) {
+            // Use deregister == false here lest in client server mode
+            // we try to connect to a network server without an embedded
+            // driver registered. Issue seen with ConstraintCharacteristicsTest.
+            TestConfiguration.getCurrent().shutdownEngine(false);
+        }
         
     	setProperties(newValues);
     }

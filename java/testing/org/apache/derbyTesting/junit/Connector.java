@@ -104,8 +104,9 @@ interface Connector {
      * This method can only be called when the
      * engine is running embedded in this JVM.
      * Return nothing, exception is expected to be thrown with SQLState XJ015
+     * @param deregisterDriver if true, deregister driver
      */
-    abstract void shutEngine() throws SQLException;
+    abstract void shutEngine(boolean deregisterDriver) throws SQLException;
    
     /**
      * Set the login timeout for getting connections. Timeout is measured in seconds.

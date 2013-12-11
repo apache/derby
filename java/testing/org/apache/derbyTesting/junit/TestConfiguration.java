@@ -1792,7 +1792,25 @@ public final class TestConfiguration {
     public void shutdownEngine()
     {
         try {
-            connector.shutEngine();
+            connector.shutEngine(true);
+            Assert.fail("Engine failed to shut down");
+        } catch (SQLException e) {
+             BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
+        }
+    }
+
+    /**
+     * Shutdown the engine for this configuration
+     * assuming it is booted.
+     * This method can only be called when the engine
+     * is running embedded in this JVM.
+     *
+     * @param deregisterDeriver if true, deregister the driver
+     */
+    public void shutdownEngine(boolean deregisterDeriver)
+    {
+        try {
+            connector.shutEngine(deregisterDeriver);
             Assert.fail("Engine failed to shut down");
         } catch (SQLException e) {
              BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);

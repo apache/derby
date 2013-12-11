@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 
 /**
@@ -139,7 +140,12 @@ public class DataSourceConnector implements Connector {
         config.waitForShutdownComplete(getDatabaseName());
     }
 
-    public void shutEngine() throws SQLException {
+    public void shutEngine(boolean deregisterDriver) throws SQLException {
+        if (SanityManager.DEBUG) {
+             // "false" only used with driver manager
+            SanityManager.ASSERT(deregisterDriver);
+        }
+
         DataSource tmpDs = singleUseDS( makeShutdownDBAttributes( config ) );
         JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
         tmpDs.getConnection();

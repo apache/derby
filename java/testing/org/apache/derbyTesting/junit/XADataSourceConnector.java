@@ -142,7 +142,7 @@ public class XADataSourceConnector implements Connector {
         config.waitForShutdownComplete(getDatabaseName());
     }
 
-    public void shutEngine() throws SQLException {
+    public void shutEngine(boolean deregisterDriver) throws SQLException {
         Assert.fail("shutdown engine not implemened");
     }
     

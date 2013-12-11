@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -154,8 +155,9 @@ public class DriverManagerConnector implements Connector {
      * with the user and password defined by the configuration.
      */
     public void shutDatabase() throws SQLException {
-        getConnectionByAttributes(config.getJDBCUrl(),
-                "shutdown", "true");
+        Properties p = new Properties();
+        p.setProperty("shutdown", "true");
+        getConnectionByAttributes(config.getJDBCUrl(), p);
         config.waitForShutdownComplete(getDatabaseName());
     }
 
@@ -165,10 +167,18 @@ public class DriverManagerConnector implements Connector {
      * by the configuration.
      * Always shutsdown using the embedded URL thus this
      * method will not work in a remote testing environment.
+     * @param deregisterDriver
+     * @throws java.sql.SQLException
      */
-    public void shutEngine() throws SQLException {
+    public void shutEngine(boolean deregisterDriver) throws SQLException {
+        Properties p = new Properties();
+        p.setProperty("shutdown", "true");
         
-        getConnectionByAttributes("jdbc:derby:", "shutdown", "true");
+        if (!deregisterDriver) {
+            p.setProperty("deregister", "false");
+        }
+
+        getConnectionByAttributes("jdbc:derby:", p);
     }
     
     public void setLoginTimeout( int seconds ) throws SQLException
@@ -186,14 +196,20 @@ public class DriverManagerConnector implements Connector {
      * The attributes user and password are set from the configuration
      * and then the passed in attribute is set.
      */
-    private Connection getConnectionByAttributes(String url, String key, String value)
+    private Connection getConnectionByAttributes(
+            String url,
+            Properties p)
         throws SQLException
     {
         Properties attributes = new Properties();
 
         attributes.setProperty("user", config.getUserName());
         attributes.setProperty("password", config.getUserPassword());
-        attributes.setProperty(key, value);
+
+        for (Enumeration e = p.keys(); e.hasMoreElements(); ) {
+            String key = (String)e.nextElement();
+            attributes.setProperty(key, p.getProperty(key));
+        }
 
         try {
             DriverManager.getDriver(url);

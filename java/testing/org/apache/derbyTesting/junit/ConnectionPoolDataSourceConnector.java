@@ -29,6 +29,7 @@ import java.util.Properties;
 import javax.sql.ConnectionPoolDataSource;
 
 import junit.framework.AssertionFailedError;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Connection factory using javax.sql.ConnectionPoolDataSource.
@@ -173,7 +174,12 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         config.waitForShutdownComplete(getDatabaseName());
     }
 
-    public void shutEngine() throws SQLException {
+    public void shutEngine(boolean deregisterDriver) throws SQLException {
+        if (SanityManager.DEBUG) {
+             // "false" only used with driver manager
+            SanityManager.ASSERT(deregisterDriver);
+        }
+
         ConnectionPoolDataSource tmpDs =
                 singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) );
         JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
