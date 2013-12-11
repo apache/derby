@@ -464,10 +464,20 @@ class IndexChanger
             final DataValueDescriptor [] key =
                     new DataValueDescriptor[rowArray.length - 1];
             System.arraycopy(rowArray, 0, key, 0, key.length);
+
+            // If the constraint mode is deferred, perform the check without
+            // waiting for any locks; we will just presume any lock conflicts
+            // constitute duplicates (not always the case), and check those keys
+            // again at commit time.
+            final boolean deferred =
+                    lcc.isEffectivelyDeferred(activation, indexCID);
+
             ScanController idxScan = tc.openScan(
                     indexCID,
                     false,
-                    TransactionController.OPENMODE_LOCK_ROW_NOWAIT,
+                    (deferred ?
+                     TransactionController.OPENMODE_LOCK_ROW_NOWAIT :
+                     0),
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
                     (FormatableBitSet)null, // retrieve all fields
@@ -492,7 +502,7 @@ class IndexChanger
             } catch (StandardException e) {
                 if ((e.getSQLState().equals(SQLState.LOCK_TIMEOUT) ||
                      e.getSQLState().equals(SQLState.DEADLOCK)) &&
-                     lcc.isEffectivelyDeferred(activation, indexCID))  {
+                     deferred)  {
                     // Assume there is a duplicate, so we'll check again at
                     // commit time.
                     duplicate = true;

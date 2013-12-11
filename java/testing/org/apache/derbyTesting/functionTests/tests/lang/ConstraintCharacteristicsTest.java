@@ -100,6 +100,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         s.addTest(new ConstraintCharacteristicsTest(
                       "testLocking"));
         s.addTest(new ConstraintCharacteristicsTest(
+                      "testLockingWithCommit"));
+        s.addTest(new ConstraintCharacteristicsTest(
+                      "testLockingWithRollback"));
+        s.addTest(new ConstraintCharacteristicsTest(
                       "testDatabaseMetaData"));
         s.addTest(new ConstraintCharacteristicsTest(
                       "testCreateConstraintDictionaryEncodings"));
@@ -1167,6 +1171,146 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             }
         }
     }
+
+    private void setupTab1() throws SQLException {
+        Statement stmt = createStatement();
+        stmt.execute(
+                "create table tab1 (i integer)");
+        stmt.executeUpdate(
+                "alter table tab1 add constraint con1 unique (i) deferrable");
+        PreparedStatement ps = prepareStatement("insert into tab1 " +
+                "values (?)");
+
+        for (int i = 0; i < 10; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+
+        ps.close();
+        stmt.close();
+        commit();
+    }
+
+
+    private void dropTab1() throws SQLException {
+        Statement stmt = createStatement();
+        try {
+            stmt.execute("drop table tab1");
+            commit();
+        } catch (SQLException e) {
+            // ignore so we get to see original exception if there is one
+        }
+    }
+
+    /**
+     * Test inserting a duplicate record while original is deleted in a
+     * transaction and later committed.
+     * <p/>
+     * This test was lifted from UniqueConstraintMultiThrededTest
+     * except that here we run it with a deferrable constraint. We
+     * include it her e since it exposed a bug during implementation
+     * of deferrable constraints: we check a deferrable constraint
+     * <em>after</em> the insert (cf. {@code IndexChanger}) by using a
+     * BTree scan.  Iff the constraint mode is deferred, we treat any
+     * lock or deadlock timeout as if it were a duplicate, allowing us
+     * to defer the check till commit time, as so possibly gain more
+     * concurrency. To get speed in this case, the scan returns
+     * immediately if it can't get a lock.  The error was that, if the
+     * constraint mode is <em>not</em> deferred (i.e. immediate), we
+     * should wait for the lock, and we didn't. This was exposed by
+     * this test since the 2 seconds wait makes it work in the normal
+     * case (the lock would be released), but in the no-wait scan, we
+     * saw a the lock time-out error.
+     */
+    public void testLockingWithCommit () throws Exception {
+        setupTab1();
+
+        try {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    executeThreads(
+                            (int)Math.pow(2,i),
+                            (int)Math.pow(2,j), true);
+                }
+            }
+        } finally {
+            dropTab1();
+        }
+    }
+
+    /**
+     * Test inserting a duplicate record while original is deleted in
+     * a transaction and later rolled back.
+     * <p/>
+     * See also comment for {@link #testLockingWithCommit() }.
+     */
+    public void testLockingWithRollback () throws Exception {
+        setupTab1();
+
+        try {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    executeThreads(
+                            (int)Math.pow(2,i),
+                            (int)Math.pow(2,j), false);
+                }
+            }
+        } finally {
+            dropTab1();
+        }
+    }
+
+    /**
+     * Deletes a record in a transaction and tries to insert the same
+     * from a different transaction. Once second transaction goes on wait
+     * first transaction is committed or rolled back based on third
+     * parameter (boolean commit).
+     *
+     * @param isolation1 isolation level for 1st thread
+     * @param isolation2 isolation level for 2nd thread
+     * @param commit whether or not to commit
+     *
+     * (Lifted from UniqueConstraintMultiThrededTest to test with deferrable
+     * constraint.)
+     */
+    private void executeThreads (int isolation1, int isolation2,
+            boolean commit) throws Exception {
+        Connection con1 = openDefaultConnection();
+        con1.setTransactionIsolation(isolation1);
+        Connection con2 = openDefaultConnection();
+        try {
+            con2.setTransactionIsolation(isolation2);
+            DBOperations dbo1 = new DBOperations (con1, 5);
+            DBOperations dbo2 = new DBOperations (con2, 5);
+            dbo1.delete();
+            Thread t = new Thread (dbo2);
+            t.start();
+            //wait for 2 sec should be enough for dbo2 so on wait
+            t.sleep(2000);
+            if (commit) {
+                dbo1.rollback();
+                t.join();
+                assertSQLState("isolation levels: " + isolation1
+                        + " " + isolation2, "23505", dbo2.getException());
+            }
+            else {
+                dbo1.commit();
+                t.join();
+                assertNull("isolation levels: " + isolation1
+                        + " " + isolation2, dbo2.getException());
+            }
+            assertNull("unexpected failure: " + isolation1
+                        + " " + isolation2, dbo2.getUnexpectedException());
+        }
+        finally {
+            con1.commit();
+            con2.commit();
+            con1.close();
+            con2.close();
+        }
+
+    }
+
 
     private Xid doXAWork(Statement s, XAResource xar)
             throws SQLException, XAException {
