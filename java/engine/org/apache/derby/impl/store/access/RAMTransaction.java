@@ -438,6 +438,7 @@ public class RAMTransaction
                       ContainerHandle.MODE_DROP_ON_COMMIT           |
                       ContainerHandle.MODE_OPEN_FOR_LOCK_ONLY       |
                       ContainerHandle.MODE_LOCK_NOWAIT              |
+                      ContainerHandle.MODE_LOCK_ROW_NOWAIT          |
                       ContainerHandle.MODE_TRUNCATE_ON_ROLLBACK     |
                       ContainerHandle.MODE_FLUSH_ON_COMMIT          |
                       ContainerHandle.MODE_NO_ACTIONS_ON_COMMIT     |
@@ -498,6 +499,7 @@ public class RAMTransaction
                    TransactionController.OPENMODE_USE_UPDATE_LOCKS |
                    TransactionController.OPENMODE_FOR_LOCK_ONLY |
                    TransactionController.OPENMODE_LOCK_NOWAIT |
+                   TransactionController.OPENMODE_LOCK_ROW_NOWAIT |
                    TransactionController.OPENMODE_SECONDARY_LOCKED)) != 0)
             {
                 SanityManager.THROWASSERT(

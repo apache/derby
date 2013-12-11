@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.access.btree.index;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException; 
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
@@ -45,6 +46,7 @@ import org.apache.derby.impl.store.access.btree.LeafControlRow;
 import org.apache.derby.impl.store.access.btree.OpenBTree;
 import org.apache.derby.impl.store.access.btree.BTreeRowPosition;
 import org.apache.derby.impl.store.access.btree.WaitError;
+import org.apache.derby.impl.store.access.heap.HeapController;
 
 /**
 
@@ -294,6 +296,11 @@ class B2IRowLocking3 implements BTreeLockingPolicy
             {
                 aux_leaf.release();
                 aux_leaf = null;
+            }
+
+            if ((((HeapController)base_cc).getOpenConglomerate().getOpenMode() &
+                    TransactionManager.OPENMODE_LOCK_ROW_NOWAIT) != 0) {
+                throw StandardException.newException(SQLState.LOCK_TIMEOUT);
             }
 
             base_cc.lockRow(

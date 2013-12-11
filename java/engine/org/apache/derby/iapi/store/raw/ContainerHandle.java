@@ -144,6 +144,7 @@ public interface ContainerHandle
 	public static final int MODE_USE_UPDATE_LOCKS	   = 0x00001000; // external access
     public static final int MODE_SECONDARY_LOCKED      = 0x00002000; // external access
     public static final int MODE_BASEROW_INSERT_LOCKED = 0x00004000; // external access
+    public static final int MODE_LOCK_ROW_NOWAIT       = 0x00008000;
 
 	public static final int TEMPORARY_SEGMENT = -1;
 

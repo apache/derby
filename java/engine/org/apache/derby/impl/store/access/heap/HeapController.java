@@ -737,4 +737,7 @@ public class HeapController
      * Public Methods of XXXX class:
      **************************************************************************
      */
+    public OpenConglomerate getOpenConglomerate() {
+        return open_conglom;
+    }
 }

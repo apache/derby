@@ -467,8 +467,7 @@ class IndexChanger
             ScanController idxScan = tc.openScan(
                     indexCID,
                     false,
-                    0, // FIXME: want NO_WAIT but not yet implemented
-                       // for row locks in BTRee scan
+                    TransactionController.OPENMODE_LOCK_ROW_NOWAIT,
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
                     (FormatableBitSet)null, // retrieve all fields

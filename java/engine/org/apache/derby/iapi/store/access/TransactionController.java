@@ -244,6 +244,15 @@ public interface TransactionController
     static final int OPENMODE_LOCK_NOWAIT           = 0x00000080;
 
     /**
+     * The row lock request will not wait.
+     * <p>
+     * The request to get the row lock (any row lock including intent or
+     * "real" row level lock), will not wait if it can't be granted. A
+     * lock timeout will be returned.
+     **/
+    static final int OPENMODE_LOCK_ROW_NOWAIT       = 0x00008000;
+
+    /**
      * Constants used for the countOpen() call.
      **/
     public static final int OPEN_CONGLOMERATE   = 0x01;

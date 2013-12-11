@@ -736,6 +736,15 @@ public class Heap
     DynamicCompiledOpenConglomInfo  dynamic_info)
 		throws StandardException
 	{
+        if (SanityManager.DEBUG) {
+            if ((open_mode &
+                    TransactionController.OPENMODE_LOCK_ROW_NOWAIT) != 0) {
+                SanityManager.THROWASSERT(
+                    "Bad open mode to Heap#openScan:" +
+                    Integer.toHexString(open_mode));
+            }
+        }
+
         // Heap scans do not suppport start and stop scan positions (these
         // only make sense for ordered storage structures).
 		if (!RowUtil.isRowEmpty(startKeyValue)
