@@ -156,19 +156,19 @@ import java.util.zip.CRC32;
 	are present and where the last checkpoint log record is located.
 	@derby.upgrade	
 	@derby.diskLayout
-	(pre-v15)
-		int format id
-		int log file version
-		long the log instant (LogCounter) of the last completed checkpoint
-	(v15 onward)
 		int format id
 		int obsolete log file version
 		long the log instant (LogCounter) of the last completed checkpoint
-		int JBMS version
-		int checkpoint interval
+		   (logfile counter, position)
+		int Derby major version
+		int Derby minor version
+		int subversion revision/build number
+		byte Flags (beta flag (0 or 1), test durability flag (0 or 1))
+		byte spare (0)
+		byte spare (0)
+		byte spare (0)
 		long spare (value set to 0)
-		long spare (value set to 0)
-		long spare (value set to 0)
+		long checksum for control data written
 
 	@derby.endFormat
 	</PRE>	
@@ -2397,7 +2397,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         chance system crashes while writing into the file,
         using the checksum we find that the control file
         is hosed then we  use the mirror file, which will have
-        the condrol data written at last check point.
+        the control data written at last check point.
 
 		see comment at beginning of file for log control file format.
 
