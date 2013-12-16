@@ -2403,6 +2403,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		<P> MT- synchronized by caller
 	*/
+	// When changing this code, also update the comment at the beginning of
+	// this class, the ControlFileReader of DERBY-5195, and the description
+	// on the web page in http://db.apache.org/derby/papers/logformats.html
 	boolean writeControlFile(StorageFile logControlFileName, long value)
 		 throws IOException, StandardException
 	{
