@@ -310,6 +310,12 @@ public class TestDurabilityProperty {
             report("timeWithTestModeCommitOff = " + timeWithTestModeCommitOff);
         }
 
+        // To run this, uncomment and build.
+        // This check is disabled for normal test runs because we cannot
+        // guarantee that some event on the machine might skew the inserts 
+        // with one or another of the three settings, causing a false failure.
+        // See DERBY-5865.
+        /*
         // an approximation on the upper bound for time taken to do
         // inserts in autocommit mode with derby.system.durability=test mode
         long upperBound = 3000;
@@ -342,7 +348,7 @@ public class TestDurabilityProperty {
                     report("timeWithTestModeCommitOff = " + timeWithTestModeCommitOff);
                 }
             }
-        }
+        }*/
 
     }
 }
