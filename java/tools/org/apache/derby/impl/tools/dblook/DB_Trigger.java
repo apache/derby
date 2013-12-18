@@ -59,7 +59,8 @@ public class DB_Trigger {
 
 		Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(
-                "SELECT * FROM SYS.SYSTRIGGERS WHERE STATE != 'D'");
+                "SELECT * FROM SYS.SYSTRIGGERS WHERE STATE != 'D' " +
+                "ORDER BY CREATIONTIMESTAMP");
 
 		boolean firstTime = true;
 		while (rs.next()) {

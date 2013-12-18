@@ -6510,4 +6510,41 @@ File dblook.log was NOT empty.  Contents are:
 -- **--> DEBUG: Failed to load jar file <jarFilePath>
 java.io.FileNotFoundException: <filePath>
 ############## End File Contents ################
+-= Start DERBY-6387 test. =-
+Database 'wombat' deleted.
+Creating database 'wombat' from ddl script 'dblook_makeDB_derby6387.sql'
+--
+*******************************************
+Dumping full schema for 'wombat'
+to file 'wombat.sql':
+*******************************************
+File dblook.log was empty.
+File wombat.sql was NOT empty.  Contents are:
+############## Begin File Contents ################
+-- ============================
+-- This file was created using Derby's dblook utility.
+-- Timestamp: xxxxxxFILTERED-TIMESTAMPxxxxx
+-- Source database is: <dbPath>
+-- Connection URL is: <dbURL>
+-- appendLogs: false
+-- ----------------------------------------------
+-- DDL Statements for tables
+-- ----------------------------------------------
+CREATE TABLE "APP"."T1" ("X" INTEGER)
+-- ----------------------------------------------
+-- DDL Statements for triggers
+-- ----------------------------------------------
+CREATE TRIGGER "APP"."TR13" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR14" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR15" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR16" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR17" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR18" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR19" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR20" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR21" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR22" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR23" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR24" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+############## End File Contents ################
 [ Done. ]
