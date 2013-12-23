@@ -226,6 +226,9 @@ class StaticMethodCallNode extends MethodCallNode
                      getContextManager()
                      );
 
+                // Propagate tags used to flag nodes which need privilege checks. See DERBY-6429.
+                resolvedAggregate.copyTagsFrom( this );
+
                 // The parser may have noticed that this aggregate is invoked in a
                 // GROUP BY clause. That is not allowed.
                 if ( appearsInGroupBy )

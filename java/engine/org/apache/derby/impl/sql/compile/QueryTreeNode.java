@@ -22,6 +22,8 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
@@ -84,6 +86,8 @@ public abstract class QueryTreeNode implements Visitable
 	private ContextManager cm;
 	private LanguageConnectionContext lcc;
 	private GenericConstantActionFactory	constantActionFactory;
+
+    private ArrayList<String>   visitableTags;
 
 	/**
 	 * In Derby SQL Standard Authorization, views, triggers and constraints 
@@ -572,8 +576,11 @@ public abstract class QueryTreeNode implements Visitable
 	 * @return true if need to collect privilege requirement for this node
 	 */
     boolean isPrivilegeCollectionRequired()
+        throws StandardException
 	{
-		return(isPrivilegeCollectionRequired);
+        return
+            isPrivilegeCollectionRequired &&
+            getCompilerContext().passesPrivilegeFilters( this );
 	}
 
 	/**
@@ -704,6 +711,28 @@ public abstract class QueryTreeNode implements Visitable
 		// no children
 	}
 
+    public  void    addTag( String tag )
+    {
+        if ( visitableTags == null ) { visitableTags = new ArrayList<String>(); }
+        visitableTags.add( tag );
+    }
+
+    public  boolean taggedWith( String tag )
+    {
+        if ( visitableTags == null ) { return false; }
+        else { return visitableTags.contains( tag ); }
+    }
+
+    /** Copy the tags from another QueryTreeNode */
+    protected   void    copyTagsFrom( QueryTreeNode that )
+    {
+        if ( that.visitableTags == null ) { return; }
+        else
+        {
+            for ( String tag : that.visitableTags ) { addTag( tag ); }
+        }
+    }
+    
 	/**
 	 * Get the int value of a Property
 	 *
@@ -1309,6 +1338,21 @@ public abstract class QueryTreeNode implements Visitable
             dtd = bindUserType( dtd );
             return dtd.getCatalogType();
         }
+    }
+
+    /** Get the AliasDescriptor of a UDT */
+    public  AliasDescriptor getUDTDesc( DataTypeDescriptor dtd )
+        throws StandardException
+    {
+        UserDefinedTypeIdImpl userTypeID = (UserDefinedTypeIdImpl) dtd.getTypeId().getBaseTypeId();
+
+        DataDictionary dd = getDataDictionary();
+        SchemaDescriptor typeSchema = getSchemaDescriptor( userTypeID.getSchemaName() );
+        char  udtNameSpace = AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR;
+        String unqualifiedTypeName = userTypeID.getUnqualifiedName();
+        AliasDescriptor ad = dd.getAliasDescriptor( typeSchema.getUUID().toString(), unqualifiedTypeName, udtNameSpace );
+
+        return ad;
     }
 
     /**

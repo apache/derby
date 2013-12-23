@@ -42,11 +42,29 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
+    private static  final   String      TEST_DBO = "TEST_DBO";
+    private static  final   String      RUTH = "RUTH";
+
 	private static String[] users = { "TEST_DBO", "george", "sam", 
 			"monica", "swiper", "sam", "satheesh", "bar",
 			"mamta4", "mamta3", "mamta2", "mamta1", "sammy",
-			"user5", "user4", "user3", "user2", "user1"
+            "user5", "user4", "user3", "user2", "user1", RUTH
 	};
+
+    public static  final   String  NO_GENERIC_PERMISSION = "42504";
+    public static  final   String  NO_SELECT_OR_UPDATE_PERMISSION = "42502";
+
+    public  static  class   Permission
+    {
+        public  final   String  text;
+        public  final   String  sqlStateWhenMissing;
+
+        public  Permission( String text, String sqlStateWhenMissing )
+        {
+            this.text = text;
+            this.sqlStateWhenMissing = sqlStateWhenMissing;
+        }
+    }
 	
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -129,7 +147,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         st_satConnection.executeUpdate(
             "create table satheesh.tsat(i int not null primary "
-            + "key, j int)");
+            + "key, j int, noselect int)");
         
         st_satConnection.executeUpdate(
             " create index tsat_ind on satheesh.tsat(j)");
@@ -481,7 +499,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "select * from satheesh.tsat");
         
         assertStatementError("42500", st_swiperConnection,
-            " insert into satheesh.tsat values (1, 2)");
+            " insert into satheesh.tsat(i, j) values (1, 2)");
         
         assertStatementError("42502", st_swiperConnection,
             " update satheesh.tsat set i=j");
@@ -496,7 +514,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         
         st_satConnection.executeUpdate(
-            " grant select(i), update(j) on tsat to swiper");
+            " grant select(i, j), update(j) on tsat to swiper");
         
         st_satConnection.executeUpdate(
             " grant all privileges on table1 to swiper");
@@ -520,7 +538,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         
         assertStatementError("42502", st_swiperConnection,
-            " select i from satheesh.tsat where j=2");
+            " select i from satheesh.tsat where noselect=2");
         
         rs = st_swiperConnection.executeQuery(
             " select i from satheesh.tsat where 2 > (select "
@@ -533,7 +551,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         assertStatementError("42502", st_swiperConnection,
             " select i from satheesh.tsat where 2 > (select "
-            + "count(j) from satheesh.tsat)");
+            + "count(noselect) from satheesh.tsat)");
         
         rs = st_swiperConnection.executeQuery(
             " select i from satheesh.tsat where 2 > (select "
@@ -551,7 +569,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " update satheesh.tsat set j=2 where i=2");
         
         assertStatementError("42502", st_swiperConnection,
-            " update satheesh.tsat set j=2 where j=1");
+            " update satheesh.tsat set j=2 where noselect=1");
         
         rs = st_swiperConnection.executeQuery(
             " select * from satheesh.table1");
@@ -572,7 +590,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         assertStatementError("42502", st_swiperConnection,
             " select b from satheesh.table1 t1, satheesh.tsat t2 "
-            + "where t1.a = t2.j");
+            + "where t1.a = t2.noselect");
         
         rs = st_swiperConnection.executeQuery(
             " select * from satheesh.table1, (select i from "
@@ -584,15 +602,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         
         assertStatementError("42502", st_swiperConnection,
-            " select * from satheesh.table1, (select j from "
+            " select * from satheesh.table1, (select noselect from "
             + "satheesh.tsat) table2");
         
-        // GrantRevoke TODO: This one should pass, but currently 
-        // fails. Bind update expression in two steps.
-        
-        assertStatementError("42502", st_swiperConnection,
+        st_swiperConnection.executeUpdate(
             "update satheesh.tsat set j=i");
-        
+                
         st_swiperConnection.executeUpdate(
             " create table my_tsat (i int not null, c char(10), "
             + "constraint fk foreign key(i) references satheesh.tsat)");
@@ -10636,5 +10651,848 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user2Connection.executeUpdate("drop schema user2 restrict");
     }
 
+    /**
+     * Test that UPDATE statements require the correct privileges as
+     * described on DERBY-6429. Tables are referenced in SET and WHERE clauses.
+     */
+    public void test_6429_tables()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_simple_6429(x int, y int, z int)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create view v1_simple_6429(a, b) as select x, y from t1_simple_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SelectHashMap_6429 external name 'java.util.HashMap' language java\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type CheckHashMap_6429 external name 'java.util.HashMap' language java\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type WhereHashMap_6429 external name 'java.util.HashMap' language java\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function generationFunction_6429( rawValue int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function setFunction_6429( hashMap SelectHashMap_6429, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function checkFunction_6429( hashMap CheckHashMap_6429, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function whereFunction_6429( hashMap WhereHashMap_6429, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate setAggregate_6429 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate whereAggregate_6429 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_6429\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_6429\n" +
+             "(\n" +
+             "    key1 int,\n" +
+             "    key2 int,\n" +
+             "    primary key( key1, key2 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table setTable_6429\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table whereTable_6429\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table updateTable_6429\n" +
+             "(\n" +
+             "    updateColumn int,\n" +
+             "    selectColumn SelectHashMap_6429,\n" +
+             "    untouchedGenerationSource int,\n" +
+             "    generatedColumn generated always as ( updateColumn + generationFunction_6429( untouchedGenerationSource ) ),\n" +
+             "    untouchedCheckSource CheckHashMap_6429,\n" +
+             "    untouchedForeignSource int,\n" +
+             "    untouchedBeforeTriggerSource int,\n" +
+             "    untouchedAfterTriggerSource int,\n" +
+             "    whereColumn WhereHashMap_6429,\n" +
+             "    check ( updateColumn > checkFunction_6429( untouchedCheckSource, 'foo' ) ),\n" +
+             "    foreign key ( updateColumn, untouchedForeignSource ) references primaryTable_6429( key1, key2 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeUpdateTrigger_6429\n" +
+             "no cascade before update of updateColumn on updateTable_6429\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_6429( 'before', old.updateColumn + old.untouchedBeforeTriggerSource )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterUpdateTrigger_6429\n" +
+             "after update of updateColumn on updateTable_6429\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_6429( 'before', old.updateColumn + old.untouchedAfterTriggerSource )\n"
+             );
+
+        //
+        // Permissions
+        //
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t1_simple_6429 to ruth"
+             );
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "execute on function setFunction_6429", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function whereFunction_6429", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate setAggregate_6429", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate whereAggregate_6429", NO_GENERIC_PERMISSION ),
+            new Permission( "update ( updateColumn ) on updateTable_6429", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( selectColumn ) on updateTable_6429", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( whereColumn ) on updateTable_6429", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( a ) on setTable_6429", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select( a ) on whereTable_6429", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grant_6429( dboConnection, permission.text );
+        }
+
+        // Should fail because ruth doesn't have SELECT privilege on column y.
+        expectExecutionError
+            ( ruthConnection, NO_SELECT_OR_UPDATE_PERMISSION,
+              "update test_dbo.t1_simple_6429 set x = y" );
+
+        // Should fail because ruth doesn't have SELECT permission on v1_simple_6429.a
+        String  simpleViewUpdate =
+            "update test_dbo.t1_simple_6429\n" +
+            "  set x =\n" +
+            "  ( select b from test_dbo.v1_simple_6429 where a = 1 )\n";
+        expectExecutionError
+            ( ruthConnection, NO_SELECT_OR_UPDATE_PERMISSION, simpleViewUpdate );
+
+        // Succeeds after we grant ruth that permission.
+        goodStatement
+            (
+             dboConnection,
+             "grant select on v1_simple_6429 to ruth"
+             );
+        goodStatement( ruthConnection, simpleViewUpdate );
+
+        // Should fail because ruth doesn't have SELECT permission on t1_simple_6429.z
+        String  simpleViewUpdate2 =
+            "update test_dbo.t1_simple_6429 g\n" +
+            "  set x =\n" +
+            "  ( select b from test_dbo.v1_simple_6429 where a = g.z )\n";
+        expectExecutionError
+            ( ruthConnection, NO_SELECT_OR_UPDATE_PERMISSION, simpleViewUpdate2 );
+
+        // Succeeds after we grant ruth that permission.
+        goodStatement
+            (
+             dboConnection,
+             "grant select( z ) on t1_simple_6429 to ruth"
+             );
+        goodStatement( ruthConnection, simpleViewUpdate2 );
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  update =
+            "update test_dbo.updateTable_6429\n" +
+            "    set updateColumn =\n" +
+            "        test_dbo.setFunction_6429( selectColumn, 'foo' ) +\n" +
+            "        ( select test_dbo.setAggregate_6429( a ) from test_dbo.setTable_6429 )\n" +
+            "where\n" +
+            "    test_dbo.whereFunction_6429( whereColumn, 'foo' ) >\n" +
+            "    ( select test_dbo.whereAggregate_6429( a ) from test_dbo.whereTable_6429 )\n";
+
+        // fails because ruth does not have USAGE permission on SelectHashMap_6429 and WhereHashMap_6429
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
+
+        // armed with those permissions, ruth can execute the update
+        grant_6429( dboConnection, "usage on type SelectHashMap_6429" );
+        grant_6429( dboConnection, "usage on type WhereHashMap_6429" );
+        goodStatement( ruthConnection, update );
+
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission_6429( permission, dboConnection, ruthConnection, update );
+        }
+        
+        //
+        // Drop schema.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop view v1_simple_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table t1_simple_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table updateTable_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table whereTable_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table setTable_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table primaryTable_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop procedure addHistoryRow_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate whereAggregate_6429 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate setAggregate_6429 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function whereFunction_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function checkFunction_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function setFunction_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function generationFunction_6429"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type WhereHashMap_6429 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type CheckHashMap_6429 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SelectHashMap_6429 restrict"
+             );
+        
+    }
+    /**
+     * Verify that the update fails with the correct error after you revoke
+     * a permission and that the update succeeds after you add the permission back.
+     */
+    private void    vetPermission_6429
+        (
+         Permission permission,
+         Connection dboConnection,
+         Connection ruthConnection,
+         String update
+         )
+        throws Exception
+    {
+        revoke_6429( dboConnection, permission.text );
+        expectExecutionError( ruthConnection, permission.sqlStateWhenMissing, update );
+        grant_6429( dboConnection, permission.text );
+        goodStatement( ruthConnection, update );
+    }
+    private void    grant_6429( Connection conn, String permission )
+        throws Exception
+    {
+        String  command = "grant " + permission + " to ruth";
+
+        goodStatement( conn, command );
+    }
+    private void    revoke_6429( Connection conn, String permission )
+        throws Exception
+    {
+        String  command = "revoke " + permission + " from ruth";
+        if ( permission.startsWith( "execute" ) || permission.startsWith( "usage" ) )   { command += " restrict"; }
+
+        goodStatement( conn, command );
+    }
+    
+    /**
+     * Test that UPDATE statements require the correct privileges as
+     * described on DERBY-6429. Views are referenced in SET and WHERE clauses.
+     */
+    public void test_6429_views()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SelectHashMap_6429_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type CheckHashMap_6429_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type WhereHashMap_6429_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function generationFunction_6429_2( rawValue int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function setFunction_6429_2( hashMap SelectHashMap_6429_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function checkFunction_6429_2( hashMap CheckHashMap_6429_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function whereFunction_6429_2( hashMap WhereHashMap_6429_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate setAggregate_6429_2 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate whereAggregate_6429_2 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_6429_2\n" +
+             "(\n" +
+             "    key1 int,\n" +
+             "    key2 int,\n" +
+             "    primary key( key1, key2 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table setTable_6429_2\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create view setView_6429_2( setViewCol ) as select a from setTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table whereTable_6429_2\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create view whereView_6429_2( whereViewCol ) as select a from whereTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table updateTable_6429_2\n" +
+             "(\n" +
+             "    updateColumn int,\n" +
+             "    selectColumn SelectHashMap_6429_2,\n" +
+             "    untouchedGenerationSource int,\n" +
+             "    generatedColumn generated always as ( updateColumn + generationFunction_6429_2( untouchedGenerationSource ) ),\n" +
+             "    untouchedCheckSource CheckHashMap_6429_2,\n" +
+             "    untouchedForeignSource int,\n" +
+             "    untouchedBeforeTriggerSource int,\n" +
+             "    untouchedAfterTriggerSource int,\n" +
+             "    whereColumn WhereHashMap_6429_2,\n" +
+             "    check ( updateColumn > checkFunction_6429_2( untouchedCheckSource, 'foo' ) ),\n" +
+             "    foreign key ( updateColumn, untouchedForeignSource ) references primaryTable_6429_2( key1, key2 )\n" +
+             ")\n"
+             );
+
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "execute on function setFunction_6429_2", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function whereFunction_6429_2", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate setAggregate_6429_2", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate whereAggregate_6429_2", NO_GENERIC_PERMISSION ),
+            new Permission( "update ( updateColumn ) on updateTable_6429_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( selectColumn ) on updateTable_6429_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( whereColumn ) on updateTable_6429_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( setViewCol ) on setView_6429_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select( whereViewCol ) on whereView_6429_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grant_6429( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  update =
+            "update test_dbo.updateTable_6429_2\n" +
+            "    set updateColumn =\n" +
+            "        test_dbo.setFunction_6429_2( selectColumn, 'foo' ) +\n" +
+            "        ( select test_dbo.setAggregate_6429_2( setViewCol ) from test_dbo.setView_6429_2 )\n" +
+            "where\n" +
+            "    test_dbo.whereFunction_6429_2( whereColumn, 'foo' ) >\n" +
+            "    ( select test_dbo.whereAggregate_6429_2( whereViewCol ) from test_dbo.whereView_6429_2 )\n";
+
+        // fails because ruth does not have USAGE permission on SelectHashMap_6429_2 and WhereHashMap_6429_2
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
+
+        // armed with those permissions, ruth can execute the update
+        grant_6429( dboConnection, "usage on type SelectHashMap_6429_2" );
+        grant_6429( dboConnection, "usage on type WhereHashMap_6429_2" );
+        goodStatement( ruthConnection, update );
+
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission_6429( permission, dboConnection, ruthConnection, update );
+        }
+        
+        //
+        // Drop schema.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table updateTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop view whereView_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table whereTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop view setView_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table setTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table primaryTable_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate whereAggregate_6429_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate setAggregate_6429_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function whereFunction_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function checkFunction_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function setFunction_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function generationFunction_6429_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type WhereHashMap_6429_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type CheckHashMap_6429_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SelectHashMap_6429_2 restrict"
+             );
+
+    }
+    
+    /**
+     * Test that UPDATE statements require the correct privileges as
+     * described on DERBY-6429. Table functions are referenced in SET and WHERE clauses.
+     */
+    public void test_6429_tableFunctions()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SelectHashMap_6429_3 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type CheckHashMap_6429_3 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type WhereHashMap_6429_3 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function generationFunction_6429_3( rawValue int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function setFunction_6429_3( hashMap SelectHashMap_6429_3, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function checkFunction_6429_3( hashMap CheckHashMap_6429_3, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function whereFunction_6429_3( hashMap WhereHashMap_6429_3, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate setAggregate_6429_3 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate whereAggregate_6429_3 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_6429_3\n" +
+             "(\n" +
+             "    key1 int,\n" +
+             "    key2 int,\n" +
+             "    primary key( key1, key2 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function setTableFunction_6429_3()\n" +
+             "returns table( x int, y int, z int, w int )\n" +
+             "language java\n" +
+             "parameter style derby_jdbc_result_set\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedVTITest.integerList'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function whereTableFunction_6429_3()\n" +
+             "returns table( x int, y int, z int, w int )\n" +
+             "language java\n" +
+             "parameter style derby_jdbc_result_set\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedVTITest.integerList'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table updateTable_6429_3\n" +
+             "(\n" +
+             "    updateColumn int,\n" +
+             "    selectColumn SelectHashMap_6429_3,\n" +
+             "    untouchedGenerationSource int,\n" +
+             "    generatedColumn generated always as ( updateColumn + generationFunction_6429_3( untouchedGenerationSource ) ),\n" +
+             "    untouchedCheckSource CheckHashMap_6429_3,\n" +
+             "    untouchedForeignSource int,\n" +
+             "    untouchedBeforeTriggerSource int,\n" +
+             "    untouchedAfterTriggerSource int,\n" +
+             "    whereColumn WhereHashMap_6429_3,\n" +
+             "    check ( updateColumn > checkFunction_6429_3( untouchedCheckSource, 'foo' ) ),\n" +
+             "    foreign key ( updateColumn, untouchedForeignSource ) references primaryTable_6429_3( key1, key2 )\n" +
+             ")\n"
+             );
+
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "execute on function setFunction_6429_3", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function whereFunction_6429_3", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate setAggregate_6429_3", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate whereAggregate_6429_3", NO_GENERIC_PERMISSION ),
+            new Permission( "update ( updateColumn ) on updateTable_6429_3", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( selectColumn ) on updateTable_6429_3", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( whereColumn ) on updateTable_6429_3", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "execute on function setTableFunction_6429_3", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function whereTableFunction_6429_3", NO_GENERIC_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grant_6429( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  update =
+            "update test_dbo.updateTable_6429_3\n" +
+            "  set updateColumn =\n" +
+            "    test_dbo.setFunction_6429_3( selectColumn, 'foo' ) + \n" +
+            "    ( select test_dbo.setAggregate_6429_3( x ) from table( test_dbo.setTableFunction_6429_3() ) stf )\n" +
+            "where test_dbo.whereFunction_6429_3( whereColumn, 'foo' ) >\n" +
+            "    ( select test_dbo.whereAggregate_6429_3( x ) from table ( test_dbo.whereTableFunction_6429_3() ) wtf )\n";
+
+        // fails because ruth does not have USAGE permission on SelectHashMap_6429_2 and WhereHashMap_6429_2
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
+
+        // armed with those permissions, ruth can execute the update
+        grant_6429( dboConnection, "usage on type SelectHashMap_6429_3" );
+        grant_6429( dboConnection, "usage on type WhereHashMap_6429_3" );
+        goodStatement( ruthConnection, update );
+
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission_6429( permission, dboConnection, ruthConnection, update );
+        }
+        
+        //
+        // Drop schema.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table updateTable_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function whereTableFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function setTableFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table primaryTable_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate whereAggregate_6429_3 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate setAggregate_6429_3 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function whereFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function checkFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function setFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function generationFunction_6429_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type WhereHashMap_6429_3 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type CheckHashMap_6429_3 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SelectHashMap_6429_3 restrict"
+             );
+    }
     
 }

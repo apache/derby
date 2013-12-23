@@ -39,6 +39,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.VisitableFilter;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -140,6 +142,7 @@ public class CompilerContextImpl extends ContextImpl
 		initRequiredPriv();
 		defaultSchemaStack = null;
         referencedSequences = null;
+        privilegeCheckFilters =  null;
 	}
 
 	//
@@ -969,6 +972,35 @@ public class CompilerContextImpl extends ContextImpl
         return referencedSequences.containsKey( sd.getUUID() );
     }
 
+    public  void    addPrivilegeFilter( VisitableFilter vf )
+    {
+        if ( privilegeCheckFilters == null ) { privilegeCheckFilters = new ArrayList<VisitableFilter>(); }
+        
+        privilegeCheckFilters.add( vf );
+    }
+
+    public  void    removePrivilegeFilter( VisitableFilter vf )
+    {
+        if ( (vf != null) && (privilegeCheckFilters != null) )
+        {
+            privilegeCheckFilters.remove( vf );
+        }
+    }
+
+    public  boolean passesPrivilegeFilters( Visitable visitable )
+        throws StandardException
+    {
+        // if there are no filters, then all QueryTreeNodes pass.
+        if ( privilegeCheckFilters == null ) { return true; }
+
+        for ( VisitableFilter filter : privilegeCheckFilters )
+        {
+            if ( !filter.accept( visitable ) ) { return false; }
+        }
+
+        return true;
+    }
+    
 	/*
 	** Context state must be reset in restContext()
 	*/
@@ -1028,4 +1060,7 @@ public class CompilerContextImpl extends ContextImpl
 	private HashMap<UUID,String> requiredUsagePrivileges;
 	private HashMap<StatementRolePermission,StatementRolePermission> requiredRolePrivileges;
     private HashMap<UUID,SequenceDescriptor> referencedSequences;
+
+    private ArrayList<VisitableFilter> privilegeCheckFilters;
+    
 } // end of class CompilerContextImpl

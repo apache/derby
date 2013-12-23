@@ -1276,6 +1276,11 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     public static Number makeNumber( int arg ) { return new Integer( arg ); }
 
+    public  static  Integer getIntValue( HashMap<String,Integer> map, String key )
+    {
+        return map.get( key );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

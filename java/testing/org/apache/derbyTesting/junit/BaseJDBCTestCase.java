@@ -1663,6 +1663,111 @@ public abstract class BaseJDBCTestCase
     protected static void dumpRs(ResultSet s) throws SQLException {
         dumpRs(s, System.out);
     }
+
+    // helper methods moved from GeneratedColumnsHelper
+
+    /**
+     * Run good DDL.
+     * @throws SQLException 
+     */
+    protected void    goodStatement( Connection conn, String command ) throws SQLException
+    {
+        PreparedStatement    ps = chattyPrepare( conn, command );
+
+        ps.execute();
+        ps.close();
+    }
+    
+    /**
+     * Run a good update statement with an expected row count.
+     * @throws SQLException 
+     */
+    protected void    goodUpdate( Connection conn, String update, int expectedRowCount ) throws SQLException
+    {
+        PreparedStatement    ps = chattyPrepare( conn, update );
+
+        int actualRowCount = ps.executeUpdate();
+        ps.close();
+
+        println( "Expecting to touch " + expectedRowCount + " rows." );
+        assertEquals( expectedRowCount, actualRowCount );
+    }
+    
+	protected	static	ResultSet	executeQuery( Statement stmt, String text )
+		throws SQLException
+	{
+		println( "Executing '" + text + "'" );
+
+        return stmt.executeQuery( text );
+	}
+
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    protected PreparedStatement   chattyPrepare( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return conn.prepareStatement( text );
+    }
+
+    /**
+     * Prepare a callable statement and report its sql text.
+     */
+    protected CallableStatement   chattyPrepareCall( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing callable statement:\n\t" + text );
+        
+        return conn.prepareCall( text );
+    }
+
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    protected void    expectCompilationError( String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        assertCompileError( sqlState, query );
+    }
+
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    protected void    expectCompilationError( Connection conn, String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement( query );
+        } catch (SQLException se )
+        {
+            assertSQLState( sqlState, se );
+
+            return;
+        }
+
+        fail( "Expected SQL state: " + sqlState );
+    }
+
+    /**
+     * Assert that the statement text, when executed, raises an error.
+     */
+    protected void    expectExecutionError( Connection conn, String sqlState, String query )
+        throws Exception
+    {
+        println( "\nExpecting " + sqlState + " when executing:\n\t"  );
+        PreparedStatement   ps = chattyPrepare( conn, query );
+
+        assertStatementError( sqlState, ps );
+        ps.close();
+    }
+    
+
 } // End class BaseJDBCTestCase
 
 

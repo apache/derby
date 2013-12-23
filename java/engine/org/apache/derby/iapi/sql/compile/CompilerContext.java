@@ -585,4 +585,24 @@ public interface CompilerContext extends Context
 	 */
     boolean isReferenced( SequenceDescriptor sd );
 
+    /**
+     * Add a filter for determining which QueryTreeNodes give rise to privilege checks
+     * at run time. The null filter (the default) says that all QueryTreeNodes potentially give
+     * rise to privilege checks.
+     */
+    public  void    addPrivilegeFilter( VisitableFilter vf );
+
+    /**
+     * Remove a filter for determining which QueryTreeNodes give rise to privilege
+     * checks at run time.
+     */
+    public  void    removePrivilegeFilter( VisitableFilter vf );
+    
+    /**
+     * Return true if a QueryTreeNode passes all of the filters which determine whether
+     * the QueryTreeNode gives rise to run time privilege checks.
+     */
+    public  boolean passesPrivilegeFilters( Visitable visitable )
+        throws StandardException;
+    
 }

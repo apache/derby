@@ -1565,6 +1565,8 @@ class ResultColumn extends ValueNode
   			newResultColumn.markGenerated();
   		}
 
+        newResultColumn.copyTagsFrom( this );
+
   		return newResultColumn;
 	}
 

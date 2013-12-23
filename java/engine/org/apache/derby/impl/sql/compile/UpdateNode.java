@@ -37,8 +37,11 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.TagFilter;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -53,6 +56,7 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.vti.DeferModification;
@@ -191,6 +195,15 @@ public final class UpdateNode extends DMLModStatementNode
 			}
 		}
 
+        // collect lists of objects which will require privilege checks
+        ArrayList<String>   explicitlySetColumns = getExplicitlySetColumns();
+        List<ValueNode> allValueNodes = collectAllValueNodes();
+        tagPrivilegedNodes();
+
+        // tell the compiler to only add privilege checks for nodes which have been tagged
+        TagFilter   tagFilter = new TagFilter( TagFilter.NEED_PRIVS_FOR_UPDATE_STMT );
+        getCompilerContext().addPrivilegeFilter( tagFilter );
+		
 		bindTables(dataDictionary);
 
 		// wait to bind named target table until the cursor
@@ -257,7 +270,10 @@ public final class UpdateNode extends DMLModStatementNode
 		// and we already bound the cursor or the select,
 		// the table descriptor should always be found.
 		verifyTargetTable();
-		
+
+        // add UPDATE_PRIV on all columns on the left side of SET operators
+        addUpdatePriv( explicitlySetColumns );
+
 		/* OVERVIEW - We generate a new ResultColumn, CurrentRowLocation(), and
 		 * prepend it to the beginning of the source ResultColumnList.  This
 		 * will tell us which row(s) to update at execution time.  However,
@@ -339,12 +355,10 @@ public final class UpdateNode extends DMLModStatementNode
 		/* Bind the original result columns by column name */
 		normalizeCorrelatedColumns( resultSet.resultColumns, targetTable );
 
-		getCompilerContext().pushCurrentPrivType(getPrivType()); // Update privilege
 		resultSet.bindResultColumns(targetTableDescriptor,
 					targetVTI,
 					resultSet.resultColumns, this,
 					fromList);
-		getCompilerContext().popCurrentPrivType();
 
         // don't allow overriding of generation clauses
         forbidGenerationOverrides( resultSet.getResultColumns(),
@@ -516,9 +530,7 @@ public final class UpdateNode extends DMLModStatementNode
 		resultSet.setResultColumns(resultColumnList);
 
 		/* Bind the expressions */
-		getCompilerContext().pushCurrentPrivType(getPrivType()); // Update privilege
 		super.bindExpressions();
-		getCompilerContext().popCurrentPrivType();
 
 		/* Bind untyped nulls directly under the result columns */
 		resultSet.
@@ -603,7 +615,12 @@ public final class UpdateNode extends DMLModStatementNode
             }
         }
 
-		getCompilerContext().popCurrentPrivType();		
+		getCompilerContext().popCurrentPrivType();
+
+        // don't remove the privilege filter. additional binding may be
+        // done during the pre-processing phase
+
+        addUDTUsagePriv( allValueNodes );
 
     } // end of bind()
 
@@ -613,6 +630,157 @@ public final class UpdateNode extends DMLModStatementNode
 		return Authorizer.UPDATE_PRIV;
 	}
 
+    /**
+     * Get the names of the explicitly set columns, that is, the columns on the left side
+     * of SET operators.
+     */
+    private ArrayList<String>   getExplicitlySetColumns()
+        throws StandardException
+    {
+        ArrayList<String>   result = new ArrayList<String>();
+        ResultColumnList    rcl = resultSet.getResultColumns();
+
+        for ( int i = 0; i < rcl.size(); i++ )
+        {
+            result.add( rcl.elementAt( i ).getName() );
+        }
+
+        return result;
+    }
+
+    /**
+     * Collect all of the ValueNodes in the WHERE clause and on the right side
+     * of SET operators. Later on, we will need to add permissions for all UDTs
+     * mentioned by these nodes.
+     */
+    private List<ValueNode>    collectAllValueNodes()
+        throws StandardException
+    {
+        CollectNodesVisitor<ValueNode> getValues =
+            new CollectNodesVisitor<ValueNode>(ValueNode.class);
+
+        // process the WHERE clause
+        ValueNode   whereClause = ((SelectNode) resultSet).whereClause;
+        if ( whereClause != null ) { whereClause.accept( getValues ); }
+
+        // process the right sides of the SET operators
+        ResultColumnList    rcl = resultSet.getResultColumns();
+        for ( int i = 0; i < rcl.size(); i++ )
+        {
+            rcl.elementAt( i ).getExpression().accept( getValues );
+        }
+
+        return getValues.getList();
+    }
+
+    /**
+     * Add USAGE privilege for all UDTs mentioned in the WHERE clause and
+     * on the right side of SET operators.
+     */
+    private void    addUDTUsagePriv( List<ValueNode> valueNodes )
+        throws StandardException
+    {
+        if ( !isPrivilegeCollectionRequired() ) { return; }
+        
+        for ( ValueNode val : valueNodes )
+        {
+            DataTypeDescriptor  dtd = val.getTypeServices();
+            if ( (dtd != null) && dtd.getTypeId().userType() )
+            {
+                AliasDescriptor ad = getUDTDesc( dtd );
+                getCompilerContext().addRequiredUsagePriv( ad );
+            }
+        }
+    }
+
+    /**
+     * Tag all of the nodes which may require privilege checks.
+     * These are various QueryTreeNodes in the WHERE clause and on the right
+     * side of SET operators.
+     */
+    private void    tagPrivilegedNodes()
+        throws StandardException
+    {
+        ArrayList<QueryTreeNode>    result = new ArrayList<QueryTreeNode>();
+
+        SelectNode  selectNode = (SelectNode) resultSet;
+
+        // add this node so that addUpdatePriv() and addUDTUsagePriv() will work
+        result.add( this );
+
+        // process the WHERE clause
+        ValueNode   whereClause = selectNode.whereClause;
+        if ( whereClause !=  null ) { collectPrivilegedNodes( result, whereClause ); }
+
+        // process the right sides of the SET operators
+        ResultColumnList    rcl = resultSet.getResultColumns();
+        for ( int i = 0; i < rcl.size(); i++ )
+        {
+            collectPrivilegedNodes( result, rcl.elementAt( i ).getExpression() );
+        }
+
+        // now tag all the nodes we collected
+        for ( QueryTreeNode expr : result )
+        {
+            expr.addTag( TagFilter.NEED_PRIVS_FOR_UPDATE_STMT );
+        }
+    }
+
+    /**
+     * Add to an evolving list all of the nodes under an expression which may require privilege checks.
+     */
+    private void    collectPrivilegedNodes
+        ( ArrayList<QueryTreeNode> result, QueryTreeNode expr )
+        throws StandardException
+    {
+        // get all column references
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+        expr.accept( getCRs );
+        result.addAll( getCRs.getList() );
+
+        // get all function references
+        CollectNodesVisitor<StaticMethodCallNode> getSMCNs =
+            new CollectNodesVisitor<StaticMethodCallNode>(StaticMethodCallNode.class);
+        expr.accept( getSMCNs );
+        result.addAll( getSMCNs.getList() );
+
+        // get all FromBaseTables in order to bulk-get their selected columns
+        CollectNodesVisitor<FromBaseTable> getFBTs =
+            new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
+        expr.accept( getFBTs );
+        result.addAll( getFBTs.getList() );
+    }
+
+    /**
+     * Add UPDATE_PRIV on all columns on the left side of SET operators.
+     */
+    private void    addUpdatePriv( ArrayList<String> explicitlySetColumns )
+        throws StandardException
+    {
+        if ( !isPrivilegeCollectionRequired() ) { return; }
+        
+        CompilerContext cc = getCompilerContext();
+
+        cc.pushCurrentPrivType( Authorizer.UPDATE_PRIV );
+        try {
+            for ( String columnName : explicitlySetColumns )
+            {
+                ColumnDescriptor    cd = targetTableDescriptor.getColumnDescriptor( columnName );
+                cc.addRequiredColumnPriv( cd );
+            }
+        }
+        finally
+        {
+            cc.popCurrentPrivType();
+        }
+    }
+
+    /**
+     * Add privilege checks for UDTs referenced by this statement.
+     */
+
+    
 	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)
 	 *

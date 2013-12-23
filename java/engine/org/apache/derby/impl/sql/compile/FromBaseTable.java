@@ -49,6 +49,7 @@ import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
+import org.apache.derby.iapi.sql.compile.TagFilter;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -2386,7 +2387,7 @@ class FromBaseTable extends FromTable
 				//on the actual view and that is what the following code is
 				//checking.
                 for (ResultColumn rc : resultColumns) {
-                    if (rc.isPrivilegeCollectionRequired()) {
+                    if (isPrivilegeCollectionRequired()) {
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
                     }
 				}
@@ -2809,6 +2810,19 @@ class FromBaseTable extends FromTable
                     ( (rowLocationColumnName == null) || !(rowLocationColumnName.equals( columnReference.getColumnName() )) )
                     )
 				{
+                    //
+                    // Add a privilege for this column if the bind() phase of an UPDATE
+                    // statement marked it as a selected column. see DERBY-6429.
+                    //
+                    if ( columnReference.isPrivilegeCollectionRequired() )
+                    {
+                        if ( columnReference.taggedWith( TagFilter.NEED_PRIVS_FOR_UPDATE_STMT ) )
+                        {
+                            getCompilerContext().addRequiredColumnPriv
+                                ( tableDescriptor.getColumnDescriptor( columnReference.getColumnName() ) );
+                        }
+                    }
+                         
 					FormatableBitSet referencedColumnMap = tableDescriptor.getReferencedColumnMap();
 					if (referencedColumnMap == null)
 						referencedColumnMap = new FormatableBitSet(

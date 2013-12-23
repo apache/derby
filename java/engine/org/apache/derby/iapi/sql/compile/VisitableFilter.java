@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.sql.compile.Visitable
+   Derby - Class org.apache.derby.iapi.sql.compile.VisitableFilter
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,35 +21,17 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
 
 /**
- * A Visitable is something that can be visited by
- * a Visitor
+ * Filter for qualifying Visitables.
  *
  */
-public interface Visitable
+public interface VisitableFilter
 {
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
-	 * 
-	 * @param v the visitor
-	 *
-	 * @exception StandardException on error
+	 * Return true if the Visitable passes the filter.
 	 */
-	public  Visitable accept(Visitor v) 
+	public  boolean accept( Visitable visitable ) 
 		throws StandardException;
-
-    /**
-     * Add a tag to this Visitable.
-     */
-    public  void    addTag( String tag );
-
-    /**
-     * Return true if this Visitable is tagged with the indicated tag.
-     */
-    public  boolean taggedWith( String tag );
 }

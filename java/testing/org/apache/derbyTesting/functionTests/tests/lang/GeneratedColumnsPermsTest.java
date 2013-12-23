@@ -145,17 +145,16 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              dboConnection,
              "grant update ( a ) on t_bp_1 to public"
              );
-        
+
         expectExecutionError
             (
              janetConnection,
              LACK_TABLE_PRIV,
              "insert into test_dbo.t_bp_1( a ) values ( 100 )"
              );
-        expectExecutionError
+        goodStatement
             (
              janetConnection,
-             LACK_COLUMN_PRIV,
              "update test_dbo.t_bp_1 set a = a+ 1"
              );
         expectExecutionError
@@ -176,7 +175,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select a from test_dbo.t_bp_1 order by a",
              new String[][]
              {
-                 { "1", },
+                 { "2", },
              },
              false
              );
@@ -195,10 +194,9 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              LACK_TABLE_PRIV,
              "insert into test_dbo.t_bp_1( a ) values ( 100 )"
              );
-        expectExecutionError
+        goodStatement
             (
              janetConnection,
-             LACK_COLUMN_PRIV,
              "update test_dbo.t_bp_1 set a = a+ 1"
              );
         expectExecutionError
@@ -213,7 +211,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_bp_1 order by a",
              new String[][]
              {
-                 { "1", "-1", },
+                 { "3", "-3", },
              },
              false
              );
@@ -249,7 +247,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_bp_1 order by a",
              new String[][]
              {
-                 { "2", "-2", },
+                 { "4", "-4", },
              },
              false
              );
@@ -279,7 +277,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_bp_1 order by a",
              new String[][]
              {
-                 { "2", "-2", },
+                 { "4", "-4", },
                  { "100", "-100", },
              },
              false
@@ -296,7 +294,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
         goodStatement
             (
              janetConnection,
-             "delete from test_dbo.t_bp_1 where a = 2"
+             "delete from test_dbo.t_bp_1 where a = 4"
              );
         assertResults
             (
@@ -379,12 +377,13 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "no sql\n" +
              "external name 'java.lang.Math.abs'\n"
              );
-        expectExecutionError
+        goodStatement
             (
              janetConnection,
-             LACK_EXECUTE_PRIV,
              "update test_dbo.t_fp_1 set a = a + 1"
              );
+
+        // this is a wrong result. see DERBY-6434
         expectExecutionError
             (
              janetConnection,
@@ -397,7 +396,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_fp_1 order by a",
              new String[][]
              {
-                 { "100", "-100", },
+                 { "101", "-101", },
              },
              false
              );
@@ -426,7 +425,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "select * from test_dbo.t_fp_1 order by a",
              new String[][]
              {
-                 { "101", "-101", },
+                 { "102", "-102", },
                  { "200", "-200", },
              },
              false

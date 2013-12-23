@@ -219,27 +219,4 @@ public class Derby5234Test extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Run a successful statement.
-     * @throws SQLException 
-     */
-    private void    goodStatement( Connection conn, String command ) throws SQLException
-    {
-        PreparedStatement    ps = chattyPrepare( conn, command );
-
-        ps.execute();
-        ps.close();
-    }
-    
-    /**
-     * Prepare a statement and report its sql text.
-     */
-    private PreparedStatement   chattyPrepare( Connection conn, String text )
-        throws SQLException
-    {
-        println( "Preparing statement:\n\t" + text );
-        
-        return conn.prepareStatement( text );
-    }
-
 }

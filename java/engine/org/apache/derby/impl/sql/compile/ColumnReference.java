@@ -353,6 +353,7 @@ public class ColumnReference extends ValueNode
 		replacesWindowFunctionCall =
 			oldCR.getGeneratedToReplaceWindowFunctionCall();
 		scoped = oldCR.isScoped();
+        copyTagsFrom( oldCR );
 	}
 
 	/**
