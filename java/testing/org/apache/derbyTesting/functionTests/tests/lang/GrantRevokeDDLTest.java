@@ -171,15 +171,15 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " grant update(i) on satheesh.tsat to bar");
         
         rs = st_satConnection.executeQuery(
-            " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms");
+            " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms ORDER BY GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
+            {"FOO", "SATHEESH", "N", "y", "y", "y", "N", "N"},
             {"PUBLIC", "SATHEESH", "y", "N", "N", "N", "N", "N"},
-            {"FOO", "SATHEESH", "N", "y", "y", "y", "N", "N"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -295,15 +295,15 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Check success by looking at systableperms directly for now
         
         rs = st_satConnection.executeQuery(
-            "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms");
+            "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
+            { "FOO", "SATHEESH", "N", "N", "y", "N", "N", "N"},
             { "PUBLIC", "SATHEESH", "y", "N", "N", "N", "N", "N"},
-            { "FOO", "SATHEESH", "N", "N", "y", "N", "N", "N"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -317,7 +317,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Check success by looking at systableperms directly for now
         
         rs = st_satConnection.executeQuery(
-            "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms");
+            "select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms ORDER BY GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -433,19 +433,19 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_satConnection.executeQuery(
             " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas where schemaname not "
-            + "like 'SYS%'");
+            + "like 'SYS%' ORDER BY SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"NULLID", "TEST_DBO"},
-            {"SQLJ", "TEST_DBO"},
             {"APP", "APP"},
-            {"SATHEESH", "SATHEESH"},
+            {"DERBY", "DERBY"},
             {"MYDODO", "DODO"},
-            {"DERBY", "DERBY"}
+            {"NULLID", "TEST_DBO"},
+            {"SATHEESH", "SATHEESH"},
+            {"SQLJ", "TEST_DBO"},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -898,33 +898,33 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create schema authorization testSchema");
         
         rs = st.executeQuery(
-            " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas");
+            " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas order by SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"SYSIBM", "TEST_DBO"},
-            {"SYS", "TEST_DBO"},
-            {"SYSCAT", "TEST_DBO"},
-            {"SYSFUN", "TEST_DBO"},
-            {"SYSPROC", "TEST_DBO"},
-            {"SYSSTAT", "TEST_DBO"},
-            {"NULLID", "TEST_DBO"},
-            {"SQLJ", "TEST_DBO"},
-            {"SYSCS_DIAG", "TEST_DBO"},
-            {"SYSCS_UTIL", "TEST_DBO"},
             {"APP", "APP"},
-            {"SATHEESH", "SATHEESH"},
-            {"MYDODO", "DODO"},
             {"DERBY", "DERBY"},
-            {"SWIPER", "SWIPER"},
-            {"SAM", "SAM"},
             {"GEORGE", "GEORGE"},
+            {"MYDODO", "DODO"},
             {"MYFRIEND", "TEST_DBO"},
             {"MYSCHEMA", "ME"},
-            {"TESTSCHEMA", "TESTSCHEMA"}
+            {"NULLID", "TEST_DBO"},
+            {"SAM", "SAM"},
+            {"SATHEESH", "SATHEESH"},
+            {"SQLJ", "TEST_DBO"},
+            {"SWIPER", "SWIPER"},
+            {"SYS", "TEST_DBO"},
+            {"SYSCAT", "TEST_DBO"},
+            {"SYSCS_DIAG", "TEST_DBO"},
+            {"SYSCS_UTIL", "TEST_DBO"},
+            {"SYSFUN", "TEST_DBO"},
+            {"SYSIBM", "TEST_DBO"},
+            {"SYSPROC", "TEST_DBO"},
+            {"SYSSTAT", "TEST_DBO"},
+            {"TESTSCHEMA", "TESTSCHEMA"},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -994,7 +994,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // Should still work, as DBA
         
         rs = st.executeQuery(
-            "select * from swiper.swiperTab");
+            "select * from swiper.swiperTab order by i,j");
         
         expColNames = new String [] {"I", "J"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1010,7 +1010,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into swiper.swiperTab values (2,2)");
         
         rs = st.executeQuery(
-            " select * from swiper.swiperTab");
+            " select * from swiper.swiperTab order by i,j");
         
         expColNames = new String [] {"I", "J"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1284,7 +1284,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into mamta1.t11 values(2)");
         
         rs = st_mamta2.executeQuery(
-            " select * from mamta1.t11");
+            " select * from mamta1.t11 order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1336,7 +1336,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         }
         
         rs = st_mamta1.executeQuery(
-            " select * from mamta1.t11");
+            " select * from mamta1.t11 order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1481,7 +1481,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t11 values(2)");
         
         rs = st_mamta1.executeQuery(
-            " select * from t11");
+            " select * from t11 order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1852,7 +1852,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "create view v27 as (select c141 from mamta1.t14)");
         
         rs = st_mamta2.executeQuery(
-            " select * from v27");
+            " select * from v27 order by c141");
         
         expColNames = new String [] {"C141"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -1968,7 +1968,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2");
         
         rs = st_mamta2.executeQuery(
-            " select * from v21ViewTest");
+            " select * from v21ViewTest order by c111, c122");
         
         expColNames = new String [] {"C111", "C122"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2088,7 +2088,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // dba can do select from that view
         
         rs = st.executeQuery(
-            "select * from mamta2.v21ViewTest");
+            "select * from mamta2.v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C122"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2107,7 +2107,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // part of it's schema even though it was created by the dba
         
         rs = st_mamta2.executeQuery(
-            "select * from v21ViewTest");
+            "select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C122"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2561,7 +2561,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "grant select on v21ViewTest to mamta3");
         
         rs = st_mamta2.executeQuery(
-            " select * from v21ViewTest");
+            " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C112"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2732,7 +2732,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create view v21ViewTest as select * from mamta1.t11ViewTest");
         
         rs = st_mamta2.executeQuery(
-            " select * from v21ViewTest");
+            " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2788,7 +2788,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // view is back in action
         
         rs = st_mamta2.executeQuery(
-            "select * from v21ViewTest");
+            "select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -2912,7 +2912,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // view is back in action
         
         rs = st_mamta2.executeQuery(
-            "select * from v21ViewTest");
+            "select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -3080,7 +3080,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "from mamta1.t11ViewTest as t1, mamta1.t12ViewTest as t2");
         
         rs = st_mamta2.executeQuery(
-            " select * from v21ViewTest");
+            " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111", "C122"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -3979,7 +3979,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " grant insert on t12RoutineTest to mamta2");
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerTest");
+            " select * from t11TriggerTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -3993,7 +3993,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t12RoutineTest");
+            " select * from t12RoutineTest order by c121");
         
         expColNames = new String [] {"C121"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4042,7 +4042,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerTest");
+            " select * from t11TriggerTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4056,7 +4056,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t12RoutineTest");
+            " select * from t12RoutineTest order by c121");
         
         expColNames = new String [] {"C121"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4064,8 +4064,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expRS = new String [][]
         {
             {"1"},
+            {"1"},
             {"2"},
-            {"1"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -4235,7 +4235,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
-            " select * from t12RoutineTest");
+            " select * from t12RoutineTest order by c121");
         
         expColNames = new String [] {"C121"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4249,7 +4249,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t13TriggerTest");
+            " select * from t13TriggerTest order by c131");
         
         expColNames = new String [] {"C131"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4257,8 +4257,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expRS = new String [][]
         {
             {"1"},
+            {"1"},
             {"2"},
-            {"1"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -4323,7 +4323,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
-            " select * from t12RoutineTest");
+            " select * from t12RoutineTest order by c121");
         
         expColNames = new String [] {"C121"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4337,7 +4337,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t13TriggerTest");
+            " select * from t13TriggerTest order by c131");
         
         expColNames = new String [] {"C131"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4345,9 +4345,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expRS = new String [][]
         {
             {"1"},
-            {"2"},
             {"1"},
-            {"1"}
+            {"1"},
+            {"2"},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -4585,7 +4585,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t41TriggerTest values(2)");
         
         rs = st_mamta4.executeQuery(
-            " select * from t41TriggerTest");
+            " select * from t41TriggerTest order by c411");
         
         expColNames = new String [] {"C411"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4601,7 +4601,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerTest");
+            " select * from t11TriggerTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -4617,7 +4617,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta2
         
         rs = st_mamta2.executeQuery(
-            " select * from v21ViewTest");
+            " select * from v21ViewTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5237,7 +5237,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // of 2 insert triggers
         
         rs = st_mamta1.executeQuery(
-            "select * from t11TriggerRevokeTest");
+            "select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5349,7 +5349,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms where "
-            + "grantee='SAMMY' or grantee='USER1'");
+            + "grantee='SAMMY' or grantee='USER1' order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5382,7 +5382,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms where "
-            + "grantee='SAMMY' or grantee='USER1'");
+            + "grantee='SAMMY' or grantee='USER1' order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5433,7 +5433,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms where "
-            + "grantee='SAMMY' or grantee='USER3'");
+            + "grantee='SAMMY' or grantee='USER3' order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "GRANTOPTION"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5635,96 +5635,96 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_mamta1.executeQuery(
             " select cast (ATAN(d) as DECIMAL(6,3)) AS ATAN FROM "
-            + "SYSFUN_MATH_TEST");
+            + "SYSFUN_MATH_TEST order by atan");
         
         expColNames = new String [] {"ATAN"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
             {"0.590"},
-            {"0.929"}
+            {"0.929"},
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
             " select cast (COS(d) as DECIMAL(6,3)) AS COS FROM "
-            + "SYSFUN_MATH_TEST");
+            + "SYSFUN_MATH_TEST order by cos");
         
         expColNames = new String [] {"COS"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
+            {"0.228"},
             {"0.783"},
-            {"0.228"}
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
             " select cast (SIN(d) as DECIMAL(6,3)) AS SIN FROM "
-            + "SYSFUN_MATH_TEST");
+            + "SYSFUN_MATH_TEST order by sin");
         
         expColNames = new String [] {"SIN"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
             {"0.620"},
-            {"0.973"}
+            {"0.973"},
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
             " select cast (TAN(d) as DECIMAL(6,3)) AS TAN FROM "
-            + "SYSFUN_MATH_TEST");
+            + "SYSFUN_MATH_TEST order by tan");
         
         expColNames = new String [] {"TAN"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
             {"0.792"},
-            {"4.255"}
+            {"4.255"},
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
             " select cast (DEGREES(d) as DECIMAL(6,3)) AS "
-            + "DEGREES FROM SYSFUN_MATH_TEST");
+            + "DEGREES FROM SYSFUN_MATH_TEST order by degrees");
         
         expColNames = new String [] {"DEGREES"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
             {"38.388"},
-            {"76.776"}
+            {"76.776"},
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
             " select cast (RADIANS(d) as DECIMAL(6,3)) AS "
-            + "RADIANS FROM SYSFUN_MATH_TEST");
+            + "RADIANS FROM SYSFUN_MATH_TEST order by radians");
         
         expColNames = new String [] {"RADIANS"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {null},
             {"0.011"},
-            {"0.023"}
+            {"0.023"},
+            {null},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -5936,7 +5936,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection mamta1
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerRevokeTest");
+            " select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111", "C12"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5951,7 +5951,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t12TriggerRevokeTest");
+            " select * from t12TriggerRevokeTest order by c121");
         
         expColNames = new String [] {"C121", "C122", "C123"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5971,7 +5971,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into t11TriggerRevokeTest values(4, 404)");
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerRevokeTest");
+            " select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111", "C12"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -5987,7 +5987,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t12TriggerRevokeTest");
+            " select * from t12TriggerRevokeTest order by c121");
         
         expColNames = new String [] {"C121", "C122", "C123"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -6015,7 +6015,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into t11TriggerRevokeTest values (5,505)");
         
         rs = st_mamta1.executeQuery(
-            " select * from t11TriggerRevokeTest");
+            " select * from t11TriggerRevokeTest order by c111");
         
         expColNames = new String [] {"C111", "C12"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -6032,7 +6032,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_mamta1.executeQuery(
-            " select * from t12TriggerRevokeTest");
+            " select * from t12TriggerRevokeTest order by c121");
         
         expColNames = new String [] {"C121", "C122", "C123"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -6458,7 +6458,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         rs = st_user1.executeQuery(
             " select c.grantee, c.type, c.columns from "
             + "sys.syscolperms c, sys.systables t where c.tableid = "
-            + "t.tableid and t.tablename='D1847_C'");
+            + "t.tableid and t.tablename='D1847_C' order by grantee");
         
         expColNames = new String [] {"GRANTEE", "TYPE", "COLUMNS"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -6478,7 +6478,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         rs = st_user1.executeQuery(
             " select c.grantee, c.type, c.columns from "
             + "sys.syscolperms c, sys.systables t where c.tableid = "
-            + "t.tableid and t.tablename='D1847_C'");
+            + "t.tableid and t.tablename='D1847_C' order by GRANTEE");
         
         expColNames = new String [] {"GRANTEE", "TYPE", "COLUMNS"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7059,7 +7059,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t2 values (1, 'Yip', 10)");
         
         rs = st_user1.executeQuery(
-            " select * from t1");
+            " select * from t1 order by C1");
         
         expColNames = new String [] {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7306,7 +7306,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " grant execute on function F_ABS1 to user2");
         
         rs = st_user1.executeQuery(
-            " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms");
+            " select GRANTEE, GRANTOR, SELECTPRIV, DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV from sys.systableperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "SELECTPRIV", "DELETEPRIV", "INSERTPRIV", "UPDATEPRIV", "REFERENCESPRIV", "TRIGGERPRIV"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7327,7 +7327,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertDrainResults(rs, 0);
 
         rs = st_user1.executeQuery(
-            " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms");
+            " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms order by GRANTEE, GRANTOR");
         
         expColNames = new String [] {"GRANTEE", "GRANTOR", "GRANTOPTION"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7353,7 +7353,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to select from t1, ok
         
         rs = st_user2.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7404,7 +7404,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // ok
         
         rs = st_user2.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7433,7 +7433,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // try to select from t1, ok
         
         rs = st_user3.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7506,7 +7506,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // same as above
         
         rs = st_user3.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7547,7 +7547,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // ok, use PUBLIC
         
         rs = st_user3.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7581,7 +7581,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // ok, privileged
         
         rs = st_user3.executeQuery(
-            "select * from user1.t1");
+            "select * from user1.t1 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -7928,7 +7928,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             + "union select * from user1.svb");
         
         rs = st_user2.executeQuery(
-            " select * from svc");
+            " select * from svc order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -8119,7 +8119,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into rt2 values (3,3,3)");
         
         rs = st_user2.executeQuery(
-            " select * from rt2");
+            " select * from rt2 order by C1, C2, C3");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9451,7 +9451,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // set connection user4
         
         rs = st_user4.executeQuery(
-            " select * from user2.tshared1");
+            " select * from user2.tshared1 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9467,17 +9467,17 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
-            " select * from user3.tshared1");
+            " select * from user3.tshared1 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"4"},
-            {"3"},
+            {"1"},
             {"2"},
-            {"1"}
+            {"3"},
+            {"4"},
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -9502,7 +9502,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into user2.tshared1 select * from user3.tshared1");
         
         rs = st_user4.executeQuery(
-            " select * from vshared1");
+            " select * from vshared1 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9519,7 +9519,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
-            " select * from vshared2");
+            " select * from vshared2 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9548,7 +9548,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user4.executeQuery(
-            " select * from vshared4");
+            " select * from vshared4 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9650,7 +9650,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " insert into t6 values (1, 10)");
         
         rs = st.executeQuery(
-            " select * from user2.t7");
+            " select * from user2.t7 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9715,15 +9715,15 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "insert into user1.t8 values (2, 20)");
         
         rs = st_user1.executeQuery(
-            " select * from user1.t9");
+            " select * from user1.t9 order by C1");
         
         expColNames = new String [] {"C1", "C2", "C3"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
+            {"2", "2", "2"},
             {"10", "888", "10"},
-            {"2", "2", "2"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
@@ -9772,7 +9772,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " update user1.t10 set i=10");
         
         rs = st_user2.executeQuery(
-            " select * from user1.t10");
+            " select * from user1.t10 order by I, J");
         
         expColNames = new String [] {"I", "J"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9786,7 +9786,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user2.executeQuery(
-            " select * from user1.t11");
+            " select * from user1.t11 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9812,7 +9812,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " update user1.t10 set i=20");
         
         rs = st_user2.executeQuery(
-            " select * from user1.t10");
+            " select * from user1.t10 order by I, J");
         
         expColNames = new String [] {"I", "J"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9826,7 +9826,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user2.executeQuery(
-            " select * from user1.t11");
+            " select * from user1.t11 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -9938,7 +9938,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS, true);
         
         rs = st_user5.executeQuery(
-            " select * from user1.t11");
+            " select * from user1.t11 order by I");
         
         expColNames = new String [] {"I"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -10370,7 +10370,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dboSt.executeUpdate("create schema session");
         dboSt.executeUpdate("create table session.t2(i int)");
         dboSt.executeUpdate("insert into session.t2 values 2,22");
-        rs = dboSt.executeQuery("select * from session.t2");
+        rs = dboSt.executeQuery("select * from session.t2 order by I");
         JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
 
         // Dbo creates a global temporary table with the same name as the
@@ -10379,9 +10379,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dboSt.executeUpdate("declare global temporary table t2(i int, j int) " +
                             "on commit preserve rows not logged");
         dboSt.executeUpdate("insert into session.t2 values (222,222),(2,2)");
-        rs = dboSt.executeQuery("select * from session.t2");
+        rs = dboSt.executeQuery("select * from session.t2 order by i");
         JDBC.assertFullResultSet(rs,
-                                 new String [][] {{"222", "222"}, {"2", "2"}} );
+                                 new String [][] { {"2", "2"}, {"222", "222"}, } );
 
         // Non-dbo tries to access the physical table in SESSION schema (has no
         // privilege, so should get authorization error).
@@ -10397,7 +10397,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             ("declare global temporary table t4(i int, j int) " +
              "on commit preserve rows not logged");
         georgeSt.executeUpdate("insert into session.t4 values (4,4),(44,44)");
-        rs = georgeSt.executeQuery("select * from session.t4");
+        rs = georgeSt.executeQuery("select * from session.t4 order by i");
         JDBC.assertFullResultSet(rs,
                                  new String [][] {{"4", "4"}, {"44", "44"}} );
 
@@ -10416,7 +10416,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         dbo.close();
         dbo = getConnection();
         dboSt = dbo.createStatement();
-        rs = dboSt.executeQuery("select * from session.t2");
+        rs = dboSt.executeQuery("select * from session.t2 order by i");
         JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
 
         // close result sets
@@ -10619,7 +10619,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user1Connection.executeUpdate(
                 " insert into user1.t12 values(91,91)");
         JDBC.assertFullResultSet(
-        		st_user1Connection.executeQuery(" select * from user1.t11"),
+        		st_user1Connection.executeQuery(" select * from user1.t11 order by c111"),
                 new String[][]{{null, "1"}});
         
         // following should fail because there is a dependent trigger on 
