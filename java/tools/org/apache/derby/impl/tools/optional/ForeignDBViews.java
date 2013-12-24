@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.vti.ForeignTableVTI;
 
 /**
  * <p>
@@ -171,6 +172,9 @@ public	class   ForeignDBViews  implements OptionalTool
 
         // now drop the schemas created by loadTool()
         for ( String schemaName : schemas ) { dropDerbySchema( derbyConn, schemaName ); }
+
+        // now drop the connection to the foreign database
+        ForeignTableVTI.dropConnection( foreignConnectionURL );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

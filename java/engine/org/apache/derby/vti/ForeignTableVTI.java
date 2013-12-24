@@ -194,6 +194,34 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
 
     ////////////////////////////////////////////////////////////////////////
     //
+    //	SUPPORT FUNCTIONS
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Remove the cached connection to the foreign database. This method is called
+     * by ForeignDBViews.unloadTool().
+     * </p>
+     */
+    public  static  void    dropConnection( String connectionURL )
+    {
+        _connections.remove( connectionURL );
+    }
+
+    /**
+     * <p>
+     * This function is useful for verifying that the connection to the foreign
+     * database was dropped when the foreignViews tool was unloaded.
+     * </p>
+     */
+    public  static  int countConnections()
+    {
+        return _connections.size();
+    }
+
+    ////////////////////////////////////////////////////////////////////////
+    //
     //	ResultSet BEHAVIOR
     //
     ////////////////////////////////////////////////////////////////////////

@@ -249,6 +249,16 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
                 { "Polaris", "100", "1" },
             };
 
+        // create a function to count the number of connections
+        // managed by ForeignTableVTI
+        goodStatement
+            (
+             dboConnection,
+             "create function countConnections() returns int\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derby.vti.ForeignTableVTI.countConnections'\n"
+             );
+
         // wrong number of arguments
         expectExecutionError
             (
@@ -293,6 +303,13 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              starResult,
              false
              );
+        assertResults
+            (
+             dboConnection,
+             "values countConnections()",
+             new String[][] { { "1" } },
+             false
+             );
         
         // wrong number of arguments
         expectExecutionError
@@ -307,6 +324,13 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
             (
              dboConnection,
              "call syscs_util.syscs_register_tool( 'foreignViews', false, '" + foreignURL + "' )"
+             );
+        assertResults
+            (
+             dboConnection,
+             "values countConnections()",
+             new String[][] { { "0" } },
+             false
              );
 
         // should fail because the view and its schema were dropped when the tool was unloaded
@@ -373,6 +397,14 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
              MISSING_SCHEMA,
              starSelect
              );
+        assertResults
+            (
+             dboConnection,
+             "values countConnections()",
+             new String[][] { { "0" } },
+             false
+             );
+        goodStatement( dboConnection, "drop function countConnections" );
     }
 
     /**
