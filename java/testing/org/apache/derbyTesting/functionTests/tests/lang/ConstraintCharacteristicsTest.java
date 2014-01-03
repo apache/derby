@@ -60,6 +60,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     private static final String LANG_DEFERRED_CONSTRAINTS_VIOLATION = "23506";
     private static final String LANG_DUPLICATE_KEY_CONSTRAINT = "23505";
     private static final String LOCK_TIMEOUT = "40XL1";
+    private static final String
+        LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS = "42X97";
+    private static final String
+        LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT = "42X86";
+    private static final String LANG_SYNTAX_ERROR = "42X01";
+    private static final String NOT_IMPLEMENTED = "0A000";
+    private static final String LANG_NOT_NULL_CHARACTERISTICS = "42XAN";
+    private static final String LANG_OBJECT_NOT_FOUND = "42X94";
 
     static String expImpDataFile;          // file used to perform
                                            // import/export
@@ -80,7 +88,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
 
     public static Test suite() {
-        String nameRoot = "ConstraintCharacteristicsTest";
+        String nameRoot = ConstraintCharacteristicsTest.class.getName();
         TestSuite suite = new TestSuite(nameRoot);
         suite.addTest(baseSuite(nameRoot + ":embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -90,57 +98,50 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     private static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);
+
         suite.addTest(new ConstraintCharacteristicsTest(
-                          "testSyntaxAndBinding"));
-
-        // Need to set a property to allow non default characteristics until
-        // feature completed: remove then
-        Properties systemProperties = new Properties();
-        systemProperties.setProperty(
-            "derby.constraintsTesting", "true");
-        systemProperties.setProperty(
-            "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
-        TestSuite s = new TestSuite(
-            "WithLenientChecking");
-
-        s.addTest(new ConstraintCharacteristicsTest(
+                      "testSyntaxAndBinding"));
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testDropNotNullOnUniqueColumn"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testCompressTable"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testLocking"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testLockingWithCommit"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testLockingWithRollback"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testDatabaseMetaData"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testCreateConstraintDictionaryEncodings"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testAlterConstraintDictionaryEncodings"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testAlterConstraintInvalidation"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testBasicDeferral"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testRoutines"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testDeferredRowsInvalidation"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testImport"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testDerby6374"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testXA"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testManySimilarDuplicates"));
-        s.addTest(new ConstraintCharacteristicsTest(
+        suite.addTest(new ConstraintCharacteristicsTest(
                       "testAlmostRemovedAllDups"));
 
-        suite.addTest(new SystemPropertyTestSetup(s, systemProperties, true));
+        Properties systemProperties = new Properties();
+        systemProperties.setProperty(
+            "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
 
-        return new SupportFilesSetup(suite);
+        return new SupportFilesSetup(
+                new SystemPropertyTestSetup(suite, systemProperties, true));
     }
 
     @Override
@@ -208,7 +209,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
          */
 
         assertTableLevelDefaultBehaviorAccepted(c, s);
-        assertTableLevelFailTillFeatureImplemented(s);
+        assertTableLevelNonDefaultAccepted(s);
 
         /*
          * A L T E R    C O N S T R A I N T    C H A R A C T E R I S T I C S
@@ -216,32 +217,37 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         s.executeUpdate(
             "create table t(i int, constraint app.c primary key(i))");
 
-        // default, so allow (nil action for now)
+        // default, so allow
         s.executeUpdate("alter table t alter constraint c enforced");
 
-        // not default behavior, so expect error until feature implemented
+        // not default behavior, expect error until feature implemented
         assertStatementError(
-            "0A000", s, "alter table t alter constraint c not enforced");
+            NOT_IMPLEMENTED, s,
+            "alter table t alter constraint c not enforced");
 
         for (String ch : illegalAlterCharacteristics) {
             // Anything beyond enforcement is illegal in ALTER context
             assertStatementError(
-                "42X01", s, "alter table t alter constraint c " + ch);
+                LANG_SYNTAX_ERROR, s, "alter table t alter constraint c " + ch);
         }
 
         // Unknown constraint name
         assertStatementError(
-            "42X86", s, "alter table t alter constraint cuckoo not enforced");
+            LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT, s,
+            "alter table t alter constraint cuckoo not enforced");
 
         /*
          * S E T   C O N S T R A I N T
          */
-
-        assertStatementError("0A000", s, "set constraints c deferred");
-        assertStatementError("0A000", s, "set constraints all deferred");
+        s.executeUpdate("alter table t drop constraint c");
+        s.executeUpdate("alter table t add constraint c " +
+                        "    primary key(i) deferrable");
+        s.executeUpdate("set constraints c deferred");
+        s.executeUpdate("set constraints all deferred");
 
         // Unknown constraint name
-        assertStatementError( "42X94", s, "set constraints cuckoo deferred");
+        assertStatementError(LANG_OBJECT_NOT_FOUND, s,
+                             "set constraints cuckoo deferred");
         c.rollback();
 
         /*
@@ -249,14 +255,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
          */
 
         assertColumnLevelDefaultBehaviorAccepted(c, s);
-        assertColumnLevelFailTillFeatureImplemented(s);
+        assertColumnLevelNonDefaultAccepted(s);
 
         // Characteristics are not currently allowed for NOT NULL,
         // since Derby does not represent NOT NULL as a constraint,
         // but rather as an aspect of the column's data type. It is
         // possible to alter the column nullable and vice versa,
         // though.
-        assertStatementError("42XAN", s,
+        assertStatementError(LANG_NOT_NULL_CHARACTERISTICS, s,
                     "create table t(i int " +
                     "not null deferrable initially immediate)");
     }
@@ -313,20 +319,29 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         }
 
         for (String[] ch : nonDefaultCharacteristics) {
-            s.executeUpdate(
-                    "create table t(i int, constraint c primary key(i) " +
-                    ch[0] + ")");
+            if (ch[0].startsWith(" references") ||
+                ch[0].startsWith(" check") ||
+                ch[0].contains("not enforced")) {
 
-            assertAlterDictState(s, "enforced");
-            assertAlterDictState(s, "not enforced");
-            rollback();
+                assertStatementError(NOT_IMPLEMENTED,
+                        s,
+                        "create table t(i int, constraint c primary key(i) " +
+                                ch[0] + ")");
+            } else {
+                s.executeUpdate(
+                        "create table t(i int, constraint c primary key(i) " +
+                                ch[0] + ")");
+
+                assertAlterDictState(s, "enforced");
+                assertAlterDictState(s, "not enforced");
+                rollback();
+            }
         }
 
         for (String ch : illegalAlterCharacteristics) {
             assertAlterInconsistentCharacteristics(s, ch);
         }
     }
-
 
     /**
      * Check that altering constraint characteristics invalidates prepared
@@ -346,7 +361,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         PreparedStatement ps = c.prepareStatement("insert into t values 3");
         ps.execute();
 
-        s.executeUpdate("alter table t alter constraint c not enforced ");
+        s.executeUpdate("alter table t alter constraint c enforced ");
 
         ContextManager contextManager =
                 ((EmbedConnection)c).getContextManager();
@@ -1484,37 +1499,55 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
      * @throws SQLException
      */
-    private static void assertTableLevelFailTillFeatureImplemented(
+    private static void assertTableLevelNonDefaultAccepted(
             Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
-                assertStatementError("0A000",
-                        s,
-                        "create table t(i int, constraint c " +
-                        ct + ch[0] + ")");
+                // Only primary key and unique implemented
+                if (ct.contains("references") ||
+                    ct.contains("check") ||
+                    ch[0].contains("not enforced")) {
+
+                    assertStatementError(NOT_IMPLEMENTED,
+                            s,
+                            "create table t(i int, constraint c " +
+                                    ct + ch[0] + ")");
+                } else {
+                    s.executeUpdate("create table t(i int, constraint c " +
+                                    ct + ch[0] + ")");
+                    s.executeUpdate("drop table t");
+                }
             }
         }
     }
 
     /**
-     * Assert that we fail with feature not implemented
-     * until feature is implemented (for characteristics that are not Derby
-     * default).
+     * Assert that we allow non defaults
      *
      * @param s statement
 
      * @throws SQLException
      */
-    private static void assertColumnLevelFailTillFeatureImplemented(
+    private static void assertColumnLevelNonDefaultAccepted(
             Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
-                assertStatementError("0A000",
-                        s,
-                        "create table t(i int " +
-                        ct + ch[0] + ")");
+                // Only primary key and unique implemented
+                if (ct.startsWith(" references") ||
+                    ct.startsWith(" check") ||
+                    ch[0].contains("not enforced")) {
+
+                    assertStatementError(NOT_IMPLEMENTED,
+                            s,
+                            "create table t(i int " +
+                                    ct + ch[0] + ")");
+                } else {
+                    s.executeUpdate("create table t(i int " +
+                            ct + ch[0] + ")");
+                    s.executeUpdate("drop table t");
+                }
             }
         }
     }
@@ -1606,15 +1639,30 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             String code) throws SQLException {
 
         for (String ct: tableConstraintTypes) {
-            s.executeUpdate("create table t(i int, constraint c " + ct + " " +
+            try {
+                s.executeUpdate(
+                    "create table t(i int, constraint c " + ct + " " +
                     characteristics + ")");
 
-            JDBC.assertFullResultSet(
-                s.executeQuery("select state from sys.sysconstraints " +
-                               "    where constraintname = 'C'"),
-                new String[][]{{code}});
-
-            rollback();
+                if (characteristics.contains("not enforced")) {
+                    fail();
+                } else {
+                    JDBC.assertFullResultSet(
+                        s.executeQuery(
+                            "select state from sys.sysconstraints " +
+                            "    where constraintname = 'C'"),
+                        new String[][]{{code}});
+                    rollback();
+                }
+            } catch (SQLException e) {
+                if (characteristics.contains("not enforced") ||
+                    ct.contains("references") ||
+                    ct.contains("check")) {
+                    assertSQLState(NOT_IMPLEMENTED, e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
 
@@ -1634,13 +1682,22 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         String oldState = getOldState(s);
         String newState = computeNewState(oldState, enforcement);
 
-        s.executeUpdate("alter table t alter constraint c " +
+        if (!enforcement.contains("not enforced")) {
+            s.executeUpdate("alter table t alter constraint c " +
                     enforcement);
-
-        JDBC.assertFullResultSet(
-                s.executeQuery("select state from sys.sysconstraints " +
-                "    where constraintname = 'C'"),
-                new String[][]{{newState}});
+            JDBC.assertFullResultSet(
+                    s.executeQuery("select state from sys.sysconstraints " +
+                            "    where constraintname = 'C'"),
+                    new String[][]{{newState}});
+        } else {
+            try {
+                s.executeUpdate("alter table t alter constraint c " +
+                    enforcement);
+                fail();
+            } catch (SQLException e) {
+                assertSQLState(NOT_IMPLEMENTED, e);
+            }
+        }
     }
 
     private String getOldState(Statement s) throws SQLException {
@@ -1673,7 +1730,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 fail("wrong characteristics unexpectedly passed muster");
                 rollback();
             } catch (SQLException e) {
-                assertSQLState("42X97", e);
+                assertSQLState(LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS, e);
             }
         }
     }
@@ -1688,7 +1745,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             fail("wrong characteristics unexpectedly passed muster");
             rollback();
         } catch (SQLException e) {
-            assertSQLState("42X01", e);
+            assertSQLState(LANG_SYNTAX_ERROR, e);
         }
     }
 

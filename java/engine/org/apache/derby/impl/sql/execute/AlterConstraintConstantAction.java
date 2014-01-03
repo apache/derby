@@ -159,11 +159,18 @@ public class AlterConstraintConstantAction extends ConstraintConstantAction
             dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
                             "DEFERRED CONSTRAINTS");
 
-            // Remove when feature DERBY-532 is completed
-            if (!PropertyUtil.getSystemProperty(
+            if (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT ||
+                constraintType == DataDictionary.CHECK_CONSTRAINT ||
+                constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
+                !characteristics[2] /* not enforced */) {
+
+                // Remove when feature DERBY-532 is completed
+                if (!PropertyUtil.getSystemProperty(
                         "derby.constraintsTesting", "false").equals("true")) {
-                throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
+                    throw StandardException.newException(
+                        SQLState.NOT_IMPLEMENTED,
                         "non-default enforcement");
+                }
             }
         }
 

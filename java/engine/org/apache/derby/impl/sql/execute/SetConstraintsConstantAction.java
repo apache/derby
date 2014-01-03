@@ -104,13 +104,6 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             c.getFullSQLName());
                 }
 
-                // Remove when feature DERBY-532 is completed
-                if (!PropertyUtil.getSystemProperty(
-                        "derby.constraintsTesting", "false").equals("true")) {
-                    throw StandardException.newException(
-                        SQLState.NOT_IMPLEMENTED, "SET CONSTRAINT");
-                }
-
                 if (deferred && !cd.deferrable()) {
                     throw StandardException.newException(
                             SQLState.LANG_SET_CONSTRAINT_NOT_DEFERRABLE,
@@ -132,13 +125,6 @@ class SetConstraintsConstantAction extends DDLConstantAction
                 }
             }
         } else {
-            // Remove when feature DERBY-532 is completed
-            if (!PropertyUtil.getSystemProperty(
-                    "derby.constraintsTesting", "false").equals("true")) {
-                throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
-                        "SET CONSTRAINT");
-            }
-
             lcc.setDeferredAll(activation, deferred);
         }
 
