@@ -1335,8 +1335,9 @@ public interface DataDictionary
 	/**
 	 * Load up the trigger descriptor list for this table
 	 * descriptor and return it.  If the descriptor list
-	 * is already loaded up, it is retuned without further
-	 * ado.
+     * is already loaded up, it is returned without further
+     * ado. The descriptors are returned in the order in
+     * which the triggers were created, with the oldest first.
 	 *
 	 * @param td			The table descriptor.
 	 *

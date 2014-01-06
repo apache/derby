@@ -943,7 +943,6 @@ class CreateTriggerNode extends DDLStatementNode
 											(UUID)null,			// action SPSid 
 											actionText,
                                             compSchemaDescriptor.getUUID(),
-											(Timestamp)null,	// creation time
 											referencedColInts,
 											referencedColsInTriggerAction,
                                             originalWhenText,

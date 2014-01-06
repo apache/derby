@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -33,6 +34,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
@@ -76,7 +78,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	private String					oldReferencingName;
 	private String					newReferencingName;
 	private UUID					spsCompSchemaId;
-	private Timestamp				creationTimestamp;
 	private int[]					referencedCols;
 	private int[]					referencedColsInTriggerAction;
     private final ProviderInfo[]    providerInfo;
@@ -100,8 +101,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	 * @param spsCompSchemaId	the compilation schema for the action and when
 	 *							spses.   If null, will be set to the current default
 	 *							schema
-	 * @param creationTimestamp	when was this trigger created?  if null, will be
-	 *						set to the time that executeConstantAction() is invoked
 	 * @param referencedCols	what columns does this trigger reference (may be null)
 	 * @param referencedColsInTriggerAction	what columns does the trigger 
 	 *						action reference through old/new transition variables
@@ -128,7 +127,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		UUID				actionSPSId,
 		String				actionText,
 		UUID				spsCompSchemaId,
-		Timestamp			creationTimestamp,
 		int[]				referencedCols,
 		int[]				referencedColsInTriggerAction,
         String              originalWhenText,
@@ -153,7 +151,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		this.actionSPSId = actionSPSId;
 		this.actionText = actionText;
 		this.spsCompSchemaId = spsCompSchemaId;
-		this.creationTimestamp = creationTimestamp;
 		this.referencedCols = referencedCols;
 		this.referencedColsInTriggerAction = referencedColsInTriggerAction;
 		this.originalActionText = originalActionText;
@@ -316,7 +313,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									triggerTable,
                                     whenSPSId,
 									actionSPSId,
-									creationTimestamp == null ? new Timestamp(System.currentTimeMillis()) : creationTimestamp,
+                                    makeCreationTimestamp(dd),
 									referencedCols,
 									referencedColsInTriggerAction,
 									originalActionText,
@@ -435,6 +432,53 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	{
 		return constructToString("CREATE TRIGGER ", triggerName);		
 	}
+
+    /**
+     * Construct the creation timestamp for the trigger. DERBY-5866: Also make
+     * sure the creation timestamp is higher than any timestamp on an existing
+     * trigger on the same table. Otherwise, the triggers may not fire in the
+     * correct order.
+     */
+    private Timestamp makeCreationTimestamp(DataDictionary dd)
+            throws StandardException {
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // Allow overriding the timestamp in debug mode for testing of
+        // specific scenarios.
+        if (SanityManager.DEBUG) {
+            String val = PropertyUtil.getSystemProperty(
+                    "derby.debug.overrideTriggerCreationTimestamp");
+            if (val != null) {
+                now.setTime(Long.parseLong(val));
+            }
+        }
+
+        TriggerDescriptorList tdl = dd.getTriggerDescriptors(triggerTable);
+        int numTriggers = tdl.size();
+
+        if (numTriggers == 0) {
+            // This is the first trigger on the table, so no need to check
+            // if there are any higher timestamps.
+            return now;
+        }
+
+        // Get the timestamp of the most recent existing trigger on the table.
+        Timestamp highest = tdl.get(numTriggers - 1).getCreationTimestamp();
+
+        if (now.after(highest)) {
+            // The current timestamp is higher than the most recent existing
+            // trigger on the table, so it is OK.
+            return now;
+        }
+
+        // Otherwise, there is an existing trigger on the table with a
+        // timestamp that is at least as high as the current timestamp. Adjust
+        // the current timestamp so that it is one millisecond higher than the
+        // timestamp of the existing trigger. This ensures that the triggers
+        // will fire in the same order as they were created.
+
+        now.setTime(highest.getTime() + 1);
+
+        return now;
+    }
 }
-
-

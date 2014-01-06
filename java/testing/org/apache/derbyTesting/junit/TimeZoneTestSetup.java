@@ -70,13 +70,13 @@ public class TimeZoneTestSetup extends BaseTestSetup {
         requestedDefault = null;
     }
     
-    private void setDefault(final TimeZone tz) throws SecurityException{
+    public static void setDefault(final TimeZone tz) {
         if (tz== null) {
             throw new IllegalArgumentException("tz cannot be <null>");
         }
         AccessController.doPrivileged(
-                new PrivilegedAction<Object>() {
-                    public Object run() throws SecurityException {
+                new PrivilegedAction<Void>() {
+                    public Void run() {
                         TimeZone.setDefault(tz);
                         return null;
                     }});
