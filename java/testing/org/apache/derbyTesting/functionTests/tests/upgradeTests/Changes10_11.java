@@ -227,4 +227,49 @@ public class Changes10_11 extends UpgradeChange
             }
         }
     }
+
+    /**
+     * Create a trigger in each upgrade phase and verify that they fire in
+     * the order in which they were created. DERBY-5866 changed how the
+     * trigger creation timestamp was stored (from local time zone to UTC),
+     * and we want to test that this change doesn't affect the trigger
+     * execution order when the triggers have been created with different
+     * versions.
+     */
+    public void testDerby5866TriggerExecutionOrder() throws SQLException {
+        Statement s = createStatement();
+        switch (getPhase()) {
+            case PH_CREATE:
+                s.execute("create table d5866_t1(x int)");
+                s.execute("create table d5866_t2(x int "
+                        + "generated always as identity, y varchar(100))");
+                s.execute("create trigger d5866_create after insert "
+                        + "on d5866_t1 for each statement mode db2sql "
+                        + "insert into d5866_t2(y) values 'CREATE'");
+                break;
+            case PH_SOFT_UPGRADE:
+                s.execute("create trigger d5866_soft after insert on d5866_t1 "
+                        + "insert into d5866_t2(y) values 'SOFT UPGRADE'");
+                break;
+            case PH_POST_SOFT_UPGRADE:
+                s.execute("create trigger d5866_post_soft after insert "
+                        + "on d5866_t1 for each statement mode db2sql "
+                        + "insert into d5866_t2(y) values 'POST SOFT UPGRADE'");
+                break;
+            case PH_HARD_UPGRADE:
+                s.execute("create trigger d5866_hard after insert on d5866_t1 "
+                        + "insert into d5866_t2(y) values 'HARD UPGRADE'");
+
+                // Fire all the triggers and verify that they executed in
+                // the right order.
+                s.execute("insert into d5866_t1 values 1,2,3");
+                JDBC.assertFullResultSet(
+                        s.executeQuery("select y from d5866_t2 order by x"),
+                        new String[][] {
+                            { "CREATE" }, { "SOFT UPGRADE" },
+                            { "POST SOFT UPGRADE" }, { "HARD UPGRADE" }
+                        });
+                break;
+        }
+    }
 }

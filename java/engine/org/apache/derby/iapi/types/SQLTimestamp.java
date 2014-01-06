@@ -382,10 +382,28 @@ public final class SQLTimestamp extends DataType
 	/** no-arg constructor required by Formattable */
 	public SQLTimestamp() { }
 
+    /**
+     * Create a new SQLTimestamp instance that represents the specified
+     * Timestamp in the time zone of the given Calendar.
+     * @param value the Timestamp value to be represented by this instance
+     * @param cal the time zone of the calendar is used to construct the
+     * database timestamp value
+     * @throws StandardException if an error occurs
+     */
+    public SQLTimestamp(Timestamp value, Calendar cal) throws StandardException
+    {
+        setValue(value, cal);
+    }
 
+    /**
+     * Create a new SQLTimestamp instance that represents the specified
+     * Timestamp in the local time zone.
+     * @param value the Timestamp value to be represented by this instance
+     * @throws StandardException if an error occurs
+     */
 	public SQLTimestamp(Timestamp value) throws StandardException
 	{
-		setValue(value, (Calendar) null);
+        this(value, (Calendar) null);
 	}
 
 	SQLTimestamp(int encodedDate, int encodedTime, int nanos) {
