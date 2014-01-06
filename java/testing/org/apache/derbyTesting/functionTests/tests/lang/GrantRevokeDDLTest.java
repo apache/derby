@@ -433,7 +433,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         rs = st_satConnection.executeQuery(
             " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas where schemaname not "
-            + "like 'SYS%' ORDER BY SCHEMANAME");
+            + "like 'SYS%' and schemaname not like 'TEST_DBO%' ORDER BY SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
         JDBC.assertColumnNames(rs, expColNames);
@@ -898,7 +898,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create schema authorization testSchema");
         
         rs = st.executeQuery(
-            " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas order by SCHEMANAME");
+            " select SCHEMANAME, AUTHORIZATIONID from sys.sysschemas where schemaname not like 'TEST_DBO%' order by SCHEMANAME");
         
         expColNames = new String [] {"SCHEMANAME", "AUTHORIZATIONID"};
         JDBC.assertColumnNames(rs, expColNames);
