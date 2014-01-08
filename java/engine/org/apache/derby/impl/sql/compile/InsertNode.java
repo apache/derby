@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.IgnoreFilter;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
@@ -258,9 +259,13 @@ public final class InsertNode extends DMLModStatementNode
 
 		/*
 		** Get the resultColumnList representing the columns in the base
-		** table or VTI.
+		** table or VTI. We don't bother adding any permission checks here
+        ** because they are assumed by INSERT permission on the table.
 		*/
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
 		getResultColumnList();
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
 		/* If we have a target column list, then it must have the same # of
 		 * entries as the result set's RCL.
@@ -286,9 +291,9 @@ public final class InsertNode extends DMLModStatementNode
 			{
 				targetColumnList.bindResultColumnsByName(targetVTI.getResultColumns(), targetVTI,
 														this);
-			}
+			}	
 			getCompilerContext().popCurrentPrivType();
-		}
+        }
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */
 		if (SanityManager.DEBUG)
@@ -331,6 +336,20 @@ public final class InsertNode extends DMLModStatementNode
 		 * avoid the redundancy.
 		 */
 		super.bindExpressions();
+
+        //
+        // At this point, we have added permissions checks for the driving query.
+        // Now add a check for INSERT privilege on the target table.
+        //
+        if (isPrivilegeCollectionRequired())
+        {
+            getCompilerContext().pushCurrentPrivType( getPrivType());
+            getCompilerContext().addRequiredTablePriv( targetTableDescriptor );
+            getCompilerContext().popCurrentPrivType();
+        }
+
+        // Now stop adding permissions checks.
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
 
 		/*
 		** If the result set is a union, it could be a table constructor.
@@ -517,14 +536,6 @@ public final class InsertNode extends DMLModStatementNode
 
 			autoincRowLocation = 
 				dd.computeAutoincRowLocations(tc, targetTableDescriptor);
-
-			if (isPrivilegeCollectionRequired())
-			{
-				getCompilerContext().pushCurrentPrivType(getPrivType());
-				getCompilerContext().addRequiredTablePriv(targetTableDescriptor);
-				getCompilerContext().popCurrentPrivType();				
-			}
-
 		}
 		else
 		{

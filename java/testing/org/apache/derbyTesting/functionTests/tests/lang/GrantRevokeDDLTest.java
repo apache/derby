@@ -53,6 +53,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
     public static  final   String  NO_GENERIC_PERMISSION = "42504";
     public static  final   String  NO_SELECT_OR_UPDATE_PERMISSION = "42502";
+    public static  final   String  NO_TABLE_PERMISSION = "42500";
 
     public  static  class   Permission
     {
@@ -11492,6 +11493,258 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             (
              dboConnection,
              "drop type SelectHashMap_6429_3 restrict"
+             );
+    }
+    
+    /**
+     * Test that INSERT statements require the correct privileges as
+     * described on DERBY-6434.
+     */
+    public void test_6434_tables()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type GenerationType_6434 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type CheckType_6434 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SelectType_6434 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function generationFunction_6434( hashMap GenerationType_6434, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function checkFunction_6434( hashMap CheckType_6434, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function selectFunction_6434( hashMap SelectType_6434, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate selectAggregate_6434 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create sequence sequence_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_6434\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_6434\n" +
+             "(\n" +
+             "    key1 int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table selectTable_6434\n" +
+             "(\n" +
+             "    selectColumn int,\n" +
+             "    selectColumn2 SelectType_6434\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table insertTable_6434\n" +
+             "(\n" +
+             "    insertColumn int references primaryTable_6434( key1 ),\n" +
+             "    privatePrimaryColumn int primary key,\n" +
+             "    privateGenerationSource GenerationType_6434,\n" +
+             "    privateForeignSource int,\n" +
+             "    privateCheckSource CheckType_6434,\n" +
+             "    privateBeforeTriggerSource int,\n" +
+             "    privateAfterTriggerSource int,\n" +
+             "    generatedColumn generated always as ( insertColumn + generationFunction_6434( privateGenerationSource, 'foo' ) ),\n" +
+             "    check ( insertColumn > checkFunction_6434( privateCheckSource, 'foo' ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table foreignTable_6434\n" +
+             "(\n" +
+             "    key1 int references insertTable_6434( privatePrimaryColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeInsertTrigger_6434\n" +
+             "no cascade before insert on insertTable_6434\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_6434( 'before', new.insertColumn + new.privateBeforeTriggerSource )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterInsertTrigger_6434\n" +
+             "after insert on insertTable_6434\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_6434( 'before', new.insertColumn + new.privateAfterTriggerSource )\n"
+             );
+
+        //
+        // Privileges
+        //
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "insert on insertTable_6434", NO_TABLE_PERMISSION ),
+            new Permission( "usage on sequence sequence_6434", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function selectFunction_6434", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate selectAggregate_6434", NO_GENERIC_PERMISSION ),
+            new Permission( "select on selectTable_6434", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grant_6429( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  insert =
+            "insert into test_dbo.insertTable_6434( insertColumn, privatePrimaryColumn )\n" +
+            "    select next value for test_dbo.sequence_6434, test_dbo.selectFunction_6434( selectColumn2, 'foo' )\n" +
+            "    from test_dbo.selectTable_6434\n" +
+            "    where selectColumn > ( select test_dbo.selectAggregate_6434( selectColumn ) from test_dbo.selectTable_6434 )\n";
+
+        // fails because ruth doesn't have USAGE permission on type SelectType_6434
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, insert );
+
+        // succeeds after granting that permission
+        grant_6429( dboConnection, "usage on type SelectType_6434" );
+        goodStatement( ruthConnection, insert );
+        
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission_6429( permission, dboConnection, ruthConnection, insert );
+        }
+
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop trigger afterInsertTrigger_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop trigger beforeInsertTrigger_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table selectTable_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table foreignTable_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table insertTable_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table primaryTable_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop procedure addHistoryRow_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop sequence sequence_6434 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate selectAggregate_6434 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function selectFunction_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function checkFunction_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function generationFunction_6434"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SelectType_6434 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type CheckType_6434 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type GenerationType_6434 restrict"
              );
     }
     

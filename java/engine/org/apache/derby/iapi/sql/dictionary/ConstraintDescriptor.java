@@ -609,6 +609,13 @@ public abstract class ConstraintDescriptor
 			//can not reference a table/routine.
 			ConglomerateDescriptor newBackingConglomCD = drop(lcc, true);
 
+            //
+            // Invalidate every statement which depends on the table.
+            // This causes us to follow the same code path which we pursue
+            // when the CHECK constraint is dropped explicitly.
+            //
+            getDataDictionary().getDependencyManager().invalidateFor( table, DependencyManager.ALTER_TABLE, lcc );
+
 			lcc.getLastActivation().addWarning(
 				StandardException.newWarning(
 					SQLState.LANG_CONSTRAINT_DROPPED,

@@ -310,8 +310,9 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
 
     /**
      * <p>
-     * Test that you need execute privilege to run functions mentioned in
-     * generation clauses.
+     * Test that you DON'T need execute privilege to run functions mentioned in
+     * generation clauses. That privilege is needed by the user who declared
+     * the generation clause.
      * </p>
      */
     public  void    test_002_functionPermissions()
@@ -383,11 +384,9 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              "update test_dbo.t_fp_1 set a = a + 1"
              );
 
-        // this is a wrong result. see DERBY-6434
-        expectExecutionError
+        goodStatement
             (
              janetConnection,
-             LACK_EXECUTE_PRIV,
              "insert into test_dbo.t_fp_1( a ) values ( 200 )"
              );
         assertResults
@@ -397,6 +396,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              new String[][]
              {
                  { "101", "-101", },
+                 { "200", "-200", },
              },
              false
              );
@@ -427,6 +427,7 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              {
                  { "102", "-102", },
                  { "200", "-200", },
+                 { "201", "-201", },
              },
              false
              );
