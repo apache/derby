@@ -98,6 +98,14 @@ grant codeBase "${derby.install.url}derbynet.jar"
 
   permission java.net.SocketPermission "*", "accept"; 
 
+// Allow the server to listen to the socket on the default port (1527).
+// If you have specified another port number with the -p option to
+// "NetworkServerControl start" on the command line, or with the portNumber
+// parameter to the NetworkServerControl constructor in the API, or with the
+// property derby.drda.portNumber, you should change the port number in the
+// permission statement accordingly.
+  permission java.net.SocketPermission "localhost:1527", "listen";
+
 //
 // Needed for server tracing.
 //
