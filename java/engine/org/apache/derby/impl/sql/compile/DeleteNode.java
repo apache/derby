@@ -296,7 +296,6 @@ class DeleteNode extends DMLModStatementNode
 							resultColumnList,
 							(int[]) null,
 							readColsBitSet,
-							false,
 							true);  /* we alway include triggers in core language */
 
 				/* If the target table is also a source table, then

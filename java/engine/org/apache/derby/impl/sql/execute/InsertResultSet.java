@@ -144,7 +144,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private	TemporaryRowHolderImpl	rowHolder;
 	private RowLocation				rl;
 
-	private	boolean					hasBeforeStatementTrigger;
 	private	boolean					hasBeforeRowTrigger;
 	private	BulkTableScanResultSet	tableScan;
 
@@ -245,22 +244,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	public ExecRow preprocessSourceRow(ExecRow execRow)
 		throws StandardException
 	{
-		//System.out.println("preprocessrow is called ");
-		/*
-		** We can process before row triggers now.  All other
-		** triggers can only be fired after we have inserted
-		** all our rows.
-		*/
-		if (hasBeforeRowTrigger)
-		{
-			// RESOLVE
-			// Possibly dead code-- if there are triggers we don't do bulk insert.
-			rowHolder.truncate();
-			rowHolder.insert(execRow);
-			triggerActivator.notifyEvent(TriggerEvents.BEFORE_INSERT,
-											(CursorResultSet)null,
-											rowHolder.getResultSet(), 
-											(int[])null);
+        if (triggerInfo != null) {
+            // We do not use bulk insert if we have triggers
+            if (SanityManager.DEBUG) {
+                SanityManager.NOTREACHED();
+            }
 		}
 
         if ( generationClauses != null )
@@ -268,8 +256,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             evaluateGenerationClauses( generationClauses, activation, sourceResultSet, execRow, false );
         }
 
-		if (checkGM != null && !hasBeforeStatementTrigger)
-		{
+        if (checkGM != null) {
 			evaluateCheckConstraints();
 		}
 		// RESOLVE - optimize the cloning
@@ -330,14 +317,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		fkInfoArray = constants.getFKInfo();
 		triggerInfo = constants.getTriggerInfo();
 		
-		/*
-		** If we have a before statement trigger, then
-		** we cannot check constraints inline.
-		*/
-		hasBeforeStatementTrigger = (triggerInfo != null) ?
-				triggerInfo.hasTrigger(true, false) :
-				false;
-
 		hasBeforeRowTrigger = (triggerInfo != null) ?
 				triggerInfo.hasTrigger(true, true) :
 				false;
@@ -456,55 +435,17 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                     getSavedObject(fullTemplateId)).build(
                         activation.getExecutionFactory());
 
-            long baseTableConglom =
-                    bulkInsertCore(lcc, fullTemplate, heapConglom);
+            bulkInsertCore(lcc, fullTemplate, heapConglom);
 
-			if (hasBeforeStatementTrigger)
-			{	
-				tableScan = getTableScanResultSet(baseTableConglom); 
-
-				// fire BEFORE trigger, do this before checking constraints
-				triggerActivator.notifyEvent(TriggerEvents.BEFORE_INSERT, 
-												(CursorResultSet)null,
-												tableScan, 
-												(int[])null);
-			
-				// if we have a check constraint or generation clauses, we have
-				// to do it the hard way now before we get
-				// to our AFTER triggers.
-				if ((checkGM != null) || (generationClauses != null) )
-				{
-					tableScan = getTableScanResultSet(baseTableConglom); 
-
-					try
-					{
-						ExecRow currRow = null;
-						while ((currRow = tableScan.getNextRowCore()) != null)
-						{
-							// we have to set the source row so the check constraint
-							// sees the correct row.
-							sourceResultSet.setCurrentRow(currRow);
- 							evaluateCheckConstraints();
-						}
-					} finally
-					{
-						sourceResultSet.clearCurrentRow();
-					}
-				}
+            if (triggerInfo != null) {
+                if (SanityManager.DEBUG) {
+                    // If we have triggers, we do not use bulkInsert
+                    SanityManager.NOTREACHED();
+                }
 			}
 			
             bulkValidateForeignKeys(tc, lcc.getContextManager(), fullTemplate);
 	
-			// if we have an AFTER trigger, let 'er rip
-			if ((triggerInfo != null) && 
-				(triggerInfo.hasTrigger(false, true) ||
-				 triggerInfo.hasTrigger(false, false))) 
-			{
-				triggerActivator.notifyEvent(TriggerEvents.AFTER_INSERT,
-										(CursorResultSet)null,
-										getTableScanResultSet(baseTableConglom), 
-										(int[])null); 
-			}
 			bulkInsertPerformed = true;
 		}
 		else
@@ -1319,7 +1260,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	}
 
 	// Do the work for a bulk insert
-	private long bulkInsertCore(LanguageConnectionContext lcc,
+    private void bulkInsertCore(LanguageConnectionContext lcc,
                                 ExecRow fullTemplate,
 								long oldHeapConglom)
 		throws StandardException
@@ -1339,13 +1280,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		// Get the properties on the old heap
 		bulkHeapCC.getInternalTablePropertySet(properties);
 
-		if (triggerInfo != null)
-		{
-			triggerActivator = new TriggerEventActivator(lcc, 
-										constants.targetUUID,
-										triggerInfo,
-										TriggerExecutionContext.INSERT_EVENT,
-										activation, null);
+        if (triggerInfo != null) {
+            // no triggers in bulk insert mode
+            if (SanityManager.DEBUG) {
+                SanityManager.NOTREACHED();
+            }
 		}
 
 		/*
@@ -1417,7 +1356,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		 */
 		if (newHeapConglom == oldHeapConglom)
 		{
-			return oldHeapConglom;
+            return;
 		}
 
 		// Find out how many rows were inserted
@@ -1470,8 +1409,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		dd.updateConglomerateDescriptor(cd, newHeapConglom, tc);
 		tc.dropConglomerate(oldHeapConglom);
 		// END RESOLVE
-
-		return newHeapConglom;
 	}
 
 	/**

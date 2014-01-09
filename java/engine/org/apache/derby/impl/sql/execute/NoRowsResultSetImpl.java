@@ -555,55 +555,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		}
 	}
 
-	/**
-	  *	Run a check constraint against the current row. Raise an error if
-	  * the check constraint is violated.
-	  *
-	  *	@param	checkGM			Generated code to run the check constraint.
-	  * @param	checkName		Name of the constraint to check.
-	  *	@param	heapConglom		Number of heap conglomerate.
-	  *	@param	activation		Class in which checkGM lives.
-	  *
-	  * @exception StandardException thrown on error
-	  */
-	public	static	void	evaluateACheckConstraint
-	(
-	  GeneratedMethod checkGM,
-	  String checkName,
-	  long heapConglom,
-	  Activation activation
-	)
-		throws StandardException
-	{
-		if (checkGM != null)
-		{
-			DataValueDescriptor checkBoolean;
-
-			checkBoolean = (DataValueDescriptor) checkGM.invoke(activation);
-
-			/* Throw exception if check constraint is violated.
-			 * (Only if check constraint evaluates to false.)
-			 */ 
-			if ((checkBoolean != null) &&
-				(! checkBoolean.isNull()) &&
-				(! checkBoolean.getBoolean()))
-			{
-				/* Now we have a lot of painful work to get the
-				 * table name for the error message.  All we have 
-				 * is the conglomerate number to work with.
-				 */
-				DataDictionary dd = activation.getLanguageConnectionContext().getDataDictionary();
-				ConglomerateDescriptor cd = dd.getConglomerateDescriptor( heapConglom );
-				TableDescriptor td = dd.getTableDescriptor(cd.getTableID());
-
-				StandardException se = StandardException.newException(SQLState.LANG_CHECK_CONSTRAINT_VIOLATED, 
-					td.getQualifiedName(), checkName);
-
-				throw se;
-			}
-		}
-
-	}
 
 	/**
 	  * Compute the generation clauses on the current row in order to fill in

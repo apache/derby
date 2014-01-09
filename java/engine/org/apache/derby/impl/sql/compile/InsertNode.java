@@ -500,7 +500,6 @@ public final class InsertNode extends DMLModStatementNode
 												sourceRCL,
 												(int[]) null,
 												(FormatableBitSet) null,
-												false,
 											    true);  /* we always include
 														 * triggers in core language */
 	

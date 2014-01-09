@@ -598,7 +598,6 @@ public final class UpdateNode extends DMLModStatementNode
                                                 sourceRCL,
                                                 changedColumnIds,
                                                 readColsBitSet,
-                                                false,
                                                 true); /* we always include triggers in core language */
 
             /* If the target table is also a source table, then
@@ -1204,8 +1203,11 @@ public final class UpdateNode extends DMLModStatementNode
 		** because they are added as a side effect of adding
 		** their indexes above.
 		*/
-		baseTable.getAllRelevantConstraints
-			( StatementType.UPDATE, false, changedColumnIds, needsDeferredProcessing, relevantConstraints );
+		baseTable.getAllRelevantConstraints(
+            StatementType.UPDATE,
+            changedColumnIds,
+            needsDeferredProcessing,
+            relevantConstraints);
 
 		int rclSize = relevantConstraints.size();
 		for (int index = 0; index < rclSize; index++)

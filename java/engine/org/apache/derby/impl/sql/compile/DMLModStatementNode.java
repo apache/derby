@@ -627,7 +627,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ResultColumnList	sourceRCL,
 		int[]				changedColumnIds,
 		FormatableBitSet				readColsBitSet,
-		boolean				skipCheckConstraints,
 		boolean 			includeTriggers
     )
 		throws StandardException
@@ -647,7 +646,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		try {
 			getAllRelevantConstraints(dataDictionary, 	
 											targetTableDescriptor, 
-											skipCheckConstraints,
 											changedColumnIds);
 			createConstraintDependencies(dataDictionary, relevantCdl, dependent);
 			generateFKInfo(relevantCdl, dataDictionary, targetTableDescriptor, readColsBitSet);
@@ -656,11 +654,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 							   changedColumnIds, includeTriggers);
 			createTriggerDependencies(relevantTriggers, dependent);
             generateTriggerInfo(relevantTriggers);
-
-			if (skipCheckConstraints)
-			{
-				return null;
-			}
 
 			checkConstraints = generateCheckTree(relevantCdl,
 														targetTableDescriptor);
@@ -804,7 +797,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * Makes the calling object (usually a Statement) dependent on all the constraints.
 	 *
-	 * @param cdl				The constriant descriptor list
+     * @param cdl               The constraint descriptor list
 	 * @param td				The TableDescriptor
 	 *
 	 * @return	The ANDing of all appropriate check constraints as a query tree.
@@ -1286,7 +1279,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @param dd				The DataDictionary
 	 * @param td				The TableDescriptor
-	 * @param skipCheckConstraints Skip check constraints
 	 * @param changedColumnIds	If null, all columns being changed, otherwise array
 	 *							of 1-based column ids for columns being changed
 	 *
@@ -1298,7 +1290,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	(
 		DataDictionary		dd, 
 		TableDescriptor		td,
-		boolean				skipCheckConstraints,
 		int[]				changedColumnIds
     )
 		throws StandardException
@@ -1310,7 +1301,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		needsDeferredProcessing[0] = requiresDeferredProcessing;
 		td.getAllRelevantConstraints
-			( statementType, skipCheckConstraints, changedColumnIds,
+            ( statementType, changedColumnIds,
 			  needsDeferredProcessing, relevantCdl );
 
 		adjustDeferredFlag( needsDeferredProcessing[0] );

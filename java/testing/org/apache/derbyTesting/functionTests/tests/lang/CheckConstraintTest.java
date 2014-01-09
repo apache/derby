@@ -31,9 +31,13 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public final class CheckConstraintTest extends BaseJDBCTestCase {
+
+    // poached from GeneratedColumnsTest
+    private static  final   String  IMPORT_FILE_NAME = "t_bi_1.dat";
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -47,7 +51,10 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
     {
         TestSuite suite = new TestSuite("checkConstraint Test");
         suite.addTest(TestConfiguration.defaultSuite(CheckConstraintTest.class));
-        return suite;
+
+        return new SupportFilesSetup(
+             suite,
+             new String [] { "functionTests/tests/lang/" + IMPORT_FILE_NAME });
     }
     
     public void testNotAllowedInCheckConstraints() throws Exception
@@ -1016,4 +1023,69 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         assertStatementError("23513", s, "insert into t values -10");
         assertStatementError("23513", s, "insert into t values 10");
     }
+
+    private void setupForBulkInsert(Statement s, int limit)
+            throws SQLException {
+        s.executeUpdate(
+            "create table t_bi_1( a int, b int check (b < " + limit + "))");
+
+        s.executeUpdate(
+            "create function func () returns int " + 
+            "    language java parameter style java deterministic no sql " +
+            "    external name '" + this.getClass().getName() + ".func'");
+    }
+
+    /**
+     * DERBY-6453. Exercise hitherto untested code path in
+     * InsertResultSet (call to evaluateCheckConstraints from
+     * preprocessSourceRow used by bulkInsert) and verify IMPORT with
+     * trigger (which would a priori mandate bulk insert, but is
+     * changed due to normal inserts due to the presence of a
+     * trigger).
+     */
+    public void testbulkInsert() throws SQLException {
+
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        setupForBulkInsert(s, 0);
+
+        assertStatementError(
+            "23513", s,
+            "call syscs_util.syscs_import_data( " + 
+            "    null, " + 
+            "    'T_BI_1', " + 
+            "    'A, B', " + 
+            "    '1, 2', " + 
+            "    'extin/" + IMPORT_FILE_NAME + "', " + 
+            "    null, null, null, 0 )");
+
+        setupForBulkInsert(s, 10);
+
+        s.executeUpdate(
+            "create trigger dagstrigger no cascade before insert on t_bi_1 " +
+            "    values func() ");
+
+        funcWasCalled = false;
+
+        s.executeUpdate(
+            "call syscs_util.syscs_import_data( " + 
+            "    null, " + 
+            "    'T_BI_1', " + 
+            "    'A, B', " + 
+            "    '1, 2', " + 
+            "    'extin/" + IMPORT_FILE_NAME + "', " + 
+            "    null, null, null, 0 )");
+
+        assertTrue(funcWasCalled);
+    }
+
+    static boolean funcWasCalled;
+    
+    public static int func()
+    {
+        funcWasCalled = true;
+        return 0;
+    }
+
 }

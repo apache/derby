@@ -731,7 +731,6 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	  *	statement type and its list of updated columns.
 	  *
 	  *	@param	statementType			As defined in StatementType.
-	  * @param	skipCheckConstraints	Skip check constraints
 	  * @param	changedColumnIds		If null, all columns being changed, otherwise array
 	  *									of 1-based column ids for columns being changed
 	  *	@param	needsDeferredProcessing	IN/OUT. true if the statement already needs
@@ -745,7 +744,6 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	public	void	getAllRelevantConstraints
 	(
 		int							statementType,
-		boolean						skipCheckConstraints,
 		int[]						changedColumnIds,
 		boolean[]					needsDeferredProcessing,
 		ConstraintDescriptorList	relevantConstraints
@@ -768,12 +766,6 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		for (int index = 0; index < cdlSize; index++)
 		{
 			ConstraintDescriptor cd = cdl.elementAt(index);
-
-			if (skipCheckConstraints &&
-					(cd.getConstraintType() == DataDictionary.CHECK_CONSTRAINT))
-			{
-				continue;
-			}
 
 			/*
 			** For each constraint, figure out if it requires deferred processing.
