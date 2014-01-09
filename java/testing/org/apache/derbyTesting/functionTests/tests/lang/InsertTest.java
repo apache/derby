@@ -207,4 +207,75 @@ public class InsertTest extends BaseJDBCTestCase {
                 TOO_MANY_RESULT_COLUMNS,
                 "insert into derby4449 (x) values (default, default)");
     }
+
+    /**
+     * Regression test case for DERBY-6443. INSERT statements bind the
+     * source SELECT statement twice, and the second time it would miss
+     * aggregates and subqueries if they were wrapped in a function call.
+     * This led to inconsistencies in the query tree that caused errors
+     * during execution (or assertion failures during compilation in sane
+     * builds).
+     */
+    public void testDerby6443() throws SQLException {
+        Statement s = createStatement();
+
+        // Disable auto-commit for easy cleanup of test tables (automatically
+        // rolled back in tearDown()), and create a separate schema to avoid
+        // name conflicts with other test cases.
+        setAutoCommit(false);
+        s.execute("CREATE SCHEMA d6443");
+        s.execute("SET SCHEMA d6443");
+
+        // This is the original test case provided in the bug report. It
+        // used to fail with an assert failure when compiling the trigger
+        // (in sane builds), or with an ArrayIndexOutOfBoundsException when
+        // the trigger fired (in insane builds).
+        s.execute("CREATE TABLE foo (name VARCHAR(20), val DOUBLE)");
+        s.execute("CREATE TABLE summary "
+                + "(name VARCHAR(20), aver DOUBLE, size INT)");
+        s.execute("CREATE TRIGGER trg_foo AFTER INSERT ON foo "
+                + "REFERENCING NEW TABLE AS changed FOR EACH STATEMENT "
+                + "INSERT INTO summary (name, aver, size) "
+                + "SELECT name, FLOOR(AVG(LOG10(val))), COUNT(*) "
+                + "FROM changed "
+                + "GROUP BY name");
+        s.execute("INSERT INTO foo (name, val) "
+                + "VALUES ('A', 10), ('A', 20), ('B', 30), ('C', 40)");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from foo order by val"),
+                new String[][] {
+                    { "A", "10.0" },
+                    { "A", "20.0" },
+                    { "B", "30.0" },
+                    { "C", "40.0" },
+                });
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from summary order by name"),
+                new String[][] {
+                    { "A", "1.0", "2" },
+                    { "B", "1.0", "1" },
+                    { "C", "1.0", "1" },
+                });
+
+        // Some other problematic queries...
+
+        s.execute("create table t1(x int)");
+        s.execute("insert into t1 values 1");
+        s.execute("create table t2(x int)");
+
+        // Used to fail with assert or ArrayIndexOutOfBoundsException.
+        s.execute("insert into t2 select floor(avg(x)) from t1");
+
+        // Same here...
+        s.execute("create function f(x int) returns int language java "
+                + "parameter style java external name 'java.lang.Math.abs'");
+        s.execute("insert into t2 select f(avg(x)) from t1");
+
+        // This query used to fail with a NullPointerException.
+        s.execute("insert into t2 select f((select x from t1)) from t1");
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t2"),
+                new String[][] {{"1"}, {"1"}, {"1"}});
+    }
 }
