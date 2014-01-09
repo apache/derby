@@ -23,15 +23,13 @@ import java.sql.Statement;
 import java.util.Random;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class MathTrigFunctionsTest extends BaseJDBCTestCase {
-
-	private static final boolean debugFlag = false;
 
    private static final double
             PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE = -1.79769E+308;
@@ -57,7 +55,8 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
 	private static final double[] logValues = { 0.000000001, 0.25, 0.5, 1.0,
            45.0, 90.0, 135.0, 180.0, 270, PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE,
-           PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE };
+           PRE_DERBY_3398_LARGEST_POS_DERBY_DOUBLE, 10, 100, 1000, 10000,
+           100000, 1000000, 10000000, 100000000, 1000000000};
 
    private static final double[] testValues = {
             PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE,
@@ -408,6 +407,114 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
         psFN.close();
 	}
 
+    public void testCot() throws SQLException {
+        executeNullValues("COT");
+        executeNullFn("COT");
+        debug();
+
+        PreparedStatement ps = prepareStatement("VALUES COT(?)");
+        PreparedStatement psFN = prepareStatement("VALUES {fn COT(?)}");
+
+        for (double value : testValues) {
+            checkResult(ps, value, 1.0d / StrictMath.tan(value));
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < 100; i++) {
+            double randD = rand.nextDouble();
+            double expected = 1.0d / StrictMath.tan(randD);
+            checkResult(ps, randD, expected);
+            checkResult(psFN, randD, expected);
+        }
+    }
+
+    private void checkResult(PreparedStatement ps,
+                             double input, double expected)
+            throws SQLException {
+
+        // Derby doesn't distinguish between positive and negative zero.
+        if (expected == -0.0d) {
+            expected = 0.0d;
+        }
+
+        ps.setDouble(1, input);
+        if (Double.isNaN(expected) || Double.isInfinite(expected)) {
+            debug("input value: " + input + " expected value: " + expected
+                    + " : OUT OF RANGE");
+            assertStatementError("22003", ps);
+        } else {
+            debug("input value: " + input + " expected value: " + expected);
+            JDBC.assertSingleValueResultSet(
+                    ps.executeQuery(), String.valueOf(expected));
+        }
+    }
+
+    public void testCosh() throws SQLException {
+        executeNullValues("COSH");
+        debug();
+
+        PreparedStatement ps = prepareStatement("VALUES COSH(?)");
+
+        // COSH is not a JDBC escape function. Expect syntax error when
+        // called as one.
+        assertCompileError("42X01", "VALUES {fn COSH(?)}");
+
+        for (double value : testValues) {
+            checkResult(ps, value, StrictMath.cosh(value));
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < 100; i++) {
+            double randD = rand.nextDouble();
+            double expect = StrictMath.cosh(randD);
+            checkResult(ps, randD, expect);
+        }
+    }
+
+    public void testSinh() throws SQLException {
+        executeNullValues("SINH");
+        debug();
+
+        PreparedStatement ps = prepareStatement("VALUES SINH(?)");
+
+        // SINH is not a JDBC escape function. Expect syntax error when
+        // called as one.
+        assertCompileError("42X01", "VALUES {fn SINH(?)}");
+
+        for (double value : testValues) {
+            checkResult(ps, value, StrictMath.sinh(value));
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < 100; i++) {
+            double randD = rand.nextDouble();
+            double expect = StrictMath.sinh(randD);
+            checkResult(ps, randD, expect);
+        }
+    }
+
+    public void testTanh() throws SQLException {
+        executeNullValues("TANH");
+        debug();
+
+        PreparedStatement ps = prepareStatement("VALUES TANH(?)");
+
+        // TANH is not a JDBC escape function. Expect syntax error when
+        // called as one.
+        assertCompileError("42X01", "VALUES {fn TANH(?)}");
+
+        for (double value : testValues) {
+            checkResult(ps, value, StrictMath.tanh(value));
+        }
+
+        Random rand = new Random();
+        for (int i = 0; i < 100; i++) {
+            double randD = rand.nextDouble();
+            double expect = StrictMath.tanh(randD);
+            checkResult(ps, randD, expect);
+        }
+    }
+
 	/**
 	 * Tests the PI function which returns a value that is closer than any other
 	 * value to pi.
@@ -681,9 +788,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
         PreparedStatement psFN =
             prepareStatement("VALUES {fn LOG10(?)}");
 		for (int i = 0; i < logValues.length; i++) {
-			// ln 10 = y * (log base 10 (10))
-			// 2.3025850929940456840179914546844 = y * 1
-			double expected = java.lang.StrictMath.log(logValues[i]) / 2.3025850929940456840179914546844;
+            double expected = StrictMath.log10(logValues[i]);
 			double rValue = getValue(ps, logValues[i]);
 			debug("LOG10: input value: " + logValues[i] + " expected value: "
 					+ expected + " return value: " + rValue);
@@ -695,7 +800,7 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 		Random rand = new java.util.Random();
 		for (int i = 0; i < 100; i++) {
 			double randD = rand.nextDouble();
-			double expect = java.lang.StrictMath.log(randD) / 2.3025850929940456840179914546844;
+            double expect = StrictMath.log10(randD);
 			double rVal = getValue(ps, randD);
 			assertEquals(expect, rVal, 0.0);
 			double fVal = getValue(psFN, randD);
@@ -1110,15 +1215,11 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 	}
 
 	private void debug(String message) {
-		if (debugFlag) {
-			System.out.println(message);
-		}
+        println(message);
 	}
 
 	private void debug() {
-		if (debugFlag) {
-			System.out.println();
-		}
+        println("");
 	}
 
 	public MathTrigFunctionsTest(String name) {

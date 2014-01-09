@@ -62,8 +62,6 @@ import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
-import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
@@ -1803,24 +1801,6 @@ public class SystemProcedures  {
 	}
 	
 	/**
-	 * Constant for natural log(10).
-	 */
-	private static final double LOG10 = StrictMath.log(10.0d);
-	
-	/**
-	 * Base 10 log function. SYSFUN.LOG10
-	 * Calculated by
-	 * <code>
-	 * log(value) / log(10)
-	 * </code>
-	 * where log is the natural log.
-	 */
-	public static double LOG10(double value)
-	{
-		return StrictMath.log(value) / LOG10;
-	}
-
-	/**
 	 * Cotangent function. SYSFUN.COT
 	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
 	 * @return 1 / tan(x)
@@ -1828,37 +1808,6 @@ public class SystemProcedures  {
 	public static double COT(double value)
 	{
 		return 1.0 / StrictMath.tan(value);
-	}
-
-	/**
-	 * Hyperbolic Cosine function. SYSFUN.COSH
-	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
-	 * @return 1/2 (e^x + e^-x)
-	 */
-	public static double COSH(double value)
-	{
-		return (StrictMath.exp(value) + StrictMath.exp(-value)) / 2.0;
-	}
-
-	/**
-	 * Hyperbolic Sine function. SYSFUN.SINH
-	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
-	 * @return 1/2 (e^x - e^-x)
-	 */
-	public static double SINH(double value)
-	{
-		return (StrictMath.exp(value) - StrictMath.exp(-value)) / 2.0;
-	}
-
-	/**
-	 * Hyperbolic Tangent function. SYSFUN.TANH
-	 * @see <a href="http://mathworld.wolfram.com/HyperbolicFunctions.html">HyperbolicFunctions</a>
-	 * @return (e^x - e^-x) / (e^x + e^-x)
-	 */
-	public static double TANH(double value)
-	{
-		return (StrictMath.exp(value) - StrictMath.exp(-value)) /
-			(StrictMath.exp(value) + StrictMath.exp(-value));
 	}
 
 	/**

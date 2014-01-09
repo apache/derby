@@ -232,7 +232,7 @@ public final class	DataDictionaryImpl
         {"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)",  "true", "false", "DOUBLE" },
         {"LN", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "false", "DOUBLE" },
         {"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "false", "DOUBLE" }, // Same as LN
-        {"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)",  "true", "false", "DOUBLE" },
+        {"LOG10", "DOUBLE", "java.lang.StrictMath", "log10(double)",  "true", "false", "DOUBLE" },
         {"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)",  "true", "false", "DOUBLE" },
         {"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "false", "DOUBLE" },
         {"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "false", "DOUBLE" }, // Same as CEIL
@@ -241,9 +241,9 @@ public final class	DataDictionaryImpl
         {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()",  "false", "false" },
         {"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)",  "false", "false", "INTEGER" }, // Escape function spec.
         {"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)",  "true", "false", "DOUBLE" },
-        {"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)",  "true", "false", "DOUBLE" },
-        {"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)",  "true", "false", "DOUBLE" },
-        {"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)",  "true", "false", "DOUBLE" }
+        {"COSH", "DOUBLE", "java.lang.StrictMath", "cosh(double)",  "true", "false", "DOUBLE" },
+        {"SINH", "DOUBLE", "java.lang.StrictMath", "sinh(double)",  "true", "false", "DOUBLE" },
+        {"TANH", "DOUBLE", "java.lang.StrictMath", "tanh(double)",  "true", "false", "DOUBLE" }
 	};
 	
 
