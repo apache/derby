@@ -1342,10 +1342,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 dbo1.commit();
                 t.join();
                 assertNull("isolation levels: " + isolation1
-                        + " " + isolation2, dbo2.getException());
+                            + " " + isolation2 + ": exception " + 
+                        dbo2.getException(), dbo2.getException());
             }
             assertNull("unexpected failure: " + isolation1
-                        + " " + isolation2, dbo2.getUnexpectedException());
+                        + " " + isolation2 + ": exception " + 
+                        dbo2.getUnexpectedException(), 
+                    dbo2.getUnexpectedException());
         }
         finally {
             con1.commit();
