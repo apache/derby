@@ -611,7 +611,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * @param changedColumnIds		If null, all columns being changed, otherwise array
 	 *								of 1-based column ids for columns being changed
 	 * @param readColsBitSet		bit set for the read scan
-	 * @param skipCheckConstraints 	whether to skip check constraints or not
 	 * @param includeTriggers		whether triggers are included in the processing
 	 *
 	 * @return	The bound, ANDed check constraints as a query tree.
