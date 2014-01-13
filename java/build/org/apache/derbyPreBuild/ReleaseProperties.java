@@ -22,10 +22,12 @@
 package org.apache.derbyPreBuild;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
@@ -75,6 +77,9 @@ public class ReleaseProperties extends Task
     
 	public final static int	MAINT_ENCODING = 1000000;
     private final static int MAINT_LENGTH = 7;
+
+    private final   static  String  DRDA_MAINT = "drdamaint";
+    private final   static  int DRDA_MAINT_ID_DEFAULT = 0;
 
     // properties to set on the way out
     private static final String NEW_RELEASE_ID = "derby.release.id.new";
@@ -138,6 +143,9 @@ public class ReleaseProperties extends Task
         PrintWriter    propertiesPW = null;
 
         try {
+            int     drdaMaintID = readDRDAMaintID( target );
+            System.out.println( "XXX ReleaseProperties. drda maint id = " + drdaMaintID );
+            
             VersionID versionID = new VersionID( _releaseID );
             if ( _bump ) { versionID.bump(); }
             
@@ -150,7 +158,7 @@ public class ReleaseProperties extends Task
 
             propertiesPW.println( APACHE_LICENSE_HEADER );
 
-            propertiesPW.println( "drdamaint=0" );
+            propertiesPW.println( DRDA_MAINT + "=" + drdaMaintID );
             propertiesPW.println( "maint=" + encodeFixpackAndPoint( versionID ) );
             propertiesPW.println( "major=" + major );
             propertiesPW.println( "minor=" + minor );
@@ -231,6 +239,25 @@ public class ReleaseProperties extends Task
 
         pw.close();
         fw.close();
+    }
+
+    /**
+     * <p>
+     * Read the DRDA maintenance id from the existing release properties.
+     * Returns 0 if the release properties file doesn't exist.
+     * </p>
+     */
+    private int readDRDAMaintID( File inputFile )
+        throws Exception
+    {
+        if ( !inputFile.exists() ) { return DRDA_MAINT_ID_DEFAULT; }
+        
+        Properties  releaseProperties = new Properties();
+        releaseProperties.load( new FileInputStream( inputFile ) );
+
+        String  stringValue = releaseProperties.getProperty( DRDA_MAINT );
+
+        return Integer.parseInt( stringValue );
     }
     
     /////////////////////////////////////////////////////////////////////////
