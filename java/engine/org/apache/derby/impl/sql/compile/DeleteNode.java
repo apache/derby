@@ -40,6 +40,9 @@ import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.IgnoreFilter;
+import org.apache.derby.iapi.sql.compile.ScopeFilter;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -137,6 +140,14 @@ class DeleteNode extends DMLModStatementNode
 			TableName					cursorTargetTableName = null;
 			CurrentOfNode       		currentOfNode = null;
 
+            //
+            // Don't add privilege requirements for the UDT types of columns.
+            // The compiler will attempt to add these when generating the full column list during
+            // binding of the tables.
+            //
+            IgnoreFilter    ignorePermissions = new IgnoreFilter();
+            getCompilerContext().addPrivilegeFilter( ignorePermissions );
+            
 			DataDictionary dataDictionary = getDataDictionary();
             // for DELETE clause of a MERGE statement, the tables have already been bound
 			if ( !inMatchingClause() ) { super.bindTables(dataDictionary); }
@@ -277,8 +288,20 @@ class DeleteNode extends DMLModStatementNode
 				resultSet.setResultColumns(resultColumnList);
 			}
 
+            // done excluding column types from privilege checking
+            getCompilerContext().removePrivilegeFilter( ignorePermissions );
+
 			/* Bind the expressions before the ResultColumns are bound */
+
+            // only add privileges when we're inside the WHERE clause
+            ScopeFilter scopeFilter = new ScopeFilter( getCompilerContext(), CompilerContext.WHERE_SCOPE, 1 );
+            getCompilerContext().addPrivilegeFilter( scopeFilter );
 			super.bindExpressions();
+
+            //
+            // Don't remove the WHERE scopeFilter. Pre-processing may try to
+            // add other privileges which we don't need.
+            //
 
 			/* Bind untyped nulls directly under the result columns */
 			resultSet.getResultColumns().
@@ -369,12 +392,11 @@ class DeleteNode extends DMLModStatementNode
 
 				}
 			}
-			if (isPrivilegeCollectionRequired())
-			{
-				getCompilerContext().pushCurrentPrivType( getPrivType());
-				getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
-				getCompilerContext().popCurrentPrivType();
-			}
+
+            // add need for DELETE privilege on the target table
+            getCompilerContext().pushCurrentPrivType( getPrivType());
+            getCompilerContext().addRequiredTablePriv( targetTableDescriptor);
+            getCompilerContext().popCurrentPrivType();
 		}
 		finally
 		{

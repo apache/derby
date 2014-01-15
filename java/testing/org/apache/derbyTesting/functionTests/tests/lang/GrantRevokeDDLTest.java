@@ -11500,7 +11500,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
      * Test that INSERT statements require the correct privileges as
      * described on DERBY-6434.
      */
-    public void test_6434_tables()
+    public void test_6434_insert()
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -11745,6 +11745,237 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             (
              dboConnection,
              "drop type GenerationType_6434 restrict"
+             );
+    }
+    
+    /**
+     * Test that DELETE statements require the correct privileges as
+     * described on DERBY-6434.
+     */
+    public void test_6434_delete()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SelectType_6434_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type BeforeTriggerType_6434_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type AfterTriggerType_6434_2 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function selectFunction_6434_2( hashMap SelectType_6434_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function beforeTriggerFunction_6434_2( hashMap BeforeTriggerType_6434_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function afterTriggerFunction_6434_2( hashMap AfterTriggerType_6434_2, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create derby aggregate selectAggregate_6434_2 for int\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ModeAggregate'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_6434_2\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_6434_2\n" +
+             "(\n" +
+             "    key1 int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table selectTable_6434_2\n" +
+             "(\n" +
+             "    selectColumn int,\n" +
+             "    selectColumn2 SelectType_6434_2\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table deleteTable_6434_2\n" +
+             "(\n" +
+             "    privateForeignColumn int references primaryTable_6434_2( key1 ),\n" +
+             "    privatePrimaryColumn int primary key,\n" +
+             "    privateBeforeTriggerSource BeforeTriggerType_6434_2,\n" +
+             "    privateAfterTriggerSource AfterTriggerType_6434_2,\n" +
+             "    publicSelectColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table foreignTable_6434_2\n" +
+             "(\n" +
+             "    key1 int references deleteTable_6434_2( privatePrimaryColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeDeleteTrigger_6434_2\n" +
+             "no cascade before delete on deleteTable_6434_2\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_6434_2( 'before', beforeTriggerFunction_6434_2( old.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterDeleteTrigger_6434_2\n" +
+             "after delete on deleteTable_6434_2\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_6434_2( 'after', afterTriggerFunction_6434_2( old.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+
+        //
+        // Privileges
+        //
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "delete on deleteTable_6434_2", NO_TABLE_PERMISSION ),
+            new Permission( "execute on function selectFunction_6434_2", NO_GENERIC_PERMISSION ),
+            new Permission( "usage on derby aggregate selectAggregate_6434_2", NO_GENERIC_PERMISSION ),
+            new Permission( "select on selectTable_6434_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( publicSelectColumn ) on deleteTable_6434_2", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grant_6429( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  delete =
+            "delete from test_dbo.deleteTable_6434_2\n" +
+            "where publicSelectColumn =\n" +
+            "(\n" +
+            "    select test_dbo.selectAggregate_6434_2( selectColumn )\n" +
+            "    from test_dbo.selectTable_6434_2\n" +
+            "    where test_dbo.selectFunction_6434_2( selectColumn2, 'foo' ) < 100\n" +
+            ")\n";
+
+        // fails because ruth doesn't have USAGE permission on type SelectType_6434_2
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, delete );
+
+        // succeeds after granting that permission
+        grant_6429( dboConnection, "usage on type SelectType_6434_2" );
+        goodStatement( ruthConnection, delete );
+        
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission_6429( permission, dboConnection, ruthConnection, delete );
+        }
+
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table foreignTable_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table deleteTable_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table selectTable_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table primaryTable_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop procedure addHistoryRow_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop derby aggregate selectAggregate_6434_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function afterTriggerFunction_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function beforeTriggerFunction_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function selectFunction_6434_2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type AfterTriggerType_6434_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type BeforeTriggerType_6434_2 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SelectType_6434_2 restrict"
              );
     }
     

@@ -590,6 +590,7 @@ class SelectNode extends ResultSetNode
         
 		if (whereClause != null)
 		{
+            cc.beginScope( CompilerContext.WHERE_SCOPE );
 			cc.pushCurrentPrivType( Authorizer.SELECT_PRIV);
 
             int previousReliability = orReliability( CompilerContext.WHERE_CLAUSE_RESTRICTION );
@@ -619,6 +620,7 @@ class SelectNode extends ResultSetNode
 			
 			whereClause = whereClause.checkIsBoolean();
 			getCompilerContext().popCurrentPrivType();
+            cc.endScope( CompilerContext.WHERE_SCOPE );
 
 			checkNoWindowFunctions(whereClause, "WHERE");
 		}

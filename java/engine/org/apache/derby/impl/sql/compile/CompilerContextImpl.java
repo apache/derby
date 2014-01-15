@@ -78,6 +78,8 @@ import org.apache.derby.iapi.util.ReuseFactory;
 public class CompilerContextImpl extends ContextImpl
 	implements CompilerContext {
 
+    private static  final   int SCOPE_CELL = 0;
+    
 	//
 	// Context interface       
 	//
@@ -143,6 +145,7 @@ public class CompilerContextImpl extends ContextImpl
 		defaultSchemaStack = null;
         referencedSequences = null;
         privilegeCheckFilters =  null;
+        namedScopes = null;
 	}
 
 	//
@@ -1001,8 +1004,44 @@ public class CompilerContextImpl extends ContextImpl
         return true;
     }
     
+    public  void    beginScope( String scopeName )
+    {
+        if ( namedScopes == null ) { namedScopes = new HashMap<String,int[]>(); }
+        
+        int[]   scopeDepth = namedScopes.get( scopeName );
+        if ( scopeDepth == null )
+        {
+            scopeDepth = new int[ SCOPE_CELL + 1 ];
+            namedScopes.put( scopeName, scopeDepth );
+        }
+
+        scopeDepth[ SCOPE_CELL ]++;
+    }
+    
+    public  void    endScope( String scopeName )
+    {
+        if ( namedScopes == null ) { return; }
+
+        int[]   scopeDepth = namedScopes.get( scopeName );
+        if ( scopeDepth == null )   { return; }
+
+        scopeDepth[ SCOPE_CELL ]--;
+
+        if ( scopeDepth[ SCOPE_CELL ] <= 0 ) { namedScopes.remove( scopeName ); }
+    }
+
+    public  int     scopeDepth( String scopeName )
+    {
+        if ( namedScopes == null ) { return 0; }
+
+        int[]   scopeDepth = namedScopes.get( scopeName );
+        if ( scopeDepth == null )   { return 0; }
+        else { return scopeDepth[ SCOPE_CELL ]; }
+    }
+
+
 	/*
-	** Context state must be reset in restContext()
+	** Context state must be reset in resetContext()
 	*/
 
 	private final Parser 		parser;
@@ -1024,6 +1063,8 @@ public class CompilerContextImpl extends ContextImpl
 	private List<Object>				savedObjects;
 	private String				classPrefix;
 	private SchemaDescriptor	compilationSchema;
+    private ArrayList<VisitableFilter> privilegeCheckFilters;
+    private HashMap<String,int[]> namedScopes;
 
 	/**
 	 * Saved execution time default schema, if we need to change it
@@ -1060,7 +1101,5 @@ public class CompilerContextImpl extends ContextImpl
 	private HashMap<UUID,String> requiredUsagePrivileges;
 	private HashMap<StatementRolePermission,StatementRolePermission> requiredRolePrivileges;
     private HashMap<UUID,SequenceDescriptor> referencedSequences;
-
-    private ArrayList<VisitableFilter> privilegeCheckFilters;
     
 } // end of class CompilerContextImpl

@@ -132,6 +132,8 @@ public interface CompilerContext extends Context
 	public	static	final	int			CONDITIONAL_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
 	public	static	final	int			GROUP_BY_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
 
+    public  static  final   String  WHERE_SCOPE = "whereScope";
+    
 	/////////////////////////////////////////////////////////////////////////////////////
 	//
 	//	BEHAVIOR
@@ -604,5 +606,25 @@ public interface CompilerContext extends Context
      */
     public  boolean passesPrivilegeFilters( Visitable visitable )
         throws StandardException;
+
+    /**
+     * Record that the compiler is entering a named scope. Increment the
+     * depth counter for that scope.
+     */
+    public  void    beginScope( String scopeName );
+    
+    /**
+     * Record that the compiler is exiting a named scope. Decrement the
+     * depth counter for that scope.
+     */
+    public  void    endScope( String scopeName );
+
+    /**
+     * Get the current depth for the named scope. For instance, if
+     * we are processing a WHERE clause inside a subquery which is
+     * invoked inside an outer WHERE clause, the depth of the whereScope
+     * would be 2. Returns 0 if the compiler isn't inside any such scope.
+     */
+    public  int     scopeDepth( String scopeName );
     
 }
