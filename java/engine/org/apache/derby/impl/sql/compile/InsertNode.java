@@ -265,7 +265,6 @@ public final class InsertNode extends DMLModStatementNode
         IgnoreFilter    ignorePermissions = new IgnoreFilter();
         getCompilerContext().addPrivilegeFilter( ignorePermissions );
 		getResultColumnList();
-        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
 		/* If we have a target column list, then it must have the same # of
 		 * entries as the result set's RCL.
@@ -294,6 +293,8 @@ public final class InsertNode extends DMLModStatementNode
 			}	
 			getCompilerContext().popCurrentPrivType();
         }
+
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */
 		if (SanityManager.DEBUG)

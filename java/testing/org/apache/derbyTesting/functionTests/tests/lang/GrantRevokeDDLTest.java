@@ -12119,4 +12119,147 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
              );
     }
     
+    /**
+     * Test that INSERT and UPDATEs run generation expressions with definer's rights.
+     */
+    public void test_6433()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function absoluteValue_6433( inputValue int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type hashmap_6433 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function makeHashMap_6423() returns hashmap_6433\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_generated_function_6433\n" +
+             "(\n" +
+             "    a int,\n" +
+             "    b int generated always as ( absoluteValue_6433( a ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_generated_type_6433\n" +
+             "(\n" +
+             "    a hashmap_6433,\n" +
+             "    b boolean generated always as ( a is null )\n" +
+             ")\n"
+             );
+        
+        //
+        // Data
+        //
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_generated_function_6433( a ) values -101"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_generated_type_6433( a ) values ( makeHashMap_6423() )"
+             );
+
+        //
+        // Privileges
+        //
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t1_generated_function_6433 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t1_generated_function_6433 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t1_generated_type_6433 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t1_generated_type_6433 to ruth"
+             );
+        
+        //
+        // Verify that granted permissions are sufficient for ruth
+        // to INSERT and UPDATE the table.
+        //
+        goodStatement
+            (
+             ruthConnection,
+             "insert into test_dbo.t1_generated_function_6433( a ) values ( -102 )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "update test_dbo.t1_generated_function_6433 set a = -103"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into test_dbo.t1_generated_type_6433( a ) values ( null )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "update test_dbo.t1_generated_type_6433 set a = null"
+             );
+        
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table t1_generated_type_6433"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table t1_generated_function_6433"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function makeHashMap_6423"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type hashmap_6433 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function absoluteValue_6433"
+             );
+    }
+
 }
