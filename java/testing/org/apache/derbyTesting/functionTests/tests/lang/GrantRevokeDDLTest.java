@@ -11979,4 +11979,144 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
              );
     }
     
+    /**
+     * Test that INSERT and UPDATEs run CHECK constraints with definer's rights.
+     */
+    public void test_6432()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function absoluteValue_6432( inputValue int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type hashmap_6432 external name 'java.util.HashMap' language java\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function makeHashmap_6432() returns hashmap_6432\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_check_function_6432\n" +
+             "(\n" +
+             "    a int check ( absoluteValue_6432( a ) > 100 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_check_type_6432\n" +
+             "(\n" +
+             "    a hashmap_6432 check( (a is null) or (a is not null) )\n" +
+             ")\n"
+             );
+
+        //
+        // Data
+        //
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_check_function_6432( a ) values -101"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_check_type_6432( a ) values ( makeHashmap_6432() )"
+             );
+
+        //
+        // Privileges
+        //
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t1_check_function_6432 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t1_check_function_6432 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t1_check_type_6432 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t1_check_type_6432 to ruth"
+             );
+
+        //
+        // Succeeds after the changes made by DERBY-6429 and DERBY-6434.
+        //
+        goodStatement
+            (
+             ruthConnection,
+             "insert into test_dbo.t1_check_function_6432 values ( -102 )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "update test_dbo.t1_check_function_6432 set a = -103"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into test_dbo.t1_check_type_6432 values ( null )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "update test_dbo.t1_check_type_6432 set a = null"
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table t1_check_type_6432"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table t1_check_function_6432"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function makeHashmap_6432"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type hashmap_6432 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function absoluteValue_6432"
+             );
+    }
+    
 }
