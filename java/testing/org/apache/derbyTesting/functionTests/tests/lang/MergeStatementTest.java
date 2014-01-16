@@ -4299,6 +4299,82 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_024" );
     }
     
+    /**
+     * <p>
+     * Verify that the INSERT list can be omitted.
+     * </p>
+     */
+    public  void    test_025_noInsertList()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_025( a int, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_025( a int, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_025 values ( 1, 100 ), ( 2, 200 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_025 values ( 1, 100 ), ( 3, 300 )"
+             );
+
+        //
+        // Omitting the INSERT column list is OK as long as this is
+        // a short-hand for the full column list.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "merge into t1_025\n" +
+             "using t2_025 on t1_025.a = t2_025.a\n" +
+             "when not matched then insert values ( t2_025.a, t2_025.b )\n"
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_025 order by a",
+             new String[][]
+             {
+                 { "1", "100" },
+                 { "2", "200" },
+                 { "3", "300" },
+             },
+             false
+             );
+
+        //
+        // Fails because the omitted INSERT column list implies that a value
+        // must be supplied for every column in the table.
+        //
+        expectCompilationError
+            ( dboConnection, COLUMN_COUNT_MISMATCH,
+              "merge into t1_025\n" +
+              "using t2_025 on t1_025.a = t2_025.a\n" +
+              "when not matched then insert values ( t2_025.a )\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_025" );
+        goodStatement( dboConnection, "drop table t1_025" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

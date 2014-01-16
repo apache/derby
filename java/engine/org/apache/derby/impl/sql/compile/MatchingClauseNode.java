@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -780,13 +781,16 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        TableDescriptor td = targetTable.getTableDescriptor();
+
+        // construct a full insert column list if insert columns weren't specified
+        if ( _insertColumns == null )  { _insertColumns = buildFullColumnList( td ); }
+
         if ( _insertColumns.size() != _insertValues.size() )
         {
             throw StandardException.newException( SQLState.LANG_DB2_INVALID_COLS_SPECIFIED ); 
         }
         
-        TableDescriptor td = targetTable.getTableDescriptor();
-
         // forbid illegal values for identity columns
         for ( int i = 0; i <_insertValues.size(); i++ )
         {
@@ -815,6 +819,35 @@ public class MatchingClauseNode extends QueryTreeNode
         // needed to make the SelectNode bind
         _insertValues.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
         bindExpressions( _insertValues, fullFromList );
+    }
+
+    /**
+     * <p>
+     * Build the full column list for a table.
+     * </p>
+     */
+    private ResultColumnList    buildFullColumnList( TableDescriptor td )
+        throws StandardException
+    {
+        ResultColumnList    result = new ResultColumnList( getContextManager() );
+		ColumnDescriptorList cdl = td.getColumnDescriptorList();
+		int					 cdlSize = cdl.size();
+
+		for ( int index = 0; index < cdlSize; index++ )
+		{
+            ColumnDescriptor colDesc = cdl.elementAt( index );
+            ColumnReference columnRef = new ColumnReference( colDesc.getColumnName(), null, getContextManager() );
+            ResultColumn    resultColumn = new ResultColumn
+                (
+                 columnRef,
+                 null,
+                 getContextManager()
+                 );
+            
+            result.addResultColumn( resultColumn );
+        }
+
+        return result;
     }
     
     /**
