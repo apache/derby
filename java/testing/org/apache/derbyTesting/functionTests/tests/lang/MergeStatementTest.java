@@ -4375,6 +4375,132 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_025" );
     }
 
+    /**
+     * <p>
+     * Verify that MERGE works with system tables and global temporary tables.
+     * </p>
+     */
+    public  void    test_026_otherTableTypes()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_026( a int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "declare global temporary table session.t2_temp_026( a int )\n" +
+             "on commit preserve rows not logged\n"
+             );
+
+        // allow system tables as source tables
+        goodStatement
+            (
+             dboConnection,
+             "merge into t1_026 t\n" +
+             "using sys.syscolumns c on t.a = c.columnNumber\n" +
+             "when not matched then insert ( a ) values ( c.columnNumber )\n"
+             );
+
+        // but don't allow system tables as target tables
+        expectCompilationError
+            ( dboConnection, TARGET_MUST_BE_BASE,
+              "merge into sys.syscolumns c\n" +
+              "using t1_026 t on t.a = c.columnNumber\n" +
+              "when not matched then insert ( columnNumber ) values ( t.a )\n"
+              );
+
+        // allow temporary tables as source tables
+        goodStatement
+            (
+             dboConnection,
+             "delete from t1_026"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_026 values ( 1 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into session.t2_temp_026 values ( 1 ), ( 2 )"
+             );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_026\n" +
+             "using session.t2_temp_026 s on s.a = t1_026.a\n" +
+             "when not matched then insert values ( s.a )\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_026 order by a",
+             new String[][]
+             {
+                 { "1" },
+                 { "2" },
+             },
+             false
+             );
+
+        // allow temporary tables as target tables
+        goodStatement
+            (
+             dboConnection,
+             "delete from t1_026"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "delete from session.t2_temp_026"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_026 values ( 1 ), ( 2 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into session.t2_temp_026 values ( 1 )"
+             );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into session.t2_temp_026 s\n" +
+             "using t1_026 on t1_026.a = s.a\n" +
+             "when not matched then insert values ( t1_026.a )\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from session.t2_temp_026 order by a",
+             new String[][]
+             {
+                 { "1" },
+                 { "2" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table session.t2_temp_026" );
+        goodStatement( dboConnection, "drop table t1_026" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

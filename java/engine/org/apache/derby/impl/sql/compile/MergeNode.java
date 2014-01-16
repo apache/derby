@@ -520,7 +520,15 @@ public final class MergeNode extends DMLModStatementNode
         TableDescriptor desc = fbt.getTableDescriptor();
         if ( desc == null ) { return false; }
 
-        return ( desc.getTableType() == TableDescriptor.BASE_TABLE_TYPE );
+        switch( desc.getTableType() )
+        {
+        case TableDescriptor.BASE_TABLE_TYPE:
+        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
+            return true;
+
+        default:
+            return false;
+        }
     }
 
     /** Return true if the source table is a base table, view, or table function */
@@ -536,6 +544,8 @@ public final class MergeNode extends DMLModStatementNode
         switch( desc.getTableType() )
         {
         case TableDescriptor.BASE_TABLE_TYPE:
+        case TableDescriptor.SYSTEM_TABLE_TYPE:
+        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
         case TableDescriptor.VIEW_TYPE:
             return true;
 
