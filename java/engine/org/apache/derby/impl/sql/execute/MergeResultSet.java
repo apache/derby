@@ -60,6 +60,8 @@ class MergeResultSet extends NoRowsResultSetImpl
     private long                        _rowCount;
     private TemporaryRowHolderImpl[]    _thenRows;
 
+	private int						numOpens;
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTRUCTOR
@@ -95,6 +97,15 @@ class MergeResultSet extends NoRowsResultSetImpl
     {
         setup();
 
+		if (numOpens++ == 0)
+		{
+			_drivingLeftJoin.openCore();
+		}
+		else
+		{
+			_drivingLeftJoin.reopenCore();
+		}
+
         boolean rowsFound = collectAffectedRows();
         if ( !rowsFound )
         {
@@ -124,7 +135,6 @@ class MergeResultSet extends NoRowsResultSetImpl
         }
 
         _rowCount = 0L;
-        _drivingLeftJoin.openCore();
     }
     
     /**
@@ -149,12 +159,15 @@ class MergeResultSet extends NoRowsResultSetImpl
             
             _constants.getMatchingClause( i ).cleanUp();
         }
+
+        if ( _drivingLeftJoin != null ) { _drivingLeftJoin.close(); }
+		numOpens = 0;
     }
 
 
     public void finish() throws StandardException
     {
-        _drivingLeftJoin.finish();
+        if ( _drivingLeftJoin != null ) { _drivingLeftJoin.finish(); }
         super.finish();
     }
 

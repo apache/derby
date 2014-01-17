@@ -4565,6 +4565,75 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_027" );
     }
     
+    /**
+     * <p>
+     * Verify that you can drive MERGE statements from row-based triggers.
+     * </p>
+     */
+    public  void    test_028_basicRowTrigger()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create view singlerow_028( x ) as values 1"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_028( x int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_028( y int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger tr after insert on t1_028\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "merge into t2_028\n" +
+             "using singlerow_028 on t2_028.y = new.x\n" +
+             "when not matched then insert ( y ) values ( new.x )\n"
+             );
+
+        // now exercise the trigger
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_028 values 1,2,3,4,5,4,3,2,1,1,1,2,3,100"
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t2_028 order by y",
+             new String[][]
+             {
+                 { "1" },
+                 { "2" },
+                 { "3" },
+                 { "4" },
+                 { "5" },
+                 { "100" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_028" );
+        goodStatement( dboConnection, "drop table t2_028" );
+        goodStatement( dboConnection, "drop view singlerow_028" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
