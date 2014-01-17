@@ -4501,6 +4501,70 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_026" );
     }
     
+    /**
+     * <p>
+     * Verify that correlation names on the left side of SET clauses are replaced properly.
+     * </p>
+     */
+    public  void    test_027_correlationNamesInSetClauses()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_027( a int, b int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_027( c int, d int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_027 values ( 1, 100 ), ( 2, 200 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_027 values ( 1, 1000 ), (2, 2000), ( 3, 3000 ), ( 4, 4000 )"
+             );
+
+        // test that correlation names are replaced properly
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_027 x\n" +
+             "using t2_027 y on x.a = y.c\n" +
+             "when matched and x.b > 100 then update set x.b = y.d\n" +
+             "when matched and x.b <= 100 then delete\n" +
+             "when not matched and y.d > 3000 then insert values ( y.c, y.d )\n",
+             3
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_027 order by a",
+             new String[][]
+             {
+                 { "2", "2000" },
+                 { "4", "4000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_027" );
+        goodStatement( dboConnection, "drop table t1_027" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

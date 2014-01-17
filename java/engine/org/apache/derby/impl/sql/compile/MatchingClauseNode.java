@@ -203,9 +203,39 @@ public class MatchingClauseNode extends QueryTreeNode
         throws StandardException
     {
         parent.replaceCorrelationName( correlationName, newTableName, _matchingRefinement );
-        parent.replaceCorrelationName( correlationName, newTableName, _updateColumns );
+        replaceCorrelationNameInSetClauses( parent, correlationName, newTableName );
         parent.replaceCorrelationName( correlationName, newTableName, _insertColumns );
         parent.replaceCorrelationName( correlationName, newTableName, _insertValues );
+    }
+    
+    /**
+     * <p>
+     * Replace references to the correlation name with the underlying table name
+     * in the SET clauses of WHEN MATCHED ... THEN UPDATE clauses. This replacement is
+     * done before the ColumnReferences are bound.
+     * </p>
+     */
+    public  void    replaceCorrelationNameInSetClauses
+        (
+         MergeNode  parent,
+         String correlationName,
+         TableName  newTableName
+         )
+        throws StandardException
+    {
+        if ( _updateColumns == null ) { return; }
+        
+        // this handles the right side of the SET clauses
+        parent.replaceCorrelationName( correlationName, newTableName, _updateColumns );
+
+        // we have to hand-process the left side because the Visitor
+        // logic for ResultColumns does not process the ColumnReference
+        for ( int i = 0; i < _updateColumns.size(); i++ )
+        {
+            ResultColumn    rc = _updateColumns.elementAt( i );
+
+            parent.replaceCorrelationName( correlationName, newTableName, rc.getReference() );
+        }
     }
     
     /** Bind this WHEN [ NOT ] MATCHED clause against the parent JoinNode */
