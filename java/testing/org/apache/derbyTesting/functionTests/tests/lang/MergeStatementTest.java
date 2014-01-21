@@ -4634,6 +4634,65 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop view singlerow_028" );
     }
     
+    /**
+     * <p>
+     * This case tests a problem query which causes an index scan to
+     * be selected for the target table. Row locations weren't being treated
+     * as columns in the result row and conglomerate info was not being
+     * propagated to copied ResultColumnLists.
+     * </p>
+     */
+    public  void    test_029_scanViaIndex()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_029(x int primary key)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_029(x int)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_029 values( 33 )"
+             );
+
+        // this was the problem query
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_029\n" +
+             "using t2_029 on t1_029.x = 42\n" +
+             "when not matched then insert (x) values (42)\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select  * from t1_029 order by x",
+             new String[][]
+             {
+                 { "42" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_029" );
+        goodStatement( dboConnection, "drop table t2_029" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

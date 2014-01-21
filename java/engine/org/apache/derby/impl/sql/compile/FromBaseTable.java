@@ -2926,6 +2926,7 @@ class FromBaseTable extends FromTable
 		 */
 		ResultColumnList prRCList = resultColumns;
 		resultColumns = resultColumns.copyListAndObjects();
+		resultColumns.setIndexRow( baseConglomerateDescriptor.getConglomerateNumber(), forUpdate() );
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the ProjectRestrictNode's ResultColumnList.  (VirtualColumnNodes include

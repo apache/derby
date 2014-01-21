@@ -3648,7 +3648,13 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 				 */
 				if (onlyBCNs && ! (oldCol.getExpression() instanceof BaseColumnNode))
 				{
-					continue;
+                    boolean skipable =
+                        ( ! (oldCol.getExpression() instanceof BaseColumnNode) ) &&
+                        ( ! (oldCol.getExpression() instanceof CurrentRowLocationNode) );
+                    if ( skipable )
+                    {
+                        continue;
+                    }
 				}
 				newReferencedCols.set(index);
 				colsAdded++;
