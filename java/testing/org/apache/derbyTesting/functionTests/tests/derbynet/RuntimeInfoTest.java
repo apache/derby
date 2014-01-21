@@ -77,9 +77,15 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite("RuntimeInfoTest");
-        
-        suite.addTest(decorateTest(englishLocale));
-        suite.addTest(decorateTest(germanLocale));
+
+        // Run testRunTests in both English and German locale
+        suite.addTest(decorateTest(englishLocale, "testRunTests"));
+        suite.addTest(decorateTest(germanLocale, "testRunTests"));
+
+        // Other test cases, only tested in a single locale.
+        suite.addTest(
+                decorateTest(englishLocale, "testRuntimeInfoWithLongValues"));
+
 		return suite;
 	}	
 	
@@ -188,6 +194,33 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		assertEquals("Output doesn't match", expectedOutput, s);
 	}
 
+    /**
+     * Regression test case for DERBY-6456, which caused an infinite loop if
+     * the runtimeinfo output was more than 32KB.
+     */
+    public void testRuntimeInfoWithLongValues() throws Exception {
+        // First open many connections on the server, so that the reply from
+        // getRuntimeInfo() will be long.
+        for (int i = 0; i < 200; i++) {
+            prepareAndExecuteQuery(openDefaultConnection(),
+                "VALUES 'Hello, World! How are you today?',\n"
+              + "'Not that bad today, actually. Thanks for asking.'\n"
+              + "-- Let's add some more text to increase the output length.\n"
+              + "-- And even more here... The statement text, including this\n"
+              + "-- comment, will be included in the runtimeinfo output.\n");
+        }
+
+        // This call used to hang.
+        String runtimeinfo =
+            NetworkServerTestSetup.getNetworkServerControl().getRuntimeInfo();
+
+        // For debugging:
+        println(runtimeinfo);
+
+        // Output gets truncated to 65535 bytes (DERBY-5220).
+        assertEquals(65535, runtimeinfo.length());
+    }
+
 	public static PreparedStatement prepareAndExecuteQuery(Connection conn,
 			String sql) throws SQLException {
 		PreparedStatement ps = conn.prepareStatement(sql);
@@ -232,9 +265,9 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 * 
 	 * @return the decorated test
 	 */
-	private static Test decorateTest(Locale serverLocale) {
-        Test test = new TestSuite(RuntimeInfoTest.class);
-        
+    private static Test decorateTest(Locale serverLocale, String testName) {
+        Test test = new RuntimeInfoTest(testName);
+
         test = TestConfiguration.clientServerDecorator(test);
         
         /* A single use database must be used to ensure the consistent output.
