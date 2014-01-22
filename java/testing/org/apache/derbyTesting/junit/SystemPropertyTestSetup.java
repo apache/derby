@@ -130,6 +130,24 @@ public class SystemPropertyTestSetup extends TestSetup {
     protected void tearDown()
     throws java.lang.Exception
     {
+        // Shut down the engine to restore any static properties. Do that
+        // before the properties are reset to their old values, since the
+        // engine shutdown may rely on some of the system properties. For
+        // example, the system properties could contain the user database
+        // (in derby.user.* style properties), and clearing those first
+        // would lead to "invalid authentication" errors when attempting
+        // to shut down the engine.
+        try {
+            if (staticProperties) {
+                TestConfiguration.getCurrent().shutdownEngine();
+            }
+        } finally {
+            restoreOldPropertyValues();
+            oldValues = null;
+        }
+    }
+
+    private void restoreOldPropertyValues() throws Exception {
     	// Clear all the system properties set by the new set
     	// that will not be reset by the old set.
        	for (Enumeration e = newValues.propertyNames(); e.hasMoreElements();)
@@ -140,12 +158,8 @@ public class SystemPropertyTestSetup extends TestSetup {
        	}
     	// and then reset nay old values
     	setProperties(oldValues);
-    	// shutdown engine to restore any static properties
-    	if (staticProperties)
-    		TestConfiguration.getCurrent().shutdownEngine();
-        oldValues = null;
     }
-    
+
     private void setProperties(Properties values)
         throws PrivilegedActionException
     {

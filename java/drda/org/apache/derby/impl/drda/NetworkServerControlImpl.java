@@ -2780,8 +2780,9 @@ public final class NetworkServerControlImpl {
             }
             else
             {
-                commandOs.writeShort(msg.length());
-                writeString(msg);
+                byte[] msgBytes = msg.getBytes(DEFAULT_ENCODING);
+                commandOs.writeShort(msgBytes.length);
+                commandOs.write(msgBytes);
             }
         }
         catch (IOException e)

@@ -47,6 +47,9 @@ import junit.framework.TestSuite;
 
 public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
+    private static final String NON_ASCII_USER = "bj\u00F8rn";
+    private static final String NON_ASCII_PASSWORD = "l\u00F8yndom";
+
     private static final String POLICY_FILE_NAME =
             "org/apache/derbyTesting/functionTests/tests/derbynet/NetworkServerControlApiTest.policy";
     
@@ -162,8 +165,27 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         assertFalse(conn.getMetaData().isReadOnly());
         assertTrue(fileExists(derbysystemhome+"/trace/Server1.trace"));
     }
-    
-    
+
+    /**
+     * Run the shutdown command with credentials that contain non-ASCII
+     * characters. Regression test case for DERBY-6457.
+     */
+    public void xtestShutdownWithNonASCIICredentials() throws Exception {
+        NetworkServerControl control =
+                NetworkServerTestSetup.getNetworkServerControl();
+
+        // Verify that the server is up.
+        NetworkServerTestSetup.pingForServerStart(control);
+
+        // Shut down the server with the default credentials, which contain
+        // non-ASCII characters. See NON_ASCII_USER and NON_ASCII_PASSWORD.
+        // This call used to hang forever before DERBY-6457 was fixed.
+        control.shutdown();
+
+        // Verify that the server is down.
+        NetworkServerTestSetup.pingForServerUp(control, null, false);
+    }
+
     /**
      * Test NetworkServerControl ping command.
      * @throws Exception
@@ -250,7 +272,11 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         suite.addTest(decorateTest());
         
         suite = decorateSystemPropertyTests(suite);
-                    
+
+        suite.addTest(decorateShutdownTest(
+                "xtestShutdownWithNonASCIICredentials",
+                NON_ASCII_USER, NON_ASCII_PASSWORD));
+
         return suite;
     }
 
@@ -271,6 +297,30 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                     traceProps2));
         
         return suite;
+    }
+
+    /**
+     * Decorate a test case that will attempt to shut down a network server
+     * using the supplied credentials. The network server will run with
+     * authentication enabled.
+     *
+     * @param testName name of the test case to decorate
+     * @param user the user that should attempt to shut down the server
+     * @param password the password to be used when shutting down the server
+     * @return the decorated test case
+     */
+    private static Test decorateShutdownTest(String testName,
+                                             String user, String password) {
+        Properties props = new Properties();
+        props.setProperty("derby.connection.requireAuthentication", "true");
+        props.setProperty("derby.authentication.provider", "BUILTIN");
+        props.setProperty("derby.user." + user, password);
+
+        Test test = new NetworkServerControlApiTest(testName);
+        test = TestConfiguration.clientServerDecorator(test);
+        test = new SystemPropertyTestSetup(test, props, true);
+        test = TestConfiguration.changeUserDecorator(test, user, password);
+        return test;
     }
 
      // test fixtures from maxthreads
