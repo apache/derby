@@ -167,8 +167,20 @@ public final class NetworkServerControlImpl {
     private final static int SHUTDOWN_CHECK_ATTEMPTS = 100;
     private final static int SHUTDOWN_CHECK_INTERVAL= 100;
 
-    // maximum reply size
-    private final static int MAXREPLY = 32767;
+    /**
+     * Maximum reply size. The reply buffer must be large enough to hold the
+     * largest reply that {@link #readBytesReply(String)} and
+     * {@link #readStringReply(String)} can receive. That is, a reply header
+     * (4 bytes), a status byte (1 byte), a length field (2 bytes) and the
+     * longest value (in bytes) that could be written by
+     * {@link DDMWriter#writeLDBytes(byte[])} or
+     * {@link DDMWriter#writeLDString(String)}.
+     */
+    private final static int MAXREPLY =
+            REPLY_HEADER_LENGTH
+            + 1     // status byte
+            + 2     // length field
+            + DDMWriter.MAX_VARCHAR_BYTE_LENGTH;
 
     // Application Server Attributes.
     protected static String att_srvclsnm;

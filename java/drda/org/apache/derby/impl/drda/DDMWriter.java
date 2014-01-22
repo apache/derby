@@ -62,7 +62,7 @@ class DDMWriter
      * The maximum length in bytes for strings sent by {@code writeLDString()},
      * which is the maximum unsigned integer value that fits in two bytes.
      */
-    private final static int MAX_VARCHAR_BYTE_LENGTH = 0xFFFF;
+    final static int MAX_VARCHAR_BYTE_LENGTH = 0xFFFF;
 
     /**
      * Output buffer.
