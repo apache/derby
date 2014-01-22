@@ -2875,21 +2875,33 @@ public final class NetworkServerControlImpl {
     
 
     /**
-     * Ensure the reply buffer is at large enought to hold all the data;
+     * Ensure the reply buffer is large enough to hold all the data;
      * don't just rely on OS level defaults
      *
      *
      * @param minimumBytesNeeded    size of buffer required
+     * @param failOnEOS tells whether or not an error should be raised if
+     * end-of-stream is reached before the requested amount of bytes could
+     * be read
      * @exception Exception throws an exception if a problem reading the reply
      */
-    private void ensureDataInBuffer(int minimumBytesNeeded) throws Exception
+    private void ensureDataInBuffer(int minimumBytesNeeded, boolean failOnEOS)
+            throws Exception
     {
         // make sure the buffer is large enough
         while ((replyBufferCount - replyBufferPos) < minimumBytesNeeded)
         {
             try {
                 int bytesRead = clientIs.read(replyBuffer, replyBufferCount, replyBuffer.length - replyBufferCount);
-                replyBufferCount += bytesRead;
+                if (bytesRead == -1) {
+                    if (failOnEOS) {
+                        consolePropertyMessage(
+                                "DRDA_InvalidReplyTooShort.S", true);
+                    }
+                    break;
+                } else {
+                    replyBufferCount += bytesRead;
+                }
         
             } catch (IOException e)
             {
@@ -2928,7 +2940,7 @@ public final class NetworkServerControlImpl {
      */
     private void readCommandReplyHeader() throws Exception
     {
-        ensureDataInBuffer(REPLY_HEADER_LENGTH);
+        ensureDataInBuffer(REPLY_HEADER_LENGTH, false);
         if (replyBufferCount < REPLY_HEADER_LENGTH)
         {
             consolePropertyMessage("DRDA_InvalidReplyHeader1.S", Integer.toString(replyBufferCount));
@@ -2946,9 +2958,7 @@ public final class NetworkServerControlImpl {
      */
     private int readShort() throws Exception
     {
-        ensureDataInBuffer(2);
-        if (replyBufferPos + 2 > replyBufferCount)
-            consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
+        ensureDataInBuffer(2, true);
         return ((replyBuffer[replyBufferPos++] & 0xff) << 8) +
                 (replyBuffer[replyBufferPos++] & 0xff);
     }
@@ -2958,9 +2968,7 @@ public final class NetworkServerControlImpl {
      */
     private int readInt() throws Exception
     {
-        ensureDataInBuffer(4);
-        if (replyBufferPos + 4 > replyBufferCount)
-            consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
+        ensureDataInBuffer(4, true);
         return ((replyBuffer[replyBufferPos++] & 0xff) << 24) +
             ((replyBuffer[replyBufferPos++] & 0xff) << 16) +
             ((replyBuffer[replyBufferPos++] & 0xff) << 8) +
@@ -2997,9 +3005,7 @@ public final class NetworkServerControlImpl {
     private String readLDString() throws Exception
     {
         int strlen = readShort();
-        ensureDataInBuffer(strlen);
-        if (replyBufferPos + strlen > replyBufferCount)
-            consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
+        ensureDataInBuffer(strlen, true);
         String retval= new String(replyBuffer, replyBufferPos, strlen, DEFAULT_ENCODING);
         replyBufferPos += strlen;
         return retval;
@@ -3031,9 +3037,7 @@ public final class NetworkServerControlImpl {
     private byte[] readLDBytes() throws Exception
     {
         int len = readShort();
-        ensureDataInBuffer(len);
-        if (replyBufferPos + len > replyBufferCount)
-            consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
+        ensureDataInBuffer(len, true);
         byte [] retval =  new byte[len];
         for (int i = 0; i < len; i++)
             retval[i] = replyBuffer[replyBufferPos++];
