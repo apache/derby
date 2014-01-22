@@ -4756,6 +4756,75 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t2_030" );
     }
     
+    /**
+     * <p>
+     * Verify the fix to a query involving a view.
+     * </p>
+     */
+    public  void    test_031_view()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_031(x int, y int)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table tv_031(x int, y int)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create view v_031 as select * from tv_031"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_031 values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into tv_031 values ( 1, 1000 ), ( 3, 3000 ), ( 4, 4000 )"
+             );
+
+        // verify the fix
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_031\n" +
+             "using v_031 on t1_031.x = v_031.x\n" +
+             "when matched then update set t1_031.y = v_031.y\n",
+             2
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_031 order by x",
+             new String[][]
+             {
+                 { "1", "1000" },
+                 { "2", "200" },
+                 { "3", "3000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop view v_031" );
+        goodStatement( dboConnection, "drop table t1_031" );
+        goodStatement( dboConnection, "drop table tv_031" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

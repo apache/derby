@@ -381,7 +381,11 @@ public final class UpdateNode extends DMLModStatementNode
 			((FromBaseTable) targetTable).markUpdated(
 												resultSet.getResultColumns());
 		}
-		else if (targetTable instanceof FromVTI)
+		else if
+            (
+             (targetTable instanceof FromVTI) ||
+             (targetTable instanceof FromSubquery)
+             )
 		{
             resultColumnList = resultSet.getResultColumns();
 		}
