@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLRef;
 
 /**
  * INSERT/UPDATE/DELETE a target table based on how it outer joins
@@ -204,6 +205,10 @@ class MergeResultSet extends NoRowsResultSetImpl
                 {
                     matched = true;
                     baseRowLocation = (RowLocation) rlColumn.getObject();
+                    
+                    // change the HeapRowLocation into a SQLRef, something which the
+                    // temporary table can (de)serialize correctly
+                    _row.setColumn( _row.nColumns(), new SQLRef( baseRowLocation ) );
                 }
             }
 

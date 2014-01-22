@@ -4693,6 +4693,69 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t2_029" );
     }
     
+    /**
+     * <p>
+     * Verify the fix to a query which broke the serialization of
+     * row locations.
+     * </p>
+     */
+    public  void    test_030_SQLRef_serialization()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_030(x int, y varchar(100))"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_030(x int)"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_030 values 1, 1, 2"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_030 values (1, null), (2, '')"
+             );
+
+        // verify the fix
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_030\n" +
+             "using t2_030 on true\n" +
+             "when matched then update set y = y || 'x'\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select  * from t1_030 order by x, y",
+             new String[][]
+             {
+                 { "1", null },
+                 { "2", "x" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_030" );
+        goodStatement( dboConnection, "drop table t2_030" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
