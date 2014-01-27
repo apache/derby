@@ -775,6 +775,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Statement s = createStatement();
         
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','T1', NULL)");
         s.executeUpdate("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         
         // 2,20,100
