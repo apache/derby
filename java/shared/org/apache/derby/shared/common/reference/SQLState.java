@@ -950,6 +950,7 @@ public interface SQLState {
     String LANG_SOURCE_NOT_BASE_VIEW_OR_VTI                        = "42XAL";    
     String LANG_SAME_EXPOSED_NAME                                       = "42XAM";    
     String LANG_NOT_NULL_CHARACTERISTICS                               = "42XAN";
+    String LANG_NO_SUBQUERIES_IN_MATCHED_CLAUSE         = "42XAO";
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
     // String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE             = "42Y02";

@@ -2281,9 +2281,14 @@ Guide.
                 <text>The source and target tables of a MERGE statement may not have the same correlation name.</text>
             </msg>		
 
-	    <msg>
+	        <msg>
                 <name>42XAN</name>
                 <text>Constraint characteristics not allowed for NOT NULL.</text>
+            </msg>
+
+	        <msg>
+                <name>42XAO</name>
+                <text>Subqueries are not allowed in the WHEN [ NOT ] MATCHED clauses of MERGE statements.</text>
             </msg>
 
             <msg>

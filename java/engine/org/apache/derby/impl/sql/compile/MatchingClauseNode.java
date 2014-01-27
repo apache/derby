@@ -248,6 +248,15 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        //
+        // Although the SQL Standard allows subqueries in the WHEN [ NOT ] MATCHED clauses,
+        // we don't support them yet. That is because code-generation for those clauses breaks
+        // if they contain subqueries. That, in turn, is because we don't completely optimize those
+        // clauses. If we improve Derby so that we do completely optimize the WHEN [ NOT ] MATCHED clauses,
+        // then we can consider enabling subqueries in them.
+        //
+        forbidSubqueries();
+
         _thenColumns = new ResultColumnList( getContextManager() );
 
         if ( isDeleteClause() ) { bindDelete( dd, fullFromList, targetTable ); }
@@ -1114,6 +1123,45 @@ public class MatchingClauseNode extends QueryTreeNode
         }
 
         return -1;
+    }
+
+    /**
+     * <p>
+     * Forbid subqueries in WHEN [ NOT ] MATCHED clauses.
+     * </p>
+     */
+    private void    forbidSubqueries()
+        throws StandardException
+    {
+        forbidSubqueries( _matchingRefinement );
+        forbidSubqueries( _updateColumns );
+        forbidSubqueries( _insertColumns );
+        forbidSubqueries( _insertValues );
+    }
+    private void    forbidSubqueries( ResultColumnList rcl )
+        throws StandardException
+    {
+        if ( rcl != null )
+        {
+            for ( int i = 0; i < rcl.size(); i++ )
+            {
+                forbidSubqueries( rcl.elementAt( i ) );
+            }
+        }
+    }
+    private void    forbidSubqueries( ValueNode expr )
+        throws StandardException
+    {
+        if ( expr != null )
+        {
+            CollectNodesVisitor<SubqueryNode> getSubqueries =
+                new CollectNodesVisitor<SubqueryNode>(SubqueryNode.class);
+            expr.accept( getSubqueries );
+            if ( getSubqueries.getList().size() > 0 )
+            {
+                throw StandardException.newException( SQLState.LANG_NO_SUBQUERIES_IN_MATCHED_CLAUSE );
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

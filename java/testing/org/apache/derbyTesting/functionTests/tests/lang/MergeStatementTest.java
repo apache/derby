@@ -71,6 +71,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      MISSING_TABLE = "42X05";
     private static  final   String      NO_ROWS_AFFECTED = "02000";
     private static  final   String      NO_DML_IN_BEFORE_TRIGGERS = "42Z9D";
+    private static  final   String      NO_SUBQUERIES_IN_MATCHED_CLAUSE = "42XAO";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -4823,6 +4824,78 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop view v_031" );
         goodStatement( dboConnection, "drop table t1_031" );
         goodStatement( dboConnection, "drop table tv_031" );
+    }
+    
+    /**
+     * <p>
+     * For the time being, forbid subqueries in WHEN [ NOT ] MATCHED clauses.
+     * </p>
+     */
+    public  void    test_032_noSubqueriesInMatchedClauses()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_032( a int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_032( a int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_032( a int )"
+             );
+
+        //
+        // All of these statements should be rejected because they carry
+        // subqueries in the WHEN [ NOT ] MATCHED clause.
+        //
+        expectCompilationError
+            ( dboConnection, NO_SUBQUERIES_IN_MATCHED_CLAUSE,
+              "merge into t1_032\n" +
+              "using t2_032 on t1_032.a = t2_032.a\n" +
+              "when matched and t1_032.a > (select max( a ) from t3_032 ) then update set a = t2_032.a * 2\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SUBQUERIES_IN_MATCHED_CLAUSE,
+              "merge into t1_032\n" +
+              "using t2_032 on t1_032.a = t2_032.a\n" +
+              "when matched then update set a = (select max( a ) from t3_032 )\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SUBQUERIES_IN_MATCHED_CLAUSE,
+              "merge into t1_032\n" +
+              "using t2_032 on t1_032.a = t2_032.a\n" +
+              "when matched and t1_032.a > (select max( a ) from t3_032 ) then delete\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SUBQUERIES_IN_MATCHED_CLAUSE,
+              "merge into t1_032\n" +
+              "using t2_032 on t1_032.a = t2_032.a\n" +
+              "when not matched and t1_032.a > (select max( a ) from t3_032 ) then insert values ( 1 )\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SUBQUERIES_IN_MATCHED_CLAUSE,
+              "merge into t1_032\n" +
+              "using t2_032 on t1_032.a = t2_032.a\n" +
+              "when not matched then insert values ( (select max( a ) from t3_032 ) )\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t3_032" );
+        goodStatement( dboConnection, "drop table t2_032" );
+        goodStatement( dboConnection, "drop table t1_032" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
