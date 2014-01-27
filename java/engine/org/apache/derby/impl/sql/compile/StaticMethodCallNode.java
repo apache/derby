@@ -176,6 +176,12 @@ class StaticMethodCallNode extends MethodCallNode
     /** Flag that this function invocation appears in a GROUP BY clause */
     public  void    setAppearsInGroupBy() { appearsInGroupBy = true; }
     
+    @Override
+    TableName getFullName()
+	{
+		return  procedureName;
+	}
+
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.

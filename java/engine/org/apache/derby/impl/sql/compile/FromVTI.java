@@ -1731,7 +1731,12 @@ class FromVTI extends FromTable implements VTIEnvironment
         mb.push( storeObjectInPS( acb, projectedColumnNames ) );
         mb.push( storeObjectInPS( acb, vtiRestriction ) );        
 
-		return 18;
+        // push the schema name and unqualified name of the table function
+        TableName   fullName = methodCall.getFullName();
+		mb.push( (fullName == null) ? "" : fullName.getSchemaName() );
+		mb.push( (fullName == null) ? "" : fullName.getTableName() );
+
+		return 20;
 	}
     /** Store an object in the prepared statement.  Returns -1 if the object is
      * null. Otherwise returns the object's retrieval handle.

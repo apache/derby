@@ -668,6 +668,8 @@ public interface ResultSetFactory {
 		@param returnTypeNumber	Which saved object contains the return type (a multi-set) serialized as a byte array
 		@param vtiProjectionNumber	Which saved object contains the projection for a RestrictedVTI
 		@param vtiRestrictionNumber	Which saved object contains the restriction for a RestrictedVTI
+        @param   vtiSchema   Name of the schema holding the table function.
+        @param   vtiName      Name of the table function.
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -687,7 +689,9 @@ public interface ResultSetFactory {
                                      boolean isDerbyStyleTableFunction,
                                      int returnTypeNumber,
                                      int vtiProjectionNumber,
-                                     int vtiRestrictionNumber
+                                     int vtiRestrictionNumber,
+                                     String vtiSchema,
+                                     String vtiName
                                           )
 		 throws StandardException;
 

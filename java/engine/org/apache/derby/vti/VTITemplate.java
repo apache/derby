@@ -68,8 +68,10 @@ import java.util.Map;
 	For table functions and virtual tables, the database engine only calls methods defined
 	in the JDBC 2.0 definition of java.sql.ResultSet.
  */
-public abstract class VTITemplate   implements ResultSet
+public abstract class VTITemplate   implements ResultSet, AwareVTI
 {
+    private VTIContext  _vtiContext;
+    
     public  boolean 	isWrapperFor(Class<?> iface) throws SQLException { throw notImplemented( "isWrapperFor" ); }
     public  <T> T unwrap(Class<T> iface) throws SQLException { throw notImplemented( "unwrap" ); }
 
@@ -276,6 +278,15 @@ public abstract class VTITemplate   implements ResultSet
     public  void 	updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException { throw notImplemented( "updateSQLXML" ); }
     public  void 	updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException { throw notImplemented( "updateSQLXML" ); }
     
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  AwareVTI BEHAVIOR
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    public  VTIContext  getContext() { return _vtiContext; }
+    public  void    setContext( VTIContext context )    { _vtiContext = context; }
+
     /////////////////////////////////////////////////////////////////////////
     //
     //  MINIONS

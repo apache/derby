@@ -463,7 +463,9 @@ public class GenericResultSetFactory implements ResultSetFactory
                                      boolean isDerbyStyleTableFunction,
                                      int returnTypeNumber,
                                      int vtiProjectionNumber,
-                                     int vtiRestrictionNumber
+                                     int vtiRestrictionNumber,
+                                     String vtiSchema,
+                                     String vtiName
                                           )
 		throws StandardException
 	{
@@ -481,7 +483,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 								isDerbyStyleTableFunction,
                                 returnTypeNumber,
                                 vtiProjectionNumber,
-                                vtiRestrictionNumber
+                                vtiRestrictionNumber,
+                                vtiSchema,
+                                vtiName
                                 );
 	}
 

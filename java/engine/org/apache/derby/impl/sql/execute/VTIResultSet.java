@@ -54,8 +54,10 @@ import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.IFastPath;
 import org.apache.derby.vti.VTIEnvironment;
+import org.apache.derby.vti.AwareVTI;
 import org.apache.derby.vti.RestrictedVTI;
 import org.apache.derby.vti.Restriction;
+import org.apache.derby.vti.VTIContext;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -99,6 +101,9 @@ class VTIResultSet extends NoPutResultSetImpl
     private String[] vtiProjection;
     private Restriction vtiRestriction;
 
+    private String  vtiSchema;
+    private String  vtiName;
+
 	/**
 		Specified isolation level of SELECT (scan). If not set or
 		not application, it will be set to TransactionControl.UNSPECIFIED_ISOLATION_LEVEL
@@ -122,7 +127,9 @@ class VTIResultSet extends NoPutResultSetImpl
 				 boolean isDerbyStyleTableFunction,
                  int returnTypeNumber,
                  int vtiProjectionNumber,
-                 int vtiRestrictionNumber
+                 int vtiRestrictionNumber,
+                 String vtiSchema,
+                 String vtiName
                  ) 
 		throws StandardException
 	{
@@ -136,6 +143,8 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
 		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
+        this.vtiSchema = vtiSchema;
+        this.vtiName = vtiName;
 
         ExecPreparedStatement ps = activation.getPreparedStatement();
 
@@ -246,6 +255,21 @@ class VTIResultSet extends NoPutResultSetImpl
                     RestrictedVTI restrictedVTI = (RestrictedVTI) userVTI;
 
                     restrictedVTI.initScan( vtiProjection, cloneRestriction( activation ) );
+                }
+
+                if ( userVTI instanceof AwareVTI )
+                {
+                    AwareVTI awareVTI = (AwareVTI) userVTI;
+
+                    awareVTI.setContext
+                        (
+                         new VTIContext
+                         (
+                          vtiSchema,
+                          vtiName,
+                          activation.getLanguageConnectionContext().getStatementContext().getStatementText()
+                          )
+                         );
                 }
 			}
 

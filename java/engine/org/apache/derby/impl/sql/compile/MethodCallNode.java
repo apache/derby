@@ -113,6 +113,17 @@ abstract class MethodCallNode extends JavaValueNode
 	}
 
     /**
+     * <p>
+     * Get the schema-qualified name of the the routine. Is non-null only for
+     * StaticMethodCallNodes.
+     * </p>
+     */
+    TableName getFullName()
+	{
+		return  null;
+	}
+
+    /**
      * @return the name of the class that contains the method, null if not known. It may not be known
      *         until this node has been bound.
      */
