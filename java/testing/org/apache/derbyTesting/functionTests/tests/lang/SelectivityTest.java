@@ -34,6 +34,8 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 
 public class SelectivityTest extends BaseJDBCTestCase {
 
@@ -233,6 +235,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "test, template --DERBY-PROPERTIES joinStrategy=hash \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+        RuntimeStatisticsParser rtsp = 
+              SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // choose NL join, no index. Selectivity should be the same
         // join on two. template inner, NL, no index, all rows.
@@ -242,6 +247,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertFalse(rtsp.usedHashJoin());
         
         // choose NL join, index template_two. Selectivity should be the same
         // join on two. template inner, NL, index=two, all rows.
@@ -251,6 +258,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=template_two \n" +
                 "where test.two = template.two").close();
         checkEstimatedRowCount(conn,8020012.5);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
         // do joins on 20
         // first NL
@@ -262,6 +271,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty").close();
         // Rowcount should be same as testSingleColumnSelectivityHash
         checkEstimatedRowCount(conn,802001.25);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
         // join on 20 but use index 20_2
         // cost as well as selectivity should be divided using selectivity
@@ -273,10 +284,12 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=template_22 \n" +
                 "where test.twenty = template.twenty").close();
         checkEstimatedRowCount(conn,802001.25);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_22"));
         
         // join on twenty but no index
         // note: the original test had this comment:
-        // rc should be divided using selectivity. cost should be way different
+        // 'rc should be divided using selectivity. cost should be way different'
         // however, it seems the ec is identical.
         // join on twenty, template inner, NL, index=null, all rows
         s.executeQuery("select template.id from " +
@@ -298,6 +311,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred and test.id <= 100").close();
         // note: original cloudscape result was expecting 3884.85 here.
         checkEstimatedRowCount(conn,3924.9);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
         
         // join on hundred. 
         // template inner, NL, index=null, 100 rows from outer
@@ -307,6 +323,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.hundred = template.hundred and test.id <= 100").close();
         checkEstimatedRowCount(conn,3924.9);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
         
         // join on hundred. 
         // template inner, hash, index=null, 100 rows from outer.
@@ -316,6 +334,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "index=null \n" +
                 "where test.hundred = template.hundred and test.id <= 100").close();
         checkEstimatedRowCount(conn,3924.9);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEST", "TEST_ID"));
     }
     
     public void testMultiPredicate() throws SQLException {
@@ -332,6 +353,10 @@ public class SelectivityTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         
         // join on twenty/two. template inner, hash, index=null, all rows.
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','TEST',NULL)");
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','TEMPLATE',NULL)");
         s.executeUpdate("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         s.executeQuery("select template.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -340,6 +365,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // join on twenty/two. template inner, NL, index=template_two, all rows
         s.executeQuery("select template.id from " +
@@ -349,6 +377,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
         // join on twenty/two. 
         // template inner, NL, index=template_twenty, all rows.
@@ -359,6 +389,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
         // join on twenty/two. template inner, NL, index=template_22, all rows.
         s.executeQuery("select template.id from " +
@@ -368,6 +400,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_22"));
         
         // multi predicate tests continued
         // drop index twenty, two -- use above predicates
@@ -384,6 +418,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // join on twenty/two. index twenty_two dropped. 
         // template inner, NL, index=template_two, all rows.'
@@ -394,16 +430,20 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
         
         // join on twenty/two. index twenty_two dropped. 
         // template inner, NL, index=template_twenty, all rows.
         s.executeQuery("select template.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
-                "test, template --DERBY-PROPERTIES joinStrategy=hash, " +
+                "test, template --DERBY-PROPERTIES joinStrategy=nestedLoop, " +
                 "index=template_twenty \n" +
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,401000.625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
         s.executeUpdate("drop index template_two");
         
@@ -431,6 +471,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.twenty = template.twenty " +
                 "and test.two = template.two").close();
         checkEstimatedRowCount(conn,80200.12500000001);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWENTY"));
         
         // now drop index template_twenty
         // selectivity should become 0.1 * 0.1 = 0.01
@@ -466,6 +508,10 @@ public class SelectivityTest extends BaseJDBCTestCase {
         // row count is 16*10^6 * 0.005 = 8*10^4.
         
         // join on hundred. constant pred on two. NL, index=null, all rows.
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','TEMPLATE',NULL)");
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','TEST',NULL)");
         s.executeUpdate("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         s.executeQuery("select template.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -487,6 +533,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred " +
                 "and 1 = template.two").close();
         checkEstimatedRowCount(conn,80200.125);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
         
         // hundred and twenty
         // we can use statistics for 100,2 to get selectivity for 100 and
@@ -511,6 +560,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where test.hundred = template.hundred " +
                 "and 1 = template.twenty").close();
         checkEstimatedRowCount(conn,8020.0125);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_102"));
     }
     
     public void testThreeWayJoins() throws SQLException {
@@ -534,6 +585,14 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty and " +
                 "t2.two = t3.two").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 2, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
+        assertTrue(rtsp.findString(
+                "Hash Scan ResultSet for T3 using index T3_TWO_TWENTY", 1));
         
         // t1 x t2 -> 16 * 10^4.
         // x t3    -> 32 * 10^7
@@ -545,6 +604,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two and " +
                 "t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
         
         // variations on above query; try different join strategies
         s.executeQuery("select t1.id from " +
@@ -554,6 +620,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -562,6 +635,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_HUNDRED"));
+        assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -570,6 +650,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -578,6 +665,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
         
         // duplicate predicates; this time t1.hundred=?
         // will show up twice when t1 is optimized at the end
@@ -589,6 +683,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         // variations on above query; try different join strategies
         s.executeQuery("select t1.id from " +
@@ -598,6 +699,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -606,6 +714,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_HUNDRED"));
+        assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -614,6 +729,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_HUNDRED"));
+        assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -622,6 +744,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t1.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         // some more variations on the above theme
         // some constant predicates thrown in.
@@ -629,7 +758,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         // -- for some reason if you give the constant 
         // as a numeric argument it doesn't recognize that 
         // as a constant start/stop value for the index 
-        // The errir is that the types must be comparable.
+        // The error is that the types must be comparable.
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
                 "t2, t3, t1 " +
@@ -638,6 +767,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t3.hundred " +
                 "and t1.hundred='1'").close();
         checkEstimatedRowCount(conn,30458.025);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T2", "T2_HUNDRED"));
+        assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_HUNDRED"));
+        assertTrue(rtsp.findString("Bit set of columns fetched=All", 1));
         
         // we have t1.100=t2.100 and t1.100=t3.100, so 
         // t2.100=t3.100 is redundant. 
@@ -651,6 +787,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t3.hundred " +
                 "and t2.hundred = t3.hundred").close();
         checkEstimatedRowCount(conn,3212015.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T3", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         // slightly different join predicates-- use composite stats.
         // t1 x t2            --> 16 * 10.4.
@@ -662,6 +805,14 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
+        assertTrue(rtsp.findString(
+                "Hash Scan ResultSet for T3 using index T3_TWO_TWENTY", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         // same as above but muck around with join order.
         s.executeQuery("select t1.id from " +
@@ -671,6 +822,14 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
+        assertTrue(rtsp.findString(
+                "Hash Scan ResultSet for T3 using index T3_TWO_TWENTY", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -679,6 +838,14 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString(
+                "Hash Scan ResultSet for T3 using index T3_TWO_TWENTY", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -687,6 +854,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -695,6 +869,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
         
         s.executeQuery("select t1.id from " +
                 "--DERBY-PROPERTIES joinOrder=fixed \n" + 
@@ -703,6 +884,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,1.606007503125E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
         
         // and just for fun, what would we have gotten without statistics.
         s.executeQuery("select t1.id from " +
@@ -712,6 +900,13 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t2.two = t3.two " +
                 "and t2.twenty = t3.twenty").close();
         checkEstimatedRowCount(conn,6.4240300125000015E7);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T3", "T3_TWO_TWENTY"));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 1}", 1));
+        assertTrue(rtsp.findString("Table Scan ResultSet for T1", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={0, 3}", 1));
+        assertTrue(rtsp.findString("Hash Scan ResultSet for T2", 1));
+        assertTrue(rtsp.findString("Bit set of columns fetched={1, 2, 3}", 1));
     }
     
     public void testScratch() throws SQLException {
@@ -748,6 +943,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where t1.two = s.two " +
                 "and s.hundred = CAST(CHAR(t1.hundred) AS INTEGER)").close();
         checkEstimatedRowCount(conn,802001.25);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // preds are on column 2.
         // 0.1 -> 16*10.5
@@ -756,6 +954,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "t1, scratch_table s " +
                 "where t1.twenty = s.twenty").close();
         checkEstimatedRowCount(conn,1604002.5);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_TWO_TWENTY"));
+        assertTrue(rtsp.usedHashJoin());
         
         // preds are on column 2,3.
         // 0.01 -> 16*10.4
@@ -765,6 +966,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "where t1.twenty = s.twenty " +
                 "and s.hundred = CAST(CHAR(t1.hundred) AS INTEGER)").close();
         checkEstimatedRowCount(conn,160400.2500000);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("T1", "T1_TWENTY_HUNDRED"));
+        assertTrue(rtsp.usedHashJoin());
     }
     
     public void testStatMatcher() throws SQLException {
@@ -776,7 +980,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         
         s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
-                "('APP','T1', NULL)");
+                "('APP','T1',NULL)");
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS" +
+                "('APP','T2',NULL)");
         s.executeUpdate("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         
         // 2,20,100
@@ -785,6 +991,9 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty " +
                 "and t1.hundred = t2.hundred").close();
         checkEstimatedRowCount(conn,4010.00625);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // now muck around with the order of the predicates
         // 2,100,20
@@ -793,6 +1002,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.hundred = t2.hundred " +
                 "and t1.twenty = t2.twenty").close();
         checkEstimatedRowCount(conn,4010.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // 100,20,2
         s.executeQuery("select t1.id from t1, t2 " +
@@ -800,6 +1011,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.twenty = t2.twenty " +
                 "and t1.two = t2.two").close();
         checkEstimatedRowCount(conn,4010.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         // 100,2,20
         s.executeQuery("select t1.id from t1, t2 " +
@@ -807,18 +1020,24 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t1.two = t2.two " +
                 "and t1.twenty = t2.twenty").close();
         checkEstimatedRowCount(conn,4010.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         s.executeQuery("select t1.id from t1, t2 " +
                 "where t1.twenty = t2.twenty " +
                 "and t1.hundred = t2.hundred " +
                 "and t1.two = t2.two").close();
         checkEstimatedRowCount(conn,4010.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
         
         s.executeQuery("select t1.id from t1, t2 " +
                 "where t1.twenty = t2.twenty " +
                 "and t1.two = t2.two " +
                 "and t1.hundred = t2.hundred").close();
         checkEstimatedRowCount(conn,4010.00625);
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
     }
     
     // Beetle was the bug system for Cloudscape, the forerunner
@@ -848,6 +1067,10 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 "and t10.a = 2 " +
                 "and t10.b = 2").close();
         checkEstimatedRowCount(conn,7945.920000000);
+        RuntimeStatisticsParser rtsp = 
+                SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("COMPLEX", "COMPLEXIND"));
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TEMPLATE", "TEMPLATE_TWO"));
     }
     
     public void testBasic() throws SQLException {
