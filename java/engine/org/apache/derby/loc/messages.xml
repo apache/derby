@@ -3707,7 +3707,12 @@ Guide.
                 <text>Cannot change constraint mode of {0}. It is not a deferrable constraint.</text>
                 <arg>constraintName</arg>
             </msg>
-X0Y91
+
+            <msg>
+                <name>X0Y92.S</name>
+                <text>Cannot change the names of this table function's columns.</text>
+            </msg>
+
         </family>
 
 

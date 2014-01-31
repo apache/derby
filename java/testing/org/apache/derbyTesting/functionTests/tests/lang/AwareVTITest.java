@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -45,6 +46,8 @@ public class AwareVTITest  extends GeneratedColumnsHelper
     // CONSTANTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    private static  final   String  CANNOT_CHANGE_COLUMNS = "X0Y92";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -132,6 +135,39 @@ public class AwareVTITest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test that column names can be set in a StringColumnVTI, but only
+     * if they haven't already been set.
+     * </p>
+     */
+    public void test_02_StringColumnVTI() throws Exception
+    {
+        Connection conn = getConnection();
+
+        String[][]  rows = new String[][]
+            {
+                { "foo", "bar" },
+                { "wibble", "baz" }
+            };
+        UnnamedColumnsVTI   ucv = new UnnamedColumnsVTI( rows );
+
+        // you can set the column names once...
+        ucv.setColumnNames( new String [] { "A", "B" } );
+
+        // ...but only once
+        try {
+            ucv.setColumnNames( new String [] { "C", "D" } );
+            fail( "Attempt to reset column names should have failed." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( CANNOT_CHANGE_COLUMNS, se.getSQLState() );
+        }
+
+        assertResults( ucv, rows, false );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -141,6 +177,20 @@ public class AwareVTITest  extends GeneratedColumnsHelper
     public  static  DummyAwareVTI   dummyAwareVTI()
     {
         return new DummyAwareVTI();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  static  class   UnnamedColumnsVTI    extends StringArrayVTI
+    {
+        public  UnnamedColumnsVTI( String[][] rows )
+        {
+            super( null, rows );
+        }
     }
 
 }

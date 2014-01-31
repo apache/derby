@@ -34,6 +34,8 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
@@ -101,7 +103,10 @@ public  abstract    class   StringColumnVTI extends VTITemplate
      */
     public  StringColumnVTI( String[] columnNames )
     {
-        _columnNames = ArrayUtil.copy( columnNames );
+        if ( columnNames != null )
+        {
+            _columnNames = ArrayUtil.copy( columnNames );
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -110,6 +115,22 @@ public  abstract    class   StringColumnVTI extends VTITemplate
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Set the column names for this table function. This is useful for AwareVTIs,
+     * which need to figure out their column names after analyzing their execution
+     * context. Throws an exception if the column names have already been set.
+     * </p>
+     */
+    public  void    setColumnNames( String[] columnNames )
+        throws SQLException
+    {
+        if ( _columnNames != null ) { throw makeSQLException( SQLState.LANG_CANNOT_CHANGE_COLUMN_NAMES ); }
+
+        _columnNames = ArrayUtil.copy( columnNames );
+    }
+
+    
     /**
      * <p>
      * Get the number of columns.
@@ -390,6 +411,18 @@ public  abstract    class   StringColumnVTI extends VTITemplate
                 return new ByteArrayInputStream( rawBytes );
             } catch (UnsupportedEncodingException e) { throw wrap( e ); }
         }
+    }
+
+    /**
+     * <p>
+     * Construct a SQLException from a SQLState and args.
+     * </p>
+     */
+    private SQLException    makeSQLException( String sqlstate, Object... args )
+    {
+        StandardException   se = StandardException.newException( sqlstate, args );
+
+        return new SQLException( se.getMessage(), se.getSQLState() );
     }
 
 }

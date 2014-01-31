@@ -1404,6 +1404,7 @@ public interface SQLState {
 	String LANG_BAD_OPTIONAL_TOOL_ARGS                                = "X0Y89.S";
 	String LANG_CANT_INSTANTIATE_CLASS                                = "X0Y90.S";
     String LANG_SET_CONSTRAINT_NOT_DEFERRABLE                         = "X0Y91.S";
+    String LANG_CANNOT_CHANGE_COLUMN_NAMES                         = "X0Y92.S";
 
 	// TEMPORARY EXECUTION RESTRICTIONS
 
