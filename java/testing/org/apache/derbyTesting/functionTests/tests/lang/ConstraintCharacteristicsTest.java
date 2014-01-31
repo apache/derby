@@ -93,9 +93,26 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         suite.addTest(baseSuite(nameRoot + ":embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite(nameRoot + ":client")));
+        suite.addTest(restSuite(nameRoot + ":embedded"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                restSuite(nameRoot + ":client")));
         return suite;
     }
 
+    // this suite holds tests that require a more optimal 
+    // locks.waitTimeout setting.
+    private static Test restSuite(String name) {
+        TestSuite suite = new TestSuite(name);
+        suite.addTest(new ConstraintCharacteristicsTest(
+                "testLocking"));
+        Properties systemProperties = new Properties();
+        systemProperties.setProperty(
+            "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
+
+        return new SupportFilesSetup(
+                new SystemPropertyTestSetup(suite, systemProperties, true));
+    }
+    
     private static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);
 
@@ -105,8 +122,6 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                       "testDropNotNullOnUniqueColumn"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testCompressTable"));
-        suite.addTest(new ConstraintCharacteristicsTest(
-                      "testLocking"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testLockingWithCommit"));
         suite.addTest(new ConstraintCharacteristicsTest(
@@ -138,7 +153,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         Properties systemProperties = new Properties();
         systemProperties.setProperty(
-            "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
+            "derby.locks.waitTimeout", Integer.toString(500));
 
         return new SupportFilesSetup(
                 new SystemPropertyTestSetup(suite, systemProperties, true));
