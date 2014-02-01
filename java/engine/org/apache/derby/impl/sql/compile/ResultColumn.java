@@ -127,7 +127,7 @@ class ResultColumn extends ValueNode
     }
 
     /**
-     * @param name The name of the column, if any.
+     * @param underlyingName The name of the column, if any.
      * @param expression The expression this result column represents
      * @param cm context manager
      */
