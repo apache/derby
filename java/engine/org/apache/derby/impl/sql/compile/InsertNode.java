@@ -430,7 +430,7 @@ public final class InsertNode extends DMLModStatementNode
 			for (int index = 0; index < targetSize; index++)
 			{
                 int position = targetColumnList.elementAt(index).
-												columnDescriptor.getPosition();
+                    getColumnDescriptor().getPosition();
 
 				if (index != position-1)
 				{

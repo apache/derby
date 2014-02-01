@@ -394,7 +394,7 @@ class SelectNode extends ResultSetNode
 
 			ColumnReference crNode = (ColumnReference) rc.getExpression();
 
-			if (crNode.columnName.equals(colName))
+			if (crNode.getColumnName().equals(colName))
 				return (ColumnReference) crNode.getClone();
 		}
 

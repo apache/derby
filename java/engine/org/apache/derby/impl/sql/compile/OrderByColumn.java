@@ -218,7 +218,7 @@ class OrderByColumn extends OrderedColumn {
 			if (addedColumnOffset >= 0 &&
 					target instanceof SelectNode &&
 					( (SelectNode)target ).hasDistinct())
-				throw StandardException.newException(SQLState.LANG_DISTINCT_ORDER_BY, cr.columnName);
+				throw StandardException.newException(SQLState.LANG_DISTINCT_ORDER_BY, cr.getColumnName());
 		}else if(isReferedColByNum(expression)){
 			
 			ResultColumnList targetCols = target.getResultColumns();
@@ -390,7 +390,7 @@ class OrderByColumn extends OrderedColumn {
 			ColumnReference cr = (ColumnReference) expression;
 
 			resultCol = targetCols.findResultColumnForOrderBy(
-                    cr.getColumnName(), cr.getTableNameNode());
+                    cr.getColumnName(), cr.getQualifiedTableName());
 
 			if(resultCol == null){
                resultCol = new ResultColumn(
@@ -474,8 +474,8 @@ class OrderByColumn extends OrderedColumn {
 			throw StandardException.newException(SQLState.LANG_QUALIFIED_COLUMN_NAME_NOT_ALLOWED, fullName);
 		}
 
-		if(cr.getTableNameNode() != null){
-			TableName tableNameNode = cr.getTableNameNode();
+		if(cr.getQualifiedTableName() != null){
+			TableName tableNameNode = cr.getQualifiedTableName();
 
 			FromTable fromTable = target.getFromTableByName(tableNameNode.getTableName(),
 									(tableNameNode.hasSchema() ?
@@ -487,7 +487,7 @@ class OrderByColumn extends OrderedColumn {
 								       tableNameNode.getSchemaName():null),
 								      false);
 				if(fromTable == null){
-					String fullName = cr.getTableNameNode().toString();
+					String fullName = cr.getQualifiedTableName().toString();
 					throw StandardException.newException(SQLState.LANG_EXPOSED_NAME_NOT_FOUND, fullName);
 				}
 			}
@@ -512,7 +512,7 @@ class OrderByColumn extends OrderedColumn {
 
         ResultColumn resCol = targetCols.getOrderByColumnToBind(
                             cr.getColumnName(),
-							cr.getTableNameNode(),
+							cr.getQualifiedTableName(),
 							sourceTableNumber,
 							this);
         /* Search targetCols before using addedColumnOffset because select list wildcards, '*',
@@ -524,7 +524,7 @@ class OrderByColumn extends OrderedColumn {
             resolveAddedColumn(target);
 							
         if (resCol == null || resCol.isNameGenerated()){
-			String errString = cr.columnName;
+			String errString = cr.getColumnName();
 			throw StandardException.newException(SQLState.LANG_ORDER_BY_COLUMN_NOT_FOUND, errString);
 		}
 

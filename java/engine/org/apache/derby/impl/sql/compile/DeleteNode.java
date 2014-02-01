@@ -1015,7 +1015,7 @@ class DeleteNode extends DMLModStatementNode
 			{
 				ColumnReference	reference = (ColumnReference) expression;
 				
-				reference.setTableNameNode( correlationNameNode );
+				reference.setQualifiedTableName( correlationNameNode );
 			}
 		}
 		

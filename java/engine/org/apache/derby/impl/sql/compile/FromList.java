@@ -710,7 +710,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
                     crtn = fbt.getExposedTableName();
                 }
             }
-            columnReference.setTableNameNode( crtn );
+            columnReference.setQualifiedTableName( crtn );
         }
         
 		return matchingRC;

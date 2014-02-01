@@ -1916,7 +1916,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				{
 					if ( synTableName.equals( crTableName ) )
 					{
-						reference.setTableNameNode( targetTableName );
+						reference.setQualifiedTableName( targetTableName );
 					}
 					else
 					{

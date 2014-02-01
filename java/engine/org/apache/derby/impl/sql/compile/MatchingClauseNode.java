@@ -317,7 +317,7 @@ public class MatchingClauseNode extends QueryTreeNode
             {
                 mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression() );
 
-                ColumnReference leftCR = new ColumnReference( rc.exposedName, targetTableName, getContextManager() );
+                ColumnReference leftCR = new ColumnReference( rc.getName(), targetTableName, getContextManager() );
                 mergeNode.addColumn( drivingColumnMap, leftCR );
             }
         }
@@ -535,7 +535,7 @@ public class MatchingClauseNode extends QueryTreeNode
                     origRC.setExpression( cr );
 
                     // remove the column descriptor in order to turn off hasGenerationClause()
-                    origRC.columnDescriptor = null;
+                    origRC.setColumnDescriptor( null, null );
                 }
                 
                 continue;
@@ -834,7 +834,7 @@ public class MatchingClauseNode extends QueryTreeNode
         for ( int i = 0; i <_insertValues.size(); i++ )
         {
             ResultColumn    rc = _insertValues.elementAt( i );
-            String          columnName = _insertColumns.elementAt( i ).exposedName;
+            String          columnName = _insertColumns.elementAt( i ).getName();
             ValueNode       expr = rc.getExpression();
             ColumnDescriptor    cd = td.getColumnDescriptor( columnName );
 
@@ -1402,7 +1402,7 @@ public class MatchingClauseNode extends QueryTreeNode
         {
             ResultColumn    lastLeftJoinRC = leftJoinResult.elementAt( leftJoinResult.size() - 1 );
             ValueNode       value = lastLeftJoinRC.getExpression();
-            String              columnName = lastLeftJoinRC.exposedName;
+            String              columnName = lastLeftJoinRC.getName();
             ColumnReference rowLocationCR = new ColumnReference
                 ( columnName, hojn.getTableName(), getContextManager() );
 

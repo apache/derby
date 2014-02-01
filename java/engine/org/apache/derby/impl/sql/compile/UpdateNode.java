@@ -1477,7 +1477,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 			if ( (reference != null) && correlationName.equals( reference.getTableName() ) )
 			{
-				reference.setTableNameNode( tableNameNode );
+				reference.setQualifiedTableName( tableNameNode );
 			}
 		}
 		

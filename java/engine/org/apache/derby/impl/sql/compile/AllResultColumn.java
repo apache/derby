@@ -70,7 +70,7 @@ class AllResultColumn extends ResultColumn
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(columnDescriptor == null,
+			SanityManager.ASSERT(getColumnDescriptor() == null,
 					"columnDescriptor is expected to be non-null");
 		}
 

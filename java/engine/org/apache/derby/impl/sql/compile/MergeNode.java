@@ -352,7 +352,7 @@ public final class MergeNode extends DMLModStatementNode
 
         for ( ColumnReference cr : colRefs )
         {
-            TableName   origTableName = cr.tableName;
+            TableName   origTableName = cr.getQualifiedTableName();
             if ( origTableName != null )
             {
                 if (
@@ -360,7 +360,7 @@ public final class MergeNode extends DMLModStatementNode
                     correlationName.equals( origTableName.getTableName() )
                     )
                 {
-                    cr.setTableNameNode( newTableName );
+                    cr.setQualifiedTableName( newTableName );
                 }
             }
         }

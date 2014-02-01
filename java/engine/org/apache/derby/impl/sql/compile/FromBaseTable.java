@@ -2757,7 +2757,7 @@ class FromBaseTable extends FromTable
 		TableName		columnsTableName;
 		TableName		exposedTableName;
 
-		columnsTableName = columnReference.getTableNameNode();
+		columnsTableName = columnReference.getQualifiedTableName();
 
         if(columnsTableName != null) {
             if(columnsTableName.getSchemaName() == null && correlationName == null)

@@ -42,14 +42,14 @@ import org.apache.derby.iapi.util.JBitSet;
 
 public class ColumnReference extends ValueNode
 {
-	String	columnName;
+	private String	_columnName;
 
 	/*
 	** This is the user-specified table name.  It will be null if the
 	** user specifies a column without a table name.  Leave it null even
 	** when the column is bound as it is only used in binding.
 	*/
-	TableName	tableName;
+	private TableName	_qualifiedTableName;
 
     /**
      * The FromTable this column reference is bound to.
@@ -76,10 +76,10 @@ public class ColumnReference extends ValueNode
     private ResultColumn source;
 
 	/* For unRemapping */
-	ResultColumn	origSource;
+	private ResultColumn	_origSource;
 	private String	origName;
-	int				origTableNumber = -1;
-	int				origColumnNumber = -1;
+	private int				_origTableNumber = -1;
+	private int				_origColumnNumber = -1;
 
     /* For remembering original (tn,cn) of this CR during join flattening. */
     private int tableNumberBeforeFlattening = -1;
@@ -123,8 +123,8 @@ public class ColumnReference extends ValueNode
                     int            tokEndOffset,
                     ContextManager cm)  {
         super(cm);
-        this.columnName = columnName;
-        this.tableName = tableName;
+        _columnName = columnName;
+        _qualifiedTableName = tableName;
         this.setBeginOffset(tokBeginOffset);
         this.setEndOffset(tokEndOffset);
 		tableNumber = -1;
@@ -142,8 +142,8 @@ public class ColumnReference extends ValueNode
                     TableName      tableName,
                     ContextManager cm) {
         super(cm);
-        this.columnName = columnName;
-        this.tableName = tableName;
+        _columnName = columnName;
+        _qualifiedTableName = tableName;
 		tableNumber = -1;
 		remaps = null;
 	}
@@ -159,14 +159,14 @@ public class ColumnReference extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "columnName: " + columnName + "\n" +
+			return "columnName: " + _columnName + "\n" +
 				"tableNumber: " + tableNumber + "\n" +
 				"columnNumber: " + columnNumber + "\n" +
 				"replacesAggregate: " + replacesAggregate + "\n" +
 				"replacesWindowFunctionCall: " +
 				    replacesWindowFunctionCall + "\n" +
-				"tableName: " + ( ( tableName != null) ?
-								  tableName.toString() :
+				"tableName: " + ( ( _qualifiedTableName != null) ?
+								  _qualifiedTableName.toString() :
 								  "null") + "\n" +
 				"nestingLevel: " + nestingLevel + "\n" +
 				"sourceLevel: " + sourceLevel + "\n" +
@@ -209,9 +209,9 @@ public class ColumnReference extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT(nestingLevel != -1,
-				"nestingLevel on "+columnName+" is not expected to be -1");
+				"nestingLevel on "+_columnName+" is not expected to be -1");
 			SanityManager.ASSERT(sourceLevel != -1,
-				"sourceLevel on "+columnName+" is not expected to be -1");
+				"sourceLevel on "+_columnName+" is not expected to be -1");
 		}
 		return sourceLevel != nestingLevel;
 	}
@@ -325,7 +325,7 @@ public class ColumnReference extends ValueNode
 		throws StandardException
 	{
         ColumnReference newCR =
-                new ColumnReference(columnName, tableName, getContextManager());
+                new ColumnReference(_columnName, _qualifiedTableName, getContextManager());
 
 		newCR.copyFields(this);
 		return newCR;
@@ -343,7 +343,7 @@ public class ColumnReference extends ValueNode
 	{
 		super.copyFields(oldCR);
 
-		tableName = oldCR.getTableNameNode();
+		_qualifiedTableName = oldCR.getQualifiedTableName();
 		tableNumber = oldCR.getTableNumber();
 		columnNumber = oldCR.getColumnNumber();
 		source = oldCR.getSource();
@@ -388,7 +388,7 @@ public class ColumnReference extends ValueNode
 
 		if (fromList.size() == 0)
 		{
-			throw StandardException.newException(SQLState.LANG_ILLEGAL_COLUMN_REFERENCE, columnName);
+			throw StandardException.newException(SQLState.LANG_ILLEGAL_COLUMN_REFERENCE, _columnName);
 		}
 
 		matchingRC = fromList.bindColumnReference(this);
@@ -413,10 +413,12 @@ public class ColumnReference extends ValueNode
 
     String getSQLColumnName()
 	{
-		if (tableName == null)
-			return columnName;
+		if (_qualifiedTableName == null)
+        {
+			return _columnName;
+        }
 		
-		return tableName.toString() + "." + columnName;
+		return _qualifiedTableName.toString() + "." + _columnName;
 	}
 
 	/**
@@ -427,7 +429,7 @@ public class ColumnReference extends ValueNode
     @Override
 	public String getColumnName()
 	{
-		return columnName;
+		return _columnName;
 	}
 
 	/**
@@ -469,7 +471,7 @@ public class ColumnReference extends ValueNode
     @Override
     String getTableName()
 	{
-		return ( ( tableName != null) ? tableName.getTableName() : null );
+		return ( ( _qualifiedTableName != null) ? _qualifiedTableName.getTableName() : null );
 	}
 
 	/**
@@ -519,14 +521,14 @@ public class ColumnReference extends ValueNode
 	  Return the table name as the node it is.
 	  @return the column's table name.
 	 */
-	public TableName getTableNameNode()
+	public TableName getQualifiedTableName()
 	{
-		return tableName;
+		return _qualifiedTableName;
 	}
 
-    void setTableNameNode(TableName tableName)
+    void setQualifiedTableName(TableName tableName)
 	{
-		this.tableName = tableName;
+		_qualifiedTableName = tableName;
 	}
 
 	/**
@@ -670,7 +672,7 @@ public class ColumnReference extends ValueNode
 
 		if (SanityManager.DEBUG)
 		{
-			// SanityManager.ASSERT(origSource == null,
+			// SanityManager.ASSERT(_origSource == null,
 			// 		"Trying to remap ColumnReference twice without unremapping it.");
 		}
 
@@ -690,24 +692,24 @@ public class ColumnReference extends ValueNode
 		 * have to keep track of the "orig" info for every remap
 		 * operation, not just for the most recent one.
 		 */
-		if (scoped && (origSource != null))
+		if (scoped && (_origSource != null))
 		{
 			if (remaps == null)
 				remaps = new java.util.ArrayList<RemapInfo>();
 			remaps.add(new RemapInfo(
-				columnNumber, tableNumber, columnName, source));
+				columnNumber, tableNumber, _columnName, source));
 		}
 		else
 		{
-			origSource = source;
-			origName = columnName;
-			origColumnNumber = columnNumber;
-			origTableNumber = tableNumber;
+			_origSource = source;
+			origName = _columnName;
+			_origColumnNumber = columnNumber;
+			_origTableNumber = tableNumber;
 		}
 
 		/* Find the matching ResultColumn */
 		source = getSourceResultColumn();
-		columnName = source.getName();
+		_columnName = source.getName();
         // Use the virtual column id if the ResultColumn's expression
         // is a virtual column (DERBY-5933).
         columnNumber = source.getExpression() instanceof VirtualColumnNode ?
@@ -732,23 +734,25 @@ public class ColumnReference extends ValueNode
 
     void unRemapColumnReferences()
 	{
-		if (origSource == null)
+		if (_origSource == null)
+        {
 			return;
+        }
 
 		if (SanityManager.DEBUG)
 		{
-			// SanityManager.ASSERT(origSource != null,
+			// SanityManager.ASSERT(_origSource != null,
 			// 	"Trying to unremap a ColumnReference that was not remapped.");
 		}
 
         if ((remaps == null) || (remaps.isEmpty()))
 		{
-			source = origSource;
-			origSource = null;
-			columnName = origName;
+			source = _origSource;
+			_origSource = null;
+			_columnName = origName;
 			origName = null;
-			tableNumber = origTableNumber;
-			columnNumber = origColumnNumber;
+			tableNumber = _origTableNumber;
+			columnNumber = _origColumnNumber;
 		}
 		else
 		{
@@ -756,7 +760,7 @@ public class ColumnReference extends ValueNode
 			// recent (and only the most recent) remap operation.
 			RemapInfo rI = remaps.remove(remaps.size() - 1);
 			source = rI.getSource();
-			columnName = rI.getColumnName();
+			_columnName = rI.getColumnName();
 			tableNumber = rI.getTableNumber();
 			columnNumber = rI.getColumnNumber();
             if (remaps.isEmpty())
@@ -772,7 +776,7 @@ public class ColumnReference extends ValueNode
 	 */
 	protected boolean hasBeenRemapped()
 	{
-		return (origSource != null);
+		return (_origSource != null);
 	}
 
 	/*
@@ -837,14 +841,14 @@ public class ColumnReference extends ValueNode
 			{
 				SanityManager.THROWASSERT(
 					"sourceRC is expected to be non-null for " +
-					columnName);
+					_columnName);
 			}
 
 			if ( ! sourceRC.isRedundant())
 			{
 				SanityManager.THROWASSERT(
 					"sourceRC is expected to be redundant for " +
-					columnName);
+					_columnName);
 			}
 		}
 
@@ -892,19 +896,19 @@ public class ColumnReference extends ValueNode
                 ResultColumn ftRC = rcl.getResultColumn(
                     tableNumberBeforeFlattening,
                     columnNumberBeforeFlattening,
-                    columnName);
+                    _columnName);
 
                 if (ftRC == null) {
                     // The above lookup won't work for references to a base
                     // column, so fall back on column name, which is unique
                     // then.
-                    ftRC = rcl.getResultColumn(columnName);
+                    ftRC = rcl.getResultColumn(_columnName);
                 }
 
                 if (SanityManager.DEBUG) {
                     SanityManager.ASSERT(
                         ftRC != null,
-                        "Failed to find column '" + columnName +
+                        "Failed to find column '" + _columnName +
                         "' in the " + "RCL for '" + ft.getTableName() +
                         "'.");
                 }
@@ -1046,7 +1050,7 @@ public class ColumnReference extends ValueNode
     @Override
     String getSchemaName()
 	{
-		return ( ( tableName != null) ? tableName.getSchemaName() : null );
+		return ( ( _qualifiedTableName != null) ? _qualifiedTableName.getSchemaName() : null );
 	}
 
 	/**
@@ -1199,7 +1203,7 @@ public class ColumnReference extends ValueNode
 
 		ColumnReference other = (ColumnReference)o;
 		return (tableNumber == other.tableNumber 
-				&& columnName.equals(other.getColumnName()));
+				&& _columnName.equals(other.getColumnName()));
 	}
 
 	/**
@@ -1255,8 +1259,8 @@ public class ColumnReference extends ValueNode
     void acceptChildren(Visitor v) throws StandardException {
         super.acceptChildren(v);
 
-        if (tableName != null) {
-            tableName = (TableName) tableName.accept(v);
+        if (_qualifiedTableName != null) {
+            _qualifiedTableName = (TableName) _qualifiedTableName.accept(v);
         }
     }
 }

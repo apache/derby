@@ -348,7 +348,7 @@ class CreateViewNode extends DDLStatementNode
 			// if we hit a generated column in what we think is the visible
 			// range.
 			if (SanityManager.DEBUG) {
-				if (rc.isGenerated)
+				if (rc.isGenerated())
 					SanityManager.THROWASSERT("Encountered generated column in expected visible range at rcl[" + index +"]");
 			}
 			//RESOLVEAUTOINCREMENT

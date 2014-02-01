@@ -589,14 +589,18 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 						continue;
 
                 ColumnReference cr = (ColumnReference) rcExpr;
-                if( (! tableName.equals( cr.getTableNameNode())) && tableNumber != cr.getTableNumber())
+                if( (! tableName.equals( cr.getQualifiedTableName())) && tableNumber != cr.getTableNumber())
+                {
                     continue;
+                }
 				columnNameMatches =
 					columnName.equals( resultColumn.getSourceColumnName() );
 			}
 			else
+            {
 				columnNameMatches =
 					resultColumn.columnNameMatches(columnName);
+            }
 
 
 			/* We finally got past the qualifiers, now see if the column
@@ -715,8 +719,10 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                     continue;
                 }
 				ColumnReference cr = (ColumnReference) rcExpr;
-                if( ! tableName.equals( cr.getTableNameNode()))
+                if( ! tableName.equals( cr.getQualifiedTableName()))
+                {
                     continue;
+                }
 				columnNameMatches =
 					columnName.equals( resultColumn.getSourceColumnName() );
 			}
@@ -1984,11 +1990,16 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
             ResultColumn resultColumn = elementAt(index);
 
 			/* Vectors are 0-based, VirtualColumnIds are 1-based */
-            resultColumn.expression = new VirtualColumnNode(
-                    sourceResultSet,
-                    sourceResultColumnList.elementAt(index),
-                    index + 1,
-                    getContextManager());
+            resultColumn.setExpression
+                (
+                 new VirtualColumnNode
+                 (
+                  sourceResultSet,
+                  sourceResultColumnList.elementAt(index),
+                  index + 1,
+                  getContextManager()
+                  )
+                 );
 
 			/* Mark the ResultColumn as being referenced */
 			if (markReferenced)

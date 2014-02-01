@@ -5334,7 +5334,7 @@ derivedColumn(ResultColumnList resultColumns) throws StandardException :
 		*/
 		if ((columnName == null) && (columnExpression instanceof ColumnReference))
 		{
-			columnName = ((ColumnReference) columnExpression).columnName;
+			columnName = ((ColumnReference) columnExpression).getColumnName();
 		}
 
        return new ResultColumn(
@@ -12115,7 +12115,7 @@ renameColumnStatement() throws StandardException :
 	<COLUMN> oldColumnReference = columnReference()
 		<TO> newColumnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-        if (oldColumnReference.getTableNameNode() == null) {
+        if (oldColumnReference.getQualifiedTableName() == null) {
 			throw StandardException.newException(
 				SQLState.LANG_OBJECT_DOES_NOT_EXIST,
 				"RENAME COLUMN",
@@ -12123,7 +12123,7 @@ renameColumnStatement() throws StandardException :
         }
 
         return new RenameNode(
-			oldColumnReference.getTableNameNode(),
+			oldColumnReference.getQualifiedTableName(),
 			oldColumnReference.getColumnName(),
 			newColumnName,
             false,

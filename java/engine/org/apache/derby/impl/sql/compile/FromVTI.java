@@ -1100,7 +1100,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		ResultColumn	resultColumn = null;
 		TableName		columnsTableName;
 
-		columnsTableName = columnReference.getTableNameNode();
+		columnsTableName = columnReference.getQualifiedTableName();
 
 		/*
 		** If the column did not specify a name, or the specified name

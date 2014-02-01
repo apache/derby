@@ -1479,7 +1479,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 }
 
 				// Remap this crNode to underlying column reference in the select, if possible.
-				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.columnName);
+				ColumnReference newCRNode = select.findColumnReferenceInResult(crNode.getColumnName());
 				if (newCRNode == null)
 					continue;
 

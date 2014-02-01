@@ -293,7 +293,7 @@ public final class CurrentOfNode extends FromTable {
 		ResultColumn	resultColumn = null;
 		TableName		columnsTableName;
 
-		columnsTableName = columnReference.getTableNameNode();
+		columnsTableName = columnReference.getQualifiedTableName();
 
         if(columnsTableName != null)
             if(columnsTableName.getSchemaName() == null && correlationName == null)

@@ -64,26 +64,26 @@ import org.apache.derby.iapi.util.StringUtil;
 class ResultColumn extends ValueNode
                 implements ResultColumnDescriptor, Comparable<ResultColumn>
 {
-	/* name and exposedName should point to the same string, unless there is a
-	 * derived column list, in which case name will point to the underlying name
-	 * and exposedName will point to the name from the derived column list.
+	/* _underlyingName and _derivedColumnName should point to the same string, unless there is a
+	 * derived column list, in which case _underlyingName will point to the underlying name
+	 * and _derivedColumnName will point to the name from the derived column list.
 	 */
-	String			name;
-	String			exposedName;
-	String			tableName;
-	String			sourceTableName;
+	private String			_underlyingName; // name from the actual data source
+	private String			_derivedColumnName;
+	private String			_unqualifiedTableName;
+	private String			_unqualifiedSourceTableName;
 	//Used by metadata api ResultSetMetaData.getSchemaName to get a column's table's schema.
-	String			sourceSchemaName;
-	ValueNode		expression;
-	ColumnDescriptor	columnDescriptor;
-	boolean			isGenerated;
-	boolean			isGeneratedForUnmatchedColumnInInsert;
-	boolean			isGroupingColumn;
-	boolean			isReferenced;
-	boolean			isRedundant;
-	boolean			isNameGenerated;
-	boolean			updated;
-	boolean			updatableByCursor;
+	private String			_sourceSchemaName;
+	private ValueNode		_expression;
+	private ColumnDescriptor	_columnDescriptor;
+	private boolean			_isGenerated;
+	private boolean			_isGeneratedForUnmatchedColumnInInsert;
+	private boolean			_isGroupingColumn;
+	private boolean			_isReferenced;
+	private boolean			_isRedundant;
+	private boolean			_isNameGenerated;
+	private boolean			_updated;
+	private boolean			_updatableByCursor;
 	private boolean defaultColumn;
     private boolean wasDefault;
     //Following 2 fields have been added for DERBY-4631. 
@@ -132,13 +132,13 @@ class ResultColumn extends ValueNode
      * @param cm context manager
      */
     ResultColumn(
-            String name,
+            String underlyingName,
             ValueNode expression,
             ContextManager cm) throws StandardException {
         super(cm);
         setTypeExpressionAndDefault(expression);
-        this.name = name;
-        this.exposedName = this.name;
+        _underlyingName = underlyingName;
+        _derivedColumnName = _underlyingName;
     }
 
     /**
@@ -153,8 +153,8 @@ class ResultColumn extends ValueNode
             ContextManager cm) throws StandardException {
         super(cm);
         setTypeExpressionAndDefault(expression);
-        this.name = cr.getColumnName();
-        this.exposedName = cr.getColumnName();
+        _underlyingName = cr.getColumnName();
+        _derivedColumnName = cr.getColumnName();
 
         // When we bind, we'll want to make sure the reference has the right
         // table name.
@@ -173,10 +173,10 @@ class ResultColumn extends ValueNode
             ContextManager cm) throws StandardException {
         super(cm);
         setTypeExpressionAndDefault(expression);
-        this.name = cd.getColumnName();
-        this.exposedName = name;
+        _underlyingName = cd.getColumnName();
+        _derivedColumnName = _underlyingName;
         setType(cd.getType());
-        this.columnDescriptor = cd;
+        _columnDescriptor = cd;
         this.autoincrement = cd.isAutoincrement();
     }
 
@@ -194,7 +194,7 @@ class ResultColumn extends ValueNode
         setTypeExpressionAndDefault(expression);
         setType(dtd);
 
-        if (expression instanceof ColumnReference) {
+        if (_expression instanceof ColumnReference) {
             reference = (ColumnReference)expression;
         }
     }
@@ -309,7 +309,7 @@ class ResultColumn extends ValueNode
 	 *
 	 * This function is used by ORDER BY column resolution. For the
 	 * ORDER BY clause, Derby will prefer to match on the column's
-	 * alias (exposedName), but will also successfully match on the
+	 * alias (_derivedColumnName), but will also successfully match on the
 	 * underlying column name. Thus the following statements are
 	 * treated equally:
 	 *  select name from person order by name;
@@ -319,8 +319,8 @@ class ResultColumn extends ValueNode
 	 */
 	boolean columnNameMatches(String columnName)
 	{
-		return columnName.equals(exposedName) ||
-			columnName.equals(name) ||
+		return columnName.equals(_derivedColumnName) ||
+			columnName.equals( _underlyingName ) ||
 			columnName.equals(getSourceColumnName());
 	}
 	
@@ -346,11 +346,17 @@ class ResultColumn extends ValueNode
 	String getUnderlyingOrAliasName() 
 	{
 		if (getSourceColumnName() != null)
+        {
 			return getSourceColumnName();
-		else if (name != null)
-			return name;
+        }
+		else if ( _underlyingName != null )
+        {
+			return _underlyingName;
+        }
 		else
-			return exposedName;
+        {
+			return _derivedColumnName;
+        }
 	}
 	
 	/**
@@ -359,8 +365,8 @@ class ResultColumn extends ValueNode
 	 */
 	String getSourceColumnName()
 	{
-		if (expression instanceof ColumnReference)
-			return ((ColumnReference)expression).getColumnName();
+		if (_expression instanceof ColumnReference)
+			return ((ColumnReference)_expression).getColumnName();
 		return null;
 	}
 	/**
@@ -370,20 +376,20 @@ class ResultColumn extends ValueNode
 
 	public String getName()
 	{
-		return exposedName;
+		return _derivedColumnName;
 	}
 
     @Override
     String getSchemaName() throws StandardException
 	{
-		if ((columnDescriptor!=null) &&
-			(columnDescriptor.getTableDescriptor() != null))
-			return columnDescriptor.getTableDescriptor().getSchemaName();
+		if ((_columnDescriptor!=null) &&
+			(_columnDescriptor.getTableDescriptor() != null))
+			return _columnDescriptor.getTableDescriptor().getSchemaName();
 		else
 		{
-			if (expression != null)
+			if (_expression != null)
 			// REMIND: could look in reference, if set.
-				return expression.getSchemaName();
+				return _expression.getSchemaName();
 			else
 				return null;
 		}
@@ -392,18 +398,18 @@ class ResultColumn extends ValueNode
     @Override
     String getTableName()
 	{
-		if (tableName != null)
+		if (_unqualifiedTableName != null)
 		{
-			return tableName;
+			return _unqualifiedTableName;
 		}
-		if ((columnDescriptor!=null) &&
-			(columnDescriptor.getTableDescriptor() != null))
+		if ((_columnDescriptor!=null) &&
+			(_columnDescriptor.getTableDescriptor() != null))
 		{
-			return columnDescriptor.getTableDescriptor().getName();
+			return _columnDescriptor.getTableDescriptor().getName();
 		}
 		else
 		{
-			return expression.getTableName();
+			return _expression.getTableName();
 		}
 	}
 
@@ -412,7 +418,7 @@ class ResultColumn extends ValueNode
 	 */
 	public String getSourceTableName()
 	{
-		return sourceTableName;
+		return _unqualifiedSourceTableName;
 	}
 
 	/**
@@ -420,7 +426,7 @@ class ResultColumn extends ValueNode
 	 */
 	public String getSourceSchemaName()
 	{
-		return sourceSchemaName;
+		return _sourceSchemaName;
 	}
 
 	/**
@@ -429,9 +435,9 @@ class ResultColumn extends ValueNode
 	 */
     void clearTableName()
 	{
-		if (expression instanceof ColumnReference)
+		if (_expression instanceof ColumnReference)
 		{
-			((ColumnReference) expression).setTableNameNode((TableName) null);
+			((ColumnReference) _expression).setQualifiedTableName( (TableName) null );
 		}
 	}
 
@@ -442,8 +448,8 @@ class ResultColumn extends ValueNode
 
 	public int getColumnPosition()
 	{
-		if (columnDescriptor!=null)
-			return columnDescriptor.getPosition();
+		if (_columnDescriptor!=null)
+			return _columnDescriptor.getPosition();
 		else
 			return virtualColumnId;
 
@@ -461,7 +467,7 @@ class ResultColumn extends ValueNode
 
     void setExpression(ValueNode expression)
 	{
-		this.expression = expression;
+		_expression = expression;
 	}
 
 	/**
@@ -472,7 +478,7 @@ class ResultColumn extends ValueNode
 
     ValueNode getExpression()
 	{
-		return expression;
+		return _expression;
 	}
 
 	/**
@@ -499,9 +505,9 @@ class ResultColumn extends ValueNode
 
     void setName(String name)
 	{
-		if (this.name == null)
+		if ( _underlyingName == null )
 		{
-			this.name = name;
+			_underlyingName = name;
 		}
 		else {
 			if (SanityManager.DEBUG)
@@ -510,7 +516,7 @@ class ResultColumn extends ValueNode
 				"don't change name from reference name");
 		}
 
-		this.exposedName = name;
+		_derivedColumnName = name;
 	}
 
 	/**
@@ -518,7 +524,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isNameGenerated()
 	{
-		return isNameGenerated;
+		return _isNameGenerated;
 	}
 
 	/**
@@ -526,7 +532,7 @@ class ResultColumn extends ValueNode
 	 */
     void setNameGenerated(boolean value)
 	{
-		isNameGenerated = value;
+		_isNameGenerated = value;
 	}
 
 	/**
@@ -600,7 +606,7 @@ class ResultColumn extends ValueNode
 	 */
     void collapseVirtualColumnIdGap(int removedColumnId)
 	{
-		if (columnDescriptor == null && virtualColumnId > removedColumnId)
+		if (_columnDescriptor == null && virtualColumnId > removedColumnId)
 			virtualColumnId--;
 	}
 
@@ -612,11 +618,11 @@ class ResultColumn extends ValueNode
 	 */
     void guaranteeColumnName() throws StandardException
 	{
-		if (exposedName == null)
+		if (_derivedColumnName == null)
 		{
 			/* Unions may also need generated names, if both sides name don't match */
-			exposedName ="SQLCol" + getCompilerContext().getNextColumnNumber();
-			isNameGenerated = true;
+			_derivedColumnName ="SQLCol" + getCompilerContext().getNextColumnNumber();
+			_isNameGenerated = true;
 		}
 	}
 
@@ -631,20 +637,20 @@ class ResultColumn extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "exposedName: " + exposedName + "\n" +
-				"name: " + name + "\n" +
-				"tableName: " + tableName + "\n" +
+			return "derivedColumnName: " + _derivedColumnName + "\n" +
+				"underlyingName: " + _underlyingName + "\n" +
+				"tableName: " + _unqualifiedTableName + "\n" +
 				"isDefaultColumn: " + defaultColumn + "\n" +
 				"wasDefaultColumn: " + wasDefault + "\n" +
-				"isNameGenerated: " + isNameGenerated + "\n" +
-				"sourceTableName: " + sourceTableName + "\n" +
+				"isNameGenerated: " + _isNameGenerated + "\n" +
+				"sourceTableName: " + _unqualifiedSourceTableName + "\n" +
 				"type: " + getTypeServices() + "\n" +
-				"columnDescriptor: " + columnDescriptor + "\n" +
-				"isGenerated: " + isGenerated + "\n" +
-				"isGeneratedForUnmatchedColumnInInsert: " + isGeneratedForUnmatchedColumnInInsert + "\n" +
-				"isGroupingColumn: " + isGroupingColumn + "\n" +
-				"isReferenced: " + isReferenced + "\n" +
-				"isRedundant: " + isRedundant + "\n" +
+				"columnDescriptor: " + _columnDescriptor + "\n" +
+				"isGenerated: " + _isGenerated + "\n" +
+				"isGeneratedForUnmatchedColumnInInsert: " + _isGeneratedForUnmatchedColumnInInsert + "\n" +
+				"isGroupingColumn: " + _isGroupingColumn + "\n" +
+				"isReferenced: " + _isReferenced + "\n" +
+				"isRedundant: " + _isRedundant + "\n" +
 				"rightOuterJoinUsingClause: " + rightOuterJoinUsingClause + "\n" +
 				"joinResultSet: " + joinResultSet + "\n" +
 				"virtualColumnId: " + virtualColumnId + "\n" +
@@ -669,10 +675,10 @@ class ResultColumn extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
-			if (expression != null)
+			if (_expression != null)
 			{
 				printLabel(depth, "expression: ");
-				expression.treePrint(depth + 1);
+				_expression.treePrint(depth + 1);
 			}
 			if (reference != null)
 			{
@@ -709,11 +715,11 @@ class ResultColumn extends ValueNode
 		** Don't do it if this result column doesn't have a type yet.
 		** This can happen if the parameter is part of a table constructor.
 		*/
-		if (expression.requiresTypeFromContext())
+		if (_expression.requiresTypeFromContext())
 		{
 			if (getTypeServices() != null)
 			{
-				expression.setType(getTypeServices());
+				_expression.setType(getTypeServices());
 			}
 		}
 
@@ -727,16 +733,16 @@ class ResultColumn extends ValueNode
 		// JoinResultSet with it. eg
 		//      select c from t1 right join t2 using (c)
 		// Here, we are talking about column c as in "select c"
-		if (expression.getTableName() == null) {
+		if (_expression.getTableName() == null) {
 			fromList.isJoinColumnForRightOuterJoin(this);
 		}
 
-		setExpression( expression.bindExpression(fromList, subqueryList,
+		setExpression( _expression.bindExpression(fromList, subqueryList,
                                                  aggregates) );
 
-		if (expression instanceof ColumnReference)
+		if (_expression instanceof ColumnReference)
 		{
-			autoincrement = ((ColumnReference)expression).getSource().isAutoincrement();
+			autoincrement = ((ColumnReference)_expression).getSource().isAutoincrement();
 		}
 			
 
@@ -815,7 +821,7 @@ class ResultColumn extends ValueNode
 	{
         ColumnDescriptor    colDesc;
 
-        colDesc = tableDescriptor.getColumnDescriptor(exposedName);
+        colDesc = tableDescriptor.getColumnDescriptor(_derivedColumnName);
 
         if (colDesc == null)
 		{
@@ -828,7 +834,7 @@ class ResultColumn extends ValueNode
 				errorString += schemaName + ".";
 			errorString += tableDescriptor.getName();
 
-			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, exposedName, errorString);
+			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, _derivedColumnName, errorString);
 		}
 
         setColumnDescriptor(tableDescriptor, colDesc);
@@ -854,17 +860,17 @@ class ResultColumn extends ValueNode
 			throw StandardException.newException(SQLState.LANG_NULL_IN_VALUES_CLAUSE);
 		}
 
-        if( expression instanceof UntypedNullConstantNode)
+        if( _expression instanceof UntypedNullConstantNode)
         	//since we don't know the type of such a constant node, we just
         	//use the default values for collation type and derivation.
         	//eg insert into table1 values(1,null)
         	//When this method is executed for the sql above, we don't know
         	//the type of the null at this point.
             setExpression( getNullNode(bindingRC.getTypeServices()) );
-        else if( ( expression instanceof ColumnReference) && expression.getTypeServices() == null)
+        else if( ( _expression instanceof ColumnReference) && _expression.getTypeServices() == null)
         {
             // The expression must be a reference to a null column in a values table.
-            expression.setType( bindingRC.getType());
+            _expression.setType( bindingRC.getType());
         }
 	}
 
@@ -887,13 +893,8 @@ class ResultColumn extends ValueNode
 	void setColumnDescriptor(TableDescriptor tableDescriptor,
 				ColumnDescriptor columnDescriptor) throws StandardException
 	{
-		/* Callers are responsible for verifying that the column exists */
-		if (SanityManager.DEBUG)
-	    SanityManager.ASSERT(columnDescriptor != null,
-					"Caller is responsible for verifying that column exists");
-
-		setType(columnDescriptor.getType());
-		this.columnDescriptor = columnDescriptor;
+		if ( columnDescriptor != null ) { setType(columnDescriptor.getType()); }
+		_columnDescriptor = columnDescriptor;
 
 		/*
 			If the node was created using a reference, the table name
@@ -901,13 +902,13 @@ class ResultColumn extends ValueNode
 		 */
 		if (reference != null && reference.getTableName() != null) 
 		{
-			if (! tableDescriptor.getName().equals(
+			if ( (tableDescriptor != null) && ! tableDescriptor.getName().equals(
 					reference.getTableName()) ) 
 			{
 				/* REMIND: need to have schema name comparison someday as well...
 				** left out for now, lots of null checking needed...
 				** || ! tableDescriptor.getSchemaName().equals(
-				**	reference.getTableNameNode().getSchemaName())) {
+				**	reference.getQualifiedTableName().getSchemaName())) {
 				*/
 				String realName = tableDescriptor.getName();
 				String refName = reference.getTableName();
@@ -934,14 +935,14 @@ class ResultColumn extends ValueNode
 		** is used in the expression.  It is probably not
 		** necessary to clone the object here.
 		*/
-		setType(expression.getTypeServices());
+		setType(_expression.getTypeServices());
 
-		if (expression instanceof ColumnReference)
+		if (_expression instanceof ColumnReference)
 		{
-			ColumnReference cr = (ColumnReference) expression;
-			tableName = cr.getTableName();
-			sourceTableName = cr.getSourceTableName();
-			sourceSchemaName = cr.getSourceSchemaName();
+			ColumnReference cr = (ColumnReference) _expression;
+			_unqualifiedTableName = cr.getTableName();
+			_unqualifiedSourceTableName = cr.getSourceTableName();
+			_sourceSchemaName = cr.getSourceSchemaName();
 		}
 	}
 
@@ -951,7 +952,7 @@ class ResultColumn extends ValueNode
 	 * @param t The source table name
 	 */
     void setSourceTableName(String t) {
-		sourceTableName = t;
+		_unqualifiedSourceTableName = t;
 	}
 
 	/**
@@ -959,7 +960,7 @@ class ResultColumn extends ValueNode
 	 * @param s The source schema name
 	 */
     void setSourceSchemaName(String s) {
-		sourceSchemaName = s;
+		_sourceSchemaName = s;
 	}
 
 	/**
@@ -984,9 +985,9 @@ class ResultColumn extends ValueNode
 								PredicateList outerPredicateList) 
 					throws StandardException
 	{
-		if (expression == null)
+		if (_expression == null)
 			return this;
-		setExpression( expression.preprocess(numTables, outerFromList,
+		setExpression( _expression.preprocess(numTables, outerFromList,
 										   outerSubqueryList,
                                            outerPredicateList) );
 		return this;
@@ -1053,7 +1054,7 @@ class ResultColumn extends ValueNode
     void generateExpression(ExpressionClassBuilder ecb, MethodBuilder mb)
 									throws StandardException
 	{
-        expression.generateExpression(ecb, mb);
+        _expression.generateExpression(ecb, mb);
 	}
 
 	/**
@@ -1162,7 +1163,7 @@ class ResultColumn extends ValueNode
 		** case.
 		*/
 		if ((otherExpression != null) && (otherExpression.requiresTypeFromContext()) ||
-			(expression.requiresTypeFromContext()))
+			(_expression.requiresTypeFromContext()))
 		{
 			return false;
 		}
@@ -1285,7 +1286,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isGenerated()
 	{
-		return (isGenerated == true);
+		return (_isGenerated == true);
 	}
 
 	/**
@@ -1295,7 +1296,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isGeneratedForUnmatchedColumnInInsert()
 	{
-		return (isGeneratedForUnmatchedColumnInInsert == true);
+		return (_isGeneratedForUnmatchedColumnInInsert == true);
 	}
 
 	/**
@@ -1303,9 +1304,9 @@ class ResultColumn extends ValueNode
 	 */
     void markGenerated()
 	{
-		isGenerated = true;
+		_isGenerated = true;
 		/* A generated column is a referenced column */
-		isReferenced = true;
+		_isReferenced = true;
 	}
 
 	/**
@@ -1313,9 +1314,9 @@ class ResultColumn extends ValueNode
 	 */
     void markGeneratedForUnmatchedColumnInInsert()
 	{
-		isGeneratedForUnmatchedColumnInInsert = true;
+		_isGeneratedForUnmatchedColumnInInsert = true;
 		/* A generated column is a referenced column */
-		isReferenced = true;
+		_isReferenced = true;
 	}
 
 	/**
@@ -1325,7 +1326,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isReferenced()
 	{
-		return isReferenced;
+		return _isReferenced;
 	}
 
 	/**
@@ -1333,7 +1334,7 @@ class ResultColumn extends ValueNode
 	 */
     void setReferenced()
 	{
-		isReferenced = true;
+		_isReferenced = true;
 	}
 
     /**
@@ -1345,7 +1346,7 @@ class ResultColumn extends ValueNode
         if( isReferenced())
             return;
         
-        for( ValueNode expr = expression; expr != null && (expr instanceof VirtualColumnNode);)
+        for( ValueNode expr = _expression; expr != null && (expr instanceof VirtualColumnNode);)
         {
             VirtualColumnNode vcn = (VirtualColumnNode) expr;
             ResultColumn src = vcn.getSourceColumn();
@@ -1363,7 +1364,7 @@ class ResultColumn extends ValueNode
 	 */
     void setUnreferenced()
 	{
-		isReferenced = false;
+		_isReferenced = false;
 	}
 
 	/**
@@ -1374,7 +1375,7 @@ class ResultColumn extends ValueNode
 	{
 		setReferenced();
 
-		ValueNode vn = expression;
+		ValueNode vn = _expression;
 
 		while (vn instanceof VirtualColumnNode)
 		{
@@ -1392,7 +1393,7 @@ class ResultColumn extends ValueNode
 	 */
     boolean isRedundant()
 	{
-		return isRedundant;
+		return _isRedundant;
 	}
 
 	/**
@@ -1400,7 +1401,7 @@ class ResultColumn extends ValueNode
 	 */
     void setRedundant()
 	{
-		isRedundant = true;
+		_isRedundant = true;
 	}
 
 	/**
@@ -1408,7 +1409,7 @@ class ResultColumn extends ValueNode
 	 */
     void markAsGroupingColumn()
 	{
-		isGroupingColumn = true;
+		_isGroupingColumn = true;
 	}
 
 	/**
@@ -1421,7 +1422,7 @@ class ResultColumn extends ValueNode
 
 	void rejectParameter() throws StandardException
 	{
-		if ((expression != null) && (expression.isParameterNode()))
+		if ((_expression != null) && (_expression.isParameterNode()))
 			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
 	}
 
@@ -1440,7 +1441,7 @@ class ResultColumn extends ValueNode
 	 */
 	void markUpdated()
 	{
-		updated = true;
+		_updated = true;
 	}
 
 	/**
@@ -1449,7 +1450,7 @@ class ResultColumn extends ValueNode
 	 */
 	void markUpdatableByCursor()
 	{
-		updatableByCursor = true;
+		_updatableByCursor = true;
 	}
 
 	/**
@@ -1459,7 +1460,7 @@ class ResultColumn extends ValueNode
 	 */
 	boolean updated()
 	{
-		return updated;
+		return _updated;
 	}
 
 	/**
@@ -1470,7 +1471,7 @@ class ResultColumn extends ValueNode
     @Override
 	public boolean updatableByCursor()
 	{
-		return updatableByCursor;
+		return _updatableByCursor;
 	}
 
 	/**
@@ -1492,20 +1493,20 @@ class ResultColumn extends ValueNode
 		 * The SELECT generated for the HAVING needs its own copy
 		 * of the ColumnReferences.
 		 */
-		if (expression instanceof ColumnReference)
+		if (_expression instanceof ColumnReference)
 		{
-			cloneExpr = ((ColumnReference) expression).getClone();
+			cloneExpr = ((ColumnReference) _expression).getClone();
 		}
 		else
 		{
-			cloneExpr = expression;
+			cloneExpr = _expression;
 		}
 
 		/* If a columnDescriptor exists, then we must propagate it */
-		if (columnDescriptor != null)
+		if (_columnDescriptor != null)
 		{
             newResultColumn = new ResultColumn(
-                    columnDescriptor, expression, getContextManager());
+                    _columnDescriptor, _expression, getContextManager());
 			newResultColumn.setExpression(cloneExpr);
 		}
 		else
@@ -1620,8 +1621,8 @@ class ResultColumn extends ValueNode
         int expType;
         if (isAutoincrementGenerated()) {
             expType = Qualifier.VARIANT;
-        } else if (expression != null) {
-            expType = expression.getOrderableVariantType();
+        } else if (_expression != null) {
+            expType = _expression.getOrderableVariantType();
         } else {
             expType = Qualifier.CONSTANT;
         }
@@ -1653,9 +1654,9 @@ class ResultColumn extends ValueNode
 	{
 		super.acceptChildren(v);
 	
-		if (expression != null)
+		if (_expression != null)
 		{
-			setExpression( (ValueNode)expression.accept(v) );
+			setExpression( (ValueNode)_expression.accept(v) );
 		}
 	}
 
@@ -1685,7 +1686,7 @@ class ResultColumn extends ValueNode
 	  get the column descriptor for the column in the table.
 	  Otherwise return null.
 	  */
-	ColumnDescriptor getTableColumnDescriptor() {return columnDescriptor;}
+	ColumnDescriptor getTableColumnDescriptor() {return _columnDescriptor;}
 
 	/**
 	 * Returns true if this result column is a placeholder for a generated
@@ -1716,10 +1717,10 @@ class ResultColumn extends ValueNode
   		autoincrement = true;
   	}
         
-        public boolean isGroupingColumn()
-        {
-        	return isGroupingColumn;
-        }
+    public boolean isGroupingColumn()
+    {
+        return _isGroupingColumn;
+    }
         
 	/**
 	 * @exception StandardException		Thrown on error
@@ -1787,6 +1788,9 @@ class ResultColumn extends ValueNode
 
 	/* Get the wrapped reference if any */
 	public	ColumnReference	getReference() { return reference; }
+
+    /** Get the column descriptor */
+    ColumnDescriptor    getColumnDescriptor() { return _columnDescriptor; }
 	
 	/**
 	 * Get the source BaseColumnNode for this result column. The
@@ -1797,10 +1801,10 @@ class ResultColumn extends ValueNode
 	 *   or null if a BaseColumnNode cannot be found
 	 */
     BaseColumnNode getBaseColumnNode() {
-		ValueNode vn = expression;
+		ValueNode vn = _expression;
 		while (true) {
 			if (vn instanceof ResultColumn) {
-				vn = ((ResultColumn) vn).expression;
+				vn = ((ResultColumn) vn)._expression;
 			} else if (vn instanceof ColumnReference) {
 				vn = ((ColumnReference) vn).getSource();
 			} else if (vn instanceof VirtualColumnNode) {
@@ -1834,11 +1838,11 @@ class ResultColumn extends ValueNode
     int getTableNumber()
 		throws StandardException
 	{
-		if (expression instanceof ColumnReference)
-			return ((ColumnReference)expression).getTableNumber();
-		else if (expression instanceof VirtualColumnNode)
+		if (_expression instanceof ColumnReference)
+			return ((ColumnReference)_expression).getTableNumber();
+		else if (_expression instanceof VirtualColumnNode)
 		{
-			VirtualColumnNode vcn = (VirtualColumnNode)expression;
+			VirtualColumnNode vcn = (VirtualColumnNode)_expression;
 
 			// If the VCN points to a FromBaseTable, just get that
 			// table's number.
@@ -1862,8 +1866,8 @@ class ResultColumn extends ValueNode
 	{
         if (isSameNodeKind(o)) {
         	ResultColumn other = (ResultColumn)o;
-        	if (expression != null) {
-        		return expression.isEquivalent(other.expression);
+        	if (_expression != null) {
+        		return _expression.isEquivalent(other._expression);
         	}
         }
 
@@ -1876,7 +1880,7 @@ class ResultColumn extends ValueNode
 	 */
 	public boolean hasGenerationClause()
 	{
-        if ( (columnDescriptor != null) && columnDescriptor.hasGenerationClause() ) { return true; }
+        if ( (_columnDescriptor != null) && _columnDescriptor.hasGenerationClause() ) { return true; }
         else { return false; }
 	}
     

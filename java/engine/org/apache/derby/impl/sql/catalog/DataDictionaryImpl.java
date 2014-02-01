@@ -4942,7 +4942,7 @@ public final class	DataDictionaryImpl
 			//usage of trigger action columns again in 10.9
             for (ColumnReference ref : refs)
 			{
-				TableName tableName = ref.getTableNameNode();
+				TableName tableName = ref.getQualifiedTableName();
 				if ((tableName == null) ||
 					((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&
 					(newReferencingName == null || !newReferencingName.equals(tableName.getTableName()))))
@@ -5033,7 +5033,7 @@ public final class	DataDictionaryImpl
 		//		(SELECT c FROM new TriggerOldTransitionTable OLD)
         for (ColumnReference ref : refs)
 		{
-			TableName tableName = ref.getTableNameNode();
+			TableName tableName = ref.getQualifiedTableName();
 			if ((tableName == null) ||
 				((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&
 				(newReferencingName == null || !newReferencingName.equals(tableName.getTableName()))))
