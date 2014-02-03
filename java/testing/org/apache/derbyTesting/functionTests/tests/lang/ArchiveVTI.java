@@ -97,7 +97,14 @@ public class ArchiveVTI extends ForwardingVTI implements AwareVTI, RestrictedVTI
      * </p>
      *
      * <pre>
-     *
+     * create function t1( archiveSuffix varchar( 32672 ) ) returns table
+     * (
+     *     keyCol int,
+     *     aCol int,
+     *     bCol int
+     * )
+     * language java parameter style derby_jdbc_result_set reads sql data
+     * external name 'org.apache.derbyTesting.functionTests.tests.lang.ArchiveVTI.archiveVTI'
      * </pre>
      *
      * @param archiveSuffix All of the archive tables have names of the form $tablename$archiveSuffix.
