@@ -109,15 +109,15 @@ class ResultColumn extends ValueNode
 
 	// tells us if this ResultColumn is a placeholder for a generated
 	// autoincrement value for an insert statement.
-	boolean			autoincrementGenerated;
+	private boolean			_autoincrementGenerated;
 
 	// tells us if this ResultColumn represents an autoincrement column in a
 	// base table.
-	boolean 		autoincrement;
+	private boolean 		_autoincrement;
 
 	/* ResultSetNumber for the ResultSet (at generate() time) that we belong to */
 	private int		resultSetNumber = -1;
-	ColumnReference reference; // used to verify quals at bind time, if given.
+	private ColumnReference _reference; // used to verify quals at bind time, if given.
 
 	/* virtualColumnId is the ResultColumn's position (1-based) within the ResultSet */
 	private int		virtualColumnId;
@@ -158,7 +158,7 @@ class ResultColumn extends ValueNode
 
         // When we bind, we'll want to make sure the reference has the right
         // table name.
-        this.reference = cr;
+        _reference = cr;
     }
 
     /**
@@ -177,7 +177,7 @@ class ResultColumn extends ValueNode
         _derivedColumnName = _underlyingName;
         setType(cd.getType());
         _columnDescriptor = cd;
-        this.autoincrement = cd.isAutoincrement();
+        _autoincrement = cd.isAutoincrement();
     }
 
     /**
@@ -195,7 +195,7 @@ class ResultColumn extends ValueNode
         setType(dtd);
 
         if (_expression instanceof ColumnReference) {
-            reference = (ColumnReference)expression;
+            _reference = (ColumnReference)expression;
         }
     }
 
@@ -511,8 +511,8 @@ class ResultColumn extends ValueNode
 		}
 		else {
 			if (SanityManager.DEBUG)
-			SanityManager.ASSERT(reference == null || 
-				name.equals(reference.getColumnName()), 
+			SanityManager.ASSERT(_reference == null || 
+				name.equals(_reference.getColumnName()), 
 				"don't change name from reference name");
 		}
 
@@ -680,10 +680,10 @@ class ResultColumn extends ValueNode
 				printLabel(depth, "expression: ");
 				_expression.treePrint(depth + 1);
 			}
-			if (reference != null)
+			if (_reference != null)
 			{
 				printLabel(depth, "reference: ");
-				reference.treePrint(depth + 1);
+				_reference.treePrint(depth + 1);
 			}
 		}
 	}
@@ -742,7 +742,7 @@ class ResultColumn extends ValueNode
 
 		if (_expression instanceof ColumnReference)
 		{
-			autoincrement = ((ColumnReference)_expression).getSource().isAutoincrement();
+			_autoincrement = ((ColumnReference)_expression).getSource().isAutoincrement();
 		}
 			
 
@@ -900,10 +900,10 @@ class ResultColumn extends ValueNode
 			If the node was created using a reference, the table name
 			of the reference must agree with that of the tabledescriptor.
 		 */
-		if (reference != null && reference.getTableName() != null) 
+		if (_reference != null && _reference.getTableName() != null) 
 		{
 			if ( (tableDescriptor != null) && ! tableDescriptor.getName().equals(
-					reference.getTableName()) ) 
+					_reference.getTableName()) ) 
 			{
 				/* REMIND: need to have schema name comparison someday as well...
 				** left out for now, lots of null checking needed...
@@ -911,7 +911,7 @@ class ResultColumn extends ValueNode
 				**	reference.getQualifiedTableName().getSchemaName())) {
 				*/
 				String realName = tableDescriptor.getName();
-				String refName = reference.getTableName();
+				String refName = _reference.getTableName();
 
 				throw StandardException.newException(SQLState.LANG_TABLE_NAME_MISMATCH, 
 					realName, refName);
@@ -1694,27 +1694,27 @@ class ResultColumn extends ValueNode
 	 */
     boolean isAutoincrementGenerated()
 	{
-		return autoincrementGenerated;
+		return _autoincrementGenerated;
 	}
 
     void setAutoincrementGenerated()
 	{
-		autoincrementGenerated = true;
+		_autoincrementGenerated = true;
 	}
 
     void resetAutoincrementGenerated()
 	{
-		autoincrementGenerated = false;
+		_autoincrementGenerated = false;
 	}
 
   	public boolean isAutoincrement()
   	{
-		return autoincrement;
+		return _autoincrement;
   	}
 
     void setAutoincrement()
   	{
-  		autoincrement = true;
+  		_autoincrement = true;
   	}
         
     public boolean isGroupingColumn()
@@ -1787,7 +1787,7 @@ class ResultColumn extends ValueNode
     }
 
 	/* Get the wrapped reference if any */
-	public	ColumnReference	getReference() { return reference; }
+	public	ColumnReference	getReference() { return _reference; }
 
     /** Get the column descriptor */
     ColumnDescriptor    getColumnDescriptor() { return _columnDescriptor; }
