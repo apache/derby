@@ -53,7 +53,9 @@ org/apache/derby/tools/dblook.java
 # package: org.apache.derby.vti
 
 org/apache/derby/vti/AwareVTI.java
+org/apache/derby/vti/AwareVTI.java
 org/apache/derby/vti/ForeignTableVTI.java
+org/apache/derby/vti/ForwardingVTI.java
 org/apache/derby/vti/RestrictedVTI.java
 org/apache/derby/vti/Restriction.java
 org/apache/derby/vti/StringColumnVTI.java

@@ -120,7 +120,7 @@ import org.apache.derby.iapi.util.IdUtil;
  * select lastName from foreignEmployee where employeeID = 2;
  * </pre>
  */
-public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
+public	class   ForeignTableVTI extends ForwardingVTI implements  RestrictedVTI
 {
     ////////////////////////////////////////////////////////////////////////
     //
@@ -138,7 +138,9 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
 
     private String  _foreignSchemaName;
     private String  _foreignTableName;
+    
     private String  _connectionURL;
+    private Connection  _foreignConnection;     // if null, we use _connectionURL to make a Connection
 
     private String[]    _columnNames;
     private Restriction _restriction;
@@ -147,7 +149,6 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
     // the actual query
     private int[]               _columnNumberMap;
     private PreparedStatement   _foreignPreparedStatement;
-    private ResultSet           _foreignResultSet;
 
     ////////////////////////////////////////////////////////////////////////
     //
@@ -155,6 +156,23 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
     //
     ////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Construct from the foreign schema and table name and a foreign connection.
+     * </p>
+     */
+    public  ForeignTableVTI
+        (
+         String foreignSchemaName,
+         String foreignTableName,
+         Connection foreignConnection
+         )
+    {
+        _foreignSchemaName = foreignSchemaName;
+        _foreignTableName = foreignTableName;
+        _foreignConnection = foreignConnection;
+    }
+    
     protected  ForeignTableVTI
         (
          String foreignSchemaName,
@@ -237,103 +255,28 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
             _restriction = null;
             _columnNumberMap = null;
 
-            if ( _foreignResultSet != null ) { _foreignResultSet.close(); }
+            if ( getWrappedResultSet() != null ) { getWrappedResultSet().close(); }
             if ( _foreignPreparedStatement != null ) { _foreignPreparedStatement.close(); }
 
-            _foreignResultSet = null;
+            wrapResultSet( null );
             _foreignPreparedStatement = null;
+            _foreignConnection = null;
         }
     }
 
     public  boolean next()  throws SQLException
     {
-        if ( !isClosed() && (_foreignResultSet == null) )
+        if ( !isClosed() && (getWrappedResultSet() == null) )
         {
             _foreignPreparedStatement = prepareStatement
-                ( getForeignConnection( _connectionURL ), makeQuery() );
-            _foreignResultSet = _foreignPreparedStatement.executeQuery();
+                ( getForeignConnection( _connectionURL, _foreignConnection ), makeQuery() );
+            wrapResultSet( _foreignPreparedStatement.executeQuery() );
         }
 
-        return _foreignResultSet.next();
+        return getWrappedResultSet().next();
     }
 
-    public boolean isClosed() { return (_connectionURL == null); }
-
-    public  boolean wasNull()   throws SQLException
-    { return _foreignResultSet.wasNull(); }
-
-    public  ResultSetMetaData   getMetaData()   throws SQLException
-    { return _foreignResultSet.getMetaData(); }
-
-    public  InputStream 	getAsciiStream(int i) throws SQLException
-    { return _foreignResultSet.getAsciiStream( mapColumnNumber( i ) ); }
-    
-    public  BigDecimal 	getBigDecimal(int i) throws SQLException
-    { return _foreignResultSet.getBigDecimal( mapColumnNumber( i ) ); }
-
-    @Deprecated
-    public  BigDecimal 	getBigDecimal(int i, int scale) throws SQLException
-    { return _foreignResultSet.getBigDecimal( mapColumnNumber( i ), scale ); }
-    
-    public  InputStream 	getBinaryStream(int i)  throws SQLException
-    { return _foreignResultSet.getBinaryStream( mapColumnNumber( i ) ); }
-    
-    public  Blob 	getBlob(int i)  throws SQLException
-    { return _foreignResultSet.getBlob( mapColumnNumber( i ) ); }
-    
-    public  boolean 	getBoolean(int i) throws SQLException
-    { return _foreignResultSet.getBoolean( mapColumnNumber( i ) ); }
-    
-    public  byte 	getByte(int i)    throws SQLException
-    { return _foreignResultSet.getByte( mapColumnNumber( i ) ); }
-    
-    public  byte[] 	getBytes(int i) throws SQLException
-    { return _foreignResultSet.getBytes( mapColumnNumber( i ) ); }
-    
-    public  Reader 	getCharacterStream(int i) throws SQLException
-    { return _foreignResultSet.getCharacterStream( mapColumnNumber( i ) ); }
-
-    public  Clob 	getClob(int i)  throws SQLException
-    { return _foreignResultSet.getClob( mapColumnNumber( i ) ); }
-
-    public  Date 	getDate(int i)  throws SQLException
-    { return _foreignResultSet.getDate( mapColumnNumber( i ) ); }
-
-    public  Date 	getDate(int i, Calendar cal)    throws SQLException
-    { return _foreignResultSet.getDate( mapColumnNumber( i ), cal ); }
-
-    public  double 	getDouble(int i)    throws SQLException
-    { return _foreignResultSet.getDouble( mapColumnNumber( i ) ); }
-
-    public  float 	getFloat(int i) throws SQLException
-    { return _foreignResultSet.getFloat( mapColumnNumber( i ) ); }
-
-    public  int 	getInt(int i)   throws SQLException
-    { return _foreignResultSet.getInt( mapColumnNumber( i ) ); }
-
-    public  long 	getLong(int i)  throws SQLException
-    { return _foreignResultSet.getLong( mapColumnNumber( i ) ); }
-
-    public  Object 	getObject(int i)    throws SQLException
-    { return _foreignResultSet.getObject( mapColumnNumber( i ) ); }
-
-    public  short 	getShort(int i) throws SQLException
-    { return _foreignResultSet.getShort( mapColumnNumber( i ) ); }
-
-    public  String 	getString(int i)    throws SQLException
-    { return _foreignResultSet.getString( mapColumnNumber( i ) ); }
-
-    public  Time 	getTime(int i)  throws SQLException
-    { return _foreignResultSet.getTime( mapColumnNumber( i ) ); }
-
-    public  Time 	getTime(int i, Calendar cal)    throws SQLException
-    { return _foreignResultSet.getTime( mapColumnNumber( i ), cal ); }
-
-    public  Timestamp 	getTimestamp(int i) throws SQLException
-    { return _foreignResultSet.getTimestamp( mapColumnNumber( i ) ); }
-
-    public  Timestamp 	getTimestamp(int i, Calendar cal)   throws SQLException
-    { return _foreignResultSet.getTimestamp( mapColumnNumber( i ), cal ); }
+    public boolean isClosed() { return ( (_connectionURL == null) && (_foreignConnection == null) ); }
 
     ////////////////////////////////////////////////////////////////////////
     //
@@ -365,9 +308,11 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
     ////////////////////////////////////////////////////////////////////////
 
     private static  Connection  getForeignConnection
-        ( String connectionURL )
+        ( String connectionURL, Connection foreignConnection )
         throws SQLException
     {
+        if ( foreignConnection != null ) { return foreignConnection; }
+        
         Connection  conn = _connections.get( connectionURL );
 
         if ( conn == null )
@@ -453,7 +398,8 @@ public	class   ForeignTableVTI extends VTITemplate implements  RestrictedVTI
      * foreign query.
      * </p>
      */
-    private int mapColumnNumber( int derbyNumber )
+    @Override
+    protected int mapColumnNumber( int derbyNumber )
     {
         return _columnNumberMap[ derbyNumber - 1 ];
     }

@@ -168,6 +168,64 @@ public class AwareVTITest  extends GeneratedColumnsHelper
         assertResults( ucv, rows, false );
     }
     
+    /**
+     * <p>
+     * Test the ArchiveVTI table function. This table function may be an example
+     * in the Derby user docs. If you break this table function, then you need to
+     * adjust the user docs accordingly. That documentation should be linked from
+     * DERBY-6117.
+     * </p>
+     */
+    public void test_03_ArchiveVTI() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table t1\n" +
+             "(\n" +
+             "    keyCol int,\n" +
+             "    aCol int,\n" +
+             "    bCol int\n" +
+             ")\n"
+             );
+        goodStatement( conn, "create table t1_archive_001 as select * from t1 with no data" );
+        goodStatement( conn, "create table t1_archive_002 as select * from t1 with no data" );
+        goodStatement( conn, "insert into t1_archive_002 values ( 1, 100, 1000 ), ( 2, 200, 2000 ), ( 3, 300, 3000 )" );
+        goodStatement( conn, "insert into t1_archive_001 values ( 4, 400, 4000 ), ( 5, 500, 5000 ), ( 6, 600, 6000 )" );
+        goodStatement( conn, "insert into t1 values ( 7, 700, 7000 ), ( 8, 800, 8000 ), ( 9, 900, 9000 )" );
+        goodStatement
+            (
+             conn,
+             "create function t1( archiveSuffix varchar( 32672 ) ) returns table\n" +
+             "(\n" +
+             "    keyCol int,\n" +
+             "    aCol int,\n" +
+             "    bCol int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.ArchiveVTI.archiveVTI'\n"
+             );
+        
+        assertResults
+            (
+             conn,
+             "select keyCol, bCol from table( t1( '_ARCHIVE_' ) ) s\n" +
+             "where keyCol between 3 and 7\n" +
+             "order by keyCol\n",
+             new String[][]
+             {
+                 { "3", "3000" },
+                 { "4", "4000" },
+                 { "5", "5000" },
+                 { "6", "6000" },
+                 { "7", "7000" },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
