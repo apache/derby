@@ -113,7 +113,12 @@ public class StaticMethodCallNode extends MethodCallNode
 	private int[]		 applicationParameterNumbers; 
 
 	private boolean		isSystemCode;
-	private boolean		alreadyBound;
+
+    /**
+     * This flag is true while bindExpression() is executing. It is used to
+     * avoid infinite recursion when bindExpression() is reentered.
+     */
+    private boolean isInsideBind;
 
     /**
      * Generated boolean field to hold the indicator
@@ -182,10 +187,24 @@ public class StaticMethodCallNode extends MethodCallNode
 			throws StandardException
 	{
 		// for a function we can get called recursively
-		if (alreadyBound)
-			return this;
+        if (isInsideBind) {
+            return this;
+        }
 
+        isInsideBind = true;
+        try {
+            return bindExpressionMinion(fromList, subqueryList, aggregateVector);
+        } finally {
+            isInsideBind = false;
+        }
+    }
 
+    private JavaValueNode bindExpressionMinion(
+            FromList fromList,
+            SubqueryList subqueryList,
+            List aggregateVector)
+        throws StandardException
+    {
 		bindParameters(fromList, subqueryList, aggregateVector);
 
 		
@@ -345,7 +364,6 @@ public class StaticMethodCallNode extends MethodCallNode
 		resolveMethodCall( javaClassName, true );
 
 
-		alreadyBound = true;
 		if (isPrivilegeCollectionRequired())
 			getCompilerContext().addRequiredRoutinePriv(ad);
 
