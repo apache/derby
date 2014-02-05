@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * <p>
@@ -213,24 +214,10 @@ public final class MergeNode extends DMLModStatementNode
             throw StandardException.newException( SQLState.LANG_SAME_EXPOSED_NAME );
         }
 
-        //
-        // Replace all references to correlation names with the actual
-        // resolved table name.
-        //
         FromList    dfl = new FromList( getContextManager() );
         dfl.addFromTable( _sourceTable );
         dfl.addFromTable( _targetTable );
         dfl.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
-        
-        replaceCorrelationName( _targetTable.correlationName, _targetTable.tableName );
-        _targetTable.correlationName = null;
-
-        if ( _sourceTable instanceof FromBaseTable )
-        {
-            TableName   sourceTableName = ((FromBaseTable) _sourceTable).tableName;
-            replaceCorrelationName( _sourceTable.correlationName, sourceTableName );
-            _sourceTable.correlationName = null;
-        }
 
         //
         // Bind the WHEN [ NOT ] MATCHED clauses.
@@ -238,7 +225,7 @@ public final class MergeNode extends DMLModStatementNode
         FromList    dummyFromList = new FromList( getContextManager() );
         FromBaseTable   dummyTargetTable = new FromBaseTable
             (
-             _targetTable.tableName,
+             _targetTable.getTableNameField(),
              _targetTable.correlationName,
              null,
              null,
@@ -249,7 +236,7 @@ public final class MergeNode extends DMLModStatementNode
         dummyFromList.addFromTable( dummySourceTable );
         dummyFromList.addFromTable( dummyTargetTable );
         dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
-        
+
         // target table must be a base table
         if ( !targetIsBaseTable( _targetTable ) ) { notBaseTable(); }
 
@@ -267,104 +254,6 @@ public final class MergeNode extends DMLModStatementNode
             mcn.bindResultSetNumbers( this, _leftJoinFromList );
         }
 	}
-
-    /**
-     * <p>
-     * Replace references to the correlation name with the underlying table name
-     * in all ColumnReferences under all expressions. If the correlation name is null,
-     * then replace all references to the unqualified table name with the fully
-     * qualified table name. This replacement is
-     * done before the ColumnReferences are bound.
-     * </p>
-     */
-    private void    replaceCorrelationName
-        (
-         String correlationName,
-         TableName  newTableName
-         )
-        throws StandardException
-    {
-        if ( correlationName == null ) { correlationName = newTableName.getTableName(); }
-
-        replaceCorrelationName
-            (
-             correlationName,
-             newTableName,
-             _searchCondition
-             );
-            
-        for ( MatchingClauseNode mcn : _matchingClauses )
-        {
-            mcn.replaceCorrelationName
-                (
-                 this,
-                 correlationName,
-                 newTableName
-                 );
-        }
-    }
-    
-    /**
-     * <p>
-     * Replace references to the correlation name with the underlying table name
-     * in all ColumnReferences under the indicated list of ResultColumns. This replacement is
-     * done before the ColumnReferences are bound.
-     * </p>
-     */
-    public  void    replaceCorrelationName
-        (
-         String correlationName,
-         TableName  newTableName,
-         ResultColumnList   rcl
-         )
-        throws StandardException
-    {
-        if ( rcl == null ) { return; }
-        
-        for ( int i = 0; i < rcl.size(); i++ )
-        {
-            replaceCorrelationName( correlationName, newTableName, rcl.elementAt( i ) );
-        }
-    }
-    
-    /**
-     * <p>
-     * Replace references to the correlation name with the underlying table name
-     * in all ColumnReferences in the indicated expression. This replacement is
-     * done before the ColumnReferences are bound.
-     * </p>
-     */
-    public  void    replaceCorrelationName
-        (
-         String correlationName,
-         TableName  newTableName,
-         ValueNode  expression
-         )
-        throws StandardException
-    {
-        if ( expression == null ) { return; }
-        
-        CollectNodesVisitor<ColumnReference> getCRs =
-            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
-
-        expression.accept(getCRs);
-        List<ColumnReference> colRefs = getCRs.getList();
-
-        for ( ColumnReference cr : colRefs )
-        {
-            TableName   origTableName = cr.getQualifiedTableName();
-            if ( origTableName != null )
-            {
-                if (
-                    (origTableName.getSchemaName() == null) &&
-                    correlationName.equals( origTableName.getTableName() )
-                    )
-                {
-                    cr.setQualifiedTableName( newTableName );
-                }
-            }
-        }
-    }
 
     /** Get the exposed name of a FromTable */
     private String  getExposedName( FromTable ft ) throws StandardException
@@ -477,20 +366,34 @@ public final class MergeNode extends DMLModStatementNode
     private ResultColumnList    buildSelectList() throws StandardException
     {
         HashMap<String,ColumnReference> drivingColumnMap = new HashMap<String,ColumnReference>();
-        getColumnsInExpression( drivingColumnMap, _searchCondition );
+        getColumnsInExpression( drivingColumnMap, _searchCondition, ColumnReference.MERGE_UNKNOWN );
         
         for ( MatchingClauseNode mcn : _matchingClauses )
         {
             mcn.getColumnsInExpressions( this, drivingColumnMap );
-            getColumnsFromList( drivingColumnMap, mcn.getBufferedColumns() );
+
+            int mergeTableID = mcn.isDeleteClause() ? ColumnReference.MERGE_TARGET : ColumnReference.MERGE_UNKNOWN;
+            getColumnsFromList( drivingColumnMap, mcn.getBufferedColumns(), mergeTableID );
         }
 
         ResultColumnList    selectList = new ResultColumnList( getContextManager() );
 
         // add all of the columns from the source table which are mentioned
-        addColumns( (FromTable) _leftJoinFromList.elementAt( SOURCE_TABLE_INDEX ), drivingColumnMap, selectList );
+        addColumns
+            (
+             (FromTable) _leftJoinFromList.elementAt( SOURCE_TABLE_INDEX ),
+             drivingColumnMap,
+             selectList,
+             ColumnReference.MERGE_SOURCE
+             );
         // add all of the columns from the target table which are mentioned
-        addColumns( (FromTable) _leftJoinFromList.elementAt( TARGET_TABLE_INDEX ), drivingColumnMap, selectList );
+        addColumns
+            (
+             (FromTable) _leftJoinFromList.elementAt( TARGET_TABLE_INDEX ),
+             drivingColumnMap,
+             selectList,
+             ColumnReference.MERGE_TARGET
+             );
 
         addTargetRowLocation( selectList );
 
@@ -507,6 +410,7 @@ public final class MergeNode extends DMLModStatementNode
         TableName   fromTableName = _targetTable.getTableName();
         ColumnReference cr = new ColumnReference
                 ( TARGET_ROW_LOCATION_NAME, fromTableName, getContextManager() );
+        cr.setMergeTableID( ColumnReference.MERGE_TARGET );
         ResultColumn    rowLocationColumn = new ResultColumn( (String) null, cr, getContextManager() );
         rowLocationColumn.markGenerated();
 
@@ -598,7 +502,8 @@ public final class MergeNode extends DMLModStatementNode
         (
          FromTable  fromTable,
          HashMap<String,ColumnReference> drivingColumnMap,
-         ResultColumnList   selectList
+         ResultColumnList   selectList,
+         int    mergeTableID
          )
         throws StandardException
     {
@@ -608,6 +513,7 @@ public final class MergeNode extends DMLModStatementNode
         {
             ColumnReference cr = new ColumnReference
                 ( columnNames[ i ], fromTable.getTableName(), getContextManager() );
+            cr.setMergeTableID( mergeTableID );
             ResultColumn    rc = new ResultColumn( (String) null, cr, getContextManager() );
             selectList.addResultColumn( rc );
         }
@@ -632,7 +538,7 @@ public final class MergeNode extends DMLModStatementNode
     
     /** Add the columns in the matchingRefinement clause to the evolving map */
     void    getColumnsInExpression
-        ( HashMap<String,ColumnReference> map, ValueNode expression )
+        ( HashMap<String,ColumnReference> map, ValueNode expression, int mergeTableID )
         throws StandardException
     {
         if ( expression == null ) { return; }
@@ -643,12 +549,12 @@ public final class MergeNode extends DMLModStatementNode
         expression.accept(getCRs);
         List<ColumnReference> colRefs = getCRs.getList();
 
-        getColumnsFromList( map, colRefs );
+        getColumnsFromList( map, colRefs, mergeTableID );
     }
 
     /** Add a list of columns to the the evolving map */
     private void    getColumnsFromList
-        ( HashMap<String,ColumnReference> map, ResultColumnList rcl )
+        ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
         throws StandardException
     {
         CollectNodesVisitor<ColumnReference> getCRs =
@@ -657,17 +563,17 @@ public final class MergeNode extends DMLModStatementNode
         rcl.accept( getCRs );
         List<ColumnReference> colRefs = getCRs.getList();
 
-        getColumnsFromList( map, colRefs );
+        getColumnsFromList( map, colRefs, mergeTableID );
     }
     
     /** Add a list of columns to the the evolving map */
     private void    getColumnsFromList
-        ( HashMap<String,ColumnReference> map, List<ColumnReference> colRefs )
+        ( HashMap<String,ColumnReference> map, List<ColumnReference> colRefs, int mergeTableID )
         throws StandardException
     {
         for ( ColumnReference cr : colRefs )
         {
-            addColumn( map, cr );
+            addColumn( map, cr, mergeTableID );
         }
     }
 
@@ -675,10 +581,13 @@ public final class MergeNode extends DMLModStatementNode
     void    addColumn
         (
          HashMap<String,ColumnReference> map,
-         ColumnReference    cr
+         ColumnReference    originalCR,
+         int    mergeTableID
          )
         throws StandardException
     {
+        ColumnReference cr = originalCR;
+        
         if ( cr.getTableName() == null )
         {
             ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
@@ -686,11 +595,40 @@ public final class MergeNode extends DMLModStatementNode
             cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
         }
 
+        associateColumn( cr, mergeTableID );
+        originalCR.setMergeTableID( cr.getMergeTableID() );
+
         String  key = makeDCMKey( cr.getTableName(), cr.getColumnName() );
         if ( map.get( key ) == null )
         {
             map.put( key, cr );
         }
+    }
+
+    /** Associate a column with the SOURCE or TARGET table */
+    private void    associateColumn( ColumnReference cr, int mergeTableID )
+        throws StandardException
+    {
+        if ( mergeTableID != ColumnReference.MERGE_UNKNOWN )    { cr.setMergeTableID( mergeTableID ); }
+        else
+        {
+            // we have to figure out which table the column is in
+            String  columnsTableName = cr.getTableName();
+
+            if ( ((FromTable)_leftJoinFromList.elementAt( SOURCE_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            {
+                cr.setMergeTableID( ColumnReference.MERGE_SOURCE );
+            }
+            else if ( ((FromTable)_leftJoinFromList.elementAt( TARGET_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            {
+                cr.setMergeTableID( ColumnReference.MERGE_TARGET );
+            }
+        }
+
+        // Don't raise an error if a column in another table is referenced and we
+        // don't know how to handle it here. If the column is not in the SOURCE or TARGET
+        // table, then it will be caught by other bind-time logic. Columns which ought
+        // to be associated, but aren't, will be caught later on by MatchingClauseNode.getMergeTableID().
     }
 
     /** Make a HashMap key for a column in the driving column map of the LEFT JOIN */

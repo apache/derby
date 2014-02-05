@@ -42,6 +42,11 @@ import org.apache.derby.iapi.util.JBitSet;
 
 public class ColumnReference extends ValueNode
 {
+    // For associating columns with the SOURCE and TARGET tables of MERGE statements.
+    public  static  final   int MERGE_UNKNOWN = 0;
+    public  static  final   int MERGE_SOURCE = MERGE_UNKNOWN + 1;
+    public  static  final   int MERGE_TARGET = MERGE_SOURCE + 1;
+    
 	private String	_columnName;
 
 	/*
@@ -103,6 +108,10 @@ public class ColumnReference extends ValueNode
 	   and has been remapped multiple times.
 	 */
 	private java.util.ArrayList<RemapInfo> remaps;
+
+    /** Columns mentioned by MERGE statements need to be associated
+     * the SOURCE or TARGET table */
+    private int _mergeTableID = MERGE_UNKNOWN;
 
 	/**
      * Constructor.
@@ -354,6 +363,10 @@ public class ColumnReference extends ValueNode
 			oldCR.getGeneratedToReplaceWindowFunctionCall();
 		scoped = oldCR.isScoped();
         copyTagsFrom( oldCR );
+        if ( oldCR._mergeTableID != MERGE_UNKNOWN )
+        {
+            setMergeTableID( oldCR.getMergeTableID() );
+        }
 	}
 
 	/**
@@ -391,7 +404,7 @@ public class ColumnReference extends ValueNode
 			throw StandardException.newException(SQLState.LANG_ILLEGAL_COLUMN_REFERENCE, _columnName);
 		}
 
-		matchingRC = fromList.bindColumnReference(this);
+        matchingRC = fromList.bindColumnReference(this);
 
 		/* Error if no match found in fromList */
 		if (matchingRC == null)
@@ -1223,6 +1236,38 @@ public class ColumnReference extends ValueNode
 	{
 		return scoped;
 	}
+
+    /** Associate this column with a SOURCE or TARGET table of a MERGE statement */
+    void    setMergeTableID( int mergeTableID )
+    {
+        // Changing the association of a column means we are confused. Shouldn't happen.
+        if ( _mergeTableID != MERGE_UNKNOWN )
+        {
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.ASSERT
+                    (
+                     (_mergeTableID == mergeTableID),
+                     "MERGE statement can't re-associate column " + debugName()
+                     );
+            }
+        }
+
+        _mergeTableID = mergeTableID;
+    }
+
+    /** Get the MERGE table (SOURCE or TARGET) associated with this column */
+    int getMergeTableID()
+    {
+        return _mergeTableID;
+    }
+
+    /** Get the name of this column (for debugging printout) */
+    String  debugName()
+    {
+        if ( _qualifiedTableName == null ) { return _columnName; }
+        else { return _qualifiedTableName + "." + _columnName; }
+    }
 
 	/**
 	 * Helper class to keep track of remap data when a ColumnReference

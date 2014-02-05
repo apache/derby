@@ -1154,6 +1154,17 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		 */
         for (ResultColumn rc : inputRcl)
 		{
+            ColumnReference oldCR = rc.getReference();
+            if ( oldCR != null )
+            {
+                // for UPDATE actions of MERGE statement, preserve the original table name.
+                // this is necessary in order to correctly bind the column list of the dummy SELECT.
+                if ( oldCR.getMergeTableID() != ColumnReference.MERGE_UNKNOWN )
+                {
+                    exposedName = oldCR.getQualifiedTableName();
+                }
+            }
+            
             ResultColumn newRc = new ResultColumn(
                     rc.getName(),
                     new ColumnReference(rc.getName(), exposedName, cm),

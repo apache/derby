@@ -187,57 +187,6 @@ public class MatchingClauseNode extends QueryTreeNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * <p>
-     * Replace references to the correlation name with the underlying table name
-     * in all ColumnReferences under all expressions. This replacement is
-     * done before the ColumnReferences are bound.
-     * </p>
-     */
-    public  void    replaceCorrelationName
-        (
-         MergeNode  parent,
-         String correlationName,
-         TableName  newTableName
-         )
-        throws StandardException
-    {
-        parent.replaceCorrelationName( correlationName, newTableName, _matchingRefinement );
-        replaceCorrelationNameInSetClauses( parent, correlationName, newTableName );
-        parent.replaceCorrelationName( correlationName, newTableName, _insertColumns );
-        parent.replaceCorrelationName( correlationName, newTableName, _insertValues );
-    }
-    
-    /**
-     * <p>
-     * Replace references to the correlation name with the underlying table name
-     * in the SET clauses of WHEN MATCHED ... THEN UPDATE clauses. This replacement is
-     * done before the ColumnReferences are bound.
-     * </p>
-     */
-    public  void    replaceCorrelationNameInSetClauses
-        (
-         MergeNode  parent,
-         String correlationName,
-         TableName  newTableName
-         )
-        throws StandardException
-    {
-        if ( _updateColumns == null ) { return; }
-        
-        // this handles the right side of the SET clauses
-        parent.replaceCorrelationName( correlationName, newTableName, _updateColumns );
-
-        // we have to hand-process the left side because the Visitor
-        // logic for ResultColumns does not process the ColumnReference
-        for ( int i = 0; i < _updateColumns.size(); i++ )
-        {
-            ResultColumn    rc = _updateColumns.elementAt( i );
-
-            parent.replaceCorrelationName( correlationName, newTableName, rc.getReference() );
-        }
-    }
-    
     /** Bind this WHEN [ NOT ] MATCHED clause against the parent JoinNode */
     void    bind
         (
@@ -301,7 +250,7 @@ public class MatchingClauseNode extends QueryTreeNode
     {
         if ( _matchingRefinement != null )
         {
-            mergeNode.getColumnsInExpression( drivingColumnMap, _matchingRefinement );
+            mergeNode.getColumnsInExpression( drivingColumnMap, _matchingRefinement, ColumnReference.MERGE_UNKNOWN );
         }
 
         if ( isUpdateClause() )
@@ -315,10 +264,10 @@ public class MatchingClauseNode extends QueryTreeNode
             //
             for ( ResultColumn rc : _updateColumns )
             {
-                mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression() );
+                mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression(), ColumnReference.MERGE_UNKNOWN );
 
                 ColumnReference leftCR = new ColumnReference( rc.getName(), targetTableName, getContextManager() );
-                mergeNode.addColumn( drivingColumnMap, leftCR );
+                mergeNode.addColumn( drivingColumnMap, leftCR, ColumnReference.MERGE_TARGET );
             }
         }
         else if ( isInsertClause() )
@@ -326,7 +275,7 @@ public class MatchingClauseNode extends QueryTreeNode
             // get all columns mentioned in the VALUES subclauses of WHEN NOT MATCHED ... THEN INSERT clauses
             for ( ResultColumn rc : _insertValues )
             {
-                mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression() );
+                mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression(), ColumnReference.MERGE_UNKNOWN );
             }
         }
     }
@@ -338,15 +287,17 @@ public class MatchingClauseNode extends QueryTreeNode
         (
          DataDictionary dd,
          FromList fullFromList,
-         FromTable targetTable
+         FromBaseTable targetTable
          )
         throws StandardException
     {
-        bindSetClauses( fullFromList, targetTable );
-        
+        ResultColumnList    setClauses = realiasSetClauses( targetTable );
+        bindSetClauses( fullFromList, targetTable, setClauses );
+
         SelectNode  selectNode = new SelectNode
             (
-             _updateColumns,
+             //             _updateColumns,
+             setClauses,
              fullFromList,
              null,      // where clause
              null,      // group by list
@@ -355,7 +306,7 @@ public class MatchingClauseNode extends QueryTreeNode
              null,      // optimizer plan override
              getContextManager()
              );
-        _dml = new UpdateNode( targetTable.getTableName(), selectNode, this, getContextManager() );
+        _dml = new UpdateNode( targetTable.getTableNameField(), selectNode, this, getContextManager() );
 
         _dml.bindStatement();
 
@@ -383,6 +334,42 @@ public class MatchingClauseNode extends QueryTreeNode
         buildThenColumnsForUpdate( fullFromList, targetTable, fullUpdateRow, beforeColumns, afterColumns );
     }
 
+    /**
+     * <p>
+     * Due to discrepancies on how names are resolved in SELECT and UPDATE,
+     * we have to force the left side of SET clauses to use the same table identifiers
+     * as the right sides of the SET clauses.
+     * </p>
+     */
+    private ResultColumnList    realiasSetClauses
+        (
+         FromBaseTable targetTable
+         )
+        throws StandardException
+    {
+        ResultColumnList    rcl = new ResultColumnList( getContextManager() );
+        for ( int i = 0; i < _updateColumns.size(); i++ )
+        {
+            ResultColumn    setRC = _updateColumns.elementAt( i );
+            ColumnReference newTargetColumn = new ColumnReference
+                (
+                 setRC.getReference().getColumnName(),
+                 targetTable.getTableName(),
+                 getContextManager()
+                 );
+            newTargetColumn.setMergeTableID( ColumnReference.MERGE_TARGET );
+            ResultColumn    newRC = new ResultColumn
+                (
+                 newTargetColumn,
+                 setRC.getExpression(),
+                 getContextManager()
+                 );
+            rcl.addResultColumn( newRC );
+        }
+
+        return rcl;
+    }
+    
     /**
      * <p>
      * Get the bound SELECT node under the dummy UPDATE node.
@@ -417,14 +404,15 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    bindSetClauses
         (
          FromList fullFromList,
-         FromTable targetTable
+         FromTable targetTable,
+         ResultColumnList   setClauses
          )
         throws StandardException
     {
         // needed to make the UpdateNode bind
-        _updateColumns.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _updateColumns, true );
+        setClauses.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _updateColumns, true );
 
-        bindExpressions( _updateColumns, fullFromList );
+        bindExpressions( setClauses, fullFromList );
     }
 
     /**
@@ -685,8 +673,14 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        FromBaseTable   deleteTarget = new FromBaseTable
+            ( targetTable.getTableNameField(), null, null, null, getContextManager() );
+        FromList    dummyFromList = new FromList( getContextManager() );
+        dummyFromList.addFromTable( deleteTarget );
+        dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
+ 
         CurrentOfNode   currentOfNode = CurrentOfNode.makeForMerge
-            ( CURRENT_OF_NODE_NAME, targetTable, getContextManager() );
+            ( CURRENT_OF_NODE_NAME, deleteTarget, getContextManager() );
         FromList        fromList = new FromList( getContextManager() );
         fromList.addFromTable( currentOfNode );
         SelectNode      selectNode = new SelectNode
@@ -700,7 +694,7 @@ public class MatchingClauseNode extends QueryTreeNode
              null, /* optimizer plan override */
              getContextManager()
              );
-        _dml = new DeleteNode( targetTable.getTableName(), selectNode, this, getContextManager() );
+        _dml = new DeleteNode( targetTable.getTableNameField(), selectNode, this, getContextManager() );
 
         _dml.bindStatement();
 
@@ -771,7 +765,7 @@ public class MatchingClauseNode extends QueryTreeNode
          DataDictionary dd,
          MergeNode  mergeNode,
          FromList fullFromList,
-         FromTable targetTable
+         FromBaseTable targetTable
          )
         throws StandardException
     {
@@ -795,7 +789,7 @@ public class MatchingClauseNode extends QueryTreeNode
              );
         _dml = new InsertNode
             (
-             targetTable.getTableName(),
+             targetTable.getTableNameField(),
              _insertColumns,
              selectNode,
              this,      // in NOT MATCHED clause
@@ -1089,8 +1083,8 @@ public class MatchingClauseNode extends QueryTreeNode
         if ( bufferedExpression instanceof ColumnReference )
         {
             ColumnReference bufferedCR = (ColumnReference) bufferedExpression;
-            String              tableName = bufferedCR.getTableName();
-            String              columnName = bufferedCR.getColumnName();
+            String              bufferedCRName = bufferedCR.getColumnName();
+            int                 bufferedCRMergeTableID = getMergeTableID( bufferedCR );
 
             // loop through the SELECT list to find this column reference
             for ( int sidx = 0; sidx < selectCount; sidx++ )
@@ -1103,13 +1097,18 @@ public class MatchingClauseNode extends QueryTreeNode
                 if ( selectCR != null )
                 {
                     if (
-                        tableName.equals( selectCR.getTableName() ) &&
-                        columnName.equals( selectCR.getColumnName() )
+                        ( getMergeTableID( selectCR ) == bufferedCRMergeTableID) &&
+                        bufferedCRName.equals( selectCR.getColumnName() )
                         )
                     {
                         return sidx + 1;
                     }
                 }
+            }
+            
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT( "Can't find select list column corresponding to " + bufferedCR.debugName() );
             }
         }
         else if ( bufferedExpression instanceof CurrentRowLocationNode )
@@ -1123,6 +1122,23 @@ public class MatchingClauseNode extends QueryTreeNode
         }
 
         return -1;
+    }
+
+    /** Find the MERGE table id of the indicated column */
+    private int getMergeTableID( ColumnReference cr )
+    {
+        int                 mergeTableID = cr.getMergeTableID();
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT
+                (
+                 ( (mergeTableID == ColumnReference.MERGE_SOURCE) || (mergeTableID == ColumnReference.MERGE_TARGET) ),
+                 "Column " + cr.debugName() + " has illegal MERGE table id: " + mergeTableID
+                 );
+        }
+
+        return mergeTableID;
     }
 
     /**

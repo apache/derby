@@ -900,7 +900,11 @@ class ResultColumn extends ValueNode
 			If the node was created using a reference, the table name
 			of the reference must agree with that of the tabledescriptor.
 		 */
-		if (_reference != null && _reference.getTableName() != null) 
+		if (
+            _reference != null &&
+            _reference.getTableName() != null &&
+            (_reference.getMergeTableID() == ColumnReference.MERGE_UNKNOWN)
+            ) 
 		{
 			if ( (tableDescriptor != null) && ! tableDescriptor.getName().equals(
 					_reference.getTableName()) ) 

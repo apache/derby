@@ -4898,6 +4898,73 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_032" );
     }
     
+    /**
+     * <p>
+     * Correctly resolve column references using a source and target
+     * whose table and column names are identical but which live in different
+     * schemas.
+     * </p>
+     */
+    public  void    test_033_identicalNames()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+        Connection  aliceConnection = openUserConnection( ALICE );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             ruthConnection,
+             "create table t1_033( x int, y int )"
+             );
+        goodStatement
+            (
+             aliceConnection,
+             "create table t1_033( x int, y int )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into t1_033 values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
+             );
+        goodStatement
+            (
+             aliceConnection,
+             "insert into t1_033 values ( 1, 1000 ), ( 3, 3000 ), ( 4, 4000 )"
+             );
+
+        // verify the behavior
+        goodUpdate
+            (
+             dboConnection,
+             "merge into ruth.t1_033 r\n" +
+             "using alice.t1_033 a on r.x = a.x\n" +
+             "when matched then update set x = a.x * 10\n",
+             2
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from ruth.t1_033 order by x",
+             new String[][]
+             {
+                 { "2", "200" },
+                 { "10", "100" },
+                 { "30", "300" },
+             },
+             false
+             );
+        
+        //
+        // drop schema
+        //
+        goodStatement( ruthConnection, "drop table t1_033" );
+        goodStatement( aliceConnection, "drop table t1_033" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
