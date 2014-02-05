@@ -44,7 +44,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Tests the LOCK TABLE in various modes.
+ * Tests the printing of the WAIT state in the LOCK TABLE.
  */
 public class LockTableVtiTest extends BaseJDBCTestCase {
 
@@ -59,7 +59,7 @@ public class LockTableVtiTest extends BaseJDBCTestCase {
 
     /**
      * Construct top level suite in this JUnit test
-     * The suite is wrapped in a DatabasePropertyTestSetup set
+     * The suite is wrapped in a DatabasePropertyTestSetup to set
      * the lock wait timeout.
      *
      * @return A suite containing embedded fixtures
@@ -133,9 +133,9 @@ public class LockTableVtiTest extends BaseJDBCTestCase {
      * Tests to make sure that WAIT state is displayed in lock
      * table output
      * 
-     * @exception SQLException
+     * @exception Exception
      */
-    public void testDisplayWaitState() throws Throwable {
+    public void testDisplayWaitState() throws Exception {
         Statement s = createStatement();
         setAutoCommit(false);
         // setting to -1 (wait for ever) to improve timing control
@@ -208,11 +208,11 @@ public class LockTableVtiTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Get the number of locks in the lock table
-     * @return number of locks
+     * See if there is a 'WAIT' lock
+     * @return true if there was a WAIT lock, false if not
      * @throws SQLException
      */
-    private boolean getWaitState() throws Exception {
+    private boolean getWaitState() throws SQLException {
         Statement s = createStatement();
         ResultSet rs = s.executeQuery(
                 "SELECT state from syscs_diag.lock_table " +
