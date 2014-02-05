@@ -88,7 +88,6 @@ public class StoreScriptsTest extends ScriptTestCase {
         #derby.debug.true=enableRowLocking,DeadlockTrace
         derby.debug.true=verbose_heap_post_commit */
         "removeStubs",
-        "lockTableVti", 
         //"rollForwardBackup", has a _sed.properties file; connects to 
         // multiple databases - needs to be fully converted.
         // "rollForwardRecovery", original uses useextdirs=true, which
