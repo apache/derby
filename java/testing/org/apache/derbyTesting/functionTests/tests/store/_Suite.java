@@ -83,6 +83,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ServicePropertiesFileTest.suite());
         suite.addTest(Derby5234Test.suite());
         suite.addTest(KeepDisposableStatsPropertyTest.suite());
+        suite.addTest(LockTableVtiTest.suite());
         suite.addTest(StoreScriptsTest.suite());
         suite.addTest(Derby4923Test.suite());
 
