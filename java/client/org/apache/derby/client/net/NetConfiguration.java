@@ -86,6 +86,10 @@ public class NetConfiguration {
     // Identifier Length for fixed length rdb name
     static final int PKG_IDENTIFIER_FIXED_LEN = 18;
 
+    // Maximum RDBNAM Identifier Length
+    //  this used to be 255 prior to DERBY-4805 fix
+    static final int RDBNAM_MAX_LEN = 1024;  
+
     // Maximum RDB Identifier Length
     static final int PKG_IDENTIFIER_MAX_LEN = 255;
 

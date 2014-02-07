@@ -493,9 +493,22 @@ class NetConnectionRequest extends Request
             
         }
         
+        //DERBY-4805(Increase the length of the RDBNAM field in the 
+        // DRDA implementation)
+        //The new RDBNAM length in 10.11 is 1024bytes(it used to be 254 bytes).
+        //But if a 10.11 or higher client talks to a 10.10 or under server with
+        // a RDBNAM > 254 bytes, it will result in a protocol exception
+        // because those servers do not support RDBNAM greater than 254 bytes.
+        // This behavior will logged in the jira.
+        //One way to fix this would have been to check the server version
+        // before hand but we do not have that information when the client is
+        // first trying to establish connection to the server by sending the
+        // connect request along with the RDBNAM.
+        int maxRDBlength =
+                 NetConfiguration.RDBNAM_MAX_LEN;
         writeScalarString(CodePoint.RDBNAM, rdbnam,
                 NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, //minimum RDBNAM length in bytes
-                NetConfiguration.PKG_IDENTIFIER_MAX_LEN,   //maximum RDBNAM length in bytes
+                maxRDBlength,  
                 SQLState.NET_DBNAME_TOO_LONG);
                 
     }

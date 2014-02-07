@@ -1656,6 +1656,15 @@ public class NetConnection extends ClientConnection {
 
     }
     
+    public final boolean serverSupportLongRDBNAM() {
+        
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+        
+        return metadata.serverSupportLongRDBNAM();
+
+    }
+    
     
     /**
      * Check whether the server supports session data caching

@@ -59,10 +59,15 @@ class NetPackageRequest extends NetConnectionRequest {
         byte[] pkgNameBytes = ccsidMgr.convertFromJavaString(
                 section.getPackageName(), netAgent_);
 
+        //Maximum RDBNAM length would depend on the server level. 
+        // Server under 10.11 support only 255 bytes but server
+        // at 10.11 and higher support higher limit of 1024
         boolean scldtalenRequired =
                 checkPKGNAMlengths(netAgent_.netConnection_.databaseName_,
                 dbnameBytes.length,
-                maxIdentifierLength,
+                (netAgent_.netConnection_.databaseMetaData_.serverSupportLongRDBNAM())? 
+                        NetConfiguration.RDBNAM_MAX_LEN 
+                        : NetConfiguration.PKG_IDENTIFIER_MAX_LEN,  
                 NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
 
         if (!scldtalenRequired) {

@@ -320,7 +320,7 @@ endDss
 createDssRequest
 startDdm ACCSEC
 writeScalar2Bytes SECMEC 3 //  userid password
-writeScalarPaddedBytes RDBNAM "thisNeedsToBeNoMoreThan255CharactersLong" 256
+writeScalarPaddedBytes RDBNAM "thisNeedsToBeNoMoreThan1024CharactersLong" 1025
 writeScalarString USRID test
 writeScalarString PASSWORD test
 endDdm

@@ -664,7 +664,7 @@ class NetCursor extends Cursor {
     //   SQLWARN8; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     //   SQLWARN9; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     //   SQLWARNA; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
-    //   SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    //   SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     //   SQLERRMSG_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 70
     //   SQLERRMSG_s; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 70
     private void parseSQLCAXGRP(Typdef typdef, NetSqlca netSqlca) throws DisconnectException, SqlException {
@@ -684,7 +684,7 @@ class NetCursor extends Cursor {
         byte[] sqlwarn = readFdocaBytes(11);
 
         // skip over the rdbnam for now
-        // SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+        // SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
         parseVCS(typdef);
 
         //   SQLERRMSG_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 70
@@ -781,7 +781,7 @@ class NetCursor extends Cursor {
     // SQLDCMSGID; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 10
     // SQLDCMDE; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 8
     // SQLDCPMOD; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 5
-    // SQLDCRDB; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    // SQLDCRDB; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     // SQLDCTOKS; PROTOCOL TYPE N-RLO; ENVLID 0xF7; Length Override 0
     // SQLDCMSG_m; PROTOCOL TYPE NVMC; ENVLID 0x3F; Length Override 32672
     // SQLDCMSG_S; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 32672

@@ -1587,6 +1587,19 @@ class NetStatementReply extends NetPackageReply
 
         ensureBLayerDataInBuffer(ddmLength);
 
+        int maxDDMlength;
+        //For SQLAM level 7, this was harcoded to be 781 in 10.10 codeline. But
+        // after DERBY-4805 is fixed in Derby 10.11, we allow 1024 bytes for
+        // RDBNAM rather than just 255 characters. Because of this, the 
+        // DDM length in Derby 10.11 can be higher than 781. To be precise,
+        // it is 781-255+1024=1550. The following if statement is doing this
+        // calculation using constant identifiers rather than constant values
+        if (netAgent_.netConnection_.databaseMetaData_.serverSupportLongRDBNAM()) {
+        	maxDDMlength = 781-NetConfiguration.PKG_IDENTIFIER_MAX_LEN+
+        			NetConfiguration.RDBNAM_MAX_LEN;
+        } else
+        	maxDDMlength = 781;
+
         if (ddmLength == 64) {
             // read all the bytes except the section number into the byte[] for caching
             pkgnamcsnLength = ddmLength - 2;
@@ -1600,7 +1613,7 @@ class NetStatementReply extends NetPackageReply
             rdbcolid = readFastString(18); // RDB Collection ID
             pkgid = readFastString(18);    // RDB Package ID
             pkgcnstkn = readFastBytes(8);  // Package Consistency Token
-        } else if ((ddmLength >= 71) && (ddmLength <= 781)) {
+        } else if ((ddmLength >= 71) && (ddmLength <= maxDDMlength)) {
             // this is the new SCLDTA format.
 
             // new up a byte[] to cache all the bytes except the 2-byte section number
@@ -1608,7 +1621,12 @@ class NetStatementReply extends NetPackageReply
 
             // get rdbnam
             int scldtaLen = peekFastLength();
-            if (scldtaLen < 18 || scldtaLen > 255) {
+            int maxRDBlength =
+                    ((netAgent_.netConnection_.databaseMetaData_.serverSupportLongRDBNAM())? 
+                            NetConfiguration.RDBNAM_MAX_LEN 
+                            : NetConfiguration.PKG_IDENTIFIER_MAX_LEN);
+            if (scldtaLen < NetConfiguration.PKG_IDENTIFIER_FIXED_LEN || 
+            		scldtaLen > maxRDBlength) {
                 agent_.accumulateChainBreakingReadExceptionAndThrow(
                     new DisconnectException(agent_,
                         new ClientMessageId(
@@ -2110,7 +2128,7 @@ class NetStatementReply extends NetPackageReply
     //   SQLXUPDATEABLE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
     //   SQLXGENERATED; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
     //   SQLXPARMMODE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
-    //   SQLXRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    //   SQLXRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     //   SQLXCORNAME_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 255
     //   SQLXCORNAME_s; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
     //   SQLXBASENAME_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 255
@@ -2138,7 +2156,7 @@ class NetStatementReply extends NetPackageReply
         //   SQLXPARMMODE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
         short sqlxparmmode = readFastShort();
 
-        //   SQLXRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+        //   SQLXRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
         String sqlxrdbnam = parseFastVCS();
 
         //   SQLXCORNAME_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 255
@@ -2206,7 +2224,7 @@ class NetStatementReply extends NetPackageReply
     //   SQLDSENSITIVE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
     //   SQLDFCODE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
     //   SQLDKEYTYPE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
-    //   SQLDRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    //   SQLDRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     //   SQLDSCHEMA_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 255
     //   SQLDSCHEMA_s; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
     private void parseSQLDHGRP(ColumnMetaData columnMetaData) throws DisconnectException {
@@ -2233,7 +2251,7 @@ class NetStatementReply extends NetPackageReply
         //   SQLDKEYTYPE; PROTOCOL TYPE I2; ENVLID 0x04; Length Override 2
         short sqldkeytype = readFastShort();
 
-        //   SQLDRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+        //   SQLDRDBNAM; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
         String sqldrdbnam = parseFastVCS();
 
         //   SQLDSCHEMA_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 255

@@ -2665,7 +2665,7 @@ class NetConnectionReply extends Reply
     //   SQLWARN8; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     //   SQLWARN9; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     //   SQLWARNA; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
-    //   SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    //   SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     //   SQLERRMSG_m; PROTOCOL TYPE VCM; ENVLID 0x3E; Length Override 70
     //   SQLERRMSG_s; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 70
     private void parseSQLCAXGRP(NetSqlca netSqlca) throws DisconnectException {
@@ -2688,7 +2688,7 @@ class NetConnectionReply extends Reply
 
         if (netAgent_.targetSqlam_ >= NetConfiguration.MGRLVL_7) {
             // skip over the rdbnam for now
-            // SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+            // SQLRDBNAME; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
             parseFastVCS();
         }
 
@@ -3067,7 +3067,7 @@ class NetConnectionReply extends Reply
     // SQLCNATYPE; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     // SQLCNETYPE; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 1
     // SQLCNPRDID; PROTOCOL TYPE FCS; ENVLID 0x30; Length Override 8
-    // SQLCNRDB; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
+    // SQLCNRDB; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 1024
     // SQLCNCLASS; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
     // SQLCNAUTHID; PROTOCOL TYPE VCS; ENVLID 0x32; Length Override 255
     private void parseSQLCNGRP() throws DisconnectException {
@@ -3156,33 +3156,33 @@ class NetConnectionReply extends Reply
     // SQL Diagnostics Extended Names Group Description - Identity 0xD5
     // Nullable
     //
-    // SQLDCXRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCXRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 1024
     // SQLDCXSCH_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
     // SQLDCXNAM_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
     // SQLDCXTBLN_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
-    // SQLDCXRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCXRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 1024
     // SQLDCXSCH_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXNAM_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXTBLN_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     //
-    // SQLDCXCRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCXCRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 1024
     // SQLDCXCSCH_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
     // SQLDCXCNAM_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
-    // SQLDCXCRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCXCRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 1024
     // SQLDCXCSCH_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXCNAM_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     //
-    // SQLDCXRRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCXRRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 1024
     // SQLDCXRSCH_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
     // SQLDCXRNAM_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
-    // SQLDCXRRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCXRRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 1024
     // SQLDCXRSCH_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXRNAM_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     //
-    // SQLDCXTRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
+    // SQLDCXTRDB_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 1024
     // SQLDCXTSCH_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
     // SQLDCXTNAM_m ; PROTOCOL TYPE NVCM; ENVLID 0x3F; Length Override 255
-    // SQLDCXTRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
+    // SQLDCXTRDB_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 1024
     // SQLDCXTSCH_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     // SQLDCXTNAM_s ; PROTOCOL TYPE NVCS; ENVLID 0x33; Length Override 255
     private void parseSQLDCXGRP() throws DisconnectException {

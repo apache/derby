@@ -102,6 +102,13 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
     private boolean supportsBooleanValues_;
 
     /**
+     * DERBY-4805(Increase the length of the RDBNAM field in the DRDA 
+     *   implementation)  
+     * True if the server supports RDBNAM longer than 255 character
+     */
+    private boolean supportsLongRDBNAM_;
+
+    /**
      * True if the server supports transport of boolean parameter values as
      * booleans. If false, boolean values used as parameters in prepared
      * statements will be transported as smallints to preserve backwards
@@ -2372,6 +2379,9 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
 
         supportsBooleanParameterTransport_ =
                 productLevel_.greaterThanOrEqualTo(10, 8, 0);
+
+        supportsLongRDBNAM_ =
+                productLevel_.greaterThanOrEqualTo(10, 11, 0);
     }
 
     /**
@@ -2434,6 +2444,10 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      */
     final public boolean serverSupportsBooleanParameterTransport() {
         return supportsBooleanParameterTransport_;
+    }
+
+    final public boolean serverSupportLongRDBNAM() {
+        return supportsLongRDBNAM_;
     }
 
     //------------helper methods for meta data info call methods------------------

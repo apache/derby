@@ -66,68 +66,97 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         databasesForCleanup = new ArrayList<String>();
     }
 
+    //DERBY-4805(Increase the length of the RDBNAM field in the DRDA 
+    // implementation)
+    //Fixing the jira above now prevents us from getting limited to 255 bytes
+    // in network server case for RDBNAM. The new limit now is 1024 bytes.
+    //Try 2 test cases for database name. 
+    // One right at the upper boundary of 1024 byte length
+    // and second with going little over 1024 byte length.
+    //Note that the test below is written for in-memory db rather than
+    // traditional on disk dbs. This is because depending on the file
+    // system and operating systems, there are different limits on
+    // how long a file name can be. In order to avoid having to 
+    // worry about various OSes, it is more portable to do the testing
+    // with in-memory db. 
     public void testBoundaries() throws SQLException, UnsupportedEncodingException {
         if (usingEmbedded()) return; /* This test is only for Client/Server */
 
-        // ensuring that we get a connection.
-        getConnection();
-        
+        //To get around the file name length limit on various operating 
+        // systems, using in memory db to try the long RDBNAM of 1024
+        // bytes
+        //Following url works fine because the length of string
+        // memory...;true is 1024 bytes long
+        String dbUrl1024bytes = "memory:dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;create=true";
+        //Following url fails because the length of string
+        // memory...;true is 1025 bytes long, 1 byte longer than max length
+        String dbUrl1025bytes = "memory:dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/dir1234567890/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;create=true";
+
         /*
-         * Sun's 1.4.2 JVM and IBM's JVM (any version) fail on Windows for this test
-         * Thus, we skip it.
-         * 
-         * Read JIRA's DERBY-4836 for more information.
+         *Prior to DERBY-4805 fix, maximum length in bytes was 255. With
+         * the fix, the new maximum length is 1024 bytes
+         *Try 2 test cases. One right at the upper boundary of 1024 byte length
+         * and second with 1025 byte length.
          */
-        if (getSystemProperty("os.name").startsWith("Windows")) {            
-            /* Skip with 1.4.2 jvms */
-            if (getSystemProperty("java.version").startsWith("1.4.2")) return;
-        }
-        
-        // Maximum length in bytes is 255. We subtract 14 to account for
-        // ;create=true and ;shutdown=true
-        int maxNameLength = 255 - 14;
-        
-        /**
-         * \u0041 is the letter 'A' (1 byte)
-         * \u00e7 is the letter 'c' with a cedilla (2 bytes)
-         * \u4310 is a Chinese character (3 bytes)
-         * \u1f030 is a domino tile (4 bytes)
-         */
-        String[] testCharacters = {"\u0041", "\u00e7", "\u4e10", "\u1f030"}; 
-        
-        for (int ch=0; ch<testCharacters.length; ch++) {
-            StringBuffer dbName = new StringBuffer();
-            
-            /* max length in bytes divided by length of 1 chinese char */ 
-            int maxChars = maxNameLength / testCharacters[ch].getBytes("UTF-8").length;
-            for(int i=0; i<maxChars; i++) {
-                dbName.append(testCharacters[ch]);
-            }
-            
-            /* This time it should work as we're right at the limit */
-            String url = TestConfiguration
-                    .getCurrent().getJDBCUrl(dbName.toString()+ ";create=true");
-            
-            Connection conn = DriverManager.getConnection(url);
-            conn.close();
-            
-            /* Add the database name for cleanup on tearDown() */
-            databasesForCleanup.add(dbName.toString());
-            
-            /* Append three more characters to make it fail */
-            for (int i = 0; i < 3; i++) {
-                dbName.append(testCharacters[ch]);
-            }
 
-            url = TestConfiguration
-                    .getCurrent().getJDBCUrl(dbName.toString()+ ";create=true");
+        /* This time it should work as we're right at the limit */
+        String url = TestConfiguration
+                .getCurrent().getJDBCUrl(dbUrl1024bytes);
+        loadDriver(url);
+        Connection conn = DriverManager.getConnection(url);
+        conn.close();
 
-            try {
+        //Add test case 2
+        //We will try going over 1024 byte length for database name and it 
+        // will fail as expected
+        url = TestConfiguration
+                .getCurrent().getJDBCUrl(dbUrl1025bytes);
+
+        try {
                 conn = DriverManager.getConnection(url);
                 assertTrue("Used more characters than possible in database name",
                         false);
-            } catch (SQLException e) {
-                assertSQLState("08001", e); /* Check if it failed */
+        } catch (SQLException e) {
+            	assertSQLState("08001", e); /* Check if it failed */
+        }
+    }
+    
+    /**
+     * Will check if the JDBC driver has been loaded and load it if that is not
+     * the case.
+     * Any other exception messages than "No suitable driver" on the first
+     * attempt to get the JDBC driver will result in an assertion failure.
+     * 
+     * @param url a valid connection URL for the desired JDBC driver
+     * @throws SQLException if an unexpected exception is thrown
+     */
+    private void loadDriver(String url) throws SQLException {
+        try {
+            DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            // getDriver() failed, JDBC driver probably not loaded.
+            // Expecting SQLState 08001 and message "No suitable driver"...
+            assertSQLState("Unexpected SQLState from getDriver().", "08001", e);
+            assertEquals("Unexpected exception message from getDriver(), ",
+                    "No suitable driver", e.getMessage());
+            String driverClass = 
+                    getTestConfiguration().getJDBCClient().getJDBCDriverName();
+            println("Loading JDBC driver " + driverClass);
+            // load the driver
+            try {
+                Class.forName(driverClass).newInstance();
+            } catch (ClassNotFoundException cnfe) {
+                throw new SQLException("Failed to load JDBC driver '" 
+                        + driverClass + "', ClassNotFoundException: " 
+                        + cnfe.getMessage());
+            } catch (IllegalAccessException iae) {
+                throw new SQLException("Failed to load JDBC driver '" 
+                        + driverClass + "', IllegalAccessException: " 
+                        + iae.getMessage());
+            } catch (InstantiationException ie) {
+                throw new SQLException("Failed to load JDBC driver '" 
+                        + driverClass + "', InstantiationException: " 
+                        + ie.getMessage());
             }
         }
     }

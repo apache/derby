@@ -751,9 +751,13 @@ class CodePoint
     static final String TYPDEFNAM_QTDSQLX86 = "QTDSQLX86"; //  Intel X86 platform
 
     //----------------------Max sizes for strings in the protocol ---------
+    //dbname 
+    // fixed length for SQLAM level 6, 
+    // for level 7, limit is MAX_NAME(255) but Derby 10.11 allows 1024
     static final int MAX_NAME = 255;
-    static final int RDBNAM_LEN = 18; //dbname fixed length for SQLAM level 6, for level 7,
-                                      //limit is MAX_NAME (255)
+    static final int RDBNAM_MAX_NAME = 1024;
+    static final int RDBNAM_LEN = 18; 
+                                      
     static final int PRDID_MAX = 8;
     static final int RDBCOLID_LEN = 18;
     static final int PKGID_LEN = 18;

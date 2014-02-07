@@ -3011,8 +3011,9 @@ class DRDAConnThread extends Thread {
             rdbNotFound(null);
         }
         //SQLAM level 7 allows db name up to 255, level 6 fixed len 18
+        // but Derby 10.11 allows 1024
         if (rdbName.length < CodePoint.RDBNAM_LEN ||
-                rdbName.length > CodePoint.MAX_NAME) {
+                rdbName.length > CodePoint.RDBNAM_MAX_NAME) {
             badObjectLength(CodePoint.RDBNAM);
         }
         name = reader.convertBytes(rdbName);
@@ -5732,7 +5733,7 @@ class DRDAConnThread extends Thread {
         else    // extended format
         {
             int length = reader.readNetworkShort();
-            if (length < CodePoint.RDBNAM_LEN || length > CodePoint.MAX_NAME) {
+            if (length < CodePoint.RDBNAM_LEN || length > CodePoint.RDBNAM_MAX_NAME) {
                 badObjectLength(CodePoint.RDBNAM);
             }
             reader.readString(rdbnam, length, true);
@@ -6604,7 +6605,7 @@ class DRDAConnThread extends Thread {
      *   SQLWARN8; DRDA TYPE FCS; ENVLID 0x30; Length Override 1
      *   SQLWARN9; DRDA TYPE FCS; ENVLID 0x30; Length Override 1
      *   SQLWARNA; DRDA TYPE FCS; ENVLID 0x30; Length Override 1
-     *   SQLRDBNAME; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+     *   SQLRDBNAME; DRDA TYPE VCS; ENVLID 0x32; Length Override 1024
      *   SQLERRMSG_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 70
      *   SQLERRMSG_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 70
      * @param nextException SQLException encountered
@@ -8225,7 +8226,7 @@ class DRDAConnThread extends Thread {
             writer.writeShort(0);
         }
     
-        //   SQLXRDBNAM; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+        //   SQLXRDBNAM; DRDA TYPE VCS; ENVLID 0x32; Length Override 1024
         // JCC uses this as the catalog name so we will send null.
         writer.writeShort(0);
 
