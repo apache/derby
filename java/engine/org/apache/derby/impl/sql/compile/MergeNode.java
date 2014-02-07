@@ -214,34 +214,23 @@ public final class MergeNode extends DMLModStatementNode
             throw StandardException.newException( SQLState.LANG_SAME_EXPOSED_NAME );
         }
 
+        // synonyms not allowed
+        forbidSynonyms( dd );
+
         FromList    dfl = new FromList( getContextManager() );
-        dfl.addFromTable( _sourceTable );
-        dfl.addFromTable( _targetTable );
+        FromTable   dflSource = cloneFromTable( _sourceTable );
+        FromBaseTable   dflTarget = (FromBaseTable) cloneFromTable( _targetTable );
+        dfl.addFromTable( dflSource );
+        dfl.addFromTable( dflTarget );
         dfl.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
-        //
-        // Bind the WHEN [ NOT ] MATCHED clauses.
-        //
-        FromList    dummyFromList = new FromList( getContextManager() );
-        FromBaseTable   dummyTargetTable = new FromBaseTable
-            (
-             _targetTable.getTableNameField(),
-             _targetTable.correlationName,
-             null,
-             null,
-             getContextManager()
-             );
-        FromTable       dummySourceTable = cloneSourceTable();
-        
-        dummyFromList.addFromTable( dummySourceTable );
-        dummyFromList.addFromTable( dummyTargetTable );
-        dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
-
         // target table must be a base table
-        if ( !targetIsBaseTable( _targetTable ) ) { notBaseTable(); }
+        if ( !targetIsBaseTable( dflTarget ) ) { notBaseTable(); }
 
         for ( MatchingClauseNode mcn : _matchingClauses )
         {
+            FromList    dummyFromList = cloneFromList( dd, dflTarget );
+            FromBaseTable   dummyTargetTable = (FromBaseTable) dummyFromList.elementAt( TARGET_TABLE_INDEX );
             mcn.bind( dd, this, dummyFromList, dummyTargetTable );
         }
         
@@ -255,10 +244,52 @@ public final class MergeNode extends DMLModStatementNode
         }
 	}
 
+    /** Create a FromList for binding a WHEN [ NOT ] MATCHED clause */
+    private FromList    cloneFromList( DataDictionary dd, FromBaseTable targetTable )
+        throws StandardException
+    {
+        FromList    dummyFromList = new FromList( getContextManager() );
+        FromBaseTable   dummyTargetTable = new FromBaseTable
+            (
+             targetTable.getTableNameField(),
+             targetTable.correlationName,
+             null,
+             null,
+             getContextManager()
+             );
+        FromTable       dummySourceTable = cloneFromTable( _sourceTable );
+        
+        dummyFromList.addFromTable( dummySourceTable );
+        dummyFromList.addFromTable( dummyTargetTable );
+        dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
+
+        return dummyFromList;
+    }
+
     /** Get the exposed name of a FromTable */
     private String  getExposedName( FromTable ft ) throws StandardException
     {
         return ft.getTableName().getTableName();
+    }
+
+    /** Neither the source nor the target table may be a synonym */
+    private void    forbidSynonyms( DataDictionary dd )    throws StandardException
+    {
+        forbidSynonyms( dd, _targetTable.getTableNameField().cloneMe() );
+        if ( _sourceTable instanceof FromBaseTable )
+        {
+            forbidSynonyms( dd, ((FromBaseTable)_sourceTable).getTableNameField().cloneMe() );
+        }
+    }
+    private void    forbidSynonyms( DataDictionary dd, TableName tableName ) throws StandardException
+    {
+        tableName.bind( dd );
+
+        TableName   synonym = resolveTableToSynonym( tableName );
+        if ( synonym != null )
+        {
+            throw StandardException.newException( SQLState.LANG_NO_SYNONYMS_IN_MERGE );
+        }
     }
 
     /**
@@ -406,7 +437,7 @@ public final class MergeNode extends DMLModStatementNode
     {
         // tell the target table to generate a row location column
         _targetTable.setRowLocationColumnName( TARGET_ROW_LOCATION_NAME );
-        
+
         TableName   fromTableName = _targetTable.getTableName();
         ColumnReference cr = new ColumnReference
                 ( TARGET_ROW_LOCATION_NAME, fromTableName, getContextManager() );
@@ -458,12 +489,12 @@ public final class MergeNode extends DMLModStatementNode
         }
     }
 
-    /** Clone the source table for binding the MATCHED clauses */
-    private FromTable   cloneSourceTable() throws StandardException
+    /** Clone a FromTable to avoid binding the original */
+    private FromTable   cloneFromTable( FromTable fromTable ) throws StandardException
     {
-        if ( _sourceTable instanceof FromVTI )
+        if ( fromTable instanceof FromVTI )
         {
-            FromVTI source = (FromVTI) _sourceTable;
+            FromVTI source = (FromVTI) fromTable;
 
             return new FromVTI
                 (
@@ -475,9 +506,9 @@ public final class MergeNode extends DMLModStatementNode
                  getContextManager()
                  );
         }
-        else if ( _sourceTable instanceof FromBaseTable )
+        else if ( fromTable instanceof FromBaseTable )
         {
-            FromBaseTable   source = (FromBaseTable) _sourceTable;
+            FromBaseTable   source = (FromBaseTable) fromTable;
             return new FromBaseTable
                 (
                  source.tableName,
@@ -508,11 +539,12 @@ public final class MergeNode extends DMLModStatementNode
         throws StandardException
     {
         String[]    columnNames = getColumns( getExposedName( fromTable ), drivingColumnMap );
-        
+        TableName   tableName = fromTable.getTableName();
+
         for ( int i = 0; i < columnNames.length; i++ )
         {
             ColumnReference cr = new ColumnReference
-                ( columnNames[ i ], fromTable.getTableName(), getContextManager() );
+                ( columnNames[ i ], tableName, getContextManager() );
             cr.setMergeTableID( mergeTableID );
             ResultColumn    rc = new ResultColumn( (String) null, cr, getContextManager() );
             selectList.addResultColumn( rc );

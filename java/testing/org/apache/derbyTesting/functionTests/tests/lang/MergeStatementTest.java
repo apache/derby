@@ -72,6 +72,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      NO_ROWS_AFFECTED = "02000";
     private static  final   String      NO_DML_IN_BEFORE_TRIGGERS = "42Z9D";
     private static  final   String      NO_SUBQUERIES_IN_MATCHED_CLAUSE = "42XAO";
+    private static  final   String      NO_SYNONYMS_IN_MERGE = "42XAP";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -4963,6 +4964,75 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( ruthConnection, "drop table t1_033" );
         goodStatement( aliceConnection, "drop table t1_033" );
+    }
+    
+    /**
+     * <p>
+     * Synonyms not allowed as source or target tables in MERGE statements.
+     * </p>
+     */
+    public  void    test_034_noSynonyms()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_034( x int, y int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_034( x int, y int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create synonym syn_t1_034 for t1_034"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create synonym syn_t2_034 for t2_034"
+             );
+
+        // verify that synonyms are forbidden
+        expectCompilationError
+            ( dboConnection, NO_SYNONYMS_IN_MERGE,
+              "merge into syn_t1_034\n" +
+              "using t2_034 on syn_t1_034.x  = t2_034.x\n" +
+              "when matched then update set syn_t1_034.y = t2_034.y\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SYNONYMS_IN_MERGE,
+              "merge into syn_t1_034 a\n" +
+              "using t2_034 on a.x  = t2_034.x\n" +
+              "when matched then update set a.y = t2_034.y\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SYNONYMS_IN_MERGE,
+              "merge into t1_034\n" +
+              "using syn_t2_034 on t1_034.x = syn_t2_034.x\n" +
+              "when matched then update set t1_034.y = syn_t2_034.y\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_SYNONYMS_IN_MERGE,
+              "merge into t1_034\n" +
+              "using syn_t2_034 a on t1_034.x = a.x\n" +
+              "when matched then update set t1_034.y = a.y\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop synonym syn_t2_034" );
+        goodStatement( dboConnection, "drop synonym syn_t1_034" );
+        goodStatement( dboConnection, "drop table t2_034" );
+        goodStatement( dboConnection, "drop table t1_034" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

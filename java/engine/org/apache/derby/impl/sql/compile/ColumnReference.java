@@ -1241,32 +1241,36 @@ public class ColumnReference extends ValueNode
     void    setMergeTableID( int mergeTableID )
     {
         // Changing the association of a column means we are confused. Shouldn't happen.
-        if ( _mergeTableID != MERGE_UNKNOWN )
+        if ( (_mergeTableID != MERGE_UNKNOWN) && (_mergeTableID != mergeTableID)  )
         {
             if (SanityManager.DEBUG)
             {
                 SanityManager.ASSERT
                     (
                      (_mergeTableID == mergeTableID),
-                     "MERGE statement can't re-associate column " + debugName()
+                     "MERGE statement can't re-associate column " + getSQLColumnName() +
+                     " from " + prettyPrintMergeTableID( _mergeTableID ) +
+                     " to " + prettyPrintMergeTableID( mergeTableID )
                      );
             }
         }
 
         _mergeTableID = mergeTableID;
     }
+    private String  prettyPrintMergeTableID( int mergeTableID )
+    {
+        switch ( mergeTableID )
+        {
+        case MERGE_SOURCE: return "SOURCE";
+        case MERGE_TARGET: return "TARGET";
+        default: return "UNKNOWN";
+        }
+    }
 
     /** Get the MERGE table (SOURCE or TARGET) associated with this column */
     int getMergeTableID()
     {
         return _mergeTableID;
-    }
-
-    /** Get the name of this column (for debugging printout) */
-    String  debugName()
-    {
-        if ( _qualifiedTableName == null ) { return _columnName; }
-        else { return _qualifiedTableName + "." + _columnName; }
     }
 
 	/**

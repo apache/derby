@@ -294,11 +294,13 @@ public class MatchingClauseNode extends QueryTreeNode
         ResultColumnList    setClauses = realiasSetClauses( targetTable );
         bindSetClauses( fullFromList, targetTable, setClauses );
 
+        TableName   tableName = targetTable.getTableNameField();
+        FromList    selectFromList = fullFromList;
+        
         SelectNode  selectNode = new SelectNode
             (
-             //             _updateColumns,
              setClauses,
-             fullFromList,
+             selectFromList,
              null,      // where clause
              null,      // group by list
              null,      // having clause
@@ -306,7 +308,7 @@ public class MatchingClauseNode extends QueryTreeNode
              null,      // optimizer plan override
              getContextManager()
              );
-        _dml = new UpdateNode( targetTable.getTableNameField(), selectNode, this, getContextManager() );
+        _dml = new UpdateNode( tableName, selectNode, this, getContextManager() );
 
         _dml.bindStatement();
 
@@ -320,6 +322,7 @@ public class MatchingClauseNode extends QueryTreeNode
         // the full row is the before image, the after image, and a row location
         int     rowSize = fullUpdateRow.size() / 2;
 
+        // split the row into before and after images
         for ( int i = 0; i < rowSize; i++ )
         {
             ResultColumn    origBeforeRC = fullUpdateRow.elementAt( i );
@@ -351,10 +354,11 @@ public class MatchingClauseNode extends QueryTreeNode
         for ( int i = 0; i < _updateColumns.size(); i++ )
         {
             ResultColumn    setRC = _updateColumns.elementAt( i );
+            TableName   tableName = targetTable.getTableName();
             ColumnReference newTargetColumn = new ColumnReference
                 (
                  setRC.getReference().getColumnName(),
-                 targetTable.getTableName(),
+                 tableName,
                  getContextManager()
                  );
             newTargetColumn.setMergeTableID( ColumnReference.MERGE_TARGET );
@@ -436,7 +440,7 @@ public class MatchingClauseNode extends QueryTreeNode
         TableDescriptor td = targetTable.getTableDescriptor();
         HashSet<String> changedColumns = getChangedColumnNames();
         HashSet<String> changedGeneratedColumns = getChangedGeneratedColumnNames( td, changedColumns );
-
+        
         _thenColumns = fullRow.copyListAndObjects();
 
         //
@@ -1108,7 +1112,7 @@ public class MatchingClauseNode extends QueryTreeNode
             
             if (SanityManager.DEBUG)
             {
-                SanityManager.THROWASSERT( "Can't find select list column corresponding to " + bufferedCR.debugName() );
+                SanityManager.THROWASSERT( "Can't find select list column corresponding to " + bufferedCR.getSQLColumnName() );
             }
         }
         else if ( bufferedExpression instanceof CurrentRowLocationNode )
@@ -1134,7 +1138,7 @@ public class MatchingClauseNode extends QueryTreeNode
             SanityManager.ASSERT
                 (
                  ( (mergeTableID == ColumnReference.MERGE_SOURCE) || (mergeTableID == ColumnReference.MERGE_TARGET) ),
-                 "Column " + cr.debugName() + " has illegal MERGE table id: " + mergeTableID
+                 "Column " + cr.getSQLColumnName() + " has illegal MERGE table id: " + mergeTableID
                  );
         }
 

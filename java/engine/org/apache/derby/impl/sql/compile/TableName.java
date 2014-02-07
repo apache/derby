@@ -227,6 +227,12 @@ public class TableName extends QueryTreeNode
 		}
 	}
 
+    /** Clone this TableName */
+    public  TableName   cloneMe()
+    {
+        return new TableName( schemaName, tableName, getContextManager() );
+    }
+
 	///////////////////////////////////////////////////////////////////////
 	//
 	//	BIND METHODS

@@ -2291,6 +2291,11 @@ Guide.
                 <text>Subqueries are not allowed in the WHEN [ NOT ] MATCHED clauses of MERGE statements.</text>
             </msg>
 
+	        <msg>
+                <name>42XAP</name>
+                <text>Synonyms are not allowed as the source or target tables of MERGE statements.</text>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
