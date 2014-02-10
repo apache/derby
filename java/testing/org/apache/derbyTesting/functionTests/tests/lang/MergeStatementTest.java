@@ -5035,6 +5035,101 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_034" );
     }
     
+    /**
+     * <p>
+     * Verify that table identifiers can be used or omitted on the left
+     * side of SET clauses.
+     * </p>
+     */
+    public  void    test_035_leftSideOfSet()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_035( x int, y int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_035( x int, y int )"
+             );
+
+        // verify with and without aliases and with and without identifiers on the left side of SET clauses
+        vet_035
+            (
+             dboConnection,
+             "merge into t1_035\n" +
+             "using t2_035 on t1_035.x = t2_035.x\n" +
+             "when matched then update set t1_035.y = t2_035.y\n"
+             );
+        vet_035
+            (
+             dboConnection,
+             "merge into t1_035\n" +
+             "using t2_035 on t1_035.x = t2_035.x\n" +
+             "when matched then update set y = t2_035.y\n"
+             );
+        vet_035
+            (
+             dboConnection,
+             "merge into t1_035 a\n" +
+             "using t2_035 on a.x = t2_035.x\n" +
+             "when matched then update set a.y = t2_035.y\n"
+             );
+        vet_035
+            (
+             dboConnection,
+             "merge into t1_035 a\n" +
+             "using t2_035 on a.x = t2_035.x\n" +
+             "when matched then update set y = t2_035.y\n" 
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_035" );
+        goodStatement( dboConnection, "drop table t1_035" );
+    }
+    private void    vet_035( Connection conn, String query )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "delete from t1_035"
+             );
+        goodStatement
+            (
+             conn,
+             "delete from t2_035"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t1_035 values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t2_035 values ( 1, 1000 ), ( 3, 3000 ), ( 4, 4000 )"
+             );
+
+        String[][]  expectedResults = new String[][]
+            {
+                { "1", "1000" },
+                { "2", "200" },
+                { "3", "3000" },
+            };
+        goodUpdate( conn, query, 2 );
+        assertResults( conn, "select * from t1_035 order by x", expectedResults, false );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
