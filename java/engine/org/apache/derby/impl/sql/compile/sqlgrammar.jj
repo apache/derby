@@ -3661,6 +3661,8 @@ mergeStatement() throws StandardException :
     searchCondition = joinCondition()
     matchingClauses = matchingClauseList()
 	{
+		setUpAndLinkParameters();
+
         return new MergeNode
         (
             targetTable,

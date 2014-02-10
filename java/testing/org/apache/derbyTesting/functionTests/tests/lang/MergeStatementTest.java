@@ -74,6 +74,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      NO_SUBQUERIES_IN_MATCHED_CLAUSE = "42XAO";
     private static  final   String      NO_SYNONYMS_IN_MERGE = "42XAP";
     private static  final   String      NO_DCL_IN_MERGE = "42XAQ";
+    private static  final   String      PARAMETER_NOT_SET = "07000";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -5174,6 +5175,73 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( dboConnection, "drop table t2_036" );
         goodStatement( dboConnection, "drop table t1_036" );
+    }
+    
+   /**
+     * <p>
+     * Verify that you can use ? parameters in MERGE statements.
+     * </p>
+     */
+    public  void    test_037_parameters()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_037( x int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_037( x int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_037 values ( 100 ), ( 200 )"
+             );
+
+        //
+        // No verify the setting of a ? parameter.
+        //
+        PreparedStatement   ps = chattyPrepare
+            (
+             dboConnection,
+             "merge into t1_037 using t2_037 on ? when not matched then insert values ( t2_037.x )"
+             );
+        try {
+            ps.execute();
+            fail( "Expected statement to raise an error because a parameter isn't set." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( PARAMETER_NOT_SET, se.getSQLState() );
+        }
+
+        ps.setBoolean( 1, true );
+        ps.execute();
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_037 order by x",
+             new String[][]
+             {
+                 { "100" },
+                 { "200" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_037" );
+        goodStatement( dboConnection, "drop table t1_037" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
