@@ -214,6 +214,9 @@ public final class MergeNode extends DMLModStatementNode
             throw StandardException.newException( SQLState.LANG_SAME_EXPOSED_NAME );
         }
 
+        // don't allow derived column lists right now
+        forbidDerivedColumnLists();
+        
         // synonyms not allowed
         forbidSynonyms( dd );
 
@@ -270,6 +273,30 @@ public final class MergeNode extends DMLModStatementNode
     private String  getExposedName( FromTable ft ) throws StandardException
     {
         return ft.getTableName().getTableName();
+    }
+
+    /**
+     *<p>
+     * Because of name resolution complexities, we do not allow derived column lists
+     * on source or target tables. These lists arise in queries like the following:
+     * </p>
+     *
+     * <pre>
+     * merge into t1 r( x )
+     * using t2 on r.x = t2.a
+     * when matched then delete;
+     * 
+     * merge into t1
+     * using t2 r( x ) on t1.a = r.x
+     * when matched then delete;
+     * </pre>
+     */
+    private void    forbidDerivedColumnLists() throws StandardException
+    {
+        if ( (_sourceTable.resultColumns != null) || (_targetTable.resultColumns != null) )
+        {
+            throw StandardException.newException( SQLState.LANG_NO_DCL_IN_MERGE );
+        }
     }
 
     /** Neither the source nor the target table may be a synonym */

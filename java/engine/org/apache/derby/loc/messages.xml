@@ -2296,6 +2296,11 @@ Guide.
                 <text>Synonyms are not allowed as the source or target tables of MERGE statements.</text>
             </msg>
 
+	        <msg>
+                <name>42XAQ</name>
+                <text>The source and target tables of MERGE statements may not have derived column lists.</text>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>

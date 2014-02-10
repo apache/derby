@@ -73,6 +73,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      NO_DML_IN_BEFORE_TRIGGERS = "42Z9D";
     private static  final   String      NO_SUBQUERIES_IN_MATCHED_CLAUSE = "42XAO";
     private static  final   String      NO_SYNONYMS_IN_MERGE = "42XAP";
+    private static  final   String      NO_DCL_IN_MERGE = "42XAQ";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -5128,6 +5129,51 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             };
         goodUpdate( conn, query, 2 );
         assertResults( conn, "select * from t1_035 order by x", expectedResults, false );
+    }
+    
+   /**
+     * <p>
+     * Don't allow derived column lists in MERGE statements..
+     * </p>
+     */
+    public  void    test_036_derivedColumnLists()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_036( a int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_036( a int )"
+             );
+
+        // verify that derived column lists are not allowed
+        expectCompilationError
+            ( dboConnection, NO_DCL_IN_MERGE,
+              "merge into t1_036 r( x )\n" +
+              "using t2_036 on r.x = t2_036.a\n" +
+              "when matched then delete\n"
+              );
+        expectCompilationError
+            ( dboConnection, NO_DCL_IN_MERGE,
+              "merge into t1_036\n" +
+              "using t2_036 r( x ) on t1_036.a = r.x\n" +
+              "when matched then delete\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_036" );
+        goodStatement( dboConnection, "drop table t1_036" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
