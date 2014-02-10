@@ -135,7 +135,7 @@ public class GenericPreparedStatement
 	private int inUseCount;
 
 	// true if the statement is being compiled.
-	boolean compilingStatement;
+    private boolean compilingStatement;
 
     /** True if the statement was invalidated while it was being compiled. */
     boolean invalidatedWhileCompiling;
@@ -224,6 +224,29 @@ public class GenericPreparedStatement
      */
     private boolean isUpToDate() {
         return isValid && (activationClass != null) && !compilingStatement;
+    }
+
+    /** Check if this statement is currently being compiled. */
+    final synchronized boolean isCompiling() {
+        return compilingStatement;
+    }
+
+    /**
+     * Signal that the statement is about to be compiled. This will block
+     * others from attempting to compile it.
+     */
+    final synchronized void beginCompiling() {
+        compilingStatement = true;
+        setActivationClass(null);
+    }
+
+    /**
+     * Signal that we're done compiling the statement and unblock others
+     * that are waiting for the compilation to finish.
+     */
+    final synchronized void endCompiling() {
+        compilingStatement = false;
+        notifyAll();
     }
 
 	public void rePrepare(LanguageConnectionContext lcc) 
@@ -835,7 +858,7 @@ recompileOutOfDatePlan:
 			isValid = false;
 
 			// block compiles while we are invalidating
-			compilingStatement = true;
+            beginCompiling();
 		}
 
 		try {
@@ -870,10 +893,7 @@ recompileOutOfDatePlan:
 				}
 			}
 		} finally {
-			synchronized (this) {
-				compilingStatement = false;
-				notifyAll();
-			}
+            endCompiling();
 		}
 	}
 

@@ -266,7 +266,7 @@ public class GenericStatement
 					return preparedStmt;
 				}
 
-				if (!preparedStmt.compilingStatement) {
+                if (!preparedStmt.isCompiling()) {
 					break;
 				}
 
@@ -277,8 +277,7 @@ public class GenericStatement
 				}
 			}
 
-			preparedStmt.compilingStatement = true;
-			preparedStmt.setActivationClass(null);
+            preparedStmt.beginCompiling();
 		}
 
 		try {
@@ -633,10 +632,7 @@ public class GenericStatement
 		}
 		finally
 		{
-			synchronized (preparedStmt) {
-				preparedStmt.compilingStatement = false;
-				preparedStmt.notifyAll();
-			}
+            preparedStmt.endCompiling();
 		}
 
 		lcc.commitNestedTransaction();
