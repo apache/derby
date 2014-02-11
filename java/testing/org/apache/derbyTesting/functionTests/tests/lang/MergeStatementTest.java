@@ -5244,6 +5244,117 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_037" );
     }
     
+   /**
+     * <p>
+     * Verify that you can use ? parameters in all search conditions as well
+     * as in INSERT values and on the left side of SET operators.
+     * </p>
+     */
+    public  void    test_038_parameters()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_038( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_038( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_038 values \n" +
+             "( 1, -1, 100 ), ( 2, -2, 200 ), ( 3, -3, 300 ), ( 5, -5, 500 ),\n" +
+             "( 100, -10, 100 ), ( 200, -20, 200 ), ( 300, -30, 300 ), ( 500, -50, 500 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_038 values\n" +
+             "( 10, -100, 1000 ), ( 30, -300, 3000), ( 40, -400, 4000 ), ( 40, -401, 4001 ), ( 50, -500, 5000 ), ( 50, -501, 5001 ),\n" +
+             "( -1000, -10, 1000 ), ( -3000, -30, 3000), ( -4000, -40, 4000 ), ( -4000, -41, 4001 ),\n" +
+             "( -5000, -50, 5000 ), ( -5000, -51, 5001 )\n"
+             );
+
+        //
+        // now verify the correct operation of ? parameters in all clauses
+        //
+        PreparedStatement    ps = chattyPrepare
+            (
+             dboConnection,
+             "merge into t1_038\n" +
+             "using t2_038 on t2_038.x = t1_038.x * ?\n" +
+             "when not matched and t2_038.y = ? then insert values (  t2_038.x, t2_038.y, t2_038.z * ? )\n" +
+             "when matched and t2_038.y = ? then delete\n" +
+             "when matched and t2_038.y = ? then update set z = t2_038.z * ?"  
+             );
+        
+        ps.setInt( 1, 10 );
+        ps.setInt( 2, -401 );
+        ps.setInt( 3, 2 );
+        ps.setInt( 4, -300 );
+        ps.setInt( 5, -501 );
+        ps.setInt( 6, 3 );
+        ps.execute();
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_038 order by x, y, z",
+             new String[][]
+             {
+                 { "1", "-1", "100" },
+                 { "2", "-2", "200" },
+                 { "5", "-5", "15003" },
+                 { "40", "-401", "8002" },
+                 { "100", "-10", "100" },
+                 { "200", "-20", "200" },
+                 { "300", "-30", "300" },
+                 { "500", "-50", "500" },
+             },
+             false
+             );
+
+        // verify that you can change the values
+        ps.setInt( 1, -10 );
+        ps.setInt( 2, -41 );
+        ps.setInt( 3, 3 );
+        ps.setInt( 4, -30 );
+        ps.setInt( 5, -51 );
+        ps.setInt( 6, 4 );
+        ps.execute();
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_038 order by x, y, z",
+             new String[][]
+             {
+                 { "-4000", "-41", "12003" },
+                 { "1", "-1", "100" },
+                 { "2", "-2", "200" },
+                 { "5", "-5", "15003" },
+                 { "40", "-401", "8002" },
+                 { "100", "-10", "100" },
+                 { "200", "-20", "200" },
+                 { "500", "-50", "20004" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table t2_038" );
+        goodStatement( dboConnection, "drop table t1_038" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

@@ -773,8 +773,17 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
-        bindInsertValues( fullFromList, targetTable );
+        ResultColumnList    selectList = new ResultColumnList( getContextManager() );
+        for ( int i = 0; i < _insertValues.size(); i++ )
+        {
+            ResultColumn    rc = _insertValues.elementAt( i );
+            selectList.addResultColumn( rc.cloneMe() );
+        }
+        selectList.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
+        bindExpressions( selectList, fullFromList );
         
+        bindInsertValues( fullFromList, targetTable );
+
         // the VALUES clause may not mention columns in the target table
         FromList    sourceTableFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
         sourceTableFromList.addElement( fullFromList.elementAt( MergeNode.SOURCE_TABLE_INDEX ) );
@@ -782,7 +791,7 @@ public class MatchingClauseNode extends QueryTreeNode
         
         SelectNode  selectNode = new SelectNode
             (
-             _insertValues,      // select list
+             selectList,      // select list
              fullFromList,
              null,      // where clause
              null,      // group by list
