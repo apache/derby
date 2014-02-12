@@ -1462,7 +1462,11 @@ public class JDBC {
         rs.close();
 
         if (rowCountsMustMatch) {
-            Assert.assertEquals("Unexpected row count",
+            String message = "Unexpected row count, expected: " +
+                    expectedRows.length + ", actual: " + actual.size() + "\n" +
+                    "\t expected rows: \n\t\t" + expected + 
+                    "\n\t actual result: \n\t\t" + actual + "\n";
+            Assert.assertEquals(message,
                                 expectedRows.length, actual.size());
         }
         if ( !actual.containsAll(expected) )

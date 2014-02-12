@@ -68,6 +68,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
         try {
             dropTable("a");
+            // commit to prevent message 'table/view a already exists'
+            commit();
         } catch (SQLException e) {
             assertSQLState("42Y55", e);
         }
