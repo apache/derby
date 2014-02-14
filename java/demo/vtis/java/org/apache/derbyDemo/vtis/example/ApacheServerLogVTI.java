@@ -21,9 +21,12 @@ limitations under the License.
 
 package org.apache.derbyDemo.vtis.example;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
+import org.apache.derby.vti.XmlVTI;
 import org.apache.derbyDemo.vtis.core.*;
 
 /**
@@ -61,11 +64,32 @@ public  class   ApacheServerLogVTI  extends XmlVTI
      * Construct from the same arguments as our superclass.
      * </p>
      */
-    public  ApacheServerLogVTI( String xmlResourceName, String rowTag, String[] childTags )
-    {
-        super( xmlResourceName, rowTag, childTags );
+    public  ApacheServerLogVTI( InputStream is )
+        throws Exception
+    {        
+        super
+            (
+             is,
+             "Visitor",
+             0,
+             "IP", "accessDate", "request", "statusCode", "fileSize", "referrer", "userAgent"
+             );
     }
     
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // FUNCTION ENTRY POINT (BOUND BY THE CREATE FUNCTION STATEMENT)
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Create from an URL string identifying the server log file */
+    public  static  ApacheServerLogVTI  apacheNaturalLogFile( String xmlResourceName )
+        throws Exception
+    {
+        return new ApacheServerLogVTI( (new URL( xmlResourceName )).openStream() );
+    }
+    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // OVERRIDES

@@ -34,31 +34,44 @@ connect 'jdbc:derby:memory:vtitest;create=true';
 
 ----------------------------------------------------------------------------------------
 --
--- Create the database procedures and tables needed
--- by this demonstration script.
---
-----------------------------------------------------------------------------------------
-
-create procedure registerXMLRowVTIs( className varchar( 32672 ) )
-language java
-parameter style java
-modifies sql data
-external name 'org.apache.derbyDemo.vtis.core.XmlVTI.registerXMLRowVTIs'
-;
-
-----------------------------------------------------------------------------------------
---
 -- Declare the table functions.
 --
 ----------------------------------------------------------------------------------------
 
 --
--- Register the table functions in the VTIs class
+-- Declare a table function which reads an Apache server log.
 --
-call registerXMLRowVTIs( 'org.apache.derbyDemo.vtis.example.VTIs' );
+create function apacheNaturalLogFile( fileURL varchar( 32672 ) ) returns table
+(
+    IP varchar(100),
+    accessDate timestamp,
+    request clob,
+    statusCode int,
+    fileSize int,
+    referrer varchar(200),
+    userAgent clob
+)
+language java parameter style derby_jdbc_result_set no sql
+external name 'org.apache.derbyDemo.vtis.example.ApacheServerLogVTI.apacheNaturalLogFile';
 
 --
--- Register a table function which reads the output of an 'svn log' command
+-- Declare a table function which reads a Derby JIRA report
+--
+create function apacheNaturalJiraReport( fileURL varchar( 32672 ) ) returns table
+(
+    keyCol int,
+    type varchar(20),
+    priority varchar(10),
+    status varchar(20),
+    component varchar(50),
+    customfieldvalue varchar(200),
+    title varchar(500)
+)
+language java parameter style derby_jdbc_result_set no sql
+external name 'org.apache.derbyDemo.vtis.example.DerbyJiraReportVTI.apacheNaturalJiraReport';
+
+--
+-- Declare a table function which reads the output of an 'svn log' command
 --
 create function svnLogReader( logFileName varchar( 32672 ) )
 returns TABLE
@@ -81,8 +94,8 @@ external name 'org.apache.derbyDemo.vtis.example.SubversionLogVTI.subversionLogV
 create function propertyFileVTI( fileName varchar( 32672 ) )
 returns TABLE
   (
-     messageID  varchar( 10 ),
-     messageText varchar( 1000 )
+     messageID  varchar( 20 ),
+     messageText varchar( 32672 )
   )
 language java
 parameter style DERBY_JDBC_RESULT_SET
@@ -110,7 +123,7 @@ group by committer
 ----------------------------------------------------------------------------------------
 
 -- find the messages which have not been translated into french
-select *
+select messageID, substr( m_english.messageText, 1, 100 )
 from table( propertyFileVTI( '/opt/DerbyTrunk/generated/java/org/apache/derby/loc/messages_en.properties' ) ) m_english
 where m_english.messageID not in
 (
@@ -129,54 +142,43 @@ where m_english.messageID not in
 -- Read from the XML log file produced by an Apache web server
 --
 
--- this vti treats the oddly formatted accessDate and fileSize fields as varchars
-select s.*
-from table( "apacheVanillaLogFile"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
-;
-
 -- this vti treats accessDate as a timestamp and fileSize as an int
 select s.*
-from table( "apacheNaturalLogFile"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
 ;
 
 -- look for relevant status codes
 select s.*
-from table( "apacheNaturalLogFile"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
-where s."statusCode" = 206
+from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+where s.statusCode = 206
 ;
 
 -- look for relevant IP addresses
 select s.*
-from table( "apacheNaturalLogFile"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
-where "IP" like '208%'
+from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+where IP like '208%'
 ;
 
 -- look for log records in a time range
 select s.*
-from table( "apacheNaturalLogFile"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
-where "accessDate" between timestamp( '2002-07-01 08:40:56.0' ) and timestamp( '2002-07-01 08:42:56.0' )
+from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+where accessDate between timestamp( '2002-07-01 08:40:56.0' ) and timestamp( '2002-07-01 08:42:56.0' )
 ;
 
 --
 -- Read from the XML log file produced by a JIRA report
 --
 
--- report on Derby JIRAs
-select s.*
-from table( "apacheVanillaJiraReport"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
-where s."key" between 'DERBY-2800' and 'DERBY-2950'
-;
-
 -- treat keys as ints and sort Derby JIRAs by key
 select s.*
-from table( "apacheNaturalJiraReport"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
-where s."key" between 2800 and 2950
-order by "key"
+from table( apacheNaturalJiraReport( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
+where s.keyCol between 2800 and 2950
+order by keyCol
 ;
 
 -- eliminate uninteresting Derby JIRAs
 select s.*
-from table( "apacheNaturalJiraReport"( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
-where "type" != 'Sub-task'
-order by "key"
+from table( apacheNaturalJiraReport( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
+where type != 'Sub-task'
+order by keyCol
 ;
