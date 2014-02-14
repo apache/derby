@@ -113,7 +113,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
                         ContextManager   cm)
 	{
         super(childResult, tableProperties, cm);
-        resultColumns = projection;
+        setResultColumns( projection );
         this.restriction = restriction;
         this.restrictionList = restrictionList;
         this.projectSubquerys = projectSubquerys;
@@ -246,7 +246,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		CostEstimate childCost;
 
-		costEstimate = getCostEstimate(optimizer);
+		setCostEstimate( getCostEstimate( optimizer ) );
 
 		/*
 		** Don't re-optimize a child result set that has already been fully
@@ -286,7 +286,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 															outerCost,
 															rowOrdering);
 			/* Copy child cost to this node's cost */
-			costEstimate.setCost(
+			getCostEstimate().setCost(
 							childCost.getEstimatedCost(),
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
@@ -320,9 +320,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 											   outerCost.rowCount());
 
 			/* Copy child cost to this node's cost */
-			childCost = childResult.costEstimate;
+			childCost = childResult.getCostEstimate();
 
-			costEstimate.setCost(
+			getCostEstimate().setCost(
 							childCost.getEstimatedCost(),
 							childCost.rowCount(),
 							childCost.singleScanRowCount());
@@ -370,7 +370,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			optimizer.considerCost(this, restrictionList, getCostEstimate(), outerCost);
 		}
 
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/**
@@ -1028,7 +1028,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		childResult = childResult.preprocess(numTables, gbl, fromList);
 
 		/* Build the referenced table map */
-		referencedTableMap = (JBitSet) childResult.getReferencedTableMap().clone();
+		setReferencedTableMap( (JBitSet) childResult.getReferencedTableMap().clone() );
 
 		return this;
 	}
@@ -1064,7 +1064,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		/* Build a list of the single table predicates that we can push down */
         PredicateList pushPList =
-                predicateList.getPushablePredicates(referencedTableMap);
+            predicateList.getPushablePredicates(getReferencedTableMap());
 
 		/* If this is a PRN above a SelectNode, probably due to a 
 		 * view or derived table which couldn't be flattened, then see
@@ -1210,9 +1210,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		// RESOLVE: SHOULD FACTOR IN THE NON-OPTIMIZABLE PREDICATES THAT
 		// WERE NOT PUSHED DOWN
-        costEstimate = getOptimizerFactory().getCostEstimate();
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
 
-		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
+		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
 							childResult.getCostEstimate().singleScanRowCount());
 
@@ -1234,11 +1234,13 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		** that optimization was done directly on the child node,
 		** in which case the cost estimate will be null here.
 		*/
-		if (costEstimate == null)
+		if (super.getCostEstimate() == null)
+        {
 			return childResult.getCostEstimate();
+        }
 		else
 		{
-			return costEstimate;
+			return super.getCostEstimate();
 		}
 	}
 
@@ -1252,20 +1254,26 @@ class ProjectRestrictNode extends SingleChildResultSetNode
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
-		if (finalCostEstimate != null)
-		// we already set it, so just return it.
-			return finalCostEstimate;
+		if (getCandidateFinalCostEstimate() != null)
+        {
+            // we already set it, so just return it.
+			return getCandidateFinalCostEstimate();
+        }
 
 		// If the child result set is an Optimizable, then this node's
 		// final cost is that of the child.  Otherwise, this node must
 		// hold "trulyTheBestAccessPath" for it's child so we pull
 		// the final cost from there.
 		if (childResult instanceof Optimizable)
-			finalCostEstimate = childResult.getFinalCostEstimate();
+        {
+			setCandidateFinalCostEstimate( childResult.getFinalCostEstimate() );
+        }
 		else
-			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+        {
+			setCandidateFinalCostEstimate( getTrulyTheBestAccessPath().getCostEstimate() );
+        }
 
-		return finalCostEstimate;
+		return getCandidateFinalCostEstimate();
 	}
 
     /**
@@ -1285,7 +1293,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
         //
         // If we are projecting and restricting the stream from a table
@@ -1310,6 +1318,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+
     @Override
     void generateResultSet(ExpressionClassBuilder acb, MethodBuilder mb)
 									throws StandardException
@@ -1346,7 +1355,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				childResult.generateResultSet(acb, mb);
 			else
 				childResult.generate((ActivationClassBuilder)acb, mb);
-			costEstimate = childResult.getFinalCostEstimate();
+			setCostEstimate( childResult.getFinalCostEstimate() );
 			return;
 		}
 
@@ -1385,7 +1394,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		// Map the result columns to the source columns
 
         ResultColumnList.ColumnMapping mappingArrays =
-            resultColumns.mapSourceColumns();
+            getResultColumns().mapSourceColumns();
 
         int[] mapArray = mappingArrays.mapArray;
         boolean[] cloneMap = mappingArrays.cloneMap;
@@ -1454,15 +1463,15 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		 */
 		if (projectSubquerys != null && projectSubquerys.size() > 0)
 		{
-			projectSubquerys.setPointOfAttachment(resultSetNumber);
+			projectSubquerys.setPointOfAttachment(getResultSetNumber());
 		}
 		if (restrictSubquerys != null && restrictSubquerys.size() > 0)
 		{
-			restrictSubquerys.setPointOfAttachment(resultSetNumber);
+			restrictSubquerys.setPointOfAttachment(getResultSetNumber());
 		}
 
 		// Load our final cost estimate.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		// if there is no restriction, we just want to pass null.
 		if (restriction == null)
@@ -1517,14 +1526,14 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			// as-is, with the performance trade-off as discussed above.)
 
 			/* Generate the Row function for the projection */
-			resultColumns.generateCore(acb, mb, false);
+			getResultColumns().generateCore(acb, mb, false);
 		}
 		else
 		{
 		   	mb.pushNull(ClassName.GeneratedMethod);
 		}
 		
-		mb.push(resultSetNumber);
+		mb.push(getResultSetNumber());
 
 		// if there is no constant restriction, we just want to pass null.
 		if (constantRestriction == null)
@@ -1566,10 +1575,10 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		
 		mb.push(mapArrayItem);
         mb.push(cloneMapItem);
-		mb.push(resultColumns.reusableResult());
+		mb.push(getResultColumns().reusableResult());
 		mb.push(doesProjection);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",
                     ClassName.NoPutResultSet, 11);
@@ -1664,14 +1673,14 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 				/* We get a shallow copy of the ResultColumnList and its 
 				 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 				 */
-				prRCList = resultColumns;
-				setResultColumns(resultColumns.copyListAndObjects());
+				prRCList = getResultColumns();
+				setResultColumns(getResultColumns().copyListAndObjects());
 
 				/* Replace ResultColumn.expression with new VirtualColumnNodes
 				 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
 				 * pointers to source ResultSetNode, this, and source ResultColumn.)
 				 */
-				prRCList.genVirtualColumnNodes(this, resultColumns);
+				prRCList.genVirtualColumnNodes(this, getResultColumns());
 
 				/* Finally, we create the new MaterializeResultSetNode */
                 mrsn = new MaterializeResultSetNode(
@@ -1680,9 +1689,9 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 									tableProperties,
 									getContextManager());
 				// Propagate the referenced table map if it's already been created
-				if (referencedTableMap != null)
+				if (getReferencedTableMap() != null)
 				{
-					mrsn.setReferencedTableMap((JBitSet) referencedTableMap.clone());
+					mrsn.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 				}
 				return mrsn;
 			}
@@ -1779,7 +1788,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 
 		HashSet<BaseColumnNode> columns = new HashSet<BaseColumnNode>();
 
-        for (ResultColumn rc : resultColumns) {
+        for (ResultColumn rc : getResultColumns()) {
 			BaseColumnNode bc = rc.getBaseColumnNode();
 			if (bc == null) return false;
 			columns.add(bc);

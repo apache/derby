@@ -293,7 +293,7 @@ public final class MergeNode extends DMLModStatementNode
      */
     private void    forbidDerivedColumnLists() throws StandardException
     {
-        if ( (_sourceTable.resultColumns != null) || (_targetTable.resultColumns != null) )
+        if ( (_sourceTable.getResultColumns() != null) || (_targetTable.getResultColumns() != null) )
         {
             throw StandardException.newException( SQLState.LANG_NO_DCL_IN_MERGE );
         }
@@ -527,7 +527,7 @@ public final class MergeNode extends DMLModStatementNode
                 (
                  source.methodCall,
                  source.correlationName,
-                 source.resultColumns,
+                 source.getResultColumns(),
                  null,
                  source.exposedName,
                  getContextManager()

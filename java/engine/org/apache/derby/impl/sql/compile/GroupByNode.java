@@ -169,7 +169,7 @@ class GroupByNode extends SingleChildResultSetNode
 		** RCL to its columns.
 		*/
 		newBottomRCL = childResult.getResultColumns().copyListAndObjects();
-		resultColumns = childResult.getResultColumns();
+		setResultColumns( childResult.getResultColumns() );
 		childResult.setResultColumns(newBottomRCL);
 
 		/*
@@ -181,7 +181,7 @@ class GroupByNode extends SingleChildResultSetNode
 
 		if (this.groupingList != null && this.groupingList.isRollup())
                 {
-			resultColumns.setNullability(true);
+                    getResultColumns().setNullability(true);
 			parent.getResultColumns().setNullability(true);
                 }
 		/* We say that the source is never in sorted order if there is a distinct aggregate.
@@ -292,7 +292,7 @@ class GroupByNode extends SingleChildResultSetNode
 		*/
         ResultColumnList rclNew = new ResultColumnList((getContextManager()));
 
-        for (ResultColumn rc : resultColumns)
+        for (ResultColumn rc : getResultColumns())
 		{
 			if (!rc.isGenerated()) {
 				rclNew.addElement(rc);
@@ -302,7 +302,7 @@ class GroupByNode extends SingleChildResultSetNode
 		// if any columns in the source RCL were generated for an order by
 		// remember it in the new RCL as well. After the sort is done it will
 		// have to be projected out upstream.
-		rclNew.copyOrderBySelect(resultColumns);
+		rclNew.copyOrderBySelect(getResultColumns());
 		
         parent = new ProjectRestrictNode(
 										this, 	// child
@@ -323,7 +323,7 @@ class GroupByNode extends SingleChildResultSetNode
 		/*
 		** Set the group by RCL to be empty
 		*/
-        resultColumns = new ResultColumnList((getContextManager()));
+        setResultColumns( new ResultColumnList((getContextManager())) );
 
 	}
 
@@ -341,7 +341,7 @@ class GroupByNode extends SingleChildResultSetNode
 	private ArrayList<SubstituteExpressionVisitor> addUnAggColumns() throws StandardException
 	{
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
-		ResultColumnList groupByRCL = resultColumns;
+		ResultColumnList groupByRCL = getResultColumns();
 
 		ArrayList<SubstituteExpressionVisitor> referencesToSubstitute = new ArrayList<SubstituteExpressionVisitor>();
 		ArrayList<SubstituteExpressionVisitor> havingRefsToSubstitute = null;
@@ -592,7 +592,7 @@ class GroupByNode extends SingleChildResultSetNode
 		ResultColumn	tmpRC;
 		ResultColumn	aggResultRC;
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
-		ResultColumnList groupByRCL = resultColumns;
+		ResultColumnList groupByRCL = getResultColumns();
 		ResultColumnList aggRCL;
 		int				aggregatorVColId;
 		int				aggInputVColId;
@@ -939,9 +939,9 @@ class GroupByNode extends SingleChildResultSetNode
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
-        costEstimate = getOptimizerFactory().getCostEstimate();
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
 
-		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
+		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
 							childResult.getCostEstimate().singleScanRowCount());
 
@@ -989,7 +989,7 @@ class GroupByNode extends SingleChildResultSetNode
 		assignResultSetNumber();
 
 		// Get the final cost estimate from the child.
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		/*
 		** Get the column ordering for the sort.  Note that
@@ -1049,10 +1049,10 @@ class GroupByNode extends SingleChildResultSetNode
 		mb.push(aggInfoItem);
 		mb.push(orderingItem);
 
-        mb.push(acb.addItem(resultColumns.buildRowTemplate()));
+        mb.push(acb.addItem(getResultColumns().buildRowTemplate()));
 
-		mb.push(resultColumns.getTotalColumnSize());
-		mb.push(resultSetNumber);
+		mb.push(getResultColumns().getTotalColumnSize());
+		mb.push(getResultSetNumber());
 
 		/* Generate a (Distinct)ScalarAggregateResultSet if scalar aggregates */
 		if ((groupingList == null) ||  (groupingList.size() == 0))
@@ -1088,8 +1088,8 @@ class GroupByNode extends SingleChildResultSetNode
 		String resultSet = (addDistinctAggregate) ? "getDistinctScalarAggregateResultSet" : "getScalarAggregateResultSet";
 
 		mb.push(singleInputRowOptimization);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,
                 ClassName.NoPutResultSet, 10);
@@ -1117,8 +1117,8 @@ class GroupByNode extends SingleChildResultSetNode
 		 */
 		String resultSet = (addDistinctAggregate) ? "getDistinctGroupedAggregateResultSet" : "getGroupedAggregateResultSet";
     
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 		mb.push(groupingList.isRollup());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,

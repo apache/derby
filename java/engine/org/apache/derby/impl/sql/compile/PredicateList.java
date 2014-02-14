@@ -1533,7 +1533,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
                 AndNode newAnd =
                         new AndNode(leftOperand, trueNode, getContextManager());
 				newAnd.postBindFixup();
-				JBitSet tableMap = new JBitSet(select.referencedTableMap.size());
+				JBitSet tableMap = new JBitSet(select.getReferencedTableMap().size());
 
 				// Use newly constructed predicate
                 predicate =

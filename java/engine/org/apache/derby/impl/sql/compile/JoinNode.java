@@ -110,7 +110,7 @@ class JoinNode extends TableOperatorNode
              ContextManager   cm) throws StandardException {
 
         super(leftResult, rightResult, tableProperties, cm);
-        this.resultColumns = selectList;
+        setResultColumns( selectList );
         this.joinClause = onClause;
         this.joinClauseNormalized = false;
         this.usingClause = usingClause;
@@ -119,7 +119,7 @@ class JoinNode extends TableOperatorNode
 		/* JoinNodes can be generated in the parser or at the end of optimization.
 		 * Those generated in the parser do not have resultColumns yet.
 		 */
-        if (this.resultColumns != null)
+        if (getResultColumns() != null)
 		{
 			/* A longer term assertion */
 			if (SanityManager.DEBUG)
@@ -134,10 +134,10 @@ class JoinNode extends TableOperatorNode
 			/* Build the referenced table map (left || right) */
 			if (leftResultSet.getReferencedTableMap() != null)
 			{
-                this.referencedTableMap =
-                        (JBitSet) leftResultSet.getReferencedTableMap().clone();
-                this.referencedTableMap.or(
-                        rightResultSet.getReferencedTableMap());
+                setReferencedTableMap
+                    ( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
+                getReferencedTableMap().or
+                    ( rightResultSet.getReferencedTableMap() );
 			}
 		}
 
@@ -224,13 +224,13 @@ class JoinNode extends TableOperatorNode
 							getRightPredicateList(),
 							leftResultSet.getCostEstimate());
 
-		costEstimate = getCostEstimate(optimizer);
+		setCostEstimate( getCostEstimate(optimizer) );
 
 		/*
 		** We add the costs for the inner and outer table, but the number
 		** of rows is that for the inner table only.
 		*/
-		costEstimate.setCost(
+		getCostEstimate().setCost(
 			leftResultSet.getCostEstimate().getEstimatedCost() +
 			rightResultSet.getCostEstimate().getEstimatedCost(),
 			rightResultSet.getCostEstimate().rowCount(),
@@ -242,7 +242,7 @@ class JoinNode extends TableOperatorNode
 		** So, adjust this value now. This method does nothing for most
 		** join types.
 		*/
-		adjustNumberOfRowsReturned(costEstimate);
+		adjustNumberOfRowsReturned(getCostEstimate());
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -255,10 +255,10 @@ class JoinNode extends TableOperatorNode
 							(ConglomerateDescriptor) null,
 							outerCost,
 							optimizer,
-							costEstimate
+							getCostEstimate()
 							);
 
-		optimizer.considerCost(this, predList, costEstimate, outerCost);
+		optimizer.considerCost(this, predList, getCostEstimate(), outerCost);
 
 		/* Optimize subqueries only once, no matter how many times we're called */
 		if ( (! optimized) && (subqueryList != null))
@@ -267,13 +267,13 @@ class JoinNode extends TableOperatorNode
 		 	* Also need to figure out the pushing of the joinClause.
 		 	*/
 			subqueryList.optimize(optimizer.getDataDictionary(),
-									costEstimate.rowCount());
+                                  getCostEstimate().rowCount());
 			subqueryList.modifyAccessPaths();
 		}
 
 		optimized = true;
 
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/**
@@ -600,9 +600,9 @@ class JoinNode extends TableOperatorNode
 		 * for the ColumnReference will be from the wrong ResultSet
 		 * at generate().)
 		 */
-		if (resultColumns != null)
+		if (getResultColumns() != null)
 		{
-            for (ResultColumn rc : resultColumns)
+            for (ResultColumn rc : getResultColumns())
 			{
 				VirtualColumnNode vcn = (VirtualColumnNode) rc.getExpression();
 				if (resultColumn == vcn.getSourceColumn())
@@ -729,7 +729,7 @@ class JoinNode extends TableOperatorNode
 		 * exist.  This can happen in the degenerate case of an insert
 		 * select with a join expression in a derived table within the select.
 		 */
-		if (resultColumns != null)
+		if (getResultColumns() != null)
 		{
 			return;
 		}
@@ -741,15 +741,15 @@ class JoinNode extends TableOperatorNode
 		/* We get a shallow copy of the left's ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		resultColumns = leftResultSet.getResultColumns();
-		leftRCL = resultColumns.copyListAndObjects();
+		setResultColumns( leftResultSet.getResultColumns() );
+		leftRCL = getResultColumns().copyListAndObjects();
 		leftResultSet.setResultColumns(leftRCL);
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the ProjectRestrictNode's ResultColumnList.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-		resultColumns.genVirtualColumnNodes(leftResultSet, leftRCL, false);
+		getResultColumns().genVirtualColumnNodes(leftResultSet, leftRCL, false);
 
 		/*
 		** If this is a right outer join, we can get nulls on the left side,
@@ -757,7 +757,7 @@ class JoinNode extends TableOperatorNode
 		*/
 		if (this instanceof HalfOuterJoinNode && ((HalfOuterJoinNode)this).isRightOuterJoin())
 		{
-			resultColumns.setNullability(true);
+			getResultColumns().setNullability(true);
 		}
 
 		/* Now, repeat the process with the right's RCL */
@@ -770,7 +770,7 @@ class JoinNode extends TableOperatorNode
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
 		tmpRCL.genVirtualColumnNodes(rightResultSet, rightRCL, false);
-		tmpRCL.adjustVirtualColumnIds(resultColumns.size());
+		tmpRCL.adjustVirtualColumnIds(getResultColumns().size());
 
 		/*
 		** If this is a left outer join, we can get nulls on the right side,
@@ -784,7 +784,7 @@ class JoinNode extends TableOperatorNode
 		/* Now we append the propagated RCL from the right to the one from
 		 * the left and call it our own.
 		 */
-		resultColumns.nondestructiveAppend(tmpRCL);
+		getResultColumns().nondestructiveAppend(tmpRCL);
 	}
 
 	private void deferredBindExpressions(FromList fromListParam)
@@ -1100,7 +1100,7 @@ class JoinNode extends TableOperatorNode
     {
         leftResultSet.projectResultColumns();
         rightResultSet.projectResultColumns();
-        resultColumns.pullVirtualIsReferenced();
+        getResultColumns().pullVirtualIsReferenced();
         super.projectResultColumns();
     }
     
@@ -1453,7 +1453,7 @@ class JoinNode extends TableOperatorNode
 		fromList.addElement((FromTable) rightResultSet);
 
 		/* Mark our RCL as redundant */
-		resultColumns.setRedundant();
+		getResultColumns().setRedundant();
 
 		/* Remap all ColumnReferences from the outer query to this node.
 		 * (We replace those ColumnReferences with clones of the matching
@@ -1596,7 +1596,7 @@ class JoinNode extends TableOperatorNode
 		 */
 		if (subquerys != null && subquerys.size() > 0)
 		{
-			subquerys.setPointOfAttachment(resultSetNumber);
+			subquerys.setPointOfAttachment(getResultSetNumber());
 		}
 
 		// build up the tree.
@@ -1644,12 +1644,12 @@ class JoinNode extends TableOperatorNode
 		int numArgs = getNumJoinArguments();
 
 		leftResultSet.generate(acb, mb); // arg 1
-		mb.push(leftResultSet.resultColumns.size()); // arg 2
+		mb.push(leftResultSet.getResultColumns().size()); // arg 2
 		rightResultSet.generate(acb, mb); // arg 3
-		mb.push(rightResultSet.resultColumns.size()); // arg 4
+		mb.push(rightResultSet.getResultColumns().size()); // arg 4
 
 		// Get our final cost estimate based on child estimates.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		// for the join clause, we generate an exprFun
 		// that evaluates the expression of the clause
@@ -1700,7 +1700,7 @@ class JoinNode extends TableOperatorNode
    			acb.pushMethodReference(mb, userExprFun); // arg 5
 		}
 
-		mb.push(resultSetNumber); // arg 6
+		mb.push(getResultSetNumber()); // arg 6
 
 		addOuterJoinArguments(acb, mb);
 
@@ -1708,10 +1708,10 @@ class JoinNode extends TableOperatorNode
 		oneRowRightSide(acb, mb);
 
 		// estimated row count
-		mb.push(costEstimate.rowCount());
+		mb.push(getCostEstimate().rowCount());
 
 		// estimated cost
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		//User may have supplied optimizer overrides in the sql
 		//Pass them onto execute phase so it can be shown in 
@@ -1739,19 +1739,21 @@ class JoinNode extends TableOperatorNode
 		throws StandardException
 	{
 		// If we already found it, just return it.
-		if (finalCostEstimate != null)
-			return finalCostEstimate;
+		if (getCandidateFinalCostEstimate() != null)
+        {
+			return getCandidateFinalCostEstimate();
+        }
 
 		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
 		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
 
-		finalCostEstimate = getNewCostEstimate();
-		finalCostEstimate.setCost(
+		setCandidateFinalCostEstimate( getNewCostEstimate() );
+		getCandidateFinalCostEstimate().setCost(
 			leftCE.getEstimatedCost() + rightCE.getEstimatedCost(),
 			rightCE.rowCount(),
 			rightCE.rowCount());
 
-		return finalCostEstimate;
+		return getCandidateFinalCostEstimate();
 	}
 
     void oneRowRightSide(ActivationClassBuilder acb, MethodBuilder mb)
@@ -1997,9 +1999,9 @@ class JoinNode extends TableOperatorNode
 	{
 		super.acceptChildren(v);
 
-		if (resultColumns != null)
+		if (getResultColumns() != null)
 		{
-			resultColumns = (ResultColumnList)resultColumns.accept(v);
+			setResultColumns( (ResultColumnList)getResultColumns().accept(v) );
 		}
 
 		if (joinClause != null)

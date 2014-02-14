@@ -85,7 +85,7 @@ class FromSubquery extends FromTable
         this.offset = offset;
         this.fetchFirst = fetchFirst;
         this.hasJDBClimitClause = hasJDBClimitClause;
-        resultColumns = derivedRCL;
+        setResultColumns( derivedRCL );
 	}
 
 	/**
@@ -238,7 +238,7 @@ class FromSubquery extends FromTable
         FromList            emptyFromList = new FromList(
                 getOptimizerFactory().doJoinOrderOptimization(),
                 getContextManager());
-		ResultColumnList	derivedRCL = resultColumns;
+		ResultColumnList	derivedRCL = getResultColumns();
 		ResultColumnList	subqueryRCL;
 		FromList			nestedFromList;
 
@@ -292,11 +292,11 @@ class FromSubquery extends FromTable
 		 * the table since the view was created.
 		 */
 		subqueryRCL = subquery.getResultColumns();
-		if (resultColumns != null && resultColumns.getCountMismatchAllowed() &&
-			resultColumns.size() < subqueryRCL.size())
+		if (getResultColumns() != null && getResultColumns().getCountMismatchAllowed() &&
+			getResultColumns().size() < subqueryRCL.size())
 		{
 			for (int index = subqueryRCL.size() - 1; 
-				 index >= resultColumns.size(); 
+				 index >= getResultColumns().size(); 
 				 index--)
 			{
 				subqueryRCL.removeElementAt(index);
@@ -308,12 +308,12 @@ class FromSubquery extends FromTable
          */
          ResultColumnList newRcl = subqueryRCL.copyListAndObjects();
          newRcl.genVirtualColumnNodes(subquery, subquery.getResultColumns());
-         resultColumns = newRcl;
+         setResultColumns( newRcl );
 
 		/* Propagate the name info from the derived column list */
 		if (derivedRCL != null)
 		{
-			 resultColumns.propagateDCLInfo(derivedRCL, correlationName);
+            getResultColumns().propagateDCLInfo(derivedRCL, correlationName);
 		}
 	}
 
@@ -349,11 +349,11 @@ class FromSubquery extends FromTable
 		// now but what happens if the condition is false? Investigate.
 		if (columnReference.getGeneratedToReplaceAggregate()) // 1
 		{
-			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
+			resultColumn = getResultColumns().getResultColumn(columnReference.getColumnName());
 		}
 		else if (columnsTableName == null || columnsTableName.equals(correlationName)) // 5?
 		{
-		    resultColumn = resultColumns.getAtMostOneResultColumn(columnReference, correlationName, false);
+		    resultColumn = getResultColumns().getAtMostOneResultColumn(columnReference, correlationName, false);
 		}
 		    
 
@@ -473,7 +473,7 @@ class FromSubquery extends FromTable
 
         newPRN = new ProjectRestrictNode(
 								subquery,		/* Child ResultSet */
-								resultColumns,	/* Projection */
+								getResultColumns(),	/* Projection */
 								null,			/* Restriction */
 								null,			/* Restriction as PredicateList */
 								null,			/* Subquerys in Projection */
@@ -529,7 +529,7 @@ class FromSubquery extends FromTable
 		FromList	fromList = null;
 		SelectNode	selectNode;
 
-		resultColumns.setRedundant();
+		getResultColumns().setRedundant();
 
 		subquery.getResultColumns().setRedundant();
 
@@ -630,11 +630,11 @@ class FromSubquery extends FromTable
 
 		// Use visibleSize, because we don't want to propagate any order by
 		// columns not selected.
-		int rclSize = resultColumns.visibleSize();
+		int rclSize = getResultColumns().visibleSize();
 
 		for (int index = 0; index < rclSize; index++)
 		{
-			ResultColumn resultColumn = resultColumns.elementAt(index);
+			ResultColumn resultColumn = getResultColumns().elementAt(index);
 			ValueNode		 valueNode;
 			String			 columnName;
 

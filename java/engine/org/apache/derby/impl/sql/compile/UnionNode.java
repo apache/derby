@@ -133,7 +133,7 @@ class UnionNode extends SetOperatorNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(resultColumns.size() <= typeColumns.size(),
+			SanityManager.ASSERT(getResultColumns().size() <= typeColumns.size(),
 				"More columns in ResultColumnList than in base table.");
 		}
 
@@ -200,8 +200,8 @@ class UnionNode extends SetOperatorNode
 			rightResultSet = target.enhanceAndCheckForAutoincrement
                 ( rightResultSet, inOrder, colMap, false );
 			if (!inOrder ||
-					resultColumns.size() < target.resultColumnList.size()) {
-				resultColumns = getRCLForInsert(target, colMap);
+                getResultColumns().size() < target.resultColumnList.size()) {
+				setResultColumns( getRCLForInsert(target, colMap) );
 			}
 			return this;
 		} else {
@@ -294,7 +294,7 @@ class UnionNode extends SetOperatorNode
 							 leftResultSet.getCostEstimate().singleScanRowCount() +
 							 rightResultSet.getCostEstimate().singleScanRowCount());
 
-        costEst.add(rightResultSet.costEstimate, costEst);
+        costEst.add(rightResultSet.getCostEstimate(), costEst);
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -456,7 +456,7 @@ class UnionNode extends SetOperatorNode
 			 * us would have a tableNumber of -1 instead of our tableNumber.)
 			 */
 			((FromTable)treeTop).setTableNumber(tableNumber);
-			treeTop.setReferencedTableMap((JBitSet) referencedTableMap.clone());
+			treeTop.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 			all = true;
 		}
 
@@ -539,7 +539,7 @@ class UnionNode extends SetOperatorNode
 		** the types of the ? parameters come from the columns being inserted
 		** into in that case.
 		*/
-		if (topTableConstructor && ( ! insertSource) )
+		if (topTableConstructor && ( ! isInsertSource()) )
 		{
 			/*
 			** Step through all the rows in the table constructor to
@@ -630,7 +630,7 @@ class UnionNode extends SetOperatorNode
 		assignResultSetNumber();
 
 		// Get our final cost estimate based on the child estimates.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		// build up the tree.
 
@@ -641,7 +641,7 @@ class UnionNode extends SetOperatorNode
 		leftResultSet.generate(acb, mb);
 
 		/* Do we need a NormalizeResultSet above the left ResultSet? */
-		if (! resultColumns.isExactTypeAndLengthMatch(leftResultSet.getResultColumns()))
+		if (! getResultColumns().isExactTypeAndLengthMatch(leftResultSet.getResultColumns()))
 		{
 			acb.pushGetResultSetFactoryExpression(mb);
 			mb.swap();
@@ -654,7 +654,7 @@ class UnionNode extends SetOperatorNode
 		rightResultSet.generate(acb, mb);
 
 		/* Do we need a NormalizeResultSet above the right ResultSet? */
-		if (! resultColumns.isExactTypeAndLengthMatch(rightResultSet.getResultColumns()))
+		if (! getResultColumns().isExactTypeAndLengthMatch(rightResultSet.getResultColumns()))
 		{
 			acb.pushGetResultSetFactoryExpression(mb);
 			mb.swap();
@@ -674,9 +674,9 @@ class UnionNode extends SetOperatorNode
 		 *  arg7: close method
 		 */
 
-		mb.push(resultSetNumber);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getResultSetNumber());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUnionResultSet",
                 ClassName.NoPutResultSet, 5);
@@ -695,20 +695,22 @@ class UnionNode extends SetOperatorNode
 		throws StandardException
 	{
 		// If we already found it, just return it.
-		if (finalCostEstimate != null)
-			return finalCostEstimate;
+		if (getCandidateFinalCostEstimate() != null)
+        {
+			return getCandidateFinalCostEstimate();
+        }
 
 		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
 		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
 
-		finalCostEstimate = getNewCostEstimate();
-		finalCostEstimate.setCost(leftCE.getEstimatedCost(),
+		setCandidateFinalCostEstimate( getNewCostEstimate() );
+		getCandidateFinalCostEstimate().setCost(leftCE.getEstimatedCost(),
 							 leftCE.rowCount(),
 							 leftCE.singleScanRowCount() +
 							 rightCE.singleScanRowCount());
 
-		finalCostEstimate.add(rightCE, finalCostEstimate);
-		return finalCostEstimate;
+		getCandidateFinalCostEstimate().add(rightCE, getCandidateFinalCostEstimate());
+		return getCandidateFinalCostEstimate();
 	}
 
     String getOperatorName()

@@ -469,7 +469,7 @@ class HalfOuterJoinNode extends JoinNode
                 rightResultSet = RChild;
 
                 // rebuild the result columns and re-bind column references
-                ((HalfOuterJoinNode)leftResultSet).resultColumns = null;
+                ((HalfOuterJoinNode)leftResultSet).setResultColumns( null );
                  // localFromList is empty:
                 ((JoinNode)leftResultSet).bindResultColumns(localFromList);
 
@@ -619,7 +619,7 @@ private boolean isNullRejecting (
 	{
 		if (anyChange)
 		{
-			this.resultColumns = null;
+			setResultColumns( null );
             FromList localFromList = new FromList(
                     getOptimizerFactory().doJoinOrderOptimization(),
                     getContextManager());
@@ -722,7 +722,7 @@ private boolean isNullRejecting (
 												rightResultSet,
 												joinClause,
 												null,
-												resultColumns,
+												getResultColumns(),
 												null,
 												null,
 												getContextManager());

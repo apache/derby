@@ -79,7 +79,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         ** nodes above it now point to us).  Map our RCL to its columns.
         */
         newBottomRCL = childResult.getResultColumns().copyListAndObjects();
-        resultColumns = childResult.getResultColumns();
+        setResultColumns( childResult.getResultColumns() );
         childResult.setResultColumns(newBottomRCL);
 
         // Wrao purselved int a project/restrict as per convention.
@@ -102,7 +102,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         */
         ResultColumnList rclNew = new ResultColumnList(getContextManager());
 
-        for (ResultColumn rc : resultColumns)
+        for (ResultColumn rc : getResultColumns())
         {
             if (!rc.isGenerated()) {
                 rclNew.addElement(rc);
@@ -112,7 +112,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         // if any columns in the source RCL were generated for an order by
         // remember it in the new RCL as well. After the sort is done it will
         // have to be projected out upstream.
-        rclNew.copyOrderBySelect(resultColumns);
+        rclNew.copyOrderBySelect(getResultColumns());
 
         parent = new ProjectRestrictNode(this, // child
                                          rclNew,
@@ -132,7 +132,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         /*
          * Set the Windowing RCL to be empty
          */
-        resultColumns = new ResultColumnList(getContextManager());
+        setResultColumns( new ResultColumnList(getContextManager()) );
 
 
         // Add all referenced columns in select list to windowing node's RCL
@@ -165,7 +165,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         uniqueCols.addAll(getVCVisitor.getList());
 
         ResultColumnList bottomRCL  = childResult.getResultColumns();
-        ResultColumnList windowingRCL = resultColumns;
+        ResultColumnList windowingRCL = getResultColumns();
 
         for (int i= 0; i< uniqueCols.size(); i++) {
             ValueNode crOrVcn = uniqueCols.get(i);
@@ -237,7 +237,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
          * each RC as we process its corresponding window function.
          */
         ResultColumnList bottomRCL  = childResult.getResultColumns();
-        ResultColumnList windowingRCL = resultColumns;
+        ResultColumnList windowingRCL = getResultColumns();
 
         ReplaceWindowFuncCallsWithCRVisitor replaceCallsVisitor =
             new ReplaceWindowFuncCallsWithCRVisitor(
@@ -321,12 +321,12 @@ class WindowResultSetNode extends SingleChildResultSetNode
         assignResultSetNumber();
 
         // Get the final cost estimate from the child.
-        costEstimate = childResult.getFinalCostEstimate();
+        setCostEstimate( childResult.getFinalCostEstimate() );
 
 
         acb.pushGetResultSetFactoryExpression(mb);
 
-        int rclSize = resultColumns.size();
+        int rclSize = getResultColumns().size();
         FormatableBitSet referencedCols = new FormatableBitSet(rclSize);
 
         /*
@@ -334,7 +334,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
          */
 
         for (int index = rclSize-1; index >= 0; index--) {
-            ResultColumn rc = resultColumns.elementAt(index);
+            ResultColumn rc = getResultColumns().elementAt(index);
             ValueNode expr = rc.getExpression();
 
             if (rc.isGenerated() &&
@@ -356,9 +356,9 @@ class WindowResultSetNode extends SingleChildResultSetNode
         mb.upCast(ClassName.NoPutResultSet);
 
         /* row allocator */
-        mb.push(acb.addItem(resultColumns.buildRowTemplate())); // arg 3
+        mb.push(acb.addItem(getResultColumns().buildRowTemplate())); // arg 3
 
-        mb.push(resultSetNumber); //arg 4
+        mb.push(getResultSetNumber()); //arg 4
 
         /* Pass in the erdNumber for the referenced column FormatableBitSet */
         mb.push(erdNumber); // arg 5
@@ -366,8 +366,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
         /* There is no restriction at this level, we just want to pass null. */
         mb.pushNull(ClassName.GeneratedMethod); // arg 6
 
-        mb.push(costEstimate.rowCount()); //arg 7
-        mb.push(costEstimate.getEstimatedCost()); // arg 8
+        mb.push(getCostEstimate().rowCount()); //arg 7
+        mb.push(getCostEstimate().getEstimatedCost()); // arg 8
 
         mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
             "getWindowResultSet", ClassName.NoPutResultSet, 8);

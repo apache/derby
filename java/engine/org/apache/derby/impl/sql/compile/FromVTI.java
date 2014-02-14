@@ -182,7 +182,7 @@ class FromVTI extends FromTable implements VTIEnvironment
             TableName exposedTableName) {
 
         this.methodCall = invocation;
-        this.resultColumns = derivedRCL;
+        setResultColumns( derivedRCL );
         this.subqueryList = new SubqueryList(getContextManager());
 
         // Cache exposed name for this table.
@@ -207,7 +207,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 				RowOrdering rowOrdering)
 			throws StandardException
 	{
-		costEstimate = getCostEstimate(optimizer);
+		setCostEstimate( getCostEstimate(optimizer) );
 
 		/* Cost the VTI if it implements VTICosting.
 		 * Otherwise we use the defaults.
@@ -238,7 +238,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 			vtiCosted = true;
 		}
 
-		costEstimate.setCost(estimatedCost, estimatedRowCount, estimatedRowCount);
+		getCostEstimate().setCost(estimatedCost, estimatedRowCount, estimatedRowCount);
 
 		/*
 		** Let the join strategy decide whether the cost of the base
@@ -256,19 +256,19 @@ class FromVTI extends FromTable implements VTIEnvironment
 				getJoinStrategy().
 					multiplyBaseCostByOuterRows())
 		{
-			costEstimate.multiply(outerCost.rowCount(), costEstimate);
+			getCostEstimate().multiply(outerCost.rowCount(), getCostEstimate());
 		}
 
 		if ( ! optimized)
 		{
 			subqueryList.optimize(optimizer.getDataDictionary(),
-									costEstimate.rowCount());
+                                  getCostEstimate().rowCount());
 			subqueryList.modifyAccessPaths();
 		}
 
 		optimized = true;
 
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/**
@@ -537,7 +537,7 @@ class FromVTI extends FromTable implements VTIEnvironment
     ResultSetNode bindVTITables(FromList fromListParam)
 							throws StandardException
 	{
-		ResultColumnList	derivedRCL = resultColumns;
+		ResultColumnList	derivedRCL = getResultColumns();
 
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 
@@ -630,7 +630,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		if ((isConstructor()) && ((triggerTableId = getSpecialTriggerVTITableName(lcc, methodCall.getJavaClassName())) != null)  )
 		{
 			TableDescriptor td = getDataDictionary().getTableDescriptor(triggerTableId);
-			resultColumns = genResultColList(td);
+			setResultColumns( genResultColList(td) );
 
 			// costing info
 			vtiCosted = true;
@@ -640,7 +640,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		}
 		else
 		{	
-            resultColumns = new ResultColumnList((getContextManager()));
+            setResultColumns( new ResultColumnList((getContextManager())) );
 
 			// if this is a Derby-style Table Function, then build the result
 			// column list from the RowMultiSetImpl return datatype
@@ -672,16 +672,16 @@ class FromVTI extends FromTable implements VTIEnvironment
 				numVTICols = 0;
 			    }
 
-			    resultColumns.createListFromResultSetMetaData(rsmd, exposedName, 
+			    getResultColumns().createListFromResultSetMetaData(rsmd, exposedName, 
 														  getVTIName() );
 			}
 		}
-		numVTICols = resultColumns.size();
+		numVTICols = getResultColumns().size();
 	
 		/* Propagate the name info from the derived column list */
 		if (derivedRCL != null)
 		{
-			 resultColumns.propagateDCLInfo(derivedRCL, correlationName);
+            getResultColumns().propagateDCLInfo(derivedRCL, correlationName);
 		}
 
 		return this;
@@ -1055,7 +1055,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * NOTE: This method will capture any column renaming due to 
 		 * a derived column list.
 		 */
-        for (ResultColumn rc : resultColumns)
+        for (ResultColumn rc : getResultColumns())
 		{
             if (!rc.isGenerated()) {
                 // Build a ResultColumn/ColumnReference pair for the column //
@@ -1092,7 +1092,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		/* We could get called before our RCL is built.  That's okay, we'll
 		 * just say that we don't match. 
 		 */
-		if (resultColumns == null)
+		if (getResultColumns() == null)
 		{
 			return null;
 		}
@@ -1109,7 +1109,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		*/
 		if (columnsTableName == null || columnsTableName.equals(exposedName))
 		{
-			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
+			resultColumn = getResultColumns().getResultColumn(columnReference.getColumnName());
 			/* Did we find a match? */
 			if (resultColumn != null)
 			{
@@ -1156,8 +1156,8 @@ class FromVTI extends FromTable implements VTIEnvironment
             new PredicateList(getContextManager()));
 
 		/* Generate the referenced table map */
-		referencedTableMap = new JBitSet(numTables);
-		referencedTableMap.set(tableNumber);
+		setReferencedTableMap( new JBitSet(numTables) );
+		getReferencedTableMap().set(tableNumber);
 
 		/* Create the dependency map.  This FromVTI depends on any
 		 * tables which are referenced by the method call.  Note,
@@ -1217,8 +1217,8 @@ class FromVTI extends FromTable implements VTIEnvironment
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = resultColumns;
-		resultColumns = resultColumns.copyListAndObjects();
+		prRCList = getResultColumns();
+		setResultColumns( getResultColumns().copyListAndObjects() );
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the ProjectRestrictNode's ResultColumnList.  (VirtualColumnNodes include
@@ -1226,7 +1226,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		 * NOTE: We don't want to mark the underlying RCs as referenced, otherwise
 		 * we won't be able to project out any of them.
 		 */
-		prRCList.genVirtualColumnNodes(this, resultColumns, false);
+		prRCList.genVirtualColumnNodes(this, getResultColumns(), false);
 
 		/* Project out any unreferenced columns.  If there are no referenced 
 		 * columns, generate and bind a single ResultColumn whose expression is 1.
@@ -1625,17 +1625,17 @@ class FromVTI extends FromTable implements VTIEnvironment
 										  MethodBuilder mb)
 		throws StandardException
 	{
-		int				rclSize = resultColumns.size();
+		int				rclSize = getResultColumns().size();
 		FormatableBitSet			referencedCols = new FormatableBitSet(rclSize);
 		int				erdNumber = -1;
 		int				numSet = 0;
 
 		// Get our final cost estimate.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		for (int index = 0; index < rclSize; index++)
 		{
-            ResultColumn rc = resultColumns.elementAt(index);
+            ResultColumn rc = getResultColumns().elementAt(index);
 			if (rc.isReferenced())
 			{
 				referencedCols.set(index);
@@ -1661,7 +1661,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 		acb.pushThisAsActivation(mb); // arg 1
 
         // Get a row builder to allocate scan rows of the right shape and size.
-        mb.push(acb.addItem(resultColumns.buildRowTemplate())); // arg 2
+        mb.push(acb.addItem(getResultColumns().buildRowTemplate())); // arg 2
 
 		// For a Version 2 VTI we never maintain the java.sql.PreparedStatement
 		// from compile time to execute time. This would rquire the PreparedStatement
@@ -1680,7 +1680,7 @@ class FromVTI extends FromTable implements VTIEnvironment
 
 
 
-		mb.push(resultSetNumber); // arg 3
+		mb.push(getResultSetNumber()); // arg 3
 
 		// The generated method for the constructor
 		generateConstructor(acb, mb, reuseablePs); // arg 4
@@ -1711,10 +1711,10 @@ class FromVTI extends FromTable implements VTIEnvironment
 		mb.push(getCompilerContext().getScanIsolationLevel());
 
 		// estimated row count
-		mb.push(costEstimate.rowCount());
+		mb.push(getCostEstimate().rowCount());
 
 		// estimated cost
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		// Whether or not this is a Derby-style Table Function
 		mb.push(isDerbyStyleTableFunction);
@@ -1979,7 +1979,7 @@ class FromVTI extends FromTable implements VTIEnvironment
         {
             String          columnName = columnNames[ i ];
             DataTypeDescriptor  dtd = DataTypeDescriptor.getType(types[i]);
-            ResultColumn    rc = resultColumns.addColumn
+            ResultColumn    rc = getResultColumns().addColumn
                 ( exposedName, columnName, dtd );
 
             //

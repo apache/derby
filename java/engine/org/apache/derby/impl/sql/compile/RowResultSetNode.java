@@ -68,10 +68,10 @@ class RowResultSetNode extends FromTable
                      Properties tableProperties,
                      ContextManager cm) {
         super(null /* correlationName */, tableProperties, cm);
-        resultColumns = valuesClause;
+        setResultColumns( valuesClause );
 
-        if (resultColumns != null) {
-			resultColumns.markInitialSize();
+        if (getResultColumns() != null) {
+			getResultColumns().markInitialSize();
         }
 	}
 
@@ -116,8 +116,8 @@ class RowResultSetNode extends FromTable
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
 	{
-		if (!inOrder || resultColumns.size() < target.resultColumnList.size()) {
-			resultColumns = getRCLForInsert(target, colMap);
+		if (!inOrder || getResultColumns().size() < target.resultColumnList.size()) {
+			setResultColumns( getRCLForInsert(target, colMap) );
 		}
 		return this;
 	}
@@ -144,17 +144,17 @@ class RowResultSetNode extends FromTable
 		** fetched.  Is this true, and if not, does it make a difference?
 		** There's nothing to optimize in this case.
 		*/
-		if (costEstimate == null)
+		if (getCostEstimate() == null)
 		{
-			costEstimate = getOptimizerFactory().getCostEstimate();
+			setCostEstimate( getOptimizerFactory().getCostEstimate() );
 		}
 
-		costEstimate.setCost(0.0d, 1.0d, 1.0d);
+		getCostEstimate().setCost(0.0d, 1.0d, 1.0d);
 
 		/* A single row is always ordered */
 		rowOrdering.optimizableAlwaysOrdered(this);
 
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/**
@@ -205,7 +205,7 @@ class RowResultSetNode extends FromTable
 		 *		VALUES DEFAULT;
 		 * so we need to check for that here and throw an exception if found.
 		 */
-		resultColumns.checkForInvalidDefaults();
+		getResultColumns().checkForInvalidDefaults();
 
 		/* Believe it or not, a values clause can contain correlated column references
 		 * and subqueries.  In order to get correlated column resolution working 
@@ -224,7 +224,7 @@ class RowResultSetNode extends FromTable
 		}
 		setLevel(nestingLevel);
 		fromListParam.insertElementAt(this, 0);
-		resultColumns.bindExpressions(fromListParam, subquerys,
+		getResultColumns().bindExpressions(fromListParam, subquerys,
                                       aggregates);
 		// Pop ourselves back out of the FROM list
 		fromListParam.removeElementAt(0);
@@ -234,7 +234,7 @@ class RowResultSetNode extends FromTable
 			throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 		}
 
-		SelectNode.checkNoWindowFunctions(resultColumns, "VALUES");
+		SelectNode.checkNoWindowFunctions(getResultColumns(), "VALUES");
 
         for (int i = 0; i < qec.size(); i++) {
             final OrderByList obl = qec.getOrderByList(i);
@@ -301,9 +301,9 @@ class RowResultSetNode extends FromTable
 		** in our RCL.
 		*/
 		if (bindingRCL == null)
-			bindingRCL = resultColumns;
+			bindingRCL = getResultColumns();
 
-		resultColumns.bindUntypedNullsToResultColumns(bindingRCL);
+		getResultColumns().bindUntypedNullsToResultColumns(bindingRCL);
 	}
 
 	/**
@@ -433,8 +433,8 @@ class RowResultSetNode extends FromTable
 		}
 
 		/* Allocate a dummy referenced table map */ 
-		referencedTableMap = new JBitSet(numTables);
-		referencedTableMap.set(tableNumber);
+		setReferencedTableMap( new JBitSet(numTables) );
+		getReferencedTableMap().set(tableNumber);
 
         // If we have more than 1 ORDERBY columns, we may be able to
         // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
@@ -495,14 +495,14 @@ class RowResultSetNode extends FromTable
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = resultColumns;
-		resultColumns = resultColumns.copyListAndObjects();
+		prRCList = getResultColumns();
+		setResultColumns( getResultColumns().copyListAndObjects() );
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the ProjectRestrictNode's ResultColumnList.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-		prRCList.genVirtualColumnNodes(this, resultColumns);
+		prRCList.genVirtualColumnNodes(this, getResultColumns());
 
 		/* Put the new predicate in a list */
         predList = new PredicateList(getContextManager());
@@ -552,7 +552,7 @@ class RowResultSetNode extends FromTable
 		** Don't flatten if select list contains something
 		** that isn't clonable
 		*/
-		if ( ! resultColumns.isCloneable())
+		if ( ! getResultColumns().isCloneable())
 		{
 			return false;
 		}
@@ -605,10 +605,10 @@ class RowResultSetNode extends FromTable
 		** CostEstimate object, so we can represent the cost of this node.
 		** This seems like overkill, but it's just an object allocation...
 		*/
-        costEstimate = getOptimizerFactory().getCostEstimate();
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
 
 		// RESOLVE: THE COST SHOULD TAKE SUBQUERIES INTO ACCOUNT
-		costEstimate.setCost(0.0d, outerRows, outerRows);
+		getCostEstimate().setCost(0.0d, outerRows, outerRows);
 
 		subquerys.optimize(dataDictionary, outerRows);
 		return this;
@@ -700,14 +700,14 @@ class RowResultSetNode extends FromTable
 			throws StandardException
 	{
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(resultColumns.visibleSize() <= typeColumns.size(),
+			SanityManager.ASSERT(getResultColumns().visibleSize() <= typeColumns.size(),
 				"More columns in ResultColumnList than in base table");
 
 		/* Look for ? parameters in the result column list */
-		int rclSize = resultColumns.size();
+		int rclSize = getResultColumns().size();
 		for (int index = 0; index < rclSize; index++)
 		{
-            ResultColumn rc = resultColumns.elementAt(index);
+            ResultColumn rc = getResultColumns().elementAt(index);
 			ValueNode re = rc.getExpression();
 
 			if (re.requiresTypeFromContext())
@@ -845,10 +845,10 @@ class RowResultSetNode extends FromTable
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
 		// Get our final cost estimate.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		/*
 		** Check and see if everything below us is a constant or not.
@@ -881,11 +881,11 @@ class RowResultSetNode extends FromTable
 		acb.pushGetResultSetFactoryExpression(mb);
 
 		acb.pushThisAsActivation(mb);
-		resultColumns.generate(acb, mb);
+		getResultColumns().generate(acb, mb);
 		mb.push(canCache);
-		mb.push(resultSetNumber);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getResultSetNumber());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getRowResultSet",
                 ClassName.NoPutResultSet, 6);
 	}
@@ -899,7 +899,7 @@ class RowResultSetNode extends FromTable
                                  boolean allowDefaults)
 		throws StandardException
 	{
-		resultColumns.replaceOrForbidDefaults(ttd, tcl, allowDefaults);
+		getResultColumns().replaceOrForbidDefaults(ttd, tcl, allowDefaults);
 	}
 
 	/**

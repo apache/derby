@@ -212,7 +212,7 @@ class DeleteNode extends DMLModStatementNode
 			/* Generate a select list for the ResultSetNode - CurrentRowLocation(). */
 			if ( SanityManager.DEBUG )
             {
-				SanityManager.ASSERT((resultSet.resultColumns == null),
+				SanityManager.ASSERT((resultSet.getResultColumns() == null),
 							  "resultColumns is expected to be null until bind time");
             }
 
@@ -279,7 +279,7 @@ class DeleteNode extends DMLModStatementNode
 				correlateAddedColumns( resultColumnList, targetTable );
 			
                 /* Add the new result columns to the driving result set */
-                ResultColumnList    originalRCL = resultSet.resultColumns;
+                ResultColumnList    originalRCL = resultSet.getResultColumns();
                 if ( originalRCL != null )
                 {
                     originalRCL.appendResultColumns( resultColumnList, false );

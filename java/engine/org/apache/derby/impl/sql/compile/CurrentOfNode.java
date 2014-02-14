@@ -225,7 +225,7 @@ public final class CurrentOfNode extends FromTable {
 		** the result columns from preparedStatement and
 		** turn them into an RCL that we can run with.
 		*/
-        resultColumns = new ResultColumnList(getContextManager());
+        setResultColumns( new ResultColumnList(getContextManager()) );
 		ColumnDescriptorList cdl = td.getColumnDescriptorList();
 		int					 cdlSize = cdl.size();
 
@@ -243,7 +243,7 @@ public final class CurrentOfNode extends FromTable {
                 colDesc, bcn, getContextManager());
 
 			/* Build the ResultColumnList to return */
-			resultColumns.addResultColumn(rc);
+			getResultColumns().addResultColumn(rc);
 		}
 
 		/* Assign the tableNumber */
@@ -336,7 +336,7 @@ public final class CurrentOfNode extends FromTable {
             boolean notfound;
 
 			resultColumn =
-				resultColumns.getResultColumn(columnReference.getColumnName());
+				getResultColumns().getResultColumn(columnReference.getColumnName());
 
 			if (resultColumn != null) 
 			{
@@ -394,7 +394,7 @@ public final class CurrentOfNode extends FromTable {
 								throws StandardException
 	{
 		/* Generate an empty referenced table map */
-		referencedTableMap = new JBitSet(numTables);
+		setReferencedTableMap( new JBitSet(numTables) );
 		return this;
 	}
 
@@ -443,7 +443,7 @@ public final class CurrentOfNode extends FromTable {
 							throws StandardException {
 
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(!statementResultSet, 
+            SanityManager.ASSERT(!isStatementResultSet(), 
 			"CurrentOfNode not expected to be statement node");
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
@@ -461,7 +461,7 @@ public final class CurrentOfNode extends FromTable {
 
 		  mb.push(cursorName);
 		  acb.pushThisAsActivation(mb);
-		  mb.push(resultSetNumber);
+		  mb.push(getResultSetNumber());
 		
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getCurrentOfResultSet",
 						ClassName.NoPutResultSet, 3);

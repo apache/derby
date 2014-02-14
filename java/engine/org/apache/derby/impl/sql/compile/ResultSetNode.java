@@ -60,22 +60,22 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class ResultSetNode extends QueryTreeNode
 {
-	int					resultSetNumber;
+	private int					resultSetNumber;
 	/* Bit map of referenced tables under this ResultSetNode */
-	JBitSet				referencedTableMap;
-	ResultColumnList	resultColumns;
-	boolean				statementResultSet;
-	boolean				cursorTargetTable;
-	boolean				insertSource;
+	private JBitSet				referencedTableMap;
+	private ResultColumnList	resultColumns;
+	private boolean				statementResultSet;
+	private boolean				cursorTargetTable;
+	private boolean				insertSource;
 
-	CostEstimate 		costEstimate;
-	CostEstimate		scratchCostEstimate;
-	Optimizer			optimizer;
+	private CostEstimate 		costEstimate;
+	private CostEstimate		scratchCostEstimate;
+	private Optimizer			optimizer;
 
 	// Final cost estimate for this result set node, which is the estimate
 	// for this node with respect to the best join order for the top-level
 	// query. Subclasses will set this value where appropriate.
-	CostEstimate		finalCostEstimate;
+	private CostEstimate		candidateFinalCostEstimate;
 
     ResultSetNode(ContextManager cm) {
         super(cm);
@@ -127,17 +127,35 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 	}
 
+    /** Return true if this is a statement result set */
+    boolean isStatementResultSet() { return statementResultSet; }
+
+    /** Return true if this is a cursor target table */
+    boolean isCursorTargetTable() { return cursorTargetTable; }
+
+    /** Set whether this is a cursor target table */
+    void    setCursorTargetTable( boolean yesOrNo ) { cursorTargetTable = yesOrNo; }
+
+    /** Get the scratch estimate */
+    CostEstimate    getScratchCostEstimate() { return scratchCostEstimate; }
+
+    /** Set the scratch estimate */
+    void    setScratchCostEstimate( CostEstimate ce ) { scratchCostEstimate = ce; }
+
 	/**
 	 * Get the resultSetNumber in this ResultSetNode. Expected to be set during
-	 * generate().
+	 * generate(). Must be public in order to satisfy the Optimizable contract.
 	 *
 	 * @return int 	The resultSetNumber.
 	 */
 
-	public int getResultSetNumber()
+    public  int getResultSetNumber()
 	{
 		return resultSetNumber;
 	}
+    
+    void    setResultSetNumber( int rsn ) { resultSetNumber = rsn; }
+    
 
 	/**
 	 * Get the CostEstimate for this ResultSetNode.
@@ -146,17 +164,11 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 */
     CostEstimate getCostEstimate()
 	{
-		if (SanityManager.DEBUG)
-		{
-			if (costEstimate == null)
-			{
-				SanityManager.THROWASSERT(
-					"costEstimate is not expected to be null for " +
-					getClass().getName());
-			}
-		}
 		return costEstimate;
 	}
+
+    /** Set the CostEstimate for this ResultSetNode */
+    void    setCostEstimate( CostEstimate ce ) { costEstimate = ce; }
 
 	/**
 	 * Get the final CostEstimate for this ResultSetNode.
@@ -168,15 +180,21 @@ public abstract class ResultSetNode extends QueryTreeNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			if (finalCostEstimate == null)
+			if (candidateFinalCostEstimate == null)
 			{
 				SanityManager.THROWASSERT(
-					"finalCostEstimate is not expected to be null for " +
+					"candidateFinalCostEstimate is not expected to be null for " +
 					getClass().getName());
 			}
 		}
-		return finalCostEstimate;
+		return candidateFinalCostEstimate;
 	}
+
+    /** Get the final cost estimate which we've set so far */
+    CostEstimate    getCandidateFinalCostEstimate() { return candidateFinalCostEstimate; }
+
+    /** Set the final cost estimate */
+    void    setCandidateFinalCostEstimate( CostEstimate ce ) { candidateFinalCostEstimate = ce; }
 
 	/**
 	 * Assign the next resultSetNumber to the resultSetNumber in this ResultSetNode. 
@@ -315,6 +333,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 		insertSource = true;
 	}
 
+    /** Return true if this is the source result set for an INSERT */
+    boolean isInsertSource() { return insertSource; }
+    
 	/**
 	 * Verify that a SELECT * is valid for this type of subquery.
 	 *
@@ -797,7 +818,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Get the referencedTableMap for this ResultSetNode
+	 * Get the referencedTableMap for this ResultSetNode. Must be public
+     * in order to satisfy the Optimizable contract.
 	 *
 	 * @return JBitSet	Referenced table map for this ResultSetNode
 	 */
@@ -1496,6 +1518,12 @@ public abstract class ResultSetNode extends QueryTreeNode
 		// Ex. see TableOperatorNode.addOrLoadBestPlanMapping().
 		return (OptimizerImpl)optimizer;
 	}
+
+    /** Get the optimizer being used on this result set */
+    Optimizer   getOptimizer()  { return optimizer; }
+
+    /** Set the optimizer for use on this result set */
+    void    setOptimizer( Optimizer opt ) { optimizer = opt; }
 
 	/**
 	 * Get a cost estimate to use for this ResultSetNode.

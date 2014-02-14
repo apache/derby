@@ -633,9 +633,9 @@ abstract class TableOperatorNode extends FromTable
 		}
 
 		/* Build the referenced table map (left || right) */
-		referencedTableMap = (JBitSet) leftResultSet.getReferencedTableMap().clone();
-        referencedTableMap.or(rightResultSet.getReferencedTableMap());
-		referencedTableMap.set(tableNumber);
+		setReferencedTableMap( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
+        getReferencedTableMap().or(rightResultSet.getReferencedTableMap());
+		getReferencedTableMap().set(tableNumber);
 
 		/* Only generate a PRN if this node is not a flattenable join node. */
 		if (isFlattenableJoinNode())
@@ -662,7 +662,7 @@ abstract class TableOperatorNode extends FromTable
     @Override
     void projectResultColumns() throws StandardException
     {
-        resultColumns.doProjection();
+        getResultColumns().doProjection();
     }
     
     /**
@@ -687,7 +687,7 @@ abstract class TableOperatorNode extends FromTable
 								  double outerRows)
 				throws StandardException
 	{
-        costEstimate = getOptimizerFactory().getCostEstimate();
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
 
 		/* RESOLVE: This is just a stub for now */
 		leftResultSet = leftResultSet.optimize(
@@ -700,12 +700,12 @@ abstract class TableOperatorNode extends FromTable
 											outerRows);
 
 		/* The cost is the sum of the two child costs */
-		costEstimate.setCost(leftResultSet.getCostEstimate().getEstimatedCost(),
+		getCostEstimate().setCost(leftResultSet.getCostEstimate().getEstimatedCost(),
 							 leftResultSet.getCostEstimate().rowCount(),
 							 leftResultSet.getCostEstimate().singleScanRowCount() +
 							 rightResultSet.getCostEstimate().singleScanRowCount());
 
-		costEstimate.add(rightResultSet.costEstimate, costEstimate);
+		getCostEstimate().add(rightResultSet.getCostEstimate(), getCostEstimate());
 
 		return this;
 	}

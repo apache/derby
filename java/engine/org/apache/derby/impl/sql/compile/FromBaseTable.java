@@ -212,9 +212,9 @@ class FromBaseTable extends FromTable
     {
         super(correlationName, tableProperties, cm);
         this.tableName = tableName;
-        resultColumns = derivedRCL;
+        setResultColumns( derivedRCL );
         setOrigTableName(this.tableName);
-        templateColumns = resultColumns;
+        templateColumns = getResultColumns();
     }
 
     /**
@@ -235,9 +235,9 @@ class FromBaseTable extends FromTable
         super(correlationName, null, cm);
         this.tableName = tableName;
         this.updateOrDelete = updateOrDelete;
-        resultColumns = derivedRCL;
+        setResultColumns( derivedRCL );
 		setOrigTableName(this.tableName);
-		templateColumns = resultColumns;
+		templateColumns = getResultColumns();
 	}
 
     /** Set the name of the row location column */
@@ -619,7 +619,7 @@ class FromBaseTable extends FromTable
 		baseCols = irg.baseColumnPositions();
 
 		/* First we check to see if this is a covering index */
-        for (ResultColumn rc : resultColumns)
+        for (ResultColumn rc : getResultColumns())
 		{
 			/* Ignore unreferenced columns */
 			if (! rc.isReferenced())
@@ -2091,7 +2091,7 @@ class FromBaseTable extends FromTable
 		 * or it is (or was) the target table of an
 		 * updatable cursor.
 		 */
-		return (updateOrDelete != 0) || cursorTargetTable || getUpdateLocks;
+		return (updateOrDelete != 0) || isCursorTargetTable() || getUpdateLocks;
 	}
 
 	/** @see org.apache.derby.iapi.sql.compile.Optimizable#initialCapacity */
@@ -2312,13 +2312,13 @@ class FromBaseTable extends FromTable
 			ResultSetNode vtiNode = mapTableAsVTI(
                     tabDescr,
 					getCorrelationName(),
-					resultColumns,
+					getResultColumns(),
 					getProperties(),
 					getContextManager());
 			return vtiNode.bindNonVTITables(dataDictionary, fromListParam);
 		}	
 		
-		ResultColumnList	derivedRCL = resultColumns;
+		ResultColumnList	derivedRCL = getResultColumns();
   
 		// make sure there's a restriction list
         restrictionList = new PredicateList(getContextManager());
@@ -2328,8 +2328,8 @@ class FromBaseTable extends FromTable
 		CompilerContext compilerContext = getCompilerContext();
 
 		/* Generate the ResultColumnList */
-		resultColumns = genResultColList();
-		templateColumns = resultColumns;
+		setResultColumns( genResultColList() );
+		templateColumns = getResultColumns();
 
 		/* Resolve the view, if this is a view */
         if (tabDescr.getTableType() == TableDescriptor.VIEW_TYPE)
@@ -2374,7 +2374,7 @@ class FromBaseTable extends FromTable
 				 */
 				if (rsn.getResultColumns().containsAllResultColumn())
 				{
-					resultColumns.setCountMismatchAllowed(true);
+					getResultColumns().setCountMismatchAllowed(true);
 				}
 				//Views execute with definer's privileges and if any one of 
 				//those privileges' are revoked from the definer, the view gets
@@ -2386,7 +2386,7 @@ class FromBaseTable extends FromTable
 				//sql accessing a view, we only need to look for select privilege
 				//on the actual view and that is what the following code is
 				//checking.
-                for (ResultColumn rc : resultColumns) {
+                for (ResultColumn rc : getResultColumns()) {
                     if (isPrivilegeCollectionRequired()) {
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
                     }
@@ -2400,7 +2400,7 @@ class FromBaseTable extends FromTable
                     cvn.hasJDBClimitClause(),
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
-					resultColumns,
+					getResultColumns(),
 					tableProperties,
 					getContextManager());
 				// Transfer the nesting level to the new FromSubquery
@@ -2464,14 +2464,14 @@ class FromBaseTable extends FromTable
             }
 
 			/* Build the 0-based array of base column names. */
-			columnNames = resultColumns.getColumnNames();
+			columnNames = getResultColumns().getColumnNames();
 
 			/* Do error checking on derived column list and update "exposed"
 			 * column names if valid.
 			 */
 			if (derivedRCL != null)
 			{
-				 resultColumns.propagateDCLInfo(derivedRCL, 
+                getResultColumns().propagateDCLInfo(derivedRCL, 
 											    origTableName.getFullTableName());
 			}
 
@@ -2790,13 +2790,13 @@ class FromBaseTable extends FromTable
             //         sys.systables systabs
             //     where systabs.tabletype = 'T' and systabs.tableid = tt.tableid;
             //
-            if ( resultColumns == null )
+            if ( getResultColumns() == null )
             {
                 throw StandardException.newException
                     ( SQLState.LANG_BAD_TABLE_FUNCTION_PARAM_REF, columnReference.getColumnName() );
             }
             
-			resultColumn = resultColumns.getResultColumn(columnReference.getColumnName());
+			resultColumn = getResultColumns().getResultColumn(columnReference.getColumnName());
             /* Did we find a match? */
 			if (resultColumn != null)
 			{
@@ -2876,7 +2876,7 @@ class FromBaseTable extends FromTable
         {
             int passwordColNum = SYSUSERSRowFactory.PASSWORD_COL_NUM;
 
-            FormatableBitSet    refCols = resultColumns.getReferencedFormatableBitSet( false, true, false );
+            FormatableBitSet    refCols = getResultColumns().getReferencedFormatableBitSet( false, true, false );
 
             if (
                 (refCols.getLength() >= passwordColNum ) && refCols.isSet( passwordColNum - 1 )
@@ -2888,8 +2888,8 @@ class FromBaseTable extends FromTable
         }
         
         /* Generate the referenced table map */
-		referencedTableMap = new JBitSet(numTables);
-		referencedTableMap.set(tableNumber);
+		setReferencedTableMap( new JBitSet(numTables) );
+		getReferencedTableMap().set(tableNumber);
 
         return genProjectRestrict(numTables);
 	}
@@ -2924,9 +2924,9 @@ class FromBaseTable extends FromTable
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		ResultColumnList prRCList = resultColumns;
-		resultColumns = resultColumns.copyListAndObjects();
-		resultColumns.setIndexRow( baseConglomerateDescriptor.getConglomerateNumber(), forUpdate() );
+		ResultColumnList prRCList = getResultColumns();
+		setResultColumns( getResultColumns().copyListAndObjects() );
+		getResultColumns().setIndexRow( baseConglomerateDescriptor.getConglomerateNumber(), forUpdate() );
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the ProjectRestrictNode's ResultColumnList.  (VirtualColumnNodes include
@@ -2934,7 +2934,7 @@ class FromBaseTable extends FromTable
 		 * NOTE: We don't want to mark the underlying RCs as referenced, otherwise
 		 * we won't be able to project out any of them.
 		 */
-		prRCList.genVirtualColumnNodes(this, resultColumns, false);
+		prRCList.genVirtualColumnNodes(this, getResultColumns(), false);
 
 		/* Project out any unreferenced columns.  If there are no referenced 
 		 * columns, generate and bind a single ResultColumn whose expression is 1.
@@ -3096,27 +3096,33 @@ class FromBaseTable extends FromTable
 			/* Template must reflect full row.
 			 * Compact RCL down to partial row.
 			 */
-			templateColumns = resultColumns;
-			referencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, isSysstatements, false);
-			resultColumns = resultColumns.compactColumns(cursorTargetTable, isSysstatements);
+			templateColumns = getResultColumns();
+			referencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), isSysstatements, false);
+			setResultColumns( getResultColumns().compactColumns(isCursorTargetTable(), isSysstatements) );
 			return this;
 		}
 		
 		/* No need to go to the data page if this is a covering index */
 		/* Derby-1087: use data page when returning an updatable resultset */
-		if (ap.getCoveringIndexScan() && (!cursorTargetTable()))
+		if (ap.getCoveringIndexScan() && (!isCursorTargetTable()))
 		{
 			/* Massage resultColumns so that it matches the index. */
-			resultColumns = newResultColumns(resultColumns,
-				 							 trulyTheBestConglomerateDescriptor,
-											 baseConglomerateDescriptor,
-											 false);
+			setResultColumns
+                (
+                 newResultColumns
+                 (
+                  getResultColumns(),
+                  trulyTheBestConglomerateDescriptor,
+                  baseConglomerateDescriptor,
+                  false
+                  )
+                 );
 
 			/* We are going against the index.  The template row must be the full index row.
 			 * The template row will have the RID but the result row will not
 			 * since there is no need to go to the data page.
 			 */
-			templateColumns = newResultColumns(resultColumns,
+			templateColumns = newResultColumns(getResultColumns(),
 				 							 trulyTheBestConglomerateDescriptor,
 											 baseConglomerateDescriptor,
 											 false);
@@ -3125,7 +3131,7 @@ class FromBaseTable extends FromTable
 			// If this is for update then we need to get the RID in the result row
 			if (forUpdate())
 			{
-				resultColumns.addRCForRID();
+				getResultColumns().addRCForRID();
 			}
 			
 			/* Compact RCL down to the partial row.  We always want a new
@@ -3133,10 +3139,10 @@ class FromBaseTable extends FromTable
 			 * because we don't want the RID in the partial row returned
 			 * by the store.)
 			 */
-			referencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable,true, false);
-			resultColumns = resultColumns.compactColumns(cursorTargetTable,true);
+			referencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(),true, false);
+			setResultColumns( getResultColumns().compactColumns(isCursorTargetTable(),true) );
 
-			resultColumns.setIndexRow(
+			getResultColumns().setIndexRow(
 				baseConglomerateDescriptor.getConglomerateNumber(), 
 				forUpdate());
 
@@ -3167,7 +3173,7 @@ class FromBaseTable extends FromTable
 		** a cursor can fetch the current row).
 		*/
 		ResultColumnList newResultColumns =
-			newResultColumns(resultColumns,
+			newResultColumns(getResultColumns(),
 							trulyTheBestConglomerateDescriptor,
 							baseConglomerateDescriptor,
 							true
@@ -3192,8 +3198,8 @@ class FromBaseTable extends FromTable
 			/* No BULK FETCH or requalification, XOR off the columns coming from the heap 
 			 * to get the columns coming from the index.
 			 */
-			indexReferencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, true, false);
-			heapReferencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, true, true);
+			indexReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, false);
+			heapReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, true);
 			if (heapReferencedCols != null)
 			{
 				indexReferencedCols.xor(heapReferencedCols);
@@ -3202,13 +3208,13 @@ class FromBaseTable extends FromTable
 		else
 		{
 			// BULK FETCH or requalification - re-get all referenced columns from the heap
-			heapReferencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, true, false) ;
+			heapReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, false) ;
 		}
-		ResultColumnList heapRCL = resultColumns.compactColumns(cursorTargetTable, false);
+		ResultColumnList heapRCL = getResultColumns().compactColumns(isCursorTargetTable(), false);
         retval = new IndexToBaseRowNode(this,
 										baseConglomerateDescriptor,
 										heapRCL,
-                                        cursorTargetTable,
+                                        isCursorTargetTable(),
 										heapReferencedCols,
 										indexReferencedCols,
 										requalificationRestrictionList,
@@ -3220,9 +3226,9 @@ class FromBaseTable extends FromTable
 		** The template row is all the columns.  The
 		** result set is the compacted column list.
 		*/
-		resultColumns = newResultColumns;
+		setResultColumns( newResultColumns );
 
-		templateColumns = newResultColumns(resultColumns,
+		templateColumns = newResultColumns(getResultColumns(),
 			 							   trulyTheBestConglomerateDescriptor,
 										   baseConglomerateDescriptor,
 										   false);
@@ -3237,28 +3243,28 @@ class FromBaseTable extends FromTable
 		 */
 		if (bulkFetch != UNSET)
 		{
-			resultColumns.markAllUnreferenced();
+			getResultColumns().markAllUnreferenced();
 			storeRestrictionList.markReferencedColumns();
 			if (nonStoreRestrictionList != null)
 			{
 				nonStoreRestrictionList.markReferencedColumns();
 			}
 		}
-		resultColumns.addRCForRID();
+		getResultColumns().addRCForRID();
 		templateColumns.addRCForRID();
 
 		// Compact the RCL for the index scan down to the partial row.
-		referencedCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable, false, false);
-		resultColumns = resultColumns.compactColumns(cursorTargetTable, false);
-		resultColumns.setIndexRow(
+		referencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), false, false);
+		setResultColumns( getResultColumns().compactColumns(isCursorTargetTable(), false) );
+		getResultColumns().setIndexRow(
 				baseConglomerateDescriptor.getConglomerateNumber(), 
 				forUpdate());
 
 		/* We must remember if this was the cursorTargetTable
  		 * in order to get the right locking on the scan.
 		 */
-		getUpdateLocks = cursorTargetTable;
-		cursorTargetTable = false;
+		getUpdateLocks = isCursorTargetTable();
+		setCursorTargetTable( false );
 
 		return retval;
 	}
@@ -3355,7 +3361,7 @@ class FromBaseTable extends FromTable
 	{
         if ( rowLocationColumnName != null )
         {
-            resultColumns.conglomerateId = tableDescriptor.getHeapConglomerateId();
+            getResultColumns().conglomerateId = tableDescriptor.getHeapConglomerateId();
         }
 
 		generateResultSet( acb, mb );
@@ -3364,7 +3370,7 @@ class FromBaseTable extends FromTable
 		** Remember if this base table is the cursor target table, so we can
 		** know which table to use when doing positioned update and delete
 		*/
-		if (cursorTargetTable)
+		if (isCursorTargetTable())
 		{
 			acb.rememberCursorTarget(mb);
 		}
@@ -3530,7 +3536,7 @@ class FromBaseTable extends FromTable
 		acb.pushThisAsActivation(mb);
 		mb.push(getResultSetNumber());
         mb.push(acb.addItem(
-            resultColumns.buildRowTemplate(referencedCols, false)));
+                            getResultColumns().buildRowTemplate(referencedCols, false)));
 		mb.push(cd.getConglomerateNumber());
 		mb.push(tableDescriptor.getName());
 		//User may have supplied optimizer overrides in the sql
@@ -3590,7 +3596,7 @@ class FromBaseTable extends FromTable
 		/* Get the hash key columns and wrap them in a formattable */
         int[] hashKeyCols;
 
-        hashKeyCols = new int[resultColumns.size()];
+        hashKeyCols = new int[getResultColumns().size()];
 		if (referencedCols == null)
 		{
             for (int index = 0; index < hashKeyCols.length; index++)
@@ -3624,7 +3630,7 @@ class FromBaseTable extends FromTable
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
         mb.push(acb.addItem(
-            resultColumns.buildRowTemplate(referencedCols, false)));
+                            getResultColumns().buildRowTemplate(referencedCols, false)));
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
 		mb.push(tableDescriptor.getName());
@@ -3698,7 +3704,7 @@ class FromBaseTable extends FromTable
 	{
         // Put the result row template in the saved objects.
         int resultRowTemplate =
-            acb.addItem(resultColumns.buildRowTemplate(referencedCols, false));
+            acb.addItem(getResultColumns().buildRowTemplate(referencedCols, false));
 
 		// pass in the referenced columns on the saved objects
 		// chain
@@ -3710,7 +3716,7 @@ class FromBaseTable extends FromTable
 
 		// beetle entry 3865: updateable cursor using index
 		int indexColItem = -1;
-		if (cursorTargetTable || getUpdateLocks)
+		if (isCursorTargetTable() || getUpdateLocks)
 		{
 			ConglomerateDescriptor cd = getTrulyTheBestAccessPath().getConglomerateDescriptor();
 			if (cd.isIndex())
@@ -3855,7 +3861,7 @@ class FromBaseTable extends FromTable
     ResultColumnList getAllResultColumns(TableName allTableName)
 			throws StandardException
 	{
-		return getResultColumnsForList(allTableName, resultColumns, 
+		return getResultColumnsForList(allTableName, getResultColumns(), 
 				getOrigTableName());
 	}
 
@@ -4013,7 +4019,7 @@ class FromBaseTable extends FromTable
     @Override
     boolean markAsCursorTargetTable()
 	{
-		cursorTargetTable = true;
+		setCursorTargetTable( true );
 		return true;
 	}
 
@@ -4026,7 +4032,7 @@ class FromBaseTable extends FromTable
     @Override
 	protected boolean cursorTargetTable()
 	{
-		return cursorTargetTable;
+		return isCursorTargetTable();
 	}
 
 	/**
@@ -4038,7 +4044,7 @@ class FromBaseTable extends FromTable
 	 */
 	void markUpdated(ResultColumnList updateColumns)
 	{
-		resultColumns.markUpdated(updateColumns);
+		getResultColumns().markUpdated(updateColumns);
 	}
 
 	/**
@@ -4437,7 +4443,7 @@ class FromBaseTable extends FromTable
 
 		HashSet<ValueNode> columns = new HashSet<ValueNode>();
 
-        for (ResultColumn rc : resultColumns) {
+        for (ResultColumn rc : getResultColumns()) {
 			columns.add(rc.getExpression());
 		}
 

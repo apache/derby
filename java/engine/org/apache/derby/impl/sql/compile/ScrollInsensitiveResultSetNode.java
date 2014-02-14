@@ -52,7 +52,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
                             Properties tableProperties,
                             ContextManager cm) {
         super(childResult, tableProperties, cm);
-        resultColumns = rcl;
+        setResultColumns( rcl );
 	}
 
     /**
@@ -65,7 +65,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -77,7 +77,7 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 		// Generate the child ResultSet
 
 		// Get the cost estimate for the child
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		int erdNumber = acb.addItem(makeResultDescription());
 
@@ -85,15 +85,15 @@ class ScrollInsensitiveResultSetNode  extends SingleChildResultSetNode
 
 		childResult.generate(acb, mb);
 		acb.pushThisAsActivation(mb);
-		mb.push(resultSetNumber);
-		mb.push(resultColumns.size());
+		mb.push(getResultSetNumber());
+		mb.push(getResultColumns().size());
 
 		mb.pushThis();
 		mb.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "getScrollable",
 						"boolean", 0);
 
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getScrollInsensitiveResultSet",
 						ClassName.NoPutResultSet, 7);

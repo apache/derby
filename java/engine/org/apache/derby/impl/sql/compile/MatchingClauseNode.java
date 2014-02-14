@@ -317,7 +317,7 @@ public class MatchingClauseNode extends QueryTreeNode
         //
         ResultColumnList    beforeColumns = new ResultColumnList( getContextManager() );
         ResultColumnList    afterColumns = new ResultColumnList( getContextManager() );
-        ResultColumnList    fullUpdateRow = getBoundSelectUnderUpdate().resultColumns;
+        ResultColumnList    fullUpdateRow = getBoundSelectUnderUpdate().getResultColumns();
         
         // the full row is the before image, the after image, and a row location
         int     rowSize = fullUpdateRow.size() / 2;
@@ -714,7 +714,7 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    buildThenColumnsForDelete()
         throws StandardException
     {
-        ResultColumnList    dmlSignature = _dml.resultSet.resultColumns;
+        ResultColumnList    dmlSignature = _dml.resultSet.getResultColumns();
         for ( int i = 0; i < dmlSignature.size(); i++ )
         {
             ResultColumn    origRC = dmlSignature.elementAt( i );
@@ -816,7 +816,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
         _dml.bindStatement();
 
-        buildThenColumnsForInsert( fullFromList, targetTable, _dml.resultSet.resultColumns, _insertColumns, _insertValues );
+        buildThenColumnsForInsert( fullFromList, targetTable, _dml.resultSet.getResultColumns(), _insertColumns, _insertValues );
     }
 
     /**  Bind the values in the INSERT list */
@@ -1409,7 +1409,7 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
-        ResultColumnList    leftJoinResult = generatedScan.resultColumns;
+        ResultColumnList    leftJoinResult = generatedScan.getResultColumns();
         CollectNodesVisitor<ColumnReference> getCRs =
             new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
         _thenColumns.accept( getCRs );

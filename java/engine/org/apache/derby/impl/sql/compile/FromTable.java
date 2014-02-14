@@ -170,13 +170,13 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		/* Make sure there is a cost estimate to set */
 		getCostEstimate(optimizer);
 
-		setCostEstimate(singleScanCost);
+		setCostEstimateCost(singleScanCost);
 
 		/* Optimize any subqueries that need to get optimized and
 		 * are not optimized any where else.  (Like those
 		 * in a RowResultSetNode.)
 		 */
-		optimizeSubqueries(getDataDictionary(), costEstimate.rowCount());
+		optimizeSubqueries(getDataDictionary(), getCostEstimate().rowCount());
 
 		/*
 		** Get the cost of this result set in the context of the whole plan.
@@ -646,7 +646,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			getTrulyTheBestAccessPath().initializeAccessPathName(dd, td);
 		}
 
-		setCostEstimate(bestPath.getCostEstimate());
+		setCostEstimateCost(bestPath.getCostEstimate());
 
         if ( optimizerTracingIsOn() )
         { getOptimizerTracer().traceRememberingBestAccessPath( bestPath, tableNumber, planType ); }
@@ -725,15 +725,21 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		throws StandardException
 	{
 		// If we already found it, just return it.
-		if (finalCostEstimate != null)
-			return finalCostEstimate;
+		if (getCandidateFinalCostEstimate() != null)
+        {
+			return getCandidateFinalCostEstimate();
+        }
 
 		if (getTrulyTheBestAccessPath() == null)
-			finalCostEstimate = costEstimate;
+        {
+			setCandidateFinalCostEstimate( getCostEstimate() );
+        }
 		else
-			finalCostEstimate = getTrulyTheBestAccessPath().getCostEstimate();
+        {
+			setCandidateFinalCostEstimate( getTrulyTheBestAccessPath().getCostEstimate() );
+        }
 
-		return finalCostEstimate;
+		return getCandidateFinalCostEstimate();
 	}
 
 	/** @see Optimizable#isBaseTable */
@@ -750,7 +756,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
      * {@code false} otherwise
      */
     public boolean hasLargeObjectColumns() {
-        for (ResultColumn rc : resultColumns) {
+        for (ResultColumn rc : getResultColumns()) {
             if (rc.isReferenced()) {
                 DataTypeDescriptor type = rc.getType();
                 if (type != null && type.getTypeId().isLOBTypeId()) {
@@ -834,7 +840,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
         if( perRowUsage < 0)
         {
             // Do not use getRefCols() because the cached refCols may no longer be valid.
-            FormatableBitSet refCols = resultColumns.getReferencedFormatableBitSet(cursorTargetTable(), true, false);
+            FormatableBitSet refCols = getResultColumns().getReferencedFormatableBitSet(cursorTargetTable(), true, false);
             perRowUsage = 0.0;
 
             /* Add up the memory usage for each referenced column */
@@ -842,7 +848,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
             {
                 if (refCols.isSet(i))
                 {
-                    ResultColumn rc = resultColumns.elementAt(i);
+                    ResultColumn rc = getResultColumns().elementAt(i);
                     DataTypeDescriptor expressionType = rc.getExpression().getTypeServices();
                     if( expressionType != null)
                         perRowUsage += expressionType.estimatedMemoryUsage();
@@ -938,7 +944,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
 	public int getNumColumnsReturned()
 	{
-		return resultColumns.size();
+		return getResultColumns().size();
 	}
 
 	/**
@@ -1028,11 +1034,11 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 	protected CostEstimate getCostEstimate(Optimizer optimizer)
 	{
-		if (costEstimate == null)
+		if (getCostEstimate() == null)
 		{
-			costEstimate = getOptimizerFactory().getCostEstimate();
+			setCostEstimate( getOptimizerFactory().getCostEstimate() );
 		}
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/*
@@ -1044,22 +1050,20 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	*/
 	protected CostEstimate getScratchCostEstimate(Optimizer optimizer)
 	{
-		if (scratchCostEstimate == null)
+		if ( getScratchCostEstimate() == null )
 		{
-			scratchCostEstimate = getOptimizerFactory().getCostEstimate();
+			setScratchCostEstimate( getOptimizerFactory().getCostEstimate() );
 		}
 
-		return scratchCostEstimate;
+		return getScratchCostEstimate();
 	}
 
 	/**
 	 * Set the cost estimate in this node to the given cost estimate.
 	 */
-	protected void setCostEstimate(CostEstimate newCostEstimate)
+	protected void setCostEstimateCost(CostEstimate newCostEstimate)
 	{
-		costEstimate = getCostEstimate();
-
-		costEstimate.setCost(newCostEstimate);
+		getCostEstimate().setCost(newCostEstimate);
 	}
 
 	/**
@@ -1067,7 +1071,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
 	protected void assignCostEstimate(CostEstimate newCostEstimate)
 	{
-		costEstimate = newCostEstimate;
+		setCostEstimate( newCostEstimate );
 	}
 
 	/**
@@ -1422,7 +1426,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	 */
     protected void markUpdatableByCursor(List<String> updateColumns)
 	{
-		resultColumns.markUpdatableByCursor(updateColumns);
+		getResultColumns().markUpdatableByCursor(updateColumns);
 	}
 
 	/**

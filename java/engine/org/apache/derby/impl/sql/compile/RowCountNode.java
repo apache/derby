@@ -78,7 +78,7 @@ public final class RowCountNode extends SingleChildResultSetNode
         throws StandardException {
 
         super(childResult, null, cm);
-        resultColumns = rcl;
+        setResultColumns( rcl );
 
         this.offset = offset;
         this.fetchFirst = fetchFirst;
@@ -103,14 +103,14 @@ public final class RowCountNode extends SingleChildResultSetNode
          */
         assignResultSetNumber();
 
-        costEstimate = childResult.getFinalCostEstimate();
+        setCostEstimate( childResult.getFinalCostEstimate() );
 
         acb.pushGetResultSetFactoryExpression(mb);
 
         childResult.generate(acb, mb); // arg1
 
         acb.pushThisAsActivation(mb);  // arg2
-        mb.push(resultSetNumber);      // arg3
+        mb.push(getResultSetNumber());      // arg3
 
         boolean dynamicOffset = false;
         boolean dynamicFetchFirst = false;
@@ -131,8 +131,8 @@ public final class RowCountNode extends SingleChildResultSetNode
 
         mb.push( hasJDBClimitClause );  // arg6
 
-        mb.push(costEstimate.rowCount()); // arg7
-        mb.push(costEstimate.getEstimatedCost()); // arg8
+        mb.push(getCostEstimate().rowCount()); // arg7
+        mb.push(getCostEstimate().getEstimatedCost()); // arg8
 
         mb.callMethod(VMOpcode.INVOKEINTERFACE,
                       (String) null,

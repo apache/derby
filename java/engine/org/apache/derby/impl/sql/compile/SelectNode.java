@@ -144,10 +144,10 @@ class SelectNode extends ResultSetNode
         /* RESOLVE -
 		 * Consider adding selectAggregates and whereAggregates 
 		 */
-        resultColumns = selectList;
+        setResultColumns( selectList );
 
-        if (resultColumns != null) {
-			resultColumns.markInitialSize();
+        if (getResultColumns() != null) {
+			getResultColumns().markInitialSize();
         }
 
         this.fromList = fromList;
@@ -179,7 +179,7 @@ class SelectNode extends ResultSetNode
 			}
 		}
 
-		if (resultColumns != null) {
+		if (getResultColumns() != null) {
 
             // Collect simply contained window functions (note: *not*
             // any inside nested SELECTs) used in result columns, and
@@ -188,7 +188,7 @@ class SelectNode extends ResultSetNode
 			CollectNodesVisitor<WindowFunctionNode> cnvw =
                 new CollectNodesVisitor<WindowFunctionNode>(WindowFunctionNode.class,
                                         SelectNode.class);
-			resultColumns.accept(cnvw);
+			getResultColumns().accept(cnvw);
 			windowFuncCalls = cnvw.getList();
 
 			for (int i=0; i < windowFuncCalls.size(); i++) {
@@ -387,7 +387,7 @@ class SelectNode extends ResultSetNode
 			return null;
 
 		// Loop through the result columns looking for a match
-        for (ResultColumn rc : resultColumns)
+        for (ResultColumn rc : getResultColumns())
 		{
 			if (! (rc.getExpression() instanceof ColumnReference))
 				return null;
@@ -522,7 +522,7 @@ class SelectNode extends ResultSetNode
 		int numDistinctAggs;
 
         if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(fromList != null && resultColumns != null,
+            SanityManager.ASSERT(fromList != null && getResultColumns() != null,
                 "Both fromList and resultColumns are expected to be non-null");
         }
 
@@ -567,7 +567,7 @@ class SelectNode extends ResultSetNode
 
 		fromListParam.setWindows(windows);
 
-		resultColumns.bindExpressions(fromListParam, 
+		getResultColumns().bindExpressions(fromListParam, 
 									  selectSubquerys,
 									  selectAggregates);
 
@@ -690,7 +690,7 @@ class SelectNode extends ResultSetNode
 
   			VerifyAggregateExpressionsVisitor visitor = 
   				new VerifyAggregateExpressionsVisitor(groupByList);
-			resultColumns.accept(visitor);
+			getResultColumns().accept(visitor);
 		}       
 
 		/*
@@ -784,13 +784,13 @@ class SelectNode extends ResultSetNode
 		fromList.bindResultColumns(fromListParam);
 		super.bindResultColumns(fromListParam);
 		/* Only 1012 elements allowed in select list */
-		if (resultColumns.size() > Limits.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
+		if (getResultColumns().size() > Limits.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
 
         // DERBY-4407: A derived table must have at least one column.
-        if (resultColumns.size() == 0)
+        if (getResultColumns().size() == 0)
         {
             throw StandardException.newException(
                     SQLState.LANG_EMPTY_COLUMN_LIST);
@@ -855,7 +855,7 @@ class SelectNode extends ResultSetNode
 	void pushExpressionsIntoSelect(Predicate predicate)
 		throws StandardException
 	{
-		wherePredicates.pullExpressions(referencedTableMap.size(), predicate.getAndNode());
+		wherePredicates.pullExpressions(getReferencedTableMap().size(), predicate.getAndNode());
 		fromList.pushPredicates(wherePredicates);
 	}
 
@@ -872,7 +872,7 @@ class SelectNode extends ResultSetNode
     void verifySelectStarSubquery(FromList outerFromList, int subqueryType)
 					throws StandardException
 	{
-        for (ResultColumn rc : resultColumns) {
+        for (ResultColumn rc : getResultColumns()) {
             if (!(rc instanceof AllResultColumn)) {
                 continue;
             }
@@ -1057,7 +1057,7 @@ class SelectNode extends ResultSetNode
 		 * we can flatten/optimize any subqueries in the
 		 * select list.
 		 */
-		resultColumns.preprocess(numTables, 
+		getResultColumns().preprocess(numTables, 
 								 fromList, whereSubquerys,
 								 wherePredicates);
 
@@ -1121,7 +1121,7 @@ class SelectNode extends ResultSetNode
 		 */
 
 		// Flatten any flattenable FromSubquerys or JoinNodes
-		fromList.flattenFromTables(resultColumns, 
+		fromList.flattenFromTables(getResultColumns(), 
 								   wherePredicates, 
 								   whereSubquerys,
                                    groupByList,
@@ -1152,7 +1152,7 @@ class SelectNode extends ResultSetNode
                     if (obl.size() == 0)
                     {
                         qec.setOrderByList(i, null);
-                        resultColumns.removeOrderByColumns();
+                        getResultColumns().removeOrderByColumns();
                     }
                 }
             }
@@ -1195,11 +1195,11 @@ class SelectNode extends ResultSetNode
 		 */
 		if (isDistinct && groupByList == null)
 		{
-			int distinctTable =	resultColumns.allTopCRsFromSameTable();
+			int distinctTable =	getResultColumns().allTopCRsFromSameTable();
 			
 			if (distinctTable != -1)
 			{
-				if (fromList.returnsAtMostSingleRow(resultColumns, 
+				if (fromList.returnsAtMostSingleRow(getResultColumns(), 
 											   whereClause, wherePredicates,
 											   getDataDictionary()))
 				{
@@ -1230,7 +1230,7 @@ class SelectNode extends ResultSetNode
                     /* Order by list currently restricted to columns in select
                      * list, so we will always eliminate the order by here.
                      */
-                    if (obl.isInOrderPrefix(resultColumns))
+                    if (obl.isInOrderPrefix(getResultColumns()))
                     {
                         qec.setOrderByList(i, null);
                     }
@@ -1244,7 +1244,7 @@ class SelectNode extends ResultSetNode
                          */
                         newTop = genProjectRestrictForReordering();
                         obl.resetToSourceRCs();
-                        resultColumns = obl.reorderRCL(resultColumns);
+                        setResultColumns( obl.reorderRCL(getResultColumns()) );
                         newTop.getResultColumns().removeOrderByColumns();
                         qec.setOrderByList(i, null);
                     }
@@ -1266,18 +1266,18 @@ class SelectNode extends ResultSetNode
 		fromList.pushPredicates(wherePredicates);
 
 		/* Set up the referenced table map */
-		referencedTableMap = new JBitSet(numTables);
+		setReferencedTableMap( new JBitSet(numTables) );
 		int flSize = fromList.size();
 		for (int index = 0; index < flSize; index++)
 		{
-			referencedTableMap.or(((FromTable) fromList.elementAt(index)).
+			getReferencedTableMap().or(((FromTable) fromList.elementAt(index)).
 													getReferencedTableMap());
 		}
 
 		/* Copy the referenced table map to the new tree top, if necessary */
 		if (newTop != this)
 		{
-			newTop.setReferencedTableMap((JBitSet) referencedTableMap.clone());
+			newTop.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 		}
 
 
@@ -1450,7 +1450,7 @@ class SelectNode extends ResultSetNode
 
 		/* Don't flatten if select list contains something that isn't cloneable.
 		 */
-		if (! resultColumns.isCloneable())
+		if (! getResultColumns().isCloneable())
 		{
 			return false;
 		}
@@ -1499,7 +1499,7 @@ class SelectNode extends ResultSetNode
 
         prnRSN = new ProjectRestrictNode(
                 fromList.elementAt(0),   /* Child ResultSet */
-                resultColumns,      /* Projection */
+                getResultColumns(),      /* Projection */
                 whereClause,            /* Restriction */
                 wherePredicates,/* Restriction as PredicateList */
                 selectSubquerys,/* Subquerys in Projection */
@@ -1531,7 +1531,7 @@ class SelectNode extends ResultSetNode
                     nestingLevel,
                     getContextManager());
 			gbn.considerPostOptimizeOptimizations(originalWhereClause != null);
-			gbn.assignCostEstimate(optimizer.getOptimizedCost());
+			gbn.assignCostEstimate(getOptimizer().getOptimizedCost());
 
 			groupByList = null;
 			prnRSN  = gbn.getParent();
@@ -1563,7 +1563,7 @@ class SelectNode extends ResultSetNode
 					getContextManager());
 
 			prnRSN = wrsn.getParent();
-			wrsn.assignCostEstimate(optimizer.getOptimizedCost());
+			wrsn.assignCostEstimate(getOptimizer().getOptimizedCost());
 		}
 
 
@@ -1572,7 +1572,7 @@ class SelectNode extends ResultSetNode
 		{
 			// We first verify that a distinct is valid on the
 			// RCL.
-			resultColumns.verifyAllOrderable();
+			getResultColumns().verifyAllOrderable();
 
 			/* See if we can push duplicate elimination into the store
 			 * via a hash scan.  This is possible iff:
@@ -1601,9 +1601,9 @@ class SelectNode extends ResultSetNode
 			{
 				boolean simpleColumns = true;
 				HashSet<BaseColumnNode> distinctColumns = new HashSet<BaseColumnNode>();
-				int size = resultColumns.size();
+				int size = getResultColumns().size();
 				for (int i = 1; i <= size; i++) {
-					BaseColumnNode bc = resultColumns.getResultColumn(i).getBaseColumnNode();
+					BaseColumnNode bc = getResultColumns().getResultColumn(i).getBaseColumnNode();
 					if (bc == null) {
 						simpleColumns = false;
 						break;
@@ -1621,10 +1621,10 @@ class SelectNode extends ResultSetNode
 				/* We can't do a distinct scan. Determine if we can filter out 
 				 * duplicates without a sorter. 
 				 */
-				boolean inSortedOrder = isOrderedResult(resultColumns, prnRSN, !(orderByAndDistinctMerged));
+				boolean inSortedOrder = isOrderedResult(getResultColumns(), prnRSN, !(orderByAndDistinctMerged));
                 prnRSN = new DistinctNode(
                         prnRSN, inSortedOrder, null, getContextManager());
-				prnRSN.costEstimate = costEstimate.cloneMe();
+				prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
 
                 // Remember whether or not we can eliminate the sort.
                 for (int i=0; i < eliminateSort.length; i++) {
@@ -1646,7 +1646,7 @@ class SelectNode extends ResultSetNode
                                              obl,
                                              null,
                                              getContextManager());
-                    prnRSN.costEstimate = costEstimate.cloneMe();
+                    prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
                 }
 
                 // There may be columns added to the select projection list
@@ -1705,7 +1705,7 @@ class SelectNode extends ResultSetNode
 
 
 		if (wasGroupBy &&
-			resultColumns.numGeneratedColumnsForGroupBy() > 0 &&
+			getResultColumns().numGeneratedColumnsForGroupBy() > 0 &&
 			windows == null) // windows handling already added a PRN which
 							 // obviates this.
 		{
@@ -1762,7 +1762,7 @@ class SelectNode extends ResultSetNode
             }
 
             /* Set the cost of this node in the generated node */
-            prnRSN.costEstimate = costEstimate.cloneMe();
+            prnRSN.setCostEstimate( getCostEstimate().cloneMe() );
         }
 
 		return prnRSN;
@@ -1992,24 +1992,24 @@ class SelectNode extends ResultSetNode
 		}
 
 		/* Get the cost */
-        costEstimate = opt.getOptimizedCost();
+        setCostEstimate( opt.getOptimizedCost() );
 
 		/* Update row counts if this is a scalar aggregate */
 		if ((selectAggregates != null) && (selectAggregates.size() > 0)) 
 		{
-			costEstimate.setEstimatedRowCount((long) outerRows);
-			costEstimate.setSingleScanRowCount(1);
+			getCostEstimate().setEstimatedRowCount((long) outerRows);
+			getCostEstimate().setSingleScanRowCount(1);
 		}
 
-		selectSubquerys.optimize(dataDictionary, costEstimate.rowCount());
+		selectSubquerys.optimize(dataDictionary, getCostEstimate().rowCount());
 
 		if (whereSubquerys != null && whereSubquerys.size() > 0)
 		{
-			whereSubquerys.optimize(dataDictionary, costEstimate.rowCount());
+			whereSubquerys.optimize(dataDictionary, getCostEstimate().rowCount());
 		}
 		
 		if (havingSubquerys != null && havingSubquerys.size() > 0) {
-			havingSubquerys.optimize(dataDictionary, costEstimate.rowCount());
+			havingSubquerys.optimize(dataDictionary, getCostEstimate().rowCount());
 		}
 
         // dispose of the optimizer we created above
@@ -2032,23 +2032,28 @@ class SelectNode extends ResultSetNode
 							OptimizerPlan overridingPlan)
 			throws StandardException
 	{
-		if (optimizer == null)
+		if (getOptimizer() == null)
 		{
 			/* Get an optimizer. */
 			OptimizerFactory optimizerFactory = getLanguageConnectionContext().getOptimizerFactory();
 
-			optimizer = optimizerFactory.getOptimizer(
-											optList,
-											predList,
-											dataDictionary,
-											requiredRowOrdering,
-											getCompilerContext().getNumTables(),
-											overridingPlan,
-								getLanguageConnectionContext());
+			setOptimizer
+                (
+                 optimizerFactory.getOptimizer
+                 (
+                  optList,
+                  predList,
+                  dataDictionary,
+                  requiredRowOrdering,
+                  getCompilerContext().getNumTables(),
+                  overridingPlan,
+                  getLanguageConnectionContext()
+                  )
+                 );
 		}
 
-		optimizer.prepForNextRound();
-		return optimizer;
+		getOptimizer().prepForNextRound();
+		return getOptimizer();
 	}
 
 	/**
@@ -2073,13 +2078,13 @@ class SelectNode extends ResultSetNode
 
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(optimizer != null,
+			SanityManager.ASSERT(getOptimizer() != null,
 				"SelectNode's optimizer not expected to be null when " +
 				"modifying access paths.");
 		}
 
-        ((OptimizerImpl)optimizer).
-                addScopedPredicatesToList(predList, getContextManager());
+        getOptimizerImpl().addScopedPredicatesToList(predList, getContextManager());
+        
 		return modifyAccessPaths();
 	}
 
@@ -2104,10 +2109,10 @@ class SelectNode extends ResultSetNode
 		**
 		** This should be the same optimizer we got above.
 		*/
-		optimizer.modifyAccessPaths();
+		getOptimizer().modifyAccessPaths();
 
 		// Load the costEstimate for the final "best" join order.
-		costEstimate = optimizer.getFinalCost();
+		setCostEstimate( getOptimizer().getFinalCost() );
 
 		if (SanityManager.DEBUG)
 		{
@@ -2175,7 +2180,7 @@ class SelectNode extends ResultSetNode
             leftResultSet = fromList.elementAt(0);
 			leftRCList = leftResultSet.getResultColumns();
 			leftResultSet.setResultColumns(leftRCList.copyListAndObjects());
-			leftRCList.genVirtualColumnNodes(leftResultSet, leftResultSet.resultColumns);
+			leftRCList.genVirtualColumnNodes(leftResultSet, leftResultSet.getResultColumns());
 
 			/* Get right's ResultColumnList, assign shallow copy back to it,
 			 * create new VirtualColumnNodes for the original's 
@@ -2185,7 +2190,7 @@ class SelectNode extends ResultSetNode
             rightResultSet = fromList.elementAt(1);
 			rightRCList = rightResultSet.getResultColumns();
 			rightResultSet.setResultColumns(rightRCList.copyListAndObjects());
-			rightRCList.genVirtualColumnNodes(rightResultSet, rightResultSet.resultColumns);
+			rightRCList.genVirtualColumnNodes(rightResultSet, rightResultSet.getResultColumns());
 			rightRCList.adjustVirtualColumnIds(leftRCList.size());
 
 			/* Concatenate the 2 ResultColumnLists */
@@ -2223,7 +2228,7 @@ class SelectNode extends ResultSetNode
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
-		return optimizer.getFinalCost();
+		return getOptimizer().getFinalCost();
 	}
 
 	/**

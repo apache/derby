@@ -61,8 +61,8 @@ abstract class SingleChildResultSetNode extends FromTable
 
         /* Propagate the child's referenced table map, if one exists */
         if (childResult.getReferencedTableMap() != null) {
-            referencedTableMap =
-                (JBitSet)childResult.getReferencedTableMap().clone();
+            setReferencedTableMap
+                ( (JBitSet)childResult.getReferencedTableMap().clone() );
         }
     }
 
@@ -294,7 +294,7 @@ abstract class SingleChildResultSetNode extends FromTable
 		childResult = childResult.preprocess(numTables, gbl, fromList);
 
 		/* Build the referenced table map */
-		referencedTableMap = (JBitSet) childResult.getReferencedTableMap().clone();
+		setReferencedTableMap( (JBitSet) childResult.getReferencedTableMap().clone() );
 
 		return this;
 	}
@@ -402,8 +402,8 @@ abstract class SingleChildResultSetNode extends FromTable
 										predicates,
 										outerRows);
 
-        costEstimate = getOptimizerFactory().getCostEstimate();
-		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
+		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							childResult.getCostEstimate().rowCount(),
 							childResult.getCostEstimate().singleScanRowCount());
 
@@ -540,7 +540,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	 */
 	protected boolean reflectionNeededForProjection()
 	{
-		return ! (resultColumns.allExpressionsAreColumns(childResult));
+		return ! (getResultColumns().allExpressionsAreColumns(childResult));
 	}
 
 	/**
@@ -578,11 +578,13 @@ abstract class SingleChildResultSetNode extends FromTable
 		** that optimization was done directly on the child node,
 		** in which case the cost estimate will be null here.
 		*/
-		if (costEstimate == null)
+		if (getCostEstimate() == null)
+        {
 			return childResult.getFinalCostEstimate();
+        }
 		else
 		{
-			return costEstimate;
+			return getCostEstimate();
 		}
 	}
 

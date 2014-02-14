@@ -378,7 +378,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 		assignResultSetNumber();
 
 		// Get our final cost estimate based on the child estimates.
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		// build up the tree.
 
@@ -402,9 +402,9 @@ public class IntersectOrExceptNode extends SetOperatorNode
 		getRightResultSet().generate( acb, mb);
 
 		acb.pushThisAsActivation(mb);
-		mb.push(resultSetNumber);
-        mb.push( costEstimate.getEstimatedRowCount());
-        mb.push( costEstimate.getEstimatedCost());
+		mb.push(getResultSetNumber());
+        mb.push( getCostEstimate().getEstimatedRowCount());
+        mb.push( getCostEstimate().getEstimatedCost());
         mb.push( getOpType());
         mb.push( all);
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByColumns));
@@ -431,20 +431,22 @@ public class IntersectOrExceptNode extends SetOperatorNode
     CostEstimate getFinalCostEstimate()
 		throws StandardException
 	{
-		if (finalCostEstimate != null)
-			return finalCostEstimate;
+		if (getCandidateFinalCostEstimate() != null)
+        {
+			return getCandidateFinalCostEstimate();
+        }
 
 		CostEstimate leftCE = leftResultSet.getFinalCostEstimate();
 		CostEstimate rightCE = rightResultSet.getFinalCostEstimate();
 
-		finalCostEstimate = getNewCostEstimate();
-		finalCostEstimate.setCost(
+		setCandidateFinalCostEstimate( getNewCostEstimate() );
+		getCandidateFinalCostEstimate().setCost(
 			leftCE.getEstimatedCost() + rightCE.getEstimatedCost(),
 			getRowCountEstimate(leftCE.rowCount(), rightCE.rowCount()),
 			getSingleScanRowCountEstimate(leftCE.singleScanRowCount(),
 				rightCE.singleScanRowCount()));
 
-		return finalCostEstimate;
+		return getCandidateFinalCostEstimate();
 	}
 
     String getOperatorName()

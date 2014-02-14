@@ -71,7 +71,7 @@ class IndexToBaseRowNode extends FromTable
         super(null, tableProperties, cm);
         this.source = source;
         this.baseCD = baseCD;
-        this.resultColumns = resultColumns;
+        setResultColumns( resultColumns );
         this.cursorTargetTable = cursorTargetTable;
         this.restrictionList = restrictionList;
         this.forUpdate = forUpdate;
@@ -164,7 +164,7 @@ class IndexToBaseRowNode extends FromTable
 		assignResultSetNumber();
 
 		// Get the CostEstimate info for the underlying scan
-		costEstimate = getFinalCostEstimate();
+		setCostEstimate( getFinalCostEstimate() );
 
 		/* Put the predicates back into the tree */
 		if (restrictionList != null)
@@ -235,10 +235,10 @@ class IndexToBaseRowNode extends FromTable
         boolean skipPropagatedCols =
                 indexReferencedCols != null &&
                 indexReferencedCols.getNumBitsSet() != 0;
-        mb.push(acb.addItem(resultColumns
+        mb.push(acb.addItem(getResultColumns()
                 .buildRowTemplate(heapReferencedCols, skipPropagatedCols)));
 
-		mb.push(resultSetNumber);
+		mb.push(getResultSetNumber());
 		mb.push(source.getBaseTableName());
 		mb.push(heapColRefItem);
 
@@ -285,8 +285,8 @@ class IndexToBaseRowNode extends FromTable
 		}
 
 		mb.push(forUpdate);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getIndexRowToBaseRowResultSet",
 						ClassName.NoPutResultSet, 14);
@@ -394,12 +394,12 @@ class IndexToBaseRowNode extends FromTable
 	 */
 	private int[] getIndexColMapping()
 	{
-		int		rclSize = resultColumns.size();
+		int		rclSize = getResultColumns().size();
 		int[]	indexColMapping = new int[rclSize];
 
 		for (int index = 0; index < rclSize; index++)
 		{
-            ResultColumn rc = resultColumns.elementAt(index);
+            ResultColumn rc = getResultColumns().elementAt(index);
 
 			if (indexReferencedCols != null && rc.getExpression() instanceof VirtualColumnNode)
 			{

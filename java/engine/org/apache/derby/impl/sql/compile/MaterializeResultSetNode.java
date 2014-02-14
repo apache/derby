@@ -51,7 +51,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
                              Properties tableProperties,
                              ContextManager cm) {
         super(childResult, tableProperties, cm);
-        resultColumns = rcl;
+        setResultColumns( rcl );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -87,7 +87,7 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 		assignResultSetNumber();
 
 		// Get the cost estimate from the child if we don't have one yet
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		// build up the tree.
 
@@ -95,9 +95,9 @@ class MaterializeResultSetNode extends SingleChildResultSetNode
 		acb.pushGetResultSetFactoryExpression(mb);
 
 		childResult.generate(acb, mb);
-		mb.push(resultSetNumber);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getResultSetNumber());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getMaterializedResultSet",
 						ClassName.NoPutResultSet, 4);

@@ -592,7 +592,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		 */
         prRCList.genVirtualColumnNodes(chldRes, chldRes.getResultColumns());
         
-		this.resultColumns = prRCList;
+		setResultColumns( prRCList );
 		// Propagate the referenced table map if it's already been created
         if (chldRes.getReferencedTableMap() != null)
 		    {
@@ -601,10 +601,10 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
         
         
 		if (targetResultColumnList != null) {
-		    int size = Math.min(targetRCL.size(), resultColumns.size());
+		    int size = Math.min(targetRCL.size(), getResultColumns().size());
 
             for (int index = 0; index < size; index++) {
-                ResultColumn sourceRC = resultColumns.elementAt(index);
+                ResultColumn sourceRC = getResultColumns().elementAt(index);
                 ResultColumn resultColumn = targetRCL.elementAt(index);
                 sourceRC.setType(resultColumn.getTypeServices());
 		    }
@@ -624,7 +624,7 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		int				erdNumber;
 
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -636,16 +636,16 @@ class NormalizeResultSetNode extends SingleChildResultSetNode
 		// Generate the child ResultSet
 
 		// Get the cost estimate for the child
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		erdNumber = acb.addItem(makeResultDescription());
 
 		acb.pushGetResultSetFactoryExpression(mb);
 		childResult.generate(acb, mb);
-		mb.push(resultSetNumber);
+		mb.push(getResultSetNumber());
 		mb.push(erdNumber);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 		mb.push(forUpdate);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",

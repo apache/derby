@@ -91,7 +91,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 * may have been a "*" in the list.  (We will set the names and
 		 * column types at that time, as expected.)
 		 */
-		resultColumns = leftResultSet.getResultColumns().copyListAndObjects();
+		setResultColumns( leftResultSet.getResultColumns().copyListAndObjects() );
 	}
 
 	/**
@@ -232,7 +232,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 				null,						// Subquerys in Restriction
 				null,						// Table properties
 				getContextManager());
-			prnRSN.costEstimate = ce.cloneMe();
+			prnRSN.setCostEstimate( ce.cloneMe() );
 			prnRSN.setReferencedTableMap(topNode.getReferencedTableMap());
 			topNode = prnRSN;
 		}
@@ -624,18 +624,18 @@ abstract class SetOperatorNode extends TableOperatorNode
 		/* We need to recreate resultColumns for this node, since there
 		 * may have been 1 or more *'s in the left's SELECT list.
 		 */
-		resultColumns = leftResultSet.getResultColumns().copyListAndObjects();
+		setResultColumns( leftResultSet.getResultColumns().copyListAndObjects() );
 
         // The generated grouping columns of the left result set should not be
         // part of the result from the set operation (DERBY-3764).
-        resultColumns.removeGeneratedGroupingColumns();
+        getResultColumns().removeGeneratedGroupingColumns();
 
-        resultColumns.removeOrderByColumns();
+        getResultColumns().removeOrderByColumns();
 
 		/* Create new expressions with the dominant types after verifying
 		 * union compatibility between left and right sides.
 		 */
-		resultColumns.setUnionResultExpression(rightResultSet.getResultColumns(), tableNumber, level, getOperatorName());
+		getResultColumns().setUnionResultExpression(rightResultSet.getResultColumns(), tableNumber, level, getOperatorName());
 	}
 
 	/**
@@ -861,8 +861,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 		rightResultSet = rightResultSet.preprocess(numTables, gbl, fromList);
 
 		/* Build the referenced table map (left || right) */
-		referencedTableMap = (JBitSet) leftResultSet.getReferencedTableMap().clone();
-        referencedTableMap.or(rightResultSet.getReferencedTableMap());
+		setReferencedTableMap( (JBitSet) leftResultSet.getReferencedTableMap().clone() );
+        getReferencedTableMap().or(rightResultSet.getReferencedTableMap());
 
 		/* If this is a UNION without an all and we have
 		 * an order by then we can consider eliminating the sort for the
@@ -888,7 +888,7 @@ abstract class SetOperatorNode extends TableOperatorNode
                 /* Order by list currently restricted to columns in select
                  * list, so we will always eliminate the order by here.
                  */
-                if (obl.isInOrderPrefix(resultColumns))
+                if (obl.isInOrderPrefix(getResultColumns()))
                 {
                     obl = null;
                     qec.setOrderByList(i, null);

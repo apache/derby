@@ -78,11 +78,11 @@ class HashTableNode extends SingleChildResultSetNode
                   ContextManager cm)
 	{
         super(childResult, tableProperties, cm);
-        this.resultColumns = resultColumns;
+        setResultColumns( resultColumns );
         this.searchPredicateList = searchPredicateList;
         this.joinPredicateList = joinPredicateList;
         this.trulyTheBestAccessPath = accessPath;
-        this.costEstimate = costEstimate;
+        setCostEstimate( costEstimate );
         this.pSubqueryList = pSubqueryList;
         this.rSubqueryList = rSubqueryList;
         setHashKeyColumns(hashKeyColumns);
@@ -147,7 +147,7 @@ class HashTableNode extends SingleChildResultSetNode
 							throws StandardException
 	{
 		if (SanityManager.DEBUG)
-        SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
+            SanityManager.ASSERT(getResultColumns() != null, "Tree structure bad");
 
         //
         // If we are projecting and restricting the stream from a table
@@ -239,7 +239,7 @@ class HashTableNode extends SingleChildResultSetNode
 
 		// Map the result columns to the source columns
         ResultColumnList.ColumnMapping  mappingArrays =
-            resultColumns.mapSourceColumns();
+            getResultColumns().mapSourceColumns();
 
         int[] mapArray = mappingArrays.mapArray;
 
@@ -288,7 +288,7 @@ class HashTableNode extends SingleChildResultSetNode
 		 */
 		if (pSubqueryList != null && pSubqueryList.size() > 0)
 		{
-			pSubqueryList.setPointOfAttachment(resultSetNumber);
+			pSubqueryList.setPointOfAttachment(getResultSetNumber());
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.ASSERT(pSubqueryList.size() == 0,
@@ -297,7 +297,7 @@ class HashTableNode extends SingleChildResultSetNode
 		}
 		if (rSubqueryList != null && rSubqueryList.size() > 0)
 		{
-			rSubqueryList.setPointOfAttachment(resultSetNumber);
+			rSubqueryList.setPointOfAttachment(getResultSetNumber());
 			if (SanityManager.DEBUG)
 			{
 				SanityManager.ASSERT(rSubqueryList.size() == 0,
@@ -306,7 +306,7 @@ class HashTableNode extends SingleChildResultSetNode
 		}
 
 		// Get the final cost estimate based on child's cost.
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		// if there is no searchClause, we just want to pass null.
 		if (searchClause == null)
@@ -372,23 +372,23 @@ class HashTableNode extends SingleChildResultSetNode
 			// as-is, with the performance trade-off as discussed above.)
 
 			/* Generate the Row function for the projection */
-			resultColumns.generateCore(acb, mb, false);
+			getResultColumns().generateCore(acb, mb, false);
 		}
 		else
 		{
 		   	mb.pushNull(ClassName.GeneratedMethod);
 		}
 
-		mb.push(resultSetNumber);
+		mb.push(getResultSetNumber());
 		mb.push(mapArrayItem);
-		mb.push(resultColumns.reusableResult());
+		mb.push(getResultColumns().reusableResult());
 		mb.push(hashKeyItem);
 		mb.push(false);
 		mb.push(-1L);
 		mb.push(initialCapacity);
 		mb.push(loadFactor);
-		mb.push(costEstimate.singleScanRowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push(getCostEstimate().singleScanRowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getHashTableResultSet",
                 ClassName.NoPutResultSet, 14);

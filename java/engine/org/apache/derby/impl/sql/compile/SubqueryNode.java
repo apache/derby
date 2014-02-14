@@ -1977,7 +1977,7 @@ class SubqueryNode extends ValueNode
                         new MaterializeSubqueryNode(subRS, getContextManager());
 
 				// Propagate the resultSet's cost estimate to the new node.
-				materialSubNode.costEstimate = resultSet.getFinalCostEstimate();
+				materialSubNode.setCostEstimate( resultSet.getFinalCostEstimate() );
 
 				((ProjectRestrictNode) resultSet).setChildResult(materialSubNode);
 
@@ -2075,8 +2075,8 @@ class SubqueryNode extends ValueNode
 		mb.push(subqResultSetNumber);
 		mb.push(subqueryNumber);
 		mb.push(pointOfAttachment);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+		mb.push( costEstimate.rowCount() );
+		mb.push( costEstimate.getEstimatedCost() );
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSetString, ClassName.NoPutResultSet, nargs);
 

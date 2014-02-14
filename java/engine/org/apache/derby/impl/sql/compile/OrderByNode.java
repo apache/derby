@@ -68,14 +68,14 @@ class OrderByNode extends SingleChildResultSetNode
         // (Copy maintains ResultColumn.expression for now.)
         final ResultColumnList prRCList =
             childRes.getResultColumns().copyListAndObjects();
-        this.resultColumns = childRes.getResultColumns();
+        setResultColumns( childRes.getResultColumns() );
         childRes.setResultColumns(prRCList);
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the DistinctNode's RCL.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-        this.resultColumns.genVirtualColumnNodes(this, prRCList);
+        getResultColumns().genVirtualColumnNodes(this, prRCList);
 	}
 
 
@@ -117,9 +117,9 @@ class OrderByNode extends SingleChildResultSetNode
 							throws StandardException
 	{
 		// Get the cost estimate for the child
-		if (costEstimate == null)
+		if (getCostEstimate() == null)
 		{
-			costEstimate = childResult.getFinalCostEstimate();
+			setCostEstimate( childResult.getFinalCostEstimate() );
 		}
 
 	    orderByList.generate(acb, mb, childResult);
@@ -135,7 +135,7 @@ class OrderByNode extends SingleChildResultSetNode
 		// code generation for the PRN above us will fail when calling
 		// resultColumns.generateCore -> VCN.generateExpression, cf. the Sanity
 		// assert in VCN.generateExpression on sourceResultSetNumber >= 0.
-		resultSetNumber = orderByList.getResultSetNumber();
-		resultColumns.setResultSetNumber(resultSetNumber);
+		setResultSetNumber( orderByList.getResultSetNumber() );
+		getResultColumns().setResultSetNumber(getResultSetNumber());
 	}
 }

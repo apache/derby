@@ -335,7 +335,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 		/* Prepend CurrentRowLocation() to the select's result column list. */
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT((resultSet.resultColumns != null),	
+            SanityManager.ASSERT((resultSet.getResultColumns() != null),	
 							  "resultColumns is expected not to be null at bind time");
 
 		/*
@@ -350,15 +350,18 @@ public final class UpdateNode extends DMLModStatementNode
         */
 		/* Normalize the SET clause's result column list for synonym */
 		if (synonymTableName != null)
-			normalizeSynonymColumns( resultSet.resultColumns, targetTable );
+			normalizeSynonymColumns( resultSet.getResultColumns(), targetTable );
 		
 		/* Bind the original result columns by column name */
-		normalizeCorrelatedColumns( resultSet.resultColumns, targetTable );
+		normalizeCorrelatedColumns( resultSet.getResultColumns(), targetTable );
 
-		resultSet.bindResultColumns(targetTableDescriptor,
-					targetVTI,
-					resultSet.resultColumns, this,
-					fromList);
+		resultSet.bindResultColumns
+            (
+             targetTableDescriptor,
+             targetVTI,
+             resultSet.getResultColumns(), this,
+             fromList
+             );
 
         // don't allow overriding of generation clauses
         forbidGenerationOverrides( resultSet.getResultColumns(),

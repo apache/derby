@@ -99,19 +99,19 @@ class DistinctNode extends SingleChildResultSetNode
 		 */
         final ResultColumnList prRCList =
                 this.childResult.getResultColumns().copyListAndObjects();
-        this.resultColumns = this.childResult.getResultColumns();
+        setResultColumns( this.childResult.getResultColumns() );
 		this.childResult.setResultColumns(prRCList);
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
 		 * in the DistinctNode's RCL.  (VirtualColumnNodes include
 		 * pointers to source ResultSetNode, this, and source ResultColumn.)
 		 */
-        this.resultColumns.genVirtualColumnNodes(this, prRCList);
+        getResultColumns().genVirtualColumnNodes(this, prRCList);
 
 		/* Verify that we can perform a DISTINCT on the
 		 * underlying tree.
 		 */
-        this.resultColumns.verifyAllOrderable();
+        getResultColumns().verifyAllOrderable();
         this.inSortedOrder = inSortedOrder;
 	}
 
@@ -161,8 +161,8 @@ class DistinctNode extends SingleChildResultSetNode
 									optimizer,
 									rowOrdering);
 
-		costEstimate = getCostEstimate(optimizer);
-		costEstimate.setCost(childCost.getEstimatedCost(),
+		setCostEstimate( getCostEstimate(optimizer) );
+		getCostEstimate().setCost(childCost.getEstimatedCost(),
 							 childCost.rowCount(),
 							 childCost.singleScanRowCount());
 
@@ -171,7 +171,7 @@ class DistinctNode extends SingleChildResultSetNode
 		** No need to use estimateCost on join strategy - that has already
 		** been done on the child.
 		*/
-		return costEstimate;
+		return getCostEstimate();
 	}
 
 	/**
@@ -215,9 +215,9 @@ class DistinctNode extends SingleChildResultSetNode
 
 		// RESOLVE: NEED TO FACTOR IN COST OF SORTING AND FIGURE OUT HOW
 		// MANY ROWS HAVE BEEN ELIMINATED.
-        costEstimate = getOptimizerFactory().getCostEstimate();
+        setCostEstimate( getOptimizerFactory().getCostEstimate() );
 
-		costEstimate.setCost(childResult.getCostEstimate().getEstimatedCost(),
+		getCostEstimate().setCost(childResult.getCostEstimate().getEstimatedCost(),
 							 childResult.getCostEstimate().rowCount(),
 							 childResult.getCostEstimate().singleScanRowCount());
 
@@ -265,12 +265,12 @@ class DistinctNode extends SingleChildResultSetNode
 		assignResultSetNumber();
 
 		// Get the final cost estimate based on the child's cost.
-		costEstimate = childResult.getFinalCostEstimate();
+		setCostEstimate( childResult.getFinalCostEstimate() );
 
 		/*
 			create the orderItem and stuff it in.
 		 */
-		int orderItem = acb.addItem(acb.getColumnOrdering(resultColumns));
+		int orderItem = acb.addItem(acb.getColumnOrdering(getResultColumns()));
 
 		/* Generate the SortResultSet:
 		 *	arg1: childExpress - Expression for childResultSet
@@ -289,11 +289,11 @@ class DistinctNode extends SingleChildResultSetNode
 		mb.push(true);
 		mb.push(inSortedOrder);
 		mb.push(orderItem);
-        mb.push(acb.addItem(resultColumns.buildRowTemplate()));
-		mb.push(resultColumns.getTotalColumnSize());
-		mb.push(resultSetNumber);
-		mb.push(costEstimate.rowCount());
-		mb.push(costEstimate.getEstimatedCost());
+        mb.push(acb.addItem(getResultColumns().buildRowTemplate()));
+		mb.push(getResultColumns().getTotalColumnSize());
+		mb.push(getResultSetNumber());
+		mb.push(getCostEstimate().rowCount());
+		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet",
                 ClassName.NoPutResultSet, 9);
