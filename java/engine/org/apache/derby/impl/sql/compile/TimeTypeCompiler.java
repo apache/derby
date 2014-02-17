@@ -51,6 +51,10 @@ class TimeTypeCompiler extends BaseTypeCompiler
 			return true;
 		}
 
+        // DERBY-896: Allow casts from TIME to TIMESTAMP
+        if (otherType.isTimestampId()) {
+            return true;
+        }
 
 		/*
 		** If same type, convert always ok.

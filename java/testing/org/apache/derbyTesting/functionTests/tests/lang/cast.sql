@@ -327,9 +327,9 @@ values (cast (TIME('11:11:11') as date));
 
 -- this piece of convoluted logic is to ensure that we
 -- get the current date for a conversion of time to timestamp
-values cast (cast (TIME('11:11:11') as timestamp) as char(50)).substring(0, 10).equals(cast (current_date as char(10)));
+values substr(cast (cast (TIME('11:11:11') as timestamp) as char(50)), 1, 10) = cast (current_date as char(10));
 -- now make sure we got the time right
-values cast (cast (TIME('11:11:11') as timestamp) as char(30)).substring(11,21);
+values substr(cast (cast (TIME('11:11:11') as timestamp) as char(30)), 12);
 
 
 values (cast (DATE('1999-09-09') as date));
@@ -473,7 +473,6 @@ select cast(t as double precision) from tab1;
 select cast(t as float) from tab1;
 select cast(t as date) from tab1;
 select cast(t as time) from tab1;
-select cast(t as timestamp) from tab1;
 select cast(t as dec) from tab1;
 
 drop table tab1;

@@ -50,6 +50,11 @@ class DateTypeCompiler extends BaseTypeCompiler
 			return true;
 		}
 
+        // DERBY-896: Allow casts from DATE to TIMESTAMP
+        if (otherType.isTimestampId()) {
+            return true;
+        }
+
 		return (getStoredFormatIdFromTypeId() == 
 				otherType.getTypeFormatId());
 		   

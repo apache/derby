@@ -1139,6 +1139,15 @@ public final class TypeId
 						(formatId == StoredFormatIds.TIMESTAMP_TYPE_ID));
 		}
 
+        /**
+         * Is this a TIMESTAMP?
+         *
+         * @return true if this is a TIMESTAMP
+         */
+        public boolean isTimestampId() {
+            return (formatId == StoredFormatIds.TIMESTAMP_TYPE_ID);
+        }
+
         /** 
          *Is this an XML doc?
          * @return true if this is XML
