@@ -5416,6 +5416,98 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_039" );
     }
     
+   /**
+     * <p>
+     * Verify correct behavior when source table is a values clause wrapped in a view.
+     * </p>
+     */
+    public  void    test_040_valuesView()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create view sr_040( i ) as values 1"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_040( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index idx on t1_040( x, y )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_040 values\n" +
+             "( 1, 100, 1000 ), ( 1, 101, 1000 ), ( 1, 102, 1000 ), ( 1, 103, 1000 ), ( 2, 200, 2000 )\n"
+             );
+
+        // verify the behavior
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_040\n" +
+             "using sr_040 on ( x = 1 )\n" +
+             "when matched and y = 101 then delete\n" +
+             "when matched and y = 102 then update set z = -1000\n" +
+             "when not matched and i > 1 then insert values ( -1, i, 0 )\n",
+             2
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_040 order by x, y, z",
+             new String[][]
+             {
+                 { "1", "100", "1000" },
+                 { "1", "102", "-1000" },
+                 { "1", "103", "1000" },
+                 { "2", "200", "2000" },
+             },
+             false
+             );
+
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_040\n" +
+             "using sr_040 on ( x = 3 )\n" +
+             "when matched and y = 103 then delete\n" +
+             "when matched and y = 102 then update set z = -10000\n" +
+             "when not matched and i = 1 then insert values ( -1, i, 0 )\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_040 order by x, y, z",
+             new String[][]
+             {
+                 { "-1", "1", "0" },
+                 { "1", "100", "1000" },
+                 { "1", "102", "-1000" },
+                 { "1", "103", "1000" },
+                 { "2", "200", "2000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop view sr_040" );
+        goodStatement( dboConnection, "drop table t1_040" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

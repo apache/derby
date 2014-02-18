@@ -234,12 +234,6 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
 
-    /** Re-bind various clauses and lists once we have ResultSet numbers for the driving left join */
-    void    bindResultSetNumbers( MergeNode mergeNode, FromList fullFromList ) throws StandardException
-    {
-        bindRefinement( mergeNode, fullFromList );
-    }
-
     /** Collect the columns mentioned by expressions in this MATCHED clause */
     void    getColumnsInExpressions
         (
@@ -1283,6 +1277,8 @@ public class MatchingClauseNode extends QueryTreeNode
     {
         _clauseNumber = clauseNumber;
 
+        adjustMatchingRefinement( selectList, generatedScan );
+        
         if ( isInsertClause() || isUpdateClause() ) { generateInsertUpdateRow( acb, selectList, generatedScan, hojn ); }
         
         _actionMethodName = "mergeActionMethod_" + _clauseNumber;
@@ -1369,7 +1365,7 @@ public class MatchingClauseNode extends QueryTreeNode
      * The method returns the stuffed row.
      * </p>
      */
-    void    generateInsertUpdateRow
+    private void    generateInsertUpdateRow
         (
          ActivationClassBuilder acb,
          ResultColumnList selectList,
@@ -1397,11 +1393,30 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
+     * Point the column references in the matching refinement at the corresponding
+     * columns returned by the driving left join.
+     * </p>
+     */
+    private void    adjustMatchingRefinement
+        (
+         ResultColumnList selectList,
+         ResultSetNode  generatedScan
+         )
+        throws StandardException
+    {
+        if ( _matchingRefinement != null )
+        {
+            useGeneratedScan( selectList, generatedScan, _matchingRefinement );
+        }
+    }
+    
+    /**
+     * <p>
      * Point the column references in the temporary row at the corresponding
      * columns returned by the driving left join.
      * </p>
      */
-    void    adjustThenColumns
+    private void    adjustThenColumns
         (
          ResultColumnList selectList,
          ResultSetNode  generatedScan,
@@ -1410,15 +1425,8 @@ public class MatchingClauseNode extends QueryTreeNode
         throws StandardException
     {
         ResultColumnList    leftJoinResult = generatedScan.getResultColumns();
-        CollectNodesVisitor<ColumnReference> getCRs =
-            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
-        _thenColumns.accept( getCRs );
 
-        for ( ColumnReference cr : getCRs.getList() )
-        {
-            ResultColumn    leftJoinRC = leftJoinResult.elementAt( getSelectListOffset( selectList, cr ) - 1 );
-            cr.setSource( leftJoinRC );
-        }
+        useGeneratedScan( selectList, generatedScan, _thenColumns );
 
         //
         // For an UPDATE action, the final column in the temporary row is the
@@ -1444,6 +1452,31 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
 
+    /**
+     * <p>
+     * Point a node's ColumnReferences into the row returned by the driving left join.
+     * </p>
+     */
+    private void    useGeneratedScan
+        (
+         ResultColumnList selectList,
+         ResultSetNode  generatedScan,
+         QueryTreeNode  node
+         )
+        throws StandardException
+    {
+        ResultColumnList    leftJoinResult = generatedScan.getResultColumns();
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
+        node.accept( getCRs );
+
+        for ( ColumnReference cr : getCRs.getList() )
+        {
+            ResultColumn    leftJoinRC = leftJoinResult.elementAt( getSelectListOffset( selectList, cr ) - 1 );
+            cr.setSource( leftJoinRC );
+        }
+    }
+    
     /** Return true if the ResultColumn represents a RowLocation */
     private boolean isRowLocation( ResultColumn rc ) throws StandardException
     {

@@ -238,13 +238,6 @@ public final class MergeNode extends DMLModStatementNode
         }
         
         bindLeftJoin( dd );
-
-        // re-bind the matchingRefinement clauses now that we have result set numbers
-        // from the driving left join.
-        for ( MatchingClauseNode mcn : _matchingClauses )
-        {
-            mcn.bindResultSetNumbers( this, _leftJoinFromList );
-        }
 	}
 
     /** Create a FromList for binding a WHEN [ NOT ] MATCHED clause */
@@ -702,7 +695,7 @@ public final class MergeNode extends DMLModStatementNode
     {
         CompilerContext cc = getCompilerContext();
         final int previousReliability = cc.getReliability();
-        
+
         try {
             cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
             
