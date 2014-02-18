@@ -3211,6 +3211,11 @@ class FromBaseTable extends FromTable
 			heapReferencedCols = getResultColumns().getReferencedFormatableBitSet(isCursorTargetTable(), true, false) ;
 		}
 		ResultColumnList heapRCL = getResultColumns().compactColumns(isCursorTargetTable(), false);
+		heapRCL.setIndexRow
+            (
+             baseConglomerateDescriptor.getConglomerateNumber(), 
+             forUpdate()
+             );
         retval = new IndexToBaseRowNode(this,
 										baseConglomerateDescriptor,
 										heapRCL,

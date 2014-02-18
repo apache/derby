@@ -829,7 +829,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 								GeneratedMethod restriction,
 								boolean forUpdate,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost)
+								double optimizerEstimatedCost,
+								int baseColumnCount )
 			throws StandardException
 	{
 		return new IndexRowToBaseRowResultSet(
@@ -847,7 +848,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 								restriction,
 								forUpdate,
 							    optimizerEstimatedRowCount,
-								optimizerEstimatedCost);
+								optimizerEstimatedCost,
+								baseColumnCount);
 	}
 
 	/**

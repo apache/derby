@@ -80,6 +80,14 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	public long restrictionTime;
 
     //
+    // For managing row locations which are returned for the left join
+    // which drives the execution of the MERGE statement.
+    //
+    private int _baseColumnCount;
+    private boolean _includeRowLocation;
+	private FormatableBitSet _heapColsWithoutRowLocation;
+
+    //
     // class interface
     //
     IndexRowToBaseRowResultSet(
@@ -97,7 +105,8 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 					GeneratedMethod restriction,
 					boolean forUpdate,
 					double optimizerEstimatedRowCount,
-					double optimizerEstimatedCost) 
+					double optimizerEstimatedCost,
+					int baseColumnCount) 
 		throws StandardException
 	{
 		super(a, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -111,6 +120,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		this.indexName = indexName;
 		this.forUpdate = forUpdate;
 		this.restriction = restriction;
+        _baseColumnCount = baseColumnCount;
 
 		/* RESOLVE - once we push Qualifiers into the store we
 		 * need to clear their Orderable cache on each open/reopen.
@@ -172,6 +182,18 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 				}
 			}
 		}
+
+        //
+        // The row location column may be needed by the left join which drives
+        // the execution of the MERGE statement.
+        //
+        _includeRowLocation = (_baseColumnCount < accessedHeapCols.getLength());
+        if ( _includeRowLocation )
+        {
+            _heapColsWithoutRowLocation = (FormatableBitSet) accessedHeapCols.clone();
+            _heapColsWithoutRowLocation.clear( accessedHeapCols.getLength() - 1 );
+        }
+
 		recordConstructorTime();
 	}
 
@@ -338,8 +360,12 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 
 				// Fetch the columns coming from the heap
 				boolean row_exists = 
-                    baseCC.fetch(
-                        baseRowLocation, rowArray, accessedHeapCols);
+                    baseCC.fetch
+                    (
+                     baseRowLocation,
+                     rowArray,
+                     _includeRowLocation ? _heapColsWithoutRowLocation : accessedHeapCols
+                     );
 
                 if (row_exists)
                 {
@@ -393,6 +419,11 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 				{
 					currentRow = compactRow;
 				}
+
+                if ( _includeRowLocation )
+                {
+                    currentRow.setColumn( currentRow.nColumns(), baseRowLocation );
+                }
 
 				/* Update the run time statistics */
 				rowsSeen++;

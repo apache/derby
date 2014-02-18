@@ -1086,6 +1086,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param baseColumnCount		Number of columns in the base table
 
 		@return the index row to base row operation as a result set.
 		@exception StandardException thrown when unable to create the
@@ -1105,7 +1106,8 @@ public interface ResultSetFactory {
 								GeneratedMethod restriction,
 								boolean forUpdate,
 								double optimizerEstimatedRowCount,
-								double optimizerEstimatedCost)
+								double optimizerEstimatedCost,
+								int baseColumnCount )
 			throws StandardException;
 
 

@@ -5355,6 +5355,67 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t1_038" );
     }
     
+   /**
+     * <p>
+     * Verify correct behavior when the target table is read via index probing.
+     * </p>
+     */
+    public  void    test_039_indexProbe()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create view sr_039( i ) as values 1"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_039( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index idx on t1_039( x, y )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_039 values ( 1, 100, 1000 ), ( 2, 200, 2000 )"
+             );
+
+        // now verify the behavior
+        goodUpdate
+            (
+             dboConnection,
+             "merge into t1_039\n" +
+             "using sr_039 on ( x = 1 )\n" +
+             "when matched then delete\n",
+             1
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t1_039 order by x",
+             new String[][]
+             {
+                 { "2", "200", "2000" },
+             },
+             false
+             );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop view sr_039" );
+        goodStatement( dboConnection, "drop table t1_039" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
