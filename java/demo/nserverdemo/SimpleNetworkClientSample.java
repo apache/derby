@@ -33,14 +33,12 @@ import javax.sql.DataSource;
 /**
  * The primary purpose of this program is to demonstrate how to obtain
  * client connections using DriverManager or a DataSource
- * and interact with Derby Network Server
+ * and interact with Derby Network Server.
  *
  * In particular,this sample program
- * 1)   loads the Derby Network Client driver
-   (default is the derby network client driver)
- * 2)	obtains a client connection using the Driver Manager
- * 3)	obtains a client connection using a DataSource
- * 4)	tests the database connections by executing a sample query
+ * 1)	obtains a client connection using the DriverManager
+ * 2)	obtains a client connection using a DataSource
+ * 3)	tests the database connections by executing a sample query
  * and then exits the program
  *
  * Before running this program, please make sure that Derby Network Server is up
@@ -56,7 +54,7 @@ public class SimpleNetworkClientSample
 	 * The database is located in the same directory where this program is being
 	 * run. Alternately one can specify the absolute path of the database location
 	 */
-	private static String DBNAME="NSSampleDB";
+	private static String DBNAME="NSSimpleDB";
 
 	/**
 	 * Derby network server port ; default is 1527
@@ -68,7 +66,6 @@ public class SimpleNetworkClientSample
 	 * Derby Network Client Driver class names
 	 */
 
-public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDriver";
 	private static final String DERBY_CLIENT_DS = "org.apache.derby.jdbc.ClientDataSource";
 
 	/**
@@ -82,7 +79,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 
         // Default to using the Derby Client JDBC Driver for database connections
         String url = DERBY_CLIENT_URL;
-        String jdbcDriver = DERBY_CLIENT_DRIVER;
         String jdbcDataSource = DERBY_CLIENT_DS;
 
 	public static void main (String[] args) throws Exception
@@ -101,9 +97,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 		try
 		{
 			System.out.println("Starting Sample client program ");
-
-			// load  the appropriate JDBC Driver
-			loadDriver();
 
 			// get a client connection using DriverManager
 			clientConn1 = getClientDriverManagerConnection();
@@ -200,17 +193,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 
 		return ds;
 
-	}
-
-
-	/**
-	 * Load the appropriate JDBC driver
-	 */
-	public void loadDriver()
-		throws Exception
-	{
-		// Load the  Driver
-		Class.forName(jdbcDriver).newInstance();
 	}
 
 	/**

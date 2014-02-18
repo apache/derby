@@ -21,20 +21,16 @@
 
 package nserverdemo;
 
-import java.util.Properties;
-import java.sql.SQLException;
 import java.sql.DriverManager;
-import java.io.IOException;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.io.PrintWriter;
 import java.util.Properties;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.util.Random;
-import java.lang.Math;
+
 /**
  * NsSampleClientThread thread to perform the NsSampleWork
  */

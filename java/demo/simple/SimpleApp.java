@@ -47,15 +47,14 @@ import java.util.Properties;
  * starts up the Derby engine.</p>
  * <p>
  * When Derby runs in a client/server framework, the application runs in a
- * different JVM from Derby. The application only needs to load the client
- * driver, and the connectivity framework (in this case the Derby Network
- * Server) provides network connections.</p>
+ * different JVM from Derby. The connectivity framework (in this case the Derby
+ * Network Server) provides network connections. The client driver is loaded
+ * automatically.</p>
  */
 public class SimpleApp
 {
-    /* the default framework is embedded*/
+    /* the default framework is embedded */
     private String framework = "embedded";
-    private String driver = "org.apache.derby.jdbc.EmbeddedDriver";
     private String protocol = "jdbc:derby:";
 
     /**
@@ -96,8 +95,8 @@ public class SimpleApp
 
     /**
      * <p>
-     * Starts the actual demo activities. This includes loading the correct
-     * JDBC driver, creating a database by making a connection to Derby,
+     * Starts the actual demo activities. This includes creating a database by
+     * making a connection to Derby (automatically loading the driver),
      * creating a table in the database, and inserting, updating and retrieving
      * some data. Some of the retrieved data is then verified (compared) against
      * the expected results. Finally, the table is deleted and, if the embedded
@@ -121,9 +120,6 @@ public class SimpleApp
 
         System.out.println("SimpleApp starting in " + framework + " mode");
 
-        /* load the desired JDBC driver */
-        loadDriver();
-
         /* We will be using Statement and PreparedStatement objects for
          * executing SQL. These objects, as well as Connections and ResultSets,
          * are resources that should be released explicitly after use, hence
@@ -132,13 +128,10 @@ public class SimpleApp
          * in an array list for convenience.
          */
         Connection conn = null;
-	/* This ArrayList usage may cause a warning when compiling this class
-	 * with a compiler for J2SE 5.0 or newer. We are not using generics
-	 * because we want the source to support J2SE 1.4.2 environments. */
         ArrayList<Statement> statements = new ArrayList<Statement>(); // list of Statements, PreparedStatements
-        PreparedStatement psInsert = null;
-        PreparedStatement psUpdate = null;
-        Statement s = null;
+        PreparedStatement psInsert;
+        PreparedStatement psUpdate;
+        Statement s;
         ResultSet rs = null;
         try
         {
@@ -392,43 +385,6 @@ public class SimpleApp
     }
 
     /**
-     * Loads the appropriate JDBC driver for this environment/framework. For
-     * example, if we are in an embedded environment, we load Derby's
-     * embedded Driver, <code>org.apache.derby.jdbc.EmbeddedDriver</code>.
-     */
-    private void loadDriver() {
-        /*
-         *  The JDBC driver is loaded by loading its class.
-         *  If you are using JDBC 4.0 (Java SE 6) or newer, JDBC drivers may
-         *  be automatically loaded, making this code optional.
-         *
-         *  In an embedded environment, this will also start up the Derby
-         *  engine (though not any databases), since it is not already
-         *  running. In a client environment, the Derby engine is being run
-         *  by the network server framework.
-         *
-         *  In an embedded environment, any static Derby system properties
-         *  must be set before loading the driver to take effect.
-         */
-        try {
-            Class.forName(driver).newInstance();
-            System.out.println("Loaded the appropriate driver");
-        } catch (ClassNotFoundException cnfe) {
-            System.err.println("\nUnable to load the JDBC driver " + driver);
-            System.err.println("Please check your CLASSPATH.");
-            cnfe.printStackTrace(System.err);
-        } catch (InstantiationException ie) {
-            System.err.println(
-                        "\nUnable to instantiate the JDBC driver " + driver);
-            ie.printStackTrace(System.err);
-        } catch (IllegalAccessException iae) {
-            System.err.println(
-                        "\nNot allowed to access the JDBC driver " + driver);
-            iae.printStackTrace(System.err);
-        }
-    }
-
-    /**
      * Reports a data verification failure to System.err with the given message.
      *
      * @param message A message describing what failed.
@@ -461,15 +417,15 @@ public class SimpleApp
     }
 
     /**
-     * Parses the arguments given and sets the values of this class' instance
-     * variables accordingly - that is which framework to use, the name of the
-     * JDBC driver class, and which connection protocol protocol to use. The
+     * Parses the arguments given and sets the values of this class's instance
+     * variables accordingly - that is, which framework to use, the name of the
+     * JDBC driver class, and which connection protocol to use. The
      * protocol should be used as part of the JDBC URL when connecting to Derby.
      * <p>
      * If the argument is "embedded" or invalid, this method will not change
      * anything, meaning that the default values will be used.</p>
      * <p>
-     * @param args JDBC connection framework, either "embedded", "derbyclient".
+     * @param args JDBC connection framework, either "embedded" or "derbyclient".
      * Only the first argument will be considered, the rest will be ignored.
      */
     private void parseArguments(String[] args)
@@ -478,7 +434,6 @@ public class SimpleApp
             if (args[0].equalsIgnoreCase("derbyclient"))
             {
                 framework = "derbyclient";
-                driver = "org.apache.derby.jdbc.ClientDriver";
                 protocol = "jdbc:derby://localhost:1527/";
             }
         }

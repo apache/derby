@@ -25,7 +25,7 @@ import java.sql.*;
 import java.text.*;
 import java.util.*;
 
-import org.apache.commons.math.stat.descriptive.rank.Median;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
 
 import org.apache.derbyDemo.scores.util.*;
 

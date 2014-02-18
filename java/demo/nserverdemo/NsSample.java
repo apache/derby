@@ -41,20 +41,19 @@ import java.io.PrintWriter;
  The program:
 
  1.	starts the Derby Network Server
- 2.	loads the derby client JDBC driver
- 3. creates the database if not already created
- 4. checks to see if the schema is already created, and if not,
- 5. creates the schema which includes the table SAMPLETBL and corresponding indexes.
- 6. connects to the database
- 7. loads the schema by inserting data
- 8. starts client threads to perform database related operations
- 9. has each of the clients perform DML operations (select, insert, delete, update) using JDBC calls,
+ 2. creates the database if not already created
+ 3. checks to see if the schema is already created, and if not,
+ 4. creates the schema which includes the table SAMPLETBL and corresponding indexes.
+ 5. connects to the database
+ 6. loads the schema by inserting data
+ 7. starts client threads to perform database related operations
+ 8. has each of the clients perform DML operations (select, insert, delete, update) using JDBC calls,
     i)	 one client opens an embedded connection to perform database operations
          You can open an embedded connection in the same JVM that starts the Derby Network
          Server.
     ii)  one client opens a client connection to the Derby Network Server to perform database operations.
- 10.waits for the client threads to finish the tasks
- 11.shuts down the Derby Network Server at the end of the demo
+ 9. waits for the client threads to finish the tasks
+ 10.shuts down the Derby Network Server at the end of the demo
 
  <P>
  Usage: java nserverdemo.NsSample
@@ -148,16 +147,6 @@ public class NsSample {
 
 		pw.println("[NsSample] Sample Derby Network Server program demo starting. ");
 		pw.println("Please wait .....................");
-
-		// Load the JDBC Driver
-		try	{
-			Class.forName(jdbcDriver).newInstance();
-		} catch (Exception e) {
-			pw.println("[NsSample] Unable to load the JDBC driver. Following exception was thrown");
-			e.printStackTrace();
-			System.exit(1);  //critical error, so exit
-		  }
-
 
 		// See Derby documentation for description of properties that may be set
 		//  in the context of the network server.

@@ -19,12 +19,14 @@
 
  */
 
-import java.sql.*;
-import javax.sql.DataSource;
 import org.apache.derby.drda.NetworkServerControl;
-import java.util.Properties;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 /**
  * In order for a database to be consistent, only one JVM is allowed
@@ -32,11 +34,11 @@ import java.io.InputStreamReader;
  * is started. Hence, the JVM that starts the Network Server can get an
  * embedded connection to the same database that Network Server is accessing
  * to serve the clients from other JVMs. This solution allows you to take
- * advantage of the performance benefits of embedded driver as well as allow
+ * advantage of the performance benefits of the embedded driver as well as allow
  * for client connections from other JVMs to connect to the same database.
  *
  *
- * In particular,this sample program
+ * In particular, this sample program
  * 1) 	starts the Derby Network Server using a property and
  *		also loads the embedded driver
  * 2)	checks if the Derby Network Server is up and running
@@ -48,9 +50,9 @@ import java.io.InputStreamReader;
  * 7)	closes the connections
  * 8)	shuts down the Derby Network Server before exiting the program.
  *
- * Note, on running this program, there will be a NSSimpleDB database directory
- * created if not present already and there will be a derby.log file which
- * contains messages from Derby
+ * Note: On running this program, there will be a NSSimpleDB database directory
+ * created if not present already, and there will be a derby.log file which
+ * contains messages from Derby.
  *
  *  <P>
  *  Usage: java SimpleNetworkServerSample
@@ -61,7 +63,7 @@ public class SimpleNetworkServerSample
 
 	/*
 	 * The database is located in the same directory where this program is being
-	 * run. Alternately one can specify the absolute path of the database location
+	 * run. Alternatively, you can specify the absolute path of the database location
 	 */
 	private static String DBNAME="NSSimpleDB";
 
@@ -76,11 +78,11 @@ public class SimpleNetworkServerSample
 			startNetworkServer();
 
 			/*
-			  Can now spawn threads to do many wonderous things with
+			  Can now spawn threads to do many things with
 			  embedded connections but allow others to connect via
 			  Network Server. But for sample purposes, an embedded connection
 			  will be obtained and a sample query executed before waiting for
-			  the user to give input to shutdown the server.
+			  the user to give input to shut down the server.
 			*/
 
 		}
@@ -93,9 +95,9 @@ public class SimpleNetworkServerSample
 		try
 		{
 			// get an embedded connection
-			// Since Network Server was started in this jvm,  this JVM can get an embedded
-			// connection to the same database that Network Server
-			// is accessing to serve clients from other JVM's.
+			// Since the Network Server was started in this JVM, this JVM can get an embedded
+			// connection to the same database that the Network Server
+			// is accessing to serve clients from other JVMs.
 			// The embedded connection will be faster than going across the
 			// network
 			embeddedConn = getEmbeddedConnection(DBNAME,"create=true;");
@@ -125,7 +127,7 @@ public class SimpleNetworkServerSample
 				embeddedConn.close();
 			try
 			{
-				// shutdown Derby Network Server
+				// shut down Derby Network Server
 				DriverManager.getConnection("jdbc:derby:;shutdown=true");
 			}
 			catch(SQLException se)
@@ -140,24 +142,24 @@ public class SimpleNetworkServerSample
 	/**
 	 *  Setting the derby.drda.startNetworkServer property to true,
 	 *  either in the System properties as we do here or in
-	 *  the derby.properties file will cause Network Server to
+	 *  the derby.properties file, will cause the Network Server to
 	 *  start as soon as Derby is loaded.
 	 *
-	 *  To load Derby we just need to load the embedded
-	 *  Driver with:
+	 *  To load Derby, we just need to load the embedded
+	 *  driver with:
 	 *  Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 	 *
 	 *  Then we will test for a while and make sure it is up, before
 	 *  we give up.
   	 *
-	 *  Alternately Network Server might be started from the command
+	 *  Alternatively, the Network Server might be started from the command
 	 *  line or from some other program. Note: only the JVM that starts
 	 *  Network Server can make an embedded connection.
 	 */
 
 	public static void startNetworkServer() throws Exception
 	{
-		// Start network server using the property
+		// Start the Network Server using the property
 		// and then wait for the server to start by testing a connection
 		startWithProperty();
 		waitForStart();
@@ -166,13 +168,13 @@ public class SimpleNetworkServerSample
 	/**
 	 * Start Derby Network Server using the property
 	 * derby.drda.startNetworkServer. This property can be set as a system property or
-	 * or by setting in derby.properties file.
-	 * Setting this property to true , starts the Network Server when
+	 * or in the derby.properties file.
+	 * Setting this property to true starts the Network Server when
 	 * Derby boots up.
-	 * The port at which the Derby Network Server listens to can be changed
+	 * The port at which the Derby Network Server listens can be changed
 	 * by setting the derby.drda.portNumber property. By default, the server starts
-	 * at port 1527
-	 * Server output goes to derby.log
+	 * at port 1527.
+	 * Server output goes to derby.log.
 	 */
 
 	private static void startWithProperty() throws Exception
@@ -180,7 +182,7 @@ public class SimpleNetworkServerSample
 		System.out.println("Starting Network Server");
 		System.setProperty("derby.drda.startNetworkServer","true");
 
-		// Booting derby
+		// Booting Derby
 		Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 	}
 
@@ -188,7 +190,7 @@ public class SimpleNetworkServerSample
 
 	/**
 	 * Tries to check if the Network Server is up and running by calling ping
-	 * If successful, then it returns else tries for 50 seconds before giving up and throwing
+	 * If successful, it returns; otherwise, it tries for 50 seconds before giving up and throwing
 	 * an exception.
 	 * @throws Exception when there is a problem with testing if the Network Server is up
 	 * and running
@@ -199,9 +201,9 @@ public class SimpleNetworkServerSample
 		// Server instance for testing connection
 		org.apache.derby.drda.NetworkServerControl server = null;
 
-		// Use NetworkServerControl.ping() to wait for
-		// NetworkServer to come up.  We could have used
-		// NetworkServerControl to start the server but the property is
+		// Use NetworkServerControl.ping() to wait for the
+		// Network Server to come up.  We could have used
+		// NetworkServerControl to start the server, but the property is
 		// easier.
 		server = new NetworkServerControl();
 
@@ -228,15 +230,16 @@ public class SimpleNetworkServerSample
 	}
 
 	/**
-	 * Used to return an embedded Derby connection
+	 * Used to return an embedded Derby connection.
 	 * The protocol used is "jdbc:derby:dbName" where dbName is the database name
-	 * @pre the derby embedded jdbc driver must be loaded before calling this method
-	 * Alternately, if the derby network server is started in this jvm, then the embedded driver
+	 * @pre the Derby embedded JDBC driver must be loaded before calling
+	 * this method
+	 * Alternatively, if the Derby Network Server is started in this JVM, the embedded driver
 	 * org.apache.derby.jdbc.EmbeddedDriver is already loaded and it need not be loaded again.
 	 * @param	dbName	database name (ie location of the database)
 	 * @param 	attributes attributes for the database connection
-	 *			example, create=true;
-	 *					 upgrade=true;
+	 *			(for example, create=true;
+	 *					 upgrade=true;)
 	 * @return	returns embedded database connection
 	 * @throws Exception if there is any error
 	 */
@@ -287,10 +290,10 @@ public class SimpleNetworkServerSample
 
 
 	/**
-	 * This method waits until the user hits enter to stop the server
+	 * This method waits until the user presses Enter to stop the server
 	 * and eventually exit this program
 	 * Allows clients to continue to connect using client connections from other
-	 * jvms to Derby Network Server that was started in this program
+	 * JVMs to the Derby Network Server that was started in this program
 	 */
  	private static void waitForExit() throws Exception
  	{

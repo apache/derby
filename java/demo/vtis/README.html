@@ -1,0 +1,48 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to you under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="StyleSheet" href="../csfull.css" type="text/css" media="screen">
+<title>Table Functions Demo</title>
+</head>
+<body>
+<h1 class="Title">Table Functions Demo</h1>
+<p>The <code><i>DERBY_HOME</i>/demo/programs/vtis</code> directory contains
+sample table functions.</p>
+<p>This code is now built as part of the standard Derby build.
+To build the API documentation, invoke the <code>demodocs</code> target in the
+top-level build script.</p>
+<p>An <code>.sql</code> script, <code>sql/demoFileVtis.sql</code>, is provided
+to test-drive these table functions. Use Derby's <code>ij</code> tool to run
+this script. The script needs to be customized as explained in its header.</p>
+<p>This script exercises the following table functions:</p>
+<ul>
+<li><code>PropertyFileVTI</code> - a table function for presenting a property
+file as a table</li>
+<li><code>ApacheServerLogVTI</code> - an example of an
+<code>org.apache.derby.vti.XmlVTI</code> which makes a table out of an Apache
+web server log</li>
+<li><code>DerbyJiraReportVTI</code> - an example of an
+<code>org.apache.derby.vti.XmlVTI</code> which makes a table out of a JIRA
+report</li>
+<li><code>SubversionLogVTI</code> - a table function for making a table from the
+output of the <code>svn log</code> command</li>
+</ul>
+</body>
+</html>

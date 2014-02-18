@@ -140,15 +140,6 @@ public  class   Database
         throws SQLException
     {
         if ( _conn != null ) { return _conn; }
-        
-        try {
-            Class.forName( DERBY_EMBEDDED_DRIVER );
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new SQLException
-                ( "Could not locate " + DERBY_EMBEDDED_DRIVER );
-        }
 
         String      connectionURL =
             DERBY_PROTOCOL + DATABASE_NAME + CREATE_ME;

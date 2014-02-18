@@ -46,25 +46,12 @@ public class WwdClientExample
         +  " WISH_ITEM VARCHAR(32) NOT NULL) " ;
       String answer;
 
-      //   Beginning of JDBC code sections   
-      //   ## LOAD DRIVER SECTION ##
-      try	        {
-          /*
-          **  Load the Derby driver. 
-          **     When the embedded Driver is used this action start the Derby engine.
-          **  Catch an error and suggest a CLASSPATH problem
-           */
-          Class.forName(driver); 
-          System.out.println(driver + " loaded. ");
-      } catch(java.lang.ClassNotFoundException e)     {
-          System.err.print("ClassNotFoundException: ");
-          System.err.println(e.getMessage());
-          System.out.println("\n    >>> Please check your CLASSPATH variable   <<<\n");
-      }
+      //   JDBC code sections   
       //  Beginning of Primary DB access section
       //   ## BOOT DATABASE SECTION ##
      try {
-            // Create (if needed) and connect to the database
+            // Create (if needed) and connect to the database.
+            // The driver is loaded automatically.
             conn = DriverManager.getConnection(connectionURL);		 
             System.out.println("Connected to database " + dbName);
             

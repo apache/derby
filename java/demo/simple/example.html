@@ -46,22 +46,22 @@
   This example program is a minimal JDBC application written in Java. JDBC is
   the primary API for interacting with Apache Derby using Java. This program:
 </p>
-<ul class="Normal">
-  <li class="Normal">runs in either embedded mode (the default) or as a client in a client/server environment, depending on the arguments passed to the program
-  <li class="Normal">starts up the Derby engine, if running in embedded mode
-  <li class="Normal">connects to the Derby Network Server, if running in client mode
-  <li class="Normal">creates and connects to a database
-  <li class="Normal">creates a table
-  <li class="Normal">inserts data
-  <li class="Normal">updates data
-  <li class="Normal">selects data
-  <li class="Normal">drops a table
-  <li class="Normal">disconnects
-  <li class="Normal">shuts down the database, if running in embedded mode
-</ul>
+<ol class="Normal">
+  <li class="Normal">Runs in either embedded mode (the default) or as a client in a client/server environment, depending on the arguments passed to the program
+  <li class="Normal">Starts up the Derby engine, if running in embedded mode
+  <li class="Normal">Connects to the Derby Network Server, if running in client mode
+  <li class="Normal">Creates and connects to a database
+  <li class="Normal">Creates a table
+  <li class="Normal">Inserts data
+  <li class="Normal">Updates data
+  <li class="Normal">Selects data
+  <li class="Normal">Drops a table
+  <li class="Normal">Disconnects
+  <li class="Normal">Shuts down the database, if running in embedded mode
+</ol>
 <p>
   This program is intended to run in Virtual Machines for the Java Platform
-  supporting J2SE 1.4.2 or newer.
+  supporting Java SE 6 or newer.
 </p>
 <p>
   In embedded mode, the application starts up an instance of Derby within the
@@ -133,8 +133,8 @@ path separators and environment variable references." class="simple">
   <a href="http://db.apache.org/derby" target="_new">Apache Derby web site</a>.
 </p>
 <p>
-  If you are relatively new to databases or JDBC,
-  <a href="http://java.sun.com/docs/books/tutorial/jdbc/basics/index.html" target="_new">Sun's
+  If you are relatively new to databases or JDBC, the
+  <a href="http://docs.oracle.com/javase/tutorial/jdbc/basics/index.html" target="_new">Oracle
   JDBC basics tutorial</a> may be a good starting point.
 </p>
 
@@ -323,7 +323,6 @@ NOT FOUND IN CLASS PATH:
     <p class="BodyRelative">A successful run produces the following output:</p>
     <pre class="Output">
 SimpleApp starting in embedded mode
-Loaded the appropriate driver
 Connected to and created database derbyDB
 Created table location
 Inserted 1956 Webster
@@ -496,7 +495,6 @@ SUCCESS: All Derby related classes found in class path.
     <p class="BodyRelative">A successful run produces the following output:</p>
     <pre class="Output">
 SimpleApp starting in derbyclient mode
-Loaded the appropriate driver
 Connected to and created database derbyDB
 Created table location
 Inserted 1956 Webster
@@ -517,7 +515,7 @@ SimpleApp finished
 
 <!-- ##########  FOOTER (VERSION INFO)  ########## -->
 <hr>
-<p class=NavBarVersion>Last updated for Apache Derby Version 10.3.2</p>
+<p class=NavBarVersion>Last updated for Apache Derby Version 10.11</p>
 
 </body>
 </html>

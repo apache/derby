@@ -41,48 +41,42 @@ other JVMs. This solution allows you to take advantage of the performance
 benefits of the embedded driver as well as allow for client connections from other
 JVMs to connect to the same database.</p>
 
-<p>In this example, the following two programs show how to setup the server and
+<p>In this example, the following two programs show how to set up the server and
 client programs when interacting with the Network Server.</p>
-
-<p>SimpleNetworkServerSample.java:
-This program starts the Derby Network Server as well as the embedded
-driver and waits for clients to connect.</p>
-
-<p>SimpleNetworkClientSample.java:
+<ul>
+<li><tt>SimpleNetworkServerSample.java</tt>:
+This program starts the Derby Network Server and waits for clients to
+connect.</li>
+<li><tt>SimpleNetworkClientSample.java</tt>:
 This is the client program that interacts with the Derby Network Server
-from another JVM.</p>
-
-<h3>SimpleNetworkServerSample program</h3>
+from another JVM.</li>
+</ul>
+<h2>SimpleNetworkServerSample program</h2>
 
 <p>In particular, this program:</p>
 
-<ul>
- <li>starts the Derby Network Server using a property and also loads the embedded driver</li>
- <li>checks if the Derby Network Server is up and running</li>
- <li>creates the database 'NSSimpleDB' if not already created </li>
- <li>obtains an embedded database connection</li>
- <li>tests the database connection by executing a sample query</li>
- <li>allows for client connections to connect to the server until the user decides to stop the server and exit the program</li>
- <li>closes the connection</li>
- <li>shuts down the Derby
-     Network Server before exiting the program.</li>
-</ul>
+<ol>
+ <li>Starts the Derby Network Server using a property and loads the
+     embedded driver</li>
+ <li>Checks if the Derby Network Server is up and running</li>
+ <li>Creates the database <tt>NSSimpleDB</tt> if not already created </li>
+ <li>Obtains an embedded database connection</li>
+ <li>Tests the database connection by executing a sample query</li>
+ <li>Allows client connections to connect to the server until the user decides to stop the server and exit the program</li>
+ <li>Closes the connection</li>
+ <li>Shuts down the Derby Network Server before exiting the program</li>
+</ol>
 
-<p>The following files should be installed in the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</span></tt> directory in
+<p>The following files are needed in the 
+<tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</span></tt> directory in
 order to run this sample program:</p>
 
 <ul>
- <li> Source file:</li>
- <ul>
-  <li><tt>SimpleNetworkServerSample.java</tt></li>
- </ul>
- <li>Compiled class file:</li>
- <ul>
-  <li><tt>SimpleNetworkServerSample.class</tt></li>
- </ul>
+ <li>Source file: <br><tt>SimpleNetworkServerSample.java</tt></li>
+ <li>Compiled class file: <br><tt>SimpleNetworkServerSample.class</tt></li>
 </ul>
 
-<h2>How to run the SimpleNetworkServerSample program</h2>
+<h3>How to run the SimpleNetworkServerSample program</h3>
 
 <p>To run this simple Derby Network Server sample program:</p>
 
@@ -92,7 +86,7 @@ order to run this sample program:</p>
      where you installed Derby.</li>
  <li>Set the CLASSPATH to include the following jar files in order to run this
      program.</li>
-<ul><li>the current directory (".")</li>
+<ul><li>The current directory (".")</li>
 <li><tt>derbynet.jar</tt>: <BR>The Network Server jar file. It must be in your CLASSPATH since we start the Network Server in this program.</li>
 <li><tt>derby.jar</tt>: <BR>The Derby database engine jar file.</li>
 </ul>
@@ -109,23 +103,24 @@ order to run this sample program:</p>
 </li></ol>
 <p>You should receive output similar to the following if the program runs successfully:</p>
 
-<tt>
-Starting Network Server<br>
-Testing if Network Server is up and running!<br>
-Derby Network Server now running<br>
-Got an embedded connection.<br>
-Testing embedded connection by executing a sample query <br>
-number of rows in sys.systables = 16<br>
-<br>
-While my app is busy with embedded work, ij might connect like this:<br>
-<br>
-        $ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby://localhost:1527/ org.apache.derby.tools.ij<br>
-        ij> connect 'NSSimpleDB';<br>
-<br>
-<br>
-Clients can continue to connect: <br>
-Press [Enter] to stop Server<br>
-</tt>
+<pre>
+Starting Network Server
+Testing if Network Server is up and running!
+Derby Network Server now running
+Got an embedded connection.
+Testing embedded connection by executing a sample query 
+number of rows in sys.systables = 23
+
+While my app is busy with embedded work, ij might connect like this:
+
+        $ java -Dij.user=me -Dij.password=pw -Dij.protocol=jdbc:derby://localhost:1527/ org.apache.derby.tools.ij
+        ij> connect 'NSSimpleDB';
+
+Clients can continue to connect: 
+Press [Enter] to stop Server
+</pre>
+<p><b>Do not press Enter at this time.</b> Leave the server running while you run the
+<tt>SimpleNetworkClientSample</tt> program.</p>
 
 <p>Running this program will also create new directories and files:</p>
 
@@ -138,19 +133,18 @@ This log file contains Derby progress and error messages.
 </li></ul>
 
 
-<h2>Example of a Client connecting to the Network Server</h2>
+<h2>Example of a client connecting to the Network Server</h2>
 
 <h3>SimpleNetworkClientSample program</h3>
 
 <p>This program:</p>
 
-<ul>
- <li>loads the Derby Network Client JDBC Driver</li>
- <li>obtains a client connection using the Driver Manager</li>
- <li>obtains a client connection using a DataSource</li>
- <li>tests the database connections by executing a sample query</li>
- <li>closes the connections and then exits the program.</li>
-</ul>
+<ol>
+ <li>Obtains a client connection using the DriverManager</li>
+ <li>Obtains a client connection using a DataSource</li>
+ <li>Tests the database connections by executing a sample query</li>
+ <li>Closes the connections and then exits the program</li>
+</ol>
 
 <p>The following files should be installed in the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</tt> directory in order to run this sample program:</p>
 <ul>
@@ -158,19 +152,21 @@ This log file contains Derby progress and error messages.
  <li>Compiled class file: <br><tt>SimpleNetworkClientSample.class</tt></li>
 </ul>
 
-<h2>How to run the SimpleNetworkClientSample program</h2>
+<h3>How to run the SimpleNetworkClientSample program</h3>
 
-<p>To connect to the Network Server that has been started as part of the SimpleNetworkServerSample program:</p>
+<p>To connect to the Network Server:</p>
 
 <ol>
- <li>Open a command prompt and change directories to the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo</tt> directory, where <tt><i>DERBY_INSTALL</i></tt> is the directory where you installed Derby.</li>
+ <li>Open another command prompt and change directories to the
+     <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo</tt> directory, where
+     <tt><i>DERBY_INSTALL</i></tt> is the directory where you installed Derby.</li>
  <li>Clients of Derby Network Server only need the following jar files in the CLASSPATH in order to connect to the Network Server.<span>  </span>Set the CLASSPATH to include the following jar files:
  <ul>
-  <li>the current directory (".")</li>
-<li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use
+  <li>The current directory (".")</li>
+  <li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use
 the Derby Client Network JDBC Driver.</li>
  </ul></li>
-<li>Once you have set up your environment correctly, execute the
+  <li>Once you have set up your environment correctly, execute the
 application from the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</tt> directory:
 <pre><tt>java SimpleNetworkClientSample [<i>driverType</i>]</tt></pre>
 <p>where the possible values for <i>driverType</i> are:</p>
@@ -189,12 +185,14 @@ Got a client connection via the DriverManager.<br>
 connection from datasource; getDriverName = Apache Derby Network Client JDBC Driver<br>
 Got a client connection via a DataSource.<br>
 Testing the connection obtained via DriverManager by executing a sample query <br>
-number of rows in sys.systables = 16<br>
+number of rows in sys.systables = 23<br>
 Testing the connection obtained via a DataSource by executing a sample query <br>
-number of rows in sys.systables = 16<br>
+number of rows in sys.systables = 23<br>
 Goodbye!<br>
 </tt>
 
+<p>After running the program, return to the command prompt where you ran the
+<tt>SimpleNetworkServerSample</tt> program and press Enter.</p>
 </body>
 
 </html>
