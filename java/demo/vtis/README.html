@@ -44,5 +44,78 @@ report</li>
 <li><code>SubversionLogVTI</code> - a table function for making a table from the
 output of the <code>svn log</code> command</li>
 </ul>
+
+<h2 class="Heading2"><a id="runembedded" name="runembedded">How to run this sample application in an embedded environment</a>
+</h2>
+<p>
+This demo relies on the Derby embedded JDBC driver and the interactive
+ij tool (used for issuing SQL):
+</p>
+
+<table class="listing">
+  <tr>
+    <td class="listItem">Class name:</td>
+    <td class="listItem"><em class="javaObject">org.apache.derby.jdbc.EmbeddedDriver</em></td>
+  </tr>
+  <tr>
+    <td class="listItem">Library:</td>
+    <td class="listItem"><em class="fileName">derby.jar</em></td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<table class="listing">
+  <tr>
+    <td class="listItem">Class name:</td>
+    <td class="listItem"><em class="javaObject">org.apache.derby.tools.ij</em></td>
+  </tr>
+  <tr>
+    <td class="listItem">Library:</td>
+    <td class="listItem"><em class="fileName">derbytools.jar</em></td>
+  </tr>
+</table>
+
+<p>&nbsp;</p>
+
+<ol class="decimal">
+  <li class="Normal">Open a command window.
+  <li class="Normal">If you haven't set it already on a system-wide basis, set
+  the <var class="envVar">DERBY_HOME</var> environment variable to the location
+  of this Derby installation. This is not strictly required to run the demo, but
+  this environment variable will be used later on this page to refer to the
+  required Derby resources, files, etc. Examples:
+    <p class="BodyRelative">UNIX (ksh/bash)</p>
+    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
+  <li class="Normal">Change directory to the <em class="fileName">$DERBY_HOME/demo/programs/vtis</em> directory.
+  <li class="Normal">In the command window, set the CLASSPATH to include the
+  current directory (the location of <em class="fileName">demoFileVtis.sql</em>),
+  Derby's embedded driver library (<em class="fileName">derby.jar</em>),
+  and Derby's tool library (<em class="fileName">derbytools.jar</em>).
+  (You may skip this step and provide the classpath as an option to the JVM
+  launch command instead, refer to your JVM's documentation for details).
+    <p class="BodyRelative">This may be done as follows:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export CLASSPATH=.:${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar</p>
+    <p class="BodyRelative">WINDOWS:</p>
+    <p class="commandLine">set CLASSPATH=.;%DERBY_HOME%\lib\derby.jar;%DERBY_HOME%\lib\derbytools.jar</p>
+  <li class="Normal">Once you have your environment set up correctly, execute
+    the demo from the same directory (<em class="fileName">demo/programs/vtis</em>):
+    <p class="CommandLine">java org.apache.derby.tools.ij demoFileVtis.sql</p>
+    <p class="BodyRelative">A successful run produces many pages of SQL
+  commands and query results.</p>
+    <p class="BodyRelative">
+      If any error messages appear, and you are unable to resolve the error(s),
+      ask for help on the derby-user
+      <a href="http://db.apache.org/derby/derby_mail.html" target="_new">mailing list</a>.
+    </p>
+</ol>
+
+
+
+
+
 </body>
 </html>

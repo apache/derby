@@ -20,14 +20,6 @@
 -- This script demonstrates how to declare and use several sample
 -- table functions.
 --
--- Several of the function calls in this script assume that your
--- Derby code client can be found at:
---
---          /opt/DerbyTrunk
---
---  If that is not the case, then you will need to adjust this
---  script accordingly.
---
 ----------------------------------------------------------------------------------------
 
 connect 'jdbc:derby:memory:vtitest;create=true';
@@ -111,7 +103,7 @@ external name 'org.apache.derbyDemo.vtis.example.PropertyFileVTI.propertyFileVTI
 
 -- how active were the committers in 2006?
 select committer, count(*) as commits
-from table( svnLogReader( '/opt/DerbyTrunk/java/demo/vtis/data/svn_log.txt' ) ) s
+from table( svnLogReader( 'svn_log.txt' ) ) s
 where commit_time between timestamp( '2006-01-01 00:00:00' ) and timestamp( '2007-01-01 00:00:00' )
 group by committer
 ;
@@ -124,11 +116,11 @@ group by committer
 
 -- find the messages which have not been translated into french
 select messageID, substr( m_english.messageText, 1, 100 )
-from table( propertyFileVTI( '/opt/DerbyTrunk/generated/java/org/apache/derby/loc/messages_en.properties' ) ) m_english
+from table( propertyFileVTI( 'messages_en.properties' ) ) m_english
 where m_english.messageID not in
 (
     select m_french.messageID
-    from table( propertyFileVTI( '/opt/DerbyTrunk/java/engine/org/apache/derby/loc/messages_fr.properties' ) ) m_french
+    from table( propertyFileVTI( 'messages_fr.properties' ) ) m_french
 );
 
 
@@ -144,24 +136,24 @@ where m_english.messageID not in
 
 -- this vti treats accessDate as a timestamp and fileSize as an int
 select s.*
-from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+from table( apacheNaturalLogFile( 'ApacheServerLog.xml' ) ) s
 ;
 
 -- look for relevant status codes
 select s.*
-from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+from table( apacheNaturalLogFile( 'ApacheServerLog.xml' ) ) s
 where s.statusCode = 206
 ;
 
 -- look for relevant IP addresses
 select s.*
-from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+from table( apacheNaturalLogFile( 'ApacheServerLog.xml' ) ) s
 where IP like '208%'
 ;
 
 -- look for log records in a time range
 select s.*
-from table( apacheNaturalLogFile( 'file:///opt/DerbyTrunk/java/demo/vtis/data/ApacheServerLog.xml' ) ) s
+from table( apacheNaturalLogFile( 'ApacheServerLog.xml' ) ) s
 where accessDate between timestamp( '2002-07-01 08:40:56.0' ) and timestamp( '2002-07-01 08:42:56.0' )
 ;
 
@@ -171,14 +163,14 @@ where accessDate between timestamp( '2002-07-01 08:40:56.0' ) and timestamp( '20
 
 -- treat keys as ints and sort Derby JIRAs by key
 select s.*
-from table( apacheNaturalJiraReport( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
+from table( apacheNaturalJiraReport( 'DerbyJiraReport.xml' ) ) s
 where s.keyCol between 2800 and 2950
 order by keyCol
 ;
 
 -- eliminate uninteresting Derby JIRAs
 select s.*
-from table( apacheNaturalJiraReport( 'file:///opt/DerbyTrunk/java/demo/vtis/data/DerbyJiraReport.xml' ) ) s
+from table( apacheNaturalJiraReport( 'DerbyJiraReport.xml' ) ) s
 where type != 'Sub-task'
 order by keyCol
 ;

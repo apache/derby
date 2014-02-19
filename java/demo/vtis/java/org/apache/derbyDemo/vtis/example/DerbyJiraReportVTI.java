@@ -21,8 +21,8 @@ limitations under the License.
 
 package org.apache.derbyDemo.vtis.example;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
@@ -80,11 +80,11 @@ public  class   DerbyJiraReportVTI  extends XmlVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** Create from an URL string identifying the server log file */
+    /** Create from an file name identifying the server log file */
     public  static  DerbyJiraReportVTI  apacheNaturalJiraReport( String xmlResourceName )
         throws Exception
     {
-        return new DerbyJiraReportVTI( (new URL( xmlResourceName )).openStream() );
+        return new DerbyJiraReportVTI( new FileInputStream( xmlResourceName ) );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

@@ -21,8 +21,8 @@ limitations under the License.
 
 package org.apache.derbyDemo.vtis.example;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 
@@ -82,11 +82,11 @@ public  class   ApacheServerLogVTI  extends XmlVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** Create from an URL string identifying the server log file */
+    /** Create from a file name identifying the server log file */
     public  static  ApacheServerLogVTI  apacheNaturalLogFile( String xmlResourceName )
         throws Exception
     {
-        return new ApacheServerLogVTI( (new URL( xmlResourceName )).openStream() );
+        return new ApacheServerLogVTI( new FileInputStream( xmlResourceName ) );
     }
     
 
