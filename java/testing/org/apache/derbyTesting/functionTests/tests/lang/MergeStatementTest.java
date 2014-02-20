@@ -5631,6 +5631,71 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t3_041" );
     }
     
+   /**
+     * <p>
+     * Verify that we don't unnecessarily raise missing schema errors.
+     * </p>
+     */
+    public  void    test_042_missingSchema()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table deleteTable_042\n" +
+             "(\n" +
+             "    publicSelectColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table selectTable_042\n" +
+             "(\n" +
+             "    selectColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on  selectTable_042 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on  deleteTable_042 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant delete on deleteTable_042 to ruth"
+             );
+
+        //
+        // Verify that the unqualified reference to publicSelectColumn
+        // does not fail because the RUTH schema does not exist.
+        //
+        String  mergeStatement =
+            "merge into test_dbo.deleteTable_042\n" +
+            "using test_dbo.selectTable_042\n" +
+            "on publicSelectColumn = selectColumn\n" +
+            "when matched then delete\n";
+        expectExecutionWarning( ruthConnection, NO_ROWS_AFFECTED, mergeStatement );
+        expectExecutionWarning( dboConnection, NO_ROWS_AFFECTED, mergeStatement );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table deleteTable_042" );
+        goodStatement( dboConnection, "drop table selectTable_042" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

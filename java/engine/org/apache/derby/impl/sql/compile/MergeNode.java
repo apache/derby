@@ -633,22 +633,12 @@ public final class MergeNode extends DMLModStatementNode
     void    addColumn
         (
          HashMap<String,ColumnReference> map,
-         ColumnReference    originalCR,
+         ColumnReference    cr,
          int    mergeTableID
          )
         throws StandardException
     {
-        ColumnReference cr = originalCR;
-        
-        if ( cr.getTableName() == null )
-        {
-            ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
-            TableName       tableName = new TableName( null, rc.getTableName(), getContextManager() );
-            cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
-        }
-
         associateColumn( cr, mergeTableID );
-        originalCR.setMergeTableID( cr.getMergeTableID() );
 
         String  key = makeDCMKey( cr.getTableName(), cr.getColumnName() );
         if ( map.get( key ) == null )
