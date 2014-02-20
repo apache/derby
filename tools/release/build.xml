@@ -243,6 +243,8 @@
                   prefix="${derby.bin}/demo/databases"/>
       <zipfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
+      <zipfileset dir="${basedir}/classes/org/apache/derbyDemo" includes="vtis/**"
+                  prefix="${derby.bin}/demo/programs/vtis/org/apache/derbyDemo"/>
 
       <!-- docs -->
       <zipfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif,**/*.css"
