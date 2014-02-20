@@ -607,6 +607,11 @@ Guide.
                 <text>Scalar subquery is only allowed to return a single row.</text>
             </msg>
 
+            <msg>
+                <name>21000.S.1</name>
+                <text>A row in the target table qualifies for more than one DELETE or UPDATE action.</text>
+            </msg>
+
         </family>
 
 

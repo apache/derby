@@ -694,6 +694,7 @@ public interface SQLState {
 	
 	String LANG_MISSING_PARMS                                          = "07000";
 	String LANG_SCALAR_SUBQUERY_CARDINALITY_VIOLATION                  = "21000";
+	String LANG_REDUNDANT_SUBJECT_ROW                         = "21000.S.1";
 	String LANG_STRING_TRUNCATION                                      = "22001";
 	String LANG_CONCAT_STRING_OVERFLOW                                      = "54006";
 	String LANG_OUTSIDE_RANGE_FOR_DATATYPE                             = "22003";

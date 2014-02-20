@@ -243,4 +243,13 @@ public class SQLRef extends DataType implements RefDataValue
 		else
 			return value.toString();
 	}
+
+    /**
+     * Adding this overload makes it possible to use SQLRefs as keys in HashMaps.
+     */
+    public  int hashCode()
+    {
+        if ( value == null ) { return 0; }
+        else { return value.hashCode(); }
+    }
 }

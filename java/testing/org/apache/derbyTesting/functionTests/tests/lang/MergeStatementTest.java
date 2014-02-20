@@ -75,6 +75,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      NO_SYNONYMS_IN_MERGE = "42XAP";
     private static  final   String      NO_DCL_IN_MERGE = "42XAQ";
     private static  final   String      PARAMETER_NOT_SET = "07000";
+    private static  final   String      CARDINALITY_VIOLATION = "21000";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -4737,9 +4738,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_030\n" +
-             "using t2_030 on true\n" +
-             "when matched then update set y = y || 'x'\n",
-             6
+             "using t2_030 on t1_030.x = t2_030.x\n" +
+             "when matched and y is not null then update set y = y || 'x'\n",
+             1
              );
         assertResults
             (
@@ -5506,6 +5507,128 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( dboConnection, "drop view sr_040" );
         goodStatement( dboConnection, "drop table t1_040" );
+    }
+    
+   /**
+     * <p>
+     * Verify the same target row can't be touched twice by a MERGE statement.
+     * </p>
+     */
+    public  void    test_041_cardinalityViolations()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create view sr_041( i ) as values ( 1 ), ( 3 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_041( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index idx on t1_041( x, y )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_041( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t3_041( x int, y int, z int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index t2_idx_041 on t2_041( x, y )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index t3_idx_041 on t3_041( x, y )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_041 values\n" +
+             "( 1, 100, 1000 ), ( 1, 101, 1000 ), ( 1, 102, 1000 ), ( 1, 103, 1000 ), ( 2, 200, 2000 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_041 values\n" +
+             "( 1, 100, 1000 ), ( 1, 101, 1000 ), ( 2, 200, 2000 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t3_041 values\n" +
+             "( 1, 100, 1000 ), ( 1, -101, 1000 ), ( 3, 300, 3000 )\n"
+             );
+
+        //
+        // Attempt to delete the same row twice.
+        //
+        expectExecutionError
+            ( dboConnection, CARDINALITY_VIOLATION,
+              "merge into t1_041\n" +
+              "using sr_041 on ( x = 1 )\n" +
+              "when matched and y = 101 then delete\n" +
+              "when matched and y = 102 then update set z = -1000\n" +
+              "when not matched and i > 1 then insert values ( -1, i, 0 )\n"
+              );
+        expectExecutionError
+            ( dboConnection, CARDINALITY_VIOLATION,
+              "merge into t2_041\n" +
+              "using t3_041 on t2_041.x = t3_041.x\n" +
+              "when matched and t2_041.y = 101 then delete\n"
+              );
+
+        //
+        // attempt to update the same row twice
+        //
+        expectExecutionError
+            ( dboConnection, CARDINALITY_VIOLATION,
+              "merge into t2_041\n" +
+              "using t3_041 on t2_041.x = t3_041.x\n" +
+              "when matched and t2_041.y = 101 then update set z = t3_041.z\n" 
+              );
+
+        //
+        // attempt to delete and update the same row
+        //
+        expectExecutionError
+            ( dboConnection, CARDINALITY_VIOLATION,
+              "merge into t2_041\n" +
+              "using t3_041 on t2_041.x = t3_041.x\n" +
+              "when matched and t2_041.y = t3_041.y then delete\n" +
+              "when matched and t2_041.y = 100 and -101 = t3_041.y then update set z = 2 * t3_041.z\n"
+              );
+        expectExecutionError
+            ( dboConnection, CARDINALITY_VIOLATION,
+              "merge into t2_041\n" +
+              "using t3_041 on t2_041.x = t3_041.x\n" +
+              "when matched and t2_041.y = 100 and -101 = t3_041.y then update set z = 2 * t3_041.z\n" +
+              "when matched and t2_041.y = t3_041.y then delete\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop view sr_041" );
+        goodStatement( dboConnection, "drop table t1_041" );
+        goodStatement( dboConnection, "drop table t2_041" );
+        goodStatement( dboConnection, "drop table t3_041" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

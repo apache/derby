@@ -25,15 +25,16 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLRef;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * INSERT/UPDATE/DELETE a target table based on how it outer joins
@@ -61,7 +62,9 @@ class MergeResultSet extends NoRowsResultSetImpl
     private long                        _rowCount;
     private TemporaryRowHolderImpl[]    _thenRows;
 
-	private int						numOpens;
+	private BackingStoreHashtable		_subjectRowIDs;
+    
+	private int						_numOpens;
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -98,7 +101,7 @@ class MergeResultSet extends NoRowsResultSetImpl
     {
         setup();
 
-		if (numOpens++ == 0)
+		if (_numOpens++ == 0)
 		{
 			_drivingLeftJoin.openCore();
 		}
@@ -162,7 +165,14 @@ class MergeResultSet extends NoRowsResultSetImpl
         }
 
         if ( _drivingLeftJoin != null ) { _drivingLeftJoin.close(); }
-		numOpens = 0;
+
+        if ( _subjectRowIDs != null )
+        {
+            _subjectRowIDs.close();
+            _subjectRowIDs = null;
+        }
+        
+		_numOpens = 0;
     }
 
 
@@ -180,7 +190,6 @@ class MergeResultSet extends NoRowsResultSetImpl
     boolean  collectAffectedRows() throws StandardException
     {
         DataValueDescriptor     rlColumn;
-        RowLocation             baseRowLocation;
         boolean rowsFound = false;
 
         while ( true )
@@ -196,7 +205,7 @@ class MergeResultSet extends NoRowsResultSetImpl
             rowsFound = true;
 
             rlColumn = _row.getColumn( _row.nColumns() );
-            baseRowLocation = null;
+            SQLRef             baseRowLocation = null;
 
             boolean matched = false;
             if ( rlColumn != null )
@@ -204,11 +213,11 @@ class MergeResultSet extends NoRowsResultSetImpl
                 if ( !rlColumn.isNull() )
                 {
                     matched = true;
-                    baseRowLocation = (RowLocation) rlColumn.getObject();
                     
                     // change the HeapRowLocation into a SQLRef, something which the
                     // temporary table can (de)serialize correctly
-                    _row.setColumn( _row.nColumns(), new SQLRef( baseRowLocation ) );
+                    baseRowLocation = new SQLRef( (RowLocation) rlColumn.getObject() );
+                    _row.setColumn( _row.nColumns(), baseRowLocation );
                 }
             }
 
@@ -243,12 +252,71 @@ class MergeResultSet extends NoRowsResultSetImpl
 
             if ( matchingClause != null )
             {
+                if ( baseRowLocation != null ) { addSubjectRow( baseRowLocation ); }
+                
                 _thenRows[ clauseIdx ] = matchingClause.bufferThenRow( activation, _thenRows[ clauseIdx ], _row );
                 _rowCount++;
             }
         }
 
         return rowsFound;
+    }
+
+    /**
+     * <p>
+     * Add another subject row id to the evolving hashtable of affected target rows.
+     * The concept of a subject row is defined by the 2011 SQL Standard, part 2,
+     * section 14.12 (merge statement), general rule 6. A row in the target table
+     * is a subject row if it joins to the source table on the main search condition
+     * and if the joined row satisfies the matching refinement condition for
+     * some WHEN MATCHED clause. A row in the target table may only be a
+     * subject row once. That is, a given target row may only qualify for UPDATE
+     * or DELETE processing once. If it qualifies for more than one UPDATE or DELETE
+     * action, then the Standard requires us to raise a cardinality violation.
+     * </p>
+     *
+     * @param   subjectRowID    The location of the subject row.
+     *
+	 * @exception StandardException A cardinality exception is thrown if we've already added this subject row.
+     */
+    private void    addSubjectRow( SQLRef subjectRowID ) throws StandardException
+    {
+        if ( _subjectRowIDs == null ) { createSubjectRowIDhashtable(); }
+
+        if ( _subjectRowIDs.get( subjectRowID ) != null )
+        {
+            throw StandardException.newException( SQLState.LANG_REDUNDANT_SUBJECT_ROW );
+        }
+        else
+        {
+            DataValueDescriptor[] row = new DataValueDescriptor[] { subjectRowID };
+
+            _subjectRowIDs.putRow( true, row, null );
+        }
+    }
+
+    /**
+     * <p>
+     * Create a BackingStoreHashtable to hold the ids of subject rows.
+     * </p>
+     */
+    private void    createSubjectRowIDhashtable()   throws StandardException
+    {
+		final int[] keyCols = new int[] { 0 };
+
+		_subjectRowIDs = new BackingStoreHashtable
+            (
+             getActivation().getLanguageConnectionContext().getTransactionExecute(),
+             null,          // no row source. we'll fill the hashtable as we go along
+             keyCols,
+             false,         // duplicate handling doesn't matter. we probe for duplicates and error out if we find one
+             -1,            // who knows what the row count will be
+             HashScanResultSet.DEFAULT_MAX_CAPACITY,
+             HashScanResultSet.DEFAULT_INITIAL_CAPACITY,
+             HashScanResultSet.DEFAULT_MAX_CAPACITY,
+             false,         // null keys aren't relevant. the row id is always non-null
+             false          // discard after commit
+             );
     }
 
 }
