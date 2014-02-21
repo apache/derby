@@ -68,6 +68,7 @@ class UpgradeRun extends UpgradeClassLoader
         new AdditionalDb("ENCRYPT_10_2",  true),
         new AdditionalDb("ROLES_10_5", false),
         new AdditionalDb("BUILTIN_10_9", false),
+        new AdditionalDb("DERBY-4753", true),
     };
     
     public static Test suite(final int[] version, boolean useCreateOnUpgrade) {

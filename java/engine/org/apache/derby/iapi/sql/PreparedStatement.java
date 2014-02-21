@@ -102,6 +102,7 @@ public interface PreparedStatement
 	 *
 	 * @param activation The activation containing all the local state
 	 *		to execute the plan.
+     * @param forMetaData true if this is a meta-data query
      * @param timeoutMillis timeout value in milliseconds.
 	 *
 	 * @return	A ResultSet for a statement. A ResultSet represents
@@ -112,6 +113,7 @@ public interface PreparedStatement
 	 * @exception StandardException		Thrown on failure
 	 */
     ResultSet execute(Activation activation,
+                      boolean forMetaData,
                       long timeoutMillis)
         throws StandardException;
 
