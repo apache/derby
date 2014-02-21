@@ -62,6 +62,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 //import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.functionTests.tests.upgradeTests.Version;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 
 /**
  * Test the DatabaseMetaData api.
@@ -235,6 +236,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             TestConfiguration.singleUseDatabaseDecorator(
                 new DatabaseMetaDataTest("initialCompilationTest")));
 
+        // The test for DERBY-4160 needs a fresh database to ensure that the
+        // meta-data queries haven't already been compiled.
+        suite.addTest(TestConfiguration.singleUseDatabaseDecorator(
+                new DatabaseMetaDataTest("concurrentCompilationTest")));
+
         // Test for DERBY-3693 needs a fresh database to ensure that the size
         // of SYSTABLES is so small that creating a relatively small number of
         // tables will cause the query plan for getTables() to be invalidated.
@@ -328,6 +334,67 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // Re-use the previously compiled query from disk. Fails with
         // ArrayIndexOutOfBoundsException before DERBY-2584.
         getDMD().getIndexInfo(null, null, "T", false, false).close();
+    }
+
+    /**
+     * Test that a meta-data query is compiled and stored correctly even when
+     * there's a lock conflict that causes the first attempt to store it to
+     * stop midway (DERBY-4160). This test needs a fresh database so that the
+     * meta-data calls are not already compiled.
+     */
+    public void concurrentCompilationTest() throws Exception {
+        // Create a barrier that can be used to synchronize the two threads
+        // so they perform the meta-data compilation at the same time.
+        final Barrier barrier = new Barrier(2);
+
+        // Create a thread thread that attempts to compile meta-data queries.
+        final DatabaseMetaData dmd = getDMD();
+        final Exception[] exception = new Exception[1];
+        Thread th = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    concurrentCompilationTestHelper(barrier, dmd);
+                } catch (Exception e) {
+                    exception[0] = e;
+                }
+            }
+        };
+        th.start();
+
+        // At the same time, in the main thread, attempt to compile the same
+        // meta-data queries.
+        Connection c2 = openDefaultConnection();
+        concurrentCompilationTestHelper(barrier, c2.getMetaData());
+        c2.close();
+
+        // Wait until both threads are done.
+        th.join();
+
+        // Check if the helper thread got any exceptions.
+        if (exception[0] != null) {
+            fail("Exception in other thread", exception[0]);
+        }
+
+        // Finally, verify that the two meta-data methods used in the test
+        // are working.
+        testGetBestRowIdentifier();
+        testGetIndexInfo();
+    }
+
+    private void concurrentCompilationTestHelper(
+            Barrier barrier, DatabaseMetaData dmd) throws Exception {
+        // Wait until the other thread is ready to start, so that the
+        // compilation happens at the same time in both threads.
+        barrier.await();
+
+        // Often, but not always, the getIndexInfo() call would fail
+        // in one of the threads with the following error message:
+        // ERROR X0Y68: Column 'PARAM1' already exists.
+        ResultSet rs1 = dmd.getBestRowIdentifier(null, null, "", 0, true);
+        ResultSet rs2 = dmd.getIndexInfo(null, null, "", true, true);
+        JDBC.assertDrainResults(rs1);
+        JDBC.assertDrainResults(rs2);
     }
 
     /**

@@ -1125,18 +1125,13 @@ public interface DataDictionary
 	 * @param spsd	The descriptor to add
 	 * @param tc			The transaction controller
 	 * @param recompile		whether to recompile or invalidate
-	 * @param updateSYSCOLUMNS indicate whether syscolumns needs to be updated
-	 *							or not.
-	 * @param firstCompilation  first time SPS is getting compiled.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	updateSPS(
 			SPSDescriptor		spsd,
 			TransactionController	tc,
-			boolean                 recompile,
-			boolean					updateSYSCOLUMNS,
-			boolean                 firstCompilation)
+            boolean                 recompile)
 						throws StandardException;
 
 	/**

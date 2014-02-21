@@ -479,8 +479,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public void updateSPS(SPSDescriptor spsd, TransactionController tc,
-			boolean recompile, boolean updateSYSCOLUMNS,
-			boolean firstCompilation) throws StandardException {
+            boolean recompile) throws StandardException {
 		// Auto-generated method stub
 
 	}
