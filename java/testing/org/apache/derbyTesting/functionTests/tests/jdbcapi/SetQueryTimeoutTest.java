@@ -712,8 +712,8 @@ public class SetQueryTimeoutTest
         for (int i = 0; i < 3; i++) {
             long runTime=0;
             try {
-                ResultSet rs = ps.executeQuery();
                 long startTime = System.currentTimeMillis();
+                ResultSet rs = ps.executeQuery();
                 while (rs.next()); 
                 long endTime = System.currentTimeMillis();
                 runTime = endTime - startTime;
