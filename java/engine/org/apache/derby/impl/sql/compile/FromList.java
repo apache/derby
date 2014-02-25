@@ -340,21 +340,27 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			ResultSetNode newNode = fromTable.bindNonVTITables(dataDictionary, fromListParam);
+			FromTable   newNode = (FromTable) fromTable.bindNonVTITables(dataDictionary, fromListParam);
 			// If the fromTable is a view in the SESSION schema, then we need to save that information
 			// in referencesSessionSchema element. The reason for this is that the view will get
 			// replaced by it's view definition and we will loose the information that the statement
 			// was referencing a SESSION schema object. 
 			if (fromTable.referencesSessionSchema())
+            {
 				referencesSessionSchema = true;
+            }
+            newNode.setMergeTableID( fromTable.getMergeTableID() );
 			setElementAt(newNode, index);
 		}
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
-			ResultSetNode newNode = fromTable.bindVTITables(fromListParam);
+			FromTable   newNode = (FromTable) fromTable.bindVTITables(fromListParam);
 			if (fromTable.referencesSessionSchema())
+            {
 				referencesSessionSchema = true;
+            }
+            newNode.setMergeTableID( fromTable.getMergeTableID() );
 			setElementAt(newNode, index);
 		}
 
@@ -636,6 +642,20 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 		for (int index = 0; index < size; index++)
 		{
 			fromTable = (FromTable) elementAt(index);
+
+            //
+            // If the MERGE statement has marked its variables, we expect to follow
+            // its judgment. Make sure that we only match SOURCE columns to
+            // SOURCE tables and TARGET columns to TARGET tables.
+            //
+            if (
+                (fromTable.getMergeTableID() != ColumnReference.MERGE_UNKNOWN) &&
+                (columnReference.getMergeTableID() != ColumnReference.MERGE_UNKNOWN) &&
+                (fromTable.getMergeTableID() != columnReference.getMergeTableID())
+                )
+            {
+                continue;
+            }
 
 			/* We can stop if we've found a matching column or table name 
 			 * at the previous nesting level.

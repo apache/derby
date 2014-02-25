@@ -195,6 +195,12 @@ public final class UpdateNode extends DMLModStatementNode
 			}
 		}
 
+        //
+        // First step in associating added columns with the TARGET table of
+        // a MERGE statement. Here we identify the columns which were NOT ADDED.
+        //
+        if ( inMatchingClause() ) { tagOriginalResultSetColumns(); }
+
         // collect lists of objects which will require privilege checks
         ArrayList<String>   explicitlySetColumns = getExplicitlySetColumns();
         List<ValueNode> allValueNodes = collectAllValueNodes();
@@ -463,6 +469,7 @@ public final class UpdateNode extends DMLModStatementNode
 			{
 				readColsBitSet = new FormatableBitSet();
 				FromBaseTable fbt = getResultColumnList(resultSet.getResultColumns());
+
 				afterColumns = resultSet.getResultColumns().copyListAndObjects();
 
 				readColsBitSet = getReadMap(dataDictionary, 
@@ -523,7 +530,7 @@ public final class UpdateNode extends DMLModStatementNode
                 COLUMNNAME, rowLocationNode, getContextManager());
         rowLocationColumn.markGenerated();
 
-			/* Append to the ResultColumnList */
+        /* Append to the ResultColumnList */
         resultColumnList.addResultColumn(rowLocationColumn);
 
 		/*
@@ -535,6 +542,12 @@ public final class UpdateNode extends DMLModStatementNode
 
 		/* Set the new result column list in the result set */
 		resultSet.setResultColumns(resultColumnList);
+
+        //
+        // Second step in associating added columns with the TARGET table of
+        // a MERGE statement. Here we associate the columns which were not originally tagged.
+        //
+        if ( inMatchingClause() ) { associateAddedColumns(); }
 
 		/* Bind the expressions */
 		super.bindExpressions();
@@ -652,6 +665,47 @@ public final class UpdateNode extends DMLModStatementNode
         }
 
         return result;
+    }
+
+    /**
+     * Associate all added columns with the TARGET table of the enclosing
+     * MERGE statement.
+     */
+    private void    associateAddedColumns()
+        throws StandardException
+    {
+        for ( ColumnReference cr : collectAllResultSetColumns() )
+        {
+            if ( !cr.taggedWith( TagFilter.ORIG_UPDATE_COL ) )
+            {
+                cr.setMergeTableID( ColumnReference.MERGE_TARGET );
+            }
+        }
+    }
+
+    /**
+     * Tag the original columns mentioned in the result list.
+     */
+    private void    tagOriginalResultSetColumns()
+        throws StandardException
+    {
+        for ( ColumnReference cr : collectAllResultSetColumns() )
+        {
+            cr.addTag( TagFilter.ORIG_UPDATE_COL );
+        }
+    }
+
+    /**
+     * Collect all of the result set columns.
+     */
+    private List<ColumnReference>   collectAllResultSetColumns()
+        throws StandardException
+    {
+        CollectNodesVisitor<ColumnReference> crVisitor =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+        resultSet.getResultColumns().accept( crVisitor );
+
+        return crVisitor.getList();
     }
 
     /**
@@ -1531,12 +1585,8 @@ public final class UpdateNode extends DMLModStatementNode
 			 * the cursor, then a match for the ColumnReference would not
 			 * be found if we didn't null out the name.  (Aren't you
 			 * glad you asked?)
-             *
-             * However, we need the table name if this UPDATE is part of a MERGE
-             * statement. If we clear the table name, then we will not be able to
-             * resolve which table (target or source) holds the column.
 			 */
-			if ( !inMatchingClause() ) { column.clearTableName(); }
+			column.clearTableName();
 		}
 	}
 

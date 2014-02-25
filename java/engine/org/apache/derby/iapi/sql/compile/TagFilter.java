@@ -40,6 +40,9 @@ public class TagFilter implements VisitableFilter
     /** Tag placed on QueryTreeNodes which need privilege checks for UPDATE statements */
     public  static  final   String      NEED_PRIVS_FOR_UPDATE_STMT = "updatePrivs";
 
+    /** Tag placed on the original ColumnReferences in an UPDATE, before unreferenced columns are added */
+    public  static  final   String      ORIG_UPDATE_COL = "origUpdateCol";
+
     ///////////////////////////////////////////////////////////////////////////
     //
     //  STATE

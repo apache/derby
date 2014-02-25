@@ -209,7 +209,7 @@ public class MatchingClauseNode extends QueryTreeNode
         _thenColumns = new ResultColumnList( getContextManager() );
 
         if ( isDeleteClause() ) { bindDelete( dd, fullFromList, targetTable ); }
-        if ( isUpdateClause() ) { bindUpdate( dd, fullFromList, targetTable ); }
+        if ( isUpdateClause() ) { bindUpdate( dd, mergeNode, fullFromList, targetTable ); }
         if ( isInsertClause() ) { bindInsert( dd, mergeNode, fullFromList, targetTable ); }
     }
 
@@ -272,6 +272,11 @@ public class MatchingClauseNode extends QueryTreeNode
                 mergeNode.getColumnsInExpression( drivingColumnMap, rc.getExpression(), ColumnReference.MERGE_UNKNOWN );
             }
         }
+        else if ( isDeleteClause() )
+        {
+            // add all of the THEN columns
+            mergeNode.getColumnsFromList( drivingColumnMap, _thenColumns, ColumnReference.MERGE_TARGET );
+        }
     }
     
     ////////////////////// UPDATE ///////////////////////////////
@@ -280,17 +285,18 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    bindUpdate
         (
          DataDictionary dd,
+         MergeNode  mergeNode,
          FromList fullFromList,
          FromBaseTable targetTable
          )
         throws StandardException
     {
         ResultColumnList    setClauses = realiasSetClauses( targetTable );
-        bindSetClauses( fullFromList, targetTable, setClauses );
+        bindSetClauses( mergeNode, fullFromList, targetTable, setClauses );
 
         TableName   tableName = targetTable.getTableNameField();
         FromList    selectFromList = fullFromList;
-        
+
         SelectNode  selectNode = new SelectNode
             (
              setClauses,
@@ -401,6 +407,7 @@ public class MatchingClauseNode extends QueryTreeNode
     /** Bind the SET clauses of an UPDATE action */
     private void    bindSetClauses
         (
+         MergeNode mergeNode,
          FromList fullFromList,
          FromTable targetTable,
          ResultColumnList   setClauses
@@ -411,6 +418,27 @@ public class MatchingClauseNode extends QueryTreeNode
         setClauses.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _updateColumns, true );
 
         bindExpressions( setClauses, fullFromList );
+
+        //
+        // For column resolution later on, columns on the left side
+        // of SET operators are associated with the TARGET table.
+        //
+        for ( int i = 0; i < _updateColumns.size(); i++ )
+        {
+            ResultColumn    rc = _updateColumns.elementAt( i );
+            ColumnReference  cr = rc.getReference();
+            cr.setMergeTableID( ColumnReference.MERGE_TARGET );
+        }
+
+        // Now associate the columns on the right side of SET operators.
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+        _updateColumns.accept(getCRs);
+        List<ColumnReference> colRefs = getCRs.getList();
+        for ( ColumnReference cr : colRefs )
+        {
+            mergeNode.associateColumn( fullFromList, cr, ColumnReference.MERGE_UNKNOWN );
+        }
     }
 
     /**
@@ -738,7 +766,7 @@ public class MatchingClauseNode extends QueryTreeNode
      * action.
      * </p>
      */
-    void    bindDeleteThenColumns( ResultColumnList selectList )
+    private void    bindDeleteThenColumns( ResultColumnList selectList )
         throws StandardException
     {
         int     bufferedCount = _thenColumns.size();
@@ -1115,7 +1143,11 @@ public class MatchingClauseNode extends QueryTreeNode
             
             if (SanityManager.DEBUG)
             {
-                SanityManager.THROWASSERT( "Can't find select list column corresponding to " + bufferedCR.getSQLColumnName() );
+                SanityManager.THROWASSERT
+                    (
+                     "Can't find select list column corresponding to " + bufferedCR.getSQLColumnName() +
+                     " with merge table id = " + bufferedCRMergeTableID
+                     );
             }
         }
         else if ( bufferedExpression instanceof CurrentRowLocationNode )

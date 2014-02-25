@@ -254,9 +254,13 @@ public final class MergeNode extends DMLModStatementNode
              getContextManager()
              );
         FromTable       dummySourceTable = cloneFromTable( _sourceTable );
+
+        dummyTargetTable.setMergeTableID( ColumnReference.MERGE_TARGET );
+        dummySourceTable.setMergeTableID ( ColumnReference.MERGE_SOURCE );
         
         dummyFromList.addFromTable( dummySourceTable );
         dummyFromList.addFromTable( dummyTargetTable );
+        
         dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
         return dummyFromList;
@@ -367,8 +371,8 @@ public final class MergeNode extends DMLModStatementNode
             for ( MatchingClauseNode mcn : _matchingClauses )
             {
                 mcn.bindThenColumns( _selectList );
-            }            
-            
+            }
+
             resultSet = new SelectNode
                 (
                  selectList,
@@ -558,7 +562,7 @@ public final class MergeNode extends DMLModStatementNode
          )
         throws StandardException
     {
-        String[]    columnNames = getColumns( getExposedName( fromTable ), drivingColumnMap );
+        String[]    columnNames = getColumns( mergeTableID, drivingColumnMap );
         TableName   tableName = fromTable.getTableName();
 
         for ( int i = 0; i < columnNames.length; i++ )
@@ -572,13 +576,13 @@ public final class MergeNode extends DMLModStatementNode
     }
 
     /** Get the column names from the table with the given table number, in sorted order */
-    private String[]    getColumns( String exposedName, HashMap<String,ColumnReference> map )
+    private String[]    getColumns( int mergeTableID, HashMap<String,ColumnReference> map )
     {
         ArrayList<String>   list = new ArrayList<String>();
 
         for ( ColumnReference cr : map.values() )
         {
-            if ( exposedName.equals( cr.getTableName() ) ) { list.add( cr.getColumnName() ); }
+            if ( cr.getMergeTableID() == mergeTableID ) { list.add( cr.getColumnName() ); }
         }
 
         String[]    retval = new String[ list.size() ];
@@ -605,7 +609,7 @@ public final class MergeNode extends DMLModStatementNode
     }
 
     /** Add a list of columns to the the evolving map */
-    private void    getColumnsFromList
+    void    getColumnsFromList
         ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
         throws StandardException
     {
@@ -638,17 +642,30 @@ public final class MergeNode extends DMLModStatementNode
          )
         throws StandardException
     {
-        associateColumn( cr, mergeTableID );
+        if ( cr.getTableName() == null )
+        {
+            ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
+            TableName       tableName = new TableName( null, rc.getTableName(), getContextManager() );
+            cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
+        }
+
+        associateColumn( _leftJoinFromList, cr, mergeTableID );
 
         String  key = makeDCMKey( cr.getTableName(), cr.getColumnName() );
-        if ( map.get( key ) == null )
+
+        ColumnReference mapCR = map.get( key );
+        if ( mapCR != null )
+        {
+            mapCR.setMergeTableID( cr.getMergeTableID() );
+        }
+        else
         {
             map.put( key, cr );
         }
     }
 
     /** Associate a column with the SOURCE or TARGET table */
-    private void    associateColumn( ColumnReference cr, int mergeTableID )
+    void    associateColumn( FromList fromList, ColumnReference cr, int mergeTableID )
         throws StandardException
     {
         if ( mergeTableID != ColumnReference.MERGE_UNKNOWN )    { cr.setMergeTableID( mergeTableID ); }
@@ -657,11 +674,11 @@ public final class MergeNode extends DMLModStatementNode
             // we have to figure out which table the column is in
             String  columnsTableName = cr.getTableName();
 
-            if ( ((FromTable)_leftJoinFromList.elementAt( SOURCE_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            if ( ((FromTable) fromList.elementAt( SOURCE_TABLE_INDEX )).getMatchingColumn( cr ) != null )
             {
                 cr.setMergeTableID( ColumnReference.MERGE_SOURCE );
             }
-            else if ( ((FromTable)_leftJoinFromList.elementAt( TARGET_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            else if ( ((FromTable) fromList.elementAt( TARGET_TABLE_INDEX )).getMatchingColumn( cr ) != null )
             {
                 cr.setMergeTableID( ColumnReference.MERGE_TARGET );
             }

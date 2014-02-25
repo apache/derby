@@ -376,6 +376,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
                 null,
                 null,
                 getContextManager());
+        if ( inMatchingClause() )
+        {
+            fbt.setMergeTableID( ColumnReference.MERGE_TARGET );
+        }
 
 		fbt.bindNonVTITables(
 			getDataDictionary(),

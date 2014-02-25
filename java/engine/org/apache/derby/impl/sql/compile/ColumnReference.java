@@ -113,7 +113,7 @@ public class ColumnReference extends ValueNode
      * the SOURCE or TARGET table */
     private int _mergeTableID = MERGE_UNKNOWN;
 
-	/**
+    /**
      * Constructor.
 	 * This one is called by the parser where we could
 	 * be dealing with delimited identifiers.
@@ -352,7 +352,7 @@ public class ColumnReference extends ValueNode
 	{
 		super.copyFields(oldCR);
 
-		_qualifiedTableName = oldCR.getQualifiedTableName();
+		setQualifiedTableName( oldCR.getQualifiedTableName() );
 		tableNumber = oldCR.getTableNumber();
 		columnNumber = oldCR.getColumnNumber();
 		source = oldCR.getSource();
@@ -1309,7 +1309,7 @@ public class ColumnReference extends ValueNode
         super.acceptChildren(v);
 
         if (_qualifiedTableName != null) {
-            _qualifiedTableName = (TableName) _qualifiedTableName.accept(v);
+            setQualifiedTableName( (TableName) _qualifiedTableName.accept(v) );
         }
     }
 }

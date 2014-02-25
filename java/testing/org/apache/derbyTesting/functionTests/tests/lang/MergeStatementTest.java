@@ -5631,7 +5631,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table t3_041" );
     }
     
-   /**
+    /**
      * <p>
      * Verify that we don't unnecessarily raise missing schema errors.
      * </p>
@@ -5641,7 +5641,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  ruthConnection = openUserConnection( RUTH );
-
+        
         //
         // create schema
         //
@@ -5676,7 +5676,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              dboConnection,
              "grant delete on deleteTable_042 to ruth"
              );
-
+        
         //
         // Verify that the unqualified reference to publicSelectColumn
         // does not fail because the RUTH schema does not exist.
@@ -5688,12 +5688,318 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             "when matched then delete\n";
         expectExecutionWarning( ruthConnection, NO_ROWS_AFFECTED, mergeStatement );
         expectExecutionWarning( dboConnection, NO_ROWS_AFFECTED, mergeStatement );
-
+        
         //
         // drop schema
         //
         goodStatement( dboConnection, "drop table deleteTable_042" );
         goodStatement( dboConnection, "drop table selectTable_042" );
+    }
+
+    /**
+     * <p>
+     * Verify correlation names with columns added in order to
+     * support triggers.
+     * </p>
+     */
+    public  void    test_043_correlationNamesAddedColumns()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type BeforeTriggerType_043 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type AfterTriggerType_043 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function beforeTriggerFunction_043( hashMap BeforeTriggerType_043, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function afterTriggerFunction_043( hashMap AfterTriggerType_043, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_043\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_043\n" +
+             "(\n" +
+             "    key1 int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_043\n" +
+             "(\n" +
+             "    sourceChange int,\n" +
+             "    sourceOnClauseColumn int,\n" +
+             "    sourceMatchingClauseColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_043\n" +
+             "(\n" +
+             "    privateForeignColumn int references primaryTable_043( key1 ),\n" +
+             "    privatePrimaryColumn int primary key,\n" +
+             "    privateBeforeTriggerSource BeforeTriggerType_043,\n" +
+             "    privateAfterTriggerSource AfterTriggerType_043,\n" +
+             "    targetOnClauseColumn int,\n" +
+             "    targetMatchingClauseColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table foreignTable_043\n" +
+             "(\n" +
+             "    key1 int references targetTable_043( privatePrimaryColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeDeleteTrigger_043\n" +
+             "no cascade before delete on targetTable_043\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'before', beforeTriggerFunction_043( old.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterDeleteTrigger_043\n" +
+             "after delete on targetTable_043\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'after', afterTriggerFunction_043( old.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeUpdateTrigger_043\n" +
+             "no cascade before update on targetTable_043\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'before', beforeTriggerFunction_043( old.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterUpdateTrigger_043\n" +
+             "after update on targetTable_043\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'after', afterTriggerFunction_043( old.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeInsertTrigger_043\n" +
+             "no cascade before insert on targetTable_043\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'before', beforeTriggerFunction_043( new.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterInsertTrigger_043\n" +
+             "after insert on targetTable_043\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_043( 'after', afterTriggerFunction_043( new.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+
+        //
+        // Now verify that column name are correctly resolved, including columns
+        // added to satisfy triggers and constraints.
+        //
+
+        // delete
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043\n" +
+              "using sourceTable_043\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then delete\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then delete\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then delete\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on t.targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and t.targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then delete\n"
+              );
+
+        // update
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043\n" +
+              "using sourceTable_043\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = sourceChange\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = sourceChange\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = s.sourceChange\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on t.targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and t.targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then update set t.privateForeignColumn = s.sourceChange\n"
+              );
+
+        // insert
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043\n" +
+              "using sourceTable_043\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when not matched and 1 = sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( sourceChange )\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when not matched and 1 = sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( sourceChange )\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when not matched and 1 = s.sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( s.sourceChange )\n"
+              );
+
+        // all clauses together
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043\n" +
+              "using sourceTable_043\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then delete\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = sourceChange\n" +
+              "when not matched and 1 = sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( sourceChange )\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then delete\n" +
+              "when matched and targetMatchingClauseColumn = sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = sourceChange\n" +
+              "when not matched and 1 = sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( sourceChange )\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then delete\n" +
+              "when matched and targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then update set privateForeignColumn = s.sourceChange\n" +
+              "when not matched and 1 = s.sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( s.sourceChange )\n"
+              );
+        expectExecutionWarning
+            ( dboConnection, NO_ROWS_AFFECTED,
+              "merge into targetTable_043 t\n" +
+              "using sourceTable_043 s\n" +
+              "on t.targetOnClauseColumn = s.sourceOnClauseColumn\n" +
+              "when matched and t.targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then delete\n" +
+              "when matched and t.targetMatchingClauseColumn = s.sourceMatchingClauseColumn\n" +
+              "     then update set t.privateForeignColumn = s.sourceChange\n" +
+              "when not matched and 1 = s.sourceMatchingClauseColumn\n" +
+              "     then insert ( privateForeignColumn ) values ( s.sourceChange )\n"
+              );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table foreignTable_043" );
+        goodStatement( dboConnection, "drop table targetTable_043" );
+        goodStatement( dboConnection, "drop table sourceTable_043" );
+        goodStatement( dboConnection, "drop table primaryTable_043" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_043" );
+        goodStatement( dboConnection, "drop function afterTriggerFunction_043" );
+        goodStatement( dboConnection, "drop function beforeTriggerFunction_043" );
+        goodStatement( dboConnection, "drop type AfterTriggerType_043 restrict" );
+        goodStatement( dboConnection, "drop type BeforeTriggerType_043 restrict" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

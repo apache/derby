@@ -3954,7 +3954,6 @@ class FromBaseTable extends FromTable
 			throws StandardException
 	{
 		ResultColumn	 			resultColumn;
-		ValueNode		 			valueNode;
 		TableName		 			exposedName;
 
 		/* Cache exposed name for this table.
@@ -3981,11 +3980,16 @@ class FromBaseTable extends FromTable
 
 			if ((resultColumn = inputRcl.getResultColumn(position)) == null)
 			{	
-                valueNode = new ColumnReference(cd.getColumnName(),
+                ColumnReference cr = new ColumnReference(cd.getColumnName(),
 												exposedName,
 												getContextManager());
+                if ( (getMergeTableID() != ColumnReference.MERGE_UNKNOWN ) )
+                {
+                    cr.setMergeTableID( getMergeTableID() );
+                }
+
                 resultColumn =
-                        new ResultColumn(cd, valueNode, getContextManager());
+                        new ResultColumn(cd, cr, getContextManager());
 			}
 
 			/* Build the ResultColumnList to return */

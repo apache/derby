@@ -108,6 +108,9 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 
 	/** the original unbound table name */
 	protected TableName origTableName;
+
+    /** for resolving column references in MERGE statements in tough cases*/
+    private int _mergeTableID = ColumnReference.MERGE_UNKNOWN;
 	
 	/**
      * Constructor for a table in a FROM list.
@@ -1168,10 +1171,16 @@ abstract class FromTable extends ResultSetNode implements Optimizable
                     exposedName = oldCR.getQualifiedTableName();
                 }
             }
+
+            ColumnReference newCR = new ColumnReference(rc.getName(), exposedName, cm);
+            if ( (oldCR != null ) && (oldCR.getMergeTableID() != ColumnReference.MERGE_UNKNOWN ) )
+            {
+                newCR.setMergeTableID( oldCR.getMergeTableID() );
+            }
             
             ResultColumn newRc = new ResultColumn(
                     rc.getName(),
-                    new ColumnReference(rc.getName(), exposedName, cm),
+                    newCR,
                     cm);
 
             rcList.addResultColumn(newRc);
@@ -1538,6 +1547,12 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	{
 		return this.origTableName;
 	}
+
+    /** set the merge table id */
+    void    setMergeTableID( int mergeTableID ) { _mergeTableID = mergeTableID; }
+
+    /** get the merge table id */
+    int     getMergeTableID() { return _mergeTableID; }
 
     @Override
     void acceptChildren(Visitor v) throws StandardException {
