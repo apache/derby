@@ -681,13 +681,20 @@ public class SetQueryTimeoutTest
     {
         System.out.println("Testing that Statement remembers timeout.");
         stmt.setQueryTimeout(1);
+        long runTime=0;
         for (int i = 0; i < 3; i++) {
             try {
                 ResultSet rs = stmt.executeQuery(getFetchQuery("t"));
+                long startTime = System.currentTimeMillis();
                 while (rs.next());
-                throw new TestFailedException("Should have timed out.");
+                long endTime = System.currentTimeMillis();
+                runTime = endTime - startTime;
+                throw new TestFailedException("Should have timed out, for " +
+                    "statement, iteration: " +i+ ", took (millis): "+runTime);
             } catch (SQLException sqle) {
-                expectException("XCL52", sqle, "Should have timed out.");
+                expectException("XCL52", sqle, "Should have timed out, got " +
+                    "unexpected exception, for statement, iteration: " + i + 
+                    ", time taken (millis): " + runTime);
             }
         }
         stmt.close();
@@ -703,12 +710,20 @@ public class SetQueryTimeoutTest
         System.out.println("Testing that " + name + " remembers timeout.");
         ps.setQueryTimeout(1);
         for (int i = 0; i < 3; i++) {
+            long runTime=0;
             try {
                 ResultSet rs = ps.executeQuery();
+                long startTime = System.currentTimeMillis();
                 while (rs.next()); 
-                throw new TestFailedException("Should have timed out.");
+                long endTime = System.currentTimeMillis();
+                runTime = endTime - startTime;
+                throw new TestFailedException(
+                    "Should have timed out, for " + name + ", on iteration " 
+                    + i + ", runtime(millis): " + runTime);
            } catch (SQLException sqle) {
-                expectException("XCL52", sqle, "Should have timed out.");
+                expectException("XCL52", sqle, "Should have timed out, " +
+                    "got unexpected exception, for " + name + ", on iteration "
+                    + i + ", runtime(millis): " + runTime);
             }
         }
         ps.close();
