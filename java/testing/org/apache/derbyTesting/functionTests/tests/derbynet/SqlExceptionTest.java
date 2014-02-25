@@ -32,6 +32,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
@@ -100,6 +101,29 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         assertNotNull(javae.getNextException());
         assertEquals(javae.getNextException().getSQLState(), "08000");
         assertEquals(internalException, javae.getCause().getCause());
+    }
+
+    public void testSQLStateInRootException() throws SQLException {
+        String expectedSQLState = "22018";
+        Statement s = createStatement();
+        try {
+            s.execute("values cast('hello' as int)");
+            fail();
+        } catch (SQLDataException sqle) {
+            assertSQLState(expectedSQLState, sqle);
+
+            // Check message of the root cause (a StandardException on embedded
+            // and an SqlException on the client). Client didn't include
+            // the SQLState before DERBY-6484.
+            Throwable cause = sqle;
+            while (cause instanceof SQLException) {
+                cause = cause.getCause();
+            }
+            String toString = cause.toString();
+            assertTrue("Message should start with the SQLState, found: "
+                            + toString,
+                       toString.startsWith("ERROR " + expectedSQLState + ":"));
+        }
     }
 
     /**

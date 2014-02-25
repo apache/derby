@@ -346,6 +346,13 @@ public class SqlException extends Exception implements Diagnosable {
         return sqlca_;
     }
 
+    @Override
+    public String toString() {
+        // Match what the embedded driver does in StandardException.toString().
+        return "ERROR " + getSQLState() + ": " + getMessage();
+    }
+
+    @Override
     public String getMessage() {
         if ( wrappedException_ != null )
         {

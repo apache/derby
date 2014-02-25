@@ -581,8 +581,9 @@ public class StandardException extends Exception
 		Don't print the class name in the toString() method.
 	*/
 	public String toString() {
+        // Add the SQLState to the message. This should be kept consistent
+        // with SqlException.toString() in the client driver.
 		String msg = getMessage();
-
 		return "ERROR " + getSQLState() + ": " + msg;
 	}
 
