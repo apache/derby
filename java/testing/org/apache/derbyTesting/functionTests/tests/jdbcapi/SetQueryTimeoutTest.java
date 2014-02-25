@@ -684,8 +684,8 @@ public class SetQueryTimeoutTest
         long runTime=0;
         for (int i = 0; i < 3; i++) {
             try {
-                ResultSet rs = stmt.executeQuery(getFetchQuery("t"));
                 long startTime = System.currentTimeMillis();
+                ResultSet rs = stmt.executeQuery(getFetchQuery("t"));
                 while (rs.next());
                 long endTime = System.currentTimeMillis();
                 runTime = endTime - startTime;
