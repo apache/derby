@@ -26,7 +26,6 @@ import java.sql.Statement;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -69,5 +68,14 @@ public class LikeTest extends BaseJDBCTestCase {
                 s.executeQuery("select * from t where x like 'a'||'b'||'%'"),
                 expectedRows);
         assertTrue(SQLUtilities.getRuntimeStatisticsParser(s).usedIndexScan());
+    }
+
+    public void testDerby6477() throws SQLException {
+        // DERBY-6477: This statement used to fail with an OutOfMemoryError.
+        JDBC.assertSingleValueResultSet(createStatement().executeQuery(
+                "select javaclassname from sys.sysaliases where "
+                    + "javaclassname like "
+                    + "'org.apache.derby.catalog.Java5SystemProcedures%'"),
+                "org.apache.derby.catalog.Java5SystemProcedures");
     }
 }

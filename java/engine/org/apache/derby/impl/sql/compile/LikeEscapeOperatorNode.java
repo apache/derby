@@ -33,6 +33,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
 
@@ -606,6 +607,16 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             }
 
             int maxWidth = receiver.getTypeServices().getMaximumWidth();
+
+            // DERBY-6477: Skip this optimization if the receiver column has
+            // a very high maximum width (typically columns in the system
+            // tables, as they don't have the same restrictions as columns
+            // in user tables). Since greaterEqualString and lessThanString
+            // are padded to the maximum width, this optimization may cause
+            // OOME if the maximum width is high.
+            if (maxWidth > Limits.DB2_LONGVARCHAR_MAXWIDTH) {
+                return this;
+            }
 
             greaterEqualString = 
                 Like.greaterEqualString(pattern, escape, maxWidth);
