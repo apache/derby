@@ -639,6 +639,10 @@ public final class UpdateNode extends DMLModStatementNode
         // don't remove the privilege filter. additional binding may be
         // done during the pre-processing phase
 
+        //
+        // Add USAGE privilege for all UDTs mentioned in the WHERE clause and
+        // on the right side of SET operators.
+        //
         addUDTUsagePriv( allValueNodes );
 
     } // end of bind()
@@ -731,26 +735,6 @@ public final class UpdateNode extends DMLModStatementNode
         }
 
         return getValues.getList();
-    }
-
-    /**
-     * Add USAGE privilege for all UDTs mentioned in the WHERE clause and
-     * on the right side of SET operators.
-     */
-    private void    addUDTUsagePriv( List<ValueNode> valueNodes )
-        throws StandardException
-    {
-        if ( !isPrivilegeCollectionRequired() ) { return; }
-        
-        for ( ValueNode val : valueNodes )
-        {
-            DataTypeDescriptor  dtd = val.getTypeServices();
-            if ( (dtd != null) && dtd.getTypeId().userType() )
-            {
-                AliasDescriptor ad = getUDTDesc( dtd );
-                getCompilerContext().addRequiredUsagePriv( ad );
-            }
-        }
     }
 
     /**

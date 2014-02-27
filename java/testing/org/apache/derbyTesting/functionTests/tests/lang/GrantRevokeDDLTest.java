@@ -54,18 +54,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
     public static  final   String  NO_GENERIC_PERMISSION = "42504";
     public static  final   String  NO_SELECT_OR_UPDATE_PERMISSION = "42502";
     public static  final   String  NO_TABLE_PERMISSION = "42500";
-
-    public  static  class   Permission
-    {
-        public  final   String  text;
-        public  final   String  sqlStateWhenMissing;
-
-        public  Permission( String text, String sqlStateWhenMissing )
-        {
-            this.text = text;
-            this.sqlStateWhenMissing = sqlStateWhenMissing;
-        }
-    }
 	
     /**
      * Public constructor required for running test as standalone JUnit.

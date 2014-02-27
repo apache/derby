@@ -6002,6 +6002,234 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop type BeforeTriggerType_043 restrict" );
     }
     
+    /**
+     * <p>
+     * Verify privileges needed for DELETE actions.
+     * </p>
+     */
+    public  void    test_044_deletePrivileges()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceOnClauseType_044 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceMatchingClauseType_044 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type BeforeTriggerType_044 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type AfterTriggerType_044 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceOnClauseFunction_044( hashMap SourceOnClauseType_044, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceMatchingClauseFunction_044( hashMap SourceMatchingClauseType_044, hashKey varchar( 32672 ) ) returns int\n"   +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function beforeTriggerFunction_044( hashMap BeforeTriggerType_044, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function afterTriggerFunction_044( hashMap AfterTriggerType_044, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_044\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_044\n" +
+             "(\n" +
+             "    key1 int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_044\n" +
+             "(\n" +
+             "    sourceUnreferencedColumn int,\n" +
+             "    sourceOnClauseColumn SourceOnClauseType_044,\n" +
+             "    sourceMatchingClauseColumn SourceMatchingClauseType_044\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_044\n" +
+             "(\n" +
+             "    privateForeignColumn int references primaryTable_044( key1 ),\n" +
+             "    privatePrimaryColumn int primary key,\n" +
+             "    privateBeforeTriggerSource BeforeTriggerType_044,\n" +
+             "    privateAfterTriggerSource AfterTriggerType_044,\n" +
+             "    targetOnClauseColumn int,\n" +
+             "    targetMatchingClauseColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table foreignTable_044\n" +
+             "(\n" +
+             "    key1 int references targetTable_044( privatePrimaryColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeDeleteTrigger_044\n" +
+             "no cascade before delete on targetTable_044\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_044( 'before', beforeTriggerFunction_044( old.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterDeleteTrigger_044\n" +
+             "after delete on targetTable_044\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_044( 'after', afterTriggerFunction_044( old.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+
+        //
+        // Privileges
+        //
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "delete on targetTable_044", NO_TABLE_PERMISSION ),
+            new Permission( "execute on function sourceOnClauseFunction_044", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function sourceMatchingClauseFunction_044", NO_GENERIC_PERMISSION ),
+            new Permission( "select ( sourceOnClauseColumn ) on sourceTable_044", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( sourceMatchingClauseColumn ) on sourceTable_044", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( targetOnClauseColumn ) on targetTable_044", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( targetMatchingClauseColumn ) on targetTable_044", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grantPermission( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  mergeStatement =
+            "merge into test_dbo.targetTable_044\n" +
+            "using test_dbo.sourceTable_044\n" +
+            "on targetOnClauseColumn = test_dbo.sourceOnClauseFunction_044( sourceOnClauseColumn, 'foo' )\n" +
+"when matched and targetMatchingClauseColumn = test_dbo.sourceMatchingClauseFunction_044( sourceMatchingClauseColumn, 'foo' )\n " +
+            "     then delete\n";
+
+        // fails because ruth does not have USAGE permission on SourceOnClauseType_044 and SourceMatchingClauseType_044
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, mergeStatement );
+
+        // armed with those permissions, ruth can execute the MERGE statement
+        grantPermission( dboConnection, "usage on type SourceOnClauseType_044" );
+        grantPermission( dboConnection, "usage on type SourceMatchingClauseType_044" );
+        expectExecutionWarning( ruthConnection, NO_ROWS_AFFECTED, mergeStatement );
+        
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission( permission, dboConnection, ruthConnection, mergeStatement );
+        }
+        
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table foreignTable_044" );
+        goodStatement( dboConnection, "drop table targetTable_044" );
+        goodStatement( dboConnection, "drop table sourceTable_044" );
+        goodStatement( dboConnection, "drop table primaryTable_044" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_044" );
+        goodStatement( dboConnection, "drop function afterTriggerFunction_044" );
+        goodStatement( dboConnection, "drop function beforeTriggerFunction_044" );
+        goodStatement( dboConnection, "drop function sourceMatchingClauseFunction_044" );
+        goodStatement( dboConnection, "drop function sourceOnClauseFunction_044" );
+        goodStatement( dboConnection, "drop type AfterTriggerType_044 restrict" );
+        goodStatement( dboConnection, "drop type BeforeTriggerType_044 restrict" );
+        goodStatement( dboConnection, "drop type SourceMatchingClauseType_044 restrict" );
+        goodStatement( dboConnection, "drop type SourceOnClauseType_044 restrict" );
+    }
+    
+    /**
+     * Verify that the MERGE statement fails with the correct error after you revoke
+     * a permission and that the MERGE statement succeeds after you add the permission back.
+     */
+    private void    vetPermission
+        (
+         Permission permission,
+         Connection dboConnection,
+         Connection ruthConnection,
+         String mergeStatement
+         )
+        throws Exception
+    {
+        revokePermission( dboConnection, permission.text );
+        expectExecutionError( ruthConnection, permission.sqlStateWhenMissing, mergeStatement );
+        grantPermission( dboConnection, permission.text );
+        expectExecutionWarning( ruthConnection, NO_ROWS_AFFECTED, mergeStatement );
+    }
+    private void    grantPermission( Connection conn, String permission )
+        throws Exception
+    {
+        String  command = "grant " + permission + " to ruth";
+
+        goodStatement( conn, command );
+    }
+    private void    revokePermission( Connection conn, String permission )
+        throws Exception
+    {
+        String  command = "revoke " + permission + " from ruth";
+        if ( permission.startsWith( "execute" ) || permission.startsWith( "usage" ) )   { command += " restrict"; }
+
+        goodStatement( conn, command );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES

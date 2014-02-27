@@ -103,6 +103,10 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  TOO_MUCH_CONTENTION = "X0Y84";
     protected static  final   String  STRING_TRUNCATION = "22001";
 
+    protected   static  final   String  NO_GENERIC_PERMISSION = "42504";
+    protected   static  final   String  NO_SELECT_OR_UPDATE_PERMISSION = "42502";
+    protected   static  final   String  NO_TABLE_PERMISSION = "42500";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE

@@ -33,7 +33,9 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.IgnoreFilter;
 import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -220,6 +222,12 @@ public final class MergeNode extends DMLModStatementNode
         // synonyms not allowed
         forbidSynonyms( dd );
 
+        //
+        // Don't add any privileges until we bind the matching clauses.
+        //
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+            
         FromList    dfl = new FromList( getContextManager() );
         FromTable   dflSource = cloneFromTable( _sourceTable );
         FromBaseTable   dflTarget = (FromBaseTable) cloneFromTable( _targetTable );
@@ -229,6 +237,9 @@ public final class MergeNode extends DMLModStatementNode
 
         // target table must be a base table
         if ( !targetIsBaseTable( dflTarget ) ) { notBaseTable(); }
+
+        // ready to add permissions
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
         for ( MatchingClauseNode mcn : _matchingClauses )
         {
@@ -261,8 +272,17 @@ public final class MergeNode extends DMLModStatementNode
         dummyFromList.addFromTable( dummySourceTable );
         dummyFromList.addFromTable( dummyTargetTable );
         
+        //
+        // Don't add any privileges while binding the tables.
+        //
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+             
         dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
+        // ready to add permissions
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
+        
         return dummyFromList;
     }
 
@@ -327,6 +347,12 @@ public final class MergeNode extends DMLModStatementNode
         
         try {
             cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+
+            //
+            // Don't add any privileges until we bind the matching refinement clauses.
+            //
+            IgnoreFilter    ignorePermissions = new IgnoreFilter();
+            getCompilerContext().addPrivilegeFilter( ignorePermissions );
             
             _hojn = new HalfOuterJoinNode
                 (
@@ -349,6 +375,9 @@ public final class MergeNode extends DMLModStatementNode
 
             FromList    topFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
             topFromList.addFromTable( _hojn );
+
+            // ready to add permissions
+            getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
             // preliminary binding of the matching clauses to resolve column
             // references. this ensures that we can add all of the columns from
@@ -399,7 +428,21 @@ public final class MergeNode extends DMLModStatementNode
                  null,
                  getContextManager()
                  );
+            
+            //
+            // We're only interested in privileges related to the ON clause.
+            // Otherwise, the driving left join should not contribute any
+            // privilege requirements.
+            //
+            getCompilerContext().addPrivilegeFilter( ignorePermissions );
+
             _leftJoinCursor.bindStatement();
+            
+            // ready to add permissions again
+            getCompilerContext().removePrivilegeFilter( ignorePermissions );
+
+            // now figure out what privileges are needed for the ON clause
+            addOnClausePrivileges();
         }
         finally
         {
@@ -550,6 +593,68 @@ public final class MergeNode extends DMLModStatementNode
 
     /**
      * <p>
+     * Add the privileges required by the ON clause.
+     * </p>
+     */
+    private void addOnClausePrivileges() throws StandardException
+    {
+        // now add USAGE priv on referenced types
+        addUDTUsagePriv( getValueNodes( _searchCondition ) );
+
+        // add SELECT privilege on columns
+        for ( ColumnReference cr : getColumnReferences( _searchCondition ) )
+        {
+            addColumnPrivilege( cr );
+        }
+        
+        // add EXECUTE privilege on routines
+        for ( StaticMethodCallNode routine : getRoutineReferences( _searchCondition ) )
+        {
+            addRoutinePrivilege( routine );
+        }
+    }
+
+    /**
+     * <p>
+     * Add SELECT privilege on the indicated column.
+     * </p>
+     */
+    private void    addColumnPrivilege( ColumnReference cr )
+        throws StandardException
+    {
+        CompilerContext cc = getCompilerContext();
+        ResultColumn    rc = cr.getSource();
+        
+        if ( rc != null )
+        {
+            ColumnDescriptor    colDesc = rc.getColumnDescriptor();
+            
+            if ( colDesc != null )
+            {
+                cc.pushCurrentPrivType( Authorizer.SELECT_PRIV );
+                cc.addRequiredColumnPriv( colDesc );
+                cc.popCurrentPrivType();
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Add EXECUTE privilege on the indicated routine.
+     * </p>
+     */
+    private void    addRoutinePrivilege( StaticMethodCallNode routine )
+        throws StandardException
+    {
+        CompilerContext cc = getCompilerContext();
+        
+        cc.pushCurrentPrivType( Authorizer.EXECUTE_PRIV );
+        cc.addRequiredRoutinePriv( routine.ad );
+        cc.popCurrentPrivType();
+    }
+
+    /**
+     * <p>
      * Add to an evolving select list the columns from the indicated table.
      * </p>
      */
@@ -599,13 +704,45 @@ public final class MergeNode extends DMLModStatementNode
     {
         if ( expression == null ) { return; }
 
+        List<ColumnReference> colRefs = getColumnReferences( expression );
+
+        getColumnsFromList( map, colRefs, mergeTableID );
+    }
+
+    /** Get a list of ValueNodes in an expression */
+    private List<ValueNode>   getValueNodes( QueryTreeNode expression )
+        throws StandardException
+    {
+        CollectNodesVisitor<ValueNode> getVNs =
+            new CollectNodesVisitor<ValueNode>(ValueNode.class);
+
+        expression.accept(getVNs);
+        
+        return getVNs.getList();
+    }
+
+    /** Get a list of routines in an expression */
+    private List<StaticMethodCallNode>   getRoutineReferences( QueryTreeNode expression )
+        throws StandardException
+    {
+        CollectNodesVisitor<StaticMethodCallNode> getSMCNs =
+            new CollectNodesVisitor<StaticMethodCallNode>(StaticMethodCallNode.class);
+
+        expression.accept(getSMCNs);
+        
+        return getSMCNs.getList();
+    }
+
+    /** Get a list of column references in an expression */
+    private List<ColumnReference>   getColumnReferences( QueryTreeNode expression )
+        throws StandardException
+    {
         CollectNodesVisitor<ColumnReference> getCRs =
             new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
 
         expression.accept(getCRs);
-        List<ColumnReference> colRefs = getCRs.getList();
-
-        getColumnsFromList( map, colRefs, mergeTableID );
+        
+        return getCRs.getList();
     }
 
     /** Add a list of columns to the the evolving map */
@@ -613,11 +750,7 @@ public final class MergeNode extends DMLModStatementNode
         ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
         throws StandardException
     {
-        CollectNodesVisitor<ColumnReference> getCRs =
-            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
-
-        rcl.accept( getCRs );
-        List<ColumnReference> colRefs = getCRs.getList();
+        List<ColumnReference> colRefs = getColumnReferences( rcl );
 
         getColumnsFromList( map, colRefs, mergeTableID );
     }
@@ -645,7 +778,8 @@ public final class MergeNode extends DMLModStatementNode
         if ( cr.getTableName() == null )
         {
             ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
-            TableName       tableName = new TableName( null, rc.getTableName(), getContextManager() );
+            TableName       tableName = cr.getQualifiedTableName();
+            if ( tableName == null ) { tableName = new TableName( null, rc.getTableName(), getContextManager() ); }
             cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
         }
 
@@ -703,19 +837,25 @@ public final class MergeNode extends DMLModStatementNode
         CompilerContext cc = getCompilerContext();
         final int previousReliability = cc.getReliability();
 
-        try {
-            cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+        cc.pushCurrentPrivType( Authorizer.SELECT_PRIV );
             
+        try {
+            // this adds SELECT priv on referenced columns and EXECUTE privs on referenced routines
             value.bindExpression
                 (
                  fromList,
                  new SubqueryList( getContextManager() ),
                  new ArrayList<AggregateNode>()
                  );
+
+            // now add USAGE priv on referenced types
+            addUDTUsagePriv( getValueNodes( value ) );
         }
         finally
         {
             // Restore previous compiler state
+            cc.popCurrentPrivType();
             cc.setReliability( previousReliability );
         }
     }
@@ -729,6 +869,12 @@ public final class MergeNode extends DMLModStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+        //
+        // Don't add any privileges during optimization.
+        //
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+            
 		/* First optimize the left join */
 		_leftJoinCursor.optimizeStatement();
 
@@ -744,6 +890,9 @@ public final class MergeNode extends DMLModStatementNode
         {
             mcn.optimize();
         }
+        
+        // ready to add permissions again
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 	}
     ///////////////////////////////////////////////////////////////////////////////////
     //

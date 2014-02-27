@@ -297,11 +297,7 @@ class DeleteNode extends DMLModStatementNode
             ScopeFilter scopeFilter = new ScopeFilter( getCompilerContext(), CompilerContext.WHERE_SCOPE, 1 );
             getCompilerContext().addPrivilegeFilter( scopeFilter );
 			super.bindExpressions();
-
-            //
-            // Don't remove the WHERE scopeFilter. Pre-processing may try to
-            // add other privileges which we don't need.
-            //
+            getCompilerContext().removePrivilegeFilter( scopeFilter );
 
 			/* Bind untyped nulls directly under the result columns */
 			resultSet.getResultColumns().
@@ -880,6 +876,10 @@ class DeleteNode extends DMLModStatementNode
     @Override
 	public void optimizeStatement() throws StandardException
 	{
+        // Don't add any more permissions during pre-processing
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+        
 		if(cascadeDelete)
 		{
 			for(int index=0 ; index < dependentNodes.length ; index++)
@@ -889,6 +889,10 @@ class DeleteNode extends DMLModStatementNode
 		}
 
         super.optimizeStatement();
+
+        // allow more permissions to be added in case we're just one action
+        // of a MERGE statement
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 	}
 
     /**

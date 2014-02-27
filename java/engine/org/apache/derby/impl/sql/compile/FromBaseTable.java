@@ -2761,7 +2761,9 @@ class FromBaseTable extends FromTable
 
         if(columnsTableName != null) {
             if(columnsTableName.getSchemaName() == null && correlationName == null)
+            {
                 columnsTableName.bind(this.getDataDictionary());
+            }
         }
 		/*
 		** If there is a correlation name, use that instead of the

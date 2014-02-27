@@ -39,6 +39,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.IgnoreFilter;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -431,10 +432,7 @@ public class MatchingClauseNode extends QueryTreeNode
         }
 
         // Now associate the columns on the right side of SET operators.
-        CollectNodesVisitor<ColumnReference> getCRs =
-            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
-        _updateColumns.accept(getCRs);
-        List<ColumnReference> colRefs = getCRs.getList();
+        List<ColumnReference> colRefs = getColumnReferences( _updateColumns );
         for ( ColumnReference cr : colRefs )
         {
             mergeNode.associateColumn( fullFromList, cr, ColumnReference.MERGE_UNKNOWN );
@@ -699,6 +697,12 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        //
+        // Don't add any privileges until we bind the DELETE.
+        //
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+            
         FromBaseTable   deleteTarget = new FromBaseTable
             ( targetTable.getTableNameField(), null, null, null, getContextManager() );
         FromList    dummyFromList = new FromList( getContextManager() );
@@ -721,6 +725,9 @@ public class MatchingClauseNode extends QueryTreeNode
              getContextManager()
              );
         _dml = new DeleteNode( targetTable.getTableNameField(), selectNode, this, getContextManager() );
+
+        // ready to add permissions
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 
         _dml.bindStatement();
 
@@ -1345,17 +1352,13 @@ public class MatchingClauseNode extends QueryTreeNode
         if( isDeleteClause()) { return; }
         else
         {
-            CollectNodesVisitor<ColumnReference> getCRs =
-                new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
-
             ValueNode   checkConstraints = isInsertClause() ?
                 ((InsertNode) _dml).checkConstraints :
                 ((UpdateNode) _dml).checkConstraints;
 
             if ( checkConstraints != null )
             {
-                checkConstraints.accept(getCRs);
-                List<ColumnReference> colRefs = getCRs.getList();
+                List<ColumnReference> colRefs = getColumnReferences( checkConstraints );
                 for ( ColumnReference cr : colRefs )
                 {
                     cr.getSource().setResultSetNumber( NoPutResultSet.TEMPORARY_RESULT_SET_NUMBER );
@@ -1498,11 +1501,8 @@ public class MatchingClauseNode extends QueryTreeNode
         throws StandardException
     {
         ResultColumnList    leftJoinResult = generatedScan.getResultColumns();
-        CollectNodesVisitor<ColumnReference> getCRs =
-            new CollectNodesVisitor<ColumnReference>( ColumnReference.class );
-        node.accept( getCRs );
 
-        for ( ColumnReference cr : getCRs.getList() )
+        for ( ColumnReference cr : getColumnReferences( node ) )
         {
             ResultColumn    leftJoinRC = leftJoinResult.elementAt( getSelectListOffset( selectList, cr ) - 1 );
             cr.setSource( leftJoinRC );
@@ -1560,5 +1560,23 @@ public class MatchingClauseNode extends QueryTreeNode
         else if ( isInsertClause() ) { return "INSERT"; }
         else { return "DELETE"; }
 	}
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Get a list of column references in an expression */
+    private List<ColumnReference>   getColumnReferences( QueryTreeNode expression )
+        throws StandardException
+    {
+        CollectNodesVisitor<ColumnReference> getCRs =
+            new CollectNodesVisitor<ColumnReference>(ColumnReference.class);
+
+        expression.accept(getCRs);
+        
+        return getCRs.getList();
+    }
 
 }

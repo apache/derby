@@ -1356,6 +1356,25 @@ public abstract class QueryTreeNode implements Visitable
     }
 
     /**
+     * Add USAGE privilege for all UDTs mentioned in the indicated ValueNodes.
+     */
+    void    addUDTUsagePriv( List<ValueNode> valueNodes )
+        throws StandardException
+    {
+        if ( !isPrivilegeCollectionRequired() ) { return; }
+        
+        for ( ValueNode val : valueNodes )
+        {
+            DataTypeDescriptor  dtd = val.getTypeServices();
+            if ( (dtd != null) && dtd.getTypeId().userType() )
+            {
+                AliasDescriptor ad = getUDTDesc( dtd );
+                getCompilerContext().addRequiredUsagePriv( ad );
+            }
+        }
+    }
+
+    /**
      * Bind the UDTs in a table type.
      *
      * @param originalDTD A datatype: might be an unbound UDT and might not be
