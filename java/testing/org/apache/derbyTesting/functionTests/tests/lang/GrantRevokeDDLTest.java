@@ -11640,11 +11640,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "    from test_dbo.selectTable_6434\n" +
             "    where selectColumn > ( select test_dbo.selectAggregate_6434( selectColumn ) from test_dbo.selectTable_6434 )\n";
 
-        // fails because ruth doesn't have USAGE permission on type SelectType_6434
-        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, insert );
-
-        // succeeds after granting that permission
-        grant_6429( dboConnection, "usage on type SelectType_6434" );
         goodStatement( ruthConnection, insert );
         
         //
@@ -11886,11 +11881,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "    where test_dbo.selectFunction_6434_2( selectColumn2, 'foo' ) < 100\n" +
             ")\n";
 
-        // fails because ruth doesn't have USAGE permission on type SelectType_6434_2
-        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, delete );
-
-        // succeeds after granting that permission
-        grant_6429( dboConnection, "usage on type SelectType_6434_2" );
         goodStatement( ruthConnection, delete );
         
         //
@@ -12250,4 +12240,69 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
              );
     }
 
+    /**
+     * Test that SELECT does not require USAGE privilege on the user-defined
+     * types of the table columns.
+     */
+    public void test_6491()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceUnreferencedType_6491 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceValueType_6491 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_6491\n" +
+             "(\n" +
+             "    sourceUnreferencedColumn SourceUnreferencedType_6491,\n" +
+             "    sourceValueColumn SourceValueType_6491\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select( sourceValueColumn ) on sourceTable_6491 to ruth"
+             );
+
+        // test that SELECT is the only privilege needed
+        goodStatement
+            (
+             ruthConnection,
+             "select sourceValueColumn from test_dbo.sourceTable_6491"
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table sourceTable_6491"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SourceUnreferencedType_6491 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SourceValueType_6491 restrict"
+             );
+    }
+    
 }

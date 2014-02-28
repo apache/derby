@@ -146,6 +146,7 @@ public class CompilerContextImpl extends ContextImpl
         referencedSequences = null;
         privilegeCheckFilters =  null;
         namedScopes = null;
+        skippingTypePrivileges = false;
 	}
 
 	//
@@ -1039,6 +1040,21 @@ public class CompilerContextImpl extends ContextImpl
         else { return scopeDepth[ SCOPE_CELL ]; }
     }
 
+    /** Set whether we should skip adding USAGE privileges for user-defined types */
+    public  boolean    skipTypePrivileges( boolean skip )
+    {
+        boolean oldValue = skippingTypePrivileges;
+        
+        skippingTypePrivileges = skip;
+
+        return oldValue;
+    }
+
+    /** Return whether we are skipping USAGE privileges for user-defined types */
+    public  boolean skippingTypePrivileges()
+    {
+        return skippingTypePrivileges;
+    }
 
 	/*
 	** Context state must be reset in resetContext()
@@ -1065,6 +1081,7 @@ public class CompilerContextImpl extends ContextImpl
 	private SchemaDescriptor	compilationSchema;
     private ArrayList<VisitableFilter> privilegeCheckFilters;
     private HashMap<String,int[]> namedScopes;
+    private boolean             skippingTypePrivileges;
 
 	/**
 	 * Saved execution time default schema, if we need to change it

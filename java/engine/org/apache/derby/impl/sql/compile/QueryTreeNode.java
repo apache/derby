@@ -1419,7 +1419,7 @@ public abstract class QueryTreeNode implements Visitable
     {
         getCompilerContext().createDependency( ad );
 
-        if ( isPrivilegeCollectionRequired() )
+        if ( isPrivilegeCollectionRequired() && !getCompilerContext().skippingTypePrivileges() )
         {
             getCompilerContext().addRequiredUsagePriv( ad );
         }

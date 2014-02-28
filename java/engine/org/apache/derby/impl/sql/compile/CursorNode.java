@@ -240,6 +240,11 @@ public class CursorNode extends DMLStatementNode
     @Override
 	public void bindStatement() throws StandardException
 	{
+        //
+        // Don't add USAGE privilege on user-defined types.
+        //
+        boolean wasSkippingTypePrivileges = getCompilerContext().skipTypePrivileges( true );
+            
 		DataDictionary				dataDictionary;
 
 		dataDictionary = getDataDictionary();
@@ -385,7 +390,8 @@ public class CursorNode extends DMLStatementNode
 				indexOfSessionTableNamesInSavedObjects = getCompilerContext().addSavedObject(sessionSchemaTableNames);
 		}
 
-	}
+        getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
+    }
 
     /**
      * Collects table descriptors for base tables whose index statistics we

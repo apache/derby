@@ -454,7 +454,10 @@ public class GenericStatement
 						if (foundInCache)
 							((GenericLanguageConnectionContext)lcc).removeStatement(this);
 					}
-					
+
+                    // stop adding privileges for user-defined types
+                    cc.skipTypePrivileges( true );
+                    
 					qt.optimizeStatement();
 
 					optimizeTime = getCurrentTimeMillis(lcc);

@@ -626,5 +626,14 @@ public interface CompilerContext extends Context
      * would be 2. Returns 0 if the compiler isn't inside any such scope.
      */
     public  int     scopeDepth( String scopeName );
+
+    /**
+     * Set whether we should skip adding USAGE privileges for user-defined types.
+     * Returns the previous setting of this variable.
+     */
+    public  boolean    skipTypePrivileges( boolean skip );
+
+    /** Return whether we are skipping USAGE privileges for user-defined types */
+    public  boolean skippingTypePrivileges();
     
 }

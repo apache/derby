@@ -165,18 +165,18 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "grant execute on function makePrice_ruth_01 to public\n"
              );
 
-        expectExecutionError
+        // should work fine. no USAGE priv required.
+        goodStatement
             (
-             aliceConnection,
-             LACK_USAGE_PRIV,
+             ruthConnection,
              "select * from ruth.t_ruth_01\n"
              );
-        expectExecutionError
+        goodStatement
             (
-             aliceConnection,
-             LACK_USAGE_PRIV,
+             ruthConnection,
              "values( ruth.makePrice_ruth_01() )\n"
              );
+        
         expectExecutionError
             (
              aliceConnection,

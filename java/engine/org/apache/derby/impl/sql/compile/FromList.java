@@ -326,6 +326,12 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 							FromList fromListParam) 
 			throws StandardException
 	{
+        //
+        // Don't add USAGE privilege on user-defined types just because we're
+        // binding tables.
+        //
+        boolean wasSkippingTypePrivileges = getCompilerContext().skipTypePrivileges( true );
+        
 		FromTable	fromTable;
 
 		/* Now we bind the tables - this is a 2 step process.
@@ -391,6 +397,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
             }
         }
         cc.popCurrentPrivType();
+        getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
 	}
 
 	/**
