@@ -1257,6 +1257,13 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     public static HashMap makeHashMap() { return new HashMap(); }
 
+    public static HashMap makeHashMap( String key, Integer value )
+    {
+        HashMap<String,Integer> map = new HashMap<String,Integer>();
+        map.put( key, value );
+        return map;
+    }
+
     public static HashMap putValue(
             HashMap<String, String> map, String key, String value)
     {
