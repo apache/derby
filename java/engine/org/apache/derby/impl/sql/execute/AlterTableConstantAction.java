@@ -1820,8 +1820,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		// Here we get the trigger action sql and use the parser to build
 		// the parse tree for it.
-		SchemaDescriptor compSchema;
-		compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
+        SchemaDescriptor compSchema = dd.getSchemaDescriptor(
+                dd.getSPSDescriptor(trd.getActionId()).getCompSchemaId(),
+                null);
 		CompilerContext newCC = lcc.pushCompilerContext(compSchema);
 		Parser	pa = newCC.getParser();
 		StatementNode stmtnode = (StatementNode)pa.parseStatement(trd.getTriggerDefinition());
@@ -1879,7 +1880,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			//   alter table atdc_12 drop column b
 			// Following rebinding of the trigger action sql will catch the use
 			// of column b in trigger atdc_12_trigger_1
-			compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
 			newCC = lcc.pushCompilerContext(compSchema);
 		    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
 			pa = newCC.getParser();
