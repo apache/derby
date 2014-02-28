@@ -105,6 +105,10 @@ public class dblook_test {
 			createTestDatabase(dbCreationScript_2);
 			runMessageCheckTest(testDBName);
 
+            // Test DERBY-6387 - wrong order of triggers
+            System.out.println("\n-= Start DERBY-6387 test. =-");
+            testDerby6387();
+
 		} catch (SQLException se) {
 
 			System.out.println("FAILED: to complete the test:");
@@ -1728,4 +1732,22 @@ public class dblook_test {
 
 	}
 
+    /**
+     * Regression test case for DERBY-6387. Verify that triggers are returned
+     * in the order in which they were created.
+     */
+    private void testDerby6387() throws Exception {
+        // Create the test database.
+        createTestDatabase("dblook_makeDB_derby6387.sql");
+
+        // Run dblook on it.
+        lookOne(testDBName);
+
+        // Check that the error log was empty.
+        dumpFileToSysOut("dblook.log");
+
+        // Check the dblook output. Before DERBY-6387 was fixed, TR24 was
+        // first in the output. It should be last.
+        dumpFileToSysOut(testDBName + ".sql");
+    }
 }
