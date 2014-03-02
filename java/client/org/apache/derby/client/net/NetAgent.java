@@ -102,6 +102,13 @@ public class NetAgent extends Agent {
     public SqlException exceptionOpeningSocket_ = null;
     public SqlException exceptionConvertingRdbnam = null;
     
+    /**
+     * Flag which indicates that a writeChain has been started and data sent to
+     * the server.
+     * If true, starting a new write chain will throw a DisconnectException. 
+     * It is cleared when the write chain is ended.
+     */
+    private boolean writeChainIsDirty_ = false;
     //---------------------constructors/finalizer---------------------------------
     public NetAgent(NetConnection netConnection,
                     org.apache.derby.client.am.LogWriter logWriter) throws SqlException {
@@ -461,23 +468,41 @@ public class NetAgent extends Agent {
             throw de;
         }
     }
-
+    /**
+     * Marks the agent's write chain as dirty. A write chain is dirty when data
+     * from it has been sent to the server. A dirty write chain cannot be reset 
+     * and reused for another request until the remaining data has been sent to
+     * the server and the write chain properly ended. 
+     * 
+     * Resetting a dirty chain will cause the new request to be appended to the 
+     * unfinished request already at the server, which will likely lead to 
+     * cryptic syntax errors.
+     */
+    void markWriteChainAsDirty() {    
+        writeChainIsDirty_ = true;
+    }
+    
+    private void verifyWriteChainIsClean() throws DisconnectException {
+        if (writeChainIsDirty_) { 
+            throw new DisconnectException(this, 
+                new ClientMessageId(SQLState.NET_WRITE_CHAIN_IS_DIRTY));
+        }
+    }
     public void beginWriteChainOutsideUOW() throws SqlException {
+        verifyWriteChainIsClean();
         request_.initialize();
         writeDeferredResetConnection();
-        super.beginWriteChainOutsideUOW();
     }
 
     public void beginWriteChain(org.apache.derby.client.am.Statement statement) throws SqlException {
+        verifyWriteChainIsClean();
         request_.initialize();
         writeDeferredResetConnection();
         super.beginWriteChain(statement);
     }
 
-    protected void endWriteChain() {
-        super.endWriteChain();
-    }
-
+    protected void endWriteChain() {}
+    
     private void readDeferredResetConnection() throws SqlException {
         if (!netConnection_.resetConnectionAtFirstSql_) {
             return;
@@ -494,17 +519,17 @@ public class NetAgent extends Agent {
     }
 
     protected void beginReadChain(org.apache.derby.client.am.Statement statement) throws SqlException {
+        // Clear here as endWriteChain may not always be called
+        writeChainIsDirty_ = false;
         readDeferredResetConnection();
         super.beginReadChain(statement);
     }
 
     protected void beginReadChainOutsideUOW() throws SqlException {
+        // Clear here as endWriteChain may not always be called
+        writeChainIsDirty_ = false;
         readDeferredResetConnection();
         super.beginReadChainOutsideUOW();
-    }
-
-    public void endReadChain() throws SqlException {
-        super.endReadChain();
     }
 
     /**

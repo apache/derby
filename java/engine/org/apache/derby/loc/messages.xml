@@ -5216,6 +5216,23 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>targetClassName</arg>
             </msg>
 
+            <msg>
+                <name>XN022.C</name>
+                <text>A write chain that has transmitted data to the server cannot be reset until the request is finished and the chain terminated.</text>
+            </msg>
+            
+            <msg>
+                <name>XN023.C</name>
+                <text>The stream specified by parameter #{0} is locator-based and requires a nested request on the same connection to be materialized. This is not supported.</text>
+                <arg>number</arg>
+            </msg>
+            
+            <msg>
+                <name>XN024.C</name>
+                <text>Encountered an exception which terminated the connection, while reading from the stream specified by parameter #{0}. The Exception had this message: '{1}'.</text>
+                <arg>number</arg>
+                <arg>messageText</arg>
+            </msg>
         </family>
 
 

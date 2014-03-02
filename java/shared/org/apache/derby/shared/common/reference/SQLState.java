@@ -1620,6 +1620,9 @@ public interface SQLState {
     String NET_XARETVAL_ERROR                                       = "XN019.S";
     String NET_MARSHALLING_UDT_ERROR                     = "XN020.S";
     String NET_UDT_COERCION_ERROR                               = "XN021.S";
+    String NET_WRITE_CHAIN_IS_DIRTY                                 = "XN022.C";
+    String NET_LOCATOR_STREAM_PARAMS_NOT_SUPPORTED                  = "XN023.C";
+    String NET_DISCONNECT_EXCEPTION_ON_READ                         = "XN024.C";
     
     // XML - Derby-specific XML errors not covered by
     // SQL standard.

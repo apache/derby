@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 
 public class Request {
@@ -318,7 +319,27 @@ public class Request {
                 try {
                     bytesRead =
                         in.read(buffer.array(), buffer.position(), bytesToRead);
-                } catch (Exception e) {
+                } catch (IOException ioe) {
+                    if (netAgent_.getOutputStream() == null) {
+                        // The exception has taken down the connection, so we 
+                        // check if it was caused by attempting to 
+                        // read the stream from our own connection...
+                        for (Throwable t = ioe; t != null; t = t.getCause()) {
+                            if (t instanceof SqlException
+                                    && ((SqlException) t).getSQLState().equals(ExceptionUtil.getSQLStateFromIdentifier(SQLState.NET_WRITE_CHAIN_IS_DIRTY))) {
+                                throw new SqlException(netAgent_.logWriter_,
+                                        new ClientMessageId(SQLState.NET_LOCATOR_STREAM_PARAMS_NOT_SUPPORTED),
+                                        ioe, parameterIndex);
+                            }
+                        }
+                        // Something else has killed the connection, fast forward to despair...
+                        throw new SqlException(netAgent_.logWriter_,
+                                new ClientMessageId(SQLState.NET_DISCONNECT_EXCEPTION_ON_READ),
+                                ioe, parameterIndex, ioe.getMessage());
+                    }
+                    // The OutPutStream is still intact so try to finish request
+                    // with what we managed to read
+
                     status = DRDAConstants.STREAM_READ_ERROR;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
@@ -327,7 +348,7 @@ public class Request {
                         new SqlException(
                             netAgent_.logWriter_,
                             new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
-                            parameterIndex, e.getMessage(), e));
+                            parameterIndex, ioe.getMessage(), ioe));
 
                     return;
                 }
@@ -1207,6 +1228,7 @@ public class Request {
 
     protected void sendBytes(java.io.OutputStream socketOutputStream) throws java.io.IOException {
         try {
+            netAgent_.markWriteChainAsDirty();
             socketOutputStream.write(buffer.array(), 0, buffer.position());
             socketOutputStream.flush();
         } finally {
