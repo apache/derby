@@ -885,12 +885,13 @@ class SubqueryNode extends ValueNode
 			topNode = pushNewPredicate(numTables);
 			pushedNewPredicate = true;
 		}
-		/* Since NOT EXISTS subquery is not flattened, now is good time to create
-		 * an IS NULL node on top.  Other cases are taken care of in pushNewPredicate.
+        /* EXISTS and NOT EXISTS subqueries that haven't been flattened, need
+         * an IS [NOT] NULL node on top so that they return a BOOLEAN. Other
+         * cases are taken care of in pushNewPredicate.
 		 */
-		else if (subqueryType == NOT_EXISTS_SUBQUERY)
+        else if (isEXISTS() || isNOT_EXISTS())
 		{
-			topNode = genIsNullTree();
+            topNode = genIsNullTree(isEXISTS());
 			subqueryType = EXISTS_SUBQUERY;
 		}
 

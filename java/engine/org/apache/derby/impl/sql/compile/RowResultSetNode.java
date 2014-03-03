@@ -420,17 +420,11 @@ class RowResultSetNode extends FromTable
 									FromList fromList)
 								throws StandardException
 	{
-
-		if (subquerys.size() > 0)
-		{
-			subquerys.preprocess(
+        getResultColumns().preprocess(
                 numTables,
-                new FromList(
-                    getOptimizerFactory().doJoinOrderOptimization(),
-                    getContextManager()),
-                new SubqueryList(getContextManager()),
+                fromList,
+                subquerys,
                 new PredicateList(getContextManager()));
-		}
 
 		/* Allocate a dummy referenced table map */ 
 		setReferencedTableMap( new JBitSet(numTables) );

@@ -483,18 +483,20 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	/**
-	 * Transform this into this is null.  Useful for NOT elimination.
+     * Transform this into this IS NULL or IS NOT NULL.
 	 *
+     * @param notNull if true, transform this into IS NOT NULL;
+     *                otherwise, transform this into IS NULL
 	 * @return		The modified expression
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-    ValueNode genIsNullTree()
+    ValueNode genIsNullTree(boolean notNull)
 			throws StandardException
 	{
 		IsNullNode isNullNode;
 
-       isNullNode = new IsNullNode(this, false, getContextManager());
+        isNullNode = new IsNullNode(this, notNull, getContextManager());
 		isNullNode.setType(new DataTypeDescriptor(
 									TypeId.BOOLEAN_ID,
 									false)
