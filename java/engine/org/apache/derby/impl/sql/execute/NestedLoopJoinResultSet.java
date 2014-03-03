@@ -74,6 +74,9 @@ class NestedLoopJoinResultSet extends JoinResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow result = null;
 		boolean haveRow = false;
 	    boolean restrict = false;

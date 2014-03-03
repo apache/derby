@@ -1,0 +1,105 @@
+ij> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+create table derby6216( a int, status varchar(10));
+0 rows inserted/updated/deleted
+ij> insert into derby6216 values (1, 'ACTIVE'), (2, 'IDLE');
+2 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_runtimestatistics(1);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_schema('STATS');
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_mode(1);
+0 rows inserted/updated/deleted
+ij> select a from derby6216 where status != 'IDLE';
+A          
+-----------
+ij> call syscs_util.syscs_set_xplain_mode(0);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_runtimestatistics(0);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_schema('');
+0 rows inserted/updated/deleted
+ij> select stmt_text from stats.sysxplain_statements;
+STMT_TEXT                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------
+select a from derby6216 where status != 'IDLE'                                                                                  
+ij> select st.stmt_text, rs.op_identifier
+       from stats.sysxplain_statements st
+       join stats.sysxplain_resultsets rs
+         on st.stmt_id = rs.stmt_id
+       order by st.stmt_text,rs.op_identifier;
+STMT_TEXT                                                                                                                       |OP_IDENTIFIER                                                                                                                   
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+select a from derby6216 where status != 'IDLE'                                                                                  |PROJECTION                                                                                                                      
+select a from derby6216 where status != 'IDLE'                                                                                  |TABLESCAN                                                                                                                       
+ij> select st.stmt_text, sp.no_visited_pages, sp.no_visited_rows 
+    from stats.sysxplain_scan_props sp, 
+         stats.sysxplain_resultsets rs, 
+         stats.sysxplain_statements st 
+    where st.stmt_id = rs.stmt_id and 
+          rs.scan_rs_id = sp.scan_rs_id and 
+          rs.op_identifier = 'TABLESCAN' and 
+          sp.scan_object_name = 'DERBY6216';
+STMT_TEXT                                                                                                                       |NO_VISITED&|NO_VISITED&
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+select a from derby6216 where status != 'IDLE'                                                                                  |0          |0          
+ij> drop table stats.sysxplain_statements;
+0 rows inserted/updated/deleted
+ij> drop table stats.sysxplain_resultsets;
+0 rows inserted/updated/deleted
+ij> drop table stats.sysxplain_scan_props;
+0 rows inserted/updated/deleted
+ij> drop table stats.sysxplain_sort_props;
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_runtimestatistics(1);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_schema('STATS');
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_mode(1);
+0 rows inserted/updated/deleted
+ij> select sql_text from syscs_diag.transaction_table where status != 'IDLE';
+SQL_TEXT                                                                                                                        
+--------------------------------------------------------------------------------------------------------------------------------
+ij> call syscs_util.syscs_set_xplain_mode(0);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_runtimestatistics(0);
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_set_xplain_schema('');
+0 rows inserted/updated/deleted
+ij> select stmt_text from stats.sysxplain_statements;
+STMT_TEXT                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------
+select sql_text from syscs_diag.transaction_table where status != 'IDLE'                                                        
+ij> select st.stmt_text, rs.op_identifier, rs.op_details, rs.returned_rows
+       from stats.sysxplain_statements st
+       join stats.sysxplain_resultsets rs
+         on st.stmt_id = rs.stmt_id
+       order by st.stmt_text,rs.op_identifier;
+STMT_TEXT                                                                                                                       |OP_IDENTIFIER                                                                                                                   |OP_DETAILS                                                                                                                      |RETURNED_R&
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+select sql_text from syscs_diag.transaction_table where status != 'IDLE'                                                        |PROJECT-FILTER                                                                                                                  |2;                                                                                                                              |0          
+select sql_text from syscs_diag.transaction_table where status != 'IDLE'                                                        |PROJECTION                                                                                                                      |3;                                                                                                                              |0          
+select sql_text from syscs_diag.transaction_table where status != 'IDLE'                                                        |VTI                                                                                                                             |org.apache.derby.diag.TransactionTable, (1)                                                                                     |0          
+ij> select count(*) from stats.sysxplain_scan_props;
+1          
+-----------
+0          
+ij> select count(*) from stats.sysxplain_sort_props;
+1          
+-----------
+0          
+ij> 

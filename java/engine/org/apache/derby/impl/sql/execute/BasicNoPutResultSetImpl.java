@@ -137,6 +137,13 @@ implements NoPutResultSet
 		return activation;
 	}
 
+	protected final boolean isXplainOnlyMode()
+	{
+		LanguageConnectionContext lcc = getLanguageConnectionContext();
+		return
+		  (lcc.getRunTimeStatisticsMode() && lcc.getXplainOnlyMode());
+	}
+
 	// NoPutResultSet interface
 
 	/**
@@ -248,12 +255,7 @@ implements NoPutResultSet
 		attachStatementContext();
 
 		try {
-			LanguageConnectionContext lcc = getLanguageConnectionContext();
-			if(lcc.getRunTimeStatisticsMode() && lcc.getXplainOnlyMode()) {
-				// do nothing
-			} else {
-				openCore();
-			}
+			openCore();
 
 		} catch (StandardException se) {
 			activation.checkStatementValidity();
@@ -455,8 +457,8 @@ implements NoPutResultSet
 	 */
 	public final ExecRow	getNextRow() throws StandardException 
 	{
-		LanguageConnectionContext lcc = getLanguageConnectionContext();
-		if(lcc.getRunTimeStatisticsMode() && lcc.getXplainOnlyMode()){
+		if( isXplainOnlyMode() )
+		{
 			// return null to indicate no results available and 
 			// to bypass the execution
 			return null;

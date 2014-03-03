@@ -71,7 +71,7 @@ import org.w3c.dom.NodeList;
  *
  * FIXME -- some general to-do items that I don't want to forget:
  * - should resultSetNumber be its own column in sysxplain_resultsets?
- * - need tests of xplain-only mode
+ * - need MORE tests of xplain-only mode
  * - need a test of external sorting/merging
  * - need to cross-check the result set types, and verify that they're
  *   all tested at least once
@@ -520,6 +520,18 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         s.execute("call syscs_util.syscs_set_statistics_timing(1)");
     }
     
+    private static void enableXplainOnlyMode(Statement s)
+            throws SQLException
+    {
+        s.execute("call syscs_util.syscs_set_xplain_mode(1)");
+    }
+    
+    private static void clearXplainOnlyMode(Statement s)
+            throws SQLException
+    {
+        s.execute("call syscs_util.syscs_set_xplain_mode(0)");
+    }
+    
     /**
      * 
      * @param s
@@ -559,6 +571,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     					null);
     		}
     	} 
+        s.execute("call syscs_util.syscs_set_xplain_schema('')");
     }
 
     private static void verifyXplainUnset(Statement s)
@@ -619,6 +632,32 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     rs.getString("scan_rs_id")+","+
                     rs.getString("sort_rs_id")+","+
                     rs.getString("stmt_id")+","+
+                    rs.getString("timing_id"));
+        }
+        rs.close();
+    }
+    
+    private void dumpStatements(Statement s)
+        throws SQLException
+    {
+        ResultSet rs;
+        rs = s.executeQuery("select * from xpltest.sysxplain_statements");
+        while (rs.next())
+        {
+            System.out.println(
+                    rs.getString("stmt_id")+","+
+                    rs.getString("stmt_name")+","+
+                    rs.getString("stmt_type")+","+
+                    rs.getString("stmt_text")+","+
+                    rs.getString("jvm_id")+","+
+                    rs.getString("os_identifier")+","+
+                    rs.getString("xplain_mode")+","+
+                    rs.getString("xplain_time")+","+
+                    rs.getString("xplain_thread_id")+","+
+                    rs.getString("transaction_id")+","+
+                    rs.getString("session_id")+","+
+                    rs.getString("database_name")+","+
+                    rs.getString("drda_id")+","+
                     rs.getString("timing_id"));
         }
         rs.close();
@@ -1045,6 +1084,300 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         }
     }
     
+    private String getStmtIDByName(Statement s, String sName)
+			throws SQLException
+    {
+    	ResultSet rs;
+        String stmt_id = "?";
+        rs = s.executeQuery( 
+    		"select stmt_id from XPLTEST.sysxplain_statements "+
+		"where stmt_name='"+sName+"'"); 
+        if( rs.next() )
+	{
+            stmt_id = rs.getString(1); 
+	    //System.out.println("Found statemnt id " + stmt_id);
+	}
+        rs.close();
+        return stmt_id;
+    }
+    public void testSimpleXplainOnly() throws Exception
+    {
+        Statement s = createStatement();
+
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+	s.setCursorName("1");
+        JDBC.assertEmpty(s.executeQuery(
+        	"SELECT country from countries "+
+	         "WHERE region = 'Central America'" ));
+        clearXplainOnlyMode(s);
+        disableXplainStyle(s);
+
+	// dumpStatements(s);
+        // dumpResultSets(s);
+	// There should be 1 statement captured with stmt_id='1'.
+	// It should have a PROJECTION and a TABLESCAN; the TABLESCAN should be
+	// on the COUNTRIES table.
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_statements"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_statements "+
+	    "where stmt_name='1'"), "1");
+	String stmt_id = getStmtIDByName( s, "1" );
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"'"), "2");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and op_identifier='PROJECTION'"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and op_identifier='TABLESCAN'"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select op_details from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and op_identifier='TABLESCAN'"),
+	    "T: COUNTRIES");
+
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+	s.setCursorName("2");
+        JDBC.assertEmpty(s.executeQuery(
+            "select sql_text from syscs_diag.transaction_table " +
+	    "where status != 'IDLE'" ));
+        clearXplainOnlyMode(s);
+        disableXplainStyle(s);
+
+	//dumpStatements(s);
+        //dumpResultSets(s);
+
+	// This statement should have three result sets:
+	// - PROJECTION (select sql_text)
+	// - PROJECT-FILTER (where status != IDLE)
+	// - VTI (syscs_diag.transaction_table)
+	//
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_statements"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_statements "+
+	    "where stmt_name='2'"), "1");
+	stmt_id = getStmtIDByName( s, "2" );
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and op_identifier='PROJECTION'"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and "+
+	    "      op_identifier='PROJECT-FILTER'"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets "+
+	    "where stmt_id='"+stmt_id+"' and op_identifier='VTI'"), "1");
+
+        String selectStatement = 
+            "select region, count(country) from app.countries group by region";
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+	s.setCursorName("3");
+        JDBC.assertEmpty(s.executeQuery(selectStatement));
+
+        clearXplainOnlyMode(s);
+        disableXplainStyle(s);
+	//dumpStatements(s);
+        //dumpResultSets(s);
+
+        // This statement is executed as a PROJECTION with a child GROUPBY
+        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
+        // has a corresponding SCAN_PROPS row, the GROUPBY has a
+        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
+	// of the actual processing did anything.
+        //
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets"), "4");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select op_identifier from xpltest.sysxplain_resultsets " +
+                    "order by op_identifier"),
+            new String[][] {
+                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where scan_rs_id is not null"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where sort_rs_id is not null"), "1");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select s.stmt_text, rs.op_identifier," +
+                    " srt.no_input_rows, srt.no_output_rows " +
+                    " from xpltest.sysxplain_sort_props srt, " +
+                    " xpltest.sysxplain_resultsets rs, " +
+                    " xpltest.sysxplain_statements s " +
+                    " where rs.stmt_id = s.stmt_id and " +
+                    " rs.sort_rs_id = srt.sort_rs_id"),
+            new String[][] {
+                {selectStatement, "GROUPBY", "0", "0"} } );
+
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                    "select srt.sort_type, srt.no_input_rows, " +
+                    " srt.no_output_rows, srt.no_merge_runs, " +
+                    " srt.merge_run_details, srt.eliminate_duplicates, " +
+                    " srt.in_sort_order, srt.distinct_aggregate " +
+                    "from xpltest.sysxplain_sort_props srt " +
+                    "join xpltest.sysxplain_resultsets rs " +
+                    "on srt.sort_rs_id = rs.sort_rs_id " +
+                    "where rs.op_identifier='GROUPBY'"),
+                new String[][] {
+                    {"IN","0","0",null, null, null,"N","N"} } );
+    }
+
+    public void testXplainOnlyExecutePrepared() throws Exception
+    {
+        Statement s = createStatement();
+
+        String selectStatement = 
+            "select region, count(country) from app.countries group by region";
+        PreparedStatement ps = prepareStatement( selectStatement );
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+        JDBC.assertEmpty(ps.executeQuery());
+        clearXplainOnlyMode(s);
+        disableXplainStyle(s);
+	//dumpStatements(s);
+        //dumpResultSets(s);
+
+        // This statement is executed as a PROJECTION with a child GROUPBY
+        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
+        // has a corresponding SCAN_PROPS row, the GROUPBY has a
+        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
+	// of the actual processing did anything.
+        //
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets"), "4");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select op_identifier from xpltest.sysxplain_resultsets " +
+                    "order by op_identifier"),
+            new String[][] {
+                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where scan_rs_id is not null"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where sort_rs_id is not null"), "1");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select s.stmt_text, rs.op_identifier," +
+                    " srt.no_input_rows, srt.no_output_rows " +
+                    " from xpltest.sysxplain_sort_props srt, " +
+                    " xpltest.sysxplain_resultsets rs, " +
+                    " xpltest.sysxplain_statements s " +
+                    " where rs.stmt_id = s.stmt_id and " +
+                    " rs.sort_rs_id = srt.sort_rs_id"),
+            new String[][] {
+                {selectStatement, "GROUPBY", "0", "0"} } );
+
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                    "select srt.sort_type, srt.no_input_rows, " +
+                    " srt.no_output_rows, srt.no_merge_runs, " +
+                    " srt.merge_run_details, srt.eliminate_duplicates, " +
+                    " srt.in_sort_order, srt.distinct_aggregate " +
+                    "from xpltest.sysxplain_sort_props srt " +
+                    "join xpltest.sysxplain_resultsets rs " +
+                    "on srt.sort_rs_id = rs.sort_rs_id " +
+                    "where rs.op_identifier='GROUPBY'"),
+                new String[][] {
+                    {"IN","0","0",null, null, null,"N","N"} } );
+
+	
+	// Since now we're not in XplainOnly mode, the prepared statement
+	// returns the expected normal result set.
+
+        JDBC.assertUnorderedResultSet(ps.executeQuery(),
+            new String[][] { 
+                {"Africa", "19"}, {"Asia", "15"},
+                {"Australia and New Zealand", "2"}, {"Caribbean", "10"},
+                {"Central America", "6"}, {"Central Asia", "4"},
+                {"Europe", "29"}, {"Middle East", "7"},
+                {"North Africa", "5"}, {"North America", "3"},
+                {"Pacific Islands", "3"}, {"South America", "11"} } );
+
+	// And then back to empty again:
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+        JDBC.assertEmpty(ps.executeQuery());
+        clearXplainOnlyMode(s);
+        disableXplainStyle(s);
+        
+        // Verify that statistics were collected.
+        JDBC.assertDrainResults(
+                s.executeQuery("select * from xpltest.sysxplain_statements"),
+                1);
+    }
+    
+    public void testXplainOnlyPrepared() throws Exception
+    {
+        Statement s = createStatement();
+
+        String selectStatement = 
+            "select region, count(country) from app.countries group by region";
+
+        // Try preparing the statement while we're in xplain-only mode, then
+        // execute it normally.
+
+        enableXplainStyle(s);
+        enableXplainOnlyMode(s);
+        PreparedStatement ps2 = prepareStatement( selectStatement );
+        clearXplainOnlyMode(s);
+        JDBC.assertUnorderedResultSet(ps2.executeQuery(),
+            new String[][] { 
+                {"Africa", "19"}, {"Asia", "15"},
+                {"Australia and New Zealand", "2"}, {"Caribbean", "10"},
+                {"Central America", "6"}, {"Central Asia", "4"},
+                {"Europe", "29"}, {"Middle East", "7"},
+                {"North Africa", "5"}, {"North America", "3"},
+                {"Pacific Islands", "3"}, {"South America", "11"} } );
+        disableXplainStyle(s);
+	//dumpStatements(s);
+        //dumpResultSets(s);
+
+        // This statement is executed as a PROJECTION with a child GROUPBY
+        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
+        // has a corresponding SCAN_PROPS row, the GROUPBY has a
+        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
+	// of the actual processing did anything.
+        //
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets"), "4");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select op_identifier from xpltest.sysxplain_resultsets " +
+                    "order by op_identifier"),
+            new String[][] {
+                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where scan_rs_id is not null"), "1");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_resultsets " +
+            "where sort_rs_id is not null"), "1");
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select s.stmt_text, rs.op_identifier," +
+                    " srt.no_input_rows, srt.no_output_rows " +
+                    " from xpltest.sysxplain_sort_props srt, " +
+                    " xpltest.sysxplain_resultsets rs, " +
+                    " xpltest.sysxplain_statements s " +
+                    " where rs.stmt_id = s.stmt_id and " +
+                    " rs.sort_rs_id = srt.sort_rs_id"),
+            new String[][] {
+                {selectStatement, "GROUPBY", "114", "12"} } );
+
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                    "select srt.sort_type, srt.no_input_rows, " +
+                    " srt.no_output_rows, srt.no_merge_runs, " +
+                    " srt.merge_run_details, srt.eliminate_duplicates, " +
+                    " srt.in_sort_order, srt.distinct_aggregate " +
+                    "from xpltest.sysxplain_sort_props srt " +
+                    "join xpltest.sysxplain_resultsets rs " +
+                    "on srt.sort_rs_id = rs.sort_rs_id " +
+                    "where rs.op_identifier='GROUPBY'"),
+                new String[][] {
+                    {"IN","114","12",null, null, null,"N","N"} } );
+    }
     
     
     /**

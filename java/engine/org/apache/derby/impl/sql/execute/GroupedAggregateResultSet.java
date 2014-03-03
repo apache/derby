@@ -352,6 +352,9 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 		if (!isOpen)
 		{
 			return null;

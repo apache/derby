@@ -170,6 +170,9 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecIndexRow execIndexRow = null;
 	    ExecIndexRow aggResult = null;
 		boolean	cloneArg = true;

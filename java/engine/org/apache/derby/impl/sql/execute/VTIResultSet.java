@@ -394,6 +394,9 @@ class VTIResultSet extends NoPutResultSetImpl
      */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 	    ExecRow result = null;
 
 		beginTime = getCurrentTimeMillis();

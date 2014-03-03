@@ -416,6 +416,9 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     public ExecRow getNextRowCore() throws StandardException
     {
+		if( isXplainOnlyMode() )
+			return null;
+
         checkCancellationFlag();
 
         // Step 1.

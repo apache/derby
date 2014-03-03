@@ -135,6 +135,9 @@ class SetOpResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
     {
+		if( isXplainOnlyMode() )
+			return null;
+
 		beginTime = getCurrentTimeMillis();
 	    if ( isOpen )
         {

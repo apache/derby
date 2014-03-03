@@ -152,6 +152,9 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 	 */
 	public ExecRow	getNextRowCore() throws StandardException 
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 		if (nextSatisfied)
 		{
 			clearCurrentRow();

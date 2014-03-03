@@ -175,6 +175,9 @@ class WindowResultSet extends NoPutResultSetImpl
      */
     public ExecRow getNextRowCore() throws StandardException
     {
+		if( isXplainOnlyMode() )
+			return null;
+
         ExecRow sourceRow = null;
         ExecRow retval = null;
         boolean restrict = false;

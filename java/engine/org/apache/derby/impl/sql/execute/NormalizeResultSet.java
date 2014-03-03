@@ -175,6 +175,9 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	 */
 	public ExecRow	getNextRowCore() throws StandardException
 	{
+		if( isXplainOnlyMode() )
+			return null;
+
 		ExecRow		sourceRow = null;
 		ExecRow		result = null;
 
