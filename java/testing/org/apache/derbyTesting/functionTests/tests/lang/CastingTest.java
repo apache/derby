@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -31,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashSet;
 
 import junit.framework.Test;
 
@@ -155,17 +158,17 @@ public static String[][]SQLData =
 
     public static final boolean[][]  T_146 = {
             
-//Types.                 S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
-//                    M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
-//                    A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
-//                    L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
-//                    L  G  N  M     L     H  V  .  H  V           S
-//                    I  E  T  A     E     A  A  B  .  A           T
-//                    N  R     L           R  R  I  B  R           A
-//                    T                       C  T  I  .           M
-//                                            H     T  B           P
-//                                            A        I
-//                                            R        T
+//Types.                  S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
+//                        M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
+//                        A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
+//                        L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
+//                        L  G  N  M     L     H  V  .  H  V           S
+//                        I  E  T  A     E     A  A  B  .  A           T
+//                        N  R     L           R  R  I  B  R           A
+//                        T                       C  T  I  .           M
+//                                                H     T  B           P
+//                                                A        I
+//                                                R        T
 /* 0 SMALLINT */        { X, X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n },
 /* 1 INTEGER  */        { X, X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n },
 /* 2 BIGINT   */        { X, X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n },
@@ -179,8 +182,8 @@ public static String[][]SQLData =
 /* 10 VARCH. BIT   */   { n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X },
 /* 11 LONGVAR. BIT */   { n, n, n, n, n, n, n, n, n, X, X, X, n, n, n, n, X },
 /* 12 CLOB         */   { n, n, n, n, n, n, X, X, X, n, n, n, X, n, n, n, n },
-/* 13 DATE         */   { n, n, n, n, n, n, X, X, n, n, n, n, n, X, n, n, n },
-/* 14 TIME         */   { n, n, n, n, n, n, X, X, n, n, n, n, n, n, X, n, n },
+/* 13 DATE         */   { n, n, n, n, n, n, X, X, n, n, n, n, n, X, n, X, n },
+/* 14 TIME         */   { n, n, n, n, n, n, X, X, n, n, n, n, n, n, X, X, n },
 /* 15 TIMESTAMP    */   { n, n, n, n, n, n, X, X, n, n, n, n, n, X, X, X, n },
 /* 16 BLOB         */   { n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, X },
 
@@ -196,17 +199,17 @@ public static String[][]SQLData =
 
     public static final boolean[][]  T_147a = {
             
-//Types.                S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
-//                   M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
-//                   A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
-//                   L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
-//                   L  G  N  M     L     H  V  .  H  V           S
-//                   I  E  T  A     E     A  A  B  .  A           T
-//                   N  R     L           R  R  I  B  R           A
-//                   T                       C  T  I  .           M
-//                                           H     T  B           P
-//                                           A        I
-//                                              R        T
+//Types.                  S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
+//                        M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
+//                        A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
+//                        L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
+//                        L  G  N  M     L     H  V  .  H  V           S
+//                        I  E  T  A     E     A  A  B  .  A           T
+//                        N  R     L           R  R  I  B  R           A
+//                        T                       C  T  I  .           M
+//                                                H     T  B           P
+//                                                A        I
+//                                                R        T
 /* 0 SMALLINT */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
 /* 1 INTEGER  */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
 /* 2 BIGINT   */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
@@ -234,17 +237,17 @@ public static String[][]SQLData =
     // Note: This table is referenced in NullIfTest.java
     public static final boolean[][]  T_147b = {
             
-//Types.                 S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
-//                    M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
-//                    A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
-//                    L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
-//                    L  G  N  M     L     H  V  .  H  V           S
-//                    I  E  T  A     E     A  A  B  .  A           T
-//                    N  R     L           R  R  I  B  R           A
-//                    T                       C  T  I  .           M
-//                                            H     T  B           P
-//                                            A        I
-//                                            R        T
+//Types.                  S  I  B  D  R  D  C  V  L  C  V  L  C  D  T  T  B
+//                        M  N  I  E  E  O  H  A  O  H  A  O  L  A  I  I  L
+//                        A  T  G  C  A  U  A  R  N  A  R  N  O  T  M  M  O
+//                        L  E  I  I  L  B  R  C  G  R  C  G  B  E  E  E  B
+//                        L  G  N  M     L     H  V  .  H  V           S
+//                        I  E  T  A     E     A  A  B  .  A           T
+//                        N  R     L           R  R  I  B  R           A
+//                        T                       C  T  I  .           M
+//                                                H     T  B           P
+//                                                A        I
+//                                                R        T
 /* 0 SMALLINT */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
 /* 1 INTEGER  */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
 /* 2 BIGINT   */        { X, X, X, X, X, X, n, n, n, n, n, n, n, n, n, n, n },
@@ -284,8 +287,8 @@ public static String[][]SQLData =
     /*VARCHAR(60) FOR BIT DATA*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","10aa20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10bb","10cc","Exception","Exception","Exception","Exception","01dd"},
     /*LONG VARCHAR FOR BIT DATA*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","10aa20202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020","10bb","10cc","Exception","Exception","Exception","Exception","01dd"},
     /*CLOB(1k)*/ {"Exception","Exception","Exception","Exception","Exception","Exception","13                                                          ","13","13","Exception","Exception","Exception","13","Exception","Exception","Exception","Exception"},
-    /*DATE*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01                                                  ","2000-01-01","Exception","Exception","Exception","Exception","Exception","2000-01-01","Exception","Exception","Exception"},
-    /*TIME*/ {"Exception","Exception","Exception","Exception","Exception","Exception","15:30:20                                                    ","15:30:20","Exception","Exception","Exception","Exception","Exception","Exception","15:30:20","Exception","Exception"},
+    /*DATE*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01                                                  ","2000-01-01","Exception","Exception","Exception","Exception","Exception","2000-01-01","Exception","2000-01-01 00:00:00.0","Exception"},
+    /*TIME*/ {"Exception","Exception","Exception","Exception","Exception","Exception","15:30:20                                                    ","15:30:20","Exception","Exception","Exception","Exception","Exception","Exception","15:30:20","TODAY 15:30:20.0","Exception"},
     /*TIMESTAMP*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01 15:30:20.0                                       ","2000-01-01 15:30:20.0","Exception","Exception","Exception","Exception","Exception","2000-01-01","15:30:20","2000-01-01 15:30:20.0","Exception"},
     /*BLOB(1k)*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","01dd"}
     };
@@ -404,6 +407,11 @@ public static String[][]SQLData =
             for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
                 for (int targetType = 0; targetType < SQLUtilities.SQLTypes.length; targetType++) {
                     try {
+                        // Record the start time so that we can calculate
+                        // the current date when checking TIME -> TIMESTAMP
+                        // conversion.
+                        final long startTime = System.currentTimeMillis();
+
                         String targetTypeName = SQLUtilities.SQLTypes[targetType];
                         // For casts from Character types use strings that can
                         // be converted to the targetType.
@@ -421,12 +429,46 @@ public static String[][]SQLData =
                         ResultSetMetaData rsmd = rs.getMetaData();
                         assertEquals(rsmd.getColumnType(1), jdbcTypes[targetType]);
                         rs.close();
+
+                        // Record the time after finishing the data retrieval.
+                        // Used for calculating the current date when checking
+                        // TIME -> TIMESTAMP conversion.
+                        final long finishTime = System.currentTimeMillis();
+
                         if (dataOffset == 0)
                             assertNull(val);
                         else
                         {
                             //System.out.print("\"" + val + "\"");
-                            assertEquals(val,explicitCastValues[sourceType][targetType]);
+                            String expected =
+                                explicitCastValues[sourceType][targetType];
+
+                            if (isTime(sourceType) && isTimestamp(targetType)) {
+                                // The expected value for a cast from TIME to
+                                // TIMESTAMP includes the current date, so
+                                // construct the expected value at run-time.
+                                // We may have crossed midnight during query
+                                // execution, in which case we cannot tell
+                                // whether today or yesterday was used. Accept
+                                // both.
+                                String[] expectedValues = {
+                                    expected.replace(
+                                      "TODAY", new Date(startTime).toString()),
+                                    expected.replace(
+                                      "TODAY", new Date(finishTime).toString()),
+                                };
+
+                                HashSet valid = 
+                                    new HashSet(Arrays.asList(expectedValues));
+
+                                if (!valid.contains(val)) {
+                                    fail("Got " + val + ", expected one of "
+                                         + valid);
+                                }
+                            } else {
+                                // For all other types...
+                                assertEquals(expected, val);
+                            }
                         }
                         checkSupportedCast(sourceType, targetType);
                     } catch (SQLException se) {
@@ -972,6 +1014,87 @@ public static String[][]SQLData =
         assertEquals("Transfer size", transferSize, dt.getTransferSize());
     }
 
+    /**
+     * DERBY-896: Verify that casts from DATE and TIME to TIMESTAMP work.
+     */
+    public void testDateTimeToTimestamp() throws SQLException {
+        Statement s = createStatement();
+
+        ResultSet rs = s.executeQuery(
+                "values (cast (current date as timestamp), "
+                      + "current date, "
+                      + "cast (current time as timestamp), "
+                      + "current time)");
+
+        // Verify correct types of casts.
+        ResultSetMetaData rsmd = rs.getMetaData();
+        assertEquals(Types.TIMESTAMP, rsmd.getColumnType(1));
+        assertEquals(Types.TIMESTAMP, rsmd.getColumnType(3));
+
+        rs.next();
+
+        // CAST (CURRENT DATE AS TIMESTAMP) should match midnight of
+        // current date.
+        assertEquals(rs.getString(2) + " 00:00:00.0", rs.getString(1));
+
+        // CAST (CURRENT TIME AS TIMESTAMP) should match current time of
+        // current date.
+        assertEquals(rs.getString(2) + ' ' + rs.getString(4) + ".0",
+                     rs.getString(3));
+
+        rs.close();
+
+        // Don't allow casts between DATE and TIME.
+        assertCompileError(ILLEGAL_CAST_EXCEPTION_SQLSTATE,
+                           "values cast(current time as date)");
+        assertCompileError(ILLEGAL_CAST_EXCEPTION_SQLSTATE,
+                           "values cast(current date as time)");
+
+        s.execute("create table derby896(id int generated always as identity, "
+                + "d date, t time, ts timestamp)");
+
+        // Only explicit casts are allowed.
+        assertCompileError(LANG_NOT_STORABLE_SQLSTATE,
+                           "insert into derby896(ts) values current time");
+        assertCompileError(LANG_NOT_STORABLE_SQLSTATE,
+                           "insert into derby896(ts) values current date");
+        s.execute("insert into derby896(d,t,ts) values "
+            + "(current date, current time, cast(current date as timestamp)), "
+            + "(current date, current time, cast(current time as timestamp))");
+
+        // Verify that the correct values were inserted.
+        rs = s.executeQuery("select d, t, ts from derby896 order by id");
+        rs.next();
+        assertEquals(rs.getString(1) + " 00:00:00.0", rs.getString(3));
+        rs.next();
+        assertEquals(rs.getString(1) + ' ' + rs.getString(2) + ".0",
+                     rs.getString(3));
+        rs.close();
+
+        // Insert some more values that we can use in casts later.
+        s.execute("insert into derby896(d, t) values "
+                + "({d'1999-12-31'}, {t'23:59:59'}), "
+                + "({d'2000-01-01'}, {t'00:00:00'}), "
+                + "({d'1970-01-01'}, {t'00:00:01'}), "
+                + "({d'1969-12-31'}, {t'12:00:00'})");
+
+        // Verify correct casts from DATE to TIMESTAMP in SELECT list.
+        rs = s.executeQuery("select d, cast(d as timestamp) from derby896");
+        while (rs.next()) {
+            assertEquals(rs.getString(1) + " 00:00:00.0", rs.getString(2));
+        }
+        rs.close();
+
+        // Verify correct casts from TIME to TIMESTAMP in SELECT list.
+        rs = s.executeQuery("select t, cast(t as timestamp), current date "
+                            + "from derby896");
+        while (rs.next()) {
+            assertEquals(rs.getString(3) + ' ' + rs.getString(1) + ".0",
+                         rs.getString(2));
+        }
+        rs.close();
+    }
+
     protected void tearDown() throws SQLException, Exception {
         Statement scb = createStatement();
 
@@ -1123,13 +1246,12 @@ public static String[][]SQLData =
                 || (typeOffset == LONGVARCHAR_FOR_BIT_OFFSET) || (typeOffset == BLOB_OFFSET));
     }
 
-    private static boolean isDateTimeTimestamp(int typeOffset) {
-        return ((typeOffset == DATE_OFFSET) || (typeOffset == TIME_OFFSET) || (typeOffset == TIMESTAMP_OFFSET));
-
+    private static boolean isTime(int typeOffset) {
+        return (typeOffset == TIME_OFFSET);
     }
 
-    private static boolean isClob(int typeOffset) {
-        return (typeOffset == CLOB_OFFSET);
+    private static boolean isTimestamp(int typeOffset) {
+        return (typeOffset == TIMESTAMP_OFFSET);
     }
 
     private static boolean isLob(int typeOffset) {
