@@ -263,8 +263,9 @@ public abstract class Agent {
         }
         connection_.completeChainBreakingDisconnect();
     }
-    
-    abstract public void beginWriteChainOutsideUOW() throws SqlException;
+
+    public void beginWriteChainOutsideUOW() throws SqlException {
+    }
 
     public void beginWriteChain(Statement statement) throws SqlException {
         connection_.writeTransactionStart(statement);
@@ -274,10 +275,10 @@ public abstract class Agent {
         beginWriteChain(statement);
     }
 
-    abstract protected void endWriteChain();
+    protected void endWriteChain() {
+    }
 
     protected final void endBatchedWriteChain() {
-        endWriteChain();
     }
 
     protected void beginReadChain(Statement statement) throws SqlException {

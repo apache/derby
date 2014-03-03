@@ -226,10 +226,9 @@ public class ClobLocatorReader extends java.io.Reader {
             currentPos += result.length;
             return result;
         } catch (SqlException ex) {
-            // Passing cause as ctor argument ensures that the IOException 
-            // inherits the cause's message, (unlike invoking initCause() on a 
-            // default-constructed IOException).
-            throw new IOException(ex);
+            IOException ioEx = new IOException();
+            ioEx.initCause(ex);
+            throw ioEx;
         }
     }
 }
