@@ -459,6 +459,11 @@ class CastNode extends ValueNode
             )
         { setNullability( true ); }
 		else { setNullability(castOperand.getTypeServices().isNullable()); }
+        
+        if (targetUDT != null)
+        {
+            addUDTUsagePriv( this );
+        }
 	}
 
 	/**

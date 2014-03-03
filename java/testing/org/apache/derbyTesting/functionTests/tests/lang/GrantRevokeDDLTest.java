@@ -11957,6 +11957,148 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Test that INSERT statements driven by SELECTs require the correct privileges as
+     * described on DERBY-6434.
+     */
+    public void test_6434_select()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceValueType_6434_3 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type TargetValueType_6434_3 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceValueExtractor_6434_3( hashMap SourceValueType_6434_3, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceValueMaker_6434_3( hashKey varchar( 32672 ), hashValue int ) returns SourceValueType_6434_3\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function targetValueMaker_6434_3( hashKey varchar( 32672 ), hashValue int ) returns TargetValueType_6434_3\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_6434_3( a TargetValueType_6434_3 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_6434_3( b SourceValueType_6434_3 )"
+             );
+
+        //
+        // Privileges
+        //
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on targetTable_6434_3 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function sourceValueExtractor_6434_3 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function sourceValueMaker_6434_3 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function targetValueMaker_6434_3 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on sourceTable_6434_3 to ruth"
+             );
+
+        // the problem SELECT-driven INSERT
+        goodStatement
+            (
+             ruthConnection,
+             "insert into test_dbo.targetTable_6434_3\n" +
+             "  select test_dbo.targetValueMaker_6434_3( 'bar', test_dbo.sourceValueExtractor_6434_3( b, 'foo' ) )\n" +
+             "  from test_dbo.sourceTable_6434_3\n"
+             );
+
+        // make sure that privilege checks are still needed for explicit casts
+        expectExecutionError
+            (
+             ruthConnection,
+             NO_GENERIC_PERMISSION,
+             "select * from test_dbo.sourceTable_6434_3\n" +
+             "where ( cast( null as test_dbo.SourceValueType_6434_3 ) ) is not null\n"
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "drop table sourceTable_6434_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop table targetTable_6434_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function targetValueMaker_6434_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function sourceValueMaker_6434_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop function sourceValueExtractor_6434_3"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type TargetValueType_6434_3 restrict"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "drop type SourceValueType_6434_3 restrict"
+             );
+    }
+    
+    /**
      * Test that INSERT and UPDATEs run CHECK constraints with definer's rights.
      */
     public void test_6432()

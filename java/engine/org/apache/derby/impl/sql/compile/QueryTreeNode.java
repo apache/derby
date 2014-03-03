@@ -1363,14 +1363,22 @@ public abstract class QueryTreeNode implements Visitable
     {
         if ( !isPrivilegeCollectionRequired() ) { return; }
         
-        for ( ValueNode val : valueNodes )
+        for ( ValueNode val : valueNodes ) { addUDTUsagePriv( val ); }
+    }
+
+    /**
+     * Add USAGE privilege for a single UDT.
+     */
+    void    addUDTUsagePriv( ValueNode val )
+        throws StandardException
+    {
+        if ( !isPrivilegeCollectionRequired() ) { return; }
+        
+        DataTypeDescriptor  dtd = val.getTypeServices();
+        if ( (dtd != null) && dtd.getTypeId().userType() )
         {
-            DataTypeDescriptor  dtd = val.getTypeServices();
-            if ( (dtd != null) && dtd.getTypeId().userType() )
-            {
-                AliasDescriptor ad = getUDTDesc( dtd );
-                getCompilerContext().addRequiredUsagePriv( ad );
-            }
+            AliasDescriptor ad = getUDTDesc( dtd );
+            getCompilerContext().addRequiredUsagePriv( ad );
         }
     }
 

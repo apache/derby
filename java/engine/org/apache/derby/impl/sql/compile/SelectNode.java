@@ -517,6 +517,11 @@ class SelectNode extends ResultSetNode
     void bindExpressions(FromList fromListParam)
 					throws StandardException
 	{
+        //
+        // Don't add USAGE privilege on user-defined types.
+        //
+        boolean wasSkippingTypePrivileges = getCompilerContext().skipTypePrivileges( true );
+            
 		int fromListParamSize = fromListParam.size();
 		int fromListSize = fromList.size();
 		int numDistinctAggs;
@@ -712,6 +717,8 @@ class SelectNode extends ResultSetNode
 
             bindOffsetFetch(qec.getOffset(i), qec.getFetchFirst(i));
         }
+
+        getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
     }
 
 	/**
