@@ -70,42 +70,54 @@ public class SQLExceptionFactory extends ExceptionFactory {
         // Create dummy exception which ferries arguments needed to serialize
         // SQLExceptions across the DRDA network layer.
         //
-        t = wrapArgsForTransportAcrossDRDA( message, messageId, next, severity, t, args );
+        StandardException ferry =
+                wrapArgsForTransportAcrossDRDA(messageId, t, args);
 
         final SQLException ex;
         if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //no derby sqlstate belongs to
             //TransientConnectionException DERBY-3074
-            ex = new SQLNonTransientConnectionException(message, sqlState, severity, t);
+            ex = new SQLNonTransientConnectionException(
+                    message, sqlState, severity, ferry);
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
-            ex = new SQLDataException(message, sqlState, severity, t);
+            ex = new SQLDataException(message, sqlState, severity, ferry);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
             ex = new SQLIntegrityConstraintViolationException(message, sqlState,
-                    severity, t);
+                    severity, ferry);
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
-                    severity, t);
+                    severity, ferry);
         }
         else if (sqlState.startsWith(SQLState.TRANSACTION_PREFIX)) {
             ex = new SQLTransactionRollbackException(message, sqlState,
-                    severity, t);
+                    severity, ferry);
         } else if (sqlState.startsWith(SQLState.LSE_COMPILATION_PREFIX)) {
-            ex = new SQLSyntaxErrorException(message, sqlState, severity, t);
+            ex = new SQLSyntaxErrorException(
+                    message, sqlState, severity, ferry);
         } else if (sqlState.startsWith(SQLState.UNSUPPORTED_PREFIX)) {
-            ex = new SQLFeatureNotSupportedException(message, sqlState, severity, t);
+            ex = new SQLFeatureNotSupportedException(
+                    message, sqlState, severity, ferry);
         } else if
                 (
                  sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5)) ||
                  sqlState.equals(SQLState.LOGIN_TIMEOUT.substring(0, 5))
                  ) {
-            ex = new SQLTimeoutException(message, sqlState, severity, t);
+            ex = new SQLTimeoutException(message, sqlState, severity, ferry);
         } else {
-            ex = new SQLException(message, sqlState, severity, t);
+            ex = new SQLException(message, sqlState, severity, ferry);
+        }
+
+        // If the argument ferry has recorded any extra next exceptions,
+        // graft them into the parent exception.
+        SQLException ferriedExceptions = ferry.getNextException();
+        if (ferriedExceptions != null) {
+            ex.setNextException(ferriedExceptions);
         }
 
         if (next != null) {
             ex.setNextException(next);
         }
+
         return ex;
     }
 
@@ -128,17 +140,25 @@ public class SQLExceptionFactory extends ExceptionFactory {
      * That serialization involves some clever encoding of the Derby messageID and
      * arguments. Unfortunately, once we create one of the
      * JDBC4-specific subclasses of SQLException, we lose the messageID and
-     * args. This method creates a dummy EmbedSQLException which preserves that
-     * information. We return the dummy exception.
+     * args. This method creates a dummy StandardException which preserves that
+     * information, unless the cause is already a StandardException which
+     * contains the necessary information for serializing the exception.
      * </p>
 	 */
-    private SQLException wrapArgsForTransportAcrossDRDA(
-            String message, String messageId, SQLException next,
-            int severity, Throwable t, Object[] args) {
-        return new EmbedSQLException(
-                message, messageId,
-                (next == null ?
-                    null : StandardException.getArgumentFerry(next)),
-                severity, t, args);
+    private StandardException wrapArgsForTransportAcrossDRDA(
+            String messageId, Throwable cause, Object[] args) {
+
+        // If the cause is a StandardException with the same message id, we
+        // already have what we need. Just return that exception.
+        if (cause instanceof StandardException) {
+            StandardException se = (StandardException) cause;
+            if (messageId.equals(se.getMessageId())) {
+                return se;
+            }
+        }
+
+        // Otherwise, we create a new StandardException that carries the
+        // message id and arguments.
+        return StandardException.newException(messageId, cause, args);
     }
 }

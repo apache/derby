@@ -168,30 +168,7 @@ public abstract class Util  {
 			try {
 				SanityManager.ASSERT(mustBeTrue, msg);
 			} catch (Throwable t) {
-				SQLException se = conn.handleException(t);
-				// get around typing constraints.
-				// it must be a Util, we wrapped it.
-				SanityManager.ASSERT(se instanceof EmbedSQLException);
-				throw (EmbedSQLException)se;
-			}
-		}
-	}
-
-	/**
-		Mimic SanityManager.THROWASSERT in a JDBC-friendly way,
-		and providing system cleanup for JDBC failures.
-		We need the connection to do cleanup...
-	 */
-	static void THROWASSERT(EmbedConnection conn, String msg) throws SQLException {
-		if (SanityManager.DEBUG) {
-			try {
-				SanityManager.THROWASSERT(msg);
-			} catch (Throwable t) {
-				SQLException se = conn.handleException(t);
-				// get around typing constraints.
-				// it must be a Util, we wrapped it.
-				SanityManager.ASSERT(se instanceof EmbedSQLException);
-				throw (EmbedSQLException)se;
+                throw conn.handleException(t);
 			}
 		}
 	}

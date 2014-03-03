@@ -79,7 +79,6 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
@@ -2099,13 +2098,14 @@ public final class NetworkServerControlImpl {
         //localize message if necessary
         while (se != null)
         {
+            StandardException ferry = StandardException.getArgumentFerry(se);
             if (currentSession != null && currentSession.langUtil != null &&
-                se instanceof EmbedSQLException)
+                ferry != null)
             {
                 locMsg.append(se.getSQLState()+":"+ 
                     MessageService.getLocalizedMessage(
-                    currentSession.langUtil.getLocale(), ((EmbedSQLException)se).getMessageId(), 
-                    ((EmbedSQLException)se).getArguments()));
+                    currentSession.langUtil.getLocale(),
+                    ferry.getMessageId(), ferry.getArguments()));
             }
             else
                 locMsg.append(se.getSQLState()+":"+se.getMessage());

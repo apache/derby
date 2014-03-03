@@ -34,7 +34,6 @@ import java.sql.*;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.DerbyIOException;
-import org.apache.derby.impl.jdbc.EmbedSQLException;
 
 /**
  * This class is used to test JDBC4 specific methods in the PreparedStatement(s)
@@ -1328,10 +1327,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
                        preSQLState, sqle);
         // We need to dig a little with the current way exceptions are
         // being reported. We can use getCause because we always run with
-        // Mustang/Java SE 6.
+        // Java SE 6 or later.
         Throwable cause = getLastSQLException(sqle).getCause();
-        assertTrue("Exception not an EmbedSQLException",
-                   cause instanceof EmbedSQLException);
+        assertEquals("org.apache.derby.iapi.error.StandardException",
+                     cause.getClass().getName());
         cause = cause.getCause();
         assertTrue("Exception not a DerbyIOException",
                    cause instanceof DerbyIOException);

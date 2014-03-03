@@ -22,18 +22,12 @@
 package org.apache.derby.iapi.error;
 
 import java.sql.SQLException;
-
-import org.apache.derby.impl.jdbc.EmbedSQLException;
-
+import org.apache.derby.iapi.jdbc.ExceptionFactory;
 
 /**
 	Class that wraps StandardExceptions in a SQLException.
 	This is used to make any public API methods always
 	throw SQLException rather than a random collection.
-	This wrapping is also special cased by TypeStatementException
-	to avoid double wrapping of some errors.
-	<P>
-	This will get cleaned up in main.
  */
 public class PublicAPI
 {
@@ -42,7 +36,9 @@ public class PublicAPI
 		operation failed due to a database error.
 	 */
 	public static SQLException wrapStandardException(StandardException se) {
-		return EmbedSQLException.wrapStandardException(se.getMessage(),
-			se.getMessageId(), se.getSeverity(), se);
+        se.markAsPublicAPI();
+        return ExceptionFactory.getInstance().getSQLException(
+                se.getMessage(), se.getMessageId(), (SQLException) null,
+                se.getSeverity(), se, se.getArguments());
 	}
 }

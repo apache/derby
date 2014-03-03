@@ -96,7 +96,7 @@ ij> commit;
 ij> --this one should fail as we're still using the default import format
 call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T2' , 'extin/AccountData_format1.dat' , 
                                     null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLSyntaxErrorException: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.' was thrown while evaluating an expression.
 ERROR 42X04: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.
 ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T2'));
 1          
@@ -136,7 +136,7 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T3' ,
                                   null , '16, 15, 1, 4, 19, 200' ,
 				  'extin/AccountData_defaultformat.dat' , 
 				  null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLSyntaxErrorException: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.' was thrown while evaluating an expression.
 ERROR 42X04: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.
 ij> select count(*) from T3;
 ERROR 42X05: Table/View 'T3' does not exist.
@@ -326,7 +326,7 @@ ij> create table Alt2 (	Account	int,
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT2' , 'extin/UnsupportedFormat2.dat' , 
                                       null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN10' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLSyntaxErrorException: Column 'COLUMN10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN10' is not a column in the target table.' was thrown while evaluating an expression.
 ERROR 42X04: Column 'COLUMN10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN10' is not a column in the target table.
 ij> select count(*) from Alt2;
 1          
@@ -359,7 +359,7 @@ ij> create table Alt3 (	Account	int,
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/AccountData_NullFields.dat' , 
                                       null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN20' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN20' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLSyntaxErrorException: Column 'COLUMN20' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN20' is not a column in the target table.' was thrown while evaluating an expression.
 ERROR 42X04: Column 'COLUMN20' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN20' is not a column in the target table.
 ij> select count(*) from Alt3;
 1          
@@ -572,7 +572,7 @@ ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' ,
 				  null , '2,3,4,5,6,7,8,11,12', 
 				  'extin/Access1.txt' , 
 				  null, null, null, 0) ;
-ERROR 38000: The exception 'java.sql.SQLException: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
+ERROR 38000: The exception 'java.sql.SQLSyntaxErrorException: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> select * from HouseHoldItem;
 ERROR 42X05: Table/View 'HOUSEHOLDITEM' does not exist.

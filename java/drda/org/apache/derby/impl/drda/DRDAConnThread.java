@@ -65,7 +65,6 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
 
@@ -1357,14 +1356,14 @@ class DRDAConnThread extends Thread {
      * is not enough to check that the SQL state is 08004 and conclude
      * that authentication caused the exception to be thrown.
      *
-     * This method tries to cast the exception to an EmbedSQLException
+     * This method tries to get a StandardException from the SQLException
      * and use getMessageId on that object to check for authentication
      * error instead of the SQL state we get from
      * SQLExceptions#getSQLState. getMessageId returns the entire id
      * as defined in SQLState (e.g. 08004.C.1), while getSQLState only
      * return the 5 first characters (i.e. 08004 instead of 08004.C.1)
      *
-     * If the cast to EmbedSQLException is not successful, the
+     * If the SQLException isn't linked to a StandardException, the
      * assumption that SQL State 08004 is caused by an authentication
      * failure is followed even though this is not correct. This was
      * the pre DERBY-3060 way of solving the issue.
@@ -1379,14 +1378,14 @@ class DRDAConnThread extends Thread {
         boolean authFail = false;
 
         // get exception which carries Derby messageID and args
-        SQLException se = StandardException.getArgumentFerry(sqlException);
+        StandardException se = StandardException.getArgumentFerry(sqlException);
 
-        if (se instanceof EmbedSQLException) {
-            // DERBY-3060: if this is an EmbedSQLException, we can
+        if (se != null) {
+            // DERBY-3060: if this is a Derby exception, we can
             // check the messageId to find out what caused the
             // exception.
 
-            String msgId = ((EmbedSQLException)se).getMessageId();
+            String msgId = se.getMessageId();
 
             // Of the 08004.C.x messages, only
             // SQLState.NET_CONNECT_AUTH_FAILED is an authentication
@@ -1395,10 +1394,10 @@ class DRDAConnThread extends Thread {
                 authFail = true;
             }
         } else {
-            String sqlState = se.getSQLState();
+            String sqlState = sqlException.getSQLState();
             if (sqlState.regionMatches(0,SQLState.LOGIN_FAILED,0,5)) {
                 // Unchanged by DERBY-3060: This is not an
-                // EmbedSQLException, so we cannot check the
+                // Derby exception, so we cannot check the
                 // messageId. As before DERBY-3060, we assume that all
                 // 08004 error codes are due to an authentication
                 // failure, even though this ambigious
@@ -6447,14 +6446,16 @@ class DRDAConnThread extends Thread {
         String sqlerrmc;
 
         // get exception which carries Derby messageID and args, per DERBY-1178
-        se = StandardException.getArgumentFerry( se );
-        
-        if (se instanceof EmbedSQLException  && ! severe) {
-            sqlerrmc = buildTokenizedSqlerrmc(se);
-        } else if (se instanceof DataTruncation) {
+        StandardException ferry = StandardException.getArgumentFerry(se);
+
+        if (se instanceof DataTruncation) {
+            // Encode DataTruncation in a special way.
             sqlerrmc = buildDataTruncationSqlerrmc((DataTruncation) se);
+        } else if (ferry != null && !severe) {
+            // All other non-severe Derby exceptions are encoded here.
+            sqlerrmc = buildTokenizedSqlerrmc(se);
         } else {
-            // If this is not an EmbedSQLException or is a severe excecption where
+            // If this is not a Derby exception or is a severe excecption where
             // we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
             // preformatted message using the server locale
             sqlerrmc = buildPreformattedSqlerrmc(se);
@@ -6473,7 +6474,7 @@ class DRDAConnThread extends Thread {
 
     /**
      * Build preformatted SQLException text 
-     * for severe exceptions or SQLExceptions that are not EmbedSQLExceptions.
+     * for severe exceptions or SQLExceptions that are not Derby exceptions.
      * Just send the message text localized to the server locale.
      * 
      * @param se  SQLException for which to build SQLERRMC
@@ -6511,11 +6512,12 @@ class DRDAConnThread extends Thread {
         
         String sqlerrmc = "";
         do {
-            if ( se instanceof EmbedSQLException)
+            StandardException ferry = StandardException.getArgumentFerry(se);
+            if (ferry != null)
             {
-                String messageId = ((EmbedSQLException)se).getMessageId();
+                String messageId = ferry.getMessageId();
                 // arguments are variable part of a message
-                Object[] args = ((EmbedSQLException)se).getArguments();
+                Object[] args = ferry.getArguments();
                 for (int i = 0; args != null &&  i < args.length; i++) {
                     sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
                 }
@@ -6734,9 +6736,11 @@ class DRDAConnThread extends Thread {
             // arguments are variable part of a message
             // only send arguments for diagnostic level 0
             if (diagnosticLevel == CodePoint.DIAGLVL0) {
-                // we are only able to get arguments of EmbedSQLException
-                if (se instanceof EmbedSQLException) {
-                    Object[] args = ((EmbedSQLException)se).getArguments();
+                // we are only able to get arguments of Derby exceptions
+                StandardException ferry =
+                        StandardException.getArgumentFerry(se);
+                if (ferry != null) {
+                    Object[] args = ferry.getArguments();
                     for (int i = 0; args != null &&  i < args.length; i++) {
                         sqlerrmc += args[i].toString() + SQLERRMC_TOKEN_DELIMITER;
                     }
