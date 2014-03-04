@@ -429,7 +429,8 @@ public final class TransactionResourceImpl
             // chain. Therefore, call wrapInSQLException() recursively to
             // convert the cause chain into a chain of SQLExceptions.
             return Util.seeNextException(se.getMessageId(),
-                        se.getArguments(), wrapInSQLException(se.getCause()));
+                        wrapInSQLException(se.getCause()), se.getCause(),
+                        se.getArguments());
         }
 
         // thrownException is a Java exception

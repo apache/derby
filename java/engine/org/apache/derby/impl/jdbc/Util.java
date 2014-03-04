@@ -124,35 +124,6 @@ public abstract class Util  {
     	errorStringBuilder.reset();
     }
 
-	
-	/**
-     * This looks up the message and sqlstate values and calls
-     * the SQLExceptionFactory method to generate
-     * the appropriate exception off of them.
-     */
-
-	private static SQLException newEmbedSQLException(String messageId,
-			Object[] args, SQLException next, int severity, Throwable t) {
-        String message = MessageService.getTextMessage(messageId, args);
-        return ExceptionFactory.getInstance().getSQLException(
-			    message, messageId, next, severity, t, args);
-	}
-
-	public static SQLException newEmbedSQLException(String messageId,
-			Object[] args, int severity) {
-		return newEmbedSQLException(messageId, args, (SQLException) null, severity, (Throwable) null);
-	}
-
-	private static SQLException newEmbedSQLException(String messageId,
-			Object[] args, int severity, Throwable t) {
-		return newEmbedSQLException(messageId,args, (SQLException)  null, severity, t);
-	}
-
-	private static SQLException newEmbedSQLException(
-			String messageId, int severity) {
-		return newEmbedSQLException(messageId, (Object[]) null, (SQLException) null, severity, (Throwable) null);
-	}
-
 	// class interface
 
 
@@ -243,22 +214,19 @@ public abstract class Util  {
 	** Its parameters are specific to its message.
 	** These will throw SQLException when the message repository
 	** cannot be located.
-	** Note that these methods call the static method newEmbedSQLException,
+    ** Note that these methods use the SQL exception factory,
 	** they don't directly do a new Util.
 	*/
 
     public static SQLException generateCsSQLException(
             String error, Object... args) {
-		return newEmbedSQLException(error,
-                args,
-        		StandardException.getSeverityFromIdentifier(error));
+        return generateCsSQLException(error, null, args);
 	}
 
     static SQLException generateCsSQLException(
                     String error, Throwable t, Object... args) {
-		return newEmbedSQLException(error,
-                args,
-                StandardException.getSeverityFromIdentifier(error), t);
+        return ExceptionFactory.getInstance().getSQLException(
+                error, (SQLException) null, t, args);
 	}
 
 	public static SQLException generateCsSQLException(StandardException se) {
@@ -268,8 +236,7 @@ public abstract class Util  {
     }
 
 	public static SQLException noCurrentConnection() {
-		return newEmbedSQLException(SQLState.NO_CURRENT_CONNECTION,
-        		StandardException.getSeverityFromIdentifier(SQLState.NO_CURRENT_CONNECTION));
+        return generateCsSQLException(SQLState.NO_CURRENT_CONNECTION);
 	}
 
     /**
@@ -278,14 +245,15 @@ public abstract class Util  {
      * <code>setNextException()</code>.
      *
      * @param messageId message id
+     * @param next the next SQLException, possibly null
+     * @param cause the underlying exception, possibly null
      * @param args the arguments to the message creation
-     * @param next the next SQLException
      * @return an SQLException wrapping another SQLException
      */
-    static SQLException seeNextException(String messageId, Object[] args,
-                                         SQLException next) {
-        return newEmbedSQLException(messageId, args, next,
-            StandardException.getSeverityFromIdentifier(messageId), null);
+    static SQLException seeNextException(String messageId, SQLException next,
+                                         Throwable cause, Object... args) {
+        return ExceptionFactory.getInstance().getSQLException(
+                messageId, next, cause, args);
     }
 
 	public static SQLException javaException(Throwable t) {
@@ -305,9 +273,9 @@ public abstract class Util  {
                 next = javaException(cause);
             }
         }
-		SQLException    result = newEmbedSQLException(SQLState.JAVA_EXCEPTION,
-                new Object[] {name, msg}, next,
-                ExceptionSeverity.NO_APPLICABLE_SEVERITY, t);
+
+        SQLException result = seeNextException(
+                SQLState.JAVA_EXCEPTION, next, t, name, msg);
 
     	if ( result.getErrorCode() >= logSeverityLevel ) { logSQLException( result ); }
         
@@ -316,8 +284,8 @@ public abstract class Util  {
 
 
 	public static SQLException policyNotReloaded( Throwable t ) {
-		return newEmbedSQLException(SQLState.POLICY_NOT_RELOADED, new Object[] { t.getMessage() },
-        		StandardException.getSeverityFromIdentifier(SQLState.POLICY_NOT_RELOADED), t);
+        return generateCsSQLException(
+                SQLState.POLICY_NOT_RELOADED, t, t.getMessage());
 	}
 
 	public static SQLException notImplemented() {
@@ -326,10 +294,7 @@ public abstract class Util  {
 	}
 
 	public static SQLException notImplemented(String feature) {
-
-		return newEmbedSQLException(SQLState.NOT_IMPLEMENTED,
-			new Object[] {feature},
-                StandardException.getSeverityFromIdentifier(SQLState.NOT_IMPLEMENTED));
+        return generateCsSQLException(SQLState.NOT_IMPLEMENTED, feature);
 	}
 
 	static SQLException setStreamFailure(IOException e) {
@@ -342,9 +307,8 @@ public abstract class Util  {
 	}
 
 	static SQLException typeMisMatch(int targetSQLType) {
-		return newEmbedSQLException(SQLState.TYPE_MISMATCH,
-			new Object[] {typeName(targetSQLType)},
-                StandardException.getSeverityFromIdentifier(SQLState.TYPE_MISMATCH));
+        return generateCsSQLException(
+                SQLState.TYPE_MISMATCH, typeName(targetSQLType));
 	}
 
     /** Create the correct BatchUpdateException depending on whether this is Java 8 or lower */

@@ -4784,12 +4784,8 @@ public class EmbedResultSet extends ConnectionChild
     private void checkScrollCursor(String methodName) throws SQLException {
 		checkIfClosed(methodName);
 		if (stmt.getResultSetType() == java.sql.ResultSet.TYPE_FORWARD_ONLY)
-			throw Util
-					.newEmbedSQLException(
-							SQLState.NOT_ON_FORWARD_ONLY_CURSOR,
-							new Object[] { methodName },
-							StandardException
-									.getSeverityFromIdentifier(SQLState.NOT_ON_FORWARD_ONLY_CURSOR));
+            throw Util.generateCsSQLException(
+                    SQLState.NOT_ON_FORWARD_ONLY_CURSOR, methodName);
 	}
     
     private void checkUpdatableCursor(String operation) throws SQLException {

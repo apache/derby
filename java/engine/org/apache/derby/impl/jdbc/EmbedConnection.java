@@ -2645,8 +2645,7 @@ public class EmbedConnection implements EngineConnection
 
 		} catch (StandardException mse) {
             throw Util.seeNextException(SQLState.CREATE_DATABASE_FAILED,
-                                        new Object[] { dbname },
-                                        handleException(mse));
+                                        handleException(mse), mse, dbname);
 		}
 
 		// clear these values as some modules hang onto
@@ -2840,8 +2839,8 @@ public class EmbedConnection implements EngineConnection
 				nse = Util.generateCsSQLException(mse);
 
             throw Util.seeNextException(SQLState.BOOT_DATABASE_FAILED,
-                                        new Object[] { dbname, 
-                                        (Object) this.getClass().getClassLoader() }, nse);
+                                        nse, (ne == null ? mse : ne),
+                                        dbname, getClass().getClassLoader());
 		}
 
 		// If database exists, getDatabase() will return the database object.
