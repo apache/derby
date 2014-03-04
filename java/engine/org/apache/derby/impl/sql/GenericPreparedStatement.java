@@ -241,8 +241,13 @@ public class GenericPreparedStatement
 
 	public void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException {
+        rePrepare(lcc, false);
+    }
+
+    public void rePrepare(LanguageConnectionContext lcc, boolean forMetaData)
+        throws StandardException {
 		if (!upToDate()) {
-			PreparedStatement ps = statement.prepare(lcc);
+            PreparedStatement ps = statement.prepare(lcc, forMetaData);
 
 			if (SanityManager.DEBUG)
 				SanityManager.ASSERT(ps == this, "ps != this");
@@ -305,7 +310,7 @@ public class GenericPreparedStatement
 		Activation a = getActivation(lcc, false);
 		a.setSingleExecution();
 		lcc.setupSubStatementSessionContext(parent);
-		return executeStmt(a, rollbackParentContext, timeoutMillis);
+        return executeStmt(a, rollbackParentContext, false, timeoutMillis);
 	}
 
 	/**
@@ -319,7 +324,8 @@ public class GenericPreparedStatement
 	{
 		parent.getLanguageConnectionContext().
 			setupSubStatementSessionContext(parent);
-		return executeStmt(activation, rollbackParentContext, timeoutMillis);
+        return executeStmt(activation, rollbackParentContext,
+                           false, timeoutMillis);
 	}
 
 
@@ -327,10 +333,11 @@ public class GenericPreparedStatement
 	 * @see PreparedStatement#execute
 	 */
 	public ResultSet execute(Activation activation,
+                             boolean forMetaData,
 							 long timeoutMillis)
 			throws StandardException
 	{
-		return executeStmt(activation, false, timeoutMillis);
+        return executeStmt(activation, false, forMetaData, timeoutMillis);
 	}
 
 
@@ -341,6 +348,7 @@ public class GenericPreparedStatement
 	  * @param rollbackParentContext True if 1) the statement context is
 	  *  NOT a top-level context, AND 2) in the event of a statement-level
 	  *	 exception, the parent context needs to be rolled back, too.
+      * @param forMetaData true if this is a meta-data query
       * @param timeoutMillis timeout value in milliseconds.
 	  *	@return	the result set to be pawed through
 	  *
@@ -348,6 +356,7 @@ public class GenericPreparedStatement
 	  */
     private ResultSet executeStmt(Activation activation,
 								  boolean rollbackParentContext,
+                                  boolean forMetaData,
 								  long timeoutMillis)
         throws
             StandardException 
@@ -422,7 +431,7 @@ recompileOutOfDatePlan:
 			// to execute.  That exception will be caught by the executeSPS()
 			// method of the GenericTriggerExecutor class, and at that time
 			// the SPS action will be recompiled correctly.
-                rePrepare(lccToUse);
+                rePrepare(lccToUse, forMetaData);
 			}
 
 			StatementContext statementContext = lccToUse.pushStatementContext(

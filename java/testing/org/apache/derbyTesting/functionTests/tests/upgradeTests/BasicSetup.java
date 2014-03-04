@@ -20,16 +20,19 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import javax.sql.DataSource;
 
 import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
 
@@ -1957,5 +1960,63 @@ public class BasicSetup extends UpgradeChange {
         // fail, but it caused PhaseChanger to fail when moving to the
         // PH_SOFT_UPGRADE phase or the PH_HARD_UPGRADE phase.
         JDBC.assertDrainResults(getConnection().getMetaData().getSchemas());
+    }
+
+    /**
+     * Verify that recompilation of a stale meta-data query works in soft
+     * upgrade. Before DERBY-4753, it used to fail with a syntax error
+     * because the recompilation didn't accept internal syntax.
+     */
+    public void testDERBY4753() throws SQLException {
+        // Use a separate database for this test case because
+        // 1) we set a database property that we don't want the other test
+        //    cases to see
+        // 2) we want to start with an empty database so that the schema
+        //    changes we make are considered significant enough to make the
+        //    plans stale (in an already populated database, larger changes
+        //    are needed to make the plans stale)
+        final DataSource ds = JDBCDataSource.getDataSourceLogical("DERBY-4753");
+
+        if (getPhase() == PH_CREATE) {
+            // Create the database with the old version and set the stale
+            // plan check interval as low as possible to make the test reach
+            // the stale plan check earlier.
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            Connection c = ds.getConnection();
+            Statement s = c.createStatement();
+            s.execute("call syscs_util.syscs_set_database_property("
+                    + "'derby.language.stalePlanCheckInterval', '5')");
+            s.close();
+            c.close();
+        } else if (getPhase() == PH_SOFT_UPGRADE) {
+            Connection c = ds.getConnection();
+            DatabaseMetaData dmd = c.getMetaData();
+
+            // First make sure the getIndexInfo query is compiled.
+            JDBC.assertEmpty(dmd.getIndexInfo(null, null, "", true, true));
+
+            // Then make some schema changes so that the tables used by the
+            // getIndexInfo query grows so much that they will be recompiled
+            // on the next stale plan check.
+            Statement s = c.createStatement();
+            for (int i = 0; i < 10; i++) {
+                String sql = "create table s" + i + ".t(col0 int";
+                for (int j = 1; j < 1000; j++) {
+                    sql += ", col" + j + " int";
+                }
+                sql += ')';
+                s.execute(sql);
+            }
+            s.close();
+
+            // Finally execute getIndexInfo() as many times as needed to
+            // reach the stale plan check interval so that it is recompiled.
+            // The fifth call used to fail with a syntax error.
+            for (int i = 0; i < 5; i++) {
+                JDBC.assertEmpty(dmd.getIndexInfo(null, null, "", true, true));
+            }
+
+            c.close();
+        }
     }
 }
