@@ -809,7 +809,8 @@ public class MatchingClauseNode extends QueryTreeNode
             selectList.addResultColumn( rc.cloneMe() );
         }
         selectList.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
-        bindExpressions( selectList, fullFromList );
+
+       bindExpressions( selectList, fullFromList );
         
         bindInsertValues( fullFromList, targetTable );
 
@@ -943,6 +944,11 @@ public class MatchingClauseNode extends QueryTreeNode
          )
         throws StandardException
     {
+        //
+        // Don't add USAGE privilege on user-defined types just because we're
+        // building the THEN columns.
+        //
+        boolean wasSkippingTypePrivileges = getCompilerContext().skipTypePrivileges( true );
         TableDescriptor td = targetTable.getTableDescriptor();
 
         _thenColumns = fullRow.copyListAndObjects();
@@ -1043,6 +1049,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
         }   // end loop through _thenColumns
 
+        getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
     }
 
     /**
@@ -1081,10 +1088,11 @@ public class MatchingClauseNode extends QueryTreeNode
     {
         CompilerContext cc = getCompilerContext();
         final int previousReliability = cc.getReliability();
+
+        boolean wasSkippingTypePrivileges = cc.skipTypePrivileges( true );
+        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
         
         try {
-            cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
-            
             rcl.bindExpressions
                 (
                  fromList,
@@ -1096,6 +1104,7 @@ public class MatchingClauseNode extends QueryTreeNode
         {
             // Restore previous compiler state
             cc.setReliability( previousReliability );
+            cc.skipTypePrivileges( wasSkippingTypePrivileges );
         }
     }
 

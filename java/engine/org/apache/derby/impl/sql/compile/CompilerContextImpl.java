@@ -724,7 +724,10 @@ public class CompilerContextImpl extends ContextImpl
 			|| currPrivType == Authorizer.TRIGGER_PRIV // Table privilege only
 			|| currPrivType == Authorizer.EXECUTE_PRIV
 			|| column == null)
+        {
 			return;
+        }
+
 		/*
 		* Note that to look up the privileges for this column,
 		* we need to know what table the column is in. However,

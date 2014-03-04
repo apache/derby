@@ -598,9 +598,6 @@ public final class MergeNode extends DMLModStatementNode
      */
     private void addOnClausePrivileges() throws StandardException
     {
-        // now add USAGE priv on referenced types
-        addUDTUsagePriv( getValueNodes( _searchCondition ) );
-
         // add SELECT privilege on columns
         for ( ColumnReference cr : getColumnReferences( _searchCondition ) )
         {
@@ -611,6 +608,12 @@ public final class MergeNode extends DMLModStatementNode
         for ( StaticMethodCallNode routine : getRoutineReferences( _searchCondition ) )
         {
             addRoutinePrivilege( routine );
+        }
+
+        // add USAGE privilege on CASTs to user-defined types
+        for ( CastNode value : getCastNodes( _searchCondition ) )
+        {
+            addUDTUsagePriv( value );
         }
     }
 
@@ -709,16 +712,16 @@ public final class MergeNode extends DMLModStatementNode
         getColumnsFromList( map, colRefs, mergeTableID );
     }
 
-    /** Get a list of ValueNodes in an expression */
-    private List<ValueNode>   getValueNodes( QueryTreeNode expression )
+    /** Get a list of CastNodes in an expression */
+    private List<CastNode>   getCastNodes( QueryTreeNode expression )
         throws StandardException
     {
-        CollectNodesVisitor<ValueNode> getVNs =
-            new CollectNodesVisitor<ValueNode>(ValueNode.class);
+        CollectNodesVisitor<CastNode> getCNs =
+            new CollectNodesVisitor<CastNode>(CastNode.class);
 
-        expression.accept(getVNs);
+        expression.accept(getCNs);
         
-        return getVNs.getList();
+        return getCNs.getList();
     }
 
     /** Get a list of routines in an expression */
@@ -848,9 +851,6 @@ public final class MergeNode extends DMLModStatementNode
                  new SubqueryList( getContextManager() ),
                  new ArrayList<AggregateNode>()
                  );
-
-            // now add USAGE priv on referenced types
-            addUDTUsagePriv( getValueNodes( value ) );
         }
         finally
         {

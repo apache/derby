@@ -545,6 +545,7 @@ public final class InsertNode extends DMLModStatementNode
                                                   resultSet);
 		}
         
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
 		getCompilerContext().popCurrentPrivType();
 	}
 
