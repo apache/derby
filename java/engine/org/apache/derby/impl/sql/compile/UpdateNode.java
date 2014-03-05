@@ -203,7 +203,7 @@ public final class UpdateNode extends DMLModStatementNode
 
         // collect lists of objects which will require privilege checks
         ArrayList<String>   explicitlySetColumns = getExplicitlySetColumns();
-        List<ValueNode> allValueNodes = collectAllValueNodes();
+        List<CastNode> allCastNodes = collectAllCastNodes();
         tagPrivilegedNodes();
 
         // tell the compiler to only add privilege checks for nodes which have been tagged
@@ -636,15 +636,16 @@ public final class UpdateNode extends DMLModStatementNode
 
 		getCompilerContext().popCurrentPrivType();
 
-        // don't remove the privilege filter. additional binding may be
-        // done during the pre-processing phase
+        getCompilerContext().removePrivilegeFilter( tagFilter );
 
         //
-        // Add USAGE privilege for all UDTs mentioned in the WHERE clause and
+        // Add USAGE privilege for all CASTs to UDTs mentioned in the WHERE clause and
         // on the right side of SET operators.
         //
-        addUDTUsagePriv( allValueNodes );
-
+        for ( CastNode value : allCastNodes )
+        {
+            addUDTUsagePriv( value );
+        }
     } // end of bind()
 
     @Override
@@ -713,28 +714,28 @@ public final class UpdateNode extends DMLModStatementNode
     }
 
     /**
-     * Collect all of the ValueNodes in the WHERE clause and on the right side
+     * Collect all of the CastNodes in the WHERE clause and on the right side
      * of SET operators. Later on, we will need to add permissions for all UDTs
      * mentioned by these nodes.
      */
-    private List<ValueNode>    collectAllValueNodes()
+    private List<CastNode>    collectAllCastNodes()
         throws StandardException
     {
-        CollectNodesVisitor<ValueNode> getValues =
-            new CollectNodesVisitor<ValueNode>(ValueNode.class);
+        CollectNodesVisitor<CastNode> getCasts =
+            new CollectNodesVisitor<CastNode>(CastNode.class);
 
         // process the WHERE clause
         ValueNode   whereClause = ((SelectNode) resultSet).whereClause;
-        if ( whereClause != null ) { whereClause.accept( getValues ); }
+        if ( whereClause != null ) { whereClause.accept( getCasts ); }
 
         // process the right sides of the SET operators
         ResultColumnList    rcl = resultSet.getResultColumns();
         for ( int i = 0; i < rcl.size(); i++ )
         {
-            rcl.elementAt( i ).getExpression().accept( getValues );
+            rcl.elementAt( i ).getExpression().accept( getCasts );
         }
 
-        return getValues.getList();
+        return getCasts.getList();
     }
 
     /**

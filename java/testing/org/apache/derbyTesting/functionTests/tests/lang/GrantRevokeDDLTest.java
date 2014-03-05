@@ -10865,12 +10865,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "    test_dbo.whereFunction_6429( whereColumn, 'foo' ) >\n" +
             "    ( select test_dbo.whereAggregate_6429( a ) from test_dbo.whereTable_6429 )\n";
 
-        // fails because ruth does not have USAGE permission on SelectHashMap_6429 and WhereHashMap_6429
-        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
-
-        // armed with those permissions, ruth can execute the update
-        grant_6429( dboConnection, "usage on type SelectHashMap_6429" );
-        grant_6429( dboConnection, "usage on type WhereHashMap_6429" );
         goodStatement( ruthConnection, update );
 
         //
@@ -11153,12 +11147,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "    test_dbo.whereFunction_6429_2( whereColumn, 'foo' ) >\n" +
             "    ( select test_dbo.whereAggregate_6429_2( whereViewCol ) from test_dbo.whereView_6429_2 )\n";
 
-        // fails because ruth does not have USAGE permission on SelectHashMap_6429_2 and WhereHashMap_6429_2
-        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
-
-        // armed with those permissions, ruth can execute the update
-        grant_6429( dboConnection, "usage on type SelectHashMap_6429_2" );
-        grant_6429( dboConnection, "usage on type WhereHashMap_6429_2" );
         goodStatement( ruthConnection, update );
 
         //
@@ -11396,12 +11384,6 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             "where test_dbo.whereFunction_6429_3( whereColumn, 'foo' ) >\n" +
             "    ( select test_dbo.whereAggregate_6429_3( x ) from table ( test_dbo.whereTableFunction_6429_3() ) wtf )\n";
 
-        // fails because ruth does not have USAGE permission on SelectHashMap_6429_2 and WhereHashMap_6429_2
-        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, update );
-
-        // armed with those permissions, ruth can execute the update
-        grant_6429( dboConnection, "usage on type SelectHashMap_6429_3" );
-        grant_6429( dboConnection, "usage on type WhereHashMap_6429_3" );
         goodStatement( ruthConnection, update );
 
         //

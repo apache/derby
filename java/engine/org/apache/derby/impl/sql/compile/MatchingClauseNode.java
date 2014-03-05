@@ -314,6 +314,11 @@ public class MatchingClauseNode extends QueryTreeNode
         _dml.bindStatement();
 
         //
+        // Don't add USAGE privilege on user-defined types.
+        //
+        boolean wasSkippingTypePrivileges = getCompilerContext().skipTypePrivileges( true );
+            
+        //
         // Split the update row into its before and after images.
         //
         ResultColumnList    beforeColumns = new ResultColumnList( getContextManager() );
@@ -336,6 +341,8 @@ public class MatchingClauseNode extends QueryTreeNode
         }
 
         buildThenColumnsForUpdate( fullFromList, targetTable, fullUpdateRow, beforeColumns, afterColumns );
+
+        getCompilerContext().skipTypePrivileges( wasSkippingTypePrivileges );
     }
 
     /**
@@ -810,7 +817,7 @@ public class MatchingClauseNode extends QueryTreeNode
         }
         selectList.replaceOrForbidDefaults( targetTable.getTableDescriptor(), _insertColumns, true );
 
-       bindExpressions( selectList, fullFromList );
+        bindExpressions( selectList, fullFromList );
         
         bindInsertValues( fullFromList, targetTable );
 

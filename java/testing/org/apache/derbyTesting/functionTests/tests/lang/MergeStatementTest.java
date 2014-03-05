@@ -6566,6 +6566,346 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop type OnClauseType_046 restrict" );
     }
     
+    /**
+     * <p>
+     * Verify privileges needed for UPDATE actions.
+     * </p>
+     */
+    public  void    test_047_updatePrivileges()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceOnClauseType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceMatchingClauseType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceValueType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type TargetValueType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type TargetValueInputType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type BeforeTriggerType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type AfterTriggerType_047 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceOnClauseFunction_047( hashMap SourceOnClauseType_047, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceMatchingClauseFunction_047( hashMap SourceMatchingClauseType_047, hashKey varchar( 32672 ) ) returns int\n"  +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function sourceValueFunction_047( hashMap SourceValueType_047, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function targetValueInputFunction_047( hashMap TargetValueInputType_047, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function targetValueFunction_047( hashKey varchar( 32672 ), hashValue int ) returns TargetValueType_047\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function beforeTriggerFunction_047( hashMap BeforeTriggerType_047, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function afterTriggerFunction_047( hashMap AfterTriggerType_047, hashKey varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.getIntValue'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_047\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table primaryTable_047\n" +
+             "(\n" +
+             "    key1 int primary key\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_047\n" +
+             "(\n" +
+             "    sourceUnreferencedColumn int,\n" +
+             "    sourceOnClauseColumn SourceOnClauseType_047,\n" +
+             "    sourceMatchingClauseColumn SourceMatchingClauseType_047,\n" +
+             "    sourceValueColumn SourceValueType_047\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_047\n" +
+             "(\n" +
+             "    privateForeignColumn int references primaryTable_047( key1 ),\n" +
+             "    privatePrimaryColumn int primary key,\n" +
+             "    privateBeforeTriggerSource BeforeTriggerType_047,\n" +
+             "    privateAfterTriggerSource AfterTriggerType_047,\n" +
+             "    targetOnClauseColumn int,\n" +
+             "    targetMatchingClauseColumn int,\n" +
+             "    targetValueInputColumn TargetValueInputType_047,\n" +
+             "    targetValueColumn TargetValueType_047\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table foreignTable_047\n" +
+             "(\n" +
+             "    key1 int references targetTable_047( privatePrimaryColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger beforeUpdateTrigger_047\n" +
+             "no cascade before update on targetTable_047\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_047( 'before', beforeTriggerFunction_047( new.privateBeforeTriggerSource, 'foo' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger afterUpdateTrigger_047\n" +
+             "after update on targetTable_047\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_047( 'after', afterTriggerFunction_047( new.privateAfterTriggerSource, 'foo' ) )\n"
+             );
+
+        //
+        // Privileges
+        //
+        Permission[]    permissions = new Permission[]
+        {
+            new Permission( "update ( targetValueColumn ) on targetTable_047", LACK_COLUMN_PRIV ),
+            new Permission( "execute on function sourceOnClauseFunction_047", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function sourceMatchingClauseFunction_047", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function sourceValueFunction_047", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function targetValueInputFunction_047", NO_GENERIC_PERMISSION ),
+            new Permission( "execute on function targetValueFunction_047", NO_GENERIC_PERMISSION ),
+            new Permission( "select ( sourceOnClauseColumn ) on sourceTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( sourceMatchingClauseColumn ) on sourceTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( sourceValueColumn ) on sourceTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( targetOnClauseColumn ) on targetTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( targetMatchingClauseColumn ) on targetTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+            new Permission( "select ( targetValueInputColumn ) on targetTable_047", NO_SELECT_OR_UPDATE_PERMISSION ),
+        };
+        for ( Permission permission : permissions )
+        {
+            grantPermission( dboConnection, permission.text );
+        }
+
+        //
+        // Try adding and dropping privileges.
+        //
+        String  mergeStatement =
+            "merge into test_dbo.targetTable_047\n" +
+            "using test_dbo.sourceTable_047\n" +
+            "on targetOnClauseColumn = test_dbo.sourceOnClauseFunction_047( sourceOnClauseColumn, 'foo' )\n" +
+            "when matched\n" +
+            "  and targetMatchingClauseColumn = test_dbo.sourceMatchingClauseFunction_047( sourceMatchingClauseColumn, 'foo' )\n" +
+            "     then update set targetValueColumn =\n" +
+            "     test_dbo.targetValueFunction_047\n" +
+            "     (\n" +
+            "        'foo',\n" +
+            "        test_dbo.sourceValueFunction_047( sourceValueColumn, 'foo' ) +\n" +
+            "        test_dbo.targetValueInputFunction_047( targetValueInputColumn, 'foo' )\n" +
+            "     )\n"
+            ;
+
+        // ruth can execute the MERGE statement
+        expectExecutionWarning( ruthConnection, NO_ROWS_AFFECTED, mergeStatement );
+        
+        //
+        // Verify that revoking each permission in isolation raises
+        // the correct error.
+        //
+        for ( Permission permission : permissions )
+        {
+            vetPermission( permission, dboConnection, ruthConnection, mergeStatement );
+        }
+        
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table foreignTable_047" );
+        goodStatement( dboConnection, "drop table targetTable_047" );
+        goodStatement( dboConnection, "drop table sourceTable_047" );
+        goodStatement( dboConnection, "drop table primaryTable_047" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_047" );
+        goodStatement( dboConnection, "drop function afterTriggerFunction_047" );
+        goodStatement( dboConnection, "drop function beforeTriggerFunction_047" );
+        goodStatement( dboConnection, "drop function targetValueFunction_047" );
+        goodStatement( dboConnection, "drop function targetValueInputFunction_047" );
+        goodStatement( dboConnection, "drop function sourceValueFunction_047" );
+        goodStatement( dboConnection, "drop function sourceMatchingClauseFunction_047" );
+        goodStatement( dboConnection, "drop function sourceOnClauseFunction_047" );
+        goodStatement( dboConnection, "drop type AfterTriggerType_047 restrict" );
+        goodStatement( dboConnection, "drop type BeforeTriggerType_047 restrict" );
+        goodStatement( dboConnection, "drop type TargetValueInputType_047 restrict" );
+        goodStatement( dboConnection, "drop type TargetValueType_047 restrict" );
+        goodStatement( dboConnection, "drop type SourceValueType_047 restrict" );
+        goodStatement( dboConnection, "drop type SourceMatchingClauseType_047 restrict" );
+        goodStatement( dboConnection, "drop type SourceOnClauseType_047 restrict" );
+    }
+    
+    /**
+     * <p>
+     * Verify privileges needed for CASTs involving UPDATE actions.
+     * </p>
+     */
+    public  void    test_048_updateUdtCasts()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        //
+        // create schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceOnClauseType_048 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type SourceMatchingClauseType_048 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type TargetValueType_048 external name 'java.util.HashMap' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_048\n" +
+             "(\n" +
+             "    sourceUnreferencedColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_048\n" +
+             "(\n" +
+             "    targetValueColumn TargetValueType_048\n" +
+             ")\n"
+             );
+
+        //
+        // Privileges
+        //
+        goodStatement
+            (
+             dboConnection,
+             "grant update ( targetValueColumn ) on targetTable_048 to ruth"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on sourceTable_048 to ruth"
+             );
+
+        // the statement
+        String  updateStatement =
+            "merge into test_dbo.targetTable_048\n" +
+            "using test_dbo.sourceTable_048\n" +
+            "on cast( null as test_dbo.SourceOnClauseType_048 ) is not null\n" +
+            "when matched and cast( null as test_dbo.SourceMatchingClauseType_048 ) is not null\n" +
+            "     then update set targetValueColumn = cast( null as test_dbo.TargetValueType_048 )\n";
+
+        // fails because ruth doesn't have USAGE priv on SourceMatchingClauseType_048
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, updateStatement );
+        goodStatement( dboConnection, "grant usage on type SourceMatchingClauseType_048 to ruth" );
+
+        // fails because ruth doesn't have USAGE priv on TargetValueType_048
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, updateStatement );
+        goodStatement( dboConnection, "grant usage on type TargetValueType_048 to ruth" );
+
+        // fails because ruth doesn't have USAGE priv on SourceOnClauseType_048
+        expectExecutionError( ruthConnection, NO_GENERIC_PERMISSION, updateStatement );
+        goodStatement( dboConnection, "grant usage on type SourceOnClauseType_048 to ruth" );
+
+        // now ruth can run the MERGE statement
+        goodStatement( ruthConnection, updateStatement );
+
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop table targetTable_048" );
+        goodStatement( dboConnection, "drop table sourceTable_048" );
+        goodStatement( dboConnection, "drop type TargetValueType_048 restrict" );
+        goodStatement( dboConnection, "drop type SourceMatchingClauseType_048 restrict" );
+        goodStatement( dboConnection, "drop type SourceOnClauseType_048 restrict" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
