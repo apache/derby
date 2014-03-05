@@ -161,31 +161,31 @@ public class SelectivityTest extends BaseJDBCTestCase {
                 statsrs = s.executeQuery(
                         "select indexname, stats, ncols from showstats " +
                         "where indexname like 'T1%' " +
-                        "order by indexname");
+                        "order by indexname, stats");
                 JDBC.assertFullResultSet(statsrs, new String[][] {
                         {"T1_HUNDRED","numunique= 100 numrows= 4000","1"},
-                        {"T1_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
                         {"T1_TWENTY_HUNDRED","numunique= 20 numrows= 4000","1"},
-                        {"T1_TWO_TWENTY","numunique= 40 numrows= 4000","2"},
-                        {"T1_TWO_TWENTY","numunique= 2 numrows= 4000","1"}});
+                        {"T1_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
+                        {"T1_TWO_TWENTY","numunique= 2 numrows= 4000","1"},
+                        {"T1_TWO_TWENTY","numunique= 40 numrows= 4000","2"}});
                 statsrs = s.executeQuery(
                         "select indexname, stats, ncols from showstats " +
-                        "where indexname like 'T2%' order by indexname");
+                        "where indexname like 'T2%' order by indexname, stats");
                 JDBC.assertFullResultSet(statsrs, new String[][] {
                         {"T2_HUNDRED","numunique= 100 numrows= 4000","1"},
-                        {"T2_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
                         {"T2_TWENTY_HUNDRED","numunique= 20 numrows= 4000","1"},
-                        {"T2_TWO_TWENTY","numunique= 40 numrows= 4000","2"},
-                        {"T2_TWO_TWENTY","numunique= 2 numrows= 4000","1"}});
+                        {"T2_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
+                        {"T2_TWO_TWENTY","numunique= 2 numrows= 4000","1"},
+                        {"T2_TWO_TWENTY","numunique= 40 numrows= 4000","2"}});
                 statsrs = s.executeQuery(
                         "select indexname, stats, ncols from showstats " +
-                        "where indexname like 'T3%' order by indexname");
+                        "where indexname like 'T3%' order by indexname, stats");
                 JDBC.assertFullResultSet(statsrs, new String[][] {
                         {"T3_HUNDRED","numunique= 100 numrows= 4000","1"},
-                        {"T3_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
                         {"T3_TWENTY_HUNDRED","numunique= 20 numrows= 4000","1"},
-                        {"T3_TWO_TWENTY","numunique= 40 numrows= 4000","2"},
-                        {"T3_TWO_TWENTY","numunique= 2 numrows= 4000","1"}});
+                        {"T3_TWENTY_HUNDRED","numunique= 2000 numrows= 4000","2"},
+                        {"T3_TWO_TWENTY","numunique= 2 numrows= 4000","1"},
+                        {"T3_TWO_TWENTY","numunique= 40 numrows= 4000","2"}});
                 
                 s.executeUpdate("create table scratch_table" +
                         "(id int, two int, twenty int, hundred int)");
@@ -1177,7 +1177,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         
         statsrs = s.executeQuery(
                 "select indexname, stats, ncols from showstats " +
-                "where indexname = 'TBASIC2_CH_DT' order by indexname");
+                "where indexname = 'TBASIC2_CH_DT' order by indexname, stats");
         JDBC.assertFullResultSet(statsrs, new String[][] {
                 {"TBASIC2_CH_DT","numunique= 3 numrows= 7","1"},
                 {"TBASIC2_CH_DT","numunique= 7 numrows= 7","2"}});
@@ -1190,7 +1190,8 @@ public class SelectivityTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(statsrs, new String[][] {{"7"}});
         statsrs = s.executeQuery(
                 "select indexname, stats, ncols from showstats " +
-                "where indexname = 'TBASIC2_DT_VC' order by indexname");
+                "where indexname = 'TBASIC2_DT_VC' " +
+                "order by indexname, stats, ncols");
         JDBC.assertFullResultSet(statsrs, new String[][] {
                 {"TBASIC2_DT_VC","numunique= 3 numrows= 7","1"},
                 {"TBASIC2_DT_VC","numunique= 3 numrows= 7","2"}});
