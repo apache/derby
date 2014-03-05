@@ -4432,19 +4432,13 @@ public final class	DataDictionaryImpl
 	 * @param spsd	The descriptor to add
 	 * @param tc			The transaction controller
      * @param recompile Whether to recompile or invalidate
-	 * @param updateParamDescriptors If true, will update the
-	 *						parameter descriptors in SYS.SYSCOLUMNS.
-	 * @param firstCompilation  true, if Statement is getting compiled for first
-	 *                          time and SPS was created with NOCOMPILE option.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void	updateSPS(
 			SPSDescriptor			spsd,
 			TransactionController	tc,
-			boolean                 recompile,
-			boolean					updateParamDescriptors,
-			boolean                 firstCompilation)
+            boolean                 recompile)
 						throws StandardException
 	{
 		ExecIndexRow				keyRow1 = null;
@@ -4455,23 +4449,13 @@ public final class	DataDictionaryImpl
 		int[] updCols;
 		if (recompile)
 		{
-			if(firstCompilation)
-			{
-				updCols = new int[] {SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID,
-						 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_TEXT,
-									 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_LASTCOMPILED,
-									 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_USINGTEXT,
-									 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE,
-									 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_INITIALLY_COMPILABLE};
-			}else
-			{
-
-				updCols = new int[] {SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID,
-						 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_TEXT,
-										 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_LASTCOMPILED,
-										 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_USINGTEXT,
-										 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE };
-			}
+            updCols = new int[] {
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID,
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_TEXT,
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_LASTCOMPILED,
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_USINGTEXT,
+                SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE,
+            };
 		}
 		else 
 		{
@@ -4507,11 +4491,9 @@ public final class	DataDictionaryImpl
 					 tc);
 
 
-		/*
-		** If we don't need to update the parameter
-		** descriptors, we are done.
-		*/
-		if (!updateParamDescriptors)
+        // If this is an invalidation request, we don't need to update the
+        // parameter descriptors, so we are done.
+        if (!recompile)
 		{
 			return;
 		}
@@ -4526,58 +4508,11 @@ public final class	DataDictionaryImpl
 			return;
 		}
 
-		if(firstCompilation)
-		{
-			/*beetle:5119, reason for doing add here instead of update
-			 *is with NOCOMPILE option of create statement/boot time SPS,
-			 *SPS statement is not compiled to find out the parameter info.
-			 *Because of the parameter info was not inserted at SPSDescriptor 
-			 *creation time. As this is the first time we are compiling parameter
-			 *infor should be inserted instead of the update.
-			 */
-			addSPSParams(spsd, tc);
-		}
-		else
-		{
-			Object[] parameterDefaults = spsd.getParameterDefaults();
-
-			/* 
-			** Update each column with the new defaults and with
-			** the new datatypes.  It is possible that someone has
-			** done a drop/create on the underlying table and 
-			** changed the type of a column, which has changed
-			** the type of a parameter to our statement.
-			*/
-			int[] columnsToSet = new int[2];
-			columnsToSet[0] = SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMNDATATYPE;
-			columnsToSet[1] = SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMNDEFAULT;
-
-			UUID uuid = spsd.getUUID();
-
-			for (int index = 0; index < params.length; index++)
-			{
-				int parameterId = index + 1;
-
-			//RESOLVEAUTOINCREMENT
-				ColumnDescriptor cd = new ColumnDescriptor("PARAM" + parameterId,
-										  parameterId,	// position
-										  params[index],
-										  ((parameterDefaults == null) || // default
-										   (index >= parameterDefaults.length)) ? 
-										  (DataValueDescriptor)null :
-										  (DataValueDescriptor)parameterDefaults[index],
-										  (DefaultInfo) null,
-										  uuid,
-										  (UUID) null,
-										  0, 0, 0);
-										
-				updateColumnDescriptor(cd,
-									   cd.getReferencingUUID(), 
-									   cd.getColumnName(),
-									   columnsToSet, 
-									   tc);
-			}
-		}
+        // Update the parameter descriptors by dropping the existing ones
+        // and recreating them. If this is the first time the SPS is being
+        // compiled, the drop operation will be a no-op.
+        dropAllColumnDescriptors(spsd.getUUID(), tc);
+        addSPSParams(spsd, tc);
 	}
 
 	/**

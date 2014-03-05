@@ -134,7 +134,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 * Old code - never used.
 	 */
 	private Object			paramDefaults[];
-	private	boolean					initiallyCompilable;
+    private final boolean   initiallyCompilable;
 	private	boolean					lookedUpParams;
 	
 	private UUIDFactory				uuidFactory;
@@ -691,6 +691,8 @@ public class SPSDescriptor extends TupleDescriptor
 
 			if (!lcc.getDataDictionary().isReadOnlyUpgrade()) {
 
+                final String savepoint = lcc.getUniqueSavepointName();
+
 				// First try compiling in a nested transaction so we can 
                 // release the locks after the compilation, and not have them
                 // sit around in the parent transaction. But if we get lock 
@@ -714,6 +716,11 @@ public class SPSDescriptor extends TupleDescriptor
                     // When retrying in the user transaction, we'll wait for
                     // locks if necessary.
                     nestedTC.setNoLockWait(true);
+
+                    // Set a savepoint so that the work in the nested
+                    // transaction can be rolled back on error without
+                    // aborting the parent transaction.
+                    nestedTC.setSavePoint(savepoint, null);
 				}
 				catch (StandardException se)
 				{
@@ -722,12 +729,6 @@ public class SPSDescriptor extends TupleDescriptor
 					nestedTC = null;
 				}
 
-				// DERBY-2584: If the first attempt to compile the query fails,
-				// we need to reset initiallyCompilable to make sure the
-				// prepared plan is fully stored to disk. Save the initial
-				// value here.
-				final boolean compilable = initiallyCompilable;
-
 				try
 				{
 					prepareAndRelease(lcc, null, nestedTC);
@@ -735,7 +736,16 @@ public class SPSDescriptor extends TupleDescriptor
 				}
 				catch (StandardException se)
 				{
-					if (se.isLockTimeout())
+                    if (nestedTC != null)
+                    {
+                        // Roll back to savepoint to undo any work done by
+                        // the nested transaction. We cannot abort the nested
+                        // transaction in order to achieve the same, since
+                        // that would also abort the parent transaction.
+                        nestedTC.rollbackToSavePoint(savepoint, false, null);
+                    }
+
+                    if (nestedTC != null && se.isLockTimeout())
 					{
                         // Locks were set nowait, so a lock timeout here
                         // means that some lock request in the nested 
@@ -743,18 +753,14 @@ public class SPSDescriptor extends TupleDescriptor
                         // with a parent lock would lead to a undetected 
                         // deadlock so must give up trying in the nested
                         // transaction and retry with parent transaction.
-						if (nestedTC != null)
-						{
-                            nestedTC.commit();
-                            nestedTC.destroy();
-                            nestedTC = null;
-						}
+                        nestedTC.commit();
+                        nestedTC.destroy();
+                        nestedTC = null;
 
 						// if we couldn't do this with a nested transaction, 
                         // retry with parent-- we need to wait this time!
                         // Lock conflicts at this point are with other 
                         // transactions, so must wait.
-						initiallyCompilable = compilable;
 						prepareAndRelease(lcc, null, null);
 						updateSYSSTATEMENTS(lcc, RECOMPILE, null);
 					}
@@ -1099,24 +1105,6 @@ public class SPSDescriptor extends TupleDescriptor
 	private void updateSYSSTATEMENTS(LanguageConnectionContext lcc, int mode, TransactionController tc)
 		throws StandardException
 	{
-		boolean					updateSYSCOLUMNS,  recompile;
-		boolean firstCompilation = false;
-		if (mode == RECOMPILE)
-		{
-			recompile = true;
-			updateSYSCOLUMNS = true;
-			if(!initiallyCompilable)
-			{
-				firstCompilation = true;
-				initiallyCompilable = true;
-			}
-		}
-		else
-		{
-			recompile = false;
-			updateSYSCOLUMNS = false;
-		}
-
 		DataDictionary dd = getDataDictionary();
 
 		if (dd.isReadOnlyUpgrade())
@@ -1132,11 +1120,7 @@ public class SPSDescriptor extends TupleDescriptor
 			tc = lcc.getTransactionExecute();
 		}
 
-		dd.updateSPS(this,
-					 tc, 
-					 recompile,
-					 updateSYSCOLUMNS,
-					 firstCompilation);
+        dd.updateSPS(this, tc, (mode == RECOMPILE));
 	}
 
 	/**
