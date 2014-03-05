@@ -594,7 +594,7 @@ public class ExistsWithSubqueriesTest extends BaseJDBCTestCase {
                 + "where (not (not exists (select * from onerow))) is null"));
 
         // Similar problems were seen in IN subqueries that were rewritten
-        // to an EXISTS subqueries internally. For example, this query used
+        // to EXISTS subqueries internally. For example, this query used
         // to return NULL.
         JDBC.assertSingleValueResultSet(
                 s.executeQuery("values 1 in (select j from onerow)"), "false");
