@@ -103,7 +103,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UpdatableResultSetTest.suite());
         suite.addTest(CurrentOfTest.suite());
 	    suite.addTest(CursorTest.suite());
-        suite.addTest(CastingTest.suite());
         suite.addTest(ScrollCursors2Test.suite());
         suite.addTest(NullIfTest.suite());
         suite.addTest(InListMultiProbeTest.suite());
@@ -198,8 +197,12 @@ public class _Suite extends BaseTestCase  {
             // requires Java 5 (generics)
             suite.addTest(UserDefinedAggregatesTest.suite());
             suite.addTest(UDAPermsTest.suite());
+
+            // requires replace(CharSequence target, CharSequence replacement)
+            suite.addTest(CastingTest.suite());
         }
-         // tests that require Java 6
+
+        // tests that require Java 6
         if (JDBC.vmSupportsJDBC4())  
         {
             suite.addTest(OptionalToolsTest.suite());
