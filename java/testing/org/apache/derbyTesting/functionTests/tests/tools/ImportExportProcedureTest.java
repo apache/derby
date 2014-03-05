@@ -24,10 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLWarning;
 import java.sql.Statement;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -43,6 +40,8 @@ import junit.framework.TestSuite;
  *
  */
 public class ImportExportProcedureTest extends BaseJDBCTestCase {
+
+    private static final String INVALID_DELIMITER = "XIE0J";
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -2125,12 +2124,12 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , '', ';', null, 0) ");
-        assertStatementError("38000", cSt);
+        assertStatementError(INVALID_DELIMITER, cSt);
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , null, '', null, 0) ");
-        assertStatementError("38000", cSt);
+        assertStatementError(INVALID_DELIMITER, cSt);
         
         //same delimter can not be used as character and column 
         // delimters
@@ -2138,7 +2137,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , ';', ';', null, 1) ");
-        assertStatementError("38000", cSt);
+        assertStatementError(INVALID_DELIMITER, cSt);
         
         Connection conn = getConnection();
         conn.setAutoCommit(false);

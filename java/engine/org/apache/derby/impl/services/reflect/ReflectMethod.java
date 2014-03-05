@@ -55,9 +55,8 @@ class ReflectMethod implements GeneratedMethod {
 
 		} catch (InvocationTargetException ite) {
 
-			t = ite.getTargetException();
-			if (t instanceof StandardException)
-				throw (StandardException) t;
+            t = ite;
+
 		}
 		
 		throw StandardException.unexpectedUserException(t);

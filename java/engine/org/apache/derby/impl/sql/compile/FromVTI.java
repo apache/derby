@@ -849,13 +849,6 @@ class FromVTI extends FromTable implements VTIEnvironment
         }
 		catch(Throwable t)
 		{
-            if( t instanceof InvocationTargetException)
-            {
-                InvocationTargetException ite = (InvocationTargetException) t;
-                Throwable wrappedThrowable = ite.getTargetException();
-                if( wrappedThrowable instanceof StandardException)
-                    throw (StandardException) wrappedThrowable;
-            }
 			throw StandardException.unexpectedUserException(t);
 		}
     } // end of getNewInstance
