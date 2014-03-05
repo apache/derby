@@ -774,9 +774,9 @@ from test.s
 order by a;
 A    
 -----
+false
+false
 true 
-NULL 
-NULL 
 ij> -- negative tests
 
 -- multiple matches at parent level

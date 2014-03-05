@@ -446,22 +446,13 @@ public class RowResultSetNode extends FromTable
 									FromList fromList)
 								throws StandardException
 	{
-
-		if (subquerys.size() > 0)
-		{
-			subquerys.preprocess(
-								numTables,
-								(FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager()),
-								(SubqueryList) getNodeFactory().getNode(
-													C_NodeTypes.SUBQUERY_LIST,
-													getContextManager()),
-								(PredicateList) getNodeFactory().getNode(
+        getResultColumns().preprocess(
+                numTables,
+                fromList,
+                subquerys,
+                (PredicateList) getNodeFactory().getNode(
 													C_NodeTypes.PREDICATE_LIST,
 													getContextManager()));
-		}
 
 		/* Allocate a dummy referenced table map */ 
 		referencedTableMap = new JBitSet(numTables);

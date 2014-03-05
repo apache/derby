@@ -10186,9 +10186,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             { "values (select count(*) from user1.t4191)", new String[][] {{"0"}} },
             { "values (select count(1) from user1.t4191)", new String[][] {{"0"}} },
             { "values ((select 1 from user1.t4191))",      new String[][] {{null}} },
-            // DERBY-6408: Next two queries should have returned FALSE.
-            { "values exists(select 1 from user1.t4191)",  new String[][] {{null}} },
-            { "values exists(select * from user1.t4191)",  new String[][] {{null}} },
+            { "values exists(select 1 from user1.t4191)",  new String[][] {{"false"}} },
+            { "values exists(select * from user1.t4191)",  new String[][] {{"false"}} },
             { "select count(*) from (select 1 from user1.t4191) s", new String[][] {{"0"}} },
             { "insert into user1.t4191_table3 select 1, 2 from user1.t4191", new Integer(0) },
             { "update user1.t4191_table3 set c31 = 1 where exists (select * from user1.t4191)", new Integer(0) },

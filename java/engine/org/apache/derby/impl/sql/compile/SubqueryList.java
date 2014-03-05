@@ -48,35 +48,6 @@ public class SubqueryList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Preprocess a SubqueryList.  For now, we just preprocess each SubqueryNode
-	 * in the list.
-	 *
-	 * @param	numTables			Number of tables in the DML Statement
-	 * @param	outerFromList		FromList from outer query block
-	 * @param	outerSubqueryList	SubqueryList from outer query block
-	 * @param	outerPredicateList	PredicateList from outer query block
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public void preprocess(int numTables,
-							FromList outerFromList,
-							SubqueryList outerSubqueryList,
-							PredicateList outerPredicateList) 
-				throws StandardException
-	{
-		SubqueryNode	subqueryNode;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
-		{
-			subqueryNode = (SubqueryNode) elementAt(index);
-			subqueryNode.preprocess(numTables, outerFromList,
-									outerSubqueryList,
-									outerPredicateList);
-		}
-	}
-
-	/**
 	 * Optimize the subqueries in this list.  
 	 *
 	 * @param dataDictionary	The data dictionary to use for optimization
