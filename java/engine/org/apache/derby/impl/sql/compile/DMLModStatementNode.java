@@ -1947,8 +1947,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		{
 			super.printSubNodes(depth);
 
-			printLabel(depth, "targetTableName: ");
-			targetTableName.treePrint(depth + 1);
+            if ( targetTableName != null )
+            {
+                printLabel(depth, "targetTableName: ");
+                targetTableName.treePrint(depth + 1);
+            }
 
 			if (resultColumnList != null)
 			{

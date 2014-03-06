@@ -1564,6 +1564,45 @@ public class MatchingClauseNode extends QueryTreeNode
 	}
 
 	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+    @Override
+    void printSubNodes( int depth )
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes( depth );
+
+            if ( _matchingRefinement != null )
+            {
+                printLabel( depth, "matchingRefinement: " );
+                _matchingRefinement.treePrint( depth + 1 );
+            }
+
+            if ( _updateColumns != null )
+            {
+                printLabel( depth, "updateColumns: " );
+                _updateColumns.treePrint( depth + 1 );
+            }
+
+            if ( _insertColumns != null )
+            {
+                printLabel( depth, "insertColumns: " );
+                _insertColumns.treePrint( depth + 1 );
+            }
+
+            if ( _insertValues != null )
+            {
+                printLabel( depth, "insertValues: " );
+                _insertValues.treePrint( depth + 1 );
+            }
+		}
+	}
+
+	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *

@@ -972,6 +972,39 @@ public final class MergeNode extends DMLModStatementNode
         }
 	}
 
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+    @Override
+    void printSubNodes( int depth )
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes( depth );
+
+            printLabel( depth, "targetTable: " );
+            _targetTable.treePrint( depth + 1 );
+
+            printLabel( depth, "sourceTable: " );
+            _sourceTable.treePrint( depth + 1 );
+
+            if ( _searchCondition != null )
+            {
+                printLabel( depth, "searchCondition: " );
+                _searchCondition.treePrint( depth + 1 );
+            }
+
+            for ( MatchingClauseNode mcn : _matchingClauses )
+            {
+                printLabel( depth, mcn.toString() );
+                mcn.treePrint( depth + 1 );
+            }
+		}
+	}
+
     @Override
     String statementToString()
 	{
