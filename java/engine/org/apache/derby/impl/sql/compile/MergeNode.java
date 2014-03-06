@@ -878,12 +878,10 @@ public final class MergeNode extends DMLModStatementNode
 		/* First optimize the left join */
 		_leftJoinCursor.optimizeStatement();
 
-		/* In language we always set it to row lock, it's up to store to
-		 * upgrade it to table lock.  This makes sense for the default read
-		 * committed isolation level and update lock.  For more detail, see
-		 * Beetle 4133.
-		 */
-		//lockMode = TransactionController.MODE_RECORD;
+        //
+        // No need to set lockMode in the master MergeNode. The individual
+        // actions and the driving left-join will set their own lock modes.
+        //
 
         // now optimize the INSERT/UPDATE/DELETE actions
         for ( MatchingClauseNode mcn : _matchingClauses )
