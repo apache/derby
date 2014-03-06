@@ -40,8 +40,6 @@ public class Test_6496 extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static  final   String      TEST_DBO = "TEST_DBO";
-
     private static  final   String      LOAD_METADATA_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', true )";
     private static  final   String      UNLOAD_METADATA_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', false )";
 
@@ -100,21 +98,6 @@ public class Test_6496 extends GeneratedColumnsHelper
     public  void    test_001_metadata()
         throws Exception
     {
-        metadataTester();
-    }
-
-    /**
-     * <p>
-     * Test that we can load the metadata tool twice without popping an NPE.
-     * </p>
-     */
-    public  void    test_002_metadata()
-        throws Exception
-    {
-        metadataTester();
-    }
-    private void    metadataTester() throws Exception
-    {
         toolTester( LOAD_METADATA_TOOL, UNLOAD_METADATA_TOOL );
     }
 
@@ -123,23 +106,8 @@ public class Test_6496 extends GeneratedColumnsHelper
      * Test that we can load the optimizer tool twice without popping an NPE.
      * </p>
      */
-    public  void    test_003_optimizer()
+    public  void    test_002_optimizer()
         throws Exception
-    {
-        optimizerTester();
-    }
-
-    /**
-     * <p>
-     * Test that we can load the optimizer tool twice without popping an NPE.
-     * </p>
-     */
-    public  void    test_004_optimizer()
-        throws Exception
-    {
-        optimizerTester();
-    }
-    private void    optimizerTester() throws Exception
     {
         toolTester( LOAD_OPTIMIZER_TOOL, UNLOAD_OPTIMIZER_TOOL );
     }
@@ -152,9 +120,16 @@ public class Test_6496 extends GeneratedColumnsHelper
 
     private void    toolTester( String loadTool, String unloadTool ) throws Exception
     {
-        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection c1 = openDefaultConnection();
+        goodStatement( c1, loadTool );
+        goodStatement( c1, unloadTool );
 
-        goodStatement( dboConnection, loadTool );
-        goodStatement( dboConnection, unloadTool );
+        // Loading the tool a second time in a fresh connection, with the
+        // exact same statement text so that the compiled statement is found
+        // in the statement cache, used to result in a NullPointerException
+        // because there was no CompilerContext on the stack.
+        Connection c2 = openDefaultConnection();
+        goodStatement( c2, loadTool );
+        goodStatement( c2, unloadTool );
     }
 }
