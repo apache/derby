@@ -290,7 +290,14 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
     private void    vetConnector( Connector connector, boolean shouldSucceed ) throws Exception
     {
         try {
+            // sometimes this succeeds when we expect not, see DERBY-6250,
+            // give more time to the slug sleep
+            if (usingEmbedded())
+                SluggishAuthenticator.secondsToSleep = 4;
             tryTimeout( connector, 1, FAIL && shouldSucceed );
+            // set back.
+            if (usingEmbedded())
+                SluggishAuthenticator.secondsToSleep = 2;
             tryTimeout( connector, LONG_TIMEOUT, SUCCEED && shouldSucceed );
             tryTimeout( connector, 0, SUCCEED && shouldSucceed );
         }
@@ -298,6 +305,8 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         {
             // revert to default state
             connector.setLoginTimeout( 0 );
+            // set sluggishauthenticator sleep back
+            SluggishAuthenticator.secondsToSleep = 2;
         }
     }
     private void    tryTimeout( Connector connector, int timeout, boolean shouldSucceed ) throws Exception
@@ -315,7 +324,17 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
             Connection  conn = connector.getConnection( RUTH, RUTH_PASSWORD );
             println( "    Got a " + conn.getClass().getName() );
             conn.close();
-            if ( !shouldSucceed )   { fail( "Should not have been able to connect!" ); }
+            if ( !shouldSucceed )   
+            {
+                // sometimes the connect succeeds, see DERBY-6250. 
+                // adding more details to fail message.
+                long    duration = System.currentTimeMillis() - startTime;
+                String message ="Should not have been able to connect! \n " +
+                "        connector: " + connector +
+                "        Experiment took " + duration + " milliseconds. \n " +
+                "        seconds sleep time was: " + SluggishAuthenticator.secondsToSleep;
+                fail( message ); 
+            }
         }
         catch (SQLException se)
         {
@@ -365,6 +384,11 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
             "external name '" + getClass().getName() + ".setLoginTimeout'";
         println( createProc );
         controlConnection.prepareStatement( createProc ).execute();
+        createProc = 
+                "create procedure setAuthenticatorSleep( seconds int ) language java parameter style java no sql\n" +
+                "external name '" + getClass().getName() + ".setAuthenticatorSleep'";
+        controlConnection.prepareStatement( createProc ).execute();
+        println( createProc );
 
         Connector   connector = new DriverManagerConnector( this );
 
@@ -381,6 +405,14 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         throws Exception
     {
         setServerTimeout( controlConnection, serverTimeout );
+        // Sometimes we get an unexpected connection when we expect
+        // the timeout to work, see DERBY-6250.
+        // Setting the sleep Authenticator sleep time longer on the server.
+        // for those cases to make the chance of this occurring smaller.
+        if (!shouldSucceed)
+            setServerAuthenticatorSleep(controlConnection, 4);
+        else 
+            setServerAuthenticatorSleep(controlConnection, 2);
         vetConnector( connector, shouldSucceed );
     }
     private void    setServerTimeout( Connection conn, int seconds ) throws Exception
@@ -390,6 +422,16 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         cs.execute();
         cs.close();
     }
+    
+    private void    setServerAuthenticatorSleep( Connection conn, int seconds )
+            throws Exception
+    {
+        CallableStatement   cs = conn.prepareCall( "call setAuthenticatorSleep( ? )" );
+        cs.setInt( 1, seconds );
+        cs.execute();
+        cs.close();
+    }
+    
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -403,6 +445,12 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
         DriverManager.setLoginTimeout( seconds );
     }
     
+    /** Routine to set the SluggishAuthenticator Sleep 
+     *  time on the server */
+    public  static  void    setAuthenticatorSleep( int seconds ) throws Exception
+    {
+        SluggishAuthenticator.secondsToSleep = seconds ;
+    }
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
