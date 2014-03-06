@@ -31,7 +31,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.services.loader.ClassFactoryContext;
 import org.apache.derby.iapi.sql.compile.OptTrace;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 
@@ -107,8 +107,8 @@ public	class   OptimizerTracer  implements OptionalTool
             String  customOptTraceName = configurationParameters[ 1 ];
 
             try {
-                CompilerContext cc = (CompilerContext) ContextService.getContext( CompilerContext.CONTEXT_ID );
-                ClassFactory    classFactory = cc.getClassFactory();
+                ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContext( ClassFactoryContext.CONTEXT_ID );
+                ClassFactory    classFactory = cfc.getClassFactory();
 
                 tracer = (OptTrace) classFactory.loadApplicationClass( customOptTraceName ).newInstance();
             }

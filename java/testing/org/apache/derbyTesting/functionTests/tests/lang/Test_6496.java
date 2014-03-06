@@ -21,24 +21,10 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.DriverManager;
-import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -56,8 +42,11 @@ public class Test_6496 extends GeneratedColumnsHelper
 
     private static  final   String      TEST_DBO = "TEST_DBO";
 
-    private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', true )";
-    private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', false )";
+    private static  final   String      LOAD_METADATA_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', true )";
+    private static  final   String      UNLOAD_METADATA_TOOL = "call syscs_util.syscs_register_tool( 'databaseMetaData', false )";
+
+    private static  final   String      LOAD_OPTIMIZER_TOOL = "call syscs_util.syscs_register_tool('optimizerTracing', true, 'custom', 'org.apache.derbyTesting.functionTests.tests.lang.DummyOptTrace')";
+    private static  final   String      UNLOAD_OPTIMIZER_TOOL = "call syscs_util.syscs_register_tool('optimizerTracing', false)";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -105,30 +94,54 @@ public class Test_6496 extends GeneratedColumnsHelper
 
     /**
      * <p>
-     * Test baseline permissions where no grants are made.
+     * Test that we can load the metadata tool twice without popping an NPE.
      * </p>
      */
-    public  void    test_001()
+    public  void    test_001_metadata()
         throws Exception
     {
-        Connection  dboConnection = openUserConnection( TEST_DBO );
-
-        goodStatement( dboConnection, LOAD_TOOL );
-        goodStatement( dboConnection, UNLOAD_TOOL );
+        metadataTester();
     }
 
     /**
      * <p>
-     * Test that a user can grant access to her indexes.
+     * Test that we can load the metadata tool twice without popping an NPE.
      * </p>
      */
-    public  void    test_002()
+    public  void    test_002_metadata()
         throws Exception
     {
-        Connection  dboConnection = openUserConnection( TEST_DBO );
+        metadataTester();
+    }
+    private void    metadataTester() throws Exception
+    {
+        toolTester( LOAD_METADATA_TOOL, UNLOAD_METADATA_TOOL );
+    }
 
-        goodStatement( dboConnection, LOAD_TOOL );
-        goodStatement( dboConnection, UNLOAD_TOOL );
+    /**
+     * <p>
+     * Test that we can load the optimizer tool twice without popping an NPE.
+     * </p>
+     */
+    public  void    test_003_optimizer()
+        throws Exception
+    {
+        optimizerTester();
+    }
+
+    /**
+     * <p>
+     * Test that we can load the optimizer tool twice without popping an NPE.
+     * </p>
+     */
+    public  void    test_004_optimizer()
+        throws Exception
+    {
+        optimizerTester();
+    }
+    private void    optimizerTester() throws Exception
+    {
+        toolTester( LOAD_OPTIMIZER_TOOL, UNLOAD_OPTIMIZER_TOOL );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -137,4 +150,11 @@ public class Test_6496 extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private void    toolTester( String loadTool, String unloadTool ) throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        goodStatement( dboConnection, loadTool );
+        goodStatement( dboConnection, unloadTool );
+    }
 }
