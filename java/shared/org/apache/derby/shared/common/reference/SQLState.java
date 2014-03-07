@@ -982,7 +982,8 @@ public interface SQLState {
 	String LANG_BAD_J_D_B_C_TYPE_INFO                                  = "42Y23";
 	String LANG_VIEW_NOT_UPDATEABLE                                    = "42Y24";
 	String LANG_UPDATE_SYSTEM_TABLE_ATTEMPTED                          = "42Y25";
-    	String LANG_AGGREGATE_IN_GROUPBY_LIST                              = "42Y26";
+    String LANG_AGGREGATE_IN_GROUPBY_LIST                              = "42Y26.S.0";
+    String LANG_SUBQUERY_IN_GROUPBY_LIST                               = "42Y26.S.1";
 	String LANG_NO_PARAMS_IN_TRIGGER_ACTION                            = "42Y27";
 	// String LANG_NO_TRIGGER_ON_SYSTEM_TABLE                             = "42Y28"; -- replaced by 42X62
 	String LANG_INVALID_NON_GROUPED_SELECT_LIST                        = "42Y29";
