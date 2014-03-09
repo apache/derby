@@ -472,8 +472,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
                 // current schema at the time that the table was
                 // created/altered. See DERBY-3945.
                 //
-                SchemaDescriptor    originalCurrentSchema = getSchemaDescriptor( di.getOriginalCurrentSchema(), true );
-                compilerContext.pushCompilationSchema( originalCurrentSchema );
+                compilerContext.pushCompilationSchema(
+                    getSchemaDescriptor(di.getOriginalCurrentSchema(), false));
 
 				try {
                     bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
