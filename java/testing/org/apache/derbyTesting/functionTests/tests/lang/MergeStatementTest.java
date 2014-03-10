@@ -8088,7 +8088,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         if ( left ==  null ) { return null; }
         if ( right == null ) { return null; }
 
-        int     count = Integer.min( left.length, right.length );
+        int     count = Math.min( left.length, right.length );
         byte[]  retval = new byte[ count ];
 
         for ( int i = 0; i < count; i++ ) { retval[ i ] = (byte) (left[ i ] + right[ i ]); }
@@ -8119,12 +8119,24 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     }
 
     /** Function for making a byte array from an array of ints */
-    public  static  Blob  makeBlob( Integer... inputs )
+    public  static  Blob  makeBlob( int... inputs )
+    {
+        return makeBlob( 1, inputs );
+    }
+
+    /** Function for making a big Blob by repeating the inputs a number of times */
+    public  static  Blob  makeBlob( int repeatCount, int... inputs )
     {
         if ( inputs == null )   { return null; }
+        if ( (inputs.length == 0) || (repeatCount == 0) ) { return null; }
 
-        byte[]  retval = new byte[ inputs.length ];
-        for ( int i = 0; i < inputs.length; i++ ) { retval[ i ] = (byte) inputs[ i ].intValue(); }
+        byte[]  retval = new byte[ repeatCount * inputs.length ];
+        int     idx = 0;
+        
+        for ( int i = 0; i < repeatCount; i++ )
+        {
+            for ( int val : inputs ) { retval[ idx++ ] = (byte) val; }
+        }
 
         return new HarmonySerialBlob( retval );
     }
