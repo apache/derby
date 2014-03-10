@@ -2877,4 +2877,29 @@ public class GroupByTest extends BaseJDBCTestCase {
 
             rollback();
     }
+
+    /**
+     * GROUP BY on an expression in a JOIN used to trigger an assert failure.
+     * See DERBY-5313.
+     */
+    public void testDerby5313() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d5313_1(a int, b int)");
+        s.execute("create table d5313_2(b int, c int)");
+        s.execute("insert into d5313_1 values (3, 1), (2, 2), (3, 3)");
+        s.execute("insert into d5313_2 values (0, 1), (1, 2), (2, 3), (3, 4)");
+
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select a+b, sum(c) from "
+                             + "d5313_1 natural join d5313_2 group by a+b"),
+                new String[][] { { "4", "5" }, { "6", "4" } });
+
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select case when a=2 then 1 else 2 end, sum(c) "
+                             + "from d5313_1 natural join d5313_2 group by "
+                             + "case when a=2 then 1 else 2 end"),
+                new String[][] { { "1", "3" }, { "2", "6" } });
+    }
 }
