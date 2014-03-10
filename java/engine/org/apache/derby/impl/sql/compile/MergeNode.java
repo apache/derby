@@ -426,6 +426,7 @@ public final class MergeNode extends DMLModStatementNode
                  false,
                  CursorNode.READ_ONLY,
                  null,
+                 true,
                  getContextManager()
                  );
             

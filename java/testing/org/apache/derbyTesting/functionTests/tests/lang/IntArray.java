@@ -64,6 +64,11 @@ public class IntArray implements Externalizable, Comparable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public static IntArray makeIntArray( int... values )
+    {
+        return new IntArray( values );
+    }
+
     public static IntArray makeIntArray( int length )
     {
         return new IntArray( new int[ length ] );

@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Connection;
@@ -28,11 +30,14 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
+import java.util.Arrays;
 import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -78,6 +83,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      CARDINALITY_VIOLATION = "21000";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
+
+    private static  final   String      BEGIN_HTML = "<html>";
+    private static  final   String      END_HTML = "</html>";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -7200,6 +7208,713 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop type SourceOnClauseType_049 restrict" );
     }
     
+    /**
+     * <p>
+     * Test all datatypes in ON clauses, matching restrictions, and as INSERT/UPDATE values.
+     * </p>
+     */
+    public  void    test_050_allDatatypes()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function lv_equals_050( leftV long varchar, rightV long varchar ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function clob_equals_050( leftV clob, rightV clob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vb( inputVal int... ) returns varchar( 10 ) for bit data\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeByteArray'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vb_reverse( inputVal varchar( 10 ) for bit data ) returns varchar( 10 ) for bit data\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vb_add( leftV varchar( 10 ) for bit data, rightV varchar( 10 ) for bit data ) returns varchar( 10 ) for bit data\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function ch( inputVal int... ) returns char( 10 ) for bit data\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeByteArray'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function ch_reverse( inputVal char( 10 ) for bit data ) returns char( 10 ) for bit data\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function ch_add( leftV char( 10 ) for bit data, rightV char( 10 ) for bit data ) returns char( 10 ) for bit data\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vbl( inputVal int... ) returns blob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeBlob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vbl_reverse( inputVal blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vbl_add( leftV blob, rightV blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function vbl_equals( leftV blob, rightV blob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function xmlX( val varchar( 32672 ) ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.xmlX'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create type IntArray external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray' language java"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function mia( vals int... ) returns IntArray\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.makeIntArray'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function gc( val IntArray, cellNumber int ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.getCell'\n"
+             );
+
+        //
+        // Numeric types
+        //
+        
+        String  intTargetValues =
+            "( 1, 'orig', 1, 100, 1000 ), ( 2, 'orig: will delete', 1, 101, 1001 ), ( 3, 'orig: will update', 2, 200, 2000 ),\n" +
+            "( 4, 'orig', 2, 201, 2000 ), ( 5, 'orig', 4, 400, 4000 )\n";
+        String  intSourceValues =
+            "( 1, 101, 10000 ), ( 2, -200, -20000 ), ( 3, 300, 30000 ), ( 5, 5, -5 )\n";
+        String  intMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and t.matchingClauseColumn = -s.matchingClauseColumn\n" +
+            "     then update set valueColumn = t.valueColumn + s.valueColumn, description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  intExpectedValues = new String[][]
+        {
+            { "1", "orig", "1", "100", "1000" },
+            { "3", "updated", "2", "200", "-18000" },
+            { "4", "orig", "2", "201", "2000" },
+            { "5", "orig", "4", "400", "4000" },
+            { "6", "inserted", "5", "5", "-5" },
+        };
+
+        vet_050( dboConnection, "int", true, intTargetValues, intSourceValues, intMergeStatement, intExpectedValues );
+        vet_050( dboConnection, "bigint", true, intTargetValues, intSourceValues, intMergeStatement, intExpectedValues );
+        vet_050( dboConnection, "smallint", true, intTargetValues, intSourceValues, intMergeStatement, intExpectedValues );
+        vet_050( dboConnection, "decimal", true, intTargetValues, intSourceValues, intMergeStatement, intExpectedValues );
+        vet_050( dboConnection, "numeric", true, intTargetValues, intSourceValues, intMergeStatement, intExpectedValues );
+
+        String[][]  doubleExpectedValues = new String[][]
+        {
+            { "1", "orig", "1.0", "100.0", "1000.0" },
+            { "3", "updated", "2.0", "200.0", "-18000.0" },
+            { "4", "orig", "2.0", "201.0", "2000.0" },
+            { "5", "orig", "4.0", "400.0", "4000.0" },
+            { "6", "inserted", "5.0", "5.0", "-5.0" },
+        };
+
+        vet_050( dboConnection, "double", true, intTargetValues, intSourceValues, intMergeStatement, doubleExpectedValues );
+        vet_050( dboConnection, "float", true, intTargetValues, intSourceValues, intMergeStatement, doubleExpectedValues );
+        vet_050( dboConnection, "real", true, intTargetValues, intSourceValues, intMergeStatement, doubleExpectedValues );
+        
+        //
+        // String types
+        //
+        
+        String  stringTargetValues =
+            "( 1, 'orig', 'b', 'baa', 'baaa' ), ( 2, 'orig: will delete', 'b', 'bab', 'baab' ), ( 3, 'orig: will update', 'c', 'caa', 'caaa' ),\n" +
+            "( 4, 'orig', 'c', 'cab', 'caaa' ), ( 5, 'orig', 'e', 'eaa', 'eaaa' )\n";
+        String  stringSourceValues =
+            "( 'b', 'bab', 'baaaa' ), ( 'c', '-caa', '-caaaa' ), ( 'd', 'daa', 'daaaa' ), ( 'f', 'f', '-f' )\n";
+        String  stringMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and '-' || trim( t.matchingClauseColumn ) = trim( s.matchingClauseColumn )\n" +
+            "     then update set valueColumn = trim( t.valueColumn ) || trim( s.valueColumn ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  stringExpectedValues = new String[][]
+        {
+            { "1", "orig", "b", "baa", "baaa" },
+            { "3", "updated", "c", "caa", "caaa-caaaa" },
+            { "4", "orig", "c", "cab", "caaa" },
+            { "5", "orig", "e", "eaa", "eaaa" },
+            { "6", "inserted", "f", "f", "-f" },
+        };
+
+        vet_050
+            ( dboConnection, "varchar( 10 )", true, stringTargetValues, stringSourceValues, stringMergeStatement, stringExpectedValues );
+        vet_050
+            ( dboConnection, "char( 10 )", true, stringTargetValues, stringSourceValues, stringMergeStatement, stringExpectedValues );
+
+        String  lvMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on lv_equals_050( t.onClauseColumn, s.onClauseColumn )\n" +
+            "when matched and lv_equals_050( t.matchingClauseColumn, s.matchingClauseColumn )\n" +
+            "     then delete\n" +
+            "when matched and lv_equals_050( '-' || t.matchingClauseColumn, s.matchingClauseColumn )\n" +
+            "     then update set valueColumn = t.valueColumn || s.valueColumn, description = 'updated'\n" +
+            "when not matched and lv_equals_050( s.onClauseColumn, s.matchingClauseColumn )\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        
+        vet_050
+            ( dboConnection, "long varchar", false, stringTargetValues, stringSourceValues, lvMergeStatement, stringExpectedValues );
+
+        String  clobMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on clob_equals_050( t.onClauseColumn, s.onClauseColumn )\n" +
+            "when matched and clob_equals_050( t.matchingClauseColumn, s.matchingClauseColumn )\n" +
+            "     then delete\n" +
+            "when matched and clob_equals_050( '-' || t.matchingClauseColumn, s.matchingClauseColumn )\n" +
+            "     then update set valueColumn = t.valueColumn || s.valueColumn, description = 'updated'\n" +
+            "when not matched and clob_equals_050( s.onClauseColumn, s.matchingClauseColumn )\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        
+        vet_050
+            ( dboConnection, "clob", false, stringTargetValues, stringSourceValues, clobMergeStatement, stringExpectedValues );
+        
+        
+        //
+        // Binary types
+        //
+        
+        String  varbinaryTargetValues =
+            "( 1, 'orig', vb( 1 ), vb( 1, 0, 0 ), vb( 1, 0, 0, 0 ) ),\n" +
+            "( 2, 'orig: will delete', vb( 1 ), vb( 1, 0, 1 ), vb( 1, 0, 0, 1 ) ),\n" +
+            "( 3, 'orig: will update', vb( 2 ), vb( 2, 0, 0 ), vb( 2, 0, 0, 0 ) ),\n" +
+            "( 4, 'orig', vb( 2 ), vb( 2, 0, 1 ), vb( 2, 0, 0, 0 ) ),\n" +
+            "( 5, 'orig', vb( 4 ), vb( 4, 0, 0 ), vb( 4, 0, 0, 0 ) )\n";
+        String  varbinarySourceValues =
+            "( vb( 1 ), vb( 1, 0, 1 ), vb( 1, 0, 0, 0, 0 ) ),\n" +
+            "( vb( 2 ), vb( 0, 0, 2 ), vb( -2, 0, 0, 0, 0 ) ),\n" +
+            "( vb( 3 ), vb( 3, 0, 0 ), vb( 3, 0, 0, 0, 0 ) ),\n" +
+            "( vb( 5 ), vb( 5 ), vb( -5 ) )\n";
+        String  varbinaryMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and t.matchingClauseColumn = vb_reverse( s.matchingClauseColumn )\n" +
+            "     then update set valueColumn = vb_add( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  varbinaryExpectedValues = new String[][]
+        {
+            { "1", "orig", "01", "010000", "01000000" },
+            { "3", "updated", "02", "020000", "00000000" },
+            { "4", "orig", "02", "020001", "02000000" },
+            { "5", "orig", "04", "040000", "04000000" },
+            { "6", "inserted", "05", "05", "fb" },
+        };
+
+        vet_050
+            ( dboConnection, "varchar( 10 ) for bit data", true, varbinaryTargetValues, varbinarySourceValues,
+              varbinaryMergeStatement, varbinaryExpectedValues );
+        
+        String  binaryTargetValues =
+            "( 1, 'orig', ch( 1 ), ch( 1, 0, 0 ), ch( 1, 0, 0, 0 ) ),\n" +
+            "( 2, 'orig: will delete', ch( 1 ), ch( 1, 0, 1 ), ch( 1, 0, 0, 1 ) ),\n" +
+            "( 3, 'orig: will update', ch( 2 ), ch( 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 ), ch( 2, 0, 0, 0 ) ),\n" +
+            "( 4, 'orig', ch( 2 ), ch( 2, 0, 1 ), ch( 2, 0, 0, 0 ) ),\n" +
+            "( 5, 'orig', ch( 4 ), ch( 4, 0, 0 ), ch( 4, 0, 0, 0 ) )\n";
+        String  binarySourceValues =
+            "( ch( 1 ), ch( 1, 0, 1 ), ch( 1, 0, 0, 0, 0 ) ),\n" +
+            "( ch( 2 ), ch( 0, 0, 0, 0, 0, 0, 0, 0, 0, 2 ), ch( -2, 0, 0, 0, 0 ) ),\n" +
+            "( ch( 3 ), ch( 3, 0, 0 ), ch( 3, 0, 0, 0, 0 ) ),\n" +
+            "( ch( 5 ), ch( 5 ), ch( -5 ) )\n";
+        String  binaryMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and t.matchingClauseColumn = ch_reverse( s.matchingClauseColumn )\n" +
+            "     then update set valueColumn = ch_add( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  binaryExpectedValues = new String[][]
+        {
+            { "1", "orig", "01202020202020202020", "01000020202020202020", "01000000202020202020" },
+            { "3", "updated", "02202020202020202020", "02000000000000000000", "00000000204040404040" },
+            { "4", "orig", "02202020202020202020", "02000120202020202020", "02000000202020202020" },
+            { "5", "orig", "04202020202020202020", "04000020202020202020", "04000000202020202020" },
+            { "6", "inserted", "05202020202020202020", "05202020202020202020", "fb202020202020202020" },
+        };
+
+        vet_050
+            ( dboConnection, "char( 10 ) for bit data", true, binaryTargetValues, binarySourceValues,
+              binaryMergeStatement, binaryExpectedValues );
+        
+        String  blobTargetValues =
+            "( 1, 'orig', vbl( 1 ), vbl( 1, 0, 0 ), vbl( 1, 0, 0, 0 ) ),\n" +
+            "( 2, 'orig: will delete', vbl( 1 ), vbl( 1, 0, 1 ), vbl( 1, 0, 0, 1 ) ),\n" +
+            "( 3, 'orig: will update', vbl( 2 ), vbl( 2, 0, 0 ), vbl( 2, 0, 0, 0 ) ),\n" +
+            "( 4, 'orig', vbl( 2 ), vbl( 2, 0, 1 ), vbl( 2, 0, 0, 0 ) ),\n" +
+            "( 5, 'orig', vbl( 4 ), vbl( 4, 0, 0 ), vbl( 4, 0, 0, 0 ) )\n";
+        String  blobSourceValues =
+            "( vbl( 1 ), vbl( 1, 0, 1 ), vbl( 1, 0, 0, 0, 0 ) ),\n" +
+            "( vbl( 2 ), vbl( 0, 0, 2 ), vbl( -2, 0, 0, 0, 0 ) ),\n" +
+            "( vbl( 3 ), vbl( 3, 0, 0 ), vbl( 3, 0, 0, 0, 0 ) ),\n" +
+            "( vbl( 5 ), vbl( 5 ), vbl( -5 ) )\n";
+        String  blobMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on vbl_equals( t.onClauseColumn, s.onClauseColumn )\n" +
+            "when matched and vbl_equals( t.matchingClauseColumn, s.matchingClauseColumn )\n" +
+            "     then delete\n" +
+            "when matched and vbl_equals( t.matchingClauseColumn, vbl_reverse( s.matchingClauseColumn ) )\n" +
+            "     then update set valueColumn = vbl_add( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+            "when not matched and vbl_equals( s.onClauseColumn, s.matchingClauseColumn )\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+
+        vet_050
+            ( dboConnection, "blob", false, blobTargetValues, blobSourceValues,
+              blobMergeStatement, varbinaryExpectedValues );
+
+        //
+        // Boolean
+        //
+        
+        String  booleanTargetValues =
+            "( 1, 'orig', true, true, false ), ( 2, 'orig: will delete', true, true, true ), ( 3, 'orig: will update', false, false, true )\n";
+        String  booleanSourceValues =
+            "( true, true, true ), ( null, true, false ), ( false, false, false )\n";
+        String  booleanMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn and t.valueColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn and s.valueColumn\n" +
+            "     then delete\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then update set valueColumn = t.valueColumn and s.valueColumn, description = 'updated'\n" +
+            "when not matched and s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  booleanExpectedValues = new String[][]
+        {
+            { "1", "orig", "true", "true", "false" },
+            { "3", "updated", "false", "false", "false" },
+            { "6", "inserted", null, "true", "false" },
+        };
+
+        vet_050
+            ( dboConnection, "boolean", true, booleanTargetValues, booleanSourceValues,
+              booleanMergeStatement, booleanExpectedValues );
+        
+        //
+        // Date
+        //
+        
+        String  dateTargetValues =
+            "( 1, 'orig', date( '0001-02-23' ), date( '0100-02-23' ), date( '1000-02-23' ) ),\n" +
+            "( 2, 'orig: will delete', date( '0001-02-23' ), date( '0101-02-23' ), date( '1001-02-23' ) ),\n" +
+            "( 3, 'orig: will update', date( '0002-02-23' ), date( '0200-02-23' ), date( '2000-02-23' ) ),\n" +
+            "( 4, 'orig', date( '0002-02-23' ), date( '0201-02-23' ), date( '2000-02-23' ) ),\n" +
+            "( 5, 'orig', date( '0004-02-23' ), date( '0400-02-23' ), date( '4000-02-23' ) )\n";
+        String  dateSourceValues =
+            "( date( '0001-02-23' ), date( '0101-02-23' ), date( '1000-01-23' ) ),\n" +
+            "( date( '0002-02-23' ), date( '0202-02-23' ), date( '2000-12-23' ) ),\n" +
+            "( date( '0003-02-23' ), date( '0300-02-23' ), date( '3000-01-23' ) ),\n" +
+            "( date( '0005-02-23' ), date( '0005-02-23' ), date( '5000-01-23' ) )\n";
+        String  dateMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and year( t.matchingClauseColumn ) = year( s.matchingClauseColumn ) - 2\n" +
+            "     then update set valueColumn = date( month( t.valueColumn ) + month( s.valueColumn ) ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  dateExpectedValues = new String[][]
+        {
+            { "1", "orig", "0001-02-23", "0100-02-23", "1000-02-23" },
+            { "3", "updated", "0002-02-23", "0200-02-23", "1970-01-14" },
+            { "4", "orig", "0002-02-23", "0201-02-23", "2000-02-23" },
+            { "5", "orig", "0004-02-23", "0400-02-23", "4000-02-23" },
+            { "6", "inserted", "0005-02-23", "0005-02-23", "5000-01-23" },
+        };
+
+        vet_050
+            ( dboConnection, "date", true, dateTargetValues, dateSourceValues,
+              dateMergeStatement, dateExpectedValues );
+        
+        //
+        // Time
+        //
+        
+        String  timeTargetValues =
+            "( 1, 'orig', time( '01:00:01' ), time( '01:01:00' ), time( '01:10:00' ) ),\n" +
+            "( 2, 'orig: will delete', time( '01:00:01' ), time( '01:01:01' ), time( '01:10:01' ) ),\n" +
+            "( 3, 'orig: will update', time( '01:00:02' ), time( '01:02:00' ), time( '01:20:00' ) ),\n" +
+            "( 4, 'orig', time( '01:00:02' ), time( '01:02:01' ), time( '01:20:00' ) ),\n" +
+            "( 5, 'orig', time( '01:00:04' ), time( '01:04:00' ), time( '01:40:00' ) )\n";
+        String  timeSourceValues =
+            "( time( '01:00:01' ), time( '01:01:01' ), time( '01:00:00' ) ),\n" +
+            "( time( '01:00:02' ), time( '01:02:02' ), time( '20:02:00' ) ),\n" +
+            "( time( '01:00:03' ), time( '01:03:00' ), time( '03:00:00' ) ),\n" +
+            "( time( '01:00:05' ), time( '01:00:05' ), time( '05:00:00' ) )\n";
+        String  timeMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and second( t.matchingClauseColumn ) = second( s.matchingClauseColumn ) - 2\n" +
+            "     then update set valueColumn = coalesce( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  timeExpectedValues = new String[][]
+        {
+            { "1", "orig", "01:00:01", "01:01:00", "01:10:00" },
+            { "3", "updated", "01:00:02", "01:02:00", "01:20:00" },
+            { "4", "orig", "01:00:02", "01:02:01", "01:20:00" },
+            { "5", "orig", "01:00:04", "01:04:00", "01:40:00" },
+            { "6", "inserted", "01:00:05", "01:00:05", "05:00:00" },
+        };
+
+        vet_050
+            ( dboConnection, "time", true, timeTargetValues, timeSourceValues,
+              timeMergeStatement, timeExpectedValues );
+        
+        //
+        // Timestamp
+        //
+        
+        String  timestampTargetValues =
+            "( 1, 'orig', timestamp( '1960-01-01 01:00:01' ), timestamp( '1960-01-01 01:01:00' ), timestamp( '1960-01-01 01:10:00' ) ),\n" +
+            "( 2, 'orig: will delete', timestamp( '1960-01-01 01:00:01' ), timestamp( '1960-01-01 01:01:01' ), timestamp( '1960-01-01 01:10:01' ) ),\n  " +
+            "( 3, 'orig: will update', timestamp( '1960-01-01 01:00:02' ), timestamp( '1960-01-01 01:02:00' ), timestamp( '1960-01-01 01:20:00' ) ),\n" +
+            "( 4, 'orig', timestamp( '1960-01-01 01:00:02' ), timestamp( '1960-01-01 01:02:01' ), timestamp( '1960-01-01 01:20:00' ) ),\n" +
+            "( 5, 'orig', timestamp( '1960-01-01 01:00:04' ), timestamp( '1960-01-01 01:04:00' ), timestamp( '1960-01-01 01:40:00' ) )\n";
+        String  timestampSourceValues =
+            "( timestamp( '1960-01-01 01:00:01' ), timestamp( '1960-01-01 01:01:01' ), timestamp( '1960-01-01 01:00:00' ) ),\n" +
+            "( timestamp( '1960-01-01 01:00:02' ), timestamp( '1960-01-01 01:02:02' ), timestamp( '1960-01-01 20:02:00' ) ),\n" +
+            "( timestamp( '1960-01-01 01:00:03' ), timestamp( '1960-01-01 01:03:00' ), timestamp( '1960-01-01 03:00:00' ) ),\n" +
+            "( timestamp( '1960-01-01 01:00:05' ), timestamp( '1960-01-01 01:00:05' ), timestamp( '1960-01-01 05:00:00' ) )\n";
+        String  timestampMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on t.onClauseColumn = s.onClauseColumn\n" +
+            "when matched and t.matchingClauseColumn = s.matchingClauseColumn\n" +
+            "     then delete\n" +
+            "when matched and second( t.matchingClauseColumn ) = second( s.matchingClauseColumn ) - 2\n" +
+            "     then update set valueColumn = coalesce( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+            "when not matched and s.onClauseColumn = s.matchingClauseColumn\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  timestampExpectedValues = new String[][]
+        {
+            { "1", "orig", "1960-01-01 01:00:01.0", "1960-01-01 01:01:00.0", "1960-01-01 01:10:00.0" },
+            { "3", "updated", "1960-01-01 01:00:02.0", "1960-01-01 01:02:00.0", "1960-01-01 01:20:00.0" },
+            { "4", "orig", "1960-01-01 01:00:02.0", "1960-01-01 01:02:01.0", "1960-01-01 01:20:00.0" },
+            { "5", "orig", "1960-01-01 01:00:04.0", "1960-01-01 01:04:00.0", "1960-01-01 01:40:00.0" },
+            { "6", "inserted", "1960-01-01 01:00:05.0", "1960-01-01 01:00:05.0", "1960-01-01 05:00:00.0" },
+        };
+
+        vet_050
+            ( dboConnection, "timestamp", true, timestampTargetValues, timestampSourceValues,
+              timestampMergeStatement, timestampExpectedValues );
+        
+        //
+        // XML
+        //
+        
+        String  xmlTargetValues =
+            "(\n" +
+            "  1,\n" +
+            "  'orig',\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>1</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>100</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>1000</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  2,\n" +
+            "  'orig: will delete',\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>1</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>101</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>1001</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  3,\n" +
+            "  'orig: will update',\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>2</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>200</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>2000</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  4,\n" +
+            "  'orig',\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>2</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>201</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>2000</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  5,\n" +
+            "  'orig',\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>4</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>400</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>4000</html>' preserve whitespace )\n" +
+            ")\n";
+        String  xmlSourceValues =
+            "(\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>1</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>101</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>10000</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>2</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>-200</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>-20000</html>' preserve whitespace )\n" +
+            "),\n" +
+            "(\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>3</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>300</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>30000</html>' preserve whitespace )\n" +
+            "  ),\n" +
+            "(\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>5</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>5</html>' preserve whitespace ),\n" +
+            "  xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html>50000</html>' preserve whitespace )\n" +
+            ")\n";
+        String  xmlMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on xmlserialize( t.onClauseColumn as varchar(1000) ) = xmlserialize( s.onClauseColumn as varchar(1000) )\n" +
+"when matched and xmlserialize( t.matchingClauseColumn as varchar(1000) ) = xmlserialize( s.matchingClauseColumn as varchar(1000) )\n" +
+            "     then delete\n" +
+            "when matched\n" +
+            "     and xmlX( xmlserialize( t.matchingClauseColumn as varchar(1000) ) ) =\n" +
+            "       -xmlX( xmlserialize( s.matchingClauseColumn as varchar(1000) ) )\n" +
+            "     then update set valueColumn = coalesce( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+"when not matched and xmlserialize( s.onClauseColumn as varchar(1000) ) = xmlserialize( s.matchingClauseColumn as varchar(1000) )\n"    +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String[][]  xmlExpectedValues = new String[][]
+        {
+            { "1", "orig", "1", "100", "1000" },
+            { "3", "updated", "2", "200", "2000" },
+            { "4", "orig", "2", "201", "2000" },
+            { "5", "orig", "4", "400", "4000" },
+            { "6", "inserted", "5", "5", "50000" },
+        };
+
+        vet_050
+            ( dboConnection, "xml", false, xmlTargetValues, xmlSourceValues,
+              xmlMergeStatement, xmlExpectedValues,
+              "select\n" +
+              "  primaryKey,\n" +
+              "  description,\n" +
+              "  xmlX( xmlserialize( onClauseColumn as varchar(1000) ) ),\n" +
+              "  xmlX( xmlserialize( matchingClauseColumn as varchar(1000) ) ),\n" +
+              "  xmlX( xmlserialize( valueColumn as varchar(1000) ) )\n" +
+              "from targetTable_050 order by primaryKey\n"
+              );
+        
+        //
+        // UDT
+        //
+        
+        String  udtTargetValues =
+            "( 1, 'orig', mia( 1 ), mia( 100 ), mia( 1000 ) ),\n" +
+            "( 2, 'orig: will delete', mia( 1 ), mia( 101 ), mia( 1001 ) ),\n" +
+            "( 3, 'orig: will update', mia( 2 ), mia( 200 ), mia( 2000 ) ),\n" +
+            "( 4, 'orig', mia( 2 ), mia( 201 ), mia( 2000 ) ),\n" +
+            "( 5, 'orig', mia( 4 ), mia( 400 ), mia( 4000 ) )\n";
+        String  udtSourceValues =
+            "( mia( 1 ), mia( 101 ), mia( 10000 ) ),\n" +
+            "( mia( 2 ), mia( -200 ), mia( -20000 ) ),\n" +
+            "( mia( 3 ), mia( 300 ), mia( 30000 ) ),\n" +
+            "( mia( 5 ), mia( 5 ), mia( -5 ) )\n";
+        String  udtMergeStatement =
+            "merge into targetTable_050 t\n" +
+            "using sourceTable_050 s on gc( t.onClauseColumn, 0 ) = gc( s.onClauseColumn, 0 )\n" +
+            "when matched and gc( t.matchingClauseColumn, 0 ) = gc( s.matchingClauseColumn, 0 )\n" +
+            "     then delete\n" +
+            "when matched and gc( t.matchingClauseColumn, 0 ) = -gc( s.matchingClauseColumn, 0 )\n" +
+            "     then update set valueColumn = mia( gc( t.valueColumn, 0 ) + gc( s.valueColumn, 0 ) ), description = 'updated'\n" +
+            "when not matched and gc( s.onClauseColumn, 0 ) = gc( s.matchingClauseColumn, 0 )\n" +
+            "     then insert values ( 6, 'inserted', s.onClauseColumn, s.matchingClauseColumn, s.valueColumn )\n";
+        String  udtSelectStatement =
+            "select\n" +
+            "  primaryKey,\n" +
+            "  description,\n" +
+            "  gc( onClauseColumn, 0 ),\n" +
+            "  gc( matchingClauseColumn, 0 ),\n" +
+            "  gc( valueColumn, 0 )\n" +
+            "from targetTable_050 order by primaryKey\n";
+
+        vet_050
+            ( dboConnection, "IntArray", false, udtTargetValues, udtSourceValues,
+              udtMergeStatement, intExpectedValues, udtSelectStatement );
+        
+        //
+        // drop schema
+        //
+        goodStatement( dboConnection, "drop function lv_equals_050" );
+        goodStatement( dboConnection, "drop function clob_equals_050" );
+        goodStatement( dboConnection, "drop function vb" );
+        goodStatement( dboConnection, "drop function vb_reverse" );
+        goodStatement( dboConnection, "drop function vb_add" );
+        goodStatement( dboConnection, "drop function ch" );
+        goodStatement( dboConnection, "drop function ch_reverse" );
+        goodStatement( dboConnection, "drop function ch_add" );
+        goodStatement( dboConnection, "drop function vbl" );
+        goodStatement( dboConnection, "drop function vbl_reverse" );
+        goodStatement( dboConnection, "drop function vbl_add" );
+        goodStatement( dboConnection, "drop function vbl_equals" );
+        goodStatement( dboConnection, "drop function xmlX" );
+        goodStatement( dboConnection, "drop function mia" );
+        goodStatement( dboConnection, "drop function gc" );
+        goodStatement( dboConnection, "drop type IntArray restrict" );
+    }
+    private void    vet_050
+        (
+         Connection conn,
+         String datatype,
+         boolean    indexable,
+         String initialTargetValues,
+         String initialSourceValues,
+         String     mergeStatement,
+         String[][] expectedResults
+         )
+        throws Exception
+    {
+        String  selectStatement = "select * from targetTable_050 order by primaryKey";
+        vet_050( conn, datatype, indexable, initialTargetValues, initialSourceValues, mergeStatement, expectedResults, selectStatement );
+    }
+    private void    vet_050
+        (
+         Connection conn,
+         String datatype,
+         boolean    indexable,
+         String initialTargetValues,
+         String initialSourceValues,
+         String     mergeStatement,
+         String[][] expectedResults,
+         String selectStatement
+         )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create table targetTable_050\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    onClauseColumn " + datatype + ",\n" +
+             "    matchingClauseColumn " + datatype + ",\n" +
+             "    valueColumn " + datatype + "\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table sourceTable_050\n" +
+             "(\n" +
+             "    onClauseColumn " + datatype + ",\n" +
+             "    matchingClauseColumn " + datatype + ",\n" +
+             "    valueColumn " + datatype + "\n" +
+             ")\n"
+             );
+
+        // no index
+        vet_050( conn, initialTargetValues, initialSourceValues, mergeStatement, expectedResults, selectStatement );
+
+        // add indexes and repeat
+        if ( indexable )
+        {
+            goodStatement( conn, "create index tt_050_idx on targetTable_050( onClauseColumn )" );
+            goodStatement( conn, "create index st_050_idx on sourceTable_050( onClauseColumn )" );
+            vet_050( conn, initialTargetValues, initialSourceValues, mergeStatement, expectedResults, selectStatement );
+        }
+
+        goodStatement( conn, "drop table targetTable_050" );
+        goodStatement( conn, "drop table sourceTable_050" );
+    }
+    private void    vet_050
+        (
+         Connection conn,
+         String     initialTargetValues,
+         String     initialSourceValues,
+         String     mergeStatement,
+         String[][]     expectedResults,
+         String     selectStatement
+         )
+        throws Exception
+    {
+        populate_050( conn, initialTargetValues, initialSourceValues );
+        goodUpdate( conn, mergeStatement, 3 );
+        assertResults( conn, selectStatement, expectedResults, true );
+    }
+    private void    populate_050
+        (
+         Connection conn,
+         String     initialTargetValues,
+         String     initialSourceValues
+         )
+        throws Exception
+    {
+        goodStatement( conn, "delete from targetTable_050" );
+        goodStatement( conn, "delete from sourceTable_050" );
+        goodStatement( conn, "insert into targetTable_050 values " + initialTargetValues );
+        goodStatement( conn, "insert into sourceTable_050 values " + initialSourceValues );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -7312,8 +8027,120 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         _triggerHistory.add( new String[] { actionString, Integer.toString( actionValue ) } );
     }
 
+    /** Function for comparing two long varchar values */
+    public  static  boolean equals( String left, String right )
+    {
+        if ( left == null ) { return false; }
+        else { return left.equals( right ); }
+    }
+
+    /** Function for comparing two clob values */
+    public  static  boolean equals( Clob left, Clob right )
+        throws SQLException
+    {
+        if ( left == null ) { return false; }
+        else if ( right == null ) { return false; }
+        else
+        {
+            String  leftString = left.getSubString( 1L, (int) left.length() );
+            String  rightString = right.getSubString( 1L, (int) right.length() );
+            return leftString.equals( rightString );
+        }
+    }
+
+    /** Function for comparing two blob values */
+    public  static  boolean equals( Blob left, Blob right )
+        throws SQLException
+    {
+        if ( left == null ) { return false; }
+        else if ( right == null ) { return false; }
+        else
+        {
+            return Arrays.equals( left.getBytes( 1L, (int) left.length() ), right.getBytes( 1L, (int) right.length() ) );
+        }
+    }
+
+    /** flip the order of bytes in an array */
+    public  static  byte[]  reverse( byte[] input )
+    {
+        if ( input == null ) { return null; }
+
+        int count = input.length;
+        byte[]  output = new byte[ count ];
+
+        for ( int i = 0; i < count; i++ ) { output[ ( count - i ) - 1 ] = input[ i ]; }
+
+        return output;
+    }
+
+    /** flip the order of bytes in a blob */
+    public  static  Blob  reverse( Blob inputBlob )
+        throws SQLException
+    {
+        if ( inputBlob == null ) { return null; }
+
+        return new HarmonySerialBlob( reverse( inputBlob.getBytes( 1L, (int) inputBlob.length() ) ) );
+    }
+
+    /** add the values of two byte arrays */
+    public  static  byte[]  add( byte[] left, byte[] right )
+    {
+        if ( left ==  null ) { return null; }
+        if ( right == null ) { return null; }
+
+        int     count = Integer.min( left.length, right.length );
+        byte[]  retval = new byte[ count ];
+
+        for ( int i = 0; i < count; i++ ) { retval[ i ] = (byte) (left[ i ] + right[ i ]); }
+
+        return retval;
+    }
+
+    /** add the values of two blobs */
+    public  static  Blob  add( Blob left, Blob right )
+        throws SQLException
+    {
+        if ( left ==  null ) { return null; }
+        if ( right == null ) { return null; }
+
+        return new HarmonySerialBlob
+            ( add( left.getBytes( 1L, (int) left.length() ), right.getBytes( 1L, (int) right.length() ) ) );
+    }
+
+    /** Function for making a byte array from an array of ints */
+    public  static  byte[]  makeByteArray( Integer... inputs )
+    {
+        if ( inputs == null )   { return null; }
+
+        byte[]  retval = new byte[ inputs.length ];
+        for ( int i = 0; i < inputs.length; i++ ) { retval[ i ] = (byte) inputs[ i ].intValue(); }
+
+        return retval;
+    }
+
+    /** Function for making a byte array from an array of ints */
+    public  static  Blob  makeBlob( Integer... inputs )
+    {
+        if ( inputs == null )   { return null; }
+
+        byte[]  retval = new byte[ inputs.length ];
+        for ( int i = 0; i < inputs.length; i++ ) { retval[ i ] = (byte) inputs[ i ].intValue(); }
+
+        return new HarmonySerialBlob( retval );
+    }
+
     /** Function for returning an arbitrary integer value */
     public  static  Integer nop( Integer value ) { return value; }
+
+    /** Extract the contents of an html document as an integer */
+    public  static  int xmlX( String doc ) throws Exception
+    {
+        int     startIdx = doc.indexOf( BEGIN_HTML ) + BEGIN_HTML.length();
+        int     endIdx = doc.indexOf( END_HTML );
+        String  number = doc.substring( startIdx, endIdx );
+
+        return Integer.parseInt( number );
+    }
 
     public  static  Connection  getNestedConnection()   throws SQLException
     {

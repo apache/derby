@@ -78,6 +78,9 @@ public class CursorNode extends DMLStatementNode
 	//At generate time, we save this position in activation for easy access to session table names list from compiler context
 	private int indexOfSessionTableNamesInSavedObjects = -1;
 
+    // true if this CursorNode is the driving left-join of a MERGE statement
+    private boolean forMergeStatement;
+    
 	/**
      * Constructor for a CursorNode
 	 *
@@ -99,6 +102,7 @@ public class CursorNode extends DMLStatementNode
      *                           updatable columns specified.  May only be
      *                           provided if the updateMode parameter is
      *                           CursorNode.UPDATE.
+     * @param forMergeStatement True if this cursor is the driving left-join of a MERGE statement
      * @param cm                 The context manager
 	 */
     CursorNode(String         statementType,
@@ -110,6 +114,7 @@ public class CursorNode extends DMLStatementNode
                boolean        hasJDBClimitClause,
                int            updateMode,
                String[]       updatableColumns,
+               boolean        forMergeStatement,
                ContextManager cm)
 	{
         super(resultSet, cm);
@@ -123,6 +128,7 @@ public class CursorNode extends DMLStatementNode
         this.updatableColumns =
                 updatableColumns == null ?
                 null : Arrays.asList(updatableColumns);
+        this.forMergeStatement = forMergeStatement;
 
 		/*
 		** This is a sanity check and not an error since the parser
@@ -286,7 +292,7 @@ public class CursorNode extends DMLStatementNode
 
 			// Reject any XML values in the select list; JDBC doesn't
 			// define how we bind these out, so we don't allow it.
-			resultSet.rejectXMLValues();
+			if ( !forMergeStatement ) { resultSet.rejectXMLValues(); }
 
 			/* Verify that all underlying ResultSets reclaimed their FromList */
 			if (SanityManager.DEBUG) {

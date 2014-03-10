@@ -3374,6 +3374,7 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
                 forUpdateState == CursorNode.READ_ONLY ?
                     null :
                     updateColumns.toArray(new String[updateColumns.size()]),
+                false,
 				getContextManager());
 
 		if (checkParams)
@@ -3633,6 +3634,7 @@ bareCallStatement() throws StandardException :
                                                   false,
                                                   CursorNode.READ_ONLY,
                                                   null,
+                                                  false,
                                                   getContextManager());
 
 		// set the 0th param to be a RETURN param
