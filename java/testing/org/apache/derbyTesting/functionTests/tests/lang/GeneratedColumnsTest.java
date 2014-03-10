@@ -5637,7 +5637,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         conn.setAutoCommit(false);
 
         // Verify that the user does not have a schema.
-        JDBC.assertEmpty(conn.getMetaData().getSchemas(null, user));
+        assertFalse(schemaExists(conn, user));
 
         Statement s = conn.createStatement();
 
@@ -5656,10 +5656,26 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
                 new String[][] {{"1", "-1", "2"}, {"2", "-2", "3"}});
 
         // Verify that the user still does not have a schema.
-        JDBC.assertEmpty(conn.getMetaData().getSchemas(null, user));
+        assertFalse(schemaExists(conn, user));
 
         s.close();
         JDBC.cleanup(conn);
+    }
+
+    private static boolean schemaExists(Connection conn, String name) throws SQLException {
+        ResultSet rs = conn.getMetaData().getSchemas();
+
+        try {
+            while (rs.next()) {
+                if (name.equals(rs.getString("TABLE_SCHEM"))) {
+                    return true;
+                }
+            }
+        } finally {
+            rs.close();
+        }
+
+        return false;
     }
 
     /**

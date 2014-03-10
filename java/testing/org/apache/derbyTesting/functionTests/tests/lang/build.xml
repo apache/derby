@@ -59,35 +59,13 @@
 <!--             ============ Begin Targets ==============                -->
  
   <target name="FTOtestsubdir" depends="compilett4,copyfiles"/>
-  <target name="compilet0">
-    <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java16compile.classpath}"/>
-      	<pathelement path="${junit}"/>
-      </classpath>
-      <include name="${this.dir}/GeneratedColumnsTest.java"/>
-    </javac>
-  </target> 
 
   <!-- mkdir / init target may not be necessary, just here for reference... -->
   <target name="init">
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/lang"/>
   </target>
 
-
-  <target name="compilet1" depends="compilet0">
+  <target name="compilet1">
     <javac
       source="1.4"
       target="1.4"
