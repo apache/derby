@@ -37,6 +37,7 @@ import junit.framework.TestSuite;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -7915,6 +7916,282 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( conn, "insert into sourceTable_050 values " + initialSourceValues );
     }
     
+    /**
+     * <p>
+     * Test multiple references to blob columns.
+     * </p>
+     */
+    public  void    test_051_multiBlob()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function mb_051( repeatCount int, vals int... ) returns blob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeBlob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function bequals_051( leftV blob, rightV blob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function reverse_051( leftV blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function gc_051( leftV blob, idx bigint ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.getCell'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function add_051( leftV blob, rightV blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_051\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn blob,\n" +
+             "    generatedColumn generated always as ( reverse_051( valueColumn ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_051\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn blob\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_051 ( primaryKey, description, valueColumn ) values\n" +
+             "( 1, 'orig', mb_051( 10000, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) ),\n" +
+             "( 2, 'orig: will delete', mb_051( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) ),\n" +
+             "( 3, 'orig: will update', mb_051( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 4, 'orig', mb_051( 10000, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39 ) ),\n" +
+             "( 5, 'orig: will update', mb_051( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 6, 'orig: will delete', mb_051( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_051 values\n" +
+             "( 20, mb_051( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) ),\n" +
+             "( 21, mb_051( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 22, mb_051( 5000, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69 ) ),\n" +
+             "( 23, mb_051( 6000, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 ) )\n"
+             );
+
+        //
+        // MERGE statement which references the same blob values multiple times.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_051 t\n" +
+             "using sourceTable_051 s on bequals_051( t.valueColumn, s.valueColumn )\n" +
+             "when matched and gc_051( t.valueColumn, 1000 ) = 10\n" +
+             "     then delete\n" +
+             "when matched and gc_051( t.valueColumn, 1001 ) = 21\n" +
+             "     then update set valueColumn = add_051( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+             "when not matched and mod( gc_051( s.valueColumn, 3002 ), 10 ) = 2\n" +
+             "     then insert ( primaryKey, description, valueColumn ) values ( s.primarykey, 'inserted', s.valueColumn )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select\n" +
+             "  primaryKey,\n" +
+             "  description,\n" +
+             "  gc_051( valueColumn, 2001 ),\n" +
+             "  gc_051( generatedColumn, 2001 )\n" +
+             "from targetTable_051 order by primaryKey\n",
+             new String[][]
+             {
+                 { "1", "orig", "1", "8" },
+                 { "3", "updated", "42", "56" },
+                 { "4", "orig", "31", "38" },
+                 { "5", "updated", "42", "56" },
+                 { "22", "inserted", "61", "68" },
+                 { "23", "inserted", "51", "58" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_051" );
+        goodStatement( dboConnection, "drop table targetTable_051" );
+        goodStatement( dboConnection, "drop function mb_051" );
+        goodStatement( dboConnection, "drop function bequals_051" );
+        goodStatement( dboConnection, "drop function reverse_051" );
+        goodStatement( dboConnection, "drop function gc_051" );
+        goodStatement( dboConnection, "drop function add_051" );
+    }
+    
+    /**
+     * <p>
+     * Test multiple references to clob columns.
+     * </p>
+     */
+    public  void    test_052_multiClob()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function mc_052( repeatCount int, vals varchar( 32672 )... ) returns clob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeClob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function cequals_052( leftV clob, rightV clob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function reverse_052( leftV clob ) returns clob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function gc_052( leftV clob, idx bigint ) returns varchar( 1 )\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.getCell'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function add_052( leftV clob, rightV clob ) returns clob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_052\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn clob,\n" +
+             "    generatedColumn generated always as ( reverse_052( valueColumn ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_052\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn clob\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_052 ( primaryKey, description, valueColumn ) values\n" +
+             "( 1, 'orig', mc_052( 10000, 'abcdefghij' ) ),\n" +
+             "( 2, 'orig: will delete', mc_052( 20000, 'klmnopqrst' ) ),\n" +
+             "( 3, 'orig: will update', mc_052( 30000, 'tuvwxyzabc' ) ),\n" +
+             "( 4, 'orig', mc_052( 10000, 'defghijklm' ) ),\n" +
+             "( 5, 'orig: will update', mc_052( 30000, 'tuvwxyzabc' ) ),\n" +
+             "( 6, 'orig: will delete', mc_052( 20000, 'klmnopqrst' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_052 values\n" +
+             "( 20, mc_052( 20000, 'klmnopqrst' ) ),\n" +
+             "( 21, mc_052( 30000, 'tuvwxyzabc' ) ),\n" +
+             "( 22, mc_052( 5000, 'opqrstuvwx' ) ),\n" +
+             "( 23, mc_052( 6000, 'opqrstuvwx' ) )\n"
+             );
+
+        //
+        // MERGE statement which references the same clob values multiple times.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_052 t\n" +
+             "using sourceTable_052 s on cequals_052( t.valueColumn, s.valueColumn )\n" +
+             "when matched and gc_052( t.valueColumn, 1000 ) = 'k'\n" +
+             "     then delete\n" +
+             "when matched and gc_052( t.valueColumn, 1001 ) = 'u'\n" +
+             "     then update set valueColumn = add_052( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+             "when not matched and gc_052( s.valueColumn, 3002 ) = 'q'\n" +
+             "     then insert ( primaryKey, description, valueColumn ) values ( s.primarykey, 'inserted', s.valueColumn )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select\n" +
+             "  primaryKey,\n" +
+             "  description,\n" +
+             "  gc_052( valueColumn, 2001 ),\n" +
+             "  gc_052( generatedColumn, 2001 )\n" +
+             "from targetTable_052 order by primaryKey\n",
+             new String[][]
+             {
+                 { "1", "orig", "b", "i" },
+                 { "3", "updated", "u", "b" },
+                 { "4", "orig", "e", "l" },
+                 { "5", "updated", "u", "b" },
+                 { "22", "inserted", "p", "w" },
+                 { "23", "inserted", "p", "w" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_052" );
+        goodStatement( dboConnection, "drop table targetTable_052" );
+        goodStatement( dboConnection, "drop function mc_052" );
+        goodStatement( dboConnection, "drop function cequals_052" );
+        goodStatement( dboConnection, "drop function reverse_052" );
+        goodStatement( dboConnection, "drop function gc_052" );
+        goodStatement( dboConnection, "drop function add_052" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -8073,6 +8350,20 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         return output;
     }
 
+    /** flip the order of characterss in a String */
+    public  static  String  reverse( String inputString )
+    {
+        if ( inputString == null ) { return null; }
+
+        char[]  input = inputString.toCharArray();
+        int count = input.length;
+        char[]  output = new char[ count ];
+
+        for ( int i = 0; i < count; i++ ) { output[ ( count - i ) - 1 ] = input[ i ]; }
+
+        return new String( output );
+    }
+
     /** flip the order of bytes in a blob */
     public  static  Blob  reverse( Blob inputBlob )
         throws SQLException
@@ -8080,6 +8371,15 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         if ( inputBlob == null ) { return null; }
 
         return new HarmonySerialBlob( reverse( inputBlob.getBytes( 1L, (int) inputBlob.length() ) ) );
+    }
+
+    /** flip the order of characters in a clob */
+    public  static  Clob  reverse( Clob inputClob )
+        throws SQLException
+    {
+        if ( inputClob == null ) { return null; }
+
+        return new HarmonySerialClob( reverse( inputClob.getSubString( 1L, (int) inputClob.length() ) ) );
     }
 
     /** add the values of two byte arrays */
@@ -8105,6 +8405,17 @@ public class MergeStatementTest extends GeneratedColumnsHelper
 
         return new HarmonySerialBlob
             ( add( left.getBytes( 1L, (int) left.length() ), right.getBytes( 1L, (int) right.length() ) ) );
+    }
+
+    /** concatenate two clobs */
+    public  static  Clob  add( Clob left, Clob right )
+        throws SQLException
+    {
+        if ( left ==  null ) { return null; }
+        if ( right == null ) { return null; }
+
+        return new HarmonySerialClob
+            ( left.getSubString( 1L, (int) left.length() ) + right.getSubString( 1L, (int) right.length() ) );
     }
 
     /** Function for making a byte array from an array of ints */
@@ -8139,6 +8450,37 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         }
 
         return new HarmonySerialBlob( retval );
+    }
+
+    /** Function for making a big Clob by repeating the inputs a number of times */
+    public  static  Clob  makeClob( int repeatCount, String... inputs )
+    {
+        if ( inputs == null )   { return null; }
+        if ( (inputs.length == 0) || (repeatCount == 0) ) { return null; }
+
+        StringBuilder   buffer = new StringBuilder();
+        int     idx = 0;
+        
+        for ( int i = 0; i < repeatCount; i++ )
+        {
+            for ( String val : inputs ) { buffer.append( val ); }
+        }
+
+        return new HarmonySerialClob( buffer.toString() );
+    }
+
+    /** Get the 0-based index into the blob */
+    public  static  int getCell( Blob blob, long idx ) throws Exception
+    {
+        byte[]  bytes = blob.getBytes( idx + 1, 1 );
+
+        return bytes[ 0 ];
+    }
+
+    /** Get the 0-based index into the clob */
+    public  static  String getCell( Clob clob, long idx ) throws Exception
+    {
+        return clob.getSubString( idx + 1, 1 );
     }
 
     /** Function for returning an arbitrary integer value */
