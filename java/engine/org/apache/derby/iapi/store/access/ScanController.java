@@ -189,7 +189,7 @@ public interface ScanController extends GenericScanController
 	fetch must be compatible with the number of scan columns
 	requested at the openScan call time.
 	<BR>
-	A fetch can return a sub-set of the scan columns reqested
+    A fetch can return a sub-set of the scan columns requested
 	at scan open time by supplying a destRow will less elements
 	than the number of requested columns. In this case the N leftmost
 	of the requested columns are fetched, where N = destRow.length.

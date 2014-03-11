@@ -115,11 +115,15 @@ public interface ResultSetFactory {
 		@param checkGM	The code to enforce the check constraints, if any
         @param fullTemplate Saved item for a row template used by bulk insert,
                             or -1 if this is not a bulk insert
+        @param schemaNameName schema name of table
+        @param tableName table name
 		@return the insert operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
 	ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
-                                 GeneratedMethod checkGM, int fullTemplate)
+                                 GeneratedMethod checkGM, int fullTemplate,
+                                 String schemaNameName,
+                                 String tableName)
         throws StandardException;
 
 	/**
@@ -313,6 +317,10 @@ public interface ResultSetFactory {
         @param cloneMapItem Item # for columns that need cloning
         @param reuseResult  Whether or not to reuse the result row.
 		@param doesProjection	Whether or not this PRN does a projection
+        @param validatingCheckConstraint {@code true if this PRN is used to
+            for validating a deferred check constraint}.
+        @param validatingBaseTableCID The conglomerate id for the table being
+            validated.
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
@@ -328,6 +336,8 @@ public interface ResultSetFactory {
         int cloneMapItem,
 		boolean reuseResult,
 		boolean doesProjection,
+        boolean validatingCheckConstraint,
+        long validatingBaseTableCID,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) throws StandardException;
 
@@ -891,6 +901,33 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to create the
 			result set
 	 */
+    NoPutResultSet getValidateCheckConstraintResultSet(
+                                Activation activation,
+                                long conglomId,
+                                int scociItem,
+                                int resultRowTemplate,
+                                int resultSetNumber,
+                                GeneratedMethod startKeyGetter,
+                                int startSearchOperator,
+                                GeneratedMethod stopKeyGetter,
+                                int stopSearchOperator,
+                                boolean sameStartStopPosition,
+                                Qualifier[][] qualifiers,
+                                String tableName,
+                                String userSuppliedOptimizerOverrides,
+                                String indexName,
+                                boolean isConstraint,
+                                boolean forUpdate,
+                                int colRefItem,
+                                int indexColItem,
+                                int lockMode,
+                                boolean tableLocked,
+                                int isolationLevel,
+                                boolean oneRowScan,
+                                double optimizerEstimatedRowCount,
+                                double optimizerEstimatedCost)
+            throws StandardException;
+
 	NoPutResultSet getTableScanResultSet(
 			                    Activation activation,
 								long conglomId,
@@ -918,7 +955,7 @@ public interface ResultSetFactory {
 								double optimizerEstimatedCost)
 			throws StandardException;
 
-	/**
+    /**
 		A table scan result set forms a result set on a scan
 		of a table.
 		The rows can be constructed as they are requested from the

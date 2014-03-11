@@ -48,6 +48,7 @@ import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory;
 
 /**
  * LanguageConnectionContext keeps the result sets,
@@ -1277,7 +1278,8 @@ public interface LanguageConnectionContext extends Context {
                                        FormatableBitSet map);
 
     /**
-     * Set the constraint mode for this constraint/index to {@code deferred}.
+     * Set the constraint mode for this primary key or unique constraint to
+     * {@code deferred}.
      * If {@code deferred} is {@code false}, to immediate checking,
      * if {@code true} to deferred checking.
      *
@@ -1287,8 +1289,25 @@ public interface LanguageConnectionContext extends Context {
      * @param deferred  The new constraint mode
      * @throws StandardException
      */
-    public void setDeferred(Activation a, long conglomId, boolean deferred)
-            throws StandardException;
+    public void setConstraintDeferred(Activation a,
+                                    long conglomId,
+                                    boolean deferred) throws StandardException;
+
+    /**
+     * Set the constraint mode for this check constraint to {@code deferred}.
+     * If {@code deferred} is {@code false}, to immediate checking,
+     * if {@code true} to deferred checking.
+     *
+     * @param a         Activation
+     * @param baseTableCID conglomerate id of constraint's base table
+     * @param constraintId The constraint id
+     * @param deferred  The new constraint mode
+     * @throws StandardException
+     */
+    public void setConstraintDeferred(Activation a,
+                                 long baseTableCID,
+                                 UUID constraintId,
+                                 boolean deferred) throws StandardException;
 
     /**
      * Get the constraint mode set, if any.
@@ -1304,6 +1323,19 @@ public interface LanguageConnectionContext extends Context {
             throws StandardException;
 
     /**
+     * Get the constraint mode set, if any.
+     *
+     * @param a         Activation
+     * @param constraintId The constraint id
+     * @return         {@code true} if the constraint mode
+     *                  for this constraint/index is effectively
+     *                  deferred, {@code false} if it is immediate.
+     * @throws StandardException standard error policy
+     */
+    public boolean isEffectivelyDeferred(Activation a, UUID constraintId)
+            throws StandardException;
+
+    /**
      * Set the constraint mode for all deferrable constraints to
      * {@code deferred}.
      * If {@code deferred} is {@code false}, to immediate checking,
@@ -1316,12 +1348,15 @@ public interface LanguageConnectionContext extends Context {
             throws StandardException;
 
     /**
-     * Get the set of disk backed hash tables containing any index rows
-     * saved for deferred constraints in this transaction, keyed by the
-     * conglomerate id.
+     * Get the set of disk backed hash tables containing any index
+     * rows saved for deferred unique/PK constraints in this
+     * transaction, keyed by the conglomerate id, or rows saved
+     * containing row locations violating rows for deferred check
+     * constraints.
      * @return the set
      */
-    HashMap<Long, BackingStoreHashtable> getDeferredHashTables();
+    HashMap<Long, DeferredConstraintsMemory.ValidationInfo>
+        getDeferredHashTables();
 
     /**
      * Check that deferred constraints are valid, if not roll back the
@@ -1332,13 +1367,13 @@ public interface LanguageConnectionContext extends Context {
     public void checkIntegrity() throws StandardException;
 
     /**
-     * Forget any violating rows for the deferred constraint backed by
-     * {@code indexCID}, if any. Typically used when an index gets dropped
-     * and/or recreated.
-     *
-     * @param indexCID The conglomerate identifier of the backing index
+     * Forget any violating rows for the deferred constraint associated
+     * by conglomId,
+     * @param conglomId The conglomerate identifier of the backing
+     *        index, or a base table conglomerate id of it is a CHECK
+     *        constraint.
      * @throws StandardException
      */
-    public void invalidateDeferredConstraintsData(long indexCID)
+    public void forgetDeferredConstraintsData(long conglomId)
             throws StandardException;
 }

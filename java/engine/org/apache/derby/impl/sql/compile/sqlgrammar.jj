@@ -10422,60 +10422,97 @@ tableColumnList() throws StandardException :
 }
 
 /*
- * This method is called when a comment starting with --derby-properties is found.
- * Such a comment is a special directive to Derby and allows a sql to pass optimizer
- * overrides. Derby looks for propertyName=value [,propertyName=value]* after
- * --derby-properties and returns these properties in a Properties object as a return 
- * value of this method.
- * The param propertiesUseAllowed true indicates that users are allowed to 
- * specify optimizer overrides in the given context. 
- * False means optimizer overrides in the given context are allowed internally 
- * only eg impl/load/import.java specifies property insertMode=replace/bulkInsert
- * in the insert statement. This same property will not be acceptable from an 
- * insert statement from a user sql.
+ * This method is called when a comment starting with "--derby-properties" is
+ * found.  Such a comment is a special directive to Derby and allows an SQL
+ * statement to pass optimizer overrides. Derby looks for
+ *
+ *     propertyName = value* [, propertyName = value]*
+ *
+ * after "--derby-properties" and returns these properties in a Properties
+ * object as a return value of this method.  If the parameter
+ * "propertiesUseAllowed" is true, it indicates that users are allowed to
+ * specify optimizer overrides in the given context.  False means optimizer
+ * overrides in the given context are allowed internally only, e.g. by the
+ * class org.apache.derby.impl.load.Import specifies the property
+ * "insertMode=replace/bulkInsert" in the INSERT statement. This same property
+ * will not be acceptable from an INSERT statement from a user SQL statement.
  */
 Properties
 propertyList(boolean propertiesUseAllowed) throws StandardException :
 {
 	Properties properties = new FormatableProperties();
 	StringTokenizer commaSeparatedProperties;
-	StringTokenizer equalOperatorSeparatedProperty;
+
 }
 {
-	<DERBYDASHPROPERTIES> {
-		//first use StringTokenizer to get tokens which are delimited by ,s
-		commaSeparatedProperties = new StringTokenizer(getToken(1).image,",");
-		while (commaSeparatedProperties.hasMoreTokens()) {
-			//Now verify that tokens delimited by ,s follow propertyName=value pattern
-			String currentProperty = commaSeparatedProperties.nextToken();
-			equalOperatorSeparatedProperty = new StringTokenizer(currentProperty,"=", true);
-			if (equalOperatorSeparatedProperty.countTokens() != 3)
-				throw StandardException.newException(SQLState.PROPERTY_SYNTAX_INVALID);
-			else {
-				String key = equalOperatorSeparatedProperty.nextToken().trim();
-				if (!equalOperatorSeparatedProperty.nextToken().equals("="))
-					throw StandardException.newException(SQLState.PROPERTY_SYNTAX_INVALID);
-				String value = equalOperatorSeparatedProperty.nextToken().trim();
-				verifyImageLength(value);
-				/* Trim off the leading and trailing ', and compress all '' to ' */
-				if (value.startsWith("'") && value.endsWith("'"))
-					value = StringUtil.compressQuotes(value.substring(1, value.length() - 1), SINGLEQUOTES);
-				/* Trim off the leading and trailing ", and compress all "" to " */
-				else if (value.startsWith("\"") && value.endsWith("\""))
-					value = StringUtil.compressQuotes(value.substring(1, value.length() - 1), DOUBLEQUOTES);
-				else 
-					value = value.toUpperCase();
-				// Do not allow user to specify multiple values for the same key
-				if (properties.put(key, value) != null)
-				{
-					throw StandardException.newException(SQLState.LANG_DUPLICATE_PROPERTY, key);
-				}
-		}
-	}
-	//if this property override is supported in internal mode only, then do that verification here.
-	if (!propertiesUseAllowed) 
-		checkInternalFeature("DERBY-PROPERTIES");
-	return properties;
+    <DERBYDASHPROPERTIES> {
+        // First use StringTokenizer to get tokens which are delimited by
+        // commas
+        commaSeparatedProperties = new StringTokenizer(getToken(1).image, ",");
+
+        while (commaSeparatedProperties.hasMoreTokens()) {
+
+            // Now verify that tokens delimited by commas follow
+            // "propertyName=value" pattern
+            String currentProperty = commaSeparatedProperties.nextToken();
+
+            // Use a new tokenizer to parse "propertyName=value". Let it
+            // return the '=' delimiter as well.
+            StringTokenizer equalOperatorSeparatedProperty =
+                new StringTokenizer(currentProperty, "=", true);
+
+            if (equalOperatorSeparatedProperty.countTokens() != 3) {
+                // should see exactly three tokens: propertyName, '=' and
+                // value.
+                throw StandardException.newException(
+                    SQLState.PROPERTY_SYNTAX_INVALID);
+            } else {
+                // ignore blanks around key
+                String key = equalOperatorSeparatedProperty.nextToken().trim();
+
+                if (!equalOperatorSeparatedProperty.nextToken().equals("=")) {
+                    throw StandardException.newException(
+                        SQLState.PROPERTY_SYNTAX_INVALID);
+                }
+
+                // Also ignore blanks around value, canonize to upper case
+                // unless we have surrounding quotes.
+                String value =
+                    equalOperatorSeparatedProperty.nextToken().trim();
+
+                verifyImageLength(value);
+
+                if (value.startsWith("'") && value.endsWith("'")) {
+                    // Trim off the leading and trailing ', and compress all
+                    // '' to '
+                    value = StringUtil.compressQuotes(
+                        value.substring(1, value.length() - 1), SINGLEQUOTES);
+                } else if (value.startsWith("\"") && value.endsWith("\"")) {
+                    // Trim off the leading and trailing ", and compress all
+                    // "" to "
+                    value = StringUtil.compressQuotes(
+                        value.substring(1, value.length() - 1), DOUBLEQUOTES);
+
+                } else {
+                    value = value.toUpperCase();
+                }
+
+                // Do not allow user to specify multiple values for the same
+                // key.
+                if (properties.put(key, value) != null) {
+                    throw StandardException.newException(
+                        SQLState.LANG_DUPLICATE_PROPERTY, key);
+                }
+            }
+        }
+
+        // If this property override is supported in internal mode only, then
+        // do that verification here.
+        if (!propertiesUseAllowed) {
+            checkInternalFeature("DERBY-PROPERTIES");
+        }
+
+        return properties;
 	}
 }
 

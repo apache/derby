@@ -292,7 +292,10 @@ class HashJoinStrategy extends BaseJoinStrategy {
 
 
 	/** @see JoinStrategy#resultSetMethodName */
-	public String resultSetMethodName(boolean bulkFetch, boolean multiprobe) {
+    public String resultSetMethodName(
+            boolean bulkFetch,
+            boolean multiprobe,
+            boolean validatingCheckConstraint) {
 		return "getHashScanResultSet";
 	}
 

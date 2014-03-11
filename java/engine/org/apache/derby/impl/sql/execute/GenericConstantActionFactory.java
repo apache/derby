@@ -754,7 +754,7 @@ public class GenericConstantActionFactory
 	}
 
 	/**
-	 *	Make the ConstantAction for a Replicated INSERT statement.
+     *  Make the ConstantAction for a INSERT statement.
 	 *
 	 *  @param conglomId		Conglomerate ID.
 	 *  @param heapSCOCI		StaticCompiledOpenConglomInfo for target heap.
@@ -766,7 +766,10 @@ public class GenericConstantActionFactory
 	 *	@param deferred			True means deferred insert
 	 *  @param tableIsPublished	true if table is published, false otherwise
 	 *  @param tableID			table id
-	 *  @param targetProperties	Properties on the target table
+     *  @param hasDeferrableChecks
+     *                          The target table has deferrable CHECK
+     *                          constraints
+     *  @param targetProperties Properties on the target table
 	 *	@param fkInfo			Array of structures containing foreign key info, 
 	 *							if any (may be null)
 	 *	@param triggerInfo		Array of structures containing trigger info, 
@@ -792,7 +795,8 @@ public class GenericConstantActionFactory
 								StaticCompiledOpenConglomInfo[] indexSCOCIs,
 								String[]			indexNames,
 								boolean				deferred,
-								boolean				tableIsPublished,
+                                boolean             tableIsPublished,
+                                boolean             hasDeferrableChecks,
 								UUID				tableID,
 								int					lockMode,
 								Object         		insertToken,
@@ -819,6 +823,7 @@ public class GenericConstantActionFactory
 										indexSCOCIs,
 										indexNames,
 										deferred,
+                                        hasDeferrableChecks,
 										targetProperties,
 										tableID,
 										lockMode,
@@ -904,14 +909,14 @@ public class GenericConstantActionFactory
 
 
 	/**
-	 *	Make the ConstantAction for a Replicated DELETE statement.
+     *  Make the ConstantAction for an UPDATE statement.
 	 *
-	 *  @param conglomId			Conglomerate ID.
-	 *  @param tableType			type of this table
+     *  @param targetTableDesc      Descriptor for the updated table
 	 *	@param heapSCOCI			StaticCompiledOpenConglomInfo for heap.
 	 *  @param irgs					Index descriptors
 	 *  @param indexCIDS			Conglomerate IDs of indices
-	 *	@param indexSCOCIs	StaticCompiledOpenConglomInfos for indexes.
+     *  @param indexSCOCIs          StaticCompiledOpenConglomInfos for indexes.
+     *  @param indexNames
 	 *	@param deferred				True means deferred update
 	 *	@param targetUUID			UUID of target table
 	 *	@param lockMode				The lock mode to use
@@ -919,6 +924,7 @@ public class GenericConstantActionFactory
 	 *  @param tableIsPublished		true if table is published, false otherwise
 	 *	@param changedColumnIds		Array of ids of changes columns
 	 *  @param keyPositions     	positions of primary key columns in base row
+     *  @param updateToken
 	 *	@param fkInfo				Array of structures containing foreign key info, 
 	 *								if any (may be null)
 	 *	@param triggerInfo			Array of structures containing trigger info, 
@@ -930,12 +936,12 @@ public class GenericConstantActionFactory
 	 *	@param positionedUpdate		is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 *  @param underMerge   True if this is an action of a MERGE statement.
+     *  @return                     The constant action constructed
 	 *
 	 *  @exception StandardException Thrown on failure
 	 */
 	public	UpdateConstantAction	getUpdateConstantAction(
-								long				conglomId,
-								int					tableType,
+                                TableDescriptor     targetTableDesc,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,
 								long[]				indexCIDS,
@@ -950,7 +956,7 @@ public class GenericConstantActionFactory
 								Object         		updateToken,
 								FKInfo[]			fkInfo,
 								TriggerInfo			triggerInfo,
-								FormatableBitSet				baseRowReadList,
+                                FormatableBitSet    baseRowReadList,
 								int[]				baseRowReadMap,
 								int[]				streamStorableHeapColIds,
 								int					numColumns,
@@ -961,7 +967,7 @@ public class GenericConstantActionFactory
 			throws StandardException
 	{
 		return new UpdateConstantAction(
-										conglomId,
+                                        targetTableDesc,
 										heapSCOCI,
 										irgs,
 										indexCIDS,

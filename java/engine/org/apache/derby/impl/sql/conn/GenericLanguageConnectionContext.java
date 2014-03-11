@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -78,7 +77,6 @@ import org.apache.derby.iapi.sql.execute.CursorActivation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.transaction.TransactionControl;
@@ -89,9 +87,11 @@ import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
 import org.apache.derby.impl.sql.compile.CompilerContextImpl;
 import org.apache.derby.impl.sql.execute.AutoincrementCounter;
-import org.apache.derby.impl.sql.execute.DeferredDuplicates;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.UniquePkInfo;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.ValidationInfo;
 import org.apache.derby.shared.common.sanity.SanityManager;
-
 /**
  * LanguageConnectionContext keeps the pool of prepared statements,
  * activations, and cursors in use by the current connection.
@@ -316,7 +316,7 @@ public class GenericLanguageConnectionContext
      * saved for deferred constraints in this transaction, keyed by the
      * conglomerate id. Checked at commit time, then discarded.
      */
-    private HashMap<Long, BackingStoreHashtable> deferredHashTables;
+    private HashMap<Long, ValidationInfo> deferredHashTables;
 
     /*
        constructor
@@ -3751,7 +3751,8 @@ public class GenericLanguageConnectionContext
 
         final SQLSessionContext ssc = getCurrentSQLSessionContext(a);
         sc.setDeferredAll(ssc.getDeferredAll());
-        sc.setConstraintModes(ssc.getConstraintModes());
+        sc.setConstraintModes(ssc.getUniquePKConstraintModes());
+        sc.setCheckConstraintModes(ssc.getCheckConstraintModes());
 
         StatementContext stmctx = getStatementContext();
 
@@ -3796,24 +3797,67 @@ public class GenericLanguageConnectionContext
         // Check all constraints that were deferred inside the routine
         // but whose constraint mode is immediate on the outside. If
         // any of these violate the constraints, roll back.
-        Set<Map.Entry<Long, BackingStoreHashtable>> es =
-                deferredHashTables.entrySet();
+        Set<Map.Entry<Long, ValidationInfo>> es = deferredHashTables.entrySet();
 
-        for (Map.Entry<Long, BackingStoreHashtable> e : es) {
-            final long indexCID = e.getKey().longValue();
+        for (Map.Entry<Long, ValidationInfo> e : es) {
 
-            boolean effectivelyDeferred = effectivelyDeferred(caller, indexCID);
+            if (e.getValue() instanceof UniquePkInfo) {
 
-            if (effectivelyDeferred ) {
-                // the constraint is also deferred in the calling context
-                continue;
+                final long indexCID = e.getKey().longValue();
+
+                boolean effectivelyDeferred =
+                    effectivelyDeferred(caller, indexCID);
+
+                if (effectivelyDeferred ) {
+                    // the constraint is also deferred in the calling context
+                    continue;
+                }
+
+                doValidateUniquePKConstraint(
+                    e.getKey().longValue(),
+                    (UniquePkInfo)e.getValue(),
+                    true);
+
+            } else if (e.getValue() instanceof CheckInfo) {
+
+                final long baseTableCID = e.getKey().longValue();
+                CheckInfo ci = (CheckInfo)e.getValue();
+
+                // check if any of the constraints involved is immediate on
+                // the outside
+                boolean allEffectivelyDeferred = true;
+
+                for (UUID uid : ci.getCulprints()) {
+                    if (!effectivelyDeferred(caller, uid) &&
+                        effectivelyDeferred(nested, uid)) {
+
+                        // at least one check constraint changed back
+                        // from being deferred to immediate, so check
+                        // all immediates
+
+                        // FIXME: could be optimized if we knew
+                        // exactly which constraints failed under the
+                        // deferred regime: that might save us from
+                        // checking in a few cases.
+                        allEffectivelyDeferred = false;
+                        break;
+                    }
+                }
+
+                if (allEffectivelyDeferred) {
+                    continue;
+                }
+
+                doValidateUniqueCheckConstraints(
+                    baseTableCID,
+                    null,
+                    (CheckInfo)e.getValue(),
+                    true);
+            } else {
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
             }
-            // The constraint must have been deferred inside the routine
-            if (SanityManager.DEBUG) {
-                SanityManager.ASSERT(effectivelyDeferred(nested, indexCID));
-            }
-
-            doValidateConstraint(e.getKey().longValue(), e.getValue(), true);
         }
     }
 
@@ -3839,6 +3883,26 @@ public class GenericLanguageConnectionContext
 
         return effectivelyDeferred;
     }
+
+    private boolean effectivelyDeferred(SQLSessionContext sc, UUID constraintId)
+            throws StandardException {
+
+        final Boolean deferred = sc.isDeferred(constraintId);
+        final boolean effectivelyDeferred;
+        final DataDictionary dd = getDataDictionary();
+
+        if (deferred != null) {
+            effectivelyDeferred = deferred.booleanValue();
+        } else {
+            // no explicit setting applicable, use initial constraint mode
+            final ConstraintDescriptor conDesc =
+                    dd.getConstraintDescriptor(constraintId);
+            effectivelyDeferred = conDesc.initiallyDeferred();
+        }
+
+        return effectivelyDeferred;
+    }
+
 
     /**
      * @see LanguageConnectionContext#setupSubStatementSessionContext(Activation a)
@@ -3944,33 +4008,76 @@ public class GenericLanguageConnectionContext
     }
 
     /**
-     * {@inheritDoc}
+     * For check constraints
+     *
+     * @param a             activation
+     * @param basetableCID  the conglomerate id of the base table on which
+     *                      the constraint is defined
+     * @param constraintId  the constraint id
+     * @param deferred      the constraint mode
+     * @throws StandardException standard error policy
      */
-    public void setDeferred(Activation a, long conglomId, boolean deferred)
-            throws StandardException {
+    public void setConstraintDeferred(
+            final Activation a,
+            final long basetableCID,
+            final UUID constraintId,
+            final boolean deferred) throws StandardException {
+
         if (!deferred) {
-            // Moving to immediate, check whats done in this transaction first
-            validateDeferredConstraint(conglomId);
+            // Moving to immediate, check what's done in this transaction first
+            validateDeferredConstraint(basetableCID, constraintId);
         }
-        getCurrentSQLSessionContext(a).setDeferred(conglomId, deferred);
+
+        getCurrentSQLSessionContext(a).setDeferred(constraintId, deferred);
     }
 
-    public boolean isEffectivelyDeferred(Activation a, long conglomId)
-            throws StandardException {
+    /**
+     * For unique and primary key constraints
+     *
+     * @param a         activation
+     * @param indexCID  the conglomerate id of the supporting index
+     * @param deferred  constraint mode
+     * @throws StandardException standard error policy
+ */
+    public void setConstraintDeferred(
+            final Activation a,
+            final long indexCID,
+            final boolean deferred) throws StandardException {
+
+        if (!deferred) {
+            // Moving to immediate, check what's done in this transaction first
+            validateDeferredConstraint(indexCID, null);
+        }
+
+        getCurrentSQLSessionContext(a).setDeferred(indexCID, deferred);
+
+    }
+
+    public boolean isEffectivelyDeferred(
+            final Activation a,
+            long conglomId) throws StandardException {
+
         return effectivelyDeferred(getCurrentSQLSessionContext(a), conglomId);
     }
 
+    public boolean isEffectivelyDeferred(
+            final Activation a,
+            final UUID constraintId) throws StandardException {
+
+        return effectivelyDeferred(getCurrentSQLSessionContext(a),
+                                   constraintId);
+    }
 
     public void checkIntegrity() throws StandardException {
         validateDeferredConstraints(true);
         clearDeferreds();
     }
 
-    public void invalidateDeferredConstraintsData(long indexCID)
+    public void forgetDeferredConstraintsData(final long conglomId)
             throws StandardException {
         if (deferredHashTables != null &&
-                deferredHashTables.containsKey(Long.valueOf(indexCID))) {
-            deferredHashTables.remove(Long.valueOf(indexCID));
+                deferredHashTables.containsKey(Long.valueOf(conglomId))) {
+            deferredHashTables.remove(Long.valueOf(conglomId));
         }
     }
 
@@ -3985,7 +4092,7 @@ public class GenericLanguageConnectionContext
     /**
      * {@inheritDoc}
      */
-    public void setDeferredAll(Activation a, boolean deferred)
+    public void setDeferredAll(final Activation a, final boolean deferred)
             throws StandardException {
         if (!deferred) {
             validateDeferredConstraints(false);
@@ -4000,49 +4107,86 @@ public class GenericLanguageConnectionContext
     /**
      * {@inheritDoc}
      */
-    public HashMap<Long, BackingStoreHashtable> getDeferredHashTables() {
+    public HashMap<Long, ValidationInfo> getDeferredHashTables() {
         if (deferredHashTables == null) {
-            deferredHashTables = new HashMap<Long, BackingStoreHashtable>();
+            deferredHashTables = new HashMap<Long, ValidationInfo>();
         }
         return deferredHashTables;
     }
 
-    private void validateDeferredConstraints(boolean rollbackOnError)
+    private void validateDeferredConstraints(final boolean rollbackOnError)
             throws StandardException {
+
         if (deferredHashTables == null) {
             // Nothing to do
             return;
         }
 
-        Set<Map.Entry<Long, BackingStoreHashtable>> es =
+        final Set<Map.Entry<Long, ValidationInfo>> es =
                 deferredHashTables.entrySet();
 
-        for (Map.Entry<Long, BackingStoreHashtable> e : es) {
-            doValidateConstraint(e.getKey().longValue(),
-                                 e.getValue(),
-                                 rollbackOnError);
+        for (Map.Entry<Long, ValidationInfo> e : es) {
+            if (e.getValue() instanceof UniquePkInfo) {
+                doValidateUniquePKConstraint(e.getKey().longValue(),
+                        (UniquePkInfo)e.getValue(),
+                        rollbackOnError);
+            } else if (e.getValue() instanceof CheckInfo) {
+                doValidateUniqueCheckConstraints(e.getKey().longValue(),
+                        null,
+                        (CheckInfo)e.getValue(),
+                        rollbackOnError);
+            } else {
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+            }
         }
     }
 
 
-    private void validateDeferredConstraint(long indexCID)
-            throws StandardException {
-        BackingStoreHashtable ht = null;
+    private void validateDeferredConstraint(
+        final long conglomCID,
+        final UUID constraintId) throws StandardException {
+
+        ValidationInfo vi = null;
 
         if (deferredHashTables == null ||
-            (ht = deferredHashTables.get(indexCID)) == null) {
+            (vi = deferredHashTables.get(conglomCID)) == null) {
             // Nothing to do
             return;
         }
-        doValidateConstraint(indexCID, ht, false);
-        deferredHashTables.remove(indexCID);
+
+        if (vi instanceof CheckInfo) {
+            doValidateUniqueCheckConstraints(
+                conglomCID, constraintId, (CheckInfo)vi, false);
+        } else if (vi instanceof UniquePkInfo) {
+            doValidateUniquePKConstraint(conglomCID, (UniquePkInfo)vi, false);
+        } else {
+            if (SanityManager.DEBUG) {
+                SanityManager.NOTREACHED();
+            }
+        }
+
+        deferredHashTables.remove(conglomCID);
     }
 
-    private void doValidateConstraint(
-        long indexCID,
-        BackingStoreHashtable ht,
-        boolean rollbackOnError) throws StandardException {
+    private void doValidateUniquePKConstraint(
+        final long indexCID,
+        final UniquePkInfo ui,
+        final boolean rollbackOnError) throws StandardException {
 
-        DeferredDuplicates.validate(tran, indexCID, this, ht, rollbackOnError);
+        DeferredConstraintsMemory.validateUniquePK(
+                this, indexCID, ui.infoRows, rollbackOnError);
     }
+
+    private void doValidateUniqueCheckConstraints(
+        final long baseTableCID,
+        final UUID constraintId,
+        final CheckInfo ci,
+        final boolean rollbackOnError) throws StandardException {
+
+        DeferredConstraintsMemory.validateCheck(
+                this, baseTableCID, constraintId, ci, rollbackOnError);
+    }
+
 }

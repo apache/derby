@@ -43,6 +43,21 @@ class AndNode extends BinaryLogicalOperatorNode
     }
 
     /**
+     * @param leftOperand The left operand of the AND
+     * @param rightOperand The right operand of the AND
+     * @param methodName The methods name
+     * @param cm context manager
+     * @throws StandardException
+     */
+    AndNode(ValueNode leftOperand,
+            ValueNode rightOperand,
+            String  methodName,
+            ContextManager cm) throws StandardException {
+        super(leftOperand, rightOperand, methodName, cm);
+        this.shortCircuitValue = false;
+    }
+
+    /**
 	 * Bind this logical operator.  All that has to be done for binding
 	 * a logical operator is to bind the operands, check that both operands
 	 * are BooleanDataValue, and set the result type to BooleanDataValue.

@@ -21,11 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
@@ -33,6 +32,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.sql.compile.TableName;
 
 /**
@@ -73,9 +73,11 @@ class SetConstraintsConstantAction extends DDLConstantAction
 	}
 
 	/**
-     *  This is the guts of the Execution-time logic for SET CONSTRAINT.
+     * This is the guts of the execution time logic for SET CONSTRAINT.
 	 *
-	 *	@see ConstantAction#executeConstantAction
+     * @param activation
+     *
+     * @see ConstantAction#executeConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -86,15 +88,17 @@ class SetConstraintsConstantAction extends DDLConstantAction
                 activation.getLanguageConnectionContext();
 
         final DataDictionary dd = lcc.getDataDictionary();
+        final List<String> boundConstraints = new ArrayList<String>();
 
         if (constraints != null) {
             for (TableName c : constraints) {
-                SchemaDescriptor sd = dd.getSchemaDescriptor(
+
+                final SchemaDescriptor sd = dd.getSchemaDescriptor(
                     c.getSchemaName(),
                     lcc.getTransactionExecute(),
                     true);
 
-                ConstraintDescriptor cd =
+                final ConstraintDescriptor cd =
                     dd.getConstraintDescriptor(c.getTableName(), sd.getUUID());
 
                 if (cd == null) {
@@ -104,6 +108,19 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             c.getFullSQLName());
                 }
 
+                final String bound =
+                        IdUtil.normalToDelimited(sd.getSchemaName()) + "." +
+                        IdUtil.normalToDelimited(cd.getConstraintName());
+
+                if (boundConstraints.contains(bound)) {
+                    throw StandardException.newException(
+                            SQLState.LANG_DB2_DUPLICATE_NAMES,
+                            cd.getConstraintName(),
+                            bound);
+                } else {
+                    boundConstraints.add(bound);
+                }
+
                 if (deferred && !cd.deferrable()) {
                     throw StandardException.newException(
                             SQLState.LANG_SET_CONSTRAINT_NOT_DEFERRABLE,
@@ -111,17 +128,20 @@ class SetConstraintsConstantAction extends DDLConstantAction
                 }
 
                 if (cd instanceof KeyConstraintDescriptor) {
-                    // Unique, primary key and foreign key
+                    // Set unique, primary key and foreign key constraints
 
-                    lcc.setDeferred(activation,
+                    lcc.setConstraintDeferred(activation,
                                     ((KeyConstraintDescriptor)cd).
                                         getIndexConglomerateDescriptor(dd).
                                         getConglomerateNumber(),
                                     deferred);
                 } else {
-                    // Check constraints
-                    throw StandardException.newException(
-                            SQLState.NOT_IMPLEMENTED, "SET CONSTRAINT");
+                    // Set check constraints
+                    lcc.setConstraintDeferred(
+                            activation,
+                            cd.getTableDescriptor().getHeapConglomerateId(),
+                            cd.getUUID(),
+                            deferred);
                 }
             }
         } else {

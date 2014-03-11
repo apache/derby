@@ -21,13 +21,15 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.StatisticsImpl;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
@@ -36,7 +38,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.LanguageProperties;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
@@ -48,7 +49,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
@@ -62,6 +62,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
@@ -71,11 +72,12 @@ import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.SortObserver;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Insert the rows from the source into the specified
@@ -134,6 +136,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		
 	private ExecIndexRow[]			indexRows;
     private final int               fullTemplateId;
+    private final String            schemaName;
+    private final String            tableName;
 	private	long[]					sortIds;
 	private RowLocationRetRowSource[]
                                     rowSources;
@@ -160,7 +164,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	 * getSetAutoincrementValues.
 	 */
 	private NumberDataValue				aiCache[];
-
+    private BackingStoreHashtable   deferredChecks; // cached ref.
+    private List<UUID>              violatingCheckConstraints;
 	/**
 	 * If set to true, implies that this (rep)insertresultset has generated
 	 * autoincrement values. During refresh for example, the autoincrement
@@ -257,7 +262,17 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
         }
 
         if (checkGM != null) {
-			evaluateCheckConstraints();
+            boolean allOk = evaluateCheckConstraints();
+            if (!allOk) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(
+                            violatingCheckConstraints != null &&
+                            violatingCheckConstraints.size() > 0) ;
+                }
+
+                // We will do a callback to remember this by
+                // offendingRowLocation called from HeapController#load
+            }
 		}
 		// RESOLVE - optimize the cloning
 		if (constants.irgs.length > 0)
@@ -271,23 +286,44 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		}
 	}
 
-	/**
-	  *	Run the check constraints against the current row. Raise an error if
-	  * a check constraint is violated.
-	  *
-	  * @exception StandardException thrown on error
-	  */
-	private	void	evaluateCheckConstraints()
-		throws StandardException
-	{
-		if (checkGM != null)
-		{
 
-			// Evaluate the check constraints. The expression evaluation
-			// will throw an exception if there is a violation, so there
-			// is no need to check the result of the expression.
-			checkGM.invoke(activation);
+    public void offendingRowLocation(RowLocation rl, long constainerId)
+            throws StandardException {
+        if (violatingCheckConstraints != null) {
+            deferredChecks =
+                    DeferredConstraintsMemory.rememberCheckViolations(
+                            lcc,
+                            heapConglom,
+                            schemaName,
+                            tableName,
+                            deferredChecks,
+                            violatingCheckConstraints,
+                            rl);
+            violatingCheckConstraints.clear();
+        }
+    }
+
+    /**
+     * Run the check constraints against the current row. Raise an error if
+     * a check constraint is violated, unless all the offending checks are
+     * deferred, in which case a false value will be returned. A NULL value
+     * will be interpreted as success (not violation).
+     *
+     * @exception StandardException thrown on error
+     */
+    private boolean evaluateCheckConstraints() throws StandardException {
+        boolean result = true;
+
+        if (checkGM != null) {
+            // Evaluate the check constraints. If all check constraint modes are
+            // immediate, a check error will throw rather than return a false
+            // value.
+            SQLBoolean allOk =
+                    (SQLBoolean)checkGM.invoke(activation);
+            result = allOk.isNull() || allOk.getBoolean();
 		}
+
+        return result;
 	}
 
     /*
@@ -302,6 +338,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
                            int fullTemplate,
+                           String schemaName,
+                           String tableName,
 						   Activation activation)
 		throws StandardException
     {
@@ -311,6 +349,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
         this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
         this.fullTemplateId = fullTemplate;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
 		heapConglom = constants.conglomId;
 
         tc = activation.getTransactionController();
@@ -360,8 +400,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				*/
 				if (triggerInfo != null)
 				{
-					TriggerDescriptor td = triggerInfo.getTriggerArray()[0];
-					throw StandardException.newException(SQLState.LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER_DURING_EXECUTION, constants.getTableName(), td.getName());
+                    TriggerDescriptor trD = triggerInfo.getTriggerArray()[0];
+                    throw StandardException.newException(
+                        SQLState.LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER_DURING_EXECUTION,
+                        constants.getTableName(),
+                        trD.getName());
 				}
 			}
 		}
@@ -515,17 +558,17 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		throws StandardException
 	{
 		int size = columnIndexes.length;
-		TableDescriptor td = dd.getTableDescriptor(constants.targetUUID);
+        TableDescriptor tabDesc = dd.getTableDescriptor(constants.targetUUID);
 
 		// all 1-based column ids.
 		for (int i = 0; i < size; i++)
 		{
-			ColumnDescriptor cd = td.getColumnDescriptor(columnIndexes[i]);
+            ColumnDescriptor cd = tabDesc.getColumnDescriptor(columnIndexes[i]);
 			if (!verifyAutoGenColumn(cd))
 			{
 				throw StandardException.newException(
 					SQLState.LANG_INVALID_AUTOGEN_COLUMN_POSITION,
-					new Integer(columnIndexes[i]), td.getName());
+                    new Integer(columnIndexes[i]), tabDesc.getName());
 			}
 		}
 	}
@@ -538,16 +581,16 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private int[] generatedColumnPositionsArray()
 		throws StandardException
 	{
-		TableDescriptor td = dd.getTableDescriptor(constants.targetUUID);
+        TableDescriptor tabDesb = dd.getTableDescriptor(constants.targetUUID);
 		ColumnDescriptor cd;
-		int size = td.getMaxColumnID();
+        int size = tabDesb.getMaxColumnID();
 
 		int[] generatedColumnPositionsArray = new int[size];
         Arrays.fill(generatedColumnPositionsArray, -1);
 		int generatedColumnNumbers = 0;
 
 		for (int i=0; i<size; i++) {
-			cd = td.getColumnDescriptor(i+1);
+            cd = tabDesb.getColumnDescriptor(i+1);
 			if (cd.isAutoincrement()) { //if the column has auto-increment value
 				generatedColumnNumbers++;
 				generatedColumnPositionsArray[i] = i+1;
@@ -574,11 +617,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		throws StandardException
 	{
 		int size = columnIndexes.length;
-		TableDescriptor td = dd.getTableDescriptor(constants.targetUUID);
+        TableDescriptor tabDesc = dd.getTableDescriptor(constants.targetUUID);
 
 		//create an array of integer (the array size = number of columns in table)
 		// valid column positions are 1...getMaxColumnID()
-		int[] uniqueColumnIndexes = new int[td.getMaxColumnID()];
+        int[] uniqueColumnIndexes = new int[tabDesc.getMaxColumnID()];
 
 		int uniqueColumnNumbers = 0;
 
@@ -618,7 +661,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		int size = columnNames.length;
 		int columnPositions[] = new int[size];
 
- 		TableDescriptor td = dd.getTableDescriptor(constants.targetUUID);
+        TableDescriptor tabDesc = dd.getTableDescriptor(constants.targetUUID);
 		ColumnDescriptor cd;
 
 		for (int i = 0; i < size; i++)
@@ -627,15 +670,15 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			{
 				throw StandardException.newException(
 					SQLState.LANG_INVALID_AUTOGEN_COLUMN_NAME,
-					columnNames[i], td.getName());
+                    columnNames[i], tabDesc.getName());
 			}
 
-			cd = td.getColumnDescriptor(columnNames[i]);
+            cd = tabDesc.getColumnDescriptor(columnNames[i]);
 			if (!verifyAutoGenColumn(cd))
 			{
 				throw StandardException.newException(
 					SQLState.LANG_INVALID_AUTOGEN_COLUMN_NAME,
-					columnNames[i], td.getName());
+                    columnNames[i], tabDesc.getName());
 			}
 
 			columnPositions[i] = cd.getPosition();
@@ -659,9 +702,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		return ((cd != null) && cd.isAutoincrement());
 	}
 
-	/**
-	 * @see ResultSet#getAutoGeneratedKeysResultset
-	 */
+    @Override
 	public ResultSet getAutoGeneratedKeysResultset()
 	{
 		return autoGeneratedKeysResultSet;
@@ -682,8 +723,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		getSetAutoincrementValue(int columnPosition, long increment)
 		throws StandardException
 	{
-		long startValue = 0;
-                NumberDataValue dvd;
+        NumberDataValue dvd;
 		int index = columnPosition - 1;	// all our indices are 0 based.
 
 		/* As in DB2, only for single row insert: insert into t1(c1) values (..) do
@@ -706,6 +746,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			//			System.out.println("in bulk insert");
 			if (aiCache[index].isNull())
 			{
+                long startValue;
+
 				if (bulkInsertReplace)
 				{
 					startValue = cd.getAutoincStart();
@@ -720,7 +762,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				lcc.autoincrementCreateCounter(td.getSchemaName(),
 											   td.getName(),
 											   cd.getColumnName(),
-											   new Long(startValue),
+                                               Long.valueOf(startValue),
 											   increment,
 											   columnPosition);
 			
@@ -733,7 +775,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		else
 		{
 			NumberDataValue newValue;
-			TransactionController nestedTC = null, tcToUse = tc;
+            TransactionController nestedTC = null;
+            TransactionController tcToUse;
 
 			try
 			{
@@ -854,8 +897,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		throws StandardException
 	{
 		boolean setUserIdentity = constants.hasAutoincrement() && isSingleRowResultSet();
-		ExecRow	deferredRowBuffer = null;
-                long user_autoinc=0;
+        ExecRow deferredRowBuffer;
+        long user_autoinc=0;
                         
 		/* Get or re-use the row changer.
 		 */
@@ -975,8 +1018,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			}
 			else
 			{
-				// Evaluate any check constraints on the row
-				evaluateCheckConstraints();
+                // Immediate mode violations will throw, so we only ever
+                // see false here with deferred constraint mode for one or more
+                // of the constraints being checked.
+                boolean allOk = evaluateCheckConstraints();
 
 				if (fkChecker != null)
 				{
@@ -1000,7 +1045,21 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 							rowArray[i].getObject();
 					}
 				}
-				rowChanger.insertRow(row);
+
+                if (allOk) {
+                    rowChanger.insertRow(row, false);
+                } else {
+                    RowLocation offendingRow = rowChanger.insertRow(row, true);
+                    deferredChecks =
+                        DeferredConstraintsMemory.rememberCheckViolations(
+                            lcc,
+                            heapConglom,
+                            schemaName,
+                            tableName,
+                            deferredChecks,
+                            violatingCheckConstraints,
+                            offendingRow);
+                }
 			}
 
             rowCount++;
@@ -1105,8 +1164,23 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					// we have to set the source row so the check constraint
 					// sees the correct row.
 					sourceResultSet.setCurrentRow(deferredRowBuffer);
-					evaluateCheckConstraints();
-					rowChanger.insertRow(deferredRowBuffer);
+                    boolean allOk = evaluateCheckConstraints();
+
+                    if (allOk) {
+                        rowChanger.insertRow(deferredRowBuffer, false);
+                    } else {
+                        RowLocation offendingRow =
+                            rowChanger.insertRow(deferredRowBuffer, true);
+                        deferredChecks =
+                            DeferredConstraintsMemory.rememberCheckViolations(
+                                lcc,
+                                heapConglom,
+                                schemaName,
+                                tableName,
+                                deferredChecks,
+                                violatingCheckConstraints,
+                                offendingRow);
+                    }
 				}
 			} finally
 			{
@@ -1172,11 +1246,13 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	protected ExecRow getNextRowCore( NoPutResultSet source )
 		throws StandardException
 	{
-		ExecRow row = super.getNextRowCore( source );
+        ExecRow nextRow = super.getNextRowCore( source );
 
-        if ( (row != null) && constants.underMerge() ) { row = processMergeRow( source, row ); }
+        if ( (nextRow != null) && constants.underMerge() ) {
+            nextRow = processMergeRow( source, nextRow );
+        }
 
-        return row;
+        return nextRow;
 	}
 
     /**
@@ -1315,6 +1391,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			sourceResultSet.setNeedsRowLocation(true);
 		}
 
+        if (constants.hasDeferrableChecks) {
+            sourceResultSet.setHasDeferrableChecks();
+        }
+
+
 		dd = lcc.getDataDictionary();
 		td = dd.getTableDescriptor(constants.targetUUID);
 
@@ -1418,8 +1499,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             TransactionController tc, ContextManager cm, ExecRow fullTemplate)
 		throws StandardException
 	{
-		FKInfo 			fkInfo;
-
 		/*
 		** If there are no foreign keys, then nothing to worry 
 		** about.
@@ -1433,9 +1512,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			return;
 		}
 
-		for (int i = 0; i < fkInfoArray.length; i++)
+        for (FKInfo fkInfo : fkInfoArray)
 		{
-			fkInfo = fkInfoArray[i];
 
 			/* With regular bulk insert, we only need to check the
 			 * foreign keys in the table we inserted into.  We need
@@ -1476,9 +1554,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						 * #s have changed.
 						 */
 						pkConglom = (indexConversionTable.get(
-									new Long(fkInfo.refConglomNumber))).longValue();
+                            Long.valueOf(fkInfo.refConglomNumber))).longValue();
 						fkConglom = (indexConversionTable.get(
-										new Long(fkInfo.fkConglomNumbers[index]))).longValue();
+                            Long.valueOf(fkInfo.fkConglomNumbers[index]))).
+                            longValue();
 					}
 					else
 					{
@@ -1491,9 +1570,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						 * is very simple, though not very elegant.
 						 */
 						Long pkConglomLong = indexConversionTable.get(
-												new Long(fkInfo.refConglomNumber));
+                            Long.valueOf(fkInfo.refConglomNumber));
 						Long fkConglomLong = indexConversionTable.get(
-										new Long(fkInfo.fkConglomNumbers[index]));
+                            Long.valueOf(fkInfo.fkConglomNumbers[index]));
+
 						if (pkConglomLong == null)
 						{
 							pkConglom = fkInfo.refConglomNumber;
@@ -1512,7 +1592,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 						}
 					}
 					bulkValidateForeignKeysCore(
-							tc, cm, fkInfoArray[i], fkConglom, pkConglom, 
+                            tc, cm, fkInfo, fkConglom, pkConglom,
 							fkInfo.fkConstraintNames[index], fullTemplate);
 				}
 			}
@@ -1532,7 +1612,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				Long fkConglom = indexConversionTable.get(
 										new Long(fkInfo.fkConglomNumbers[0]));
 				bulkValidateForeignKeysCore(
-						tc, cm, fkInfoArray[i], fkConglom.longValue(),
+                        tc, cm, fkInfo, fkConglom.longValue(),
 						fkInfo.refConglomNumber, fkInfo.fkConstraintNames[0],
                         fullTemplate);
 			}
@@ -1655,12 +1735,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			if (fkScan != null)
 			{
 				fkScan.close();
-				fkScan = null;
 			}
 			if (refScan != null)
 			{
 				refScan.close();
-				refScan = null;
 			}
 		}
 	}
@@ -1749,7 +1827,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			boolean[] isAscending     = constants.irgs[index].isAscending();
            
 			int numColumnOrderings;
-			SortObserver sortObserver = null;
+            SortObserver sortObserver;
 
 			/* We can only reuse the wrappers when doing an
 			 * external sort if there is only 1 index.  Otherwise,
@@ -1781,8 +1859,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 numColumnOrderings =
                         indDes.isUnique() ? baseColumnPositions.length :
                         baseColumnPositions.length + 1;
-
-                String[] columnNames = getColumnNames(baseColumnPositions);
 
 				sortObserver = 
                     new UniqueIndexSortObserver(
@@ -2013,7 +2089,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             // We recreated the index, so any old deferred constraints
             // information supported by the dropped index needs to be updated
             // with the new index.
-            DeferredDuplicates.updateIndexCID(
+            DeferredConstraintsMemory.updateIndexCID(
                     lcc, constants.indexCIDS[index], newIndexCongloms[index]);
 
 			indexConversionTable.put(new Long(constants.indexCIDS[index]),
@@ -2248,9 +2324,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		throws StandardException
 	{
 		int					numIndexes = constants.irgs.length;
-		ExecIndexRow[]		indexRows = new ExecIndexRow[numIndexes];
-		ExecRow				baseRows = null;
-		ColumnOrdering[][]	ordering = new ColumnOrdering[numIndexes][];
+        ExecIndexRow[]      idxRows = new ExecIndexRow[numIndexes];
+        ExecRow             baseRows;
+        ColumnOrdering[][]  order = new ColumnOrdering[numIndexes][];
 		int					numColumns = td.getNumberOfColumns();
         collation       = new int[numIndexes][];
 
@@ -2298,14 +2374,14 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		for (int index = 0; index < numIndexes; index++)
 		{
 			// create a single index row template for each index
-			indexRows[index] = constants.irgs[index].getIndexRowTemplate();
+            idxRows[index] = constants.irgs[index].getIndexRowTemplate();
 
 			// Get an index row based on the base row
 			// (This call is only necessary here because we need to pass a 
             // template to the sorter.)
 			constants.irgs[index].getIndexRow(baseRows, 
 											  rl, 
-											  indexRows[index],
+                                              idxRows[index],
 											  bitSet);
 
 			/* For non-unique indexes, we order by all columns + the RID.
@@ -2319,7 +2395,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			int[] baseColumnPositions = constants.irgs[index].baseColumnPositions();
 			boolean[] isAscending = constants.irgs[index].isAscending();
 			int numColumnOrderings;
-			SortObserver sortObserver = null;
+            SortObserver sortObserver;
             final IndexRowGenerator indDes = cd.getIndexDescriptor();
 
             if (indDes.isUnique() || indDes.isUniqueDeferrable())
@@ -2327,8 +2403,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 numColumnOrderings =
                         indDes.isUnique() ? baseColumnPositions.length :
                         baseColumnPositions.length + 1;
-
-				String[] columnNames = getColumnNames(baseColumnPositions);
 
 				String indexOrConstraintName = cd.getConglomerateName();
                 boolean deferred = false;
@@ -2353,7 +2427,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                             uniqueDeferrable,
                             deferred,
                             indexOrConstraintName,
-                            indexRows[index],
+                            idxRows[index],
                             true,
                             td.getName());
 			}
@@ -2361,17 +2435,17 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
 				sortObserver       = new BasicSortObserver(false, false, 
-													 indexRows[index],
+                                                     idxRows[index],
 													 true);
 			}
-			ordering[index] = new ColumnOrdering[numColumnOrderings];
+            order[index] = new ColumnOrdering[numColumnOrderings];
 			for (int ii =0; ii < isAscending.length; ii++) 
 			{
-				ordering[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
+                order[index][ii] = new IndexColumnOrder(ii, isAscending[ii]);
 			}
 			if (numColumnOrderings > isAscending.length)
             {
-				ordering[index][isAscending.length] = 
+                order[index][isAscending.length] =
                     new IndexColumnOrder(isAscending.length);
             }
 
@@ -2379,8 +2453,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			sortIds[index] = 
                 tc.createSort(
                     (Properties)null, 
-                    indexRows[index].getRowArrayClone(),
-                    ordering[index],
+                    idxRows[index].getRowArrayClone(),
+                    order[index],
                     sortObserver,
                     false,			// not in order
                     rowCount,		// est rows	
@@ -2395,11 +2469,11 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		// are in the correct order. 
 		rowSources = new RowLocationRetRowSource[numIndexes];
 		// Fill in the RowSources
-		SortController[]	sorters = new SortController[numIndexes];
+        SortController[]    sorter = new SortController[numIndexes];
 		for (int index = 0; index < numIndexes; index++)
 		{
-			sorters[index] = tc.openSort(sortIds[index]);
-			sorters[index].completedInserts();
+            sorter[index] = tc.openSort(sortIds[index]);
+            sorter[index].completedInserts();
 			rowSources[index] = tc.openSortRowSource(sortIds[index]);
 		}
 
@@ -2430,7 +2504,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			/* Create the properties that language supplies when creating the
 			 * the index.  (The store doesn't preserve these.)
 			 */
-			int indexRowLength = indexRows[index].nColumns();
+            int indexRowLength = idxRows[index].nColumns();
 			properties.put("baseConglomerateId", Long.toString(newHeapConglom));
 			if (cd.getIndexDescriptor().isUnique())
 			{
@@ -2464,7 +2538,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			newIndexCongloms[index] = 
                 tc.createAndLoadConglomerate(
                     "BTREE",
-                    indexRows[index].getRowArray(),
+                    idxRows[index].getRowArray(),
                     null, //default column sort order 
                     collation[index],
                     properties,
@@ -2547,8 +2621,20 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		return columnNames;
 	}
 
+    @Override
 	public void finish() throws StandardException {
 		sourceResultSet.finish();
 		super.finish();
 	}
+
+    @Override
+    public void rememberConstraint(UUID cid) throws StandardException {
+        if (violatingCheckConstraints == null) {
+            violatingCheckConstraints = new ArrayList<UUID>();
+        }
+
+        if (!violatingCheckConstraints.contains(cid)) {
+            violatingCheckConstraints.add(cid);
+        }
+    }
 }

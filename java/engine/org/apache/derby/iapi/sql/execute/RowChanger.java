@@ -91,9 +91,11 @@ public interface RowChanger
 	  Insert a row into the table and perform associated index maintenance.
 
 	  @param baseRow the row.
+     * @param getRL return a row location of the inserted row
+     * @return row location if requested, else {@code null}.
 	  @exception StandardException		Thrown on error
 	  */
-	public void insertRow(ExecRow baseRow)
+    public RowLocation insertRow(ExecRow baseRow, boolean getRL)
 		 throws StandardException;
 		
 	/**

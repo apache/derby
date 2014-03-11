@@ -78,6 +78,7 @@ public final class InsertNode extends DMLModStatementNode
     private     ResultColumnList    targetColumnList;
     private     boolean             deferred;
 	public		ValueNode			checkConstraints;
+    public      boolean             hasDeferrableCheckConstraints;
 	public		Properties			targetProperties;
 	public		FKInfo				fkInfo;
 	protected	boolean				bulkInsert;
@@ -494,16 +495,21 @@ public final class InsertNode extends DMLModStatementNode
                 ( dataDictionary, targetTableDescriptor, sourceRCL, resultColumnList, false, null );
             
 			/* Get and bind all constraints on the table */
-			checkConstraints = bindConstraints(dataDictionary,
-                                                getOptimizerFactory(),
-												targetTableDescriptor,
-												null,
-												sourceRCL,
-												(int[]) null,
-												(FormatableBitSet) null,
-											    true);  /* we always include
-														 * triggers in core language */
-	
+            boolean[] hasDCC = new boolean[]{false /* a priori*/ };
+
+            checkConstraints = bindConstraints(
+                    dataDictionary,
+                    getOptimizerFactory(),
+                    targetTableDescriptor,
+                    null,
+                    sourceRCL,
+                    (int[]) null,
+                    (FormatableBitSet) null,
+                    true, // we always include triggers in core language
+                    hasDCC);
+
+            hasDeferrableCheckConstraints = hasDCC[0];
+
 			/* Do we need to do a deferred mode insert */
 			/* 
 		 	** Deferred if:
@@ -791,6 +797,7 @@ public final class InsertNode extends DMLModStatementNode
 				  indexNames,
 				  deferred,
 				  false,
+                  hasDeferrableCheckConstraints,
 				  targetTableDescriptor.getUUID(),
 				  lockMode,
 				  null, null, 
@@ -971,8 +978,17 @@ public final class InsertNode extends DMLModStatementNode
                 mb.push(-1);
             }
 
+            // arg 5, 6 table name
+            if (targetTableName.getSchemaName() == null) {
+                mb.pushNull("java.lang.String");
+            } else {
+                mb.push(targetTableName.getSchemaName());
+            }
+
+            mb.push(targetTableName.getTableName());
+
             mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
-                    "getInsertResultSet", ClassName.ResultSet, 4);
+                    "getInsertResultSet", ClassName.ResultSet, 6);
 		}
 		else
 		{

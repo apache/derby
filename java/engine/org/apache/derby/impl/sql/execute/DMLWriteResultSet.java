@@ -22,10 +22,10 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.io.InputStream;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
@@ -38,11 +38,12 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * For INSERT/UPDATE/DELETE impls.  Used to tag them.
  */
-abstract class DMLWriteResultSet extends NoRowsResultSetImpl 
+abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 {
 	protected WriteCursorConstantAction constantAction;
 	protected int[] baseRowReadMap;
@@ -353,5 +354,12 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 
         return row;
     }
-    
+
+    public void rememberConstraint(UUID cid) throws StandardException {
+        if (SanityManager.DEBUG) {
+            // This method should be overriden by InsertResultSet and
+            // UpdateResultSet, other shouldn't need it.
+            SanityManager.NOTREACHED();
+        }
+    }
 }

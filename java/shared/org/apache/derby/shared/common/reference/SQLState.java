@@ -744,6 +744,8 @@ public interface SQLState {
     String LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_S                    = "23507.S.1";
 	String LANG_FK_VIOLATION                                           = "23503";
 	String LANG_CHECK_CONSTRAINT_VIOLATED                              = "23513";
+    String LANG_DEFERRED_CHECK_CONSTRAINT_T                            = "23514.T.1";
+    String LANG_DEFERRED_CHECK_CONSTRAINT_S                            = "23515.S.1";
 
 	// From SQL/XML[2006] spec; there are others, but
 	// these are the ones we actually use with our

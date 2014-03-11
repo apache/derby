@@ -1231,6 +1231,18 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		return false;
 	}
 
+    public void setHasDeferrableChecks() {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
+
+    public boolean needsRowLocationForDeferredCheckConstraints()
+    {
+        return false;
+    }
+
+
 	/**
 		rowLocation is a callback for the drainer of the row source to return
 		the rowLocation of the current row, i.e, the row that is being returned
@@ -1269,6 +1281,13 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 */
 	public void rowLocation(RowLocation rl) throws StandardException
 	{ }
+
+    public void offendingRowLocation(
+            RowLocation rl, long containdId) throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 
 	/**
 	 * @see NoPutResultSet#positionScanAtRowLocation

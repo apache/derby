@@ -43,7 +43,7 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
     private final TransactionController     tc;
     private final LanguageConnectionContext lcc;
     private final long                      indexCID;
-    private BackingStoreHashtable           deferredRowsHashTable;
+    private BackingStoreHashtable           deferredDuplicates;
     /**
      * Constructs an object of UniqueWithDuplicateNullsIndexSortObserver
      * 
@@ -118,12 +118,11 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
     @Override
     public void rememberDuplicate(DataValueDescriptor[] row)
             throws StandardException {
-        deferredRowsHashTable = DeferredDuplicates.rememberDuplicate(
-                    tc,
-                    indexCID,
-                    deferredRowsHashTable,
-                    lcc,
-                    row);
+        deferredDuplicates = DeferredConstraintsMemory.rememberDuplicate(
+                lcc,
+                deferredDuplicates,
+                indexCID,
+                row);
     }
 
 }

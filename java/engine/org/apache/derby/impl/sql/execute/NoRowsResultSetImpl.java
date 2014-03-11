@@ -45,6 +45,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -674,32 +675,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
         }
     }
     
-	/**
-	  *	Run check constraints against the current row. Raise an error if
-	  * a check constraint is violated.
-	  *
-	  *	@param	checkGM			Generated code to run the check constraint.
-	  *	@param	activation		Class in which checkGM lives.
-	  *
-	  * @exception StandardException thrown on error
-	  */
-	public	static	void	evaluateCheckConstraints
-	(
-	  GeneratedMethod checkGM,
-	  Activation activation
-	)
-		throws StandardException
-	{
-		if (checkGM != null)
-		{
-			// Evaluate the expression containing the check constraints.
-			// This expression will throw an exception if there is a
-			// violation, so there is no need to check the result.
-			checkGM.invoke(activation);
-		}
-
-	}
-	  
 	/**
 	 * Does this ResultSet cause a commit or rollback.
 	 *

@@ -102,6 +102,12 @@ public class SortBufferRowSource extends Scan
 		return false;
 	}
 
+    public boolean needsRowLocationForDeferredCheckConstraints()
+    {
+        return false;
+    }
+
+
 	/**
 	 * @see org.apache.derby.iapi.store.access.RowSource#needsToClone
 	 */
@@ -116,6 +122,12 @@ public class SortBufferRowSource extends Scan
 			SanityManager.THROWASSERT("unexpected call to RowSource.rowLocation");
 	}
 
+    public void offendingRowLocation(
+            RowLocation rl, long containdId) throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 
 	/**
 		All columns are always set from a sorter

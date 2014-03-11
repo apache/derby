@@ -71,7 +71,8 @@ extends BasicNoPutResultSetImpl
 
 	// fields used when being called as a RowSource
 	private boolean needsRowLocation;
-	protected ExecRow clonedExecRow;
+    private boolean needsRowLocationForDeferredCheckConstraints;
+    protected ExecRow clonedExecRow;
 	protected TargetResultSet	targetResultSet;
 
 	/* beetle 4464. compact flags into array of key column positions that we do check/skip nulls,
@@ -214,6 +215,10 @@ extends BasicNoPutResultSetImpl
 		this.needsRowLocation = needsRowLocation;
 	}
 
+    public void setHasDeferrableChecks() {
+        this.needsRowLocationForDeferredCheckConstraints = true;
+    }
+
 	// RowSource interface
 	
 	/** 
@@ -276,7 +281,12 @@ extends BasicNoPutResultSetImpl
 		return needsRowLocation;
 	}
 
-	/**
+    public boolean needsRowLocationForDeferredCheckConstraints()
+    {
+        return needsRowLocationForDeferredCheckConstraints;
+    }
+
+    /**
 	 * @see RowLocationRetRowSource#rowLocation
 	 * @exception StandardException on error
 	 */
@@ -286,7 +296,11 @@ extends BasicNoPutResultSetImpl
 		targetResultSet.changedRow(clonedExecRow, rl);
 	}
 
+    public void offendingRowLocation(
+            RowLocation rl, long containdId) throws StandardException {
 
+        targetResultSet.offendingRowLocation(rl, containdId);
+    }
 	// class implementation
 
 	/**

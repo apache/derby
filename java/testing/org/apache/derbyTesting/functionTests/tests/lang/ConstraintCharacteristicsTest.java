@@ -57,30 +57,34 @@ import org.apache.derbyTesting.junit.XATestUtil;
 
 public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 {
-    private static final String LANG_DEFERRED_CONSTRAINTS_VIOLATION = "23506";
     private static final String LANG_DUPLICATE_KEY_CONSTRAINT = "23505";
+    private static final String LANG_DEFERRED_DUP_VIOLATION_T = "23506";
+    private static final String LANG_DEFERRED_DUP_VIOLATION_S = "23507";
+    private static final String LANG_CHECK_CONSTRAINT_VIOLATED = "23513";
+    private static final String LANG_DEFERRED_CHECK_VIOLATION_T = "23514";
+    private static final String LANG_DEFERRED_CHECK_VIOLATION_S = "23515";
     private static final String LOCK_TIMEOUT = "40XL1";
-    private static final String
-        LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS = "42X97";
-    private static final String
-        LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT = "42X86";
+    private static final String LANG_INCONSISTENT_C_CHARACTERISTICS = "42X97";
+    private static final String LANG_DROP_OR_ALTER_NON_EXISTING_C = "42X86";
     private static final String LANG_SYNTAX_ERROR = "42X01";
     private static final String NOT_IMPLEMENTED = "0A000";
     private static final String LANG_NOT_NULL_CHARACTERISTICS = "42XAN";
     private static final String LANG_OBJECT_NOT_FOUND = "42X94";
+    private static final String LANG_DB2_DUPLICATE_NAMES = "42734";
+    private static final String LANG_ADD_CHECK_CONSTRAINT_FAILED = "X0Y59";
 
-    static String expImpDataFile;          // file used to perform
+    private static String expImpDataFile;  // file used to perform
                                            // import/export
-    static String expImpDataWithNullsFile; // file used to perform
-                                           // import/export
-    static boolean exportFilesCreatedEmbedded = false;
-    static boolean exportFilesCreatedClient = false;
+    private static String expImpDataWithNullsFile; // file used to perform
+                                                   // import/export
+    private static boolean exportFilesCreatedEmbedded = false;
+    private static boolean exportFilesCreatedClient = false;
 
     // Use in memory database for speed for some tests
     private static final MemoryDbManager dbm =
             MemoryDbManager.getSharedInstance();
 
-    final static int WAIT_TIMEOUT_DURATION = 1;
+    private static final int WAIT_TIMEOUT_DURATION = 1;
 
     public ConstraintCharacteristicsTest(String name) {
         super(name);
@@ -88,8 +92,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
 
     public static Test suite() {
-        String nameRoot = ConstraintCharacteristicsTest.class.getName();
-        TestSuite suite = new TestSuite(nameRoot);
+        final String nameRoot = ConstraintCharacteristicsTest.class.getName();
+        final TestSuite suite = new TestSuite(nameRoot);
         suite.addTest(baseSuite(nameRoot + ":embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite(nameRoot + ":client")));
@@ -101,11 +105,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     // this suite holds tests that require a more optimal 
     // locks.waitTimeout setting.
-    private static Test restSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+    private static Test restSuite(final String name) {
+
+        final TestSuite suite = new TestSuite(name);
         suite.addTest(new ConstraintCharacteristicsTest(
-                "testLocking"));
-        Properties systemProperties = new Properties();
+                "testLockingForUniquePK"));
+
+        final Properties systemProperties = new Properties();
         systemProperties.setProperty(
             "derby.locks.waitTimeout", Integer.toString(WAIT_TIMEOUT_DURATION));
 
@@ -113,19 +119,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 new SystemPropertyTestSetup(suite, systemProperties, true));
     }
     
-    private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+    private static Test baseSuite(final String name) {
+        final TestSuite suite = new TestSuite(name);
 
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testSyntaxAndBinding"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testDropNotNullOnUniqueColumn"));
         suite.addTest(new ConstraintCharacteristicsTest(
-                      "testCompressTable"));
+                      "testCompressTableOKUnique"));
         suite.addTest(new ConstraintCharacteristicsTest(
-                      "testLockingWithCommit"));
+                      "testLockingForUniquePKWithCommit"));
         suite.addTest(new ConstraintCharacteristicsTest(
-                      "testLockingWithRollback"));
+                      "testLockingForUniquePKWithRollback"));
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testDatabaseMetaData"));
         suite.addTest(new ConstraintCharacteristicsTest(
@@ -147,11 +153,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testXA"));
         suite.addTest(new ConstraintCharacteristicsTest(
-                      "testManySimilarDuplicates"));
-        suite.addTest(new ConstraintCharacteristicsTest(
                       "testAlmostRemovedAllDups"));
+        suite.addTest(new ConstraintCharacteristicsTest(
+                      "testCheckConstraintsWithDeferredRows"));
+        suite.addTest(new ConstraintCharacteristicsTest(
+                     "testSeveralCheckConstraints"));
+        suite.addTest(new ConstraintCharacteristicsTest(
+                     "testManySimilarDuplicates"));
 
-        Properties systemProperties = new Properties();
+        final Properties systemProperties = new Properties();
         systemProperties.setProperty(
             "derby.locks.waitTimeout", Integer.toString(500));
 
@@ -182,9 +192,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 SupportFilesSetup.getReadWrite("t.data").getPath();
             expImpDataWithNullsFile =
                 SupportFilesSetup.getReadWrite("t_with_nulls.data").getPath();
-            Statement s = createStatement();
+            final Statement s = createStatement();
             s.executeUpdate("create table t(i int)");
-            s.executeUpdate("insert into t values 1,2,2,3");
+            s.executeUpdate("insert into t values 1,-2,-2, 3");
             s.executeUpdate("create table t_with_nulls(i int)");
             s.executeUpdate("insert into t_with_nulls values 1,null, null, 3");
             s.executeUpdate(
@@ -213,22 +223,23 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     public void testSyntaxAndBinding() throws SQLException {
-        Connection c = dbm.createDatabase("cct");
+        final Connection c = dbm.createDatabase("cct");
         c.setAutoCommit(false);
-        Statement s = c.createStatement();
+
+        final Statement s = c.createStatement();
         s.executeUpdate("create table referenced(i int primary key)");
         c.commit();
 
-        /*
-         * T A B L E    L E V E L    C O N S T R A I N T S
-         */
+        //
+        //   T A B L E    L E V E L    C O N S T R A I N T S
+        //
 
         assertTableLevelDefaultBehaviorAccepted(c, s);
         assertTableLevelNonDefaultAccepted(s);
 
-        /*
-         * A L T E R    C O N S T R A I N T    C H A R A C T E R I S T I C S
-         */
+        //
+        //   A L T E R    C O N S T R A I N T    C H A R A C T E R I S T I C S
+        //
         s.executeUpdate(
             "create table t(i int, constraint app.c primary key(i))");
 
@@ -248,12 +259,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         // Unknown constraint name
         assertStatementError(
-            LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT, s,
+            LANG_DROP_OR_ALTER_NON_EXISTING_C, s,
             "alter table t alter constraint cuckoo not enforced");
 
-        /*
-         * S E T   C O N S T R A I N T
-         */
+        //
+        //   S E T   C O N S T R A I N T
+        //
         s.executeUpdate("alter table t drop constraint c");
         s.executeUpdate("alter table t add constraint c " +
                         "    primary key(i) deferrable");
@@ -263,11 +274,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Unknown constraint name
         assertStatementError(LANG_OBJECT_NOT_FOUND, s,
                              "set constraints cuckoo deferred");
+        assertStatementError(LANG_DB2_DUPLICATE_NAMES , s,
+                "set constraints c,c deferred");
         c.rollback();
 
-        /*
-         * C O L U M N    L E V E L    C O N S T R A I N T S
-         */
+        //
+        //   C O L U M N    L E V E L    C O N S T R A I N T S
+        //
 
         assertColumnLevelDefaultBehaviorAccepted(c, s);
         assertColumnLevelNonDefaultAccepted(s);
@@ -293,7 +306,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testCreateConstraintDictionaryEncodings() throws SQLException {
-        Statement s = getConnection().createStatement();
+        final Statement s = getConnection().createStatement();
 
         for (String[] ch : defaultCharacteristics) {
             assertDictState(s, ch[0], ch[1]);
@@ -321,7 +334,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testAlterConstraintDictionaryEncodings() throws SQLException {
-        Statement s = getConnection().createStatement();
+        final Statement s = getConnection().createStatement();
 
         for (String[] ch : defaultCharacteristics) {
             s.executeUpdate(
@@ -335,7 +348,6 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         for (String[] ch : nonDefaultCharacteristics) {
             if (ch[0].startsWith(" references") ||
-                ch[0].startsWith(" check") ||
                 ch[0].contains("not enforced")) {
 
                 assertStatementError(NOT_IMPLEMENTED,
@@ -369,21 +381,22 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             return;
         }
 
-        Connection c = getConnection();
-        Statement s = c.createStatement();
+        final Connection c = getConnection();
+        final Statement s = createStatement();
 
         s.executeUpdate("create table t(i int, constraint c primary key(i))");
-        PreparedStatement ps = c.prepareStatement("insert into t values 3");
+        final PreparedStatement ps =
+            c.prepareStatement("insert into t values 3");
         ps.execute();
 
         s.executeUpdate("alter table t alter constraint c enforced ");
 
-        ContextManager contextManager =
+        final ContextManager contextManager =
                 ((EmbedConnection)c).getContextManager();
-        LanguageConnectionContext lcc =
+        final LanguageConnectionContext lcc =
                 (LanguageConnectionContext)contextManager.getContext(
                 "LanguageConnectionContext");
-        GenericPreparedStatement derbyPs =
+        final GenericPreparedStatement derbyPs =
                 (GenericPreparedStatement)lcc.getLastActivation().
                 getPreparedStatement();
 
@@ -398,15 +411,27 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             "create table t(i int, j int, constraint c unique(i)",
             "create table t(i int not null, j int, constraint c unique(i)"};
 
+    static final String[] uniqueSpec = { // corresponding to above forms
+            "primary key(i)",
+            "unique(i)",
+            "unique(i)"};
+
+    static final String[] checkForms = {
+            "create table t(i int, j int, constraint c check (i > 0)"};
+
+    static final String[] checkSpec = { // corresponding to above forms
+            "check (i > 0)"};
+
     static final String[][] initialContents = new String[][] {
             {"1", "10"},
             {"2", "20"},
             {"3", "30"}};
 
-    static final String[] uniqueSpec = { // corresponding to above forms
-            "primary key(i)",
-            "unique(i)",
-            "unique(i)"};
+    static final String[][] negatedInitialContents = new String[][] {
+            {"-1", "10"},
+            {"-2", "20"},
+            {"-3", "30"}};
+
 
     static final String[] setConstraintsForms = {
             "set constraints all",
@@ -414,24 +439,24 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
 
     public void testDatabaseMetaData() throws SQLException {
-        //
-        // Test that our index is still reported as unique even if we implement
-        // it as physically non-unique when deferrable: logically it is still a
-        // unique index.
-        Statement s = createStatement();
+
+        // Test that our constraint backing index is still reported as unique
+        // even if we implement it as physically non-unique when deferrable:
+        // logically it is still a unique index.
+        final Statement s = createStatement();
         s.executeUpdate(
             "create table t(i int not null " +
             "    constraint c primary key deferrable initially immediate)");
-        DatabaseMetaData dbmd = s.getConnection().getMetaData();
-        ResultSet rs = dbmd.getIndexInfo(null, null, "T", false, false);
+        final DatabaseMetaData dbmd = s.getConnection().getMetaData();
+        final ResultSet rs = dbmd.getIndexInfo(null, null, "T", false, false);
         rs.next();
         assertEquals("false", rs.getString("NON_UNIQUE"));
     }
 
 
 
-    public void testLocking() throws SQLException {
-        Statement s = createStatement();
+    public void testLockingForUniquePK() throws SQLException {
+        final Statement s = createStatement();
         s.executeUpdate(
             "create table t1(i int, " +
                 "constraint c1 primary key(i) not deferrable)");
@@ -459,11 +484,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         });
 
         Connection c2 = null;
+
         try {
             // Verify that another transaction has to wait
             c2 = openDefaultConnection();
             c2.setAutoCommit(false);
-            Statement s2 = c2.createStatement();
+
+            final Statement s2 = c2.createStatement();
+
             try {
                 s2.executeUpdate("insert into t1 values 4");
                 fail();
@@ -471,11 +499,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 assertSQLState(LOCK_TIMEOUT, e);
             }
         } finally {
-            if (usingDerbyNetClient()) {
+            if (c2 != null) {
                 c2.rollback();
+                c2.close();
             }
-            c2.close();
         }
+
         commit();
 
         //
@@ -514,8 +543,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             // commit, which in this case will see the timeout instead.
             c2 = openDefaultConnection();
             c2.setAutoCommit(false);
-            Statement s2 = c2.createStatement();
+
+            final Statement s2 = c2.createStatement();
             s2.executeUpdate("insert into t2 values 4");
+
             try {
                 c2.commit();
                 fail();
@@ -524,8 +555,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             }
         } finally {
             try {
-                c2.rollback();
-                c2.close();
+                if (c2 != null) {
+                    c2.rollback();
+                    c2.close();
+                }
             } catch (SQLException e) {
             }
         }
@@ -537,7 +570,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // Thread 2: insert same row (duplicate)
         c2 = openDefaultConnection();
         c2.setAutoCommit(false);
-        Statement s2 = c2.createStatement();
+        final Statement s2 = c2.createStatement();
         s2.executeUpdate("insert into t2 values 5");
 
         // Thread 1: try to commit: should not time out we are not doing
@@ -555,13 +588,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         // Insert a duplicate,
         s.executeUpdate("insert into t2 values 11,11");
+
         // next delete one of the duplicates,
-        Statement us = createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                       ResultSet.CONCUR_UPDATABLE);
+        final Statement us = createStatement(
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
         rs = us.executeQuery("select * from t2 where i=11");
         rs.next();
         rs.deleteRow();
         rs.close();
+
         // then try to commit.
         commit();
 
@@ -574,11 +610,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     public void testBasicDeferral() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
 
         for (String sCF : setConstraintsForms) {
             int idx = 0;
 
+            //
+            //   P R I M A R Y   K E Y,   U N I Q U E   C O N S T R A I N T S
+            //
             for (String ct : uniqueForms) {
                 try {
                     s.executeUpdate(
@@ -587,10 +626,15 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         "insert into t values " + rs2Values(initialContents));
                     commit();
 
+                    //
+                    //   I N S E R T   O F   D U P L I C A T E S
+                    //
+
                     // Normal duplicate insert should fail, still
                     // immediate mode
-                    assertStatementError(
-                        "23505", s, "insert into t values (2,30)");
+                    assertStatementError(LANG_DUPLICATE_KEY_CONSTRAINT,
+                                         s,
+                                         "insert into t values (2,30)");
 
                     // Now set deferred mode in one of two ways: by specifying
                     // ALL or by naming our index explicitly.
@@ -625,16 +669,20 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             {"3", "31"}});
 
                     // Try to set immediate mode, and detect violation
-                    assertStatementError("23507", s, sCF + " immediate");
+                    assertStatementError(LANG_DEFERRED_DUP_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
                     // Once more, error above should not roll back
-                    assertStatementError("23507", s, sCF + " immediate");
+                    assertStatementError(LANG_DEFERRED_DUP_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
 
                     // Now try to commit, which should lead to rollback
                     try {
                         commit();
                         fail("expected duplicates error on commit");
                     } catch (SQLException e) {
-                        assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                        assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
                     }
 
                     // Verify that contents are the same as before we did the
@@ -644,8 +692,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                     // Setting immediate now should work again:
                     s.executeUpdate(sCF + " immediate");
-                    assertStatementError(
-                        "23505", s, "insert into t values (2,30)");
+                    assertStatementError(LANG_DUPLICATE_KEY_CONSTRAINT,
+                                         s,
+                                         "insert into t values (2,30)");
 
                     // setting deferred again:
                     s.executeUpdate(sCF + " deferred");
@@ -653,11 +702,17 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     // Duplicate insert should now work
                     s.executeUpdate(
                         "insert into t values (2,19),(2,21),(3,31)");
-                    assertStatementError("23507", s, sCF + " immediate");
+                    assertStatementError(LANG_DEFERRED_DUP_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
                     rollback();
 
+                    //
+                    //   U P D A T E   G I V I N G   D U P L I C A T E S
+                    //
+
                     // Now set deferred mode in one of two ways: by specifying
-                    // ALL or by naming our index explicitly.
+                    // ALL or by naming our constraint explicitly.
                     s.executeUpdate(sCF + " deferred");
 
                     // Now test the same, but using UPDATE instead of INSERT
@@ -686,11 +741,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         commit();
                         fail("expected duplicates error on commit");
                     } catch (SQLException e) {
-                        assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                        assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
                     }
 
                     // Verify that contents are the same as before we did the
-                    // duplicate inserts
+                    // duplicate updates
                     JDBC.assertFullResultSet(
                         s.executeQuery("select * from t"), initialContents);
 
@@ -713,8 +768,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     // We can't add a constraint with immediate checking
                     // because of the existing duplicates.
                     assertStatementError(
-                        "23505", s, "alter table t add constraint c " +
-                        uniqueSpec[idx]);
+                        LANG_DUPLICATE_KEY_CONSTRAINT,
+                        s,
+                        "alter table t add constraint c " + uniqueSpec[idx]);
 
                     // But we can add a deferred constraint:
                     s.executeUpdate(
@@ -739,7 +795,187 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         commit();
                         fail("expected duplicates error on commit");
                     } catch (SQLException e) {
-                        assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                        assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
+                    }
+
+                    checkConsistencyOfBaseTableAndIndex(s);
+
+
+                } finally {
+                    idx++;
+                    try {
+                        s.executeUpdate("drop table t");
+                        commit();
+                    } catch (SQLException e) {}
+                }
+            }
+
+
+            //
+            //   C H E C K   C O N S T R A I N T S
+            //
+
+            idx = 0;
+
+            for (String ct : checkForms) {
+                try {
+                    s.executeUpdate(
+                        ct + " deferrable initially immediate)");
+                    s.executeUpdate(
+                        "insert into t values " + rs2Values(initialContents));
+                    commit();
+
+                    //
+                    //   I N S E R T   O F   V I O L A T I N G   R O W S
+                    //
+
+                    // Normal duplicate insert should fail, still
+                    // immediate mode
+                    assertStatementError(LANG_CHECK_CONSTRAINT_VIOLATED,
+                                         s,
+                                         "insert into t values (-2,30)");
+
+                    // Now set deferred mode in one of two ways: by specifying
+                    // ALL or by naming our index explicitly.
+                    s.executeUpdate(sCF + " deferred");
+
+                    // Rows violating CHECK constraint should now work
+                    s.executeUpdate(
+                        "insert into t values (-2,30),(1,31),(-3,32)");
+
+                    // Check contents
+                    JDBC.assertFullResultSet(
+                        s.executeQuery("select * from t"),
+                        new String[][] {
+                            {"1", "10"},
+                            {"2", "20"},
+                            {"3", "30"},
+                            {"-2", "30"},
+                            {"1", "31"},
+                            {"-3", "32"}});
+
+                    // Try to set immediate mode, and detect violation
+                    assertStatementError(LANG_DEFERRED_CHECK_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
+                    // Once more, error above should not roll back
+                    assertStatementError(LANG_DEFERRED_CHECK_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
+
+                    // Now try to commit, which should lead to rollback
+                    try {
+                        commit();
+                        fail("expected duplicates error on commit");
+                    } catch (SQLException e) {
+                        assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+                    }
+
+                    // Verify that contents are the same as before we did the
+                    // duplicate inserts
+                    JDBC.assertFullResultSet(
+                        s.executeQuery("select * from t"), initialContents);
+
+                    // Setting immediate now should work again:
+                    s.executeUpdate(sCF + " immediate");
+                    assertStatementError(LANG_CHECK_CONSTRAINT_VIOLATED,
+                                         s,
+                                         "insert into t values (-2,30)");
+
+                    // setting deferred again:
+                    s.executeUpdate(sCF + " deferred");
+
+                    // Insert with check violations should now work
+                    s.executeUpdate(
+                        "insert into t values (-2,19),(2,21),(-3,31)");
+                    assertStatementError(LANG_DEFERRED_CHECK_VIOLATION_S,
+                                         s,
+                                         sCF + " immediate");
+                    rollback();
+
+                    //
+                    //  U P D A T E   G I V I N G   V I O L A T I N G   R O W S
+                    //
+
+                    // Now set deferred mode in one of two ways: by specifying
+                    // ALL or by naming our constraint explicitly.
+                    s.executeUpdate(sCF + " deferred");
+
+                    // Now test the same, but using UPDATE instead of INSERT
+                    s.executeUpdate(
+                            "insert into t values (20,19),(200,21),(30,31)");
+                    s.executeUpdate("update t set i=-2 where i=20");
+                    s.executeUpdate("update t set i=-3 where i=200");
+                    s.executeUpdate("update t set i=-4 where i=30");
+
+                    // Check result
+                    JDBC.assertFullResultSet(
+                        s.executeQuery(
+                          "select * from t order by j"),
+                        new String[][] {
+                            {"1", "10"},
+                            {"-2", "19"},
+                            {"2", "20"},
+                            {"-3", "21"},
+                            {"3", "30"},
+                            {"-4", "31"}});
+
+                    // Now try to commit, which should lead to rollback
+                    try {
+                        commit();
+                        fail("expected duplicates error on commit");
+                    } catch (SQLException e) {
+                        assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+                    }
+
+                    // Verify that contents are the same as before we did the
+                    // duplicate inserts
+                    JDBC.assertFullResultSet(
+                        s.executeQuery("select * from t"), initialContents);
+
+                    JDBC.assertFullResultSet(s.executeQuery(
+                          "select * from t order by i"),
+                          initialContents);
+
+                    checkConsistencyOfBaseTableAndIndex(s);
+
+                    // Test add of a deferred constraint to an existing table
+                    s.execute("alter table t drop constraint c");
+
+                    // Insert "violating" rows: no constraint now
+                    s.executeUpdate(
+                        "insert into t values (-2,19),(2,21),(-3,31)");
+                    commit();
+
+                    // We can't add a constraint with immediate checking
+                    // because of the existing violations..
+                    assertStatementError(
+                        LANG_ADD_CHECK_CONSTRAINT_FAILED,
+                        s,
+                        "alter table t add constraint c " + checkSpec[idx]);
+
+                    // But we can add a deferred constraint:
+                    s.executeUpdate(
+                        "alter table t add constraint c " +
+                        checkSpec[idx] + " deferrable initially deferred");
+
+                    JDBC.assertFullResultSet(
+                        s.executeQuery(
+                          "select * from t order by i,j"),
+                        new String[][] {
+                            {"-3", "31"},
+                            {"-2", "19"},
+                            {"1", "10"},
+                            {"2", "20"},
+                            {"2", "21"},
+                            {"3", "30"}});
+
+                    // But since we still have violations, the commit will fail
+                    try {
+                        commit();
+                        fail("expected duplicates error on commit");
+                    } catch (SQLException e) {
+                        assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
                     }
 
                     checkConsistencyOfBaseTableAndIndex(s);
@@ -763,10 +999,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     public void testRoutines() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
 
-        // Caller has not set any constraints, but constraint is
-        // initially immediate
+        //
+        //   P R I M A R Y   K E Y,   U N I Q U E   C O N S T R A I N T S
+        //
+
+        // Caller has not explicitly done any "SET CONSTRAINTS", but
+        // constraint is initially immediate
         for (String ct : uniqueForms) {
             try {
                 s.executeUpdate(
@@ -777,9 +1017,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                 declareCalledNested(s);
                 assertStatementError(
-                        LANG_DEFERRED_CONSTRAINTS_VIOLATION,
+                        LANG_DEFERRED_DUP_VIOLATION_T,
                         s,
-                        "call calledNested()");
+                        "call calledNested(false)");
             } finally {
                 try {
                     s.executeUpdate("drop table t");
@@ -788,7 +1028,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             }
         }
 
-        // Constraint is initially deferred, but mode set to immediate
+        // Constraint is initially deferred, but mode then set to immediate
+        // before the call
         for (String setConstraintForm : setConstraintsForms) {
             for (String ct : uniqueForms) {
                 try {
@@ -800,9 +1041,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                     s.executeUpdate(setConstraintForm + " immediate");
                     declareCalledNested(s);
-                    assertStatementError(LANG_DEFERRED_CONSTRAINTS_VIOLATION,
+                    assertStatementError(LANG_DEFERRED_DUP_VIOLATION_T,
                             s,
-                            "call calledNested()");
+                            "call calledNested(false)");
                 } finally {
                     try {
                         s.executeUpdate("drop table t");
@@ -824,16 +1065,86 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         "insert into t values " + rs2Values(initialContents));
 
                 declareCalledNested(s);
-                s.executeUpdate("call calledNested()");
+                s.executeUpdate("call calledNested(false)");
             } finally {
                 rollback();
             }
         }
 
+
+        //
+        //    C H E C K   C O N S T R A I N T S
+        //
+        for (String ct : checkForms) {
+            try {
+                s.executeUpdate(
+                        ct + " deferrable initially immediate)");
+                s.executeUpdate(
+                        "insert into t values " + rs2Values(initialContents));
+                commit();
+
+                declareCalledNested(s);
+                assertStatementError(
+                        LANG_DEFERRED_CHECK_VIOLATION_T,
+                        s,
+                        "call calledNested(true)");
+            } finally {
+                try {
+                    s.executeUpdate("drop table t");
+                    commit();
+                } catch (SQLException e) {}
+            }
+        }
+
+        // Constraint is initially deferred, but mode then set to immediate
+        // before the call
+        for (String setConstraintForm : setConstraintsForms) {
+            for (String ct : checkForms) {
+                try {
+                    s.executeUpdate(
+                        ct + " deferrable initially deferred)");
+                    s.executeUpdate(
+                        "insert into t values " + rs2Values(initialContents));
+                    commit();
+
+                    s.executeUpdate(setConstraintForm + " immediate");
+                    declareCalledNested(s);
+                    assertStatementError(LANG_DEFERRED_CHECK_VIOLATION_T,
+                            s,
+                            "call calledNested(true)");
+                } finally {
+                    try {
+                        s.executeUpdate("drop table t");
+                        commit();
+                    } catch (SQLException e) {}
+                }
+            }
+        }
+
+        // Check that we don't bark if we actually introduced the duplicates
+        // in the caller session context
+        for (String ct : checkForms) {
+            try {
+                s.executeUpdate(
+                        ct + " deferrable initially deferred)");
+                s.executeUpdate(
+                        "insert into t values " + rs2Values(initialContents));
+                s.executeUpdate(
+                        "insert into t values " + rs2Values(initialContents));
+
+                declareCalledNested(s);
+                s.executeUpdate("call calledNested(true)");
+            } finally {
+                rollback();
+            }
+        }
     }
 
     public void testDeferredRowsInvalidation() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
+        //
+        //   U N I Q U E,   P R I M A R Y   K E Y   C O N S T R A I N T
+        //
         s.executeUpdate("create table t(i int, " +
                         "  constraint c primary key (i) initially deferred)");
         s.executeUpdate("insert into t values 1,2,2,3");
@@ -844,24 +1155,91 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         // any issue with the recorded information lcc#deferredHashTables
         // i.e. {index conglomerate -> duplicate rows} .
         //
-        // See LanguageConnectionContext#invalidateDeferredConstraintsData.
+        // See LanguageConnectionContext#forgetDeferredConstraintsData.
         commit();
+        s.executeUpdate("drop table t");
+        commit();
+        //
+        //   C H E C K   C O N S T R A I N T
+        //
+        s.executeUpdate("create table t(i int, " +
+                "  constraint c check (i > 0) initially deferred)");
+        s.executeUpdate("insert into t values -1,-2, -2, -3");
+
+        // drop the constraint with outstanding violations
+        s.executeUpdate("alter table t drop constraint c");
+        commit();
+
+        s.executeUpdate("drop table t");
+        s.executeUpdate("create table t(i int, " +
+                "  constraint c check (i > 0) initially deferred)");
+        s.executeUpdate("insert into t values -1, -2, -2, -3");
+
+        // drop the table itself with outstanding violations
+        s.executeUpdate("drop table t");
+        commit();
+
+        s.executeUpdate("create table t(i int, " +
+                "  constraint c check (i > 0) initially deferred)");
+        s.executeUpdate("insert into t values -1, -2, -2, -3");
+
+        // truncate the table with outstanding violations
+        s.executeUpdate("truncate table t");
+        commit();
+
+        // compress the table before commit: we can no longer rely
+        // on row locations, so we do a full table scan instead to detect
+        // any violations.
+        s.executeUpdate("insert into t values -1, -2, -2, -3");
+        s.executeUpdate("delete from t where i=-2");
+        s.executeUpdate("call syscs_util.syscs_compress_table('APP', 'T', 0)");
+        try {
+            commit();
+            fail("expected check violations at commit time");
+        } catch (SQLException e) {
+            assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+        }
+
+        s.executeUpdate("insert into t values -1, -2, -2, -3");
+        s.executeUpdate("delete from t where i=-2");
+        s.executeUpdate("call syscs_util.syscs_inplace_compress_table(" +
+                "'APP', 'T', 1, 1, 1)");
+        try {
+            commit();
+            fail("expected check violations at commit time");
+        } catch (SQLException e) {
+            assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+        }
+
         s.executeUpdate("drop table t");
         commit();
     }
 
+    /**
+     * Import uses other code paths than normal insert, so test it. Not very
+     * useful with deferred constraints, however, since the IMPORT performs an
+     * implicit commit at the end. However, the implementation goes through the
+     * motions of deferring the checking, and the actual checking happens at
+     * commit time. So, if the implicit commit is lifted in the future, the
+     * deferred constraints should work. For now, the only net effect is to
+     * delay the violation detection, so we should recommend immediate checking
+     * in conjunction with import.
+     *
+     * @throws SQLException
+     */
     public void testImport() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
 
         s.executeUpdate("create table t(i int)");
 
         try {
 
-            // Try the test cases below with both "replace" and not with
-            // the import statement:
+            // Try the test cases below with both "replace" and "append"
+            // semantics
             for (int addOrReplace = 0; addOrReplace < 2; addOrReplace++) {
-
-                // Import those data into a table a PRIMARY KEY constraint
+                //
+                //  P R I M A R Y   C O N S T R A I N T
+                //
                 s.executeUpdate("alter table t alter column i not null");
                 s.executeUpdate(
                     "alter table t " +
@@ -879,11 +1257,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             "    null, null , null, " + addOrReplace + ")");
                     fail("expected duplicates error on commit");
                 } catch (SQLException e) {
-                    assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                    assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
                 }
 
                 //
-                // Import those data into a table a UNIQUE NOT NULL constraint
+                //   U N I Q U E   N O T   N U L L   C O N S T R A I N T
                 //
                 s.executeUpdate("alter table t alter column i not null");
                 s.executeUpdate("alter table t drop constraint c");
@@ -896,18 +1274,18 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("set constraints c deferred");
 
                 try {
-                    // import and implicitly commit leads to checking
+                    // import and implicit commit leads to checking
                     s.executeUpdate(
                             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
                             "    'APP' , 'T' , '" + expImpDataFile + "'," +
                             "    null, null , null, " + addOrReplace + ")");
                     fail("expected duplicates error on commit");
                 } catch (SQLException e) {
-                    assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                    assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
                 }
 
                 //
-                // Import those data into a table a nullable UNIQUE constraint
+                //   n u l l a b l e   U N I Q U E   C O N S T R A I N T
                 //
                 s.executeUpdate("alter table t alter column i null");
                 s.executeUpdate("alter table t drop constraint c");
@@ -917,14 +1295,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 commit();
 
                 try {
-                    // import and implicitly commit leads to checking
+                    // import and implicit commit leads to checking
                     s.executeUpdate(
                             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
                             "    'APP' , 'T' , '" + expImpDataFile + "'," +
                             "    null, null , null, " + addOrReplace + ")");
                     fail("expected duplicates error on commit");
                 } catch (SQLException e) {
-                    assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+                    assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
                 }
 
                 // Import OK data with multiple NULLs should still work with
@@ -936,6 +1314,28 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         "    null, null , null, " + addOrReplace + ")");
                 s.executeUpdate("alter table t drop constraint c");
                 s.executeUpdate("truncate table t");
+                commit();
+
+                //
+                //   C H E C K   C O N S T R A I N T
+                //
+                s.executeUpdate(
+                    "alter table t " +
+                    "add constraint c check (i > 0) initially deferred");
+
+                try {
+                    // import and implicit commit leads to checking
+                    s.executeUpdate(
+                            "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
+                            "    'APP' , 'T' , '" + expImpDataFile + "'," +
+                            "    null, null , null, " + addOrReplace + ")");
+                    fail("expected check violations error on commit");
+                } catch (SQLException e) {
+                    assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+                }
+
+                s.executeUpdate("truncate table t");
+                commit();
             }
         } finally {
             try {
@@ -952,7 +1352,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     // clause was dropped, the test used to drop and recreate the index to
     // be non-unique was incomplete in the deferrable case.
     public void testDropNotNullOnUniqueColumn() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
 
         s.executeUpdate("create table constraintest (" +
                 "val1 varchar (20) not null, " +
@@ -972,7 +1372,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             assertSQLState(LANG_DUPLICATE_KEY_CONSTRAINT, e);
         }
 
-        PreparedStatement ps = prepareStatement(
+        final PreparedStatement ps = prepareStatement(
                 "insert into constraintest(val1) values (?)");
         ps.setString(1, null);
         ps.executeUpdate();
@@ -982,7 +1382,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
 
     public void testDerby6374() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
 
         s.executeUpdate("create table t(i int)");
 
@@ -1018,84 +1418,98 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     public void testXA() throws SQLException, XAException {
-        XADataSource xads = J2EEDataSource.getXADataSource();
+        final XADataSource xads = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
 
-        XAConnection xaconn = xads.getXAConnection();
+        final int UNIQUE_PK = 0; // loop iteration 0
+        final int CHECK = 1;     // loop iteration 1
 
-        try {
-            XAResource xar = xaconn.getXAResource();
-            Connection conn = xaconn.getConnection();
-            conn.setAutoCommit(false);
-            Statement s = conn.createStatement();
+        final String[] expectedError = {
+            LANG_DEFERRED_DUP_VIOLATION_T,
+            LANG_DEFERRED_CHECK_VIOLATION_T};
 
-            //
-            // Do XA rollback when we have a violation; expect normal
-            // operation.
-            //
-            Xid xid = doXAWork(s, xar);
-            xar.rollback(xid);
-            assertXidRolledBack(xar, xid);
-
-            //
-            // Do an XA prepare when we have a violation; expect exception
-            // and rollback.
-            //
-            xid = doXAWork(s, xar);
+        for (int i = UNIQUE_PK; i <= CHECK; i++) {
+            final XAConnection xaconn = xads.getXAConnection();
 
             try {
-                xar.prepare(xid);
-                fail("Expected XA prepare to fail due to constraint violation");
-            } catch (XAException xe) {
-                assertEquals(xe.errorCode, XAException.XA_RBINTEGRITY);
+                final XAResource xar = xaconn.getXAResource();
+                final Connection conn = xaconn.getConnection();
+                conn.setAutoCommit(false);
 
-                if (!usingDerbyNetClient()) {
-                    Throwable t = xe.getCause();
-                    assertTrue(t != null && t instanceof SQLException);
-                    assertSQLState(
-                            LANG_DEFERRED_CONSTRAINTS_VIOLATION,
-                            (SQLException)t);
+                final Statement s = conn.createStatement();
+
+                //
+                // Do XA rollback when we have a violation; expect normal
+                // operation.
+                //
+                Xid xid = (i == UNIQUE_PK) ?
+                        doXAWorkUniquePK(s, xar) :
+                        doXAWorkCheck(s, xar);
+
+                xar.rollback(xid);
+                assertXidRolledBack(xar, xid);
+
+                //
+                // Do an XA prepare when we have a violation; expect exception
+                // and rollback.
+                //
+                xid = (i == UNIQUE_PK) ?
+                        doXAWorkUniquePK(s, xar) :
+                        doXAWorkCheck(s, xar);
+
+                try {
+                    xar.prepare(xid);
+                    fail("Expected XA prepare to fail due to " +
+                         "constraint violation");
+                } catch (XAException xe) {
+                    assertEquals(XAException.XA_RBINTEGRITY, xe.errorCode);
+
+                    if (!usingDerbyNetClient()) {
+                        Throwable t = xe.getCause();
+                        assertTrue(t != null && t instanceof SQLException);
+                        assertSQLState(expectedError[i], (SQLException)t);
+                    }
+
+                    assertXidRolledBack(xar, xid);
                 }
 
-                assertXidRolledBack(xar, xid);
-            }
+                //
+                // Do XA commit (1PC, no prepare) when we have a violation;
+                // expect exception and rollback.
+                //
+                xid = (i == UNIQUE_PK) ?
+                        doXAWorkUniquePK(s, xar) :
+                        doXAWorkCheck(s, xar);
 
-            //
-            // Do XA commit (1PC, no prepare) when we have a violation;
-            // expect exception and rollback.
-            //
-            xid = doXAWork(s, xar);
+                try {
+                    xar.commit(xid, true);
+                    fail("Expected XA commit to fail due to " +
+                         "constraint violation");
+                } catch (XAException xe) {
+                    assertEquals(XAException.XA_RBINTEGRITY, xe.errorCode);
 
-            try {
-                xar.commit(xid, true);
-                fail("Expected XA commit to fail due to constraint violation");
-            } catch (XAException xe) {
-                assertEquals(xe.errorCode, XAException.XA_RBINTEGRITY);
+                    if (!usingDerbyNetClient()) {
+                        Throwable t = xe.getCause();
+                        assertTrue(t != null && t instanceof SQLException);
+                        assertSQLState(expectedError[i], (SQLException)t);
+                    }
 
-                if (!usingDerbyNetClient()) {
-                    Throwable t = xe.getCause();
-                    assertTrue(t != null && t instanceof SQLException);
-                    assertSQLState(
-                            LANG_DEFERRED_CONSTRAINTS_VIOLATION,
-                            (SQLException)t);
+                    assertXidRolledBack(xar, xid);
                 }
 
-                assertXidRolledBack(xar, xid);
+            } finally {
+                if (usingDerbyNetClient()) {
+                    xaconn.getConnection().rollback();
+                }
+                xaconn.close();
             }
-
-        } finally {
-            if (usingDerbyNetClient()) {
-                xaconn.getConnection().rollback();
-            }
-            xaconn.close();
         }
     }
 
     // Exposed a bug when running regression suites with default
     // deferrable: compress recreates the index.
-    public void testCompressTable() throws SQLException {
-        Connection con = getConnection();
-        Statement stmt = con.createStatement();
+    public void testCompressTableOKUnique() throws SQLException {
+        final Statement stmt = createStatement();
         stmt.executeUpdate(
                 "create table table1(" +
                 "name1 int unique deferrable initially immediate, " +
@@ -1110,19 +1524,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             // The following should run into problem because of constraint
             // on name1
             assertStatementError(
-                "23505", stmt,
+                LANG_DUPLICATE_KEY_CONSTRAINT, stmt,
                 "insert into table1 values(1,22,222)");
 
             // The following should run into problem because of constraint
             // on name2
             assertStatementError(
-                "23505", stmt,
+                LANG_DUPLICATE_KEY_CONSTRAINT, stmt,
                 "insert into table1 values(3,11,333)");
 
             // The following should run into problem because of constraint
             // on name3
             assertStatementError(
-                "23505", stmt,
+                LANG_DUPLICATE_KEY_CONSTRAINT, stmt,
                 "insert into table1 values(4,44,111)");
 
         } finally {
@@ -1131,7 +1545,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    final static long SIZE = (1024L * 1024L * 10) / 256;
+    final static long NO_OF_INSERTED_ROWS = (1024L * 1024L * 10) / 256;
     public void testManySimilarDuplicates() throws SQLException {
         if (usingDerbyNetClient()) {
             // skip, too heavy fixture to do twice... we use
@@ -1139,41 +1553,44 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             return;
         }
 
-        Connection c = dbm.createDatabase("cct");
+        final Connection c = dbm.createDatabase("cct");
         c.setAutoCommit(false);
 
-        Statement s = c.createStatement();
+        final Statement s = c.createStatement();
         try {
             s.executeUpdate(
                 "create table t (i varchar(256), " +
-                    "constraint c primary key(i) initially deferred)");
-            PreparedStatement ps = c.prepareStatement("insert into t values ?");
+                "    constraint c primary key(i) initially deferred)");
+
+            final PreparedStatement ps =
+                c.prepareStatement("insert into t values ?");
+
             char[] value = new char[256];
             Arrays.fill(value, 'a');
             ps.setString(1, String.valueOf(value));
-            // 10 MiB duplicates (have tried 1024 though, but takes too long
-            // in regression test
-            for (long l=0; l < SIZE; l++) {
+
+            for (long l=0; l < NO_OF_INSERTED_ROWS; l++) {
                 ps.executeUpdate();
             }
             c.commit();
         } catch (SQLException e) {
-            assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+            assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
             s.executeUpdate("call syscs_util.syscs_checkpoint_database()");
         }
     }
 
     /**
      * Remove all duplicates except the last
+     * @throws java.sql.SQLException
      */
     public void testAlmostRemovedAllDups() throws SQLException {
-        Statement s = createStatement();
+        final Statement s = createStatement();
         s.executeUpdate(
             "create table t(i int, j int, " +
             "    constraint c primary key (i) initially deferred)");
 
         try {
-            PreparedStatement ps = prepareStatement(
+            final PreparedStatement ps = prepareStatement(
                 "insert into t values (?,?)");
 
             for (int i=0; i < 10; i++) {
@@ -1207,25 +1624,23 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     {"9","9"}});
             commit();
         } catch (SQLException e) {
-            assertSQLState(LANG_DEFERRED_CONSTRAINTS_VIOLATION, e);
+            assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
         } finally {
             try {
                 s.executeUpdate("drop table t");
                 commit();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            } catch (SQLException e) {}
         }
     }
 
-    private static void setupTab1(String db) throws SQLException {
-        Connection c = dbm.getConnection(db);
-        Statement stmt = c.createStatement();
+    private static void setupTab1(final String db) throws SQLException {
+        final Connection c = dbm.getConnection(db);
+        final Statement stmt = c.createStatement();
         stmt.execute(
                 "create table tab1 (i integer)");
         stmt.executeUpdate(
                 "alter table tab1 add constraint con1 unique (i) deferrable");
-        PreparedStatement ps = c.prepareStatement("insert into tab1 " +
+        final PreparedStatement ps = c.prepareStatement("insert into tab1 " +
                 "values (?)");
 
         for (int i = 0; i < 10; i++) {
@@ -1239,9 +1654,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    private static void dropTab1(String db) throws SQLException {
-        Connection c = dbm.getConnection(db);
-        Statement stmt = c.createStatement();
+    private static void dropTab1(final String db) throws SQLException {
+        final Connection c = dbm.getConnection(db);
+        final Statement stmt = c.createStatement();
+
         try {
             stmt.execute("drop table tab1");
             c.commit();
@@ -1269,8 +1685,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * this test since the 2 seconds wait makes it work in the normal
      * case (the lock would be released), but in the no-wait scan, we
      * saw a the lock time-out error.
+     * @throws java.lang.Exception
      */
-    public void testLockingWithCommit () throws Exception {
+    public void testLockingForUniquePKWithCommit () throws Exception {
         final String db = "cct";
         dbm.createDatabase(db).close();
         setupTab1(db);
@@ -1293,9 +1710,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * Test inserting a duplicate record while original is deleted in
      * a transaction and later rolled back.
      * <p/>
-     * See also comment for {@link #testLockingWithCommit() }.
+     * See also comment for {@link #testLockingForUniquePKWithCommit() }.
+     *
+     * @throws java.lang.Exception
      */
-    public void testLockingWithRollback () throws Exception {
+    public void testLockingForUniquePKWithRollback () throws Exception {
         final String db = "cct";
         dbm.createDatabase(db).close();
         setupTab1(db);
@@ -1314,6 +1733,173 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         }
     }
 
+
+    /**
+     * A bit of white box testing to cover different code paths. SOmetimes, on
+     * INSERT and UPDATE, the actual writing of the rows is deferred, e.g.
+     * due to a "self" select, or due to the presence of triggers.
+     *
+     * @throws SQLException
+     */
+    public void testCheckConstraintsWithDeferredRows () throws
+            SQLException {
+
+        final Statement s = createStatement();
+
+        try {
+            s.executeUpdate(
+                "create table tab1 (c1 int, " +
+                "constraint c check (c1 > 0) deferrable initially deferred)");
+            commit();
+
+            //
+            // I N S E R T,   D E F E R R E D   P R O C E S S I N G
+            //
+
+            // INSERT from self causes the violation
+            s.executeUpdate("insert into tab1 values (4)");
+            s.executeUpdate("insert into tab1 values (3)");
+            s.executeUpdate("insert into tab1 select c1-3 from tab1");
+            try {
+                commit();
+                fail("expected " + LANG_DEFERRED_CHECK_VIOLATION_T +
+                     " on commit");
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+            }
+
+            //
+            // U P D A T E,   D E F E R R E D   P R O C E S S I N G
+            //
+
+            // correlated query to force deferred update processing:
+            s.executeUpdate("insert into tab1 values (2)");
+            s.executeUpdate("update tab1 as grr set c1=-1 where c1 = 2 and " +
+                    "((select max(c1) from tab1 where grr.c1 > 0) > 0)");
+
+            try {
+                commit();
+                fail("expected " + LANG_DEFERRED_CHECK_VIOLATION_T +
+                     " on commit");
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+            }
+
+            // Correlated query to force deferred update processing but with
+            // trigger which causes another code path.
+            s.executeUpdate("insert into tab1 values (2)");
+            s.executeUpdate("create table trigtab(i int)");
+            s.executeUpdate("create trigger mytrigger " +
+                    "after update on tab1 insert into trigtab values 1");
+            s.executeUpdate("update tab1 as grr set c1=-1 where c1 = 2 and " +
+                    "((select max(c1) from tab1 where grr.c1 > 0) > 0)");
+
+            try {
+                commit();
+                fail("expected " + LANG_DEFERRED_CHECK_VIOLATION_T +
+                     " on commit");
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+            }
+        } finally {
+            // clean up
+            try {
+                s.executeUpdate("drop table tab1");
+            } catch (SQLException e) {}
+
+            try {
+                s.executeUpdate("drop table trigtab");
+            } catch (SQLException e) {}
+
+            commit();
+        }
+    }
+
+    final static String DID = "deferrable initially deferred";
+    /**
+     * We can have several constraints broken on one row write,
+     * test is we register all correctly
+     *
+     * @throws SQLException
+     */
+    public void testSeveralCheckConstraints () throws SQLException {
+        final Statement s = createStatement();
+
+        try {
+            s.executeUpdate(
+                "create table t(" +
+                "i int, constraint ci check (i > 0) " + DID + ", " +
+                "j int, constraint cj check (j > 0) " + DID + ", " +
+                "k int, constraint ck check (k > 0) " + DID + ")");
+            commit();
+
+            final String[] setStrings = {
+                "j = -j, k = -k",
+                "i = -i, k = -k",
+                "i = -i, j = -j"};
+
+            final String[] makeImmediate = {"ci", "cj", "ck"};
+
+            // All constraints are broken, make all except one good and
+            // check that the one still barfs when made immediate.
+            for (int i = 0; i < 3; i++) {
+                s.executeUpdate("insert into t values (-1, -2, -3)");
+                s.executeUpdate("update t set " + setStrings[i]);
+
+                try {
+                    // We force checking of only the column which is still
+                    // broken
+                    s.executeUpdate("set constraints " + makeImmediate[i] +
+                                    " immediate");
+                    fail("expected violation: " + i);
+                } catch (SQLException e) {
+                    assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_S, e);
+                    assertTrue(e.getMessage().contains(
+                                   makeImmediate[i].toUpperCase()));
+                }
+                rollback();
+            }
+
+            // Check that we accumulate the set of broken constraints
+            // when many are violated on separate occasions
+            s.executeUpdate("insert into t values (-1,  2,  3)");
+            s.executeUpdate("insert into t values ( 1, -2,  3)");
+            s.executeUpdate("insert into t values ( 1,  2, -3)");
+
+            for (int i = 0; i < 3; i++) {
+                try {
+                    s.executeUpdate("set constraints " + makeImmediate[i] +
+                                    " immediate");
+                    fail("expected violation: " + i);
+                } catch (SQLException e) {
+                    assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_S, e);
+                    assertTrue(e.getMessage().contains(
+                                   makeImmediate[i].toUpperCase()));
+                }
+            }
+
+            rollback();
+
+            // Violations on the same the same row many times
+            s.executeUpdate("insert into t values (-1,  2,  3)");
+            s.executeUpdate("update t set i=-1");
+            s.executeUpdate("update t set i=-1");
+            try {
+                commit();
+                fail("expected check violation");
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+            }
+
+
+        } finally {
+            try {
+                s.executeUpdate("drop table t");
+                commit();
+            } catch(SQLException e) {}
+        }
+    }
+
     /**
      * Deletes a record in a transaction and tries to insert the same
      * from a different transaction. Once second transaction goes on wait
@@ -1327,32 +1913,36 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      *
      * (Lifted from UniqueConstraintMultiThrededTest to test with deferrable
      * constraint.)
+     *
+     * @throws java.lang.Exception
      */
     private static void executeThreads (
-        String db,
-        int isolation1,
-        int isolation2,
-        boolean commit) throws Exception {
+        final String db,
+        final int isolation1,
+        final int isolation2,
+        final boolean commit) throws Exception {
 
-        Connection con1 = dbm.getConnection(db);
+        final Connection con1 = dbm.getConnection(db);
         con1.setTransactionIsolation(isolation1);
-        Connection con2 = dbm.getConnection(db);
+        final Connection con2 = dbm.getConnection(db);
 
         try {
             con2.setTransactionIsolation(isolation2);
-            DBOperations dbo1 = new DBOperations (con1, 5);
-            DBOperations dbo2 = new DBOperations (con2, 5);
+            final DBOperations dbo1 = new DBOperations (con1, 5);
+            final DBOperations dbo2 = new DBOperations (con2, 5);
             dbo1.delete();
-            Thread t = new Thread (dbo2);
+            final Thread t = new Thread (dbo2);
             t.start();
 
-            t.sleep((WAIT_TIMEOUT_DURATION * 1000) / 2 );
+            Thread.sleep((WAIT_TIMEOUT_DURATION * 1000) / 2 );
 
             if (commit) {
                 dbo1.rollback();
                 t.join();
-                assertSQLState("isolation levels: " + isolation1
-                        + " " + isolation2, "23505", dbo2.getException());
+                assertSQLState(
+                    "isolation levels: " + isolation1 + " " + isolation2,
+                    LANG_DUPLICATE_KEY_CONSTRAINT,
+                    dbo2.getException());
             } else {
                 dbo1.commit();
                 t.join();
@@ -1375,9 +1965,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    private Xid doXAWork(Statement s, XAResource xar)
+    private Xid doXAWorkUniquePK(final Statement s, final XAResource xar)
             throws SQLException, XAException {
-        Xid xid = XATestUtil.getXid(1,05,32);
+        final Xid xid = XATestUtil.getXid(1,05,32);
         // Start work on a transaction branch
         xar.start(xid, XAResource.TMNOFLAGS);
 
@@ -1393,7 +1983,25 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         return xid;
     }
 
-    private void assertXidRolledBack(XAResource xar, Xid xid) {
+    private Xid doXAWorkCheck(final Statement s, final XAResource xar)
+            throws SQLException, XAException {
+        final Xid xid = XATestUtil.getXid(1,05,32);
+        // Start work on a transaction branch
+        xar.start(xid, XAResource.TMNOFLAGS);
+
+        // Create the table and insert some records which violate a deferred
+        // constraint into it.
+        s.executeUpdate(
+            "create table derby532xa(i int, " +
+            "    constraint derby532xa_c check(i > 0) initially deferred)");
+        s.executeUpdate("insert into derby532xa values -1, 1,-2");
+
+        // End work on a transaction branch
+        xar.end(xid, XAResource.TMSUCCESS);
+        return xid;
+    }
+
+    private void assertXidRolledBack(final XAResource xar, final Xid xid) {
         try {
             xar.rollback(xid);
             fail("expected the transaction to be unknown");
@@ -1405,9 +2013,13 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     /**
      * Format rows to single string in syntax suitable for VALUES statement:
      * "{@code (v1,v2,..,vn), (v1,v2,..,vn),....}"
+     *
+     * @param rs result set strings
+     * @return  the formatted string
      */
-    private static String rs2Values(String[][] rs) {
-        StringBuilder sb = new StringBuilder();
+    private static String rs2Values(final String[][] rs) {
+        final StringBuilder sb = new StringBuilder();
+
         for (String[] row : rs) {
             sb.append('(');
             for (String v : row) {
@@ -1485,7 +2097,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     private final static String[] illegalAlterCharacteristics;
 
     static {
-        List<String> characteristics = new ArrayList<String>();
+        final List<String> characteristics = new ArrayList<String>();
         characteristics.addAll(Arrays.asList(defaultCharacteristics[0]));
         characteristics.addAll(Arrays.asList(nonDefaultCharacteristics[0]));
         characteristics.addAll(Arrays.asList(illegalCharacteristics));
@@ -1518,13 +2130,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertTableLevelNonDefaultAccepted(
-            Statement s) throws SQLException {
+            final Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
                 // Only primary key and unique implemented
                 if (ct.contains("references") ||
-                    ct.contains("check") ||
                     ch[0].contains("not enforced")) {
 
                     assertStatementError(NOT_IMPLEMENTED,
@@ -1548,13 +2159,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertColumnLevelNonDefaultAccepted(
-            Statement s) throws SQLException {
+            final Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
             for (String[] ch : nonDefaultCharacteristics) {
                 // Only primary key and unique implemented
                 if (ct.startsWith(" references") ||
-                    ct.startsWith(" check") ||
                     ch[0].contains("not enforced")) {
 
                     assertStatementError(NOT_IMPLEMENTED,
@@ -1580,8 +2190,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertTableLevelDefaultBehaviorAccepted (
-            Connection c,
-            Statement s) throws SQLException {
+            final Connection c,
+            final Statement s) throws SQLException {
 
         for (String ct : tableConstraintTypes) {
             for (String[] ch : defaultCharacteristics) {
@@ -1602,8 +2212,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private static void assertColumnLevelDefaultBehaviorAccepted (
-            Connection c,
-            Statement s) throws SQLException {
+            final Connection c,
+            final Statement s) throws SQLException {
 
         for (String ct : columnConstraintTypes) {
             for (String ch[] : defaultCharacteristics) {
@@ -1619,42 +2229,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * Check that the dictionary state resulting from {@code characteristics}
      * equals {@code}.
      *
-     * @param characteristics  A table level constraint characteristics string
-     * @param code             Character encoding for characteristics
-     *
-     * @throws SQLException
-     */
-    private void assertFailTillFeatureImplemened(
-            Statement s,
-            String characteristics,
-            char code) throws SQLException {
-
-        for (String ct: tableConstraintTypes) {
-            s.executeUpdate("alter table alter constraint c " + ct + " " +
-                    characteristics + ")");
-
-            JDBC.assertFullResultSet(
-                s.executeQuery("select state from sys.sysconstraints " +
-                               "    where constraintname = 'C'"),
-                new String[][]{{String.valueOf(code)}});
-
-            rollback();
-        }
-    }
-
-    /**
-     * Check that the dictionary state resulting from {@code characteristics}
-     * equals {@code}.
-     *
+     * @param s                Statement to use
      * @param characteristics  A table level constraint characteristics string
      * @param code             Character encoding for characteristics
      *
      * @throws SQLException
      */
     private void assertDictState(
-            Statement s,
-            String characteristics,
-            String code) throws SQLException {
+            final Statement s,
+            final String characteristics,
+            final String code) throws SQLException {
 
         for (String ct: tableConstraintTypes) {
             try {
@@ -1674,8 +2258,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 }
             } catch (SQLException e) {
                 if (characteristics.contains("not enforced") ||
-                    ct.contains("references") ||
-                    ct.contains("check")) {
+                    ct.contains("references") ) {
                     assertSQLState(NOT_IMPLEMENTED, e);
                 } else {
                     throw e;
@@ -1694,11 +2277,11 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws SQLException
      */
     private void assertAlterDictState(
-            Statement s,
-            String enforcement) throws SQLException {
+            final Statement s,
+            final String enforcement) throws SQLException {
 
-        String oldState = getOldState(s);
-        String newState = computeNewState(oldState, enforcement);
+        final String oldState = getOldState(s);
+        final String newState = computeNewState(oldState, enforcement);
 
         if (!enforcement.contains("not enforced")) {
             s.executeUpdate("alter table t alter constraint c " +
@@ -1718,8 +2301,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         }
     }
 
-    private String getOldState(Statement s) throws SQLException {
-        ResultSet rs = s.executeQuery(
+    private String getOldState(final Statement s) throws SQLException {
+        final ResultSet rs = s.executeQuery(
                 "select state from sys.sysconstraints " +
                 "    where constraintname = 'C'");
         try {
@@ -1737,8 +2320,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     private void assertCreateInconsistentCharacteristics(
-            Statement s,
-            String characteristics) throws SQLException {
+            final Statement s,
+            final String characteristics) throws SQLException {
 
         for (String ct: tableConstraintTypes) {
             try {
@@ -1748,14 +2331,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 fail("wrong characteristics unexpectedly passed muster");
                 rollback();
             } catch (SQLException e) {
-                assertSQLState(LANG_INCONSISTENT_CONSTRAINT_CHARACTERISTICS, e);
+                assertSQLState(LANG_INCONSISTENT_C_CHARACTERISTICS, e);
             }
         }
     }
 
     private void assertAlterInconsistentCharacteristics(
-            Statement s,
-            String characteristics) throws SQLException {
+            final Statement s,
+            final String characteristics) throws SQLException {
 
         try {
             s.executeUpdate("alter table t alter constraint c " +
@@ -1768,9 +2351,9 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
     private static void dumpFullResultSet(
-        ResultSet rs) throws SQLException
-    {
-        ResultSetMetaData rsmd = rs.getMetaData();
+        final ResultSet rs) throws SQLException {
+
+        final ResultSetMetaData rsmd = rs.getMetaData();
 
         while (rs.next()) {
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
@@ -1783,23 +2366,27 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    private void declareCalledNested(Statement s) throws SQLException {
+    private void declareCalledNested(final Statement s) throws SQLException {
         s.executeUpdate(
-            "create procedure calledNested()" +
+            "create procedure calledNested(isCheckConstraint boolean)" +
             "  language java parameter style java" +
             "  external name '" +
             this.getClass().getName() +
             ".calledNested' modifies sql data");
     }
 
-    public static void calledNested()
+    public static void calledNested(final boolean isCheckConstraint)
             throws SQLException
     {
-        Connection c = DriverManager.getConnection("jdbc:default:connection");
-        Statement cStmt = c.createStatement();
+        final Connection c =
+            DriverManager.getConnection("jdbc:default:connection");
+        final Statement cStmt = c.createStatement();
+
         cStmt.executeUpdate("set constraints c deferred");
         cStmt.executeUpdate("insert into t values " +
-                            rs2Values(initialContents));
+                rs2Values(isCheckConstraint ?
+                        negatedInitialContents :
+                        initialContents));
         c.close();
     }
 }

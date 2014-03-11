@@ -89,6 +89,12 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 	 */
 	private boolean getTableNumberHere;
 
+    /**
+     * Used with {@code validatingBaseTableCID} to validating deferred check
+     * constraints.
+     */
+    private boolean validatingCheckConstraints = false;
+    private long validatingBaseTableCID;
 	/**
      * Constructor for a ProjectRestrictNode.
 	 *
@@ -698,7 +704,10 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 			(trulyTheBestAccessPath.getJoinStrategy() != null) &&
 			trulyTheBestAccessPath.getJoinStrategy().isHashJoin();
 
-		if ((restrictionList != null) && !alreadyPushed && !hashJoinWithThisPRN)
+        if ((restrictionList != null) &&
+            !alreadyPushed &&
+            !hashJoinWithThisPRN &&
+            !validatingCheckConstraints)
 		{
 			restrictionList.pushUsefulPredicates((Optimizable) childResult);
 		}
@@ -1577,11 +1586,13 @@ class ProjectRestrictNode extends SingleChildResultSetNode
         mb.push(cloneMapItem);
 		mb.push(getResultColumns().reusableResult());
 		mb.push(doesProjection);
+        mb.push(validatingCheckConstraints);
+        mb.push(validatingBaseTableCID);
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",
-                    ClassName.NoPutResultSet, 11);
+                    ClassName.NoPutResultSet, 13);
 	}
 
 	/**
@@ -1884,5 +1895,10 @@ class ProjectRestrictNode extends SingleChildResultSetNode
     void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         childResult.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
+    }
+
+    void setValidatingCheckConstraints(long baseTableCID) {
+        validatingCheckConstraints = true;
+        validatingBaseTableCID = baseTableCID;
     }
 }

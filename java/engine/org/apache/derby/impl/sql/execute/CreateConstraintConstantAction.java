@@ -282,7 +282,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			indexId = conglomDesc.getUUID();
 		}
 
-		UUID constraintId = uuidFactory.createUUID();
+        UUID constrId=  uuidFactory.createUUID();
 
         boolean[] defaults = new boolean[]{
             ConstraintDefinitionNode.DEFERRABLE_DEFAULT,
@@ -296,7 +296,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                                 "DEFERRED CONSTRAINTS");
 
                 if (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT ||
-                    constraintType == DataDictionary.CHECK_CONSTRAINT ||
                     constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
                     !characteristics[2] /* not enforced */) {
 
@@ -322,7 +321,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
-								constraintId, 
+                                constrId,
 								indexId, 
 								sd,
                                 characteristics[2],
@@ -337,7 +336,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
-								constraintId, 
+                                constrId,
 								indexId, 
 								sd,
                                 characteristics[2],
@@ -351,7 +350,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 								td, constraintName,
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
-								constraintId, 
+                                constrId,
 								constraintText, 
 								new ReferencedColumnsDescriptorImpl(genColumnPositions(td, false)), //int[],
 								sd,
@@ -372,7 +371,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                                 characteristics[0], //deferable,
                                 characteristics[1], //initiallyDeferred,
 								genColumnPositions(td, false), //int[],
-								constraintId,
+                                constrId,
 								indexId,
 								sd,
 								referencedConstraint,
@@ -470,6 +469,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 						getTableDescriptor(),
 				DependencyManager.CREATE_CONSTRAINT, lcc);
 		}
+
+        this.constraintId = constrId;
 	}
 	
 	/**
@@ -481,6 +482,11 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	{ 
 		return (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT);
 	}
+
+
+    boolean isInitiallyDeferred() {
+        return characteristics[1];
+    }
 
 	/**
 	 * Generate an array of column positions for the column list in

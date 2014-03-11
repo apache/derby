@@ -365,9 +365,7 @@ final class XATransactionState extends ContextImpl {
         try {
             retVal = conn.xa_prepare();
         } catch (SQLException e) {
-            if (e.getSQLState().equals(
-                  ExceptionUtil.getSQLStateFromIdentifier(
-                    SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T))) {
+            if (ExceptionUtil.isDeferredConstraintViolation(e.getSQLState())) {
                 // we are rolling back
                 xa_finalize();
             }

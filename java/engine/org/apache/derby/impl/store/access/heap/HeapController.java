@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.store.access.heap;
 
+import java.util.List;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -50,6 +52,7 @@ import org.apache.derby.impl.store.access.conglomerate.GenericConglomerateContro
 import org.apache.derby.impl.store.access.conglomerate.RowPosition;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory;
 
 /**
 
@@ -382,7 +385,8 @@ public class HeapController
 		RecordHandle rh;
 		HeapRowLocation rowlocation;
 
-		if (callbackWithRowLocation)
+        if (callbackWithRowLocation ||
+            rowSource.needsRowLocationForDeferredCheckConstraints())
 			rowlocation = new HeapRowLocation();
 		else
 			rowlocation = null;
@@ -449,6 +453,12 @@ public class HeapController
 					rowlocation.setFrom(rh);
 					rowSource.rowLocation(rowlocation);
 				}
+
+                if (rowSource.needsRowLocationForDeferredCheckConstraints()) {
+                    rowlocation.setFrom(rh);
+                    rowSource.offendingRowLocation(rowlocation,
+                                                   heap.getContainerid());
+                }
 			}
 			page.unlatch();
 			page = null;

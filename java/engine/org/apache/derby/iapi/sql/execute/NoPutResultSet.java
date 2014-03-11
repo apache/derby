@@ -137,6 +137,12 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 */
 	public void setNeedsRowLocation(boolean needsRowLocation);
 
+    /**
+     * Set that we are acting on behalf of an insert result set that has
+     * deferrable check constraints
+     */
+    public void setHasDeferrableChecks();
+
 	/**
 	 * Get the estimated row count from this result set.
 	 *

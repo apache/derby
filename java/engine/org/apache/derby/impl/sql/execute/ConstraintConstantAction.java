@@ -21,11 +21,13 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -34,12 +36,17 @@ import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.ValidationInfo;
+import org.apache.derby.impl.store.access.heap.HeapRowLocation;
+import org.apache.derby.shared.common.sanity.SanityManager;
 /**
  *	This class  describes actions that are ALWAYS performed for a
  *	constraint creation at Execution time.
@@ -56,6 +63,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	protected	String			schemaName;
 	protected	UUID			schemaId;
 	protected  IndexConstantAction indexAction;
+    protected   UUID            constraintId;
 
 	// CONSTRUCTORS
 	/**
@@ -109,6 +117,15 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	  *	@return	the constraint name
 	  */
     public	String	getConstraintName() { return constraintName; }
+
+    /**
+     * Get the constraint id of the constraint
+     * @return constraint id
+     */
+    public UUID getConstraintId() {
+        return constraintId;
+    }
+
 
 	/**
 	  *	Get the associated index constant action.
@@ -252,9 +269,12 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	 *
 	 * @param constraintName	constraint name
 	 * @param constraintText	constraint text
+     * @param constraintId      constraint id
 	 * @param td				referenced table
 	 * @param lcc				the language connection context
 	 * @param isCheckConstraint	the constraint is a check constraint
+     * @param isInitiallyDeferred {@code true} if the constraint is
+     *                          initially deferred
      *
 	 * @return true if null constraint passes, false otherwise
 	 *
@@ -264,9 +284,11 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	(
 		String							constraintName,
 		String							constraintText,
+        UUID                            constraintId,
 		TableDescriptor					td,
 		LanguageConnectionContext		lcc,
-		boolean							isCheckConstraint
+        boolean                         isCheckConstraint,
+        boolean                         isInitiallyDeferred
 	)
 		throws StandardException
 	{
@@ -306,10 +328,40 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 			*/
 			if ((value != null) && (value.longValue() != 0))
 			{	
-				//check constraint violated
-				if (isCheckConstraint)
-					throw StandardException.newException(SQLState.LANG_ADD_CHECK_CONSTRAINT_FAILED, 
-						constraintName, td.getQualifiedName(), value.toString());
+                // The query yielded a valid value > 0, so we must conclude the
+                // check constraint is violated.
+                if (isCheckConstraint) {
+                    if (isInitiallyDeferred) {
+                        // Remember the violation
+                        List<UUID> violatingConstraints = new ArrayList<UUID>();
+                        violatingConstraints.add(constraintId);
+
+                        // FIXME: We don't know the row locations of the
+                        // violating rows, so for now, just pretend we know one,
+                        // then invalidate the row location information forcing
+                        // full table check at validation time
+                        DeferredConstraintsMemory.rememberCheckViolations(
+                                lcc,
+                                td.getHeapConglomerateId(),
+                                td.getSchemaName(),
+                                td.getName(),
+                                null,
+                                violatingConstraints,
+                                new HeapRowLocation() /* dummy */);
+                        HashMap<Long, ValidationInfo>
+                                hashTables = lcc.getDeferredHashTables();
+                        CheckInfo ci = (CheckInfo)hashTables.get(
+                                Long.valueOf(td.getHeapConglomerateId()));
+                        ci.setInvalidatedRowLocations();
+
+                    } else {
+                        throw StandardException.newException(
+                                SQLState.LANG_ADD_CHECK_CONSTRAINT_FAILED,
+                                constraintName,
+                                td.getQualifiedName(),
+                                value.toString());
+                    }
+                }
 				/*
 				 * for not null constraint violations exception will be thrown in caller
 				 * check constraint will not get here since exception is thrown

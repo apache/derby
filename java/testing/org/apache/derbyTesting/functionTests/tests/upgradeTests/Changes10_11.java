@@ -292,22 +292,22 @@ public class Changes10_11 extends UpgradeChange
         String[] cDeferrableCol = new String[]{
             "create table t532(i int not null primary key deferrable)",
             "create table t532(i int unique deferrable)",
-            "create table t532(i int not null unique deferrable)"};
+            "create table t532(i int not null unique deferrable)",
+            "create table t532(i int check (i > 0) deferrable)"};
 
         String[] cDeferrableColNotYet = new String[]{
-            "create table t532(i int references referenced(i) deferrable)",
-            "create table t532(i int check(i>3) deferrable)"};
+            "create table t532(i int references referenced(i) deferrable)"};
 
         String[] cDeferrableTab = new String[]{
             "create table t532(i int not null, constraint c primary key(i) deferrable)",
             "create table t532(i int, constraint c unique(i) deferrable)",
             "create table t532(i int not null, constraint c unique(i) " + 
-                "deferrable)"};
+                "deferrable)",
+            "create table t532(i int, constraint c check (i > 0) deferrable)"};
         
         String[] cDeferrableTabNotYet = new String[]{
             "create table t532(i int, constraint c foreign key(i) " + 
-                "references referenced(i) deferrable)",
-            "create table t532(i int, constraint c check(i>3) deferrable)"};
+                "references referenced(i) deferrable)"};
 
         st.executeUpdate("create table referenced(i int primary key)");
         commit();

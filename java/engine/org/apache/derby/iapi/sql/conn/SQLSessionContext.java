@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.conn;
 
 import java.lang.String;
 import java.util.HashMap;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 /**
@@ -104,7 +105,14 @@ public interface SQLSessionContext {
      * The caller is responsible for any cloning needed.
      * @return constraint modes map
      */
-    public HashMap<Long, Boolean> getConstraintModes();
+    public HashMap<Long, Boolean> getUniquePKConstraintModes();
+
+    /**
+     * Get a handle to the session's check constraint modes.
+     * The caller is responsible for any cloning needed.
+     * @return constraint modes map
+     */
+    public HashMap<UUID, Boolean> getCheckConstraintModes();
 
     /**
      * Initialize a inferior session context with the constraint mode map
@@ -112,6 +120,13 @@ public interface SQLSessionContext {
      * @param hm constraint mode map
      */
     public void setConstraintModes(HashMap<Long, Boolean> hm);
+
+    /**
+     * Initialize a inferior session context with the check constraint mode map
+     * of the parent session context.
+     * @param hm constraint mode map
+     */
+    public void setCheckConstraintModes(HashMap<UUID, Boolean> hm);
 
     /**
      * Set the constraint mode for this constraint/index to {@code deferred}.
@@ -125,6 +140,16 @@ public interface SQLSessionContext {
     public void setDeferred(long conglomId, boolean deferred);
 
     /**
+     * Set the constraint mode for this constraint to {@code deferred}.
+     * If {@code deferred} is {@code false}, to immediate checking,
+     * if {@code true} to deferred checking.
+     *
+     * @param constraintId The constraint id
+     * @param deferred  The new constraint mode
+     */
+    public void setDeferred(UUID constraintId, boolean deferred);
+
+    /**
      * Return {@code Boolean.TRUE} if the constraint mode for this
      * constraint/index has been set to deferred, {@code Boolean.FALSE} if
      * it has been set to immediate.  Any ALL setting is considered also.
@@ -133,6 +158,21 @@ public interface SQLSessionContext {
      * constraint mode in this case.
      */
     public Boolean isDeferred(long conglomId);
+
+    /**
+     * Return {@code Boolean.TRUE} if the constraint mode for this
+     * constraint/index has been set to deferred, {@code Boolean.FALSE} if
+     * it has been set to immediate.  Any ALL setting is considered also.
+     * If the constraint mode hasn't been set for this constraint,
+     * return {@code null}. The constraint mode is the effectively the initial
+     * constraint mode in this case.
+     *
+     * @param constraintId the constraint id
+     * @return {@code Boolean.TRUE} if the constraint mode for this
+     * constraint/index has been set to deferred, {@code Boolean.FALSE} if
+     * it has been set to immediate.
+     */
+    public Boolean isDeferred(UUID constraintId);
 
     /**
      * Clear deferred information for this transaction.

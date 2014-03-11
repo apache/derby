@@ -40,6 +40,12 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.Row;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.impl.sql.execute.DMLWriteResultSet;
 
 /**
  * SQLBoolean satisfies the DataValueDescriptor
@@ -866,6 +872,35 @@ public final class SQLBoolean
 		return this;
 	}
 
+    public BooleanDataValue throwExceptionIfImmediateAndFalse(
+                                    String sqlState,
+                                    String tableName,
+                                    String constraintName,
+                                    Activation a,
+                                    int savedUUIDIdx)
+                            throws StandardException
+    {
+        if ( !isNull() && (value == false) ) {
+            final ExecPreparedStatement ps = a.getPreparedStatement();
+            final UUID constrId = (UUID)ps.getSavedObject(savedUUIDIdx);
+            final LanguageConnectionContext lcc =
+                a.getLanguageConnectionContext();
+            final boolean isDeferred = lcc.isEffectivelyDeferred(a, constrId);
+
+            if (!isDeferred) {
+                throw StandardException.newException(
+                        sqlState, tableName, constraintName);
+            } else {
+                // Just return the false value and validate later,
+                // cf NoRowsResultSetImpl#evaluateCheckConstraints.
+                // and InsertResultSet#evaluateCheckConstraints
+                DMLWriteResultSet rs =  (DMLWriteResultSet)a.getResultSet();
+                rs.rememberConstraint(constrId);
+            }
+        }
+
+        return this;
+    }
 	/*
 	 * DataValueDescriptor interface
 	 */

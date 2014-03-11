@@ -1000,12 +1000,13 @@ public class BackingStoreHashtable
      * "needsToClone" is false then the hash table will keep a reference to
      * the row passed in and no copy will be made.
      * <p>
-     * If rouine returns false, then no reference is kept to the duplicate
+     * If routine returns false, then no reference is kept to the duplicate
      * row which was rejected (thus allowing caller to reuse the object).
      *
      * @param needsToClone does this routine have to make a copy of the row,
      *                     in order to keep a reference to it after return?
      * @param row          The row to insert into the table.
+     * @param rowLocation  Location of row in conglomerate; could be null.
      *
 	 * @return true if row was inserted into the hash table.  Returns
      *              false if the BackingStoreHashtable is eliminating 

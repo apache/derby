@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -314,6 +315,27 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		int							numRows = 0;
         boolean						tableScanned = false;
 
+        if (compressTable || truncateTable) {
+            final HashMap<Long, DeferredConstraintsMemory.ValidationInfo> vis =
+                    lcc.getDeferredHashTables();
+            td = dd.getTableDescriptor(tableId);
+            final DeferredConstraintsMemory.ValidationInfo vi =
+                    vis.get(td.getHeapConglomerateId());
+
+            if (td == null) {
+                throw StandardException.newException(
+                    SQLState.LANG_TABLE_NOT_FOUND_DURING_EXECUTION, tableName);
+            }
+
+            if (vi != null &&
+                vi instanceof DeferredConstraintsMemory.CheckInfo) {
+                // We can not use row locations when re-visiting offending
+                // rows in this table, since we are truncating or compressing.
+                ((DeferredConstraintsMemory.CheckInfo)vi).
+                    setInvalidatedRowLocations();
+            }
+        }
+
         //Following if is for inplace compress. Compress using temporary
         //tables to do the compression is done later in this method.
 		if (compressTable)
@@ -419,6 +441,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			dm.invalidateFor(td, DependencyManager.TRUNCATE_TABLE, lcc);
 		else
 			dm.invalidateFor(td, DependencyManager.ALTER_TABLE, lcc);
+
 
 		// Are we working on columns?
 		if (columnInfo != null)
@@ -546,10 +569,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                  conIndex++)
 			{
 				ConstraintConstantAction cca = constraintActions[conIndex];
+                boolean isCheckInitiallyDeferred = false;
 
 				if (cca instanceof CreateConstraintConstantAction)
 				{
-					int constraintType = cca.getConstraintType();
+                    final CreateConstraintConstantAction ccca =
+                            (CreateConstraintConstantAction)cca;
+
+                    int constraintType = ccca.getConstraintType();
+
+                    isCheckInitiallyDeferred =
+                        (constraintType == DataDictionary.CHECK_CONSTRAINT) &&
+                        ccca.isInitiallyDeferred();
 
 					/* Some constraint types require special checking:
 					 *   Check		 - table must be empty, for now
@@ -586,6 +617,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								tableScanned = true;
 								numRows = getSemiRowCount(tc);
 							}
+
+                            if (isCheckInitiallyDeferred) {
+                                // Need to do this early to get UUID
+                                // assigned
+                                constraintActions[conIndex].
+                                        executeConstantAction(activation);
+                            }
+
 							if (numRows > 0)
 							{
 								/*
@@ -594,11 +633,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								** is ok to do the check now rather than try
 								** to lump together several checks.	
 								*/
+
 								ConstraintConstantAction.validateConstraint(
                                     cca.getConstraintName(),
                                     ((CreateConstraintConstantAction)cca).getConstraintText(),
+                                    cca.getConstraintId(),
                                     td,
-                                    lcc, true);
+                                    lcc,
+                                    true,
+                                    isCheckInitiallyDeferred);
 							}
 							break;
 					}
@@ -619,7 +662,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					}
 				}
 
-				constraintActions[conIndex].executeConstantAction(activation);
+                if (!isCheckInitiallyDeferred) {
+                    constraintActions[conIndex].
+                        executeConstantAction(activation);
+                } // else it is done early, see above.
 			}
 		}
 
@@ -3144,7 +3190,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		return (numIndexes > 0);
 	}
 
-	/**
+    public boolean needsRowLocationForDeferredCheckConstraints()
+    {
+        return false;
+    }
+
+    /**
 	 * @see RowLocationRetRowSource#rowLocation
 	 * @exception StandardException on error
 	 */
@@ -3518,11 +3569,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if (foundNullable && numRows > 0)
 		{
 			if (!ConstraintConstantAction.validateConstraint(
-									(String) null,
-									constraintText.toString(),
-									td,
-									lcc,
-									false))
+                    (String) null,
+                    constraintText.toString(),
+                    null, /* not used for not nullable constraints yet */
+                    td,
+                    lcc,
+                    false,
+                    false /* not used for not nullable constraints yet */))
 			{	
 				if (errorMsg.equals(SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT))
 				{	//alter table add primary key
@@ -3622,5 +3675,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		else		// no duplicates
 			return null;
 	}
+
+    public void offendingRowLocation(
+            RowLocation rl, long containdId) throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.NOTREACHED();
+        }
+    }
 
 }

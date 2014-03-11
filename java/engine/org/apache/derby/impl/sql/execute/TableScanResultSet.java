@@ -78,7 +78,7 @@ class TableScanResultSet extends ScanResultSet
 	public int rowsPerRead;
 	public boolean forUpdate;
 	final boolean sameStartStopPosition;
-	private boolean nextDone;
+    protected boolean nextDone;
 	private RowLocation rlTemplate;
 
 	// Run time statistics
@@ -105,17 +105,17 @@ class TableScanResultSet extends ScanResultSet
 	// For Scrollable insensitive updatable result sets, only qualify a row the 
 	// first time it's been read, since an update can change a row so that it 
 	// no longer qualifies
-	private boolean qualify;
+    protected boolean qualify;
 
 	// currentRowIsValid is set to the result of positioning at a rowLocation.
 	// It will be true if the positioning was successful and false if the row 
 	// was deleted under our feet. Whenenver currentRowIsValid is false it means 
 	// that the row has been deleted.
-	private boolean currentRowIsValid;
+    protected boolean currentRowIsValid;
 	
 	// Indicates whether the scan has been positioned back to a previously read
 	// row, or it is accessing a row for the first time.
-	private boolean scanRepositioned;
+    protected boolean scanRepositioned;
 
     //
     // class interface

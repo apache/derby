@@ -37,6 +37,8 @@ import java.io.ObjectInput;
 import java.io.IOException;
 
 import java.util.Properties;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 /**
  *	This class  describes compiled constants that are passed into
@@ -65,6 +67,9 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 
 	int numColumns;
 
+    private String schemaName;
+    private String tableName;
+
 	// CONSTRUCTORS
 
 	/**
@@ -76,7 +81,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	/**
 	 *	Make the ConstantAction for an UPDATE statement.
 	 *
-	 *  @param conglomId	Conglomerate ID.
+     *  @param targetTableDesc descriptor for the table to be updated
 	 *	@param heapSCOCI	StaticCompiledOpenConglomInfo for heap.
 	 *  @param irgs			Index descriptors
 	 *  @param indexCIDS	Conglomerate IDs of indices
@@ -100,7 +105,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param underMerge   True if this is an action of a MERGE statement.
 	 */
     UpdateConstantAction(
-								long				conglomId,
+                                TableDescriptor     targetTableDesc,
 								StaticCompiledOpenConglomInfo heapSCOCI,
 								IndexRowGenerator[]	irgs,
 								long[]				indexCIDS,
@@ -118,10 +123,11 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 								int					numColumns,
 								boolean				positionedUpdate,
 								boolean				singleRowSource,
-								boolean				underMerge)
+                                boolean             underMerge)
+            throws StandardException
 	{
 		super(
-			conglomId,
+            targetTableDesc.getHeapConglomerateId(),
 			heapSCOCI,
 			irgs,
 			indexCIDS,
@@ -143,6 +149,8 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		this.changedColumnIds = changedColumnIds;
 		this.positionedUpdate = positionedUpdate;
 		this.numColumns = numColumns;
+        this.schemaName = targetTableDesc.getSchemaName();
+        this.tableName = targetTableDesc.getName();
 	}
 
 	// INTERFACE METHODS
@@ -186,4 +194,11 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	public	int getTypeFormatId()	{ return StoredFormatIds.UPDATE_CONSTANT_ACTION_V01_ID; }
 
 	// CLASS METHODS
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
 }

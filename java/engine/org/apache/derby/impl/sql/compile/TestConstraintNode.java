@@ -22,11 +22,13 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -38,16 +40,18 @@ import org.apache.derby.iapi.types.TypeId;
 
 class TestConstraintNode extends UnaryLogicalOperatorNode
 {
-	private String sqlState;
-	private String tableName;
-	private String constraintName;
+    private final String sqlState;
+    private final String tableName;
+    private final UUID cid;
+    private final boolean deferrable;
+    private final String constraintName;
 
     /**
      * @param booleanValue The operand of the constraint test
      * @param sqlState The SQLState of the exception to throw if the
     *              constraint has failed
      * @param tableName The name of the table that the constraint is on
-     * @param constraintName The name of the constraint being checked
+     * @param cd The descriptor of the constraint being checked
      * @param cm context manager
      * @throws StandardException
      */
@@ -55,12 +59,18 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
             ValueNode booleanValue,
             String sqlState,
             String tableName,
-            String constraintName,
+            ConstraintDescriptor cd,
             ContextManager cm) throws StandardException {
-        super(booleanValue, "throwExceptionIfFalse", cm);
+        super(booleanValue,
+                cd.deferrable() ?
+                        "throwExceptionIfImmediateAndFalse" :
+                        "throwExceptionIfFalse",
+                cm);
         this.sqlState = sqlState;
         this.tableName = tableName;
-        this.constraintName = constraintName;
+        this.cid = cd.getUUID();
+        this.deferrable = cd.deferrable();
+        this.constraintName = cd.getConstraintName();
     }
 
     /**
@@ -125,10 +135,21 @@ class TestConstraintNode extends UnaryLogicalOperatorNode
 
 		mb.push(sqlState);
 		mb.push(tableName);
-		mb.push(constraintName);
+        mb.push(constraintName);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.BooleanDataValue,
-				"throwExceptionIfFalse", ClassName.BooleanDataValue, 3);
+        if (deferrable) {
+            acb.pushThisAsActivation(mb); // arg 4
+            mb.push(acb.addItem(cid)); // arg 5
 
+            mb.callMethod(
+                VMOpcode.INVOKEINTERFACE,
+                ClassName.BooleanDataValue,
+                "throwExceptionIfImmediateAndFalse",
+                ClassName.BooleanDataValue,
+                5);
+        } else {
+            mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.BooleanDataValue,
+                    "throwExceptionIfFalse", ClassName.BooleanDataValue, 3);
+        }
 	}
 }

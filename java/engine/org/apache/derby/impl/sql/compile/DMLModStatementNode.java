@@ -229,7 +229,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, targetTableName);
 			}
 			
-			switch (targetTableDescriptor.getTableType())
+            targetTableName.setSchemaName(sdtc.getSchemaName());
+
+            switch (targetTableDescriptor.getTableType())
 			{
 			case TableDescriptor.VIEW_TYPE:
 				// Views are currently not updatable
@@ -616,6 +618,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *								of 1-based column ids for columns being changed
 	 * @param readColsBitSet		bit set for the read scan
 	 * @param includeTriggers		whether triggers are included in the processing
+     * @param hasDeferrableCheckConstraints
+     *                        OUT semantics: set element 0 to true if the
+     *                        target table has any deferrable CHECK constraints
 	 *
 	 * @return	The bound, ANDed check constraints as a query tree.
 	 *
@@ -630,7 +635,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ResultColumnList	sourceRCL,
 		int[]				changedColumnIds,
 		FormatableBitSet				readColsBitSet,
-		boolean 			includeTriggers
+        boolean             includeTriggers,
+        boolean[]           hasDeferrableCheckConstraints
     )
 		throws StandardException
 	{
@@ -658,8 +664,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			createTriggerDependencies(relevantTriggers, dependent);
             generateTriggerInfo(relevantTriggers);
 
-			checkConstraints = generateCheckTree(relevantCdl,
-														targetTableDescriptor);
+            checkConstraints = generateCheckTree(
+                    relevantCdl,
+                    targetTableDescriptor,
+                    hasDeferrableCheckConstraints);
 
             if (checkConstraints != null)
 			{
@@ -810,13 +818,22 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	private	ValueNode generateCheckTree
 	(
 		ConstraintDescriptorList	cdl,
-		TableDescriptor				td
+        TableDescriptor             td,
+        boolean[]                   hasDeferrable
     )
 		throws StandardException
 	{
 		ConstraintDescriptorList	ccCDL = cdl.getSubList(DataDictionary.CHECK_CONSTRAINT);
 		int							ccCDLSize = ccCDL.size();
 		ValueNode					checkTree = null;
+
+        for (ConstraintDescriptor cd : ccCDL) {
+            if (cd.deferrable()) {
+                hasDeferrable[0] = true;
+                break;
+            }
+        }
+
 
 		// Get the text of all the check constraints
 		for (int index = 0; index < ccCDLSize; index++)
@@ -834,7 +851,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					oneConstraint,
 					SQLState.LANG_CHECK_CONSTRAINT_VIOLATED,
 					td.getQualifiedName(),
-					cd.getConstraintName(),
+                    cd,
 					getContextManager());
 					
 			// Link consecutive TestConstraintNodes with AND nodes
@@ -844,7 +861,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			}
 			else
 			{
-               checkTree = new AndNode(tcn, checkTree, getContextManager());
+               if (hasDeferrable[0]) {
+                   checkTree = new AndNoShortCircuitNode(
+                       tcn, checkTree, getContextManager());
+               } else {
+                   checkTree = new AndNode(tcn, checkTree, getContextManager());
+               }
 			}
 		}
 

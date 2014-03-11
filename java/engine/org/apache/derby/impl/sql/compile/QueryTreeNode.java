@@ -760,6 +760,34 @@ public abstract class QueryTreeNode implements Visitable
 	}
 	
 	/**
+     * Get the long value of a Property
+     *
+     * @param value     Property value as a String
+     * @param key       Key value of property
+     *
+     * @return  The long value of the property
+     *
+     * @exception StandardException     Thrown on failure
+     */
+    protected long getLongProperty(String value, String key)
+        throws StandardException
+    {
+        long longVal = -1;
+        try
+        {
+            longVal = Long.parseLong(value);
+        }
+        catch (NumberFormatException nfe)
+        {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_NUMBER_FORMAT_FOR_OVERRIDE,
+                value,
+                key);
+        }
+        return longVal;
+    }
+
+    /**
 	** Parse the a SQL statement from the body
 	* of another SQL statement. Pushes and pops a
 	* separate CompilerContext to perform the compilation.

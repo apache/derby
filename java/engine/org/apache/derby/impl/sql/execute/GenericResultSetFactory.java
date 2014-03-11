@@ -66,14 +66,24 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getInsertResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
-                                        GeneratedMethod checkGM, int fullTemplate)
+    public ResultSet getInsertResultSet(NoPutResultSet source,
+                                        GeneratedMethod generationClauses,
+                                        GeneratedMethod checkGM,
+                                        int fullTemplate,
+                                        String schemaName,
+                                        String tableName)
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
-        return new InsertResultSet(
-                source, generationClauses, checkGM, fullTemplate, activation);
+
+        return new InsertResultSet(source,
+                                   generationClauses,
+                                   checkGM,
+                                   fullTemplate,
+                                   schemaName,
+                                   tableName,
+                                   activation);
 	}
 
 	/**
@@ -226,6 +236,8 @@ public class GenericResultSetFactory implements ResultSetFactory
         int cloneMapItem,
 		boolean reuseResult,
 		boolean doesProjection,
+        boolean validatingCheckConstraint,
+        long validatingBaseTableCID,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
 			throws StandardException
@@ -235,6 +247,8 @@ public class GenericResultSetFactory implements ResultSetFactory
             constantRestriction, mapRefItem, cloneMapItem,
 			reuseResult,
 			doesProjection,
+            validatingCheckConstraint,
+            validatingBaseTableCID,
 		    optimizerEstimatedRowCount,
 			optimizerEstimatedCost);
 	}
@@ -666,7 +680,65 @@ public class GenericResultSetFactory implements ResultSetFactory
 								optimizerEstimatedCost);
 	}
 
-	/**
+    public NoPutResultSet getValidateCheckConstraintResultSet(
+                                    Activation activation,
+                                    long conglomId,
+                                    int scociItem,
+                                    int resultRowTemplate,
+                                    int resultSetNumber,
+                                    GeneratedMethod startKeyGetter,
+                                    int startSearchOperator,
+                                    GeneratedMethod stopKeyGetter,
+                                    int stopSearchOperator,
+                                    boolean sameStartStopPosition,
+                                    Qualifier[][] qualifiers,
+                                    String tableName,
+                                    String userSuppliedOptimizerOverrides,
+                                    String indexName,
+                                    boolean isConstraint,
+                                    boolean forUpdate,
+                                    int colRefItem,
+                                    int indexColItem,
+                                    int lockMode,
+                                    boolean tableLocked,
+                                    int isolationLevel,
+                                    boolean oneRowScan,
+                                    double optimizerEstimatedRowCount,
+                                    double optimizerEstimatedCost)
+            throws StandardException
+    {
+        StaticCompiledOpenConglomInfo scoci =
+            (StaticCompiledOpenConglomInfo)(activation.getPreparedStatement().
+                                            getSavedObject(scociItem));
+        return new ValidateCheckConstraintResultSet(
+                                conglomId,
+                                scoci,
+                                activation,
+                                resultRowTemplate,
+                                resultSetNumber,
+                                startKeyGetter,
+                                startSearchOperator,
+                                stopKeyGetter,
+                                stopSearchOperator,
+                                sameStartStopPosition,
+                                qualifiers,
+                                tableName,
+                                userSuppliedOptimizerOverrides,
+                                indexName,
+                                isConstraint,
+                                forUpdate,
+                                colRefItem,
+                                indexColItem,
+                                lockMode,
+                                tableLocked,
+                                isolationLevel,
+                                1,  // rowsPerRead is 1 if not a bulkTableScan
+                                oneRowScan,
+                                optimizerEstimatedRowCount,
+                                optimizerEstimatedCost);
+    }
+
+    /**
     	Table/Index scan where rows are read in bulk
 		@see ResultSetFactory#getBulkTableScanResultSet
 		@exception StandardException thrown on error

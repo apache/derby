@@ -898,6 +898,22 @@ Guide.
                 <arg>constraintName</arg>
             </msg>
 
+            <msg>
+                <name>23514.T.1</name>
+                <text>The transaction was aborted because of a deferred constraint violation: Check constraint identified by '{0}' defined on '{1}' as '{2}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>constraintText</arg>
+            </msg>
+
+            <msg>
+                <name>23515.S.1</name>
+                <text>Deferred constraint violation: Check constraint identified by '{0}' defined on '{1}' as '{2}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>constraintText</arg>
+            </msg>
+
         </family>
 
 

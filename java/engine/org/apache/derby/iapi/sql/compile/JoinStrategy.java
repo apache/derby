@@ -185,8 +185,13 @@ public interface JoinStrategy {
 	 * @param bulkFetch True means bulk fetch is being done on the inner table
 	 * @param multiprobe True means we are probing the inner table for rows
 	 *  matching a specified list of values.
+     * @param validatingCheckConstraint True of this is a special scan to
+     *        validate a check constraint.
 	 */
-	String resultSetMethodName(boolean bulkFetch, boolean multiprobe);
+    String resultSetMethodName(
+        boolean bulkFetch,
+        boolean multiprobe,
+        boolean validatingCheckConstraint);
 
 	/**
 	 * Get the name of the join result set method for the join

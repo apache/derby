@@ -160,7 +160,6 @@ public class AlterConstraintConstantAction extends ConstraintConstantAction
                             "DEFERRED CONSTRAINTS");
 
             if (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT ||
-                constraintType == DataDictionary.CHECK_CONSTRAINT ||
                 constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
                 !characteristics[2] /* not enforced */) {
 

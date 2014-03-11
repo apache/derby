@@ -21,15 +21,16 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
@@ -45,6 +46,9 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.SQLBoolean;
+import org.apache.derby.iapi.types.SQLRef;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Update the rows from the specified
@@ -98,6 +102,8 @@ class UpdateResultSet extends DMLWriteResultSet
 	boolean deferred;
 	boolean beforeUpdateCopyRequired = false;
 
+    private List<UUID>              violatingCheckConstraints;
+    private BackingStoreHashtable   deferredChecks; // cached ref.
     /*
      * class interface
      *
@@ -422,6 +428,31 @@ class UpdateResultSet extends DMLWriteResultSet
 		}
 	}
 
+
+    /**
+     * Run check constraints against the current row. Raise an error if
+     * a check constraint is violated, unless all the offending checks are
+     * deferred, in which case a false value will be returned. A NULL value
+     * will be interpreted as success (not violation).
+     *
+     * @exception StandardException thrown on error
+     */
+    private boolean evaluateCheckConstraints() throws StandardException     {
+        boolean result = true;
+
+        if (checkGM != null) {
+            // Evaluate the check constraints. If all check constraint modes are
+            // immediate, a check error will throw rather than return a false
+            // value.
+            SQLBoolean allOk =
+                    (SQLBoolean)checkGM.invoke(activation);
+            result = allOk.isNull() || allOk.getBoolean();
+        }
+
+        return result;
+    }
+
+
 	public boolean collectAffectedRows() throws StandardException
 	{
 
@@ -471,7 +502,23 @@ class UpdateResultSet extends DMLWriteResultSet
 				*/
 				if (triggerInfo == null)
 				{
-					evaluateCheckConstraints( checkGM, activation );
+                    boolean allOk = evaluateCheckConstraints();
+                    if (!allOk) {
+                        DataValueDescriptor[] rw = row.getRowArray();
+                        SQLRef r = (SQLRef)rw[rw.length - 1];
+                        RowLocation baseRowLocation =
+                            (RowLocation)r.getObject();
+
+                        deferredChecks =
+                            DeferredConstraintsMemory.rememberCheckViolations(
+                                lcc,
+                                heapConglom,
+                                constants.getSchemaName(),
+                                constants.getTableName(),
+                                deferredChecks,
+                                violatingCheckConstraints,
+                                baseRowLocation);
+                    }
 				}
 
 				/*
@@ -529,13 +576,25 @@ class UpdateResultSet extends DMLWriteResultSet
 			}
 			else
 			{
-				evaluateCheckConstraints( checkGM, activation );
+                boolean allOk = evaluateCheckConstraints();
 
-				/* Get the RowLocation to update 
+                /* Get the RowLocation to update
 			 	* NOTE - Column #s in the Row are 1 based.
 			 	*/
 				RowLocation baseRowLocation = (RowLocation)
 					(row.getColumn(resultWidth)).getObject();
+
+                if (!allOk) {
+                    deferredChecks =
+                        DeferredConstraintsMemory.rememberCheckViolations(
+                            lcc,
+                            heapConglom,
+                            constants.getSchemaName(),
+                            constants.getTableName(),
+                            deferredChecks,
+                            violatingCheckConstraints,
+                            baseRowLocation);
+                }
 
 				RowUtil.copyRefColumns(newBaseRow,
 										row,
@@ -801,10 +860,12 @@ class UpdateResultSet extends DMLWriteResultSet
 					** Otherwise we evaluated them as we read the
 					** rows in from the source.
 					*/
+                    boolean allOk = true;
+
 					if (triggerInfo != null)
 					{
 						source.setCurrentRow(deferredTempRow);
-						evaluateCheckConstraints(checkGM, activation);
+                        allOk = evaluateCheckConstraints();
 					}
 
 					/* 
@@ -814,7 +875,19 @@ class UpdateResultSet extends DMLWriteResultSet
 					DataValueDescriptor rlColumn = deferredTempRow2.getColumn(numberOfBaseColumns + 1);
 					RowLocation baseRowLocation = 
 							(RowLocation) (rlColumn).getObject();
-	
+
+                    if (!allOk) {
+                        deferredChecks =
+                            DeferredConstraintsMemory.rememberCheckViolations(
+                                lcc,
+                                heapConglom,
+                                constants.getSchemaName(),
+                                constants.getTableName(),
+                                deferredChecks,
+                                violatingCheckConstraints,
+                                baseRowLocation);
+                    }
+
 					/* Get the base row at the given RowLocation */
 					boolean row_exists = 
 						deferredBaseCC.fetch(
@@ -1056,4 +1129,12 @@ class UpdateResultSet extends DMLWriteResultSet
 		rowChanger.finish();
 	}
 
+    @Override
+    public void rememberConstraint(UUID cid) throws StandardException {
+        if (violatingCheckConstraints == null) {
+            violatingCheckConstraints = new ArrayList<UUID>();
+        }
+
+        violatingCheckConstraints.add(cid);
+    }
 }

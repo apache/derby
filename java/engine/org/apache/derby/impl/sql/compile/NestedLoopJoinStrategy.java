@@ -38,6 +38,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 class NestedLoopJoinStrategy extends BaseJoinStrategy {
     NestedLoopJoinStrategy() {
+        int i = 3;
 	}
 
 
@@ -167,13 +168,20 @@ class NestedLoopJoinStrategy extends BaseJoinStrategy {
     public  String  getOperatorSymbol() { return "*"; }
 
 	/** @see JoinStrategy#resultSetMethodName */
-	public String resultSetMethodName(boolean bulkFetch, boolean multiprobe) {
-		if (bulkFetch)
+    public String resultSetMethodName(
+            boolean bulkFetch,
+            boolean multiprobe,
+            boolean validatingCheckConstraint) {
+
+        if (validatingCheckConstraint) {
+            return "getValidateCheckConstraintResultSet";
+        } else if (bulkFetch) {
 			return "getBulkTableScanResultSet";
-		else if (multiprobe)
+        } else if (multiprobe) {
 			return "getMultiProbeTableScanResultSet";
-		else
+        } else {
 			return "getTableScanResultSet";
+        }
 	}
 
 	/** @see JoinStrategy#joinResultSetMethodName */

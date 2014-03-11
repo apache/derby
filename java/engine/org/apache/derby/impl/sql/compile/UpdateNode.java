@@ -611,14 +611,16 @@ public final class UpdateNode extends DMLModStatementNode
                 ( dataDictionary, targetTableDescriptor, afterColumns, resultColumnList, true, resultSet );
 
             /* Get and bind all constraints on the columns being updated */
-            checkConstraints = bindConstraints( dataDictionary,
-                                                getOptimizerFactory(),
-                                                targetTableDescriptor,
-                                                null,
-                                                sourceRCL,
-                                                changedColumnIds,
-                                                readColsBitSet,
-                                                true); /* we always include triggers in core language */
+            checkConstraints = bindConstraints(
+                dataDictionary,
+                getOptimizerFactory(),
+                targetTableDescriptor,
+                null,
+                sourceRCL,
+                changedColumnIds,
+                readColsBitSet,
+                true, /* we always include triggers in core language */
+                new boolean[1]); // dummy
 
             /* If the target table is also a source table, then
              * the update will have to be in deferred mode
@@ -910,8 +912,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 
 		return	getGenericConstantActionFactory().getUpdateConstantAction
-			( heapConglomId,
-			  targetTableDescriptor.getTableType(),
+            ( targetTableDescriptor,
 			  tc.getStaticCompiledConglomInfo(heapConglomId),
 			  indicesToMaintain,
 			  indexConglomerateNumbers,

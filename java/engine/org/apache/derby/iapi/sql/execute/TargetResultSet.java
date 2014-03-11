@@ -49,6 +49,8 @@ public interface TargetResultSet extends ResultSet
 	 */
 	public void changedRow(ExecRow execRow, RowLocation rowLocation) throws StandardException;
 
+    public void offendingRowLocation(
+            RowLocation rl, long constainerId) throws StandardException;
 	/**
 	 * Preprocess the source row prior to getting it back from the source.
 	 * This is useful for bulk insert where the store stands between the target and 

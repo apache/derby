@@ -82,7 +82,7 @@ class IndexChanger
 
     private final boolean deferrable; // supports a deferrable constraint
     private final LanguageConnectionContext lcc;
-    private BackingStoreHashtable deferredRowsHashTable; // cached for speed
+    private BackingStoreHashtable deferredDuplicates; // cached for speed
 
     /**
 	  Create an IndexChanger
@@ -528,11 +528,11 @@ class IndexChanger
                     // Save duplicate row so we can check at commit time there is
                     // no longer any duplicate.
 
-                    deferredRowsHashTable = DeferredDuplicates.rememberDuplicate(
-                            tc,
-                            indexCID,
-                            deferredRowsHashTable,
+                    deferredDuplicates =
+                        DeferredConstraintsMemory.rememberDuplicate(
                             lcc,
+                            deferredDuplicates,
+                            indexCID,
                             row.getRowArray());
                 } else { // the constraint is not deferred, so throw
                     insertStatus = ConglomerateController.ROWISDUPLICATE;

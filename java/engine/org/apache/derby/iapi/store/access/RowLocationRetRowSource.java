@@ -50,6 +50,8 @@ public interface RowLocationRetRowSource extends RowSource
 	 */
 	boolean needsRowLocation();
 
+    boolean needsRowLocationForDeferredCheckConstraints();
+
 	/**
 		rowLocation is a callback for the drainer of the row source to return
 		the rowLocation of the current row, i.e, the row that is being returned
@@ -72,7 +74,7 @@ public interface RowLocationRetRowSource extends RowSource
 
 		NeedsRowLocation and rowLocation will ONLY be called by a drainer of
 		the row source which CAN return a row location.  Drainer of row source
-		which cannot return rowLocation will guarentee to not call either
+        which cannot return rowLocation will guarantee to not call either
 		callbacks. Conversely, if NeedsRowLocation is called and it returns
 		true, then for every row return by getNextRowFromRowSource, a
 		rowLocation callback must also be issued with the row location of the
@@ -87,4 +89,7 @@ public interface RowLocationRetRowSource extends RowSource
 		@exception StandardException on error
 	 */
 	void rowLocation(RowLocation rl) throws StandardException;
+
+    void offendingRowLocation(
+            RowLocation rl, long containdId) throws StandardException;
 }

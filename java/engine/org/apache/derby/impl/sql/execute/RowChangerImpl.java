@@ -434,7 +434,7 @@ class RowChangerImpl	implements	RowChanger
 	  @param baseRow the row.
 	  @exception StandardException		Thrown on error
 	  */
-	public void insertRow(ExecRow baseRow)
+    public RowLocation insertRow(ExecRow baseRow, boolean getRL)
 		 throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -447,16 +447,24 @@ class RowChangerImpl	implements	RowChanger
 		}
 		else
 		{
-			if (isc != null)
+            if (isc != null || getRL)
 			{
+                if (baseRowLocation == null) {
+                    baseRowLocation = baseCC.newRowLocationTemplate();
+                }
 				baseCC.insertAndFetchLocation(baseRow.getRowArray(), baseRowLocation);
-				isc.insert(baseRow, baseRowLocation);
+
+                if (isc != null) {
+                    isc.insert(baseRow, baseRowLocation);
+                }
 			}
 			else
 			{
                 baseCC.insert(baseRow.getRowArray());
 			}
 		}
+
+        return getRL ? baseRowLocation : null;
 	}
 
 		

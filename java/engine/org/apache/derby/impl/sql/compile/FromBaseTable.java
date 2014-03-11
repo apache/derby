@@ -133,6 +133,14 @@ class FromBaseTable extends FromTable
 	*/
 	int 			bulkFetch = UNSET;
 
+    /*
+    ** Used to validate deferred check constraints.
+    ** It is the conglomerate number of the target inserted into or updated
+    ** when a violation was detected but deferred.
+    */
+    private long            targetTableCID;
+    private boolean         validatingCheckConstraint = false;
+
 	/* We may turn off bulk fetch for a variety of reasons,
 	 * including because of the min optimization.  
 	 * bulkFetchTurnedOff is set to true in those cases.
@@ -824,6 +832,10 @@ class FromBaseTable extends FromTable
 					throw StandardException.newException(SQLState.LANG_INVALID_BULK_FETCH_UPDATEABLE);
 				}
 			}
+            else if (key.equals("validateCheckConstraint")) {
+                // the property "validateCheckConstraint" is read earlier
+                // cf. isValidatingCheckConstraint
+            }
 			else
 			{
 				// No other "legal" values at this time
@@ -853,6 +865,23 @@ class FromBaseTable extends FromTable
 			tableProperties.put("index", indexName);
 		}
 	}
+
+    private boolean isValidatingCheckConstraint() throws StandardException {
+        if (tableProperties == null) {
+            return false;
+        }
+
+        for (Enumeration<?> e = tableProperties.keys(); e.hasMoreElements();) {
+            String key = (String)e.nextElement();
+            String value = (String) tableProperties.get(key);
+            if (key.equals("validateCheckConstraint")) {
+                targetTableCID = getLongProperty(value, key);
+                validatingCheckConstraint = true;
+                return true;
+            }
+        }
+        return false;
+    }
 
 	/** @see org.apache.derby.iapi.sql.compile.Optimizable#getBaseTableName */
     @Override
@@ -2944,7 +2973,8 @@ class FromBaseTable extends FromTable
 		prRCList.doProjection();
 
 		/* Finally, we create the new ProjectRestrictNode */
-        return new ProjectRestrictNode(
+        ProjectRestrictNode result =
+                new ProjectRestrictNode(
 								this,
 								prRCList,
 								null,	/* Restriction */
@@ -2953,6 +2983,21 @@ class FromBaseTable extends FromTable
 								null,	/* Restrict subquery list */
 								null,
                                 getContextManager());
+
+        if (isValidatingCheckConstraint()) {
+            CompilerContext cc = getCompilerContext();
+
+            if ((cc.getReliability() &
+                 // Internal feature: throw if used on app level
+                 CompilerContext.INTERNAL_SQL_ILLEGAL) != 0) {
+
+                throw StandardException.newException(
+                        SQLState.LANG_SYNTAX_ERROR, "validateCheckConstraint");
+            }
+
+            result.setValidatingCheckConstraints(targetTableCID);
+        }
+        return result;
 	}
 
 	/**
@@ -3073,7 +3118,8 @@ class FromBaseTable extends FromTable
 			(bulkFetch == UNSET) && 
 			!forUpdate() && 
 			!isOneRowResultSet() &&
-			getLevel() == 0)
+            getLevel() == 0 &&
+            !validatingCheckConstraint)
 		{
 			bulkFetch = getDefaultBulkFetch();	
 		}
@@ -3448,7 +3494,7 @@ class FromBaseTable extends FromTable
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null,
 			trulyTheBestJoinStrategy.resultSetMethodName(
-				(bulkFetch != UNSET), multiProbing),
+                (bulkFetch != UNSET), multiProbing, validatingCheckConstraint),
 			ClassName.NoPutResultSet, nargs);
 
 		/* If this table is the target of an update or a delete, then we must 

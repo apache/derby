@@ -307,9 +307,8 @@ class EmbedXAResource implements XAResource {
             } catch (SQLException sqle) {
                 XAException xe = wrapInXAException(sqle);
 
-                if (sqle.getSQLState().equals(
-                      ExceptionUtil.getSQLStateFromIdentifier(
-                        SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T))) {
+                if (ExceptionUtil.
+                        isDeferredConstraintViolation(sqle.getSQLState())) {
                     // We are rolling back
                     returnConnectionToResource(tranState, xid_im);
                 }
@@ -831,10 +830,11 @@ class EmbedXAResource implements XAResource {
             xaErrorCode = XAException.XA_RBTIMEOUT;
         else if (seErrorCode >=  ExceptionSeverity.SESSION_SEVERITY)
             xaErrorCode = XAException.XAER_RMFAIL;
-        else if (sqlstate.equals(StandardException.getSQLStateFromIdentifier(SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T)))
+        else if (ExceptionUtil.isDeferredConstraintViolation(sqlstate)) {
             xaErrorCode = XAException.XA_RBINTEGRITY;
-        else
+        } else {
             xaErrorCode = XAException.XAER_RMERR;
+        }
         
         xae = new XAException(message);
         xae.errorCode = xaErrorCode;

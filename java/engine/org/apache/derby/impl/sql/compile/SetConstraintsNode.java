@@ -24,10 +24,10 @@ package     org.apache.derby.impl.sql.compile;
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A SetConstraintsNode is the root of a QueryTree that represents a
@@ -54,7 +54,6 @@ class SetConstraintsNode extends MiscellaneousStatementNode
      * @param deferred    Encodes IMMEDIATE ({@code false}) or DEFERRED
      *                    ({@code true})
      * @param cm          The context manager
-     * @throws StandardException
      */
     SetConstraintsNode(
             List<TableName> constraints,
@@ -83,14 +82,22 @@ class SetConstraintsNode extends MiscellaneousStatementNode
     }
 
     String formatList(List<TableName> constraints) {
-        StringBuilder sb = new StringBuilder();
+        if (SanityManager.DEBUG) {
+            StringBuilder sb = new StringBuilder();
 
-        for (TableName tn : constraints) {
-            sb.append(tn);
-            sb.append(", ");
+            if (constraints == null) {
+                return "ALL";
+            } else {
+                for (TableName tn : constraints) {
+                    sb.append(tn);
+                    sb.append(", ");
+                }
+
+                return sb.substring(0, Math.max(0, sb.length() - 2));
+            }
+        } else {
+            return "";
         }
-
-        return sb.substring(0, Math.max(0, sb.length() - 2));
     }
 
     public String statementToString()

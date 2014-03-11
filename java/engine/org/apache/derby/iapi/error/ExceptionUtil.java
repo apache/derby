@@ -34,7 +34,7 @@ import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 
 /**
@@ -60,7 +60,11 @@ public class ExceptionUtil
     }
     
     /**
-     * Get the severity given a message identifier from SQLState.
+     * Get the severity given a message identifier from {@code SQLState}.
+     *
+     * @param messageID the string carrying the SQL state
+     * @return the constant representing the severity, as defined in
+     *        {@link org.apache.derby.iapi.error.ExceptionSeverity}.
      */
     public static int getSeverityFromIdentifier(String messageID) {
 
@@ -138,6 +142,7 @@ public class ExceptionUtil
      *
      * @return stack traces for all live threads as a string or an error message.
      */
+    @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
     public static String dumpThreads() {
 
         StringWriter out = new StringWriter();
@@ -147,7 +152,7 @@ public class ExceptionUtil
         try {
             //This checks that we are on a jvm >= 1.5 where we
             //can actually do threaddumps.
-            Thread.class.getMethod("getAllStackTraces", new Class[] {});
+            Thread.class.getMethod("getAllStackTraces", new Class<?>[] {});
 
             //Then get the thread dump.
             Class<?> c = Class.forName("org.apache.derby.iapi.error.ThreadDump");
@@ -161,7 +166,7 @@ public class ExceptionUtil
                 IllegalArgumentException,
                 IllegalAccessException,
                 InvocationTargetException{
-                    return m.invoke(null, null);
+                    return m.invoke(null, (Object[]) null);
                 }
             }
             );
@@ -192,4 +197,21 @@ public class ExceptionUtil
         return out.toString();
     }
 
+    /**
+     * Determine if the given {@code SQLState} string constant is a deferred
+     * constraint transactional error. If this is so, return {@code true}, else
+     * return {@code false}.
+     *
+     * @param e the string with the SQL state
+     * @return see method description
+     */
+    public static boolean isDeferredConstraintViolation(String e) {
+        return
+            e.equals(
+                ExceptionUtil.getSQLStateFromIdentifier(
+                    SQLState.LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T)) ||
+            e.equals(
+                ExceptionUtil.getSQLStateFromIdentifier(
+                    SQLState.LANG_DEFERRED_CHECK_CONSTRAINT_T));
+    }
 }

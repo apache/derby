@@ -307,15 +307,15 @@ class DeleteNode extends DMLModStatementNode
 			{
 				/* Bind the new ResultColumn */
 				rowLocationColumn.bindResultColumnToExpression();
-
 				bindConstraints(dataDictionary,
-                            getOptimizerFactory(),
-							targetTableDescriptor,
-							null,
-							resultColumnList,
-							(int[]) null,
-							readColsBitSet,
-							true);  /* we alway include triggers in core language */
+                        getOptimizerFactory(),
+                        targetTableDescriptor,
+                        null,
+                        resultColumnList,
+                        (int[]) null,
+                        readColsBitSet,
+                        true, // we alway include triggers in core language
+                        new boolean[1]); // dummy
 
 				/* If the target table is also a source table, then
 			 	* the delete will have to be in deferred mode

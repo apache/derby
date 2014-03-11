@@ -826,18 +826,17 @@ class CreateIndexConstantAction extends IndexConstantAction
                     numColumnOrderings = unique ? baseColumnPositions.length :
                             baseColumnPositions.length + 1;
 
-					sortObserver = 
-                        new UniqueIndexSortObserver(
-                                tc,
-                                lcc,
-                                DeferredDuplicates.UNDEFINED_CONGLOMERATE,
-                                true, 
-                                uniqueDeferrable,
-                                initiallyDeferred,
-                                indexOrConstraintName,
-                                indexTemplateRow,
-                                true,
-                                td.getName());
+                    sortObserver = new UniqueIndexSortObserver(
+                        tc,
+                        lcc,
+                        DeferredConstraintsMemory.UNDEFINED_CONGLOMERATE,
+                        true,
+                        uniqueDeferrable,
+                        initiallyDeferred,
+                        indexOrConstraintName,
+                        indexTemplateRow,
+                        true,
+                        td.getName());
 				}
 				else 
                 {
@@ -854,16 +853,16 @@ class CreateIndexConstantAction extends IndexConstantAction
 					//use sort operator which treats nulls unequal
 					sortObserver = 
                         new UniqueWithDuplicateNullsIndexSortObserver(
-                                tc,
-                                lcc,
-                                DeferredDuplicates.UNDEFINED_CONGLOMERATE,
-                                true, 
-                                hasDeferrableChecking,
-                                initiallyDeferred,
-                                indexOrConstraintName,
-                                indexTemplateRow,
-                                true,
-                                td.getName());
+                            tc,
+                            lcc,
+                            DeferredConstraintsMemory.UNDEFINED_CONGLOMERATE,
+                            true,
+                            hasDeferrableChecking,
+                            initiallyDeferred,
+                            indexOrConstraintName,
+                            indexTemplateRow,
+                            true,
+                            td.getName());
 				}
 			}
 			else
@@ -915,7 +914,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					(long[]) null);
 
             if (initiallyDeferred) {
-                DeferredDuplicates.associateDuplicatesWithConglomerate(
+                DeferredConstraintsMemory.associateDuplicatesWithConglomerate(
                     lcc, conglomId);
             }
 		}
