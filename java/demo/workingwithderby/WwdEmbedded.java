@@ -125,10 +125,10 @@ public class WwdEmbedded
                }  
             }
             
-         //  Beginning of the primary catch block: uses errorPrint method
+         //  Beginning of the primary catch block: prints stack trace
          }  catch (Throwable e)  {   
             /*       Catch all exceptions and pass them to 
-            **       the exception reporting method             */
+             *       the Throwable.printStackTrace method  */
             System.out.println(" . . . exception thrown:");
             e.printStackTrace(System.out);
          }
