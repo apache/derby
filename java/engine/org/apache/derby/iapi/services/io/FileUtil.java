@@ -102,94 +102,6 @@ public abstract class FileUtil {
 		return directory.delete();
 	}
 
-	public static boolean removeDirectory(String directory)
-	{
-	    return removeDirectory(new File(directory));
-	}
-
-	/**
-	  Copy a directory and all of its contents.
-	  */
-	public static boolean copyDirectory(File from, File to)
-	{
-		return copyDirectory(from, to, (byte[])null, (String[])null);
-	}
-
-	public static boolean copyDirectory(String from, String to)
-	{
-		return copyDirectory(new File(from), new File(to));
-	}
-
-	/**
-		@param filter - array of names to not copy.
-	*/
-	public static boolean copyDirectory(File from, File to, byte[] buffer, 
-										String[] filter)
-	{
-		//
-		// System.out.println("copyDirectory("+from+","+to+")");		
-
-		if (from == null)
-			return false;
-		if (!from.exists())
-			return true;
-		if (!from.isDirectory())
-			return false;
-
-		if (to.exists())
-		{
-			//			System.out.println(to + " exists");
-			return false;
-		}
-		if (!to.mkdirs())
-		{
-			//			System.out.println("can't make" + to);
-			return false;
-		}			
-
-        limitAccessToOwner(to);
-
-		String[] list = from.list();
-
-		// Some JVMs return null for File.list() when the
-		// directory is empty.
-		if (list != null) {
-
-			if (buffer == null)
-				buffer = new byte[BUFFER_SIZE]; // reuse this buffer to copy files
-
-nextFile:	for (int i = 0; i < list.length; i++) {
-
-				String fileName = list[i];
-
-				if (filter != null) {
-					for (int j = 0; j < filter.length; j++) {
-						if (fileName.equals(filter[j]))
-							continue nextFile;
-					}
-				}
-
-
-				File entry = new File(from, fileName);
-
-				//				System.out.println("\tcopying entry " + entry);
-
-				if (entry.isDirectory())
-				{
-					if (!copyDirectory(entry,new File(to,fileName),buffer,filter))
-						return false;
-				}
-				else
-				{
-					if (!copyFile(entry,new File(to,fileName),buffer))
-						return false;
-				}
-			}
-		}
-		return true;
-	}		
-
-
 	public static boolean copyFile(File from, File to, byte[] buf)
 	{
 		if (buf == null)
@@ -490,13 +402,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     public static boolean copyFile( WritableStorageFactory storageFactory, 
                                     StorageFile from, StorageFile to)
     {
-        return copyFile( storageFactory, from, to, (byte[]) null);
-    }
-    
-	public static boolean copyFile( WritableStorageFactory storageFactory, 
-                                    StorageFile from, StorageFile to, 
-                                    byte[] buf)
-	{
 		InputStream from_s = null;
 		OutputStream to_s = null;
 
@@ -504,8 +409,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 			from_s = from.getInputStream();
 			to_s = to.getOutputStream();
 
-			if (buf == null)
-				buf = new byte[BUFFER_SIZE]; // reuse this buffer to copy files
+            byte[] buf = new byte[BUFFER_SIZE];
 
 			for (int bytesRead = from_s.read(buf);
 				 bytesRead != -1;
@@ -539,24 +443,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 
 		return true;
 	} // end of copyFile
-
-	/**
-		Convert a file path into a File object with an absolute path
-		relative to a passed in root. If path is absolute then
-		a file object constructed from new File(path) is returned,
-		otherwise a file object is returned from new File(root, path)
-		if root is not null, otherwise null is returned.
-	*/
-	public static File getAbsoluteFile(File root, String path) {
-		File file = new File(path);
-		if (file.isAbsolute())
-			return file;
-
-		if (root == null)
-			return null;
-
-		return new File(root, path);
-	}
 
 	/**
 		A replacement for new File(File, String) that correctly implements
