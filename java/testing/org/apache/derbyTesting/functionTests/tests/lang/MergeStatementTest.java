@@ -8192,6 +8192,103 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop function add_052" );
     }
     
+    /**
+     * <p>
+     * Test MERGE statements involving generated columns which evaluate to null.
+     * </p>
+     */
+    public  void    test_053_nullGeneratedColumns()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_053\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn int,\n" +
+             "    notUpdatedColumn int,\n" +
+             "    generatedColumn generated always as ( valueColumn + notUpdatedColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_053\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_053 ( primaryKey, description, valueColumn, notUpdatedColumn ) values\n" +
+             "( 1, 'orig', 1, 100 ),\n" +
+             "( 2, 'orig: will delete', 2, 200 ),\n" +
+             "( 3, 'orig: will update', 3, 300 ),\n" +
+             "( 4, 'orig', 4, 400 ),\n" +
+             "( 5, 'orig: will update', 5, 500 ),\n" +
+             "( 6, 'orig: will delete', 6, 600 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_053 values\n" +
+             "( 2, -1 ),\n" +
+             "( 3, 300 ),\n" +
+             "( 5, null ),\n" +
+             "( 6, -1 ),\n" +
+             "( 7, 100 ),\n" +
+             "( 8, null ),\n" +
+             "( 100, null )\n"
+             );
+
+        //
+        // Run a MERGE statement which causes a generated column to
+        // evaluate to null sometimes, and sometimes not.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_053 t\n" +
+             "using sourceTable_053 s on t.primaryKey = s.primaryKey\n" +
+             "when matched and s.valueColumn < 0 then delete\n" +
+             "when matched and s.valueColumn > 0 or t.valueColumn = 5\n" +
+             "     then update set valueColumn = t.valueColumn + s.valueColumn, description = 'updated'\n" +
+             "when not matched and s.primaryKey < 10\n" +
+             "     then insert ( primaryKey, description, valueColumn, notUpdatedColumn ) values ( s.primarykey, 'inserted', s.valueColumn, 1 )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from targetTable_053 order by primaryKey",
+             new String[][]
+             {
+                 { "1", "orig", "1", "100", "101" },
+                 { "3", "updated", "303", "300", "603" },
+                 { "4", "orig", "4", "400", "404" },
+                 { "5", "updated", null, "500", null },
+                 { "7", "inserted", "100", "1", "101" },
+                 { "8", "inserted", null, "1", null },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_053" );
+        goodStatement( dboConnection, "drop table targetTable_053" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
