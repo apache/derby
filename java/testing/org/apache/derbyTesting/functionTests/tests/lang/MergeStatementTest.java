@@ -8289,6 +8289,204 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop table targetTable_053" );
     }
     
+    /**
+     * <p>
+     * Test MERGE statements involving triggers on generated columns.
+     * </p>
+     */
+    public  void    test_054_triggersOnGeneratedColumns()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_054()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_054\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_054()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_054\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn int,\n" +
+             "    notUpdatedColumn int,\n" +
+             "    generatedColumn generated always as ( valueColumn + notUpdatedColumn )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_054\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_054_del_before\n" +
+             "no cascade before delete on targetTable_054\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_054( 'before delete', old.generatedColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_054_del_after\n" +
+             "after delete on targetTable_054\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_054( 'after delete', old.generatedColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_054_ins_after\n" +
+             "after insert on targetTable_054\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_054( 'after insert', new.generatedColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_054_upd_before\n" +
+             "no cascade before update on targetTable_054\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_054( 'before update', old.generatedColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_054_upd_after\n" +
+             "after update on targetTable_054\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_054( 'after update', new.generatedColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_054 ( primaryKey, description, valueColumn, notUpdatedColumn ) values\n" +
+             "( 1, 'orig', 1, 100 ),\n" +
+             "( 2, 'orig: will delete', 2, 200 ),\n" +
+             "( 3, 'orig: will update', 3, 300 ),\n" +
+             "( 4, 'orig', 4, 400 ),\n" +
+             "( 5, 'orig: will update', 5, 500 ),\n" +
+             "( 6, 'orig: will delete', 6, 600 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_054 values\n" +
+             "( 2, -1 ),\n" +
+             "( 3, 300 ),\n" +
+             "( 5, null ),\n" +
+             "( 6, -1 ),\n" +
+             "( 7, 100 ),\n" +
+             "( 8, null ),\n" +
+             "( 100, null )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_054()"
+             );
+
+        //
+        // Now MERGE and fire some triggers.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_054 t\n" +
+             "using sourceTable_054 s on t.primaryKey = s.primaryKey\n" +
+             "when matched and s.valueColumn < 0 then delete\n" +
+             "when matched and s.valueColumn > 0 or t.valueColumn = 5\n" +
+             "     then update set valueColumn = t.valueColumn + s.valueColumn, description = 'updated'\n" +
+             "when not matched and s.primaryKey < 10\n" +
+             "     then insert ( primaryKey, description, valueColumn, notUpdatedColumn ) values ( s.primarykey, 'inserted', s.valueColumn, 1 )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from targetTable_054 order by primaryKey",
+             new String[][]
+             {
+                 { "1", "orig", "1", "100", "101" },
+                 { "3", "updated", "303", "300", "603" },
+                 { "4", "orig", "4", "400", "404" },
+                 { "5", "updated", null, "500", null },
+                 { "7", "inserted", "100", "1", "101" },
+                 { "8", "inserted", null, "1", null },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_054() ) h",
+             new String[][]
+             {
+                 { "before delete", "202" },
+                 { "before delete", "606" },
+                 { "after delete", "202" },
+                 { "after delete", "606" },
+                 { "before update", "303" },
+                 { "before update", "505" },
+                 { "after update", "603" },
+                 { "after update", null },
+                 { "after insert", "101" },
+                 { "after insert", null },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_054" );
+        goodStatement( dboConnection, "drop table targetTable_054" );
+        goodStatement( dboConnection, "drop function history_054" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_054" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_054" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -8396,9 +8594,9 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     }
 
     /** Procedure for adding trigger history */
-    public  static  void    addHistoryRow( String actionString, int actionValue )
+    public  static  void    addHistoryRow( String actionString, Integer actionValue )
     {
-        _triggerHistory.add( new String[] { actionString, Integer.toString( actionValue ) } );
+        _triggerHistory.add( new String[] { actionString, actionValue == null ? null : actionValue.toString() } );
     }
 
     /** Function for comparing two long varchar values */
