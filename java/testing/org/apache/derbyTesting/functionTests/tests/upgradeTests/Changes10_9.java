@@ -504,6 +504,18 @@ public class Changes10_9 extends UpgradeChange
 
         case PH_SOFT_UPGRADE:
             // boot with new version and soft-upgrade
+
+            // DERBY-6505: Take a backup of the database. Backing up the
+            // jar storage takes a different path in soft upgrade, so make
+            // sure that path is exercised.
+            String backupdir =
+                SupportFilesSetup.getReadWriteFileName("d6505-backup");
+            PreparedStatement backupStmt =
+                prepareStatement("call syscs_util.syscs_backup_database(?)");
+            backupStmt.setString(1, backupdir);
+            backupStmt.execute();
+
+            // fallthrough... run the same tests as in post soft upgrade.
         case PH_POST_SOFT_UPGRADE:
             // soft-downgrade: boot with old version after soft-upgrade
 
