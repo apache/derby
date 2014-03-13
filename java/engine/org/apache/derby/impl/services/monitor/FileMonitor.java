@@ -63,7 +63,7 @@ public final class FileMonitor extends BaseMonitor
 	private InputStream PBapplicationPropertiesStream()
 	  throws IOException {
 
-		File sr = FileUtil.newFile(home, Property.PROPERTIES_FILE);
+        File sr = new File(home, Property.PROPERTIES_FILE);
 
 		if (!sr.exists())
 			return null;

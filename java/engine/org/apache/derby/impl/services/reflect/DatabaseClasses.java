@@ -34,7 +34,6 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
@@ -172,7 +171,7 @@ abstract class DatabaseClasses
 		Object env = Monitor.getMonitor().getEnvironment();
 		File dir = env instanceof File ? (File) env : null;
 
-		final File classFile = FileUtil.newFile(dir,filename);
+        final File classFile = new File(dir, filename);
 
 		// find the error stream
 		HeaderPrintWriter errorStream = Monitor.getStream();

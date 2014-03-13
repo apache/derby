@@ -445,20 +445,6 @@ public abstract class FileUtil {
 	} // end of copyFile
 
 	/**
-		A replacement for new File(File, String) that correctly implements
-		the case when the first argument is null. The documentation for java.io.File
-		says that new File((File) null, name) is the same as new File(name).
-		This is not the case in pre 1.1.8 vms, a NullPointerException is thrown instead.
-	*/
-	public static File newFile(File parent, String name) {
-
-		if (parent == null)
-			return new File(name);
-		else
-			return new File(parent, name);
-	}
-
-	/**
 		Remove the leading 'file://' protocol from a filename which has been
         expressed as an URL. If the filename is not an URL, then nothing is done.
         Otherwise, an URL like 'file:///tmp/foo.txt' is transformed into the legal
