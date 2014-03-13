@@ -1,4 +1,3 @@
-lang/LOBDB2compatibility.sql
 lang/aggregateOptimization.sql
 lang/compressTable.sql
 lang/consistencyChecker.sql
