@@ -1129,11 +1129,26 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         ct + " deferrable initially deferred)");
                 s.executeUpdate(
                         "insert into t values " + rs2Values(initialContents));
-                s.executeUpdate(
-                        "insert into t values " + rs2Values(initialContents));
 
                 declareCalledNested(s);
                 s.executeUpdate("call calledNested(true)");
+            } finally {
+                rollback();
+            }
+        }
+        
+        // Check what happens if routine set mode to immediate with
+        // deferred rows inserted by caller
+        for (String ct : checkForms) {
+            try {
+                s.executeUpdate(
+                   ct + " deferrable initially deferred)");
+                s.executeUpdate(
+                   "insert into t values " + rs2Values(negatedInitialContents));
+                declareCalledNestedSetImmediate(s);
+                s.executeUpdate("call calledNestedSetImmediate()");
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_S, e);
             } finally {
                 rollback();
             }
@@ -2375,6 +2390,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             ".calledNested' modifies sql data");
     }
 
+    private void declareCalledNestedSetImmediate(final Statement s) 
+            throws SQLException {
+        s.executeUpdate(
+            "create procedure calledNestedSetImmediate()" +
+            "  language java parameter style java" +
+            "  external name '" +
+            this.getClass().getName() +
+            ".calledNestedSetImmediate' modifies sql data");
+    }
+
     public static void calledNested(final boolean isCheckConstraint)
             throws SQLException
     {
@@ -2388,6 +2413,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         negatedInitialContents :
                         initialContents));
         c.close();
+    }
+
+    public static void calledNestedSetImmediate() throws SQLException
+    {
+        final Connection c =
+            DriverManager.getConnection("jdbc:default:connection");
+        final Statement cStmt = c.createStatement();
+
+        try {
+            cStmt.executeUpdate("set constraints c immediate");
+        } finally { 
+            c.close();
+        }
     }
 }
 
