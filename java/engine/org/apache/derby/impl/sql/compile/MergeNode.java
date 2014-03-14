@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -391,7 +392,7 @@ public final class MergeNode extends DMLModStatementNode
             }
 
             ResultColumnList    selectList = buildSelectList();
-            
+
             // save a copy so that we can remap column references when generating the temporary rows
             _selectList = selectList.copyListAndObjects();
 
@@ -687,15 +688,15 @@ public final class MergeNode extends DMLModStatementNode
     /** Get the column names from the table with the given table number, in sorted order */
     private String[]    getColumns( int mergeTableID, HashMap<String,ColumnReference> map )
     {
-        ArrayList<String>   list = new ArrayList<String>();
+        HashSet<String>     set = new HashSet<String>();
 
         for ( ColumnReference cr : map.values() )
         {
-            if ( cr.getMergeTableID() == mergeTableID ) { list.add( cr.getColumnName() ); }
+            if ( cr.getMergeTableID() == mergeTableID ) { set.add( cr.getColumnName() ); }
         }
 
-        String[]    retval = new String[ list.size() ];
-        list.toArray( retval );
+        String[]    retval = new String[ set.size() ];
+        set.toArray( retval );
         Arrays.sort( retval );
 
         return retval;
