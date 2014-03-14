@@ -81,6 +81,7 @@ public class CollationTest extends BaseJDBCTestCase {
     /** Test cases to run with Norwegian case-sensitive collation. */
     private final static String[] NORWEGIAN_CASE_SENSITIVE = {
         "testNorwayCollation",
+        "testInListNorwayCollation",
         "testLikeEscapeClauseLengthRestriction",
     };
 
@@ -437,6 +438,31 @@ public void testPolishCollation() throws SQLException {
       commonTestingForTerritoryBasedDB(s);
     
       }    
+/**
+ * Test in list with constant and non constant elements & Norwegian collation
+ * DERBY-6025(Wrong results with IN lists and indexes in territory based 
+ *   collation)
+ */
+public void testInListNorwayCollation() throws SQLException {
+    Statement s = createStatement();
+    s.execute("CREATE TABLE derby6025_T1( c1 varchar(40) )");
+    s.executeUpdate("INSERT INTO derby6025_T1 VALUES" +
+    		"'Stranda Idrottslag', 'Aalesunds Fotballklubb'");
+    ResultSet rs = s.executeQuery("select * from derby6025_T1 where C1 in "+
+    		"('Aalesunds Fotballklubb', cast('xyz' as char(3)))");
+    JDBC.assertFullResultSet(rs,
+      		new String[][] {{"Aalesunds Fotballklubb"}});
+    
+    s.executeUpdate("create index i1 on derby6025_T1(c1)");
+    //After an index is created on column c1, following query returned 
+    // 0 rows without the fix for DERBY-6025. After DERBY-6025 is fixed, 
+    // it correctly returns 1 row.
+    rs = s.executeQuery("select * from derby6025_T1 where C1 in "+
+    		"('Aalesunds Fotballklubb', cast('xyz' as char(3)))");
+    JDBC.assertFullResultSet(rs,
+      		new String[][] {{"Aalesunds Fotballklubb"}});
+    s.execute("DROP TABLE derby6025_T1");	
+    }
   
 
   /**

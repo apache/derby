@@ -701,8 +701,20 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		/* left side of the "in" operator is our "judge" when we try to get
 		 * the min/max value of the operands on the right side.  Judge's type
 		 * is important for us, and is input parameter to min/maxValue.
+		 * We found in DERBY-6025(Wrong results with IN lists and indexes in 
+		 * territory based collation) that we need to make sure that we also
+		 * left operand's collation information with Judge object. The reason
+		 * we are sending precision/scale etc along with type id and collation
+		 * information is that DataTypeDescriptor constructor requires all
+		 * those properties too along with the collation information.
 		 */
 		int leftTypeFormatId = leftOperand.getTypeId().getTypeFormatId();
+		int leftPrecision = leftOperand.getTypeServices().getPrecision();
+		int leftScale = leftOperand.getTypeServices().getScale();
+		boolean leftIsNullable = leftOperand.getTypeServices().isNullable();
+		int leftMaximumWidth = leftOperand.getTypeServices().getMaximumWidth();
+		int leftCollationType = leftOperand.getTypeServices().getCollationType();
+		int leftCollationDerivation = leftOperand.getTypeServices().getCollationDerivation();
 		int leftJDBCTypeId = leftOperand.getTypeId().isUserDefinedTypeId() ?
 								leftOperand.getTypeId().getJDBCTypeId() : -1;
 
@@ -752,6 +764,12 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			 */
 			mb.push(leftTypeFormatId);
 			mb.push(leftJDBCTypeId);
+			mb.push(leftPrecision);
+			mb.push(leftScale);
+			mb.push(leftIsNullable);
+			mb.push(leftMaximumWidth);
+			mb.push(leftCollationType);
+			mb.push(leftCollationDerivation);
 
 			/* decide to get min or max value
 			 */
@@ -761,7 +779,7 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 			else
 				methodName = "maxValue";
 		
-			mb.callMethod(VMOpcode.INVOKESTATIC, ClassName.BaseExpressionActivation, methodName, ClassName.DataValueDescriptor, 6);
+			mb.callMethod(VMOpcode.INVOKESTATIC, ClassName.BaseExpressionActivation, methodName, ClassName.DataValueDescriptor, 12);
 
 		}
 	}

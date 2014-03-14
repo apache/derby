@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
@@ -67,6 +68,12 @@ public abstract class BaseExpressionActivation
 	 * @param judgeTypeFormatId		type format id of the judge
 	 * @param judgeUserJDBCTypeId	JDBC type id if judge is user type;
 	 *								-1 if not user type
+	 * @param judgePrecision		precision of the judge
+	 * @param judgeScale		    scale of the judge
+	 * @param judgeIsNullable		nullability of the judge
+	 * @param judgeMaximumWidth		maximum width of the judge
+	 * @param judgeCollationType	collation type of the judge
+	 * @param judgeCollationDerivation		collation derivation of the judge
 	 *
 	 * @return	The minimum value of the 4.
 	 */
@@ -75,12 +82,22 @@ public abstract class BaseExpressionActivation
 											  DataValueDescriptor v3,
 											  DataValueDescriptor v4,
 											  int judgeTypeFormatId,
-											  int judgeUserJDBCTypeId)
+											  int judgeUserJDBCTypeId,
+											  int judgePrecision,
+											  int judgeScale,
+											  boolean judgeIsNullable,
+											  int judgeMaximumWidth,
+											  int judgeCollationType,
+											  int judgeCollationDerivation)
 										throws StandardException
 	{
 		DataValueDescriptor judge;
 		if (judgeUserJDBCTypeId == -1)
-			judge = (DataValueDescriptor) new TypeId(judgeTypeFormatId, null).getNull();
+			judge = new DataTypeDescriptor(
+        			new TypeId(judgeTypeFormatId, null),
+        			judgePrecision,judgeScale,judgeIsNullable,
+        			judgeMaximumWidth,judgeCollationType,
+        			judgeCollationDerivation).getNull();
 		else
 			judge = (DataValueDescriptor) new TypeId(judgeTypeFormatId, new UserDefinedTypeIdImpl()).getNull();
 			
@@ -120,6 +137,12 @@ public abstract class BaseExpressionActivation
 	 * @param judgeTypeFormatId		type format id of the judge
 	 * @param judgeUserJDBCTypeId	JDBC type id if judge is user type;
 	 *								-1 if not user type
+	 * @param judgePrecision		precision of the judge
+	 * @param judgeScale		    scale of the judge
+	 * @param judgeIsNullable		nullability of the judge
+	 * @param judgeMaximumWidth		maximum width of the judge
+	 * @param judgeCollationType	collation type of the judge
+	 * @param judgeCollationDerivation		collation derivation of the judge
 	 *
 	 * @return	The maximum value of the 4.
 	 */
@@ -128,12 +151,22 @@ public abstract class BaseExpressionActivation
 											  DataValueDescriptor v3,
 											  DataValueDescriptor v4,
 											  int judgeTypeFormatId,
-											  int judgeUserJDBCTypeId)
+											  int judgeUserJDBCTypeId,
+											  int judgePrecision,
+											  int judgeScale,
+											  boolean judgeIsNullable,
+											  int judgeMaximumWidth,
+											  int judgeCollationType,
+											  int judgeCollationDerivation)
 										throws StandardException
 	{
 		DataValueDescriptor judge;
 		if (judgeUserJDBCTypeId == -1)
-			judge =  new TypeId(judgeTypeFormatId, null).getNull();
+			judge = new DataTypeDescriptor(
+        			new TypeId(judgeTypeFormatId, null),
+        			judgePrecision,judgeScale,judgeIsNullable,
+        			judgeMaximumWidth,judgeCollationType,
+        			judgeCollationDerivation).getNull();
 		else
 			judge =  new TypeId(judgeTypeFormatId, new UserDefinedTypeIdImpl()).getNull();
 
