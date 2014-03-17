@@ -161,9 +161,14 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 	{
 		ResultSet rs;
 		Statement s = createStatement();
-		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME in ('A_ZERO','A_ONE', 'A_TWO', 'A_THREE')");
-		String [][]expectedRows={{"A_ZERO","1","1","1"},
-				{"A_ONE","1","1","1"},{"A_TWO","1","1","1"},{"A_THREE","1","1","1"}};
+		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME in ('A_ZERO','A_ONE', 'A_TWO', 'A_THREE') order by COLUMNNAME");
+		String [][]expectedRows=
+            {
+				{"A_ONE","1","1","1"},
+                {"A_THREE","1","1","1"},
+                {"A_TWO","1","1","1"},
+                {"A_ZERO","1","1","1"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -217,7 +222,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into ai_short (i) values (1)");
 		s.executeUpdate("insert into ai_short (i) values (2)");
 		s.executeUpdate("insert into ai_short (i) values (33)");
-		rs = s.executeQuery("select * from ai_short");
+		rs = s.executeQuery("select * from ai_short order by i");
 		String[][]expectedRows=new String[][]{{"0","0"},{"1","2"},{"2","4"},{"33","6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'AIS'");
@@ -245,7 +250,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 			int j=i.intValue()+1;
 			i=new Integer(j);
 		}
-		rs = s.executeQuery("select a.i, a0, a1, a2, a3 from ai_single1 a join ai_single2 b on a.i = b.i join ai_single3 c on a.i = c.i join ai_single4 d on a.i = d.i");
+		rs = s.executeQuery("select a.i, a0, a1, a2, a3 from ai_single1 a join ai_single2 b on a.i = b.i join ai_single3 c on a.i = c.i join ai_single4 d on a.i = d.i order by a.i");
 		String[][]expectedRows=new String[][]{{"1","-1","1","0","-100"},{"2","-2","2","1","-90"},
 				{"3","-3","3","2","-80"},{"4","-4","4","3","-70"},
 				{"5","-5","5","4","-60"},{"6","-6","6","5","-50"},
@@ -358,10 +363,10 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("select a.i, a1, a2 from app.tab3schema a join app.tab4schema b on a.i = b.i");
 		expectedRows=new String[][]{{"1","0","0"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select a.i, a1, a2 from tab1schema a join tab2schema b on a.i = b.i");
+		rs=s.executeQuery("select a.i, a1, a2 from tab1schema a join tab2schema b on a.i = b.i order by a.i");
 		expectedRows=new String[][]{{"1","100","100"},{"2","101","99"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select a1, a2, a.i from tab3schema a join tab4schema b on a.i = b.i");
+		rs=s.executeQuery("select a1, a2, a.i from tab3schema a join tab4schema b on a.i = b.i order by a1");
 		expectedRows=new String[][]{{"100","100","1"},{"102","98","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -374,7 +379,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("drop table BPP.tab4schema");
 		s.executeUpdate("drop schema BPP restrict");
 		s.executeUpdate("insert into tab3 values null");
-		rs=s.executeQuery("select * from tab1");
+		rs=s.executeQuery("select * from tab1 order by s1");
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1'");
@@ -383,7 +388,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("create table tab2 (lvl int, s1  bigint generated always as identity)");
 		s.executeUpdate("create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3");
 		s.executeUpdate("insert into tab3 values null");
-		rs=s.executeQuery("select * from tab2");
+		rs=s.executeQuery("select * from tab2 order by lvl");
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB2'");
@@ -409,7 +414,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into t1_2 (x) values (1),(2),(3),(4),(5)");
 		s.executeUpdate("insert into t2_2 (x) values (1),(2),(3),(4),(5)");		
 		s.executeUpdate("insert into t3_2 (x) values (1),(2),(3),(4),(5)");
-		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x");
+		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x order by a.x");
 		expectedRows=new String[][]{{"1","1","2","0"},{"2","2","3","1"},{"3","3","4","2"},{"4","4","5","3"},{"5","5","6","4"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -420,7 +425,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into trigtest (lvl) values (3),(4)");
 		s.executeUpdate("insert into trigtest (lvl) values (5),(6)");
 		s.executeUpdate("insert into trigtest (lvl) values (7),(8)");
-		rs=s.executeQuery("select * from trigtest");
+		rs=s.executeQuery("select * from trigtest order by s1");
 		expectedRows=new String[][]{{"1","0"},{"2","1"},{"3","2"},{"4","3"},{"5","4"},{"6","5"},{"7","6"},{"8","7"},{"9","8"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select count(*) from t1_2");
@@ -432,13 +437,13 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into t1_2 (x) values (1),(2),(3),(4),(5)");
 		s.executeUpdate("insert into t2_2 (x) values (1),(2),(3),(4),(5)");
 		s.executeUpdate("insert into t3_2 (x) values (1),(2),(3),(4),(5)");
-		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x");
+		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x order by a.x");
 		expectedRows=new String[][]{{"1","6","7","5"},{"2","7","8","6"},{"3","8","9","7"},{"4","9","10","8"},{"5","10","11","9"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into t1_2 (x) values (6)");
 		s.executeUpdate("insert into t2_2 (x) values (6)");
 		s.executeUpdate("insert into t3_2 (x) values (6)");
-		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2  a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x");
+		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2  a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x order by a.x");
 		expectedRows=new String[][]{{"1","6","7","5"},{"2","7","8","6"},{"3","8","9","7"},{"4","9","10","8"},{"5","10","11","9"},{"6","11","12","10"}};
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
 		expectedRows=new String[][]{{"10"}};
@@ -449,13 +454,13 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into t1_2 (x) values (1),(2),(3),(4),(5)");
 		s.executeUpdate("insert into t2_2 (x) values (1),(2),(3),(4),(5)");
 		s.executeUpdate("insert into t3_2 (x) values (1),(2),(3),(4),(5)");
-		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x");
+		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x order by a.x");
 		expectedRows=new String[][]{{"1","12","13","11"},{"2","13","14","12"},{"3","14","15","13"},{"4","15","16","14"},{"5","16","17","15"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into t1_2 (x) values (6)");
 		s.executeUpdate("insert into t2_2 (x) values (6)");
 		s.executeUpdate("insert into t3_2 (x) values (6)");
-		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x");
+		rs=s.executeQuery("select a.x, s1, s2, s0 from t1_2 a join t2_2 b on a.x = b.x join t3_2 c on a.x = c.x order by a.x");
 		expectedRows=new String[][]{{"1","12","13","11"},{"2","13","14","12"},{"3","14","15","13"},{"4","15","16","14"},{"5","16","17","15"},{"6","17","18","16"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -470,12 +475,17 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		setAutoCommit(false);
 		s.execute("insert into lockt1 (x) values (1)");
 		s.execute("insert into lockt1 (x) values (2)");
-		rs=s.executeQuery("select * from lockt1");
+		rs=s.executeQuery("select * from lockt1 order by x");
 		String[][]expectedRows=new String[][]{{"1","0"},{"2","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select * from lock_table order by tabname, type desc, mode, cnt");
+		rs=s.executeQuery("select * from lock_table order by username, trantype, type, cnt");
 		//Utilities.showResultSet(rs);
-		expectedRows=new String[][]{{"APP   ","UserTran","TABLE   ","2  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP   ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP   ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]
+            {
+                {"APP   ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},
+                {"APP   ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},
+                {"APP   ","UserTran","TABLE   ","2  ","IX","LOCKT1      ","GRANT","ACTIVE"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("delete from lockt1");
 		commit();
@@ -507,7 +517,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into t1_col (x) values null");
 		//-- switch the order of the columns
 		s.executeUpdate("insert into t1_col (y, x) values (default, 'cc')");
-		rs=s.executeQuery("select * from t1_col");
+		rs=s.executeQuery("select * from t1_col order by y");
 		String[][]expectedRows=new String[][]{{"aa","1"},{"bb","2"},{"yy","3"},{null,"4"},{"cc","5"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
@@ -524,7 +534,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		ps.execute();
 		ps.setString(1, "three");;
 		ps.execute();
-		rs=s.executeQuery("select * from testme");
+		rs=s.executeQuery("select * from testme order by autonum");
 		String[][]expectedRows=new String[][]{{"one","1"},{"two","2"},{"three","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		//-- give exact query and make sure that the statment cache doesn't
@@ -533,7 +543,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		ps.execute();
 		ps.setString(1, "four");
 		ps.execute();
-		rs=s.executeQuery("select * from testme");
+		rs=s.executeQuery("select * from testme order by autonum");
 		expectedRows=new String[][]{{"one","1"},{"two","2"},{"three","3"},{"four","4"},{"four","5"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("drop table testme");
@@ -568,12 +578,12 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42X49", pst,"create table ni (x int, y int generated always as identity (start with  9223372036854775808))");
 		assertStatementError("42X49", pst,"create table ni (x int, y bigint  generated always as identity (start with  -9223372036854775809))");
 		s.executeUpdate("insert into ai_neg (y) values (0),(1),(2),(3),(4),(5),(6),(7),(8),(9),(10)");
-		rs=s.executeQuery("select * from ai_neg");
+		rs=s.executeQuery("select * from ai_neg order by x");
 		String[][]expectedRows=new String[][]{{"1","0"},{"2","1"},{"3","2"},{"4","3"},{"5","4"},{"6","5"},{"7","6"},{"8","7"},{"9","8"},{"10","9"},{"11","10"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("delete from ai_neg where y=8 OR y=4");
 		s.executeUpdate("insert into ai_neg (y) values (11),(13),(14),(15),(17),(18),(19)");
-		rs=s.executeQuery("select * from ai_neg");
+		rs=s.executeQuery("select * from ai_neg order by x");
 		expectedRows=new String[][]{{"1","0"},{"2","1"},{"3","2"},{"4","3"},{"6","5"},{"7","6"},{"8","7"},{"10","9"},{"11","10"},{"12","11"},{"13","13"},{"14","14"},{"15","15"},{"16","17"},{"17","18"},{"18","19"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("update ai_neg set y=-y");
@@ -601,18 +611,18 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.executeUpdate("insert into ai_over2 (x) values (1),(2),(3),(4),(5),(6),(7),(8)");
 		assertStatementError("22003", pst,"insert into ai_over2 (x) values (9),(10)");
 		String[][]expectedRows=new String[][]{{"1","-32760"},{"2","-32761"},{"3","-32762"},{"4","-32763"},{"5","-32764"},{"6","-32765"},{"7","-32766"},{"8","-32767"}};
-		rs=s.executeQuery("select * from ai_over2");
+		rs=s.executeQuery("select * from ai_over2 order by x");
 		JDBC.assertFullResultSet(rs,expectedRows);		
 		s.executeUpdate("insert into ai_over3 (x) values (1)");
 		s.executeUpdate("insert into ai_over3 (x) values (2)");
-		rs=s.executeQuery("select * from ai_over3");
+		rs=s.executeQuery("select * from ai_over3 order by x");
 		expectedRows=new String[][]{{"1","2147483646"},{"2","2147483647"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("22003", pst,"insert into ai_over3 (x) select x from ai_over3");			
 		//bigint overflow check		
 		s.executeUpdate("insert into ai_over4 (x) values (1),(2)");
 		assertStatementError("22003", pst,"insert into ai_over4 (x) values (3)");
-		rs=s.executeQuery("select * from ai_over4");
+		rs=s.executeQuery("select * from ai_over4 order by x");
 		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
@@ -628,7 +638,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42601", pst,"alter table base add column y int generated always as identity (start with  10)");
 		assertStatementError("42601", pst,"alter table base add column y bigint generated always as identity (start with  10)");
 		assertStatementError("42601", pst,"alter table base add column y bigint generated always as identity (start with  10)");
-		rs=pst.executeQuery("select * from base");
+		rs=pst.executeQuery("select * from base order by x");
 		String[][]expectedRows=new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"},{"6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into idt1(c2) values (8)");
@@ -639,7 +649,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"2","0"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into idt1(c2) values (IDENTITY_VAL_LOCAL())");
-		rs=s.executeQuery("select * from idt1");
+		rs=s.executeQuery("select * from idt1 order by c1");
 		expectedRows=new String[][]{{"1","8"},{"2","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -652,14 +662,14 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
 		expectedRows=new String[][]{{"2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select * from idt1");
+		rs=s.executeQuery("select * from idt1 order by c1");
 		expectedRows=new String[][]{{"1","8"},{"2","1"},{"3","8"},{"4","9"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into idt1(c2) select c1 from idt1");
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
 		expectedRows=new String[][]{{"2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select * from idt1");
+		rs=s.executeQuery("select * from idt1 order by c1");
 		expectedRows=new String[][]{{"1","8"},{"2","1"},{"3","8"},{"4","9"},{"5","1"},{"6","2"},{"7","3"},{"8","4"}};
 		s.executeUpdate("delete from idt1");
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -692,20 +702,20 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42Z23", pst,"insert into autoinct1 values (default), (default), (2)");
 		assertStatementError("42Z23", pst,"insert into autoinct1 values (default), (default), (2), (default)");
 		s.executeUpdate("insert into autoinct1 values (default), (default)");
-		rs=s.executeQuery("select * from autoinct1");
+		rs=s.executeQuery("select * from autoinct1 order by c1");
 		expectedRows=new String[][]{{"1"},{"2"},{"3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into autoinct1 values (default), (default), (default)");
-		rs=s.executeQuery("select * from autoinct1");
+		rs=s.executeQuery("select * from autoinct1 order by c1");
 		expectedRows=new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"},{"6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into autoinct1 values (default), (default), (default),(default)");
-		rs=s.executeQuery("select * from autoinct1");
+		rs=s.executeQuery("select * from autoinct1 order by c1");
 		expectedRows=new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"},{"6"},{"7"},{"8"},{"9"},{"10"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 		s.executeUpdate("insert into autoinct2 values (1, default), (2, default)");
-		rs=s.executeQuery("select * from autoinct2");
+		rs=s.executeQuery("select * from autoinct2 order by a");
 		expectedRows=new String[][]{{"1","1"},{"2","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42Z23", pst,"insert into autoinct2 values (1, default), (2, 2)");
@@ -717,7 +727,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into autoinct3 values (default)");
-		rs=s.executeQuery("select * from autoinct3");
+		rs=s.executeQuery("select * from autoinct3 order by c1");
 		expectedRows=new String[][]{{"1"},{"4"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42Z23",pst,"insert into autoinct3 values (1), (default)");
@@ -727,15 +737,15 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("42Z23",pst,"insert into autoinct3 values (default), (default), (2), (default)");
 		assertStatementError("42Z23",pst,"insert into autoinct3 select * from autoinct1");
 		s.executeUpdate("insert into autoinct3 values (default), (default)");
-		rs=s.executeQuery("select * from autoinct3");
+		rs=s.executeQuery("select * from autoinct3 order by c1");
 		expectedRows=new String[][]{{"1"},{"4"},{"7"},{"10"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into autoinct3 values (default), (default), (default)");
-		rs=s.executeQuery("select * from autoinct3");
+		rs=s.executeQuery("select * from autoinct3 order by c1");
 		expectedRows=new String[][]{{"1"},{"4"},{"7"},{"10"},{"13"},{"16"},{"19"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into autoinct3 values (default), (default), (default),(default)");
-		rs=s.executeQuery("select * from autoinct3");
+		rs=s.executeQuery("select * from autoinct3 order by c1");
 		expectedRows=new String[][]{{"1"},{"4"},{"7"},{"10"},{"13"},{"16"},{"19"},{"22"},{"25"},{"28"},{"31"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("drop table autoinct1");
@@ -751,19 +761,19 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		Statement pst=createStatement();
 		s.execute("insert into withinct1(i) values(1)");
 		s.execute("insert into withinct1(i) values(1)");
-		rs=s.executeQuery("select * from withinct1");
+		rs=s.executeQuery("select * from withinct1 order by withinct1_autogen");
 		String[][]expectedRows=new String[][]{{"1","1"},{"1","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into withinct2(i) values(1)");
 		s.execute("insert into withinct2(i) values(1)");
-		rs=s.executeQuery("select * from withinct2");
+		rs=s.executeQuery("select * from withinct2 order by withinct2_autogen");
 		expectedRows=new String[][]{{"1","1"},{"1","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42Z23",pst,"insert into withinctempt1(i,withinct1_autogen) values(2,1)");
 		assertStatementError("42Z23",pst,"insert into withinctempt1(i,withinct1_autogen) values(2,2)");		
 		s.execute("insert into withinctempt1(i) values(2)");
 		s.execute("insert into withinctempt1(i) values(2)");
-		rs=s.executeQuery("select * from withinctempt1");
+		rs=s.executeQuery("select * from withinctempt1 order by withinct1_autogen");
 		expectedRows=new String[][]{{"2","1"},{"2","2"}};		
 		//Utilities.showResultSet(rs);
 		JDBC.assertFullResultSet(rs,expectedRows);
@@ -771,32 +781,44 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.execute("insert into withinctempt2(i,withinct2_autogen) values(2,2)");		
 		s.execute("insert into withinctempt2(i) values(2)");
 		s.execute("insert into withinctempt2(i) values(2)");
-		rs=s.executeQuery("select * from withinctempt2");
-		expectedRows=new String[][]{{"2","1"},{"2","2"},{"2","1"},{"2","2"}};		
+		rs=s.executeQuery("select * from withinctempt2 order by withinct2_autogen, i");
+		expectedRows=new String[][]
+            {
+                {"2","1"},
+                {"2","1"},
+                {"2","2"},
+                {"2","2"}
+            };		
 		JDBC.assertFullResultSet(rs,expectedRows);		
 		s.execute("insert into withinctempt3(i) values(1)");
 		s.execute("insert into withinctempt3(i) values(1)");			
-		rs=s.executeQuery("select * from withinctempt3");
+		rs=s.executeQuery("select * from withinctempt3 order by t1_autogen");
 		expectedRows=new String[][]{{"1","1"},{"1","11"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into withinctempt4(i) values(1)");
 		s.execute("insert into withinctempt4(i) values(1)");			
-		rs=s.executeQuery("select * from withinctempt4");
+		rs=s.executeQuery("select * from withinctempt4 order by t2_autogen");
 		expectedRows=new String[][]{{"1","1"},{"1","11"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42Z23",s,"insert into withinct3(i,withinct3_autogen) values(2,1)");
 		assertStatementError("42Z23",s,"insert into withinct3(i,withinct3_autogen) values(2,2)");
 		s.execute("insert into withinct3(i) values(2)");			
 		s.execute("insert into withinct3(i) values(2)");
-		rs=s.executeQuery("select * from withinct3");
+		rs=s.executeQuery("select * from withinct3 order by withinct3_autogen");
 		expectedRows=new String[][]{{"2","1"},{"2","11"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into withinct4(i,withinct4_autogen) values(2,1)");
 		s.execute("insert into withinct4(i,withinct4_autogen) values(2,2)");
 		s.execute("insert into withinct4(i) values(2)");
 		s.execute("insert into withinct4(i) values(2)");
-		rs=s.executeQuery("select * from withinct4");
-		expectedRows=new String[][]{{"2","1"},{"2","2"},{"2","1"},{"2","11"}};
+		rs=s.executeQuery("select * from withinct4 order by withinct4_autogen");
+		expectedRows=new String[][]
+            {
+                {"2","1"},
+                {"2","1"},
+                {"2","2"},
+                {"2","11"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -807,12 +829,12 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.execute("insert into uniquet1(i) values(1)");
 		s.execute("insert into uniquet1(i) values(1)");
 		String[][]expectedRows=new String[][]{{"1","100"},{"1","120"}};
-		rs=s.executeQuery("select * from uniquet1");
+		rs=s.executeQuery("select * from uniquet1 order by t1_autogen");
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into uniquet2(i) values(1)");
 		s.execute("insert into uniquet2(i) values(1)");
 		expectedRows=new String[][]{{"1","100"},{"1","120"}};
-		rs=s.executeQuery("select * from uniquet2");
+		rs=s.executeQuery("select * from uniquet2 order by t2_autogen");
 		JDBC.assertFullResultSet(rs,expectedRows);
 		
 		assertStatementError("42Z23",s,"insert into uniquetempt1(i,t1_autogen) values(2,1)");
@@ -820,7 +842,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.execute("insert into uniquetempt1(i) values(2)");
 		s.execute("insert into uniquetempt1(i) values(2)");
 		expectedRows=new String[][]{{"2","100"},{"2","120"}};
-		rs=s.executeQuery("select * from uniquetempt1");
+		rs=s.executeQuery("select * from uniquetempt1 order by t1_autogen");
 		JDBC.assertFullResultSet(rs,expectedRows);
 		
 		s.execute("insert into uniquetempt2(i,t2_autogen) values(2,1)");
@@ -836,7 +858,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("23505",s,"insert into uniquet3(i) values(3)");
 		assertStatementError("23505",s,"insert into uniquet3(i) values(4)");
 		s.execute("insert into uniquet3(i) values(5)");		
-		rs=s.executeQuery("select i,uniquet3_autogen from uniquet3");
+		rs=s.executeQuery("select i,uniquet3_autogen from uniquet3 order by i");
 		//Utilities.showResultSet(rs);
 
 		expectedRows=new String[][]{{"1","0"},{"2","1"},{"5","2"}};
@@ -849,7 +871,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("23505",s,"insert into uniquet4(i) values(3)");
 		assertStatementError("23505",s,"insert into uniquet4(i) values(4)");
 		s.execute("insert into uniquet4(i) values(5)");
-		rs=s.executeQuery("select i,uniquet4_autogen from uniquet4");
+		rs=s.executeQuery("select i,uniquet4_autogen from uniquet4 order by i");
 		expectedRows=new String[][]{{"1","0"},{"2","1"},{"5","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
@@ -910,7 +932,10 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		String[][]expectedRows=new String[][]{{"101"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select * from variantt1");
-		expectedRows=new String[][]{{"101","1"}};
+		expectedRows=new String[][]
+            {
+                {"101","1"}
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select * from variantt2");
 		expectedRows=new String[][]{{"201","1"}};
@@ -935,8 +960,12 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"REC11","2","2","2"}};									  
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into restartt1(c12) values(9999)");
-		rs=s.executeQuery("select * from restartt1");
-		expectedRows=new String[][]{{"2","2"},{"2","9999"}};
+		rs=s.executeQuery("select * from restartt1 order by c12");
+		expectedRows=new String[][]
+            {
+                {"2","2"},
+                {"2","9999"}
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'REC11'");
 		expectedRows=new String[][]{{"REC11","4","2","2"}};
@@ -1043,19 +1072,62 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.execute("insert into D1644 (d1644c2, d1644c1) values (27, 28), (default, 29), (30, 31)");
 		s.execute("insert into D1644 (d1644c2) values default, default, default, default");
 		s.execute("insert into D1644 (d1644c2, d1644c1) values (default, 128),(default, 129),(default, 131)");
-		rs=s.executeQuery("select * from D1644");
-		String[][]expectedRows=new String[][]{{null,"1"},	{null,"10"},{null,"11"},{null,"2"},{null,"3"},{null,"12"},{null,"13"},{null,"14"},{null,"15"},{null,"16"},{null,"4"},{"17","18"},{"19","5"},{"20","6"},{"21","22"},{"23","24"},{"25","7"},{"26","8"},{"28","27"},{"29","9"},{"31","30"},{null,"10"},{null,"11"},{null,"12"},{null,"13"},{"128","14"},{"129","15"},{"131","16"}};
+		rs=s.executeQuery("select * from D1644 order by d1644c1, d1644c2");
+		String[][]expectedRows=new String[][]
+            {
+                {"17","18"},
+                {"19","5"},
+                {"20","6"},
+                {"21","22"},
+                {"23","24"},
+                {"25","7"},
+                {"26","8"},
+                {"28","27"},
+                {"29","9"},
+                {"31","30"},
+                {"128","14"},
+                {"129","15"},
+                {"131","16"},
+                {null,"1"},
+                {null,"2"},
+                {null,"3"},
+                {null,"4"},
+                {null,"10"},
+                {null,"10"},
+                {null,"11"},
+                {null,"11"},
+                {null,"12"},
+                {null,"12"},
+                {null,"13"},
+                {null,"13"},
+                {null,"14"},
+                {null,"15"},
+                {null,"16"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into D1644_A (c3, d1644_Ac1, d1644_Ac2) values (1, 2, default)");
 		s.execute("insert into D1644_A (c3, d1644_Ac1, d1644_Ac2) values (3,4,5), (6,7,default)");
 		s.execute("insert into D1644_A (c3, d1644_Ac2) values (8, default), (9, 10)");
-		rs=s.executeQuery("select * from D1644_A");
-		expectedRows=new String[][]{{"2","1","1"},{"4","5","3"},{"7","2","6"},{null,"3","8"},{null,"10","9"}};
+		rs=s.executeQuery("select * from D1644_A order by d1644_Ac1, d1644_Ac2");
+		expectedRows=new String[][]
+            {
+                {"2","1","1"},
+                {"4","5","3"},
+                {"7","2","6"},
+                {null,"3","8"},
+                {null,"10","9"}
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into D1644_B (d1644_Bc1) values default, 10");
 		s.execute("insert into D1644_B values default, 10");
-		rs=s.executeQuery("select * from D1644_B");
-		expectedRows=new String[][]{{"1"},{"10"},{"2"},{"10"}};
+		rs=s.executeQuery("select * from D1644_B order by d1644_Bc1");
+		expectedRows=new String[][]
+            {
+                {"1"},
+                {"2"},
+                {"10"},
+                {"10"}
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 
@@ -1073,8 +1145,13 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		s.execute("insert into d4006 values default");
 		s.execute("alter table d4006 alter column x with default 'def'");
 		s.execute("insert into d4006 values default");
-		rs=s.executeQuery("select * from d4006");
-		String[][]expectedRows=new String[][]{{"abc"},{null},{"def"}};
+		rs=s.executeQuery("select * from d4006 order by x");
+		String[][]expectedRows=new String[][]
+            {
+                {"abc"},
+                {"def"},
+                {null},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("alter table d4006 add column y int generated always as (-1)");
 		assertStatementError("42XA7",s,"alter table d4006 alter column y default 42");
