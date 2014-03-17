@@ -24,6 +24,7 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -252,7 +253,26 @@ class MergeResultSet extends NoRowsResultSetImpl
 
             if ( matchingClause != null )
             {
+                // this will raise an exception if the row is being touched more than once
                 if ( baseRowLocation != null ) { addSubjectRow( baseRowLocation ); }
+
+                //
+                // This bit of defensive code materializes large streams before they
+                // are handed off to the WHEN [ NOT ] MATCHED clauses. By the time
+                // that those clauses operate, the driving left join has been closed and
+                // the streams can't be materialized.
+                //
+                for ( int i = 0; i < _row.nColumns(); i++ )
+                {
+                    DataValueDescriptor dvd = _row.getColumn( i + 1 );
+                    if ( dvd instanceof StreamStorable )
+                    {
+                        if ( dvd.hasStream() )
+                        {
+                            _row.setColumn( i + 1, dvd.cloneValue( true ) );
+                        }
+                    }
+                }
                 
                 _thenRows[ clauseIdx ] = matchingClause.bufferThenRow( activation, _thenRows[ clauseIdx ], _row );
                 _rowCount++;

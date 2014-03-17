@@ -8487,6 +8487,486 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop procedure truncateTriggerHistory_054" );
     }
     
+    /**
+     * <p>
+     * Test MERGE statements which read BLOBs multiple times when running triggers.
+     * </p>
+     */
+    public  void    test_055_triggersMultiBlob()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_055()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_055\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_055()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function mb_055( repeatCount int, vals int... ) returns blob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeBlob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function bequals_055( leftV blob, rightV blob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function reverse_055( leftV blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function gc_055( leftV blob, idx bigint ) returns int\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.getCell'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function add_055( leftV blob, rightV blob ) returns blob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_055\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn blob,\n" +
+             "    generatedColumn generated always as ( reverse_055( valueColumn ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_055\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn blob\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_055_del_before\n" +
+             "no cascade before delete on targetTable_055\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_055( 'before delete', gc_055( old.generatedColumn, 50153 ) + gc_055( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_055_del_after\n" +
+             "after delete on targetTable_055\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_055( 'after delete', gc_055( old.generatedColumn, 50153 ) + gc_055( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_055_ins_after\n" +
+             "after insert on targetTable_055\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_055( 'after insert', gc_055( new.generatedColumn, 50153 ) + gc_055( new.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_055_upd_before\n" +
+             "no cascade before update on targetTable_055\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_055( 'before update', gc_055( old.generatedColumn, 50153 ) + gc_055( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_055_upd_after\n" +
+             "after update on targetTable_055\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_055( 'after update', gc_055( new.generatedColumn, 50153 ) + gc_055( new.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_055 ( primaryKey, description, valueColumn ) values\n" +
+             "( 1, 'orig', mb_055( 10000, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) ),\n" +
+             "( 2, 'orig: will delete', mb_055( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) ),\n" +
+             "( 3, 'orig: will update', mb_055( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 4, 'orig', mb_055( 10000, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39 ) ),\n" +
+             "( 5, 'orig: will update', mb_055( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 6, 'orig: will delete', mb_055( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_055 values\n" +
+             "( 20, mb_055( 20000, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 ) ),\n" +
+             "( 21, mb_055( 30000, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 ) ),\n" +
+             "( 22, mb_055( 7000, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69 ) ),\n" +
+             "( 23, mb_055( 6000, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_055()"
+             );
+
+        //
+        // Verify that rows are correctly updated and that triggers fire correctly.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_055 t\n" +
+             "using sourceTable_055 s on bequals_055( t.valueColumn, s.valueColumn )\n" +
+             "when matched and gc_055( t.valueColumn, 1000 ) = 10\n" +
+             "     then delete\n" +
+             "when matched and gc_055( t.valueColumn, 1001 ) = 21\n" +
+             "     then update set valueColumn = add_055( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+             "when not matched and mod( gc_055( s.valueColumn, 3002 ), 10 ) = 2\n" +
+             "     then insert ( primaryKey, description, valueColumn ) values ( s.primarykey, 'inserted', s.valueColumn )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select\n" +
+             "  primaryKey,\n" +
+             "  description,\n" +
+             "  gc_055( valueColumn, 2001 ),\n" +
+             "  gc_055( generatedColumn, 2001 )\n" +
+             "from targetTable_055 order by primaryKey\n",
+             new String[][]
+             {
+                 { "1", "orig", "1", "8" },
+                 { "3", "updated", "42", "56" },
+                 { "4", "orig", "31", "38" },
+                 { "5", "updated", "42", "56" },
+                 { "22", "inserted", "61", "68" },
+                 { "23", "inserted", "51", "58" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_055() ) h",
+             new String[][]
+             {
+                 { "before delete", "31" },
+                 { "before delete", "31" },
+                 { "after delete", "31" },
+                 { "after delete", "31" },
+                 { "before update", "51" },
+                 { "before update", "51" },
+                 { "after update", "102" },
+                 { "after update", "102" },
+                 { "after insert", "131" },
+                 { "after insert", "111" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_055" );
+        goodStatement( dboConnection, "drop table targetTable_055" );
+        goodStatement( dboConnection, "drop function add_055" );
+        goodStatement( dboConnection, "drop function gc_055" );
+        goodStatement( dboConnection, "drop function reverse_055" );
+        goodStatement( dboConnection, "drop function bequals_055" );
+        goodStatement( dboConnection, "drop function mb_055" );
+        goodStatement( dboConnection, "drop function history_055" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_055" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_055" );
+    }
+    
+    /**
+     * <p>
+     * Test MERGE statements which read CLOBs multiple times when running triggers.
+     * </p>
+     */
+    public  void    test_056_triggersMultiClob()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_056()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_056\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue varchar( 20 )\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_056()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue varchar( 20 )\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function mc_056( repeatCount int, vals varchar( 32672 )... ) returns clob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeClob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function cequals_056( leftV clob, rightV clob ) returns boolean\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.equals'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function reverse_056( leftV clob ) returns clob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.reverse'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function gc_056( leftV clob, idx bigint ) returns varchar( 1 )\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.getCell'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function add_056( leftV clob, rightV clob ) returns clob\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.add'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_056\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn clob,\n" +
+             "    generatedColumn generated always as ( reverse_056( valueColumn ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_056\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn clob\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_056_del_before\n" +
+             "no cascade before delete on targetTable_056\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_056( 'before delete', gc_056( old.generatedColumn, 50153 ) || gc_056( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_056_del_after\n" +
+             "after delete on targetTable_056\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_056( 'after delete', gc_056( old.generatedColumn, 50153 ) || gc_056( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_056_ins_after\n" +
+             "after insert on targetTable_056\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_056( 'after insert', gc_056( new.generatedColumn, 50153 ) || gc_056( new.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_056_upd_before\n" +
+             "no cascade before update on targetTable_056\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_056( 'before update', gc_056( old.generatedColumn, 50153 ) || gc_056( old.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_056_upd_after\n" +
+             "after update on targetTable_056\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_056( 'after update', gc_056( new.generatedColumn, 50153 ) || gc_056( new.generatedColumn, 50154 ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_056 ( primaryKey, description, valueColumn ) values\n" +
+             "( 1, 'orig', mc_056( 10000, 'abcdefghij' ) ),\n" +
+             "( 2, 'orig: will delete', mc_056( 20000, 'klmnopqrst' ) ),\n" +
+             "( 3, 'orig: will update', mc_056( 30000, 'uvwxyzabcd' ) ),\n" +
+             "( 4, 'orig', mc_056( 10000, 'efghijklmn' ) ),\n" +
+             "( 5, 'orig: will update', mc_056( 30000, 'uvwxyzabcd' ) ),\n" +
+             "( 6, 'orig: will delete', mc_056( 20000, 'klmnopqrst' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_056 values\n" +
+             "( 20, mc_056( 20000, 'klmnopqrst' ) ),\n" +
+             "( 21, mc_056( 30000, 'uvwxyzabcd' ) ),\n" +
+             "( 22, mc_056( 7000, 'efghijklmn' ) ),\n" +
+             "( 23, mc_056( 6000, 'opqrstuvwx' ) )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_056()"
+             );
+
+        //
+        // Verify that rows are correctly updated and that triggers fire correctly.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_056 t\n" +
+             "using sourceTable_056 s on cequals_056( t.valueColumn, s.valueColumn )\n" +
+             "when matched and gc_056( t.valueColumn, 1000 ) = 'k'\n" +
+             "     then delete\n" +
+             "when matched and gc_056( t.valueColumn, 1001 ) = 'v'\n" +
+             "     then update set valueColumn = add_056( t.valueColumn, s.valueColumn ), description = 'updated'\n" +
+             "when not matched and gc_056( s.valueColumn, 3002 ) = 'g' or gc_056( s.valueColumn, 3003 ) = 'r'\n" +
+             "     then insert ( primaryKey, description, valueColumn ) values ( s.primarykey, 'inserted', s.valueColumn )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select\n" +
+             "  primaryKey,\n" +
+             "  description,\n" +
+             "  gc_056( valueColumn, 2001 ),\n" +
+             "  gc_056( generatedColumn, 2001 )\n" +
+             "from targetTable_056 order by primaryKey\n",
+             new String[][]
+             {
+                 { "1", "orig", "b", "i" },
+                 { "3", "updated", "v", "c" },
+                 { "4", "orig", "f", "m" },
+                 { "5", "updated", "v", "c" },
+                 { "22", "inserted", "f", "m" },
+                 { "23", "inserted", "p", "w" },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_056() ) h",
+             new String[][]
+             {
+                 { "before delete", "qp" },
+                 { "before delete", "qp" },
+                 { "after delete", "qp" },
+                 { "after delete", "qp" },
+                 { "before update", "az" },
+                 { "before update", "az" },
+                 { "after update", "az" },
+                 { "after update", "az" },
+                 { "after insert", "kj" },
+                 { "after insert", "ut" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_056" );
+        goodStatement( dboConnection, "drop table targetTable_056" );
+        goodStatement( dboConnection, "drop function add_056" );
+        goodStatement( dboConnection, "drop function gc_056" );
+        goodStatement( dboConnection, "drop function reverse_056" );
+        goodStatement( dboConnection, "drop function cequals_056" );
+        goodStatement( dboConnection, "drop function mc_056" );
+        goodStatement( dboConnection, "drop function history_056" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_056" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_056" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -8597,6 +9077,12 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     public  static  void    addHistoryRow( String actionString, Integer actionValue )
     {
         _triggerHistory.add( new String[] { actionString, actionValue == null ? null : actionValue.toString() } );
+    }
+
+    /** Procedure for adding trigger history */
+    public  static  void    addHistoryRow( String actionString, String actionValue )
+    {
+        _triggerHistory.add( new String[] { actionString, actionValue } );
     }
 
     /** Function for comparing two long varchar values */
