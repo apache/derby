@@ -1076,6 +1076,9 @@ public class XATest extends BaseJDBCTestCase {
         assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT, psch_d
                 .getResultSetHoldability());
 
+        // intermittently we get a failure in this test if we do not
+        // rollback, see DERBY-6248.
+        conn.rollback();
         conn.close();
 
     }
