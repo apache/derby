@@ -272,58 +272,6 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     }
         
     /**
-     * Assert that the statement returns the correct results.
-     */
-    protected void assertResults( Connection conn, String query, String[][] rows, boolean trimResults )
-        throws Exception
-    {
-        PreparedStatement   ps = chattyPrepare( conn, query );
-        ResultSet                   rs = ps.executeQuery();
-
-        assertResults( rs, rows, trimResults );
-
-        rs.close();
-        ps.close();
-    }
-        
-    /**
-     * Assert that the ResultSet returns the desired rows.
-     */
-    protected void assertResults( ResultSet rs, String[][] rows, boolean trimResults )
-        throws Exception
-    {
-        int     rowCount = rows.length;
-
-        for ( int i = 0; i < rowCount; i++ )
-        {
-            String[]    row = rows[ i ];
-            int             columnCount = row.length;
-
-            assertTrue( rs.next() );
-
-            for ( int j = 0; j < columnCount; j++ )
-            {
-                String  expectedValue =  row[ j ];
-                //println( "(row, column ) ( " + i + ", " +  j + " ) should be " + expectedValue );
-                String  actualValue = null;
-                int         column = j+1;
-
-                actualValue = rs.getString( column );
-                if ( rs.wasNull() ) { actualValue = null; }
-
-                if ( (actualValue != null) && trimResults ) { actualValue = actualValue.trim(); }
-                
-                assertEquals( (expectedValue == null), rs.wasNull() );
-                
-                if ( expectedValue == null )    { assertNull( actualValue ); }
-                else { assertEquals(expectedValue, actualValue); }
-            }
-        }
-
-        assertFalse( rs.next() );
-    }
-
-    /**
      * Test that a privilege can't be revoked if an object depends on it.
      */
     protected void verifyRevokePrivilege

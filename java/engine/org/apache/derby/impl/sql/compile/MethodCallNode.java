@@ -33,6 +33,7 @@ import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -578,11 +579,38 @@ abstract class MethodCallNode extends JavaValueNode
 
         if (!parameterType.equals(argumentType))
         {
+            //
+            // This handles the conversion from primitive to wrapper type. See DERBY-6511.
+            // If the parameter type is the wrapper form of the primitive argument type,
+            // then call the "valueOf" static method of the wrapper type in order to convert
+            // the argument into a wrapper object. So, for instance, this converts a primitive "int"
+            // into a "java.lang.Integer".
+            //
+            if (
+                ClassInspector.primitiveType( argumentType ) &&
+                parameterType.equals( JSQLType.getWrapperClassName( JSQLType.getPrimitiveID( argumentType ) ) )
+                )
+            {
+                // short must be converted to int
+                if ( "short".equals( argumentType ) )
+                {
+                    mb.cast( "int" );
+                }
+                
+                mb.callMethod
+                    (
+                     VMOpcode.INVOKESTATIC,
+                     parameterType,
+                     "valueOf",
+                     parameterType,
+                     1
+                     );
+            }
             // since we reached here through method resolution
             // casts are only required for primitive types.
             // In any other case the expression type must be assignable
             // to the parameter type.
-            if (ClassInspector.primitiveType(parameterType))
+            else if (ClassInspector.primitiveType(parameterType))
             {
                 mb.cast(parameterType);
             } else

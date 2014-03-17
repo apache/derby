@@ -327,7 +327,7 @@ public final class JSQLType implements Formatable
 	  *
 	  *	@return	name of the java wrapper class corresponding to the primitive
 	  */
-	private	static String	getWrapperClassName
+	public	static String	getWrapperClassName
 	(
 		byte	primitive
     )
@@ -345,7 +345,7 @@ public final class JSQLType implements Formatable
 	  *	@return	BOOLEAN, INT, ... etc if the name is that of a primitive.
 	  *			NOT_PRIMITIVE otherwise
 	  */
-	private	static byte	getPrimitiveID
+	public	static byte	getPrimitiveID
 	(
 		String	name
     )

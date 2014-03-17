@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -685,7 +686,87 @@ public class RoutineTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * DERBY-6511: Make sure that conversions between primitive and wrapper
+     * types work properly.
+     */
+    public void test_6511() throws Exception
+    {
+        Connection  conn = getConnection();
 
+        vet_6511( conn, "boolean", "booleanpToBoolean", "booleanToBooleanp", "true" );
+        vet_6511( conn, "int", "intToInteger", "integerToInt", "1" );
+        vet_6511( conn, "bigint", "longpToLong", "longToLongp", "1" );
+        vet_6511( conn, "smallint", "shortpToInteger", "integerToShortp", "1" );
+        vet_6511( conn, "double", "doublepToDouble", "doubleToDoublep", "1.0" );
+        vet_6511( conn, "real", "floatpToFloat", "floatToFloatp", "1.0" );
+    }
+    private void    vet_6511
+        (
+         Connection conn,
+         String sqlDatatype,
+         String primitiveToWrapperName,
+         String wrapperToPrimitiveName,
+         String dataValue
+         )
+        throws Exception
+    {
+        createFunction_6511( conn, sqlDatatype, primitiveToWrapperName );
+        createFunction_6511( conn, sqlDatatype, wrapperToPrimitiveName );
+
+        vetChaining_6511( conn, primitiveToWrapperName, primitiveToWrapperName, dataValue );
+        vetChaining_6511( conn, primitiveToWrapperName, wrapperToPrimitiveName, dataValue );
+        vetChaining_6511( conn, wrapperToPrimitiveName, primitiveToWrapperName, dataValue );
+        vetChaining_6511( conn, wrapperToPrimitiveName, wrapperToPrimitiveName, dataValue );
+
+        dropFunction_6511( conn, primitiveToWrapperName );
+        dropFunction_6511( conn, wrapperToPrimitiveName );
+    }
+    private void    createFunction_6511
+        (
+         Connection conn,
+         String sqlDatatype,
+         String functionName
+         )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create function " + functionName + "( val " + sqlDatatype + " ) returns " + sqlDatatype + "\n" +
+             "language java parameter style java deterministic no sql\n" +
+             "external name '" + getClass().getName() + "." + functionName + "'"
+             );
+    }
+    private void    dropFunction_6511
+        (
+         Connection conn,
+         String functionName
+         )
+        throws Exception
+    {
+        goodStatement( conn, "drop function " + functionName );
+    }
+    private void    vetChaining_6511
+        (
+         Connection conn,
+         String innerFunctionName,
+         String outerFunctionName,
+         String dataValue
+         )
+        throws Exception
+    {
+        assertResults
+            (
+             conn,
+             "values " + outerFunctionName + "( " + innerFunctionName + "( " + dataValue + " ) )",
+             new String[][]
+             {
+                 { dataValue },
+             },
+             false
+             );
+    }
 
 
     /*
@@ -738,5 +819,67 @@ public class RoutineTest extends BaseJDBCTestCase {
 
     public static void p5749 (String s) {
     }
+
+    // functions for converting between primitive and wrapper types
+    public  static  Boolean booleanpToBoolean( boolean val )
+    {
+        return new Boolean( val );
+    }
+    public  static  boolean booleanToBooleanp( Boolean val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.booleanValue(); }
+    }
+    
+    public  static  Integer intToInteger( int val )
+    {
+        return new Integer( val );
+    }
+    public  static  int     integerToInt( Integer val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.intValue(); }
+    }
+    
+    public  static  Long    longpToLong( long val )
+    {
+        return new Long( val );
+    }
+    public  static  long     longToLongp( Long val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.longValue(); }
+    }
+    
+    public  static  Integer    shortpToInteger( short val )
+    {
+        return new Integer( val );
+    }
+    public  static  short     integerToShortp( Integer val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.shortValue(); }
+    }
+    
+    public  static  Float floatpToFloat( float val )
+    {
+        return new Float( val );
+    }
+    public  static  float     floatToFloatp( Float val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.floatValue(); }
+    }
+    
+    public  static  Double doublepToDouble( double val )
+    {
+        return new Double( val );
+    }
+    public  static  double     doubleToDoublep( Double val ) throws Exception
+    {
+        if ( val == null )  { throw new Exception( "This method does not allow nulls!" ); }
+        else { return val.doubleValue(); }
+    }
+    
 }
 
