@@ -1212,7 +1212,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_006
             (
-             dboConnection,
              "create trigger trig1_006 after update on t2_006\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -1233,7 +1232,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_006
             (
-             dboConnection,
              "create trigger trig1_006 after update on t2_006\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -1255,7 +1253,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_006
             (
-             dboConnection,
              "create trigger trig1_006 after update on t2_006\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -1276,7 +1273,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_006
             (
-             dboConnection,
              "create trigger trig1_006 after update on t2_006\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -1295,38 +1291,62 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
+        dboConnection = openUserConnection( TEST_DBO );
         goodStatement( dboConnection, "drop table t2_006" );
         goodStatement( dboConnection, "drop table t1_006" );
         truncateTriggerHistory();
     }
     private void    vet_006
         (
-         Connection conn,
          String triggerDefinition,
          String[][] expectedT1Results
          )
         throws Exception
     {
-        vet_006( conn, triggerDefinition, expectedT1Results, false );
-        vet_006( conn, triggerDefinition, expectedT1Results, true );
+        vet_006( triggerDefinition, expectedT1Results, false );
+        vet_006( triggerDefinition, expectedT1Results, true );
     }
     private void    vet_006
         (
-         Connection conn,
          String triggerDefinition,
          String[][] expectedT1Results,
          boolean    useHashJoinStrategy
          )
         throws Exception
     {
+        vet_006( triggerDefinition, expectedT1Results, useHashJoinStrategy, false );
+        vet_006( triggerDefinition, expectedT1Results, useHashJoinStrategy, true );
+    }
+    private void    vet_006
+        (
+         String triggerDefinition,
+         String[][] expectedT1Results,
+         boolean    useHashJoinStrategy,
+         boolean    bounceDatabase    // true if we want to test the (de)serialization of the MERGE statement in the trigger
+         )
+        throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+
         if ( useHashJoinStrategy ) { triggerDefinition = makeHashJoinMerge( triggerDefinition ); }
 
         goodStatement( conn, triggerDefinition );
         populate_006( conn );
+
+        if ( bounceDatabase ) { conn = bounceDatabase( TEST_DBO ); }
+        
         goodStatement( conn, "update t2_006 set c2 = -c2" );
         assertResults( conn, "select * from t1_006 order by c1", expectedT1Results, false );
         
         goodStatement( conn, "drop trigger trig1_006" );
+    }
+    private Connection  bounceDatabase( String newUser )
+        throws Exception
+    {
+        println( "Bouncing the database..." );
+        getTestConfiguration().shutdownDatabase();
+        
+        return openUserConnection( newUser );
     }
     private void    populate_006( Connection conn )
         throws Exception
@@ -2154,23 +2174,16 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // NEW transition table as source table.
         //
-        populate_012( dboConnection );
-        goodStatement
+        vet_012
             (
-             dboConnection,
              "create trigger trig1_012 after update on t2_012\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
              "merge into t1_012\n" +
              "using new_cor\n" +
              "on t1_012.c2 = new_cor.c2\n" +
-             "when not matched then insert ( c1, c2, c1_4 ) values ( new_cor.c1, new_cor.c2, new_cor.c4 )\n"
-             );
-        goodUpdate( dboConnection, update, 4 );
-        assertResults
-            (
-             dboConnection,
-             "select * from t1_012 order by c1, c2",
+             "when not matched then insert ( c1, c2, c1_4 ) values ( new_cor.c1, new_cor.c2, new_cor.c4 )\n",
+             update,
              new String[][]
              {
                  { "1", "1", "2", "100" },
@@ -2179,31 +2192,22 @@ public class MergeStatementTest extends GeneratedColumnsHelper
                  { "3", "3", "6", "300" },
                  { "4", "-4", "0", "-400" },
                  { "4", "4", "8", "400" },
-             },
-             false
+             }
              );
-        goodStatement( dboConnection, "drop trigger trig1_012" );
 
         //
         // OLD transition table as source table.
         //
-        populate_012( dboConnection );
-        goodStatement
+        vet_012
             (
-             dboConnection,
              "create trigger trig1_012 after update on t2_012\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
              "merge into t1_012\n" +
              "using old_cor\n" +
              "on t1_012.c2 = old_cor.c2\n" +
-             "when not matched then insert ( c1, c2, c1_4 ) values ( old_cor.c1, old_cor.c2, old_cor.c4 )\n"
-             );
-        goodUpdate( dboConnection, update, 4 );
-        assertResults
-            (
-             dboConnection,
-             "select * from t1_012 order by c1, c2",
+             "when not matched then insert ( c1, c2, c1_4 ) values ( old_cor.c1, old_cor.c2, old_cor.c4 )\n",
+             update,
              new String[][]
              {
                  { "1", "-1", "0", "-100" },
@@ -2212,16 +2216,46 @@ public class MergeStatementTest extends GeneratedColumnsHelper
                  { "3", "-3", "0", "-300" },
                  { "3", "3", "6", "300" },
                  { "4", "4", "8", "400" },
-             },
-             false
+             }
              );
-        goodStatement( dboConnection, "drop trigger trig1_012" );
 
         //
         // drop schema
         //
+        dboConnection = openUserConnection( TEST_DBO );
         goodStatement( dboConnection, "drop table t2_012" );
         goodStatement( dboConnection, "drop table t1_012" );
+    }
+    private void    vet_012
+        (
+         String triggerDefinition,
+         String update,
+         String[][] expectedResults
+         )
+        throws Exception
+    {
+        vet_012( triggerDefinition, update, expectedResults, false );
+        vet_012( triggerDefinition, update, expectedResults, true );
+    }
+    private void    vet_012
+        (
+         String triggerDefinition,
+         String update,
+         String[][] expectedResults,
+         boolean    bounceDatabase  // when true we test the (de)serialization of MERGE statements inside triggers
+         )
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        populate_012( dboConnection );
+        goodStatement( dboConnection, triggerDefinition );
+        
+        if ( bounceDatabase ) { dboConnection = bounceDatabase( TEST_DBO ); }
+                
+        goodUpdate( dboConnection, update, 4 );
+        assertResults( dboConnection, "select * from t1_012 order by c1, c2", expectedResults, false );
+        goodStatement( dboConnection, "drop trigger trig1_012" );
     }
     private void    populate_012( Connection conn ) throws Exception
     {
@@ -2999,7 +3033,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_018
             (
-             dboConnection,
              "create trigger trig1_018 after update on t2_018\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -3021,7 +3054,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_018
             (
-             dboConnection,
              "create trigger trig1_018 after update on t2_018\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -3043,7 +3075,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_018
             (
-             dboConnection,
              "create trigger trig1_018 after update on t2_018\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -3065,7 +3096,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         vet_018
             (
-             dboConnection,
              "create trigger trig1_018 after update on t2_018\n" +
              "referencing old table as old_cor new table as new_cor\n" +
              "for each statement\n" +
@@ -3085,19 +3115,35 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
+        dboConnection = openUserConnection( TEST_DBO );
         goodStatement( dboConnection, "drop table t1_018" );
         goodStatement( dboConnection, "drop table t2_018" );
     }
     private void    vet_018
         (
-         Connection conn,
          String triggerDefinition,
          String[][] expectedResults
          )
         throws Exception
     {
+        vet_018( triggerDefinition, expectedResults, false );
+        vet_018( triggerDefinition, expectedResults, true );
+    }
+    private void    vet_018
+        (
+         String triggerDefinition,
+         String[][] expectedResults,
+         boolean    bounceDatabase
+         )
+        throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+
         populate_018( conn );
         goodStatement( conn, triggerDefinition );
+
+        if ( bounceDatabase ) { conn = bounceDatabase( TEST_DBO ); }
+        
         goodUpdate( conn, "update t2_018 set c2 = -c2", 4 );
         assertResults( conn, "select * from t1_018 order by c1", expectedResults, false );
         goodStatement( conn, "drop trigger trig1_018" );
