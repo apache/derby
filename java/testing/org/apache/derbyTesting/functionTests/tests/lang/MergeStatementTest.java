@@ -9013,6 +9013,201 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop procedure truncateTriggerHistory_056" );
     }
     
+    /**
+     * <p>
+     * Test that deferred deletes buffer up the columns needed to satisfy triggers.
+     * </p>
+     */
+    public  void    test_057_deferredDelete()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create procedure truncateTriggerHistory_057()\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.truncateTriggerHistory'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create procedure addHistoryRow_057\n" +
+             "(\n" +
+             "    actionString varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.addHistoryRow'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create function history_057()\n" +
+             "returns table\n" +
+             "(\n" +
+             "    action varchar( 20 ),\n" +
+             "    actionValue int\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.history'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_057\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    description varchar( 20 ),\n" +
+             "    valueColumn int,\n" +
+             "    triggerColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_057\n" +
+             "(\n" +
+             "    primaryKey int,\n" +
+             "    valueColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_057_del_before\n" +
+             "no cascade before delete on targetTable_057\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_057( 'before delete', old.triggerColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_057_del_after\n" +
+             "after delete on targetTable_057\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_057( 'after delete', old.triggerColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_057_ins_after\n" +
+             "after insert on targetTable_057\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_057( 'after insert', new.triggerColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_057_upd_before\n" +
+             "no cascade before update on targetTable_057\n" +
+             "referencing old as old\n" +
+             "for each row\n" +
+             "call addHistoryRow_057( 'before update', old.triggerColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger t1_057_upd_after\n" +
+             "after update on targetTable_057\n" +
+             "referencing new as new\n" +
+             "for each row\n" +
+             "call addHistoryRow_057( 'after update', new.triggerColumn )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into targetTable_057 ( primaryKey, description, valueColumn, triggerColumn ) values\n" +
+             "( 1, 'orig', 10, 100 ),\n" +
+             "( 2, 'orig: will delete', 20, 200 ),\n" +
+             "( 3, 'orig: will update', 30, 300 ),\n" +
+             "( 4, 'orig', 40, 400 ),\n" +
+             "( 5, 'orig: will update', 30, 500 ),\n" +
+             "( 6, 'orig: will delete', 20, 100 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_057 values\n" +
+             "( 20, 20 ),\n" +
+             "( 21, 30 ),\n" +
+             "( 22, 70 ),\n" +
+             "( 23, 80 )\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "call truncateTriggerHistory_057()"
+             );
+        
+        //
+        // Verify that the triggers fire correctly.
+        //
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_057 t\n" +
+             "using sourceTable_057 s on t.valueColumn = s.valueColumn\n" +
+             "when matched and t.valueColumn = 20\n" +
+             "     then delete\n" +
+             "when matched and t.valueColumn = 30\n" +
+             "     then update set valueColumn = t.valueColumn + s.valueColumn, description = 'updated'\n" +
+             "when not matched and s.valueColumn = 70 or s.valueColumn = 80\n" +
+             "     then insert ( primaryKey, description, valueColumn ) values ( s.primarykey, 'inserted', s.valueColumn )\n",
+             6
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from targetTable_057 order by primaryKey",
+             new String[][]
+             {
+                 { "1", "orig", "10", "100" },
+                 { "3", "updated", "60", "300" },
+                 { "4", "orig", "40", "400" },
+                 { "5", "updated", "60", "500" },
+                 { "22", "inserted", "70", null },
+                 { "23", "inserted", "80", null },
+             },
+             false
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( history_057() ) h",
+             new String[][]
+             {
+                 { "before delete", "200" },
+                 { "before delete", "100" },
+                 { "after delete", "200" },
+                 { "after delete", "100" },
+                 { "before update", "300" },
+                 { "before update", "500" },
+                 { "after update", "300" },
+                 { "after update", "500" },
+                 { "after insert", null },
+                 { "after insert", null },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_057" );
+        goodStatement( dboConnection, "drop table targetTable_057" );
+        goodStatement( dboConnection, "drop function history_057" );
+        goodStatement( dboConnection, "drop procedure addHistoryRow_057" );
+        goodStatement( dboConnection, "drop procedure truncateTriggerHistory_057" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
