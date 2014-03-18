@@ -42,6 +42,7 @@ import org.apache.derby.iapi.types.HarmonySerialClob;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -99,6 +100,18 @@ public class MergeStatementTest extends GeneratedColumnsHelper
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  static  class   Collated    extends MergeStatementTest
+    {
+        public  Collated( String name ) { super( name ); }
+        public  String  expectedCollation() { return "TERRITORY_BASED"; }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // CONSTRUCTOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
@@ -114,6 +127,15 @@ public class MergeStatementTest extends GeneratedColumnsHelper
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // OVERRIDABLE BEHAVIOR
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Return the expected collation of this database */
+    public  String  expectedCollation() { return "UCS_BASIC"; }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // JUnit BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
@@ -124,9 +146,20 @@ public class MergeStatementTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(MergeStatementTest.class);
+        TestSuite suite = new TestSuite();
 
-        Test        cleanTest = new CleanDatabaseTestSetup( suite );
+        suite.addTest( standardDecoration( false ) );
+        suite.addTest( standardDecoration( true ) );
+        
+        return suite;
+    }
+
+    /**
+     * Decorate a test with standard decorators.
+     */
+    private static  Test    standardDecoration( Test raw )
+    {
+        Test        cleanTest = new CleanDatabaseTestSetup( raw );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( cleanTest, LEGAL_USERS, "MergeStatementPermissions" );
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
@@ -134,6 +167,42 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         return authorizedTest;
     }
 
+    /**
+     * Decorate a test with standard decorators.
+     */
+    private static  Test    standardDecoration( boolean withCollation )
+    {
+        Test        cleanTest;
+        if ( withCollation )
+        {
+            cleanTest = Decorator.territoryCollatedDatabase
+                (
+                 TestConfiguration.embeddedSuite( MergeStatementTest.Collated.class ),
+                 "en"
+                 );
+        }
+        else
+        {
+            cleanTest = new CleanDatabaseTestSetup
+                (
+                 TestConfiguration.embeddedSuite( MergeStatementTest.class )
+                 );
+        }
+        Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
+            ( cleanTest, LEGAL_USERS, "MergeStatementPermissions" );
+        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
+
+        return authorizedTest;
+    }
+
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+
+        // in case decoration cleverness didn't really turn on sql authorization
+        enableSQLAuthorization();
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // TESTS
@@ -9208,6 +9277,28 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop procedure truncateTriggerHistory_057" );
     }
     
+    /**
+     * <p>
+     * Verify that the collation is what we expect.
+     * </p>
+     */
+    public  void    test_058_collation()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        assertResults
+            (
+             dboConnection,
+             "values syscs_util.syscs_get_database_property( 'derby.database.collation' )",
+             new String[][]
+             {
+                 { expectedCollation() },
+             },
+             true
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
@@ -9548,6 +9639,33 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private String  makeHashJoinMerge( String original )
     {
         return original.replace ( "2 *", " " );
+    }
+
+    /** Make sure that SQL authorization is turned on */
+    private void    enableSQLAuthorization()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        ResultSet   rs = chattyPrepare
+            (
+             dboConnection,
+             "values syscs_util.syscs_get_database_property( 'derby.database.sqlAuthorization' )"
+             ).executeQuery();
+
+        try {
+            if ( rs.next() )
+            {
+                if ( "true".equals( rs.getString( 1 ) ) )   { return; }
+            }
+        }
+        finally
+        {
+            rs.close();
+        }
+
+        goodStatement( dboConnection, "call syscs_util.syscs_set_database_property( 'derby.database.sqlAuthorization', 'true' )" );
+        // bounce the database to turn on SQL authorization
+        bounceDatabase( TEST_DBO );
     }
     
 }
