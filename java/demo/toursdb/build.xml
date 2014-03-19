@@ -53,6 +53,7 @@
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="toursdb/insertMaps.java"/>
+      <compilerarg value="-Xlint:-options"/>
     </javac>
   </target>
 

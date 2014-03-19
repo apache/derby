@@ -52,6 +52,7 @@
       <classpath>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:-options"/>
     </javac>
     <javac
       source="1.4"
@@ -71,6 +72,7 @@
       <classpath>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:-options"/>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
     <javac
@@ -90,6 +92,7 @@
         <pathelement location="${javasrc.dir}"/>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:-options"/>
     </javac>
     <javac
       source="1.4"
@@ -108,6 +111,7 @@
         <pathelement location="${javasrc.dir}"/>
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
+      <compilerarg value="-Xlint:-options"/>
     </javac>
     <ant target="compile" dir="toursdb"/>
   </target>
@@ -143,6 +147,7 @@
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
        <!-- <compilerarg value="-Xlint:unchecked"/> -->
+      <compilerarg value="-Xlint:-options"/>
     </javac>
   </target>
 
