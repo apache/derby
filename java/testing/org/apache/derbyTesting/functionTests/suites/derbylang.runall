@@ -1,7 +1,6 @@
 lang/aggregateOptimization.sql
 lang/compressTable.sql
 lang/consistencyChecker.sql
-lang/currentSchema.sql
 lang/cursorerrors.sql
 lang/db2Compatibility.sql
 lang/ddlTableLockMode.sql

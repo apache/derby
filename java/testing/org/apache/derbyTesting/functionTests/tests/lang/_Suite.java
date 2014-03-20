@@ -245,6 +245,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(MergeStatementTest.suite());
         suite.addTest(ForeignKeysNonSpsTest.suite());
         suite.addTest(LOBDB2compatibilityTest.suite());
+        suite.addTest(CurrentSchemaTest.suite());
         suite.addTest(Test_6496.suite());
         suite.addTest(ConstraintCharacteristicsTest.suite());
         suite.addTest(DB2IsolationLevelsTest.suite());
