@@ -227,6 +227,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UserLobTest.suite());
         suite.addTest(OffsetFetchNextTest.suite());
         suite.addTest(TriggerBeforeTrigTest.suite());
+        suite.addTest(TriggerGeneralTest.suite());
         suite.addTest(SequenceTest.suite());
         suite.addTest(SequencePermsTest.suite());
         suite.addTest(SequenceGeneratorTest.suite());

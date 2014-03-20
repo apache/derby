@@ -35,19 +35,6 @@ public class Triggers
 	{
 	}
 
-	public static String triggerFiresMinimal(String string) throws Throwable
-	{
-		System.out.println("TRIGGER: " + "<"+string+">");
-		return "";
-	}
-
-	public static String triggerFires(String string) throws Throwable
-	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		System.out.println("TRIGGER: " + "<"+string+"> on statement "+tec.getEventStatementText());
-		printTriggerChanges();
-		return "";
-	}
 
 	public static int doNothingInt() throws Throwable
 	{
@@ -129,76 +116,6 @@ public class Triggers
 		while (s.next()) ;
 	}
 
-	private static void printTriggerChanges() throws Throwable
-	{
-		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
-		System.out.println("BEFORE RESULT SET");
-		dumpRS(tec.getOldRowSet());
-		System.out.println("\nAFTER RESULT SET");
-		dumpRS(tec.getNewRowSet());
-	}
-
-	// lifted from the metadata test	
-	private static void dumpRS(ResultSet s) throws SQLException 
-	{
-		if (s == null)
-		{
-			System.out.println("<NULL>");
-			return;
-		}
-
-		ResultSetMetaData rsmd = s.getMetaData();
-
-		// Get the number of columns in the result set
-		int numCols = rsmd.getColumnCount();
-
-		if (numCols <= 0) 
-		{
-			System.out.println("(no columns!)");
-			return;
-		}
-
-		StringBuffer heading = new StringBuffer("\t ");
-		StringBuffer underline = new StringBuffer("\t ");
-
-		int len;
-		// Display column headings
-		for (int i=1; i<=numCols; i++) 
-		{
-			if (i > 1) 
-			{
-				heading.append(",");
-				underline.append(" ");
-			}
-			len = heading.length();
-			heading.append(rsmd.getColumnLabel(i));
-			len = heading.length() - len;
-			for (int j = len; j > 0; j--)
-			{
-				underline.append("-");
-			}
-		}
-		System.out.println(heading.toString());
-		System.out.println(underline.toString());
-		
-	
-		StringBuffer row = new StringBuffer();
-		// Display data, fetching until end of the result set
-		while (s.next()) 
-		{
-			row.append("\t{");
-			// Loop through each column, getting the
-			// column data and displaying
-			for (int i=1; i<=numCols; i++) 
-			{
-				if (i > 1) row.append(",");
-				row.append(s.getString(i));
-			}
-			row.append("}\n");
-		}
-		System.out.println(row.toString());
-		s.close();
-	}
 
 	public static long returnPrimLong(long  x)
 	{
