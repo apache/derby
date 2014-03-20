@@ -7,7 +7,6 @@ lang/desc_index.sql
 lang/emptyStatistics.sql
 lang/infostreams.sql
 lang/isolationLevels.sql
-lang/joinDeadlock.sql
 lang/langUnitTests.sql
 lang/maxMemPerTab.java
 lang/openScans.sql
