@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.File;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
@@ -47,6 +48,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 /**
  * <p>
@@ -60,6 +62,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     // CONSTANTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    private static  final   String      TRACE_FILE_NAME = "mergeStatementTest.xml";
 
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
@@ -157,19 +161,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     /**
      * Decorate a test with standard decorators.
      */
-    private static  Test    standardDecoration( Test raw )
-    {
-        Test        cleanTest = new CleanDatabaseTestSetup( raw );
-        Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
-            ( cleanTest, LEGAL_USERS, "MergeStatementPermissions" );
-        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
-
-        return authorizedTest;
-    }
-
-    /**
-     * Decorate a test with standard decorators.
-     */
     private static  Test    standardDecoration( boolean withCollation )
     {
         Test        cleanTest;
@@ -192,7 +183,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             ( cleanTest, LEGAL_USERS, "MergeStatementPermissions" );
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
 
-        return authorizedTest;
+        return new SupportFilesSetup( authorizedTest );
     }
 
     protected void setUp() throws Exception
@@ -9299,6 +9290,152 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test that the left join can correctly read from an index on the target table and
+     * pick up the row id.
+     * </p>
+     */
+    public  void    test_059_targetIndex()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function mb_059( repeatCount int, vals int... ) returns blob\n" +
+             "language java parameter style derby deterministic no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.makeBlob'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table targetTable_059\n" +
+             "(\n" +
+             "    valueColumn int,\n" +
+             "    unreferencedBlobColumn blob\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index target_059_primary on targetTable_059( valueColumn )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table sourceTable_059\n" +
+             "(\n" +
+             "    valueColumn int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create unique index source_059_primary on sourceTable_059( valueColumn )"
+             );
+
+
+        //
+        // Populate tables
+        //
+        goodStatement
+            (
+             dboConnection,
+             "insert into sourceTable_059 values\n" +
+             "( 0 ),\n" +
+             "( 2 ),\n" +
+             "( 4 ),\n" +
+             "( 8 )\n"
+             );
+        PreparedStatement   ps = chattyPrepare
+            (
+             dboConnection,
+             "insert into targetTable_059 ( valueColumn, unreferencedBlobColumn ) values\n" +
+             "( ?, mb_059( 100000, ? ) )\n"
+             );
+        for ( int i = 0; i < 100; i++ )
+        {
+            if ( (i % 20) == 0 ) { println( "Inserting row " + i ); }
+            ps.setInt( 1, i );
+            ps.setInt( 2, i );
+            ps.executeUpdate();
+        }
+        goodStatement
+            (
+             dboConnection,
+             "delete from targetTable_059 where valueColumn = 4 or valueColumn = 8"
+             );
+
+        //
+        // Run a MERGE which uses the indexes.
+        //
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'xml' )" );
+        goodUpdate
+            (
+             dboConnection,
+             "merge into targetTable_059 t\n" +
+             "using sourceTable_059 s on t.valueColumn = s.valueColumn\n" +
+             "when matched and t.valueColumn = 0\n" +
+             "     then delete\n" +
+             "when matched and t.valueColumn = 2\n" +
+             "     then update set valueColumn = -t.valueColumn\n" +
+             "when not matched and s.valueColumn = 4\n" +
+             "     then insert ( valueColumn ) values ( -s.valueColumn )\n",
+             3
+             );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'optimizerTracing', false, '" + traceFile.getPath() + "' )" );
+
+        // verify the plan shape
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'optimizerTracingViews', true, '" + traceFile.getPath() + "' )" );
+        assertResults
+            (
+             dboConnection,
+             "select stmtid, qbid, summary from planCost\n" +
+             "where type = 'bestPlan'\n" +
+             "order by stmtid, qbid\n",
+             new String[][]
+             {
+                 { "1", "1", "ProjectRestrictNode" },
+                 { "1", "2", "\"" + TEST_DBO + "\".\"SOURCE_059_PRIMARY\"" },
+                 { "1", "3", "\"" + TEST_DBO + "\".\"TARGET_059_PRIMARY\"" },
+             },
+             false
+             );
+        goodStatement( dboConnection, "call syscs_util.syscs_register_tool( 'optimizerTracingViews', false )" );
+        
+        // verify the results
+        assertResults
+            (
+             dboConnection,
+             "select valueColumn from targetTable_059 where valueColumn < 10 order by valueColumn",
+             new String[][]
+             {
+                 { "-4" },
+                 { "-2" },
+                 { "1" },
+                 { "3" },
+                 { "5" },
+                 { "6" },
+                 { "7" },
+                 { "9" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table sourceTable_059" );
+        goodStatement( dboConnection, "drop table targetTable_059" );
+        goodStatement( dboConnection, "drop function mb_059" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
