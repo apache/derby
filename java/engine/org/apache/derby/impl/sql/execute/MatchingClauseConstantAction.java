@@ -193,7 +193,7 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // OTHER PUBLIC BEHAVIOR
+    // OTHER PACKAGE VISIBLE BEHAVIOR, CALLED BY MergeResultSet
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -268,13 +268,36 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
     
     /**
      * <p>
+     * Release resources at the end.
+     * </p>
+     */
+    void    cleanUp()   throws StandardException
+    {
+        if ( _actionRS != null )
+        {
+            _actionRS.close();
+            _actionRS = null;
+        }
+
+        _matchRefinementMethod = null;
+        _rowMakingMethod = null;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // MINIONS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
      * Construct and buffer a row for the DELETE
      * action corresponding to this MATCHED clause. The buffered row
      * is built from columns in the passed-in row. The passed-in row is the SELECT list
      * of the MERGE statement's driving left join.
      * </p>
      */
-    ExecRow    bufferThenRowForDelete
+    private ExecRow    bufferThenRowForDelete
         (
          Activation activation,
          ExecRow selectRow
@@ -297,7 +320,7 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
      * action corresponding to this [ NOT ] MATCHED clause.
      * </p>
      */
-    ExecRow    bufferThenRow
+    private ExecRow    bufferThenRow
         (
          Activation activation
          )
@@ -311,23 +334,6 @@ public class MatchingClauseConstantAction implements ConstantAction, Formatable
         return (ExecRow) _rowMakingMethod.invoke( activation );
     }
     
-    /**
-     * <p>
-     * Release resources at the end.
-     * </p>
-     */
-    void    cleanUp()   throws StandardException
-    {
-        if ( _actionRS != null )
-        {
-            _actionRS.close();
-            _actionRS = null;
-        }
-
-        _matchRefinementMethod = null;
-        _rowMakingMethod = null;
-    }
-
     /**
      * <p>
      * Create the temporary table for holding the rows which are buffered up

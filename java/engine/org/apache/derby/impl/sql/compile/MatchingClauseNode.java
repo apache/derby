@@ -173,22 +173,19 @@ public class MatchingClauseNode extends QueryTreeNode
     /** Return true if this is a WHEN MATCHED ... DELETE clause */
     boolean isDeleteClause()    { return !( isUpdateClause() || isInsertClause() ); }
 
-    /** Return the bound DML statement--returns null if called before binding */
-    DMLModStatementNode getDML()    { return _dml; }
-
     /**
      * Return the list of columns which form the rows of the ResultSet which drive
      * the INSERT/UPDATE/DELETE actions.
      */
-    ResultColumnList    getBufferedColumns() { return _thenColumns; }
+    ResultColumnList    getThenColumns() { return _thenColumns; }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // bind() BEHAVIOR
+    // bind() BEHAVIOR CALLED BY MergeNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** Bind this WHEN [ NOT ] MATCHED clause against the parent JoinNode */
+    /** Bind this WHEN [ NOT ] MATCHED clause against the parent MergeNode */
     void    bind
         (
          DataDictionary dd,
@@ -280,7 +277,11 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
     
-    ////////////////////// UPDATE ///////////////////////////////
+    ////////////////
+    //
+    // BIND UPDATE
+    //
+    ////////////////
 
     /** Bind a WHEN MATCHED ... THEN UPDATE clause */
     private void    bindUpdate
@@ -693,7 +694,11 @@ public class MatchingClauseNode extends QueryTreeNode
     }
 
 
-    ////////////////////// DELETE ///////////////////////////////
+    ////////////////
+    //
+    // BIND DELETE
+    //
+    ////////////////
 
     /** Bind a WHEN MATCHED ... THEN DELETE clause */
     private void    bindDelete
@@ -772,7 +777,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
-     * Calculate the 1-based offsets which define the rows which will be buffered up
+     * Calculate the 1-based offsets which define the "then" rows which will be buffered up
      * for a DELETE action at run-time. The rows are constructed
      * from the columns in the SELECT list of the driving left joins. This method
      * calculates an array of offsets into the SELECT list. The columns at those
@@ -783,21 +788,25 @@ public class MatchingClauseNode extends QueryTreeNode
     private void    bindDeleteThenColumns( ResultColumnList selectList )
         throws StandardException
     {
-        int     bufferedCount = _thenColumns.size();
+        int     thenCount = _thenColumns.size();
         int     selectCount = selectList.size();
         
-        _deleteColumnOffsets = new int[ bufferedCount ];
+        _deleteColumnOffsets = new int[ thenCount ];
 
-        for ( int bidx = 0; bidx < bufferedCount; bidx++ )
+        for ( int bidx = 0; bidx < thenCount; bidx++ )
         {
-            ResultColumn    bufferedRC = _thenColumns.elementAt( bidx );
-            ValueNode       bufferedExpression = bufferedRC.getExpression();
+            ResultColumn    thenRC = _thenColumns.elementAt( bidx );
+            ValueNode       thenExpression = thenRC.getExpression();
 
-            _deleteColumnOffsets[ bidx ] = getSelectListOffset( selectList, bufferedExpression );
+            _deleteColumnOffsets[ bidx ] = getSelectListOffset( selectList, thenExpression );
         }
     }
 
-    ////////////////////// INSERT ///////////////////////////////
+    ////////////////
+    //
+    // BIND INSERT
+    //
+    ////////////////
 
     /** Bind a WHEN NOT MATCHED ... THEN INSERT clause */
     private void    bindInsert
@@ -1087,33 +1096,11 @@ public class MatchingClauseNode extends QueryTreeNode
     }
 
 
-    ////////////////////// bind() MINIONS ///////////////////////////////
-
-    /** Boilerplate for binding a list of ResultColumns against a FromList */
-    private void bindExpressions( ResultColumnList rcl, FromList fromList )
-        throws StandardException
-    {
-        CompilerContext cc = getCompilerContext();
-        final int previousReliability = cc.getReliability();
-
-        boolean wasSkippingTypePrivileges = cc.skipTypePrivileges( true );
-        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
-        
-        try {
-            rcl.bindExpressions
-                (
-                 fromList,
-                 new SubqueryList( getContextManager() ),
-                 new ArrayList<AggregateNode>()
-                 );
-        }
-        finally
-        {
-            // Restore previous compiler state
-            cc.setReliability( previousReliability );
-            cc.skipTypePrivileges( wasSkippingTypePrivileges );
-        }
-    }
+    ////////////////////////
+    //
+    // BIND THE THEN ROW
+    //
+    ////////////////////////
 
     /**
      * <p>
@@ -1133,16 +1120,16 @@ public class MatchingClauseNode extends QueryTreeNode
      * can't be found.
      * </p>
      */
-    private int getSelectListOffset( ResultColumnList selectList, ValueNode bufferedExpression )
+    private int getSelectListOffset( ResultColumnList selectList, ValueNode thenExpression )
         throws StandardException
     {
         int                 selectCount = selectList.size();
 
-        if ( bufferedExpression instanceof ColumnReference )
+        if ( thenExpression instanceof ColumnReference )
         {
-            ColumnReference bufferedCR = (ColumnReference) bufferedExpression;
-            String              bufferedCRName = bufferedCR.getColumnName();
-            int                 bufferedCRMergeTableID = getMergeTableID( bufferedCR );
+            ColumnReference thenCR = (ColumnReference) thenExpression;
+            String              thenCRName = thenCR.getColumnName();
+            int                 thenCRMergeTableID = getMergeTableID( thenCR );
 
             // loop through the SELECT list to find this column reference
             for ( int sidx = 0; sidx < selectCount; sidx++ )
@@ -1155,8 +1142,8 @@ public class MatchingClauseNode extends QueryTreeNode
                 if ( selectCR != null )
                 {
                     if (
-                        ( getMergeTableID( selectCR ) == bufferedCRMergeTableID) &&
-                        bufferedCRName.equals( selectCR.getColumnName() )
+                        ( getMergeTableID( selectCR ) == thenCRMergeTableID) &&
+                        thenCRName.equals( selectCR.getColumnName() )
                         )
                     {
                         return sidx + 1;
@@ -1168,12 +1155,12 @@ public class MatchingClauseNode extends QueryTreeNode
             {
                 SanityManager.THROWASSERT
                     (
-                     "Can't find select list column corresponding to " + bufferedCR.getSQLColumnName() +
-                     " with merge table id = " + bufferedCRMergeTableID
+                     "Can't find select list column corresponding to " + thenCR.getSQLColumnName() +
+                     " with merge table id = " + thenCRMergeTableID
                      );
             }
         }
-        else if ( bufferedExpression instanceof CurrentRowLocationNode )
+        else if ( thenExpression instanceof CurrentRowLocationNode )
         {
             //
             // There is only one RowLocation in the SELECT list, the row location for the
@@ -1201,6 +1188,38 @@ public class MatchingClauseNode extends QueryTreeNode
         }
 
         return mergeTableID;
+    }
+
+    /////////////////
+    //
+    // BIND MINIONS
+    //
+    /////////////////
+
+    /** Boilerplate for binding a list of ResultColumns against a FromList */
+    private void bindExpressions( ResultColumnList rcl, FromList fromList )
+        throws StandardException
+    {
+        CompilerContext cc = getCompilerContext();
+        final int previousReliability = cc.getReliability();
+
+        boolean wasSkippingTypePrivileges = cc.skipTypePrivileges( true );
+        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+        
+        try {
+            rcl.bindExpressions
+                (
+                 fromList,
+                 new SubqueryList( getContextManager() ),
+                 new ArrayList<AggregateNode>()
+                 );
+        }
+        finally
+        {
+            // Restore previous compiler state
+            cc.setReliability( previousReliability );
+            cc.skipTypePrivileges( wasSkippingTypePrivileges );
+        }
     }
 
     /**
@@ -1385,7 +1404,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
-     * Adds a field to the generated class to hold the ResultSet of buffered rows
+     * Adds a field to the generated class to hold the ResultSet of "then" rows
      * which drive the INSERT/UPDATE/DELETE action. Generates code to push
      * the contents of that field onto the stack.
      * </p>
@@ -1525,17 +1544,6 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
     
-    /** Return true if the ResultColumn represents a RowLocation */
-    private boolean isRowLocation( ResultColumn rc ) throws StandardException
-    {
-        if ( rc.getExpression() instanceof CurrentRowLocationNode ) { return true; }
-
-        DataTypeDescriptor  dtd = rc.getTypeServices();
-        if ( (dtd != null) && (dtd.getTypeId().isRefTypeId()) ) { return true; }
-
-        return false;
-    }
-    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Visitable BEHAVIOR
@@ -1634,4 +1642,15 @@ public class MatchingClauseNode extends QueryTreeNode
         return getCRs.getList();
     }
 
+    /** Return true if the ResultColumn represents a RowLocation */
+    private boolean isRowLocation( ResultColumn rc ) throws StandardException
+    {
+        if ( rc.getExpression() instanceof CurrentRowLocationNode ) { return true; }
+
+        DataTypeDescriptor  dtd = rc.getTypeServices();
+        if ( (dtd != null) && (dtd.getTypeId().isRefTypeId()) ) { return true; }
+
+        return false;
+    }
+    
 }

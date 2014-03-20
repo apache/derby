@@ -119,7 +119,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * whether a given driving row matches. The row matches iff targetTable.RowLocation is not null.
  * The driving row is then assigned to the
  * first DELETE/UPDATE/INSERT action to which it applies. The relevant columns from
- * the driving row are extracted and buffered in a temporary table specific to that
+ * the driving row are extracted and buffered in a temporary table (the "then" rows) specific to that
  * DELETE/UPDATE/INSERT action. After the driving left join has been processed,
  * the DELETE/UPDATE/INSERT actions are run in order, each taking its corresponding
  * temporary table as its source ResultSet.
@@ -193,6 +193,90 @@ public final class MergeNode extends DMLModStatementNode
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // BIND-TIME ENTRY POINTS CALLED BY MatchingClauseNode
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Get the target table for the MERGE statement */
+    FromBaseTable   getTargetTable() { return _targetTable; }
+
+    /** Associate a column with the SOURCE or TARGET table */
+    void    associateColumn( FromList fromList, ColumnReference cr, int mergeTableID )
+        throws StandardException
+    {
+        if ( mergeTableID != ColumnReference.MERGE_UNKNOWN )    { cr.setMergeTableID( mergeTableID ); }
+        else
+        {
+            // we have to figure out which table the column is in
+            String  columnsTableName = cr.getTableName();
+
+            if ( ((FromTable) fromList.elementAt( SOURCE_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            {
+                cr.setMergeTableID( ColumnReference.MERGE_SOURCE );
+            }
+            else if ( ((FromTable) fromList.elementAt( TARGET_TABLE_INDEX )).getMatchingColumn( cr ) != null )
+            {
+                cr.setMergeTableID( ColumnReference.MERGE_TARGET );
+            }
+        }
+
+        // Don't raise an error if a column in another table is referenced and we
+        // don't know how to handle it here. If the column is not in the SOURCE or TARGET
+        // table, then it will be caught by other bind-time logic. Columns which ought
+        // to be associated, but aren't, will be caught later on by MatchingClauseNode.getMergeTableID().
+    }
+
+    /** Boilerplate for binding an expression against a FromList */
+    void bindExpression( ValueNode value, FromList fromList )
+        throws StandardException
+    {
+        CompilerContext cc = getCompilerContext();
+        final int previousReliability = cc.getReliability();
+
+        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+        cc.pushCurrentPrivType( Authorizer.SELECT_PRIV );
+            
+        try {
+            // this adds SELECT priv on referenced columns and EXECUTE privs on referenced routines
+            value.bindExpression
+                (
+                 fromList,
+                 new SubqueryList( getContextManager() ),
+                 new ArrayList<AggregateNode>()
+                 );
+        }
+        finally
+        {
+            // Restore previous compiler state
+            cc.popCurrentPrivType();
+            cc.setReliability( previousReliability );
+        }
+    }
+
+    /** Add the columns in the matchingRefinement clause to the evolving map */
+    void    getColumnsInExpression
+        ( HashMap<String,ColumnReference> map, ValueNode expression, int mergeTableID )
+        throws StandardException
+    {
+        if ( expression == null ) { return; }
+
+        List<ColumnReference> colRefs = getColumnReferences( expression );
+
+        getColumnsFromList( map, colRefs, mergeTableID );
+    }
+
+    /** Add a list of columns to the the evolving map */
+    void    getColumnsFromList
+        ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
+        throws StandardException
+    {
+        List<ColumnReference> colRefs = getColumnReferences( rcl );
+
+        getColumnsFromList( map, colRefs, mergeTableID );
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // bind() BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
@@ -252,40 +336,11 @@ public final class MergeNode extends DMLModStatementNode
         bindLeftJoin( dd );
 	}
 
-    /** Create a FromList for binding a WHEN [ NOT ] MATCHED clause */
-    private FromList    cloneFromList( DataDictionary dd, FromBaseTable targetTable )
-        throws StandardException
-    {
-        FromList    dummyFromList = new FromList( getContextManager() );
-        FromBaseTable   dummyTargetTable = new FromBaseTable
-            (
-             targetTable.getTableNameField(),
-             targetTable.correlationName,
-             null,
-             null,
-             getContextManager()
-             );
-        FromTable       dummySourceTable = cloneFromTable( _sourceTable );
-
-        dummyTargetTable.setMergeTableID( ColumnReference.MERGE_TARGET );
-        dummySourceTable.setMergeTableID ( ColumnReference.MERGE_SOURCE );
-        
-        dummyFromList.addFromTable( dummySourceTable );
-        dummyFromList.addFromTable( dummyTargetTable );
-        
-        //
-        // Don't add any privileges while binding the tables.
-        //
-        IgnoreFilter    ignorePermissions = new IgnoreFilter();
-        getCompilerContext().addPrivilegeFilter( ignorePermissions );
-             
-        dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
-
-        // ready to add permissions
-        getCompilerContext().removePrivilegeFilter( ignorePermissions );
-        
-        return dummyFromList;
-    }
+    /////////////////////////////////////
+    //
+    // TABLE AND CORRELATION CHECKS
+    //
+    /////////////////////////////////////
 
     /** Get the exposed name of a FromTable */
     private String  getExposedName( FromTable ft ) throws StandardException
@@ -336,6 +391,59 @@ public final class MergeNode extends DMLModStatementNode
             throw StandardException.newException( SQLState.LANG_NO_SYNONYMS_IN_MERGE );
         }
     }
+
+    /** Throw a "not base table" exception */
+    private void    notBaseTable()  throws StandardException
+    {
+        throw StandardException.newException( SQLState.LANG_TARGET_NOT_BASE_TABLE );
+    }
+
+    /** Return true if the target table is a base table */
+    private boolean targetIsBaseTable( FromBaseTable targetTable ) throws StandardException
+    {
+        FromBaseTable   fbt = targetTable;
+        TableDescriptor desc = fbt.getTableDescriptor();
+        if ( desc == null ) { return false; }
+
+        switch( desc.getTableType() )
+        {
+        case TableDescriptor.BASE_TABLE_TYPE:
+        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
+            return true;
+
+        default:
+            return false;
+        }
+    }
+
+    /** Return true if the source table is a base table, view, or table function */
+    private boolean sourceIsBase_View_or_VTI() throws StandardException
+    {
+        if ( _sourceTable instanceof FromVTI ) { return true; }
+        if ( !( _sourceTable instanceof FromBaseTable) ) { return false; }
+
+        FromBaseTable   fbt = (FromBaseTable) _sourceTable;
+        TableDescriptor desc = fbt.getTableDescriptor();
+        if ( desc == null ) { return false; }
+
+        switch( desc.getTableType() )
+        {
+        case TableDescriptor.BASE_TABLE_TYPE:
+        case TableDescriptor.SYSTEM_TABLE_TYPE:
+        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
+        case TableDescriptor.VIEW_TYPE:
+            return true;
+
+        default:
+            return false;
+        }
+    }
+
+    ///////////////////////////
+    //
+    // BINDING THE LEFT JOIN
+    //
+    ///////////////////////////
 
     /**
      * Bind the driving left join select.
@@ -453,109 +561,45 @@ public final class MergeNode extends DMLModStatementNode
         }
     }
 
-    /** Get the target table for the MERGE statement */
-    FromBaseTable   getTargetTable() { return _targetTable; }
+    ////////////////////////////
+    //
+    // CLONING THE FROM LIST
+    //
+    ////////////////////////////
 
-    /** Throw a "not base table" exception */
-    private void    notBaseTable()  throws StandardException
-    {
-        throw StandardException.newException( SQLState.LANG_TARGET_NOT_BASE_TABLE );
-    }
-
-    /** Build the select list for the left join */
-    private ResultColumnList    buildSelectList() throws StandardException
-    {
-        HashMap<String,ColumnReference> drivingColumnMap = new HashMap<String,ColumnReference>();
-        getColumnsInExpression( drivingColumnMap, _searchCondition, ColumnReference.MERGE_UNKNOWN );
-        
-        for ( MatchingClauseNode mcn : _matchingClauses )
-        {
-            mcn.getColumnsInExpressions( this, drivingColumnMap );
-
-            int mergeTableID = mcn.isDeleteClause() ? ColumnReference.MERGE_TARGET : ColumnReference.MERGE_UNKNOWN;
-            getColumnsFromList( drivingColumnMap, mcn.getBufferedColumns(), mergeTableID );
-        }
-
-        ResultColumnList    selectList = new ResultColumnList( getContextManager() );
-
-        // add all of the columns from the source table which are mentioned
-        addColumns
-            (
-             (FromTable) _leftJoinFromList.elementAt( SOURCE_TABLE_INDEX ),
-             drivingColumnMap,
-             selectList,
-             ColumnReference.MERGE_SOURCE
-             );
-        // add all of the columns from the target table which are mentioned
-        addColumns
-            (
-             (FromTable) _leftJoinFromList.elementAt( TARGET_TABLE_INDEX ),
-             drivingColumnMap,
-             selectList,
-             ColumnReference.MERGE_TARGET
-             );
-
-        addTargetRowLocation( selectList );
-
-        return selectList;
-    }
-
-    /** Add the target table's row location to the left join's select list */
-    private void    addTargetRowLocation( ResultColumnList selectList )
+    /** Create a FromList for binding a WHEN [ NOT ] MATCHED clause */
+    private FromList    cloneFromList( DataDictionary dd, FromBaseTable targetTable )
         throws StandardException
     {
-        // tell the target table to generate a row location column
-        _targetTable.setRowLocationColumnName( TARGET_ROW_LOCATION_NAME );
+        FromList    dummyFromList = new FromList( getContextManager() );
+        FromBaseTable   dummyTargetTable = new FromBaseTable
+            (
+             targetTable.getTableNameField(),
+             targetTable.correlationName,
+             null,
+             null,
+             getContextManager()
+             );
+        FromTable       dummySourceTable = cloneFromTable( _sourceTable );
 
-        TableName   fromTableName = _targetTable.getTableName();
-        ColumnReference cr = new ColumnReference
-                ( TARGET_ROW_LOCATION_NAME, fromTableName, getContextManager() );
-        cr.setMergeTableID( ColumnReference.MERGE_TARGET );
-        ResultColumn    rowLocationColumn = new ResultColumn( (String) null, cr, getContextManager() );
-        rowLocationColumn.markGenerated();
+        dummyTargetTable.setMergeTableID( ColumnReference.MERGE_TARGET );
+        dummySourceTable.setMergeTableID ( ColumnReference.MERGE_SOURCE );
+        
+        dummyFromList.addFromTable( dummySourceTable );
+        dummyFromList.addFromTable( dummyTargetTable );
+        
+        //
+        // Don't add any privileges while binding the tables.
+        //
+        IgnoreFilter    ignorePermissions = new IgnoreFilter();
+        getCompilerContext().addPrivilegeFilter( ignorePermissions );
+             
+        dummyFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
-        selectList.addResultColumn( rowLocationColumn );
-    }
-
-    /** Return true if the target table is a base table */
-    private boolean targetIsBaseTable( FromBaseTable targetTable ) throws StandardException
-    {
-        FromBaseTable   fbt = targetTable;
-        TableDescriptor desc = fbt.getTableDescriptor();
-        if ( desc == null ) { return false; }
-
-        switch( desc.getTableType() )
-        {
-        case TableDescriptor.BASE_TABLE_TYPE:
-        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
-            return true;
-
-        default:
-            return false;
-        }
-    }
-
-    /** Return true if the source table is a base table, view, or table function */
-    private boolean sourceIsBase_View_or_VTI() throws StandardException
-    {
-        if ( _sourceTable instanceof FromVTI ) { return true; }
-        if ( !( _sourceTable instanceof FromBaseTable) ) { return false; }
-
-        FromBaseTable   fbt = (FromBaseTable) _sourceTable;
-        TableDescriptor desc = fbt.getTableDescriptor();
-        if ( desc == null ) { return false; }
-
-        switch( desc.getTableType() )
-        {
-        case TableDescriptor.BASE_TABLE_TYPE:
-        case TableDescriptor.SYSTEM_TABLE_TYPE:
-        case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
-        case TableDescriptor.VIEW_TYPE:
-            return true;
-
-        default:
-            return false;
-        }
+        // ready to add permissions
+        getCompilerContext().removePrivilegeFilter( ignorePermissions );
+        
+        return dummyFromList;
     }
 
     /** Clone a FromTable to avoid binding the original */
@@ -592,6 +636,12 @@ public final class MergeNode extends DMLModStatementNode
             throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_VIEW_OR_VTI );
         }
     }
+
+    ///////////////////////////
+    //
+    // PRIVILEGE MANAGEMENT
+    //
+    ///////////////////////////
 
     /**
      * <p>
@@ -658,6 +708,92 @@ public final class MergeNode extends DMLModStatementNode
         cc.popCurrentPrivType();
     }
 
+    /** Get a list of CastNodes in an expression */
+    private List<CastNode>   getCastNodes( QueryTreeNode expression )
+        throws StandardException
+    {
+        CollectNodesVisitor<CastNode> getCNs =
+            new CollectNodesVisitor<CastNode>(CastNode.class);
+
+        expression.accept(getCNs);
+        
+        return getCNs.getList();
+    }
+
+    /** Get a list of routines in an expression */
+    private List<StaticMethodCallNode>   getRoutineReferences( QueryTreeNode expression )
+        throws StandardException
+    {
+        CollectNodesVisitor<StaticMethodCallNode> getSMCNs =
+            new CollectNodesVisitor<StaticMethodCallNode>(StaticMethodCallNode.class);
+
+        expression.accept(getSMCNs);
+        
+        return getSMCNs.getList();
+    }
+
+    ///////////////////////////////
+    //
+    // BUILD THE SELECT LIST
+    // FOR THE DRIVING LEFT JOIN
+    //
+    ///////////////////////////////
+
+    /** Build the select list for the left join */
+    private ResultColumnList    buildSelectList() throws StandardException
+    {
+        HashMap<String,ColumnReference> drivingColumnMap = new HashMap<String,ColumnReference>();
+        getColumnsInExpression( drivingColumnMap, _searchCondition, ColumnReference.MERGE_UNKNOWN );
+        
+        for ( MatchingClauseNode mcn : _matchingClauses )
+        {
+            mcn.getColumnsInExpressions( this, drivingColumnMap );
+
+            int mergeTableID = mcn.isDeleteClause() ? ColumnReference.MERGE_TARGET : ColumnReference.MERGE_UNKNOWN;
+            getColumnsFromList( drivingColumnMap, mcn.getThenColumns(), mergeTableID );
+        }
+
+        ResultColumnList    selectList = new ResultColumnList( getContextManager() );
+
+        // add all of the columns from the source table which are mentioned
+        addColumns
+            (
+             (FromTable) _leftJoinFromList.elementAt( SOURCE_TABLE_INDEX ),
+             drivingColumnMap,
+             selectList,
+             ColumnReference.MERGE_SOURCE
+             );
+        // add all of the columns from the target table which are mentioned
+        addColumns
+            (
+             (FromTable) _leftJoinFromList.elementAt( TARGET_TABLE_INDEX ),
+             drivingColumnMap,
+             selectList,
+             ColumnReference.MERGE_TARGET
+             );
+
+        addTargetRowLocation( selectList );
+
+        return selectList;
+    }
+
+    /** Add the target table's row location to the left join's select list */
+    private void    addTargetRowLocation( ResultColumnList selectList )
+        throws StandardException
+    {
+        // tell the target table to generate a row location column
+        _targetTable.setRowLocationColumnName( TARGET_ROW_LOCATION_NAME );
+
+        TableName   fromTableName = _targetTable.getTableName();
+        ColumnReference cr = new ColumnReference
+                ( TARGET_ROW_LOCATION_NAME, fromTableName, getContextManager() );
+        cr.setMergeTableID( ColumnReference.MERGE_TARGET );
+        ResultColumn    rowLocationColumn = new ResultColumn( (String) null, cr, getContextManager() );
+        rowLocationColumn.markGenerated();
+
+        selectList.addResultColumn( rowLocationColumn );
+    }
+
     /**
      * <p>
      * Add to an evolving select list the columns from the indicated table.
@@ -702,42 +838,6 @@ public final class MergeNode extends DMLModStatementNode
         return retval;
     }
     
-    /** Add the columns in the matchingRefinement clause to the evolving map */
-    void    getColumnsInExpression
-        ( HashMap<String,ColumnReference> map, ValueNode expression, int mergeTableID )
-        throws StandardException
-    {
-        if ( expression == null ) { return; }
-
-        List<ColumnReference> colRefs = getColumnReferences( expression );
-
-        getColumnsFromList( map, colRefs, mergeTableID );
-    }
-
-    /** Get a list of CastNodes in an expression */
-    private List<CastNode>   getCastNodes( QueryTreeNode expression )
-        throws StandardException
-    {
-        CollectNodesVisitor<CastNode> getCNs =
-            new CollectNodesVisitor<CastNode>(CastNode.class);
-
-        expression.accept(getCNs);
-        
-        return getCNs.getList();
-    }
-
-    /** Get a list of routines in an expression */
-    private List<StaticMethodCallNode>   getRoutineReferences( QueryTreeNode expression )
-        throws StandardException
-    {
-        CollectNodesVisitor<StaticMethodCallNode> getSMCNs =
-            new CollectNodesVisitor<StaticMethodCallNode>(StaticMethodCallNode.class);
-
-        expression.accept(getSMCNs);
-        
-        return getSMCNs.getList();
-    }
-
     /** Get a list of column references in an expression */
     private List<ColumnReference>   getColumnReferences( QueryTreeNode expression )
         throws StandardException
@@ -750,16 +850,6 @@ public final class MergeNode extends DMLModStatementNode
         return getCRs.getList();
     }
 
-    /** Add a list of columns to the the evolving map */
-    void    getColumnsFromList
-        ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
-        throws StandardException
-    {
-        List<ColumnReference> colRefs = getColumnReferences( rcl );
-
-        getColumnsFromList( map, colRefs, mergeTableID );
-    }
-    
     /** Add a list of columns to the the evolving map */
     private void    getColumnsFromList
         ( HashMap<String,ColumnReference> map, List<ColumnReference> colRefs, int mergeTableID )
@@ -803,63 +893,10 @@ public final class MergeNode extends DMLModStatementNode
         }
     }
 
-    /** Associate a column with the SOURCE or TARGET table */
-    void    associateColumn( FromList fromList, ColumnReference cr, int mergeTableID )
-        throws StandardException
-    {
-        if ( mergeTableID != ColumnReference.MERGE_UNKNOWN )    { cr.setMergeTableID( mergeTableID ); }
-        else
-        {
-            // we have to figure out which table the column is in
-            String  columnsTableName = cr.getTableName();
-
-            if ( ((FromTable) fromList.elementAt( SOURCE_TABLE_INDEX )).getMatchingColumn( cr ) != null )
-            {
-                cr.setMergeTableID( ColumnReference.MERGE_SOURCE );
-            }
-            else if ( ((FromTable) fromList.elementAt( TARGET_TABLE_INDEX )).getMatchingColumn( cr ) != null )
-            {
-                cr.setMergeTableID( ColumnReference.MERGE_TARGET );
-            }
-        }
-
-        // Don't raise an error if a column in another table is referenced and we
-        // don't know how to handle it here. If the column is not in the SOURCE or TARGET
-        // table, then it will be caught by other bind-time logic. Columns which ought
-        // to be associated, but aren't, will be caught later on by MatchingClauseNode.getMergeTableID().
-    }
-
     /** Make a HashMap key for a column in the driving column map of the LEFT JOIN */
     private String  makeDCMKey( String tableName, String columnName )
     {
         return IdUtil.mkQualifiedName( tableName, columnName );
-    }
-
-    /** Boilerplate for binding an expression against a FromList */
-    void bindExpression( ValueNode value, FromList fromList )
-        throws StandardException
-    {
-        CompilerContext cc = getCompilerContext();
-        final int previousReliability = cc.getReliability();
-
-        cc.setReliability( previousReliability | CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
-        cc.pushCurrentPrivType( Authorizer.SELECT_PRIV );
-            
-        try {
-            // this adds SELECT priv on referenced columns and EXECUTE privs on referenced routines
-            value.bindExpression
-                (
-                 fromList,
-                 new SubqueryList( getContextManager() ),
-                 new ArrayList<AggregateNode>()
-                 );
-        }
-        finally
-        {
-            // Restore previous compiler state
-            cc.popCurrentPrivType();
-            cc.setReliability( previousReliability );
-        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -894,6 +931,7 @@ public final class MergeNode extends DMLModStatementNode
         // ready to add permissions again
         getCompilerContext().removePrivilegeFilter( ignorePermissions );
 	}
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // generate() BEHAVIOR
