@@ -101,19 +101,6 @@ public class IndexLister
 	}
 
     /**
-	  *	Returns an array of all the index names on a table.
-	  *
-	  *	@return	an array of index names
-	  *
-	  * @exception StandardException		Thrown on error
-	  */
-    public	String[]		getIndexNames()	throws StandardException
-	{
-		if ( indexNames == null ) { getAllIndexes(); }
-		return	ArrayUtil.copy( indexNames );
-	}
-
-    /**
 	  *	Returns an array of distinct index row generators on a table,
 	  * erasing entries for duplicate indexes (which share same conglomerate).
 	  *
@@ -153,8 +140,8 @@ public class IndexLister
 	  */
     public	String[]		getDistinctIndexNames()	throws StandardException
 	{
-		if ( indexNames == null ) { getAllIndexes(); }
-		return	ArrayUtil.copy( indexNames );
+		if ( distinctIndexNames == null ) { getAllIndexes(); }
+		return	ArrayUtil.copy( distinctIndexNames );
 	}
 
 	////////////////////////////////////////////////////////////////////////
