@@ -43,7 +43,7 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
     private String [][] expRS;
     private final String NULLS_ELIMINATED = "01003";
     private SQLWarning sqlWarn = null;
-    private String[][] SINGLE_NULL_ROW = new String[][]{{null}};
+    private final String[][] SINGLE_NULL_ROW = new String[][]{{null}};
     /**
      * Public constructor required for running test as standalone JUnit.
      * @param name test name
