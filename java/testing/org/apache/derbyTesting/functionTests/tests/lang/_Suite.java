@@ -240,6 +240,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(TruncateTableAndOnlineBackupTest.suite()); 
         suite.addTest(QueryPlanTest.suite());
         suite.addTest(Derby6131.suite());
+        suite.addTest(AggBuiltinTest.suite());
         suite.addTest(NewOptimizerOverridesTest.suite());
         suite.addTest(XMLOptimizerTraceTest.suite());
         suite.addTest(MergeStatementTest.suite());

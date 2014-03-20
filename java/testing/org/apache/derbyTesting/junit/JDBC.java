@@ -1016,7 +1016,7 @@ public class JDBC {
 
 
     /**
-     * assertFullResultSet() using trimmed string comparisions.
+     * assertFullResultSet() using trimmed string comparisons.
      * Equal to
      * <code>
      * assertFullResultSet(rs, expectedRows, true)

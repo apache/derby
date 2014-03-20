@@ -62,7 +62,6 @@ public final class LangScripts extends ScriptTestCase {
      * run in emebdded.
      */
     private static final String[] EMBEDDED_TESTS = {
-        "aggbuiltin",
         "aggregate",        
         "cast",
         "comparisons",
