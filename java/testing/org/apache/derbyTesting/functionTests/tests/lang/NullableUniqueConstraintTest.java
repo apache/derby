@@ -45,6 +45,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
     
+    private static final String LANG_DUPLICATE_KEY_CONSTRAINT = "23505";
+    static String expImpDataFile;          // file used to perform
+                                           // import/export
+    static boolean exportFilesCreated = false;
+
     /**
      * Basic constructor.
      */
@@ -62,7 +67,7 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("NullableUniqueConstraintTest");
         suite.addTest(TestConfiguration.defaultSuite(
                             NullableUniqueConstraintTest.class));
-        return suite;
+        return new SupportFilesSetup(suite);
     }
     
     /**
@@ -73,6 +78,21 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
         Statement stmt = con.createStatement();
         stmt.executeUpdate("create table constraintest (val1 varchar (20), " +
                 "val2 varchar (20), val3 varchar (20), val4 varchar (20))");
+        expImpDataFile =
+                SupportFilesSetup.getReadWrite("t.data").getPath();
+
+        if (!exportFilesCreated) {
+            exportFilesCreated = true;
+
+            Statement s = createStatement();
+            s.executeUpdate("create table t(i int)");
+            s.executeUpdate("insert into t values 1,2,2,3");
+            s.executeUpdate(
+                    "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (" +
+                            "    'APP' , 'T' , '" + expImpDataFile + "'," +
+                            "    null, null , null)");
+            s.executeUpdate("drop table t");
+        }
     }
     
     protected void tearDown() throws Exception {
@@ -582,6 +602,42 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
 
         // Verify that the table is empty after the last delete operation.
         assertTableRowCount("D4081", 0);
+    }
+
+    public void testDerby6374() throws SQLException {
+        Statement s = createStatement();
+
+        s.executeUpdate("create table t(i int)");
+
+         try {
+            // Try the test cases below with both "replace" and not with
+            // the import statement:
+            for (int addOrReplace = 0; addOrReplace < 2; addOrReplace++) {
+
+                // Import duplicate data into a table a nullable
+                // UNIQUE constraint
+                s.executeUpdate("alter table t add constraint c unique(i)");
+                commit();
+
+                try {
+                    s.executeUpdate(
+                            "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (" +
+                            "    'APP' , 'T' , '" + expImpDataFile + "'," +
+                            "    null, null , null, " + addOrReplace + ")");
+                    fail("expected duplicates error on commit");
+                } catch (SQLException e) {
+                    assertSQLState(LANG_DUPLICATE_KEY_CONSTRAINT, e);
+                }
+                s.executeUpdate("alter table t drop constraint c");
+            }
+        } finally {
+            try {
+                s.executeUpdate("drop table t");
+                commit();
+            } catch (SQLException e) {
+                e.printStackTrace(System.out);
+            }
+        }
     }
 
     public static void main(String [] args) {

@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-
 import org.apache.derby.catalog.types.StatisticsImpl;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
@@ -48,8 +47,8 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
@@ -60,6 +59,7 @@ import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
+import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
@@ -1763,29 +1763,24 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			boolean[] isAscending     = constants.irgs[index].isAscending();
            
 			int numColumnOrderings;
-			SortObserver sortObserver = null;
+            SortObserver sortObserver;
 
 			/* We can only reuse the wrappers when doing an
 			 * external sort if there is only 1 index.  Otherwise,
 			 * we could get in a situation where 1 sort reuses a
 			 * wrapper that is still in use in another sort.
 			 */
-			boolean reuseWrappers = (numIndexes == 1);
-			if (cd.getIndexDescriptor().isUnique())
-			{
-				numColumnOrderings = baseColumnPositions.length;
-				String[] columnNames = getColumnNames(baseColumnPositions);
+            final boolean reuseWrappers = (numIndexes == 1);
+            final IndexRowGenerator indDes = cd.getIndexDescriptor();
+            final String indexOrConstraintName = cd.getConglomerateName();
+            Properties sortProperties = null;
 
-				String indexOrConstraintName = cd.getConglomerateName();
-				if (cd.isConstraint()) 
-				{
-                    // so, the index is backing up a constraint
+            if (indDes.isUnique())
+            {
+                numColumnOrderings =
+                        indDes.isUnique() ? baseColumnPositions.length :
+                        baseColumnPositions.length + 1;
 
-					ConstraintDescriptor conDesc = 
-                        dd.getConstraintDescriptor(td, cd.getUUID());
-
-					indexOrConstraintName = conDesc.getConstraintName();
-				}
 				sortObserver = 
                     new UniqueIndexSortObserver(
                             false, // don't clone rows
@@ -1794,7 +1789,26 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                             indexRows[index],
                             reuseWrappers,
                             td.getName());
-			}
+            } else if (indDes.isUniqueWithDuplicateNulls())
+            {
+                numColumnOrderings = baseColumnPositions.length + 1;
+                // tell transaction controller to use the unique with
+                // duplicate nulls sorter, when making createSort() call.
+                sortProperties = new Properties();
+                sortProperties.put(
+                   AccessFactoryGlobals.IMPL_TYPE,
+                   AccessFactoryGlobals.SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL);
+                //use sort operator which treats nulls unequal
+                sortObserver =
+                        new UniqueWithDuplicateNullsIndexSortObserver(
+                                false, // don't clone rows
+                                cd.isConstraint(),
+                                indexOrConstraintName,
+                                indexRows[index],
+                                reuseWrappers,
+                                td.getName());
+
+            }
 			else
 			{
 				numColumnOrderings = baseColumnPositions.length + 1;
@@ -1822,7 +1836,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			// create the sorters
 			sortIds[index] = 
                 tc.createSort(
-                    (Properties)null, 
+                    sortProperties,
                     indexRows[index].getRowArrayClone(),
                     ordering[index],
                     sortObserver,
