@@ -1155,7 +1155,6 @@ public class GenericConstantActionFactory
          String matchRefinementName,
          ResultDescription  thenColumnSignature,
          String rowMakingMethodName,
-         int[]  thenColumns,
          String resultSetFieldName,
          String actionMethodName,
          ConstantAction thenAction
@@ -1167,7 +1166,6 @@ public class GenericConstantActionFactory
              matchRefinementName,
              thenColumnSignature,
              rowMakingMethodName,
-             thenColumns,
              resultSetFieldName,
              actionMethodName,
              thenAction

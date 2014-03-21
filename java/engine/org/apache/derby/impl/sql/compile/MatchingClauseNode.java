@@ -87,7 +87,6 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /** the columns in the temporary conglomerate which drives the INSERT/UPDATE/DELETE */
     private ResultColumnList        _thenColumns;
-    private int[]                           _deleteColumnOffsets;
 
     // Filled in at generate() time
     private int                             _clauseNumber;
@@ -775,33 +774,6 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
 
-    /**
-     * <p>
-     * Calculate the 1-based offsets which define the "then" rows which will be buffered up
-     * for a DELETE action at run-time. The rows are constructed
-     * from the columns in the SELECT list of the driving left joins. This method
-     * calculates an array of offsets into the SELECT list. The columns at those
-     * offsets will form the row which is buffered up for the DELETE
-     * action.
-     * </p>
-     */
-    private void    bindDeleteThenColumns( ResultColumnList selectList )
-        throws StandardException
-    {
-        int     thenCount = _thenColumns.size();
-        int     selectCount = selectList.size();
-        
-        _deleteColumnOffsets = new int[ thenCount ];
-
-        for ( int bidx = 0; bidx < thenCount; bidx++ )
-        {
-            ResultColumn    thenRC = _thenColumns.elementAt( bidx );
-            ValueNode       thenExpression = thenRC.getExpression();
-
-            _deleteColumnOffsets[ bidx ] = getSelectListOffset( selectList, thenExpression );
-        }
-    }
-
     ////////////////
     //
     // BIND INSERT
@@ -1096,100 +1068,6 @@ public class MatchingClauseNode extends QueryTreeNode
     }
 
 
-    ////////////////////////
-    //
-    // BIND THE THEN ROW
-    //
-    ////////////////////////
-
-    /**
-     * <p>
-     * Bind the row which will go into the temporary table at run-time.
-     * </p>
-     */
-    void    bindThenColumns( ResultColumnList selectList )
-        throws StandardException
-    {
-        if ( isDeleteClause() ) { bindDeleteThenColumns( selectList ); }
-    }
-
-    /**
-     * <p>
-     * Find a column reference in the SELECT list of the driving left join
-     * and return its 1-based offset into that list.  Returns -1 if the column
-     * can't be found.
-     * </p>
-     */
-    private int getSelectListOffset( ResultColumnList selectList, ValueNode thenExpression )
-        throws StandardException
-    {
-        int                 selectCount = selectList.size();
-
-        if ( thenExpression instanceof ColumnReference )
-        {
-            ColumnReference thenCR = (ColumnReference) thenExpression;
-            String              thenCRName = thenCR.getColumnName();
-            int                 thenCRMergeTableID = getMergeTableID( thenCR );
-
-            // loop through the SELECT list to find this column reference
-            for ( int sidx = 0; sidx < selectCount; sidx++ )
-            {
-                ResultColumn    selectRC = selectList.elementAt( sidx );
-                ValueNode       selectExpression = selectRC.getExpression();
-                ColumnReference selectCR = selectExpression instanceof ColumnReference ?
-                    (ColumnReference) selectExpression : null;
-
-                if ( selectCR != null )
-                {
-                    if (
-                        ( getMergeTableID( selectCR ) == thenCRMergeTableID) &&
-                        thenCRName.equals( selectCR.getColumnName() )
-                        )
-                    {
-                        return sidx + 1;
-                    }
-                }
-            }
-            
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.THROWASSERT
-                    (
-                     "Can't find select list column corresponding to " + thenCR.getSQLColumnName() +
-                     " with merge table id = " + thenCRMergeTableID
-                     );
-            }
-        }
-        else if ( thenExpression instanceof CurrentRowLocationNode )
-        {
-            //
-            // There is only one RowLocation in the SELECT list, the row location for the
-            // tuple from the target table. The RowLocation is always the last column in
-            // the SELECT list.
-            //
-            return selectCount;
-        }
-
-        return -1;
-    }
-
-    /** Find the MERGE table id of the indicated column */
-    private int getMergeTableID( ColumnReference cr )
-    {
-        int                 mergeTableID = cr.getMergeTableID();
-
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT
-                (
-                 ( (mergeTableID == ColumnReference.MERGE_SOURCE) || (mergeTableID == ColumnReference.MERGE_TARGET) ),
-                 "Column " + cr.getSQLColumnName() + " has illegal MERGE table id: " + mergeTableID
-                 );
-        }
-
-        return mergeTableID;
-    }
-
     /////////////////
     //
     // BIND MINIONS
@@ -1307,7 +1185,6 @@ public class MatchingClauseNode extends QueryTreeNode
              refinementName,
              buildThenColumnSignature(),
              _rowMakingMethodName,
-             _deleteColumnOffsets,
              _resultSetFieldName,
              _actionMethodName,
              _dml.makeConstantAction()
@@ -1353,7 +1230,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
         adjustMatchingRefinement( selectList, generatedScan );
         
-        if ( isInsertClause() || isUpdateClause() ) { generateInsertUpdateRow( acb, selectList, generatedScan, hojn ); }
+        generateInsertUpdateRow( acb, selectList, generatedScan, hojn );
         
         _actionMethodName = "mergeActionMethod_" + _clauseNumber;
         
@@ -1544,6 +1421,83 @@ public class MatchingClauseNode extends QueryTreeNode
         }
     }
     
+    /**
+     * <p>
+     * Find a column reference in the SELECT list of the driving left join
+     * and return its 1-based offset into that list.  Returns -1 if the column
+     * can't be found.
+     * </p>
+     */
+    private int getSelectListOffset( ResultColumnList selectList, ValueNode thenExpression )
+        throws StandardException
+    {
+        int                 selectCount = selectList.size();
+
+        if ( thenExpression instanceof ColumnReference )
+        {
+            ColumnReference thenCR = (ColumnReference) thenExpression;
+            String              thenCRName = thenCR.getColumnName();
+            int                 thenCRMergeTableID = getMergeTableID( thenCR );
+
+            // loop through the SELECT list to find this column reference
+            for ( int sidx = 0; sidx < selectCount; sidx++ )
+            {
+                ResultColumn    selectRC = selectList.elementAt( sidx );
+                ValueNode       selectExpression = selectRC.getExpression();
+                ColumnReference selectCR = selectExpression instanceof ColumnReference ?
+                    (ColumnReference) selectExpression : null;
+
+                if ( selectCR != null )
+                {
+                    if (
+                        ( getMergeTableID( selectCR ) == thenCRMergeTableID) &&
+                        thenCRName.equals( selectCR.getColumnName() )
+                        )
+                    {
+                        return sidx + 1;
+                    }
+                }
+            }
+            
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT
+                    (
+                     "Can't find select list column corresponding to " + thenCR.getSQLColumnName() +
+                     " with merge table id = " + thenCRMergeTableID
+                     );
+            }
+        }
+        else if ( thenExpression instanceof CurrentRowLocationNode )
+        {
+            //
+            // There is only one RowLocation in the SELECT list, the row location for the
+            // tuple from the target table. The RowLocation is always the last column in
+            // the SELECT list.
+            //
+            return selectCount;
+        }
+
+        return -1;
+    }
+
+    /** Find the MERGE table id of the indicated column */
+    private int getMergeTableID( ColumnReference cr )
+    {
+        int                 mergeTableID = cr.getMergeTableID();
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT
+                (
+                 ( (mergeTableID == ColumnReference.MERGE_SOURCE) || (mergeTableID == ColumnReference.MERGE_TARGET) ),
+                 "Column " + cr.getSQLColumnName() + " has illegal MERGE table id: " + mergeTableID
+                 );
+        }
+
+        return mergeTableID;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Visitable BEHAVIOR

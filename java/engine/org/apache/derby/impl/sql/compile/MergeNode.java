@@ -504,13 +504,6 @@ public final class MergeNode extends DMLModStatementNode
             // save a copy so that we can remap column references when generating the temporary rows
             _selectList = selectList.copyListAndObjects();
 
-            // calculate the offsets into the SELECT list which define the rows for
-            // the WHEN [ NOT ] MATCHED  actions
-            for ( MatchingClauseNode mcn : _matchingClauses )
-            {
-                mcn.bindThenColumns( _selectList );
-            }
-
             resultSet = new SelectNode
                 (
                  selectList,
