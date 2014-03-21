@@ -72,23 +72,27 @@ public class MatchingClauseNode extends QueryTreeNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    // filled in by the constructor
+    //
+    // Filled in by the constructor.
+    //
     private ValueNode           _matchingRefinement;
     private ResultColumnList    _updateColumns;
     private ResultColumnList    _insertColumns;
     private ResultColumnList    _insertValues;
 
     //
-    // filled in at bind() time
+    // Filled in at bind() time.
     //
 
-    /** the INSERT/UPDATE/DELETE statement of this WHEN [ NOT ] MATCHED clause */
+    // the INSERT/UPDATE/DELETE statement of this WHEN [ NOT ] MATCHED clause
     private DMLModStatementNode _dml;
 
-    /** the columns in the temporary conglomerate which drives the INSERT/UPDATE/DELETE */
+    // the columns in the temporary conglomerate which drives the INSERT/UPDATE/DELETE
     private ResultColumnList        _thenColumns;
 
-    // Filled in at generate() time
+    //
+    // Filled in at generate() time.
+    //
     private int                             _clauseNumber;
     private String                          _actionMethodName;
     private String                          _resultSetFieldName;
@@ -347,7 +351,7 @@ public class MatchingClauseNode extends QueryTreeNode
 
     /**
      * <p>
-     * Due to discrepancies on how names are resolved in SELECT and UPDATE,
+     * Due to discrepancies in how names are resolved by SELECT and UPDATE,
      * we have to force the left side of SET clauses to use the same table identifiers
      * as the right sides of the SET clauses.
      * </p>
@@ -385,9 +389,9 @@ public class MatchingClauseNode extends QueryTreeNode
     /**
      * <p>
      * Get the bound SELECT node under the dummy UPDATE node.
-     * This may not be the source result set of the UPDATE node. That is because a ProjectRestrictResultSet
+     * This may not be the source result set of the UPDATE node. That is because a ProjectRestrictNode
      * may have been inserted on top of it by DEFAULT handling. This method
-     * exists to make the UPDATE actions of MERGE statement behave like ordinary
+     * exists to make the UPDATE actions of MERGE statements behave like ordinary
      * UPDATE statements in this situation. The behavior is actually wrong. See
      * DERBY-6414. Depending on how that bug is addressed, we may be able
      * to remove this method eventually.

@@ -108,6 +108,20 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * </ul>
  *
  * <p>
+ * The driving left join's selectList then looks like this...
+ * </p>
+ *
+ * <pre>
+ * sc1, ..., scN, tc1, ..., tcM, targetTable.RowLocation
+ * </pre>
+ *
+ * <p>
+ * Where sc1...scN are the columns we need from the source table (in alphabetical
+ * order) and tc1...tcM are the columns we need from the target table (in alphabetical
+ * order).
+ * </p>
+ *
+ * <p>
  * The matchingRefinement expressions are bound and generated against the
  * FromList of the driving left join. Dummy DeleteNode, UpdateNode, and InsertNode
  * statements are independently constructed in order to bind and generate the DELETE/UPDATE/INSERT
@@ -123,6 +137,25 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * DELETE/UPDATE/INSERT action. After the driving left join has been processed,
  * the DELETE/UPDATE/INSERT actions are run in order, each taking its corresponding
  * temporary table as its source ResultSet.
+ * </p>
+ *
+ * <p>
+ * Name resolution was a particularly thorny problem. This is because name resolution
+ * behaves differently for SELECTs and UPDATEs. In particular, while processing UPDATEs,
+ * the compiler throws away name resolution information; this happens as a consequence
+ * of work done on DERBY-1043. In the end, I had to invent more name resolution machinery
+ * in order to compensate for the differences in the handling of SELECTs and UPDATEs.
+ * If we are to allow subqueries in matching refinement clauses and in the values expressions
+ * of INSERT and UPDATE actions, then we probably need to remove this special name
+ * resolution machinery. And that, in turn, probably means revisiting DERBY-1043.
+ * </p>
+ *
+ * <p>
+ * The special name resolution machinery involves marking source and target column references
+ * in order to make it clear which table they belong to. This is done in associateColumn(). The markers
+ * are consulted at code-generation time in order to resolve column references when we
+ * generate the expressions needed to populate the rows which go into the temporary tables.
+ * That resolution happens in MatchingClauseNode.getSelectListOffset().
  * </p>
  */
 
@@ -145,18 +178,24 @@ public final class MergeNode extends DMLModStatementNode
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    // constructor args
+    //
+    // Filled in by the constructor.
+    //
     private FromBaseTable   _targetTable;
     private FromTable   _sourceTable;
     private ValueNode   _searchCondition;
     private ArrayList<MatchingClauseNode>   _matchingClauses;
 
-    // filled in at bind() time
+    //
+    // Filled in at bind() time.
+    //
     private ResultColumnList    _selectList;
     private FromList                _leftJoinFromList;
     private HalfOuterJoinNode   _hojn;
 
-    // filled in at generate() time
+    //
+    // Filled in at generate() time.
+    //
     private ConstantAction      _constantAction;
     private CursorNode          _leftJoinCursor;
 
@@ -200,7 +239,13 @@ public final class MergeNode extends DMLModStatementNode
     /** Get the target table for the MERGE statement */
     FromBaseTable   getTargetTable() { return _targetTable; }
 
-    /** Associate a column with the SOURCE or TARGET table */
+    /**
+     * <p>
+     * Associate a column with the SOURCE or TARGET table. This is
+     * part of the special name resolution machinery which smooths over
+     * the differences between name resolution for SELECTs and UPDATEs.
+     * </p>
+     */
     void    associateColumn( FromList fromList, ColumnReference cr, int mergeTableID )
         throws StandardException
     {
@@ -253,7 +298,12 @@ public final class MergeNode extends DMLModStatementNode
         }
     }
 
-    /** Add the columns in the matchingRefinement clause to the evolving map */
+    /**
+     * <p>
+     * Add the columns in the matchingRefinement clause to the evolving map.
+     * This is called when we're building the SELECT list for the driving left join.
+     * </p>
+     */
     void    getColumnsInExpression
         ( HashMap<String,ColumnReference> map, ValueNode expression, int mergeTableID )
         throws StandardException
@@ -265,7 +315,12 @@ public final class MergeNode extends DMLModStatementNode
         getColumnsFromList( map, colRefs, mergeTableID );
     }
 
-    /** Add a list of columns to the the evolving map */
+    /**
+     * <p>
+     * Add a list of columns to the the evolving map.
+     * This is called when we're building the SELECT list for the driving left join.
+     * </p>
+     */
     void    getColumnsFromList
         ( HashMap<String,ColumnReference> map, ResultColumnList rcl, int mergeTableID )
         throws StandardException
@@ -728,7 +783,7 @@ public final class MergeNode extends DMLModStatementNode
     ///////////////////////////////
     //
     // BUILD THE SELECT LIST
-    // FOR THE DRIVING LEFT JOIN
+    // FOR THE DRIVING LEFT JOIN.
     //
     ///////////////////////////////
 
