@@ -362,7 +362,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	/**
 	 * Be sure to close the Lucene IndexReader
 	 */
-	public void finalize()
+	protected void finalize()
     {
 		try {
 			if ( _indexReader != null ) { _indexReader.close(); }

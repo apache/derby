@@ -207,13 +207,16 @@ public class LuceneSupport implements OptionalTool
         String      className = getClass().getName();
         int             endPackageIdx = className.lastIndexOf( "." );
         String      packageName = className.substring( 0, endPackageIdx );
-        ResultSet   routines = conn.prepareStatement
+        PreparedStatement   ps = conn.prepareStatement
             (
              "select s.schemaName, a.alias, a.aliastype\n" +
              "from sys.sysschemas s, sys.sysaliases a\n" +
              "where s.schemaID = a.schemaID\n" +
-             "and substr( cast( a.javaclassname as varchar( 32672 ) ), 1, " + packageName.length() + " ) = '" + packageName + "'\n"
-             ).executeQuery();
+             "and substr( cast( a.javaclassname as varchar( 32672 ) ), 1, ? ) = ?\n"
+             );
+        ps.setInt( 1, packageName.length() );
+        ps.setString( 2, packageName );
+        ResultSet   routines = ps.executeQuery();
 
         try {
             while ( routines.next() )
@@ -415,7 +418,7 @@ public class LuceneSupport implements OptionalTool
             }
         
             query.append(", ");
-            query.append( textcol );
+            query.append( derbyIdentifier( textcol ) );
             query.append(" from " + makeTableName( schema, table ) );
 
             ps = conn.prepareStatement( query.toString() );
