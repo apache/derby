@@ -2561,8 +2561,6 @@
         <isset property="derby.junit.testclass"/>
       </not>
     </condition>
-    <echo message="derby.junit.classpath = ${derby.junit.classpath}" />
-    <echo message="lucene_core = ${lucene_core}" />
     <fail if="noTestclassSet">No testclass selected! Set property derby.junit.testclass</fail>
     <junit printsummary="on"
            fork="yes" forkmode="perTest"
