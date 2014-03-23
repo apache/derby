@@ -354,6 +354,14 @@ public final class SecurityManagerSetup extends TestSetup {
         if (antjunit != null)
             classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
 
+        // variables for lucene jar files
+        URL luceneCore = getURL( "org.apache.lucene.store.FSDirectory" );
+        if ( luceneCore != null )
+        {
+            classPathSet.setProperty( "derbyTesting.lucene.core", luceneCore.toExternalForm() );
+            classPathSet.setProperty( "derbyTesting.lucene.core.jar.file", luceneCore.getFile() );
+        }
+
         // Load indirectly, normally no EMMA jars in the classpath.
         // This property is needed to set correct permissions in policy files.
         URL emma = getURL("com.vladium.emma.EMMAException");

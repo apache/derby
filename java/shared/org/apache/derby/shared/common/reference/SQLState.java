@@ -1173,6 +1173,17 @@ public interface SQLState {
 	//following 1 does not match the DB2 sql state, it is a Derby specific behavior which is not compatible with DB2
 	String LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES = "XCL51.S";
 
+    // error messages for the Lucene plugin
+    String LUCENE_NOT_A_STRING_TYPE                                  = "42XBA";
+    String LUCENE_NO_PRIMARY_KEY                                  = "42XBB";
+    String LUCENE_UNSUPPORTED_TYPE                                  = "42XBC";
+    String LUCENE_INVALID_CHARACTER                                  = "42XBD";
+    String LUCENE_INDEX_DOES_NOT_EXIST                                  = "42XBE";
+    String LUCENE_MUST_OWN_SCHEMA                                  = "42XBF";
+    String LUCENE_ALREADY_LOADED                                  = "42XBG";
+    String LUCENE_ALREADY_UNLOADED                                  = "42XBH";
+    String LUCENE_BAD_INDEX                                               = "42XBI";
+    
 	// org.apache.derby.impl.sql.execute.rts
 	String RTS_ATTACHED_TO											   = "43X00.U";
 	String RTS_BEGIN_SQ_NUMBER										   = "43X01.U";

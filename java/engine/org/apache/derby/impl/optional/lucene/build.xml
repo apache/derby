@@ -3,7 +3,7 @@
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
   this work for additional information regarding copyright ownership.
-  The ASF licenses this file to You under the Apache License, Version 2.0
+  The ASF licenses this file to you under the Apache License, Version 2.0
   (the "License"); you may not use this file except in compliance with
   the License.  You may obtain a copy of the License at
 
@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="compile_impl" basedir="../../../../../..">
+<project default="lucenesupport" basedir="../../../../../../../..">
 
 <!-- Set Properties -->
   <!-- User settings -->
@@ -26,21 +26,37 @@
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
   <!-- Compiler settings -->
-  <property file="${properties.dir}/defaultcompiler.properties"/>
+<property file="${properties.dir}/defaultcompiler.properties"/> 
   <property file="${properties.dir}/${build.compiler}.properties"/>
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
+  <property name="cur.dir" value="impl/optional/lucene"/>
 
 <!-- Targets -->
-  <target name="compile_impl">
-    <ant dir="${derby.engine.dir}/impl/services"/>
-    <ant dir="${derby.engine.dir}/impl/io"/>
-    <ant dir="${derby.engine.dir}/impl/sql"/>
-    <ant dir="${derby.engine.dir}/impl/store"/>
-    <ant dir="${derby.engine.dir}/impl/db"/>
-    <ant dir="${derby.engine.dir}/impl/load"/>
-    <ant dir="${derby.engine.dir}/impl/jdbc"/>
-    <ant dir="${derby.engine.dir}/impl/optional/lucene"/>
-  </target>
+
+   <target name="lucenesupport">
+    <javac
+      source="1.6"
+      target="1.6"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${lucene_core}"/>
+        <pathelement path="${lucene_a_co}"/>
+        <pathelement path="${lucene_qp}"/>
+      </classpath>
+      <include name="${derby.dir}/${cur.dir}/**"/>
+    </javac>
+   </target>
 </project>
+

@@ -33,7 +33,6 @@
   <!-- Compiler settings -->
   <property file="${properties.dir}/sane${sanity}.properties"/>
 
-
 <!-- These properties are used by the Release build process. -->
   <condition property="isWindows">
     <os family="windows"/>
@@ -1997,6 +1996,7 @@
      <antcall target="appendnotice"><param name="sourcefile" value="jdbcstubs.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="felix.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="xalan.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="lucene.txt"/></antcall>
      
       <antcall target="checkinfile">
          <param name="checkinComment" value="Check in NOTICE as part of building a release."/>
@@ -2288,6 +2288,8 @@
         <isset property="tmp.jars"/>
     </condition>
 
+    <property file="${properties.dir}/extrapath.properties"/>
+
     <antcall target="emit-junit-classpath-jars"/>
     <antcall target="emit-junit-classpath"/>
   </target>
@@ -2389,6 +2391,9 @@
      	    <pathelement path="${derby.junit.classpath}"/>
             <!-- ant 1.7 finds junit.jar if it is on the classpath of the <junit> task -->
             <pathelement location="${javatools.dir}/junit.jar"/>
+            <pathelement location="${lucene_core}"/>
+            <pathelement location="${lucene_a_co}"/>
+            <pathelement location="${lucene_qp}"/>
       </classpath>
     </junit>
   </target>
@@ -2556,6 +2561,8 @@
         <isset property="derby.junit.testclass"/>
       </not>
     </condition>
+    <echo message="derby.junit.classpath = ${derby.junit.classpath}" />
+    <echo message="lucene_core = ${lucene_core}" />
     <fail if="noTestclassSet">No testclass selected! Set property derby.junit.testclass</fail>
     <junit printsummary="on"
            fork="yes" forkmode="perTest"
@@ -2581,6 +2588,9 @@
             <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
      	    <pathelement path="${derby.junit.classpath}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
+            <pathelement location="${lucene_core}"/>
+            <pathelement location="${lucene_a_co}"/>
+            <pathelement location="${lucene_qp}"/>
       </classpath>
     </junit>
       

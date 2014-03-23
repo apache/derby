@@ -28,6 +28,8 @@ import java.net.URL;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.Ref;
@@ -45,6 +47,8 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 
@@ -303,4 +307,94 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
         return new SQLFeatureNotSupportedException( "Unimplemented method: " + methodName );
     }
     
+    /**
+     * <p>
+     * Get an array of descriptors for the return table shape declared for this
+     * AwareVTI by its CREATE FUNCTION statement.
+     * </p>
+     */
+    public  ColumnDescriptor[]  getReturnTableSignature( Connection currentConnection )
+        throws SQLException
+    {
+        ArrayList<ColumnDescriptor> columns = new ArrayList<ColumnDescriptor>();
+        VTIContext  context = getContext();
+        String      schema = context.vtiSchema();
+        String      function = context.vtiTable();
+        ResultSet   rs = currentConnection.getMetaData().getFunctionColumns( null, schema, function, "%" );
+
+        try {
+            while ( rs.next() )
+            {
+                if ( rs.getInt( "COLUMN_TYPE" ) == DatabaseMetaData.functionColumnResult )
+                {
+                    ColumnDescriptor    cd = new ColumnDescriptor
+                        (
+                         rs.getString( "COLUMN_NAME" ),
+                         rs.getInt( "DATA_TYPE" ),
+                         rs.getInt( "PRECISION" ),
+                         rs.getInt( "SCALE" ),
+                         rs.getString( "TYPE_NAME" ),
+                         rs.getInt( "ORDINAL_POSITION" )
+                         );
+                    columns.add( cd );
+                }
+            }
+        }
+        finally { rs.close(); }
+
+        ColumnDescriptor[]  result = new ColumnDescriptor[ columns.size() ];
+        columns.toArray( result );
+        Arrays.sort( result );
+
+        return result;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * A struct class which is useful for describing columns and parameters.
+     * </p>
+     */
+    public  static  final   class   ColumnDescriptor   implements  Comparable<ColumnDescriptor>
+    {
+        public  final   String  columnName;
+        public  final   int jdbcType;
+        public  final   int precision;
+        public  final   int scale;
+        public  final   String  typeName;
+        public  final   int ordinalPosition;
+
+        public  ColumnDescriptor
+            (
+             String columnName,
+             int    jdbcType,
+             int    precision,
+             int    scale,
+             String typeName,
+             int    ordinalPosition
+             )
+        {
+            this.columnName = columnName;
+            this.jdbcType = jdbcType;
+            this.precision = precision;
+            this.scale = scale;
+            this.typeName =typeName;
+            this.ordinalPosition = ordinalPosition;
+        }
+
+        public  int compareTo( ColumnDescriptor that ) { return this.ordinalPosition - that.ordinalPosition; }
+        public  boolean equals( Object other )
+        {
+            if ( other == null ) { return false; }
+            else if ( !(other instanceof ColumnDescriptor) ) { return false; }
+            else { return (compareTo( (ColumnDescriptor) other ) == 0); }
+        }
+        public  int hashCode()  { return columnName.hashCode(); }
+    }
+
 }

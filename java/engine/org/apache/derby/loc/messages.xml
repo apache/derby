@@ -1234,7 +1234,7 @@ Guide.
 
             <msg>
                 <name>42508</name>
-                <text>User '{0}' can not create schema '{1}'. Only database owner could issue this statement.</text>
+                <text>User '{0}' can not create schema '{1}'. Only the database owner can issue this statement.</text>
                 <arg>authorizationID</arg>
                 <arg>schemaName</arg>
             </msg>
@@ -2320,6 +2320,54 @@ Guide.
 	        <msg>
                 <name>42XAQ</name>
                 <text>The source and target tables of MERGE statements may not have derived column lists.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBA</name>
+                <text>The schema, table or column does not exist or the column is not a string type.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBB</name>
+                <text>The table does not have a primary key.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBC</name>
+                <text>Type not supported by the Lucene optional tool: '{0}'</text>
+                <arg>typeName</arg>
+            </msg>
+
+	        <msg>
+                <name>42XBD</name>
+                <text>Character not allowed in Derby identifiers used by the Lucene optional tool: '{0}'</text>
+                <arg>invalidCharacter</arg>
+            </msg>
+
+	        <msg>
+                <name>42XBE</name>
+                <text>Lucene index does not exist.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBF</name>
+                <text>The schema doesn't exist or the current user isn't the DBO and doesn't own the schema.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBG</name>
+                <text>The luceneSupport tool has already been loaded.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBH</name>
+                <text>The luceneSupport tool has already been unloaded.</text>
+            </msg>
+
+	        <msg>
+                <name>42XBI</name>
+                <text>Cannot drop '{0}' because it is not a directory.</text>
+                <arg>directoryName</arg>
             </msg>
 
             <msg>
