@@ -473,6 +473,7 @@ public abstract class FileUtil {
         } catch (ClassNotFoundException ex) {
         } catch (InstantiationException ex) {
         } catch (IllegalAccessException ex) {
+        } catch (LinkageError e) {
         }
 
         // Could not create an instance. This most likely means we are
