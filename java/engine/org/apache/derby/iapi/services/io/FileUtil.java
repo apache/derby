@@ -27,21 +27,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -176,7 +167,11 @@ public abstract class FileUtil {
 			return false;
 		}			
 
-        limitAccessToOwner(to);
+        try {
+            limitAccessToOwner(to);
+        } catch (IOException ioe) {
+            return false;
+        }
 
 		String[] list = from.list();
 
@@ -308,7 +303,11 @@ public abstract class FileUtil {
 			return false;
 		}			
 
-        to.limitAccessToOwner();
+        try {
+            to.limitAccessToOwner();
+        } catch (IOException ioe) {
+            return false;
+        }
 
         String[] list = from.list();
 
@@ -463,39 +462,24 @@ public abstract class FileUtil {
 
 
     // Members used by limitAccessToOwner
-    private static final Object region = new Object();
-    private static boolean initialized = false;
+    private final static FilePermissionService filePermissionService =
+            loadFilePermissionService();
 
-    // Reflection helper objects for calling into Java >= 7
-    private static Class<?> filesClz;
-    private static Class<?> pathClz;
-    private static Class<?> pathsClz;
-    private static Class<?> aclEntryClz;
-    private static Class<?> aclFileAttributeViewClz;
-    private static Class<?> posixFileAttributeViewClz;
-    private static Class<?> userPrincipalClz;
-    private static Class<?> linkOptionArrayClz;
-    private static Class<?> linkOptionClz;
-    private static Class<?> stringArrayClz;
-    private static Class<?> aclEntryBuilderClz;
-    private static Class<?> aclEntryTypeClz;
-    private static Class<?> fileStoreClz;
-    private static Class<?> aclEntryPermissionClz;
+    private static FilePermissionService loadFilePermissionService() {
+        try {
+            Class cl = Class.forName(
+                    FilePermissionService.class.getName() + "Impl");
+            return (FilePermissionService) cl.newInstance();
+        } catch (ClassNotFoundException ex) {
+        } catch (InstantiationException ex) {
+        } catch (IllegalAccessException ex) {
+        }
 
-    private static Method get;
-    private static Method getFileAttributeView;
-    private static Method supportsFileAttributeView;
-    private static Method getFileStore;
-    private static Method getOwner;
-    private static Method setAcl;
-    private static Method build;
-    private static Method newBuilder;
-    private static Method setPrincipal;
-    private static Method setType;
-    private static Method values;
-    private static Method setPermissions;
-    
-    private static Field allow;
+        // Could not create an instance. This most likely means we are
+        // not on Java 7 or higher. Just return null, and let
+        // limitAccessToOwner() choose another strategy on older platforms.
+        return null;
+    }
 
     /**
      * Use when creating new files. If running on Unix,
@@ -515,8 +499,10 @@ public abstract class FileUtil {
      * java.nio.file.attribute} package.
      *
      * @param file assumed to be just created
+     * @throws IOException if an I/O error happens when trying to change the
+     *   file permissions
      */
-    public static void limitAccessToOwner(File file) {
+    public static void limitAccessToOwner(File file) throws IOException {
 
         String value = PropertyUtil.getSystemProperty(
             Property.STORAGE_USE_DEFAULT_FILE_PERMISSIONS);
@@ -535,84 +521,6 @@ public abstract class FileUtil {
                 // proceed
             } else {
                 return;
-            }
-        }
-
-        // lazy initialization, needs to be called in security context
-        synchronized (region) {
-            if (!initialized) {
-                initialized = true;
-
-                // >= Java 7
-                try {
-                    // If found, we have >= Java 7.
-                    filesClz = Class.forName(
-                        "java.nio.file.Files");
-                    pathClz = Class.forName(
-                        "java.nio.file.Path");
-                    pathsClz = Class.forName(
-                        "java.nio.file.Paths");
-                    aclEntryClz = Class.forName(
-                        "java.nio.file.attribute.AclEntry");
-                    aclFileAttributeViewClz = Class.forName(
-                        "java.nio.file.attribute.AclFileAttributeView");
-                    posixFileAttributeViewClz = Class.forName(
-                        "java.nio.file.attribute.PosixFileAttributeView");
-                    userPrincipalClz = Class.forName(
-                        "java.nio.file.attribute.UserPrincipal");
-                    linkOptionArrayClz = Class.forName(
-                        "[Ljava.nio.file.LinkOption;");
-                    linkOptionClz = Class.forName(
-                        "java.nio.file.LinkOption");
-                    stringArrayClz = Class.forName(
-                        "[Ljava.lang.String;");
-                    aclEntryBuilderClz = Class.forName(
-                        "java.nio.file.attribute.AclEntry$Builder");
-                    aclEntryTypeClz = Class.forName(
-                        "java.nio.file.attribute.AclEntryType");
-                    fileStoreClz = Class.forName(
-                        "java.nio.file.FileStore");
-                    aclEntryPermissionClz = Class.forName(
-                            "java.nio.file.attribute.AclEntryPermission");
-                    get = pathsClz.getMethod(
-                        "get",
-                        new Class[]{String.class, stringArrayClz});
-                    getFileAttributeView = filesClz.getMethod(
-                        "getFileAttributeView",
-                        new Class[]{pathClz, Class.class, linkOptionArrayClz});
-                    supportsFileAttributeView = fileStoreClz.getMethod(
-                        "supportsFileAttributeView",
-                        new Class[]{Class.class});
-                    getFileStore = filesClz.getMethod("getFileStore",
-                                                      new Class[]{pathClz});
-                    getOwner = filesClz.
-                        getMethod("getOwner",
-                                  new Class[]{pathClz, linkOptionArrayClz});
-                    setAcl = aclFileAttributeViewClz.
-                        getMethod("setAcl", new Class[]{List.class});
-                    build = aclEntryBuilderClz.
-                        getMethod("build", new Class[]{});
-                    newBuilder = aclEntryClz.
-                        getMethod("newBuilder", new Class[]{});
-                    setPrincipal = aclEntryBuilderClz.
-                        getMethod("setPrincipal",
-                                  new Class[]{userPrincipalClz});
-                    setType = aclEntryBuilderClz.
-                        getMethod("setType", new Class[]{aclEntryTypeClz});
-                    values = aclEntryPermissionClz.
-                        getMethod("values", (Class[]) null);
-                    setPermissions = aclEntryBuilderClz.
-                        getMethod("setPermissions", new Class[] { Set.class });
-
-                    allow = aclEntryTypeClz.getField("ALLOW");
-
-                } catch (NoSuchMethodException e) {
-                    // not Java 7 or higher
-                } catch (ClassNotFoundException e) {
-                    // not Java 7 or higher
-                } catch (NoSuchFieldException e) {
-                    // not Java 7 or higher
-                }
             }
         }
 
@@ -674,120 +582,18 @@ public abstract class FileUtil {
         }
     }
 
-    private static boolean limitAccessToOwnerViaACLs(File file) {
+    private static boolean limitAccessToOwnerViaACLs(File file)
+            throws IOException {
 
         // See if we are running on JDK 7 so we can deny access
         // using the new java.nio.file.attribute package.
 
-        if (filesClz == null) {
+        if (filePermissionService == null) {
             // nope
             return false;
         }
 
-        // We have Java 7, so call. We need to call reflectively, since the
-        // source level isn't yet at Java 7.
-        try {
-            // Path fileP = Paths.get(file.getPath());
-            Object fileP = get.invoke(
-                null, new Object[]{file.getPath(), new String[]{}});
-
-            // ACLs supported on this platform, now check the current file
-            // system:
-            Object fileStore = getFileStore.invoke(
-                null,
-                new Object[]{fileP});
-
-            boolean supported =
-                ((Boolean)supportsFileAttributeView.invoke(
-                    fileStore,
-                    new Object[]{aclFileAttributeViewClz})).booleanValue();
-
-            if (!supported) {
-                return false;
-            }
-
-
-            // AclFileAttributeView view =
-            //     Files.getFileAttributeView(fileP,
-            //         AclFileAttributeView.class);
-            Object view = getFileAttributeView.invoke(
-                null,
-                new Object[]{fileP,
-                             aclFileAttributeViewClz,
-                             Array.newInstance(linkOptionClz, 0)});
-
-            if (view == null) {
-                return false;
-            }
-
-
-            // If we have a posix view, just return and fall back on
-            // the JDK 6 approach.
-            Object posixView = getFileAttributeView.invoke(
-                null,
-                new Object[]{fileP,
-                             posixFileAttributeViewClz,
-                             Array.newInstance(linkOptionClz, 0)});
-
-            if (posixView != null) {
-                return false;
-            }
-
-            // Since we have an AclFileAttributeView which is not a
-            // PosixFileAttributeView, we probably have a NTFS file
-            // system.
-
-            // UserPrincipal owner = Files.getOwner(fileP);
-            Object owner = getOwner.invoke(
-                null,
-                new Object[]{fileP, Array.newInstance(linkOptionClz, 0)});
-
-            //
-            // Remove existing ACEs, build a new one which simply
-            // gives all possible permissions to current owner.
-            //
-            // List<AclEntry>        newAcl = new ArrayList<>();
-            // AclEntryPermissions[] perms = AclEntryPermission.values();
-            // AclEntry.Builder      aceb = AclEntry.newBuilder();
-            //
-            // aceb.setType(AclEntryType.ALLOW);
-            // aceb.setPermissions(new HashSet(Arrays.asList(perms);
-            // newAcl.add(aceb);
-
-            List<Object> newAcl = new ArrayList<Object>();
-            Object[] perms = (Object[]) values.invoke(null, (Object[]) null);
-            Object aceb = newBuilder.invoke(null, (Object[]) null);
-            Object allowValue = allow.get(aclEntryTypeClz);
-            aceb = setPrincipal.invoke(aceb, new Object[]{owner});
-            aceb = setType.invoke(aceb, new Object[]{allowValue});
-            aceb = setPermissions.invoke(
-                aceb,
-                new Object[] {new HashSet<Object>(Arrays.asList(perms))});
-            newAcl.add(build.invoke(aceb, (Object[]) null));
-
-            // view.setAcl(newAcl);
-            setAcl.invoke(view, new Object[]{newAcl});
-
-        } catch (IllegalAccessException e) {
-            // coding error
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT(e);
-            }
-        } catch (IllegalArgumentException e) {
-            // coding error
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT(e);
-            }
-        } catch (InvocationTargetException e) {
-            // java.security.AccessControlException: access denied
-            // ("java.lang.RuntimePermission" "accessUserInformation") can
-            // happen, so throw.
-            //
-            // Should we get an IOException from getOwner, the cast below
-            // would throw which is fine, since it should not happen.
-            throw (RuntimeException)e.getCause();
-        }
-
-        return true;
+        // We have Java 7, so call.
+        return filePermissionService.limitAccessToOwner(file);
     }
 }

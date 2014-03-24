@@ -785,7 +785,17 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                             }
                         }
 
-                        directory.limitAccessToOwner();
+                        try {
+                            directory.limitAccessToOwner();
+                        } catch (IOException ioe) {
+                            if (errorOK) {
+                                return null;
+                            } else {
+                                throw StandardException.newException(
+                                        SQLState.FILE_CANNOT_CREATE_SEGMENT,
+                                        ioe, directory);
+                            }
+                        }
                     }
                 }
             }
@@ -1311,13 +1321,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      * @return a RandomAccessFile
      * @throws FileNotFoundException if {@code file} cannot be opened in
      * read-write mode
+     * @throws IOException if some other I/O error happens
      */
     private RandomAccessFile getRandomAccessFile(final File file)
-            throws FileNotFoundException {
+            throws IOException {
         try {
             return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<RandomAccessFile>() {
-                    public RandomAccessFile run() throws FileNotFoundException {
+                    public RandomAccessFile run() throws IOException {
                         boolean preExisting = file.exists();
                         RandomAccessFile raf = new RandomAccessFile(file, "rw");
                         if (!preExisting) {
@@ -1327,7 +1338,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
                     }
                 });
         } catch (PrivilegedActionException pae) {
-            throw (FileNotFoundException) pae.getCause();
+            throw (IOException) pae.getCause();
         }
     }
 
@@ -1702,10 +1713,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
 
                  return result;
              }
-             catch (FileNotFoundException fnfe)
+             catch (IOException ioe)
              {
                  throw StandardException.newException(
-                     SQLState.FILE_CREATE, fnfe, actionFile.getPath());
+                     SQLState.FILE_CREATE, ioe, actionFile.getPath());
              }
 		 } // end of case BACKUP_CONTAINER_ACTION
 

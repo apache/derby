@@ -675,13 +675,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (!privExists(backupDir))
 		{
             // if backup dir does not exist, go ahead and create it.
-
-            if (!privMkdirs(backupDir))
-            {
-                throw StandardException.newException(
-                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
-                    (File) backupDir);
-            }
+            createBackupDirectory(backupDir);
 		}
 		else
 		{
@@ -777,12 +771,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			}
 
             // create the backup database directory
-            if (!privMkdirs(backupcopy))
-            {
-                throw StandardException.newException(
-                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
-                    (File) backupcopy);
-            }
+            createBackupDirectory(backupcopy);
 
             dbHistoryFile = storageFactory.newStorageFile(BACKUP_HISTORY);
             backupHistoryFile = new File(backupcopy, BACKUP_HISTORY); 
@@ -813,12 +802,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 File backupJarDir = new File(backupcopy, 
                                              FileResource.JAR_DIRECTORY_NAME);
                 // Create the backup jar directory
-                if (!privMkdirs(backupJarDir))
-                {
-                    throw StandardException.newException(
-                          SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
-                          (File) backupJarDir);
-                }
+                createBackupDirectory(backupJarDir);
 
                 LanguageConnectionContext lcc = 
                     (LanguageConnectionContext)ContextService.getContextOrNull(
@@ -953,12 +937,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			}
 
 			// Create the log directory
-            if (!privMkdirs(logBackup))
-            {
-                throw StandardException.newException(
-                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
-                    (File) logBackup);
-            }
+            createBackupDirectory(logBackup);
 
 			// do a checkpoint to get the persistent store up to date.
 			logFactory.checkpoint(this, dataFactory, xactFactory, true);
@@ -969,12 +948,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			File segBackup = new File(backupcopy, "seg0");
 			
 			// Create the data segment directory
-            if (!privMkdirs(segBackup))
-            {
-                throw StandardException.newException(
-                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY,
-                    (File) segBackup);
-            }
+            createBackupDirectory(segBackup);
 
 			// backup all the information in the data segment.
 			dataFactory.backupDataFiles(t, segBackup);
@@ -1070,6 +1044,30 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		}
 
 	}
+
+    /**
+     * Create a directory for backup.
+     *
+     * @param dir the directory to create
+     * @throws StandardException if the directory could not be created
+     */
+    private void createBackupDirectory(File dir) throws StandardException {
+        boolean created = false;
+        IOException ex = null;
+
+        try {
+            created = privMkdirs(dir);
+        } catch (IOException ioe) {
+            ex = ioe;
+        }
+
+        // If the directory wasn't created, report it. Also include the
+        // underlying IOException, if there was one.
+        if (!created) {
+            throw StandardException.newException(
+                    SQLState.RAWSTORE_CANNOT_CREATE_BACKUP_DIRECTORY, ex, dir);
+        }
+    }
 
     /**
      * Backup the database to a backup directory and enable the log archive
@@ -2423,7 +2421,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 
 
-    private synchronized boolean privMkdirs( File file)
+    private synchronized boolean privMkdirs(File file) throws IOException
     {
         actionCode = REGULAR_FILE_MKDIRS_ACTION;
         actionRegularFile = file;
@@ -2433,7 +2431,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             Object ret = AccessController.doPrivileged( this);
             return ((Boolean) ret).booleanValue();
         }
-        catch( PrivilegedActionException pae) { return false;} // does not throw an exception
+        catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
         finally
         {
             actionRegularFile = null;

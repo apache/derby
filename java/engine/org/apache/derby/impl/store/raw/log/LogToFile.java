@@ -23,14 +23,6 @@ package org.apache.derby.impl.store.raw.log;
 
 import org.apache.derby.iapi.services.diag.Performance;
 
-import org.apache.derby.impl.store.raw.log.CheckpointOperation;
-import org.apache.derby.impl.store.raw.log.LogCounter;
-import org.apache.derby.impl.store.raw.log.LogRecord;
-import org.apache.derby.impl.store.raw.log.StreamLogScan;
-
-// need this to print nested exception that corrupts the database
-
-import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.reference.MessageId;
@@ -47,12 +39,7 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.TypedFormat;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
-import org.apache.derby.iapi.services.stream.InfoStreams;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
@@ -67,7 +54,6 @@ import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.log.Logger;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.log.LogScan;
-import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
@@ -79,20 +65,16 @@ import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 
 import org.apache.derby.iapi.util.InterruptStatus;
-import org.apache.derby.iapi.util.InterruptDetectedException;
 
 import java.io.File; // Plain files are used for backups
 import java.io.IOException;
@@ -103,13 +85,13 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
-import java.io.InterruptedIOException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 
 import java.util.Properties;
-import java.util.Vector;
 import java.util.zip.CRC32;
 
 /**
@@ -2732,9 +2714,16 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             
         }else {
             // create the log directory.
-            if (!privMkdirs(logDir)) {
+            IOException ex = null;
+            boolean created = false;
+            try {
+                created = privMkdirs(logDir);
+            } catch (IOException ioe) {
+                ex = ioe;
+            }
+            if (!created) {
                 throw StandardException.newException(
-                    SQLState.LOG_SEGMENT_NOT_EXIST, logDir.getPath());
+                    SQLState.LOG_SEGMENT_NOT_EXIST, ex, logDir.getPath());
             }
             createDataWarningFile();
         }
@@ -5720,9 +5709,15 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		return runBooleanAction(3, file);
     }
 
-    protected boolean privMkdirs(StorageFile file)
+    protected boolean privMkdirs(StorageFile file) throws IOException
     {
-		return runBooleanAction(4, file);
+        this.action = 4;
+        this.activeFile = file;
+        try {
+            return ((Boolean) AccessController.doPrivileged(this));
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
     }
 
 	private synchronized String[] privList(File file)

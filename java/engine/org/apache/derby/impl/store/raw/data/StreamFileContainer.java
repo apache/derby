@@ -1042,14 +1042,22 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
                     {
 						if (!privExists(directory)) 
                         {
-							if (!privMkdirs(directory)) 
+                            boolean created = false;
+                            IOException ex = null;
+                            try {
+                                created = privMkdirs(directory);
+                            } catch (IOException ioe) {
+                                ex = ioe;
+                            }
+
+                            if (!created)
                             {
 								if (errorOK)
 									return null;
 								else
 									throw StandardException.newException(
                                             SQLState.FILE_CANNOT_CREATE_SEGMENT,
-                                            directory);
+                                            ex, directory);
 							}
 						}
 					}
@@ -1084,6 +1092,7 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
     }
 
     private synchronized boolean privMkdirs(StorageFile file)
+            throws IOException
     {
         actionCode = STORAGE_FILE_MKDIRS_ACTION;
         actionStorageFile = file;
@@ -1095,8 +1104,8 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
         }catch( PrivilegedActionException pae) 
         {
             // method executed under this priveleged block 
-            // does not throw an exception
-            return false;
+            // could throw IOException
+            throw (IOException) pae.getCause();
         } 
         finally
         {
@@ -1167,7 +1176,7 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
 
 
     // PrivilegedAction method
-    public Object run() throws FileNotFoundException
+    public Object run() throws IOException
     {
         switch(actionCode)
         {

@@ -176,6 +176,7 @@
     <!-- The java.lang.ManagementFactory class was new in J2SE 5.0 -->
     <available classname="java.lang.management.ManagementFactory" property="vmLevelIsAtLeast1.5"/>
     <available classname="java.sql.Wrapper" property="vmLevelIsAtLeast1.6" value="true"/>
+    <available classname="java.sql.PseudoColumnUsage" property="vmLevelIsAtLeast1.7"/>
     <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
   </target>
 
@@ -1370,7 +1371,7 @@
 
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
-  <target name="derbyjar" depends="initjars">
+  <target name="derbyjar" depends="checkVMLevel,initjars">
 
     <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
@@ -1378,9 +1379,18 @@
     <delete>
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
-         
+
+    <!-- Classes that will only be compiled with JDK 7 and higher are
+         commented out. Determine here whether they should be included. -->
+    <condition property="derbyjar.jdk7.prefix" value="" else="#">
+        <isset property="vmLevelIsAtLeast1.7"/>
+    </condition>
+
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
+      <filterchain>
+          <replacestring from="#jdk7#" to="${derbyjar.jdk7.prefix}"/>
+      </filterchain>
     </concat>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>

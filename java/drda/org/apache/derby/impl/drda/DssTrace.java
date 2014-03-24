@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import org.apache.derby.iapi.services.io.FileUtil;
@@ -213,8 +212,8 @@ public class DssTrace
                         final File traceDirectory = new File(fileName).getParentFile();
                         if (traceDirectory != null) {
                             AccessController.doPrivileged(
-                                    new PrivilegedAction<Void>() {
-                                        public Void run() {
+                                    new PrivilegedExceptionAction<Void>() {
+                                        public Void run() throws IOException {
                                             // DERBY-4128: First try to create the
                                             // directory with mkdir(), as that doesn't
                                             // require read permission for the parent

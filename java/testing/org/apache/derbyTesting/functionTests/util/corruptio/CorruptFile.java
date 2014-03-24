@@ -369,7 +369,7 @@ class CorruptFile implements StorageFile {
 		throw new MalformedURLException(toString());
 	}
 
-    public void limitAccessToOwner() {
+    public void limitAccessToOwner() throws IOException {
         realFile.limitAccessToOwner();
     }
 

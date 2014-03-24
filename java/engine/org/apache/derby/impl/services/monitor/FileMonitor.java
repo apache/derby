@@ -151,12 +151,13 @@ public final class FileMonitor extends BaseMonitor
                     // but avoids requiring read permission on the parent
                     // directory if it exists.
                     created = home.mkdir() || home.mkdirs();
+                    if (created) {
+                        FileUtil.limitAccessToOwner(home);
+                    }
 				} catch (SecurityException se) {
 					return false;
-				}
-
-                if (created) {
-                    FileUtil.limitAccessToOwner(home);
+                } catch (IOException ioe) {
+                    return false;
                 }
 			}
 		}

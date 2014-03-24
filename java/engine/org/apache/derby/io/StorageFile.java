@@ -290,5 +290,5 @@ public interface StorageFile
      * for the file owner unless the property {@code
      * derby.useDefaultFilePermissions} is set to {@code true}.
      */
-    public void limitAccessToOwner();
+    public void limitAccessToOwner() throws IOException;
 }

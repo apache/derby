@@ -111,14 +111,7 @@ class DirFile extends File implements StorageFile
      */
     public OutputStream getOutputStream( ) throws FileNotFoundException
     {
-        boolean exists = exists();
-        OutputStream result = new FileOutputStream(this);
-
-        if (!exists) {
-            FileUtil.limitAccessToOwner(this);
-        }
-
-        return result;
+        return getOutputStream(false);
     }
     
     /**
@@ -140,7 +133,19 @@ class DirFile extends File implements StorageFile
         OutputStream result = new FileOutputStream(this, append);
 
         if (!exists) {
-            FileUtil.limitAccessToOwner(this);
+            try {
+                limitAccessToOwner();
+            } catch (FileNotFoundException fnfe) {
+                // Throw FileNotFoundException unchanged.
+                throw fnfe;
+            } catch (IOException ioe) {
+                // Other IOExceptions should be wrapped, since
+                // FileNotFoundException is the only one we are allowed
+                // to throw here.
+                FileNotFoundException e = new FileNotFoundException();
+                e.initCause(ioe);
+                throw e;
+            }
         }
 
         return result;
@@ -441,7 +446,7 @@ class DirFile extends File implements StorageFile
 		return toURI().toURL();
 	}
 
-    public void limitAccessToOwner() {
+    public void limitAccessToOwner() throws IOException {
         FileUtil.limitAccessToOwner(this);
     }
 }
