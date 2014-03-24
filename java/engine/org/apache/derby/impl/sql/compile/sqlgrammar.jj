@@ -3663,6 +3663,8 @@ mergeStatement() throws StandardException :
     searchCondition = joinCondition()
     matchingClauses = matchingClauseList()
 	{
+        checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, "MERGE" );
+
 		setUpAndLinkParameters();
 
         return new MergeNode

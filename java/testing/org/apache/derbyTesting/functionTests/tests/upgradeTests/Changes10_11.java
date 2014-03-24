@@ -20,8 +20,13 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
@@ -42,6 +47,7 @@ public class Changes10_11 extends UpgradeChange
     private static  final   String  SYNTAX_ERROR = "42X01";
     private static  final   String  HARD_UPGRADE_REQUIRED = "XCL47";
     private static  final   String  NOT_IMPLEMENTED = "0A000";
+    private static  final   String  NO_ROWS_AFFECTED = "02000";
 
     //////////////////////////////////////////////////////////////////
     //
@@ -370,5 +376,82 @@ public class Changes10_11 extends UpgradeChange
             st.executeUpdate("drop table referenced");
             commit();
         }
+    }
+
+    public void testMerge() throws Exception
+    {
+        String mergeStatement =
+            "merge into targetTable t using sourceTable s on t.a = s.a\n" +
+            "when matched then delete\n";
+
+        Statement s = createStatement();
+        switch (getPhase())
+        {
+            case PH_CREATE:
+                s.execute("create table targetTable( a int )");
+                s.execute("create table sourceTable( a int )");
+                assertCompileError( SYNTAX_ERROR, mergeStatement );
+                break;
+            case PH_SOFT_UPGRADE:
+                assertCompileError( HARD_UPGRADE_REQUIRED,  mergeStatement );
+                break;
+            case PH_POST_SOFT_UPGRADE:
+                assertCompileError( SYNTAX_ERROR, mergeStatement );
+                break;
+            case PH_HARD_UPGRADE:
+                expectExecutionWarning( getConnection(), NO_ROWS_AFFECTED, mergeStatement );
+                break;
+        }
+    }
+
+    /**
+     * Assert that the statement text, when executed, raises a warning.
+     */
+    private void    expectExecutionWarning( Connection conn, String sqlState, String query )
+        throws Exception
+    {
+        expectExecutionWarnings( conn, new String[] { sqlState }, query );
+    }
+
+    /**
+     * Assert that the statement text, when executed, raises a warning.
+     */
+    private void    expectExecutionWarnings( Connection conn, String[] sqlStates, String query )
+        throws Exception
+    {
+        println( "\nExpecting warnings " + fill( sqlStates ).toString() + " when executing:\n\t"  );
+        PreparedStatement   ps = chattyPrepare( conn, query );
+
+        ps.execute();
+
+        int idx = 0;
+
+        for ( SQLWarning sqlWarning = ps.getWarnings(); sqlWarning != null; sqlWarning = sqlWarning.getNextWarning() )
+        {
+            String          actualSQLState = sqlWarning.getSQLState();
+
+            if ( idx >= sqlStates.length )
+            {
+                fail( "Got more warnings than we expected." );
+            }
+
+            String  expectedSqlState = sqlStates[ idx++ ];
+
+            assertEquals( expectedSqlState, actualSQLState );
+        }
+
+        assertEquals( idx, sqlStates.length );
+
+        ps.close();
+    }
+
+    /**
+     * <p>
+     * Fill an ArrayList from an array.
+     * </p>
+     */
+    protected <T> ArrayList<T> fill( T[] raw )
+    {
+        return new ArrayList<T>(Arrays.asList(raw));
     }
 }
