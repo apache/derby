@@ -188,14 +188,14 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	    // leave out lastmodified as the date will change
 	    String[][] expectedRows = new String[][]
             {
-                { "1", "LUCENETEST", "TITLES", "AUTHOR" },
-	    		{ "2", "LUCENETEST", "TITLES", "TITLE" }
+                { "LUCENETEST", "TITLES", "AUTHOR" },
+	    		{ "LUCENETEST", "TITLES", "TITLE" }
             };
 	    JDBC.assertFullResultSet
             (
              s.executeQuery
              (
-              "select id, schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes"
+              "select schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes order by schemaname, tablename, columnname"
               ),
              expectedRows
              );
@@ -206,13 +206,13 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 
 	    expectedRows = new String[][]
             {
-                { "1", "LUCENETEST", "TITLES", "AUTHOR" },
+                { "LUCENETEST", "TITLES", "AUTHOR" },
             };
 	    JDBC.assertFullResultSet
             (
              s.executeQuery
              (
-              "select id, schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes"
+              "select schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes order by schemaname, tablename, columnname"
               ),
              expectedRows
              );
@@ -225,7 +225,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select id, schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes"
+              "select schemaname, tablename, columnname from table ( LuceneSupport.listIndexes() ) listindexes"
               )
              );
 

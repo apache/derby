@@ -195,14 +195,14 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
 
         // alice can list indexes even on tables owned by ruth
-        String  listIndexes = "select id, schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes";
+        String  listIndexes = "select schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes";
         assertResults
             (
              aliceConnection,
              listIndexes,
              new String[][]
              {
-                 { "1", "RUTH", "POEMS", "POEMTEXT" },
+                 { "RUTH", "POEMS", "POEMTEXT" },
              },
              false
              );

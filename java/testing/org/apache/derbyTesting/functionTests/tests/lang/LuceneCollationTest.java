@@ -162,10 +162,10 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select id, schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes",
+             "select schemaName, tableName, columnName from table ( LuceneSupport.listIndexes() ) listindexes",
              new String[][]
              {
-                 { "1", "RUTH", "POEMS", "POEMTEXT" },
+                 { "RUTH", "POEMS", "POEMTEXT" },
              },
              false
              );

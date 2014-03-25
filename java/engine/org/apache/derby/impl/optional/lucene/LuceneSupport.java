@@ -127,7 +127,6 @@ public class LuceneSupport implements OptionalTool
 		listFunction.append(" () ");
 		listFunction.append("returns table");
 		listFunction.append("(");
-		listFunction.append("id int,");
 		listFunction.append("schemaname varchar( 128 ),");
 		listFunction.append("tablename varchar( 128 ),");
 		listFunction.append("columnname varchar( 128 ),");

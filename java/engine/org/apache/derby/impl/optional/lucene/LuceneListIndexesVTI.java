@@ -51,7 +51,7 @@ public class LuceneListIndexesVTI extends StringColumnVTI {
 	public LuceneListIndexesVTI()
         throws IOException, PrivilegedActionException, SQLException
     {
-		super(new String[]{"ID","SCHEMANAME","TABLENAME","COLUMNNAME","LASTUPDATED"});
+		super( new String[] { "SCHEMANAME","TABLENAME","COLUMNNAME","LASTUPDATED" } );
 		
 		String dir = LuceneSupport.getIndexLocation( LuceneSupport.getDefaultConnection(), null, null, null );
 		
@@ -110,14 +110,12 @@ public class LuceneListIndexesVTI extends StringColumnVTI {
         String  schemaPart = schemaDir.getName();
 
 		if (col == 1) {
-			return Integer.toString(row+1);
-		} else if (col == 2) {
 			return schemaPart;
-		} else if (col == 3) {
+		} else if (col == 2) {
 			return tablePart;
-		} else if (col == 4) {
+		} else if (col == 3) {
 			return columnPart;
-		} else if (col == 5) {
+		} else if (col == 4) {
             try {
                 DateFormat df = DateFormat.getDateTimeInstance();
                 return df.format( LuceneSupport.getLastModified( columnDir ) );
