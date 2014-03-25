@@ -1,10 +1,10 @@
 <html lang="en">
-<title>Release Notes for Apache Derby 10.10.1.1</title>
+<title>Release Notes for Apache Derby 10.10.1.4</title>
 <body>
 <h1>
-<a name="Release Notes for Apache Derby 10.10.1.1"></a>Release Notes for Apache Derby 10.10.1.1</h1>
+<a name="Release Notes for Apache Derby 10.10.1.4"></a>Release Notes for Apache Derby 10.10.1.4</h1>
 <div>
-<p>These notes describe the difference between Apache Derby release 10.10.1.1 and the preceding release 10.9.1.0.</p>
+<p>These notes describe the difference between Apache Derby release 10.10.1.4 and the preceding release 10.10.1.1.</p>
 </div>
 <ul>
 <li>
@@ -15,6 +15,12 @@
 </li>
 <li>
 <a href="#Bug Fixes">Bug Fixes</a>
+</li>
+<li>
+<a href="#Doc Fixes">Fixes in the Documentation</a>
+</li>
+<li>
+<a href="#Test Fixes">Fixes in the Tests</a>
 </li>
 <li>
 <a href="#Issues">Issues</a>
@@ -77,50 +83,15 @@ Java and JDBC versions supported:
 
 
 <p>
-This is a feature release. The following new features were added:
+This is a bug fix release. There are no new features:
 </p>
-
-
-<ul>
-
-
-<li>
-<b>SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS</b> - Derby has a new system procedure for invalidating stored prepared statements when you think that your metadata queries or triggers are misbehaving--for example if they throw a NoSuchMethodError on execution. See the section on this new system procedure in the Derby Reference Manual.</li>
-	
-
-<li>
-<b>Unencrypting databases</b> - Encryption can be turned off on existing databases. See the section on the <i>decryptDatabase</i> attribute in the Derby Reference Manual.</li>
-	
-
-<li>
-<b>Small device profile</b> - Derby runs on the small CP2 profile of Java 8.</li>
-	
-
-<li>
-<b>JDBC 4.2</b> - Derby supports the Java 8 enhancements to JDBC.</li>
-	
-
-<li>
-<b>User-defined aggregates</b> - Applications can create their own aggregate operators. See the "CREATE DERBY AGGREGATE" section in the Derby Reference Manual.</li>
-	
-
-<li>
-<b>Varargs routines</b> - SQL routines can be bound to user-written Java methods which have variable length argument lists.</li>
-	
-
-<li>
-<b>Optional tools</b> - Derby has new, optional tools to support data migration and metadata queries. See the "Optional tools" section in the Derby Tools and Utilities Guide.</li>
-	
-	
-
-</ul>
 
 
 </div>
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <div>
-<p>The following issues are addressed by Derby release 10.10.1.1. These issues are not addressed in the preceding 10.9.1.0 release.</p>
+<p>The following issues are addressed by Derby release 10.10.1.4. These issues are not addressed in the preceding 10.10.1.1 release.</p>
 <table border="2">
 <tr>
 <th>
@@ -128,750 +99,478 @@ This is a feature release. The following new features were added:
 </th><th>Description</th>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6106">DERBY-6106</a></td><td>Remove the outdated Japanese and Portuguese docs</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6513">DERBY-6513</a></td><td>Warnings when building 10.10 branch with Java 8</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6100">DERBY-6100</a></td><td>Upgrade tests fail on compact2</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6477">DERBY-6477</a></td><td>OutOfMemoryError selecting from SYS.SYSALIASES</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6098">DERBY-6098</a></td><td>Skip compatibility testing of old servers on compact profile 2</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6463">DERBY-6463</a></td><td>localcal demo seems to be obsolete and should be removed</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6097">DERBY-6097</a></td><td>Management test suite fails when JMX is not supported</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6457">DERBY-6457</a></td><td>NetworkServerControl API breaks when username or password contains non-ascii characters</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6094">DERBY-6094</a></td><td>Derby ignores DriverManager.setLoginTimeout()</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6456">DERBY-6456</a></td><td>Infinite loop in NetworkServerControlImpl when reply &gt;= 32k</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6089">DERBY-6089</a></td><td>CallableStatement#registerOutParameter on client lacks check of legal types.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6455">DERBY-6455</a></td><td>Infinite loop in NetworkServerControlImpl.ensureDataInBuffer</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6088">DERBY-6088</a></td><td>PreparedStatementTest42 lacks "fail" call when operation unexpectedly succeeds</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6443">DERBY-6443</a></td><td>ArrayIndexOutOfBoundsException when calling function from trigger</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6087">DERBY-6087</a></td><td>Can't build Javadoc with JDK 1.8 if explicit j15lib, j16lib and j17lib paths are set</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6438">DERBY-6438</a></td><td>Explicitly grant SocketPermission "listen" in default server policy</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6086">DERBY-6086</a></td><td>Factor out logic for creating custom connection in jdbcapi.StatementPoolingTest</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6426">DERBY-6426</a></td><td>Fix isLoginException</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6085">DERBY-6085</a></td><td>Improve error reporting when server port is unavailable</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6411">DERBY-6411</a></td><td>Minimal select privilege should be checked in subqueries</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6083">DERBY-6083</a></td><td>Update minimum/maximum floating-point values to align with DERBY-3398 fixes</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6408">DERBY-6408</a></td><td>EXISTS returns NULL instead of FALSE</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6081">DERBY-6081</a></td><td>JDBC 4.2 setObject() and updateObject() methods throw NPE when type is null</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6396">DERBY-6396</a></td><td>NullPointerException in DirFile</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6079">DERBY-6079</a></td><td>100's of errors in nightly test run on weme after jacoco property/priviledges checkin</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6387">DERBY-6387</a></td><td>Incorrect ordering of triggers in dblook</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6078">DERBY-6078</a></td><td>Propagate a set of properties to the junit tasks in build.xml</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6383">DERBY-6383</a></td><td>Update trigger defined on one column fires on update of other columns</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6077">DERBY-6077</a></td><td>web site needs updating on a few points</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6374">DERBY-6374</a></td><td>Bulk insert of data with nullable UNIQUE constraint fails to detect duplicates</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6076">DERBY-6076</a></td><td>Folder.gif icon missing from derby documentation website</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6373">DERBY-6373</a></td><td>NPE in Statement.getWarnings()</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6073">DERBY-6073</a></td><td>Test ordering instability in StatementPoolingTest</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6371">DERBY-6371</a></td><td>DROP COLUMN looks in wrong schema when checking trigger dependencies</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6072">DERBY-6072</a></td><td>Move lang/reopenScan.sql to LangScripts</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6363">DERBY-6363</a></td><td>Incorrect evaluation of logical expressions in CASE</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6071">DERBY-6071</a></td><td>trunk javadoc build fails with Javadoc failed: java.io.IOException: Cannot run program \bin\javadoc.exe": CreateProcess error=206, The filename or extension is too long.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6361">DERBY-6361</a></td><td>Valid statements rejected if Derby has not implicitly created the current user's schema.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6070">DERBY-6070</a></td><td>Document Derby's JDBC 4.2 implementation</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6357">DERBY-6357</a></td><td>CREATE TRIGGER doesn't detect all illegal references to SESSION schema</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6065">DERBY-6065</a></td><td>LockTable API link in the documentation is broken</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6351">DERBY-6351</a></td><td>Syntax error on equal transition table name and correlation name in statement trigger</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6064">DERBY-6064</a></td><td>Failures in upgradeTests.Changes10_9 related to index cardinality statistics</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6348">DERBY-6348</a></td><td>NPE or assert failure in recursive trigger</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6063">DERBY-6063</a></td><td>Access static variables by class name in TabInfoImpl, InsertResultSet and ControlRow</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6346">DERBY-6346</a></td><td>NPE in left join whose inner table has a generated column</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6061">DERBY-6061</a></td><td>Upgrade language is inconsistent</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6338">DERBY-6338</a></td><td>Remove Profile attribute from jar file manifests</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6060">DERBY-6060</a></td><td>Fix Javadoc for UpgradeTrajectoryTest dangling reference</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6324">DERBY-6324</a></td><td>DatabaseMetaData.getJDBCMinorVersion() should return 2 now that we've implemented JDBC 4.2</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6059">DERBY-6059</a></td><td>Document Derby usage running on Java 8 JEP 161 Compact Profiles</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6323">DERBY-6323</a></td><td>Fix incorrect @throws and @exception tags in javadoc</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6058">DERBY-6058</a></td><td>2 ClassNotFoundException failures on trunk with ibm's weme6.2 since build 1433263</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6320">DERBY-6320</a></td><td>Log a page dump to derby.log if ERROR nospc: nospc.U  is returned to the user</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6053">DERBY-6053</a></td><td>Client should use a prepared statement rather than regular statement for Connection.setTransactionIsolation</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6317">DERBY-6317</a></td><td>Optmizer can choose the wrong path when BTreeCostController.java returns an estimate cost and row count of 0.0</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6052">DERBY-6052</a></td><td>Text files under build/site do not have svn:eol-style=native</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6314">DERBY-6314</a></td><td>Upgrade from 10.10 fails with ClassCastException</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6050">DERBY-6050</a></td><td>Make all topics visible in ToCs</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6297">DERBY-6297</a></td><td>Intermittent failures in XplainStatisticsTest.testSimpleXplainOnly</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6044">DERBY-6044</a></td><td>Fix poor word breaking in table on download page(s)</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6283">DERBY-6283</a></td><td>indexStat daemon processing tables over and over even when there are no changes in the tables in soft upgraded database.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6043">DERBY-6043</a></td><td>Make JQL default query mode for 'ant genrelnotes'</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6273">DERBY-6273</a></td><td>NullPointerException when using more than one parameter in COALESCE</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6042">DERBY-6042</a></td><td>Document the syscs_util.syscs_register_tool procedure added by DERBY-6022.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6270">DERBY-6270</a></td><td>Run Java API Documentation Updater Tool on the published javadocs</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6041">DERBY-6041</a></td><td>Remove unused parameters from the BTreeLockingPolicy interface</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6268">DERBY-6268</a></td><td>Run-time statistics not collected if query contains always false predicate</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6039">DERBY-6039</a></td><td>Intermittent failure in LangProcedureTest.testDynamicResultSets: Table/View 'T1' does not exist.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6258">DERBY-6258</a></td><td>Restrict permissions on BACKUP.HISTORY</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6038">DERBY-6038</a></td><td>Intermittent failure in LangProcedureTest: cannot drop table because of open ResultSet</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6224">DERBY-6224</a></td><td>Issues with latest JDK 8 EA build because of missing SQLPermission</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6034">DERBY-6034</a></td><td>Fix documentation on procedure argument limits</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6221">DERBY-6221</a></td><td>Can't select from SYS.SYSUSERS if you use a WHERE clause in the query</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6033">DERBY-6033</a></td><td>Lift the arbitrary limit on the number of routine parameters.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6216">DERBY-6216</a></td><td>XPLAIN feature does not work and gives ERROR XCL16: ResultSet not open</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6030">DERBY-6030</a></td><td>Length of escape string in LIKE ... ESCAPE not properly checked with territory based collation</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6212">DERBY-6212</a></td><td>NullPointerException when calling a procedure with sub-query as argument</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6027">DERBY-6027</a></td><td>ORDER BY a cast expression gives NPE</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6209">DERBY-6209</a></td><td>Add release note omitted with 10.9 for new required Security Manager permissions after DERBY-5363</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6018">DERBY-6018</a></td><td>Document varargs routines.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6189">DERBY-6189</a></td><td>NPE involving temporary table and rollback</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6017">DERBY-6017</a></td><td>IN lists with mixed types may return wrong results</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6187">DERBY-6187</a></td><td>Add a release note for metadata datatype changes introduced by JDBC 4.2</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6010">DERBY-6010</a></td><td>Reference Manual should clarify what ALTER TABLE ADD COLUMN does</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6185">DERBY-6185</a></td><td>Query against view  with "where name LIKE 'Col1' ESCAPE '\' " failed</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6009">DERBY-6009</a></td><td>Need stricter checking of ORDER BY clause in VALUES expressions</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6167">DERBY-6167</a></td><td>Interrupt restarts clock for login timeout</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6008">DERBY-6008</a></td><td>Allow ORDER BY and FETCH/OFFSET in set operands</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6157">DERBY-6157</a></td><td>text for message XSLA4 might encouraging people to delete part of the transaction log</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6006">DERBY-6006</a></td><td>NullPointerException in INSERT INTO ... SELECT FROM ... ORDER BY</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6151">DERBY-6151</a></td><td>Derby does not report warnings raised by table functions</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6003">DERBY-6003</a></td><td>Create row templates outside of the generated code</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6148">DERBY-6148</a></td><td>Wrong sort elimination when using permuted join order</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6002">DERBY-6002</a></td><td>Reference manual is unclear on when territory can be set</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6137">DERBY-6137</a></td><td>update/delete statement on table with trigger fails randomly with ERROR XSTA2</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6001">DERBY-6001</a></td><td>ErrorMessageTest assert failure: Only one of the waiters should be aborted</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6131">DERBY-6131</a></td><td>select from view with "upper" and "in" list throws a ClassCastException</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6000">DERBY-6000</a></td><td>Implement support for JDBC 4.2</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6092">DERBY-6092</a></td><td>testPositionAgressive(org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobClob4BlobTest)j fails with : 'The handle is invalid.: java.io.IOException'.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5999">DERBY-5999</a></td><td>Improve documentation on index key lengths</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6047">DERBY-6047</a></td><td>NPE in StaticCallMethod#coerceMethodParameter with a constant argument to INOUT parameter</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5998">DERBY-5998</a></td><td>Replication tests fail on CDC platforms without optional JSSE package</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6045">DERBY-6045</a></td><td>in list multi-probe by primary key not chosen on tables with &gt;256 rows</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5996">DERBY-5996</a></td><td>Create readme files (cautioning users against modifying database files) at database hard upgrade time</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5979">DERBY-5979</a></td><td>ant release target creates a release.properties that has conflicting line endings so automatic checkin fails</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5995">DERBY-5995</a></td><td>Add a test case to check the 3 readme files get created even when log directory has been changed with jdbc url attribute logDevice</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5886">DERBY-5886</a></td><td>FILE_CANNOT_REMOVE_FILE exception prints garbage.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5993">DERBY-5993</a></td><td>The Reference Manual shows an embedded url in its example for the client-side-only retrieveMessageText attribute.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5866">DERBY-5866</a></td><td>testFiringConstraintOrder(org.apache.derbyTesting.functionTests.tests.lang.TriggerTest)junit.framework.AssertionFailedError: matching triggers need to be fired in order creation:1,NO CASCADE BEFORE,DELETE,ROW</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5992">DERBY-5992</a></td><td>Use BaseTestCase.execJavaCmd() to start process from NetworkServerTestSetup</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5865">DERBY-5865</a></td><td>On IBM 1.7 TestDurabilityProperty fails with  FAIL -- derby.system.durability=test mode seems to be broken.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5989">DERBY-5989</a></td><td>Stop producing byte code for non-existent qualifiers</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5823">DERBY-5823</a></td><td>Multi-row insert fails on table without generated keys with RETURN_GENERATED_KEYS</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5986">DERBY-5986</a></td><td>Make ArithmeticTest test DECIMAL data type</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5610">DERBY-5610</a></td><td>ServerPropertiesTest prints .java.net.SocketException: Connection reset to console but test passes</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5977">DERBY-5977</a></td><td>Run storemore and possibly other store .sql tests in junit harness using ScriptTest mechanism.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5560">DERBY-5560</a></td><td>Java deadlock between LogicalConnection40 and ClientXAConnection40 (patch attached)</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5976">DERBY-5976</a></td><td>Document the new SQLWarning raised when trying to change the encryption state of an already booted database.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5553">DERBY-5553</a></td><td>System property for client tracing -Dderby.client.traceDirectory does not work with XADataSource</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5972">DERBY-5972</a></td><td>Grammar doesn't accept OR operator without parentheses</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5416">DERBY-5416</a></td><td>SYSCS_COMPRESS_TABLE causes an OutOfMemoryError when the heap is full at call time and then gets mostly garbage collected later on</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5971">DERBY-5971</a></td><td>Improve test coverage for SQLBoolean class</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4923">DERBY-4923</a></td><td>update of a long row can fail with ERROR nospc: nospc.U exception.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5969">DERBY-5969</a></td><td>Encryption, re-encryption, and un-encryption silently fail if the database is already booted.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4753">DERBY-4753</a></td><td>"ERROR 42X01: Syntax error: FALSE." during call to java.sql.DatabaseMetaData.getIndexInfo</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5966">DERBY-5966</a></td><td>NativeAuthenticationServiceTest.testAll() failure: [ FILE, NATIVE authentication on, LOCAL authentication ON, Authentication/Authorization turned OFF, SecurityManager ON, Embedded ]: Connection to fifthDB unexpectedly failed.</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4729">DERBY-4729</a></td><td>add more information to the XACT_PROTOCOL_VIOLATION returned from store.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5964">DERBY-5964</a></td><td>Timestamp comparison failure in AutomaticIndexStatisticsTest.testStatisticsCorrectness</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4160">DERBY-4160</a></td><td>getMetaData().getIndexInfo crashes with "ERROR X0Y68: Column 'PARAM1' already exists."</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5962">DERBY-5962</a></td><td>Internationalize error messages for database decryption</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3940">DERBY-3940</a></td><td>Dropping a column does not drop triggers which mention that column</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5961">DERBY-5961</a></td><td>Developer's guide mentions SQL state 40XL2 which is no longer used</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-2130">DERBY-2130</a></td><td>Optimizer performance slowdown from 10.1 to 10.2</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5960">DERBY-5960</a></td><td>VirtualRandomAccessFile.close() is not idempotent</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5955">DERBY-5955</a></td><td>Prepare Derby to run with Compact Profiles (JEP 161)</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5954">DERBY-5954</a></td><td>NPE in SELECT involving subselects and windows functions</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5951">DERBY-5951</a></td><td>Missing method exception raised when using Clobs with territory based collation</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5948">DERBY-5948</a></td><td>Update JVMInfo.java to include JDK 8</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5947">DERBY-5947</a></td><td>Factor out common code from generated classes</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5945">DERBY-5945</a></td><td>Inappropriate error message when calling a procedure as a function (as if it had a return value)</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5940">DERBY-5940</a></td><td>Disable securityMechanism=8 in NSSecurityMechanismTest on ARM platforms</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5939">DERBY-5939</a></td><td>Document URL attribute for database decryption</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5938">DERBY-5938</a></td><td>Documentation says Derby works with Java 1.4.2</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5937">DERBY-5937</a></td><td>File handle is leaked when a Slave replication is shutdown with failover=true</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5935">DERBY-5935</a></td><td>Remove unused code for factory classes in the reflection service</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5934">DERBY-5934</a></td><td>Convert store.ReEncryptCrashRecovery</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5933">DERBY-5933</a></td><td>SQL sorting error</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5930">DERBY-5930</a></td><td>Reformat RawStore.setupEncryptionEngines</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5929">DERBY-5929</a></td><td>Release numbers in a few topics need updating</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5928">DERBY-5928</a></td><td>Add more task focus to Derby security documentation</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5927">DERBY-5927</a></td><td>Add utility methods to query state of URL attributes in EmbedConnection</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5926">DERBY-5926</a></td><td>Document user-defined aggregates (DERBY-672)</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5925">DERBY-5925</a></td><td>Document derby.log changes resulting from DERBY-5240</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5918">DERBY-5918</a></td><td>CREATE TABLE AS SELECT doesn't work on tables with BOOLEAN columns</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5917">DERBY-5917</a></td><td>NoClassDefFoundErrors when running tests without derbynet.jar and derbyclient.jar</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5916">DERBY-5916</a></td><td>java.lang.NullPointerException org.apache.derby.impl.store.raw.data.BaseDataFileFactory.stop() connecting to network server</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5914">DERBY-5914</a></td><td>Incorrect list of compatible JRE versions in client trace #2</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5913">DERBY-5913</a></td><td>Remove unused classes [GS]et*Action in client.am</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5912">DERBY-5912</a></td><td>testIsValidImplemented fails for NetworkServer in some slow running machines/configurations</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5911">DERBY-5911</a></td><td>WHERE condition getting pushed into sub-query with FETCH</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5910">DERBY-5910</a></td><td>Document use of Connection.close() with try-with-resources</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5909">DERBY-5909</a></td><td>The lang attribute in toc.html always says 'en-us'</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5906">DERBY-5906</a></td><td>In the Reference Manual, sin() is used as the example for the sinh() function.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5905">DERBY-5905</a></td><td>Derby html documentation doesn't render properly and prints garbage on Internet Explorer</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5900">DERBY-5900</a></td><td>Need to correct Reference Guide description of contents of SYS.SYSPERMS.OBJECTTYPE</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5898">DERBY-5898</a></td><td>add ibm18 class to functionTests.harness</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5897">DERBY-5897</a></td><td>Broken handling of paths with special characters in compatibility/VersionCombinationConfigurator</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5896">DERBY-5896</a></td><td>Change java/drda source code to use  spaces instead of tabs and clean up tab creep in java/client</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5894">DERBY-5894</a></td><td>NPE in OnlineBackupTest1 while backing up in stubFileToRemoveAfterCheckPoint</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5885">DERBY-5885</a></td><td>The order of argument names in messages.xml is sometimes wrong when the arguments occur in the message out of sequence.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5883">DERBY-5883</a></td><td>Simplify JSR-169 implementation class tree</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5880">DERBY-5880</a></td><td>Move java.sql.Wrapper implementations to base classes in embedded driver</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5878">DERBY-5878</a></td><td>Add message argument names, as comments, to English message file produced by MessageBuilder.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5877">DERBY-5877</a></td><td>Prune the brokered class tree</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5874">DERBY-5874</a></td><td>Remove JDBC 3 constants from client.am.Statement</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5873">DERBY-5873</a></td><td>Avoid unnecessary allocation of Number instances in client/server</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5872">DERBY-5872</a></td><td>Inconsistency between isWrapperFor() and unwrap() in logical statements</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5871">DERBY-5871</a></td><td>Invoke logical statements with existing statement tests</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5868">DERBY-5868</a></td><td>Move java.sql.Wrapper implementations to base classes on the client</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5864">DERBY-5864</a></td><td>weme 6.2 (J2ME) runs fail to start with Failed to invoke class org.apache.derbyTesting.functionTests.tests.derbynet._Suite java.lang.reflect.InvocationTargetException</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5860">DERBY-5860</a></td><td>Remove unused methods in DDMReader and DDMWriter</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5854">DERBY-5854</a></td><td>Test for methods in BrokeredCallableStatement</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5851">DERBY-5851</a></td><td>Inconsistent code coverage shown for LogicalPreparedStatement40</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5847">DERBY-5847</a></td><td>Clean up IDE warnings in DRDAConnThread</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5839">DERBY-5839</a></td><td>dblook run on toursdb fails on triggers with java.lang.StringIndexOutOfBoundsException in dblook.log</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5836">DERBY-5836</a></td><td>Move assertDirectoryDeleted from BaseJDBCTestCase to BaseTestCase</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5834">DERBY-5834</a></td><td>Remove unused methods in NetPreparedStatement class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5833">DERBY-5833</a></td><td>Remove unused methods in NetCallableStatement class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5831">DERBY-5831</a></td><td>Update information on BIS EAR (export control)</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5830">DERBY-5830</a></td><td>Make DoubleProperties.propertyNames() thread-safe</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5829">DERBY-5829</a></td><td>Lift DB2 restriction on the DEFAULT clause</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5828">DERBY-5828</a></td><td>Remove unused methods in NetPackageReply class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5827">DERBY-5827</a></td><td>Remove unused methods in NetStatementReply class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5826">DERBY-5826</a></td><td>Remove unused methods in NetConnectionReply class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5822">DERBY-5822</a></td><td>Document the new SQL standard behavior of the SPACE_TABLE vti</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5821">DERBY-5821</a></td><td>tools/derbyrunjartest.java doesn't use jvmflags</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5820">DERBY-5820</a></td><td>emma-instrumentation target should instrument derbyrun.jar</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5819">DERBY-5819</a></td><td>Add logic to BaseTestCase to start subprocesses ready to be attached to from a Java debugger</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5817">DERBY-5817</a></td><td>Add support for the JaCoCo code coverage tool</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5815">DERBY-5815</a></td><td>Add replicationTests.ReplicationSuite to junit-core ant target</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5814">DERBY-5814</a></td><td>Source cleanup in catalogs "impl.sql.catalog" and "impl.sql.compile"</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5813">DERBY-5813</a></td><td>Remove unused class ErrorKey</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5810">DERBY-5810</a></td><td>Include emma.jar on classpath when running compatibility test with instrumented jars</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5808">DERBY-5808</a></td><td>Compatibility test should use BaseTestCase.execJavaCmd()</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5805">DERBY-5805</a></td><td>Database encryption topics in Reference Manual need more information</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5804">DERBY-5804</a></td><td>Remove unused class GenericClassInfo</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5803">DERBY-5803</a></td><td>Make error handling in xaHelper more explicit</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5802">DERBY-5802</a></td><td>Remove unused class ExecProcUtil</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5801">DERBY-5801</a></td><td>Sub-processes should write EMMA coverage data to separate files</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5799">DERBY-5799</a></td><td>add more info on when Derby chooses 32k page size for tables.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5798">DERBY-5798</a></td><td>Disable i18n/JapanCodeConversion.sql on platforms that don't support EUC_JP or SJIS</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5797">DERBY-5797</a></td><td>AssertionFailedError in functionTests.tests.lang.UpdateStatisticsTest.testDisposableStatsEagerness</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5796">DERBY-5796</a></td><td>Remove unused methods in client.am.DateTime</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5795">DERBY-5795</a></td><td>Documentation in release doesn't include stylesheets</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5793">DERBY-5793</a></td><td>Document new SYSCS_INVALIDATE_STORED_STATEMENTS procedure</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5791">DERBY-5791</a></td><td>Replication tests should use BaseTestCase.execJavaCmd() to run local commands</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5787">DERBY-5787</a></td><td>[patch] remove dead allocation</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5786">DERBY-5786</a></td><td>Duplicate copies of InputStreamUtil.java and DynamicByteArrayOutputStream.java classes in client.net package</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5783">DERBY-5783</a></td><td>Remove duplicated code for starting remote processes in replication tests</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5779">DERBY-5779</a></td><td>Table functions should only accept arguments which are constant in their query block.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5775">DERBY-5775</a></td><td>Upgrade tests should  print full IOException stack trace when it fails to access old versions</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5764">DERBY-5764</a></td><td>Make DatabaseMetaDataTest more robust wrt changes made by other tests</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5752">DERBY-5752</a></td><td>LOBStreamControl should materialize less aggressively</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5750">DERBY-5750</a></td><td>Sending an empty string as table name to compress table procedure or empty string as index name to update statistics procedure makes the parser throw an exception.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5740">DERBY-5740</a></td><td>Remove unsued code in AlterTableConstantaction.columnDroppedAndTriggerDependencies</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5632">DERBY-5632</a></td><td>Logical deadlock happened when freezing/unfreezing the database</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5622">DERBY-5622</a></td><td>Reduce the chance for hash collisions when checking bootPassword at boot time and when changing password.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5578">DERBY-5578</a></td><td>Provide a way to invalidate stored prepared statements</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5546">DERBY-5546</a></td><td>ResultSet#updateBigDecimal on a REAL column does not do underflow checking</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5531">DERBY-5531</a></td><td>Assert failure when inserting NULL into indexed column with territory-based collation</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5462">DERBY-5462</a></td><td>ant release needs to accommodate for different ant executables on different systems</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5460">DERBY-5460</a></td><td>ant release should allow local.properties to exist</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5425">DERBY-5425</a></td><td>Updateable holdable ResultSet terminates early after 65638 updates</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5407">DERBY-5407</a></td><td>When run across the network, dblook produces unusable DDL for VARCHAR FOR BIT DATA columns.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5359">DERBY-5359</a></td><td>Missing xmlns attribute for html element in docs</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5358">DERBY-5358</a></td><td>SYSCS_COMPRESS_TABLE failed with conglomerate not found exception</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5340">DERBY-5340</a></td><td>Comment in demo server policy should follow RFC 2606 convention</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5240">DERBY-5240</a></td><td>Log Operating system information to derby.log on boot</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5232">DERBY-5232</a></td><td>Put a stern README file in log and seg0 directories to warn users of corrpution they will cause if they touch files there</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5213">DERBY-5213</a></td><td>Write tests to verify the interaction of TRUNCATE TABLE and online backup</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4841">DERBY-4841</a></td><td>Improve projecthelp for the top level Derby build script</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4811">DERBY-4811</a></td><td>Remove unused clean targets from the Derby build.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4323">DERBY-4323</a></td><td>test failure in lang.ErrorMessageTest with IBM iseries IBM 1.5</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4279">DERBY-4279</a></td><td>Statement cache deadlock</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4259">DERBY-4259</a></td><td>Document database property for determining database format version</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4229">DERBY-4229</a></td><td>encryptionKeyLength connection attribute should be documented</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-3399">DERBY-3399</a></td><td>The automatic compile path property setting for the build system should be expanded to handle Java SE 6 virtual machines.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-3398">DERBY-3398</a></td><td>Support min/max values for Java types float/double in real/double columns</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-3371">DERBY-3371</a></td><td>Strange (and untested) code fragment in RAMTransaction.addColumnToConglomerate()</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-3275">DERBY-3275</a></td><td>Mismatch between comments and actual use of initialSize parameter in CacheFactory and Clock</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2920">DERBY-2920</a></td><td>Share code between readExternal() and readExternalFromArray()</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2774">DERBY-2774</a></td><td>Desciption of variable part in error message of XSLAM was not exists in Derby reference manual.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2705">DERBY-2705</a></td><td>Description of error message for X0X61/X0Y59/X0Y69/X0Y70 in SQL error messages and exceptions of Reference manual is not appropriate.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2699">DERBY-2699</a></td><td>performance of like in territory based collation databases may be improved by changing way collation elements are calculated.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2601">DERBY-2601</a></td><td>Server SQLException error codes are not returned to client</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2572">DERBY-2572</a></td><td>Write a master script which creates a release branch.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2516">DERBY-2516</a></td><td>Network Client allows execution of callable statement when one of the parameters is not set</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2461">DERBY-2461</a></td><td>Convert lang/procedure.java to junit</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2076">DERBY-2076</a></td><td>Rewrite junitTests/derbyNet/CompatibilityTest to conform to current JUnit usage</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-1982">DERBY-1982</a></td><td>Remove support for JDK 1.3 in 10.3 and onwards</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-1721">DERBY-1721</a></td><td>DOCS - Remove duplicate information in Dev Guide re: Encryption</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-1400">DERBY-1400</a></td><td>Cleanup code in network server's DRDAStatement class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-1048">DERBY-1048</a></td><td>Include run of junitTests/CompatibilitySuite, or converted compatibility test suite with 10.1/trunk combination into suites.All</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-436">DERBY-436</a></td><td>clean up imports and static field references in DRDA classes</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-896">DERBY-896</a></td><td>Cast date to timestamp results in "ERROR 42846: Cannot convert types 'DATE' to 'TIMESTAMP'."</td>
 </tr>
 </table>
 </div>
+
+
+<h2>
+<a name="Doc Fixes"></a>Fixes in the Documentation</h2>
+<div>
+<p>The following issues are addressed by Derby release 10.10.1.4. These issues are not addressed in the preceding 10.10.1.1 release.</p>
+<table border="2">
+<tr>
+<th>
+<div style="width:110px;">Issue Id</div>
+</th><th>Description</th>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6473">DERBY-6473</a></td><td>Manuals are inconsistent in subsubprotocol information</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6448">DERBY-6448</a></td><td>Document new SocketPermission in Network Server policy file</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6415">DERBY-6415</a></td><td>SYSCS_DIAG.SPACE_TABLE sample query to show all tables and indexes should include schema</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6403">DERBY-6403</a></td><td>Doc for export/import in ref man should mention automatic commit after operation.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6399">DERBY-6399</a></td><td>clarify backup section in Derby Server and Administration Guide regarding connecting to the backed up db</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6394">DERBY-6394</a></td><td>Fix problems with searchCondition and Boolean expression documentation in Reference Manual</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6389">DERBY-6389</a></td><td>Update adminguide's list of differences between client and embedded</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6388">DERBY-6388</a></td><td>Example WHERE CURRENT OF clause in Reference Guide is nonsense</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6379">DERBY-6379</a></td><td>Manuals are inconsistent in their use of the &lt;shortdesc&gt; element</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6376">DERBY-6376</a></td><td>Revise DatabaseMetaData section of Reference Manual</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6375">DERBY-6375</a></td><td>Suggest use of indexes in devguide's deadlock avoidance topic</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6369">DERBY-6369</a></td><td>Make bullet lists into tables in two Reference Manual topics</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6367">DERBY-6367</a></td><td>Reference Manual incorrectly states that you can't schema-qualify constraint names</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6355">DERBY-6355</a></td><td>Data Integrity guidelines should include not deleting or otherwise tampering with files under the database directory</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6353">DERBY-6353</a></td><td>Update syntax description in Getting Started, use in Reference Manual too</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6316">DERBY-6316</a></td><td>Small typos in devguide examples</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6298">DERBY-6298</a></td><td>Documentation implies column NOT NULL constraint cannot be named, but it can be.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6239">DERBY-6239</a></td><td>Document optional permission SQLPermission("deregisterDriver")</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6165">DERBY-6165</a></td><td>The shutdown documentation should mention that a shutdown attempt could fail if login timeouts are enabled.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6160">DERBY-6160</a></td><td>Fixes needed to documentation topics on security policy permissions</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6129">DERBY-6129</a></td><td>Reference Manual gives incorrect datatype for SYSCOLUMNS.COLUMNNAME</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6127">DERBY-6127</a></td><td>Tell users to make sure that the state of a user-defined aggregate needs to be serializable</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6123">DERBY-6123</a></td><td>Optional tools documentation in the reference guide should mention that optional tools require derbytools.jar be in the CLASSPATH</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6121">DERBY-6121</a></td><td>Regularize how we refer to object names in the Reference Manual</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6120">DERBY-6120</a></td><td>Clarify that $ is the separator character which should be used for the external names of static nested classes</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6116">DERBY-6116</a></td><td>Confusing description of limitation on user-defined aggregate names.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6103">DERBY-6103</a></td><td>Improve documentation of ROW_NUMBER function</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6090">DERBY-6090</a></td><td>Package javadoc publishedapi/jdbc4/index.html out of date</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5244">DERBY-5244</a></td><td>DatabaseMetaData.getColumns(null, null, tableName, null) does not return the columns meta for a SYNONYM</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4847">DERBY-4847</a></td><td>Errors should be displayed if using wrong CLASSPATH to make documentation target for release</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4629">DERBY-4629</a></td><td>Explicitly document  how to get case-insensitive sorts and comparisons of string data</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4628">DERBY-4628</a></td><td>The Derby docs would be clearer if we replaced our jargon term "territory" with the term "locale" which is used commonly across the Java ecosystem.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4627">DERBY-4627</a></td><td>Document how to install your own custom collation for use in sorting and comparing string data values.</td>
+</tr>
+</table>
+</div>
+
+<h2>
+<a name="Test Fixes"></a>Fixes in the Tests</h2>
+<div>
+<p>The following issues are addressed by Derby release 10.10.1.4. These issues are not addressed in the preceding 10.10.1.1 release.</p>
+<table border="2">
+<tr>
+<th>
+<div style="width:110px;">Issue Id</div>
+</th><th>Description</th>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6401">DERBY-6401</a></td><td>Create a test option to stop running Junit tests after first failure or error</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6400">DERBY-6400</a></td><td>harness.NetServer method waitFor() is not reflecting timeout values</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6356">DERBY-6356</a></td><td>java.security.AccessControlException in i18n.LocalizedDisplayScriptTest</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6349">DERBY-6349</a></td><td>DaylightSavingTest - java.security.AccessControlException</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6306">DERBY-6306</a></td><td>XplainStatisticsTest.testSimpleQuery: BEGIN_COMP_TIME unexpectedly NULL</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6294">DERBY-6294</a></td><td>On z/os on some machines:testAttributeDrdaHost(org.apache.derbyTesting.functionTests.tests.management.NetworkServerMBeanTest)junit.framework.AssertionFailedError</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6272">DERBY-6272</a></td><td>LoginTimeoutTest fails if server is missing</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6255">DERBY-6255</a></td><td>convert i18n/messageLocale.sql</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6246">DERBY-6246</a></td><td>convert i18n/urlLocale.sql  to JUnit</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6244">DERBY-6244</a></td><td>convert i18n/caseI_tr_TR.sql to JUnit</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6233">DERBY-6233</a></td><td>XMLBindingTest fails on latest JDK 8 EA</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6225">DERBY-6225</a></td><td>SecureServerTest assertion error on contents of stdout from subprocess</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6215">DERBY-6215</a></td><td>derby.log grows enormously during StressMultiTest</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6196">DERBY-6196</a></td><td>ArrayIndexOutOfBoundsException in SURQueryMixTest</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6193">DERBY-6193</a></td><td>AutomaticIndexStatisticsTest doesn't delete its single-use database</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6183">DERBY-6183</a></td><td>rlliso2multi and rlliso3multi failing with [WARNING 01004: Data truncation]</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6181">DERBY-6181</a></td><td>fix AutoloadTest to support running concurrently when different base ports are specified.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6178">DERBY-6178</a></td><td>AutoloadTest does not proprogate original jvm -D flags to spawned JVM, leading to LAB regression test failures</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6150">DERBY-6150</a></td><td>Add automatic cleanup of connections opened with openDefaultConnection()</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6147">DERBY-6147</a></td><td>ClosedObjectTest fails on the 10.9 branch when running on Java 8</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6146">DERBY-6146</a></td><td>nightly regression test failure: testMultipleLastKeyWaitsInMaxScan(org.apache.derbyTesting.functionTests.tests.store.IndexSplitDeadlockTest)junit.framework.AssertionFailedError: Column value mismatch @ column '1',</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6144">DERBY-6144</a></td><td>nightly regression test failure, intermittent error : testStatisticsCorrectness(org.apache.derbyTesting.functionTests.tests.store.AutomaticIndexStatisticsTest)junit.framework.AssertionFailedError</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6126">DERBY-6126</a></td><td>compatibility._Suite fails if derbyTesting.jar lives in different directory than product jars</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6124">DERBY-6124</a></td><td>Marshalling error in JDBCDriverTest as part of CompatibilityTest</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6122">DERBY-6122</a></td><td>InterruptResilienceTest fails with: junit.framework.ComparisonFailure: Database shutdown expected:&lt;[08006]&gt; but was:&lt;[XBDA0]&gt;</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6114">DERBY-6114</a></td><td>OOME in XAMemTest.testDerby4137_TransactionTimeoutSpecifiedNotExceeded</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6108">DERBY-6108</a></td><td>suites.All no longer runs with weme 6.2</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5932">DERBY-5932</a></td><td>testAutoNetworkServerBoot fails with Invalid authentication</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5630">DERBY-5630</a></td><td>intermittent test failure in store/lockTableVTI.sql</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5172">DERBY-5172</a></td><td>testTimeAndDateWithCalendar (jdbcapi.CallableTest) fails intermittently with AssertionFailedError: hour expected: differs from actual.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4035">DERBY-4035</a></td><td>i18n tests fail with Lexical error on z/os</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3838">DERBY-3838</a></td><td>Convert derbynet/DerbyNetAutoStart to JUnit</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3624">DERBY-3624</a></td><td>testfailure in storetests/st_derby715 with ibm 1.5 on iseries machine; one deadlock message missing</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3519">DERBY-3519</a></td><td>junit regression test failure in testInertTime(org.apache.derbyTesting.functionTests.tests.lang.TimeHandlingTest)junit.framework.AssertionFailedError: expected:&lt;2&gt; but was:&lt;3&gt;</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-1915">DERBY-1915</a></td><td>i18n Tests fail on zOS</td>
+</tr>
+</table>
+</div>
+
 <h2>
 <a name="Issues"></a>Issues</h2>
 <div>
-<p>Compared with the previous release (10.9.1.0), Derby release 10.10.1.1 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<p>Compared with the previous release (10.10.1.1), Derby release 10.10.1.4 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
-<a href="#Note for DERBY-5969"><span>Note for DERBY-5969: 
-A SQLWarning is now raised if you try to change the encryption state
-of an already booted database.
+<a href="#Note for DERBY-6438"><span>Note for DERBY-6438: 
+Additional permission needed to run Derby network server
 </span></a>
 </li>
 <li>
-<a href="#Note for DERBY-5962"><span>Note for DERBY-5962: 
-Changed SQL states for errors while re-encrypting a database.
+<a href="#Note for DERBY-6383"><span>Note for DERBY-6383: 
+Statement level update triggers defined for specific columns fire on update of columns which were not included in the 
+CREATE TRIGGER sql. Also, statement level update triggers defined at table level do not fire for newly added columns.
+This bug effectively causes update level statement triggers to behave incorrectly.
 </span></a>
 </li>
 <li>
-<a href="#Note for DERBY-5779"><span>Note for DERBY-5779: 
-Table function arguments may no longer refer to other tables in the
-same query block.
+<a href="#Note for DERBY-6270"><span>Note for DERBY-6270: Frame injection vulnerability in old versions of the API documentation.</span></a>
+</li>
+<li>
+<a href="#Note for DERBY-6224"><span>Note for DERBY-6224: New SQLPermission needed for JDBC driver deregistration on Java SE 8.</span></a>
+</li>
+<li>
+<a href="#Note for DERBY-6187"><span>Note for DERBY-6187: 
+Datatype Change in JDBC Metadata
 </span></a>
 </li>
 <li>
-<a href="#Note for DERBY-5578"><span>Note for DERBY-5578: 
-A new system procedure helps correct misbehaving triggers and metadata queries.
-</span></a>
-</li>
-<li>
-<a href="#Note for DERBY-5546"><span>Note for DERBY-5546: 
-ResultSet#updateBigDecimal on a REAL or DOUBLE column now does underflow checking.
-</span></a>
-</li>
-<li>
-<a href="#Note for DERBY-5232"><span>Note for DERBY-5232: 
-Derby will create readme files in the database directories.
-</span></a>
-</li>
-<li>
-<a href="#Note for DERBY-3398"><span>Note for DERBY-3398: 
-Legacy DB2 compatibility limits on REAL and DOUBLE values have been
-lifted.  
-</span></a>
-</li>
-<li>
-<a href="#Note for DERBY-2601"><span>Note for DERBY-2601: Error codes match severity levels on the network client.</span></a>
+<a href="#Note for DERBY-5866"><span>Note for DERBY-5866: The meaning of SYS.SYSTRIGGERS.CREATIONTIMESTAMP has changed.</span></a>
 </li>
 </ul>
 <hr>
 <h3>
-<a name="Note for DERBY-5969"></a>Note for DERBY-5969</h3>
-<div>
-
-
-<h4>Summary of Change</h4>
-
-<p>
-A SQLWarning is now raised if you try to change the encryption state
-of an already booted database.
-</p>
-
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-
-<p>
-A SQLWarning is raised if an application sets any of the following
-attributes while trying to connect to an already booted database:
-</p>
-
-
-<ul>
-
-<li>
-<b>dataEncryption</b>
-</li>
-
-<li>
-<b>newBootPassword</b>
-</li>
-
-<li>
-<b>newEncryptionKey</b>
-</li>
-
-<li>
-<b>decryptDatabase</b>
-</li>
-
-</ul>
-
-
-<p>
-The connection attempt will succeed but a SQLWarning will appear on
-the warning chain returned by <i>Connection.getWarnings()</i>. The
-warning will have SQLState 01J17 and the following message text:
-<i>You cannot encrypt, re-encrypt, or decrypt a database which is already booted. You must shutdown the database before attempting these operations.</i>
-
-</p>
-
-
-
-<h4>Incompatibilities with Previous Release</h4>
-
-<p>
-In previous releases, Derby did not raise a SQLWarning when an
-application set the above attributes while connecting to an already
-booted database. This may cause an incompatibility now if an application
-always sets the <b>dataEncryption</b> attribute when connecting to an
-encrypted database. In previous releases, that attribute was simply
-ignored. Now the application sees an extra SQLWarning on the
-warnings chain after connecting to the encrypted database.
-</p>
-
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-All of the affected attributes share a common meaning: <i>change the
-encryption state of the database</i>. When the database was already
-booted, the request to change its encryption state was ignored silently. The application could not tell whether the
-encryption state of the database had actually been changed. Now the
-application can check the warning chain to determine whether the
-database was encrypted, re-encrypted, or decrypted as requested.
-</p>
-
-
-
-<h4>Application Changes Required</h4>
-
-
-<p>
-Applications should check the warning chain after requesting a change
-to the encryption state of the database.
-</p>
-
-
-<p>
-Applications which check the warning chain may need to be adjusted if they set the <b>dataEncryption</b>
-attribute whenever they connect to an encrypted database.
-</p>
-
-
-
-</div>
-<hr>
-<h3>
-<a name="Note for DERBY-5962"></a>Note for DERBY-5962</h3>
+<a name="Note for DERBY-6438"></a>Note for DERBY-6438</h3>
 <div>
 
 <!-- 
@@ -888,7 +587,7 @@ attribute whenever they connect to an encrypted database.
 <h4>Summary of Change</h4>
 
 <p>
-Changed SQL states for errors while re-encrypting a database.
+Additional permission needed to run Derby network server
 </p>
 
 
@@ -908,363 +607,8 @@ Changed SQL states for errors while re-encrypting a database.
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-When re-encryption of a database fails and
-throws <code>SQLException</code>, the SQL state returned
-by <code>SQLException.getSQLState()</code> may not be the same as it
-was in earlier releases.
-</p>
+An additional java.net.SocketPermission, "listen" was added to the default network server policy file, and the policy file template. The documentation was updated to describe this permission.
 
-
-<p>
-The following SQL states and messages have changed in this version:
-</p>
-
-
-<dl>
-
-<dt>
-<strong>XBCXP</strong>
-</dt>
-<dd>Cannot re-encrypt the database with a new boot password or an external encryption key when there is a global transaction in the prepared state.</dd>
-
-<dt>
-<strong>XBCXR</strong>
-</dt>
-<dd>Cannot re-encrypt a read-only database with a new boot password or an external encryption key .</dd>
-
-<dt>
-<strong>XBCXT</strong>
-</dt>
-<dd>Cannot re-encrypt a database with a new boot password or an external encryption key, when database is in the log archive mode.</dd>
-
-<dt>
-<strong>XBCXV</strong>
-</dt>
-<dd>Encryption of an encrypted database with a new key or a new password failed: &lt;failureMessage&gt;</dd>
-
-</dl>
-
-
-<p>
-The new SQL states and messages reported for the above failure
-scenarios, are:
-</p>
-
-
-<dl>
-
-<dt>
-<strong>XBCXO</strong>
-</dt>
-<dd>Cannot encrypt, re-encrypt or decrypt the database when there is a global transaction in the prepared state.</dd>
-
-<dt>
-<strong>XBCXQ</strong>
-</dt>
-<dd>Cannot encrypt, re-encrypt or decrypt a read-only database.</dd>
-
-<dt>
-<strong>XBCXS</strong>
-</dt>
-<dd>Cannot encrypt, re-encrypt or decrypt a database when it is in the log archive mode.</dd>
-
-<dt>
-<strong>XBCXU</strong>
-</dt>
-<dd>Encryption, re-encryption or decryption of a database failed: &lt;failureMessage&gt;</dd>
-
-</dl>
-
-<!-- 
-  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
-
-  For instance:
-
-  Applications which open two InputStreams on the ResultSet column now
-  fail.
--->
-
-
-<h4>Incompatibilities with Previous Release</h4>
-
-<p>
-The SQL states for some errors during re-encryption of a database have changed.
-</p>
-
-
-<!-- 
-  DESCRIBE WHY THE CHANGE WAS MADE.
-
-  For instance:
-
-  The previous behavior violated the JDBC standard. The new behavior
-  is correct.
--->
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-The consolidated messages simplify the error handling in the database
-encryption code.
-</p>
-
-
-<!-- 
-  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
-  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
-
-  For instance:
-
-  Users must recode applications which open multiple streams on the same column.
--->
-
-
-<h4>Application Changes Required</h4>
-
-<p>
-Applications that look for the old SQL states should be changed to
-look for the new SQL states.
-</p>
-
-
-
-</div>
-<hr>
-<h3>
-<a name="Note for DERBY-5779"></a>Note for DERBY-5779</h3>
-<div>
-
-
-<h4>Summary of Change</h4>
-
-<p>
-Table function arguments may no longer refer to other tables in the
-same query block.
-</p>
-
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-<p>
-In previous releases, table functions could be invoked with arguments
-which referred to other tables in the same query block. Now Derby will
-reject those queries when the statement is prepared. For instance, the
-following query, which used to work...
-</p>
-
-
-<pre>
-select *
-from T, table( F( T.a ) ) S;
-</pre>
-
-
-<p>
-...now raises this error:
-</p>
-
-
-<pre>
-ERROR 42ZB7: Illegal reference to column 'T.A'. Table function parameters may not refer to other tables in the same query block.
-</pre>
-
-
-<h4>Incompatibilities with Previous Release</h4>
-
-<p>
-Applications may fail if they join table functions to other tables inside
-the FROM list.
-</p>
-
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-The old syntax violated the SQL Standard and did not have a
-well-defined meaning.
-</p>
-
-
-
-<h4>Application Changes Required</h4>
-
-<p>
-No change is required if table function arguments refer to
-tables in outer query blocks. For instance, the following query still works:
-</p>
-
-
-<pre>
-select *
-from T
-where exists ( select B from table( F( T.a ) ) S );
-</pre>
-
-
-<p>
-However, applications need to re-write any query which uses the FROM
-list to join a table
-function to another table in the same query block. Developers should reason carefully about what the old
-syntax meant to express and then re-write the query in a legal way.
-In many cases,
-the following transformations may result in a query which
-expresses what the developer originally intended:
-</p>
-
-
-<ul>
-
-<li>
-<b>New column</b> - Add a new column to the end of the
-  <i>ResultSet</i> returned by the table function. The new column is
-  the value of the original argument which joined to another table in
-  the FROM list.</li>
-
-<li>
-<b>New overload</b> - Add a new overload for the table
-  function. The new overload omits the original argument which joined
-  to another table in the FROM list. The new overload returns results
-  for all possible values of the omitted argument.</li>
-
-<li>
-<b>Move the join into the WHERE clause</b> - Now re-write the
-  failing query, moving the join out of the FROM list and into the
-  WHERE clause.</li>
-
-</ul>
-
-
-<p>
-After applying these transformations, the failing query (given above)
-would look like this:
-</p>
-
-
-<pre>
-select *
-from T, table( F() ) S
-where T.A = S.A;
-</pre>
-
-
-
-</div>
-<hr>
-<h3>
-<a name="Note for DERBY-5578"></a>Note for DERBY-5578</h3>
-<div>
-
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
-
-<h4>Summary of Change</h4>
-
-<p>
-A new system procedure helps correct misbehaving triggers and metadata queries.
-</p>
-
-
-<!-- 
-  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-<p>
-Applications did not have a way to recompile metadata queries and
-triggers if a Derby bug made the queries and triggers behave
-incorrectly. If you suspect that your metadata queries or triggers are
-misbehaving, you may be able to fix their behavior by calling the
-following new system procedure:
-</p>
-
-
-<pre>
-CALL SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS()
-</pre>
-
-
-<!-- 
-  DESCRIBE WHY THE CHANGE WAS MADE.
-
-  For instance:
-
-  The previous behavior violated the JDBC standard. The new behavior
-  is correct.
--->
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-The new SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS procedure was
-introduced as a workaround when Derby bugs break metadata queries and triggers.
-</p>
-
-
-
-</div>
-<hr>
-<h3>
-<a name="Note for DERBY-5546"></a>Note for DERBY-5546</h3>
-<div>
-
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
-
-<h4>Summary of Change</h4>
-
-<p>
-ResultSet#updateBigDecimal on a REAL or DOUBLE column now does underflow checking.
-</p>
-
-
-<!-- 
-  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-<p>
-Using ResultSet#updateBigDecimal will throw SQL error 22003 in applications
-that didn't use to throw.
 </p>
 
 
@@ -1281,11 +625,26 @@ that didn't use to throw.
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-If the application performs ResultSet#updateBigDecimal on a REAL or a
-DOUBLE column with a value that is too small to be represented in
-Derby and didn't include code to handle SQLDataException 22003, it
-would now need to handle this (and possibly update the value with 0.0
-itself if that is the desired behavior).
+No incompatibilities arise from upgrading a Derby release to one with the additional permissions in the policy file. <BR> 
+However, unless you have this permission, when upgrading to a JVM release that has JDK 7u51 incorporated, your network server may not start if
+<UL>
+
+<LI> you use network server on a port not within the ephemeral ports specified by the OS.</LI>
+
+<LI>
+and
+<UL>
+
+<LI> you rely on the default derby policy file, or </LI>
+
+<LI> you have a customized policy file without this permission</LI>
+
+</UL>
+
+</LI>
+
+</UL>
+
 </p>
 
 
@@ -1302,7 +661,63 @@ itself if that is the desired behavior).
 <h4>Rationale for Change</h4>
 
 <p>
-To make Derby behavior more consistent and to reliably detect underflow behavior.
+An additional permission may be needed in order to bring up the Derby network server after upgrading to JVMs incorporating JDK 7u51. 
+In particular, the startup scripts may fail to boot the network server.
+</p>
+
+<p>
+This is a result of the "Better applet networking" changes made for JVM issue 8011787 (not public): the default socket permissions assigned to all code including untrusted code have been changed. <BR>
+Previously, all code was able to bind any socket type to any port number greater than or equal to 1024. It is still possible to bind sockets to the ephemeral port range on each system. The exact range of ephemeral ports varies from one operating system to another, but it is typically in the high range (such as from 49152 to 65535). <BR>
+The new restriction is that binding sockets outside of the ephemeral range now requires an explicit permission in the system security policy.
+</p>
+
+<p>
+After upgrading to a JVM with these changes, while attempting to boot, the network server may fail and raise the following error:
+<UL>
+access denied ("java.net.SocketPermission" "localhost:1527" "listen,resolve")
+java.security.AccessControlException: access denied 
+("java.net.SocketPermission" "localhost:1527" "listen,resolve")
+</UL>
+
+To workaround this problem, you must bring up the network server with a security policy which includes the now required missing permission. Instead of booting the network server as:
+
+<UL>
+java org.apache.derby.drda.NetworkServerControl start
+</UL>
+
+boot the network server as follows:
+
+<UL>
+java -Djava.security.manager -Djava.security.policy=${yourPolicyFile}
+org.apache.derby.drda.NetworkServerControl start
+</UL>
+
+where ${yourPolicyFile} is a file containing a customized version of the policy file described in the Derby Admin Guide section titled Basic Network Server security policy. You must customize that generic policy file to fit your application. In addition, you must add the following permission to the permissions block granted to the ${derby.install.url}derbynet.jar codebase:
+
+<UL>
+permission java.net.SocketPermission "localhost:${port}", "listen";
+</UL>
+
+where ${port} should be replaced by the port number where the network server listens for incoming connection requests. By default, that is port 1527.
+</p>
+
+<p>
+For more information on Derby security policies, see the Derby Admin Guide sections titled Network Server security and Running the Network Server under the security manager.
+</p>
+
+<p>
+If you are using replication, a similar permission must be granted to the security policy for the slave server. Add the following permission to the ${derby.install.url}derby.jar codebase:
+
+<UL>
+permission java.net.SocketPermission "localhost:${slavePort}", "listen";
+</UL>
+
+where ${slavePort} should be replaced by the port number where the slave server listens for incoming connection requests (typically 4851). For more information on the security policy for the slave server, see the Derby Admin Guide section titled Replication and security.
+
+</p>
+
+<p>
+With this fix, the default policy file has received these required permissions, and the scripts in the bin directory work again. However, it may still be necessary to adjust any customized policy files.
 </p>
 
 
@@ -1319,7 +734,9 @@ To make Derby behavior more consistent and to reliably detect underflow behavior
 <h4>Application Changes Required</h4>
 
 <p>
-If the application would sometimes try to perform ResultSet#updateBigDecimal with a number that can't be represented by REAL or DOUBLE, as the case may be, an exception handler may have to be added.
+Applications need not make any change to take advantage of the new permission granted in the default policy file.
+However, the default policy file may, or may not be sufficient for specific applications and it is better to use your own policy file.
+If you have your own policy file, you may need to adjust it to add the "listen" permission as appropriate.
 </p>
 
 
@@ -1327,24 +744,17 @@ If the application would sometimes try to perform ResultSet#updateBigDecimal wit
 </div>
 <hr>
 <h3>
-<a name="Note for DERBY-5232"></a>Note for DERBY-5232</h3>
+<a name="Note for DERBY-6383"></a>Note for DERBY-6383</h3>
 <div>
 
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
 
 
 <h4>Summary of Change</h4>
 
 <p>
-Derby will create readme files in the database directories.
+Statement level update triggers defined for specific columns fire on update of columns which were not included in the 
+CREATE TRIGGER sql. Also, statement level update triggers defined at table level do not fire for newly added columns.
+This bug effectively causes update level statement triggers to behave incorrectly.
 </p>
 
 
@@ -1364,78 +774,11 @@ Derby will create readme files in the database directories.
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-A database created with Derby 10.10, or upgraded to 10.10, will contain readme files named README_DO_NOT_TOUCH_FILES.txt in the top-level database directory and in the subdirectories seg0 and log.
-</p>
-
-
-<!-- 
-  DESCRIBE WHY THE CHANGE WAS MADE.
-
-  For instance:
-
-  The previous behavior violated the JDBC standard. The new behavior
-  is correct.
--->
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-Unintentional editing of the database files by the users can leave the database in a non-recoverable state. To caution users against such an action, a database created with 10.10 or upgraded to Derby 10.10 will have three readme files which will warn users against touching any files in the various database directories. These readme files are in the top-level database directory and in the subdirectories seg0 and log.
-</p>
-
-
-
-</div>
-<hr>
-<h3>
-<a name="Note for DERBY-3398"></a>Note for DERBY-3398</h3>
-<div>
-
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
-
-<h4>Summary of Change</h4>
-
-<p>
-Legacy DB2 compatibility limits on REAL and DOUBLE values have been
-lifted.  
-</p>
-
-
-<!-- 
-  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-<p>
-SQLDataException 22003 may not be raised for applications which use
-float and double Java values outside DB2's limits for SQL REAL and
-DOUBLE.
-</p>
-
-
-<p>
-In soft upgrade mode, the checking of the limits is still in place,
-but is deferred from ResultSet#updateXXX to ResultSet#updateRow.
+A statement level update trigger defined on specific columns should only fire for the update of any of those specified columns. But
+because of regression DERBY-6383, the statement level trigger defined on specific columns will fire for any column update on the 
+trigger table. Additionally, statement level update trigger defined at the table level should fire for columns added after the 
+CREATE TRIGGER sql was issued but because of DERBY-6383, any updates on those newly added columns will not fire statement triggers 
+defined at the table levels.
 </p>
 
 
@@ -1452,26 +795,11 @@ but is deferred from ResultSet#updateXXX to ResultSet#updateRow.
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-The application cannot rely on Derby to detect when values outside the
-legacy DB2 limits are used.  These limits are:
-<pre>
-    float DB2_SMALLEST_REAL = -3.402E+38f;
-    float DB2_LARGEST_REAL  = +3.402E+38f;
-    float DB2_SMALLEST_POSITIVE_REAL = +1.175E-37f;
-    float DB2_LARGEST_NEGATIVE_REAL  = -1.175E-37f;
-
-    double DB2_SMALLEST_DOUBLE = -1.79769E+308d;
-    double DB2_LARGEST_DOUBLE  = +1.79769E+308d;
-    double DB2_SMALLEST_POSITIVE_DOUBLE = +2.225E-307d;
-    double DB2_LARGEST_NEGATIVE_DOUBLE  = -2.225E-307d;
-</pre>
-
+Derby releases 10.7.1.4, 10.8.1.2, 10.9.1.0, 10.10.1.1 suffer from DERBY-6383 and will see 
+1)update statement triggers defined at column(s) level firing for columns not specified CREATE TRIGGER... AFTER UPDATE.. OF columns-list
+2)update statement triggers defined at table level not firing for columns added to the table after CREATE TRIGGER was issued.
 </p>
 
-
-<p>
-In soft upgrade mode, the place where the limits are checked has changed, cf. above.
-</p>
 
 <!-- 
   DESCRIBE WHY THE CHANGE WAS MADE.
@@ -1486,12 +814,7 @@ In soft upgrade mode, the place where the limits are checked has changed, cf. ab
 <h4>Rationale for Change</h4>
 
 <p>
-We do this to allow applications to store a wider range of the
-Java floating point number types in Derby.
-It lets the application use Derby for all Java float and
-double values with the exception of NaN (not a number), -0.0
-(normalized to +0.0) and +/- infinity as defined in the IEEE-754 1985
-floating-point standard.
+The fix for the regression DERBY-6383 will now make update statement level triggers adhere to SQL standards.
 </p>
 
 
@@ -1508,9 +831,9 @@ floating-point standard.
 <h4>Application Changes Required</h4>
 
 <p>
-If the application relied on Derby to detect when use of numbers
-outside the DB2 limits were used, the application would now need to
-perform such checks itself.
+In order to fix the buggy triggers created in the above mentioned releases, users will need to manually drop and recreate the 
+statement level update triggers in a release with DERBY-6383 fix. All statement level update triggers whether they are defined
+on specific columns or at the table level should be dropped and recreated.
 </p>
 
 
@@ -1518,7 +841,7 @@ perform such checks itself.
 </div>
 <hr>
 <h3>
-<a name="Note for DERBY-2601"></a>Note for DERBY-2601</h3>
+<a name="Note for DERBY-6270"></a>Note for DERBY-6270</h3>
 <div>
 
 <!-- 
@@ -1533,7 +856,7 @@ perform such checks itself.
 <h4>Summary of Change</h4>
 
 
-<p>Error codes match severity levels on the network client.</p>
+<p>Frame injection vulnerability in old versions of the API documentation.</p>
 
 <!-- 
   DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
@@ -1552,25 +875,149 @@ perform such checks itself.
 
 
 <p>
-In previous releases, an <code>SQLException</code> raised by the
-network client would in nearly every case return -1
-from its <code>getErrorCode()</code> method.
+Many of the previous releases of Apache Derby were built with JDK
+versions whose javadoc tool produced HTML files that had a frame
+injection vulnerability (CVE-2013-1571). The API documentation bundled
+with this version of Apache Derby has been built with a version of the
+javadoc tool that does not suffer from the vulnerability.
+</p>
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+<!-- h4>Incompatibilities with Previous Release</h4 -->
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+
+<p>
+The change removes a vulnerability.
+</p>
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+
+<p>
+API documentation for old versions of Apache Derby on public-facing
+web servers should be fixed by
+</p>
+
+
+<ul>
+
+<li>removing the old versions of the API documentation, or</li>
+
+<li>replacing the old versions of the API documentation with the new,
+  fixed version in this release, or</li>
+
+<li>repairing the vulnerable versions of the API documentation using
+  Oracle's <a href="http://www.oracle.com/technetwork/java/javase/downloads/java-doc-updater-tool-1955731.html">
+    Java API Documentation Updater Tool</a>
+
+</li>
+
+</ul>
+
+
+</div>
+<hr>
+<h3>
+<a name="Note for DERBY-6224"></a>Note for DERBY-6224</h3>
+<div>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+
+<p>New SQLPermission needed for JDBC driver deregistration on Java SE 8.</p>
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+
+<p>
+The symptoms are only seen when running an application under a Java
+security manager on Java SE 8 or later.
 </p>
 
 
 <p>
-Starting with this release, if both the network server and the network
-client are running Derby version 10.10 or
-higher, <code>getErrorCode()</code> returns a value that represents
-the severity of the error, and that is different from -1.
+When running the Apache Derby embedded driver under a Java security
+manager on Java SE 8, the embedded driver will not be deregistered
+during system shutdown
+unless <code>SQLPermission("deregisterDriver")</code> has been granted
+to <tt>derby.jar</tt>.
 </p>
 
 
 <p>
-Special note for mixed version environments: If either the server or
-the client is at version 10.10 or higher, and the other party is at
-version 10.9 or lower, <code>getErrorCode()</code> may return a value
-that is neither -1 nor the severity of the error.
+If this situation has occurred, the following message will be printed
+to the Derby error log (<tt>derby.log</tt>) along with a stack trace
+that tells where the call was made:
+</p>
+
+
+<p>
+<tt>
+Could not deregister the JDBC driver during engine shutdown. Make sure
+SQLPermission("deregisterDriver") is granted to derby.jar.
+</tt>
+</p>
+
+
+<p>
+Also, if an application attempts to deregister a JDBC driver by
+calling <code>java.sql.DriverManager.deregisterDriver()</code>
+directly, it may fail with an AccessControlException. This is not
+limited to the Apache Derby embedded driver; it will happen for any
+JDBC driver, including the Apache Derby network client driver.
 </p>
 
 <!-- 
@@ -1587,10 +1034,18 @@ that is neither -1 nor the severity of the error.
 
 
 <p>
-Applications that check the value returned
-by <code>SQLException.getErrorCode()</code> will see a different
-value in the new release.
+When running on Java SE 7 or earlier, shutting down an embedded Derby
+engine would also deregister the embedded driver
+from <code>java.sql.DriverManager</code>'s list of JDBC drivers.
 </p>
+
+
+<p>
+When running on Java SE 8 or later, the embedded driver will still be
+registered after shutdown if <tt>derby.jar</tt> is not allowed to
+invoke <code>java.sql.DriverManager.deregisterDriver()</code>.
+</p>
+
 
 <!-- 
   DESCRIBE WHY THE CHANGE WAS MADE.
@@ -1605,8 +1060,8 @@ value in the new release.
 <h4>Rationale for Change</h4>
 
 <p>
-The change makes <code>getErrorCode()</code> behave consistently in
-the network client driver and the embedded driver.
+This is a change in the <code>java.sql.DriverManager</code> class in Java
+SE 8. It is not a change in Apache Derby.
 </p>
 
 <!-- 
@@ -1622,18 +1077,197 @@ the network client driver and the embedded driver.
 <h4>Application Changes Required</h4>
 
 <p>
-If the application is coded in a way that depends
-on <code>SQLException.getErrorCode()</code> returning -1, it will have
-to be recoded to ignore the error code or to accept a different value.
+Applications that run under a Java security manager, and that depend
+on the driver being deregistered as a side-effect of shutting down the
+embedded engine, need to
+grant <code>java.sql.SQLPermission("deregisterDriver")</code>
+to <tt>derby.jar</tt>.
 </p>
 
 
 <p>
-In environments where the server version and the client driver version
-differ, and the return value
-from <code>SQLException.getErrorCode()</code> has significance for the
-application, it is recommended to upgrade both the client driver and
-the server to version 10.10 or higher.
+Applications that run under a Java security manager, and that
+call <code>java.sql.DriverManager.deregisterDriver()</code> directly,
+need to grant <code>java.sql.SQLPermission("deregisterDriver")</code>
+to the application code base, and possibly also change the call
+to <code>deregisterDriver()</code> to go
+through <code>java.security.AccessController.doPrivileged()</code>.
+</p>
+
+
+</div>
+<hr>
+<h3>
+<a name="Note for DERBY-6187"></a>Note for DERBY-6187</h3>
+<div>
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Datatype Change in JDBC Metadata
+</p>
+
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+The datatype has changed for two of the columns in the ResultSet
+returned by DatabaseMetadata.getIndexInfo(). Previously, the
+CARDINALITY and PAGES columns were INTs. Now they are BIGINTs.
+</p>
+
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+JDBC 4.2 changed the datatype of these columns.
+</p>
+
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Note that on Derby, the contents of these columns is always NULL. Applications
+may need to be recoded if they expect the metadata for these columns
+to report that they have INT type rather than BIGINT type.
+</p>
+
+
+
+</div>
+<hr>
+<h3>
+<a name="Note for DERBY-5866"></a>Note for DERBY-5866</h3>
+<div>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+
+<p>The meaning of SYS.SYSTRIGGERS.CREATIONTIMESTAMP has changed.</p>
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+
+<p>
+In earlier versions of Apache Derby,
+the <tt>SYS.SYSTRIGGERS.CREATIONTIMESTAMP</tt> column would tell what
+time the system clock showed, represented in the local time zone of
+the database, at the time the trigger was created.
+</p>
+
+
+<p>
+In databases whose format is upgraded to 10.11 or later, this column
+now represents the time the trigger was created in the UTC time zone.
+Existing values are not changed in the upgrade, so the creation
+timestamps for any triggers created before the upgrade will still be
+represented in the local time zone.
+</p>
+
+
+<p>
+Furthermore, logic has been added to make the values in that column
+monotonically increasing, so in some special cases (especially if the
+system clock has been adjusted back in time, or if the database has
+been moved to a machine whose system clock is behind the clock on the
+original machine) the column may contain a value that is not equal to
+the time the trigger was created. The latter change also takes effect
+if the database format has not been upgraded to 10.11 or later.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+<!-- h4>Incompatibilities with Previous Release</h4 -->
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+
+<p>
+The purpose of the <tt>SYS.SYSTRIGGERS.CREATIONTIMESTAMP</tt> column
+is to make it possible to fire triggers in the order in which they
+were created. A timestamp in the local time zone is not ideal for this
+purpose because there are ambiguities in time zones that observe
+daylight saving time. Also, there could be ambiguities when moving a
+database to a machine in another time zone. Storing the timestamp in
+UTC avoids both of these problems.
+</p>
+
+
+<p>
+Another problem that was seen, was that triggers that were created
+quickly after each other, could sometimes end up with the exact same
+creation timestamp. This meant that the execution order for those
+triggers was non-deterministic. The timestamp of a new trigger is now
+adjusted so that it is higher than the timestamp of any other existing
+trigger on the same table. This makes sure the triggers are executed
+in the order in which they were created.
+</p>
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+
+<p>
+Most applications should not be affected by this change in any way.
+Any applications that read the values stored
+in <tt>SYS.SYSTRIGGERS.CREATIONTIMESTAMP</tt> should take into account
+that this column doesn't necessarily tell the exact time the trigger
+was created, because it contains a value that may have been adjusted
+in order to ensure the correct execution order.
 </p>
 
 
@@ -1642,18 +1276,18 @@ the server to version 10.10 or higher.
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <div>
-<p>Derby release 10.10.1.1 was built using the following environment:</p>
+<p>Derby release 10.10.1.4 was built using the following environment:</p>
 <ul>
 <li>
 <b>Branch</b> - Source code came from the 10.10 branch.</li>
 <li>
-<b>Machine</b> - Mac OSX 10.7.5.</li>
+<b>Machine</b> - Cygwin on Microsoft Windows 7.</li>
 <li>
-<b>Ant</b> - Apache Ant version 1.7.1 compiled on June 27 2008.</li>
+<b>Ant</b> - Apache Ant version 1.7.0 compiled on June 27 2008.</li>
 <li>
-<b>Compiler</b> - All classes were compiled by a javacc built from the source for OpenJDK 64-Bit Server VM (build 25.0-b20, mixed mode).</li>
+<b>Compiler</b> - All classes were compiled by using Oracle the 1.8.0 32-Bit VM (build 25.0-b70, mixed mode).</li>
 <li>
-<b>JSR 169</b> - Java ME support was built using libraries from phoneME Advanced Milestone Release 2.</li>
+<b>JSR 169</b> - Java ME support was built using libraries from IBMs weme 6.2.</li>
 </ul>
 </div>
 <h2>
