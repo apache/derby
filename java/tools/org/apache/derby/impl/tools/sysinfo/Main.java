@@ -152,6 +152,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
       aw.println (Main.getTextMessage ("SIF01.Q"));
       aw.println (Main.getTextMessage ("SIF01.B"));
     }
+    
+    // derbyTesting info
+    try {
+        reportTesting(aw);
+    }
+    catch (Exception e) {
+        // ignore locales for the testing jar
+        aw.println("Exception in reporting version of derbyTesting.jar");
+        e.printStackTrace();
+    }
 
 
     if (pause) {
@@ -519,6 +529,82 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   } // end of reportLocales
 
+  /**
+  Writes out information about the derbyTesting classes with the product.
+
+  @param localAW the AppStreamWriter to which the info is written. If this
+  value is null, the info is written to System.out
+
+   */
+  private static void reportTesting (java.io.PrintWriter localAW) {
+
+      String hdr="org.apache.derbyTesting.*:";
+      Properties p = new Properties ();
+      String tstingResource ="/org/apache/derby/info/tsting.properties";
+
+      final Properties finalp = p;
+      final String finalTstingResource = tstingResource;
+      try {
+          InputStream is = AccessController.doPrivileged
+                  (new PrivilegedAction<InputStream>() {
+                      public InputStream run() {
+                          InputStream is =
+                                  finalp.getClass().getResourceAsStream (finalTstingResource);
+                          return is;
+                      }
+                  });
+          if (is == null) {
+              //localAW.println("resource is null: " + tstingResource);
+          }
+          else {
+              try {
+                  p.clear();
+                  p.load (is);
+                  //Displaying Testing info
+                  //String tstingName = p.getProperty("derby.tsting.external.name");
+
+                  StringBuffer successes = new StringBuffer(Main.getTextMessage(crLf()));
+                  StringBuffer failures = new StringBuffer(crLf() + Main.getTextMessage("SIF08.E") + crLf());
+                  tryTstingClasspath(successes, failures);
+                  String successString = successes.toString();
+
+                  if (successString.isEmpty() || successString.length()<=2)
+                  {
+                      // if we don't have the BaseTestCase class, assume we don't have any of the
+                      // testing classes, and just print nothing
+                      // this would be the situation that end-users would likely see.
+                      return;
+                  }
+
+                  // show the path and add brackets like we do for the core classes
+                  localAW.println(hdr);
+                  localAW.print("\t ");
+                  localAW.print("[");
+                  localAW.print(formatURL(new URL(successString)));
+                  localAW.println("]");
+                  // show the version info
+                  int major = Integer.parseInt(p.getProperty ("derby.tsting.version.major"));
+                  int minor = Integer.parseInt(p.getProperty ("derby.tsting.version.minor"));
+                  int maint = Integer.parseInt(p.getProperty ("derby.tsting.version.maint"));
+                  String build = p.getProperty ("derby.tsting.build.number");
+                  String lv = ProductVersionHolder.fullVersionString(major, minor, maint, false, build);
+                  localAW.println (Main.getTextMessage ("SIF01.S", lv));
+              } catch (IOException ioe) {
+                  //This case is a bit ugly. If we get an IOException, we return
+                  //null. Though this correctly reflects that the product is not
+                  //available for use, it may be confusing to users that we swallow
+                  //the IO error here.
+                  localAW.println("Could not get testing properties from : " + is);
+              }
+          }
+          localAW.println (sep);
+      }
+      catch (Throwable t) {
+          localAW.println ("Could not load resource: " + tstingResource);
+          localAW.println ("Exception: " + t);
+      }
+  } // end of reportTesting
+  
 	/* for arguments, choose from one of:*/
 	private static final String EMBEDDED = "embedded";
 
@@ -665,6 +751,10 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	private static void tryUtilsClasspath(StringBuffer successes, StringBuffer failures) {
 		tryMyClasspath("org.apache.derby.tools.ij", Main.getTextMessage("SIF08.Q", "derbytools.jar"), successes, failures);
 	}
+	
+	private static void tryTstingClasspath(StringBuffer successes, StringBuffer failures) {
+        tryMyClasspath("org.apache.derbyTesting.junit.BaseTestCase", "", successes, failures);
+    }
 
 	private static void tryMyClasspath(String cn, String library, StringBuffer successes, StringBuffer failures) {
 
