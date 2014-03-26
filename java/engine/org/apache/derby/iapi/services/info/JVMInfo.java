@@ -120,8 +120,20 @@ public abstract class JVMInfo
 
             try {
 
-                if (Float.parseFloat(javaVersion) > 1.8f)
+                // Extract major and minor version out of the spec version.
+                String[] ver = javaVersion.split("[.]");
+                int major = ver.length >= 1 ? Integer.parseInt(ver[0]) : 0;
+                int minor = ver.length >= 2 ? Integer.parseInt(ver[1]) : 0;
+
+                // The highest level currently supported is 1.8. Use that
+                // level if the spec version is greater than or equal to it.
+                final int highestMajor = 1;
+                final int highestMinor = 8;
+                if (major > highestMajor ||
+                        (major == highestMajor && minor >= highestMinor)) {
                     id = J2SE_18;
+                }
+
             } catch (NumberFormatException nfe) {
             }
         }
