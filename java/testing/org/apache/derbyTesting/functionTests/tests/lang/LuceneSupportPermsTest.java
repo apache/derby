@@ -342,6 +342,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  ruthConnection = openUserConnection( RUTH );
 
+        createSchema( ruthConnection, Types.INTEGER );
+
         goodStatement( dboConnection, "grant execute on procedure syscs_util.syscs_register_tool to public" );
 
         // only the DBO can load the tool
@@ -370,6 +372,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // try loading and unloading again for good measure
         goodStatement( dboConnection, LOAD_TOOL );
         goodStatement( dboConnection, UNLOAD_TOOL );
+        dropSchema( ruthConnection );
     }
     
     /**
