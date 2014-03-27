@@ -145,6 +145,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read";
   permission java.util.PropertyPermission "user.dir", "read";
   permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
 };
 
@@ -464,6 +465,7 @@ grant codeBase "${derbyTesting.lucene.core}"
   permission java.util.PropertyPermission "user.dir", "read";
   permission java.util.PropertyPermission "sun.arch.data.model", "read";
   permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
   permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
 };
 
