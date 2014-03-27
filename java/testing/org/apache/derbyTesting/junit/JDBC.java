@@ -113,6 +113,18 @@ public class JDBC {
     private static final boolean HAVE_SQLXML
                            = haveClass("java.sql.SQLXML");
 
+    /** Is the Lucene core jar file on the classpath */
+    public  static  final   boolean HAVE_LUCENE_CORE =
+        haveClass( "org.apache.lucene.analysis.Analyzer" );
+
+    /** Is the Lucene analyzer jar file on the classpath */
+    public  static  final   boolean HAVE_LUCENE_ANALYZERS =
+        haveClass( "org.apache.lucene.analysis.en.EnglishAnalyzer" );
+
+    /** Is the Lucene queryparser jar file on the classpath */
+    public  static  final   boolean HAVE_LUCENE_QUERYPARSER =
+        haveClass( "org.apache.lucene.queryparser.surround.parser.QueryParser" );
+
     /**
      * Does java.sql.ResultSet implement java.lang.AutoCloseable?
      * Indicates JDBC 4.1.

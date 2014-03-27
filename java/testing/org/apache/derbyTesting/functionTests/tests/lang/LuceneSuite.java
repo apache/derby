@@ -23,8 +23,13 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 
+import java.util.Properties;
+
 import junit.framework.Test; 
 import junit.framework.TestSuite;
+
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Suite holding all of the tests for the Lucene plugin.
@@ -41,11 +46,32 @@ public class LuceneSuite extends BaseTestCase
 	public static Test suite()
     {
 		TestSuite suite = new TestSuite("LuceneSuite");
+        Properties  properties = TestConfiguration.getSystemProperties();
         
-        suite.addTest(LuceneSupportTest.suite());
-        suite.addTest(LuceneSupportPermsTest.suite());
-        suite.addTest(LuceneCollationTest.suite());
+        //
+        // If we're told to omit the Lucene plugin tests, make sure
+        // that the Lucene jar files aren't on the classpath.
+        //
+        if ( getBooleanProperty( properties, TestConfiguration.KEY_OMIT_LUCENE ) )
+        {
+            assertFalse( "Lucene core jar file should not be on the classpath!", JDBC.HAVE_LUCENE_CORE );
+            assertFalse( "Lucene analyzer jar file should not be on the classpath!", JDBC.HAVE_LUCENE_ANALYZERS );
+            assertFalse( "Lucene query parser jar file should not be on the classpath!", JDBC.HAVE_LUCENE_QUERYPARSER );
+        }
+        else
+        {
+            suite.addTest(LuceneSupportTest.suite());
+            suite.addTest(LuceneSupportPermsTest.suite());
+            suite.addTest(LuceneCollationTest.suite());
+        }
 
         return suite;
 	}
+
+    /** Return the boolean value of a system property */
+    private static  boolean getBooleanProperty( Properties properties, String key )
+    {
+        return Boolean.valueOf( properties.getProperty( key ) ).booleanValue();
+    }
+    
 }

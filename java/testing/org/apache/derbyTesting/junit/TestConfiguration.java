@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class TestConfiguration
+ * Derby - Class org.apache.derbyTesting.junit.TestConfiguration
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -119,6 +119,7 @@ public final class TestConfiguration {
     private final static String KEY_VERBOSE = "derby.tests.debug";    
     private final static String KEY_LOGIN_TIMEOUT = "derby.tests.login.timeout";    
     private final static String KEY_TRACE = "derby.tests.trace";
+    public  final static String KEY_OMIT_LUCENE = "derby.tests.omitLucene";
 
     /**
      * derby.tests.stopAfterFirstFail - debugging property to exit after 
@@ -1389,7 +1390,7 @@ public final class TestConfiguration {
      *
      * @return the system properties.
      */
-    private static final Properties getSystemProperties() {
+    public  static final Properties getSystemProperties() {
         // Fetch system properties in a privileged block.
         return AccessController.doPrivileged(
                 new PrivilegedAction<Properties>() {
