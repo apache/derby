@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -351,17 +352,16 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     /**
      * Construct top level suite in this JUnit test
      */
-    public static Test suite()
+    public static Test suite() throws Exception
     {
         TestSuite suite = new TestSuite();
 
         //
         // Special version of the test which uses an encrypted database for credentials.
-        // Not run on windows until DERBY-5618 is addressed.
-        // Also not run on small devices because encryption is not supported there
-        // by default.
+        // Only run on platforms where we can expect cleanup of support files
+        // to succeed (DERBY-5618).
         //
-        if ( !onWindows() && !JDBC.vmSupportsJSR169() )
+        if (enableSubprotocolTests())
         {
             suite.addTest
                 (
@@ -380,9 +380,21 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // should be OK to run in the local time zone.
         return new TimeZoneTestSetup(suite, "GMT");
     }
-    private static  boolean onWindows()
-    {
-        return getSystemProperty("os.name").startsWith("Windows");
+
+    /**
+     * Check whether or not tests for subprotocols should be enabled
+     * on this platform.
+     */
+    private static boolean enableSubprotocolTests() {
+        // DERBY-5618: On Windows, we are not able to delete the jar files
+        // used by the tests for the classpath subsubprotocol if we don't
+        // close the URLClassLoader when we're done. Closing the class loader
+        // can only be done on Java 7 and higher.
+        //
+        // Run the tests if the Java version supports URLClassLoader.close(),
+        // or if we're on a non-Windows platform (where the jar files can be
+        // deleted even if the class loader hasn't been closed).
+        return ClasspathSetup.supportsClose() || !isWindowsPlatform();
     }
 
     /**
@@ -390,7 +402,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      * Create a suite of all test configurations.
      * </p>
      */
-    private static  Test   allConfigurations( boolean clientServer )
+    private static Test allConfigurations(boolean clientServer) throws Exception
     {
         TestSuite suite = new TestSuite();
 
@@ -442,9 +454,10 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              );
         
         //
-        // For testing subprotocols. Cleanup of support files is blocked by DERBY-5618.
+        // For testing subprotocols. Only run on platforms where we can
+        // expect cleanup of support files to succeed (DERBY-5618).
         //
-        if ( !onWindows() )
+        if (enableSubprotocolTests())
         {
             //
             // NATIVE authentication with credentials in read-only databases accessed via jar subprotocol
@@ -481,7 +494,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                   ( CLASSPATH, NATIVE, LOCAL, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
                   ).decorate( clientServer )
                  );
-        }   // end if !onWindows()
+        }
 
         return suite;
     }
@@ -493,7 +506,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      * stored properties that can't be removed at tearDown time.
      * </p>
      */
-    private Test    decorate( boolean clientServer )
+    private Test decorate(boolean clientServer) throws Exception
     {
         String      credentialsDBPhysicalName = TestConfiguration.generateUniqueDatabaseName();
         
@@ -534,24 +547,17 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         //    };
         
         //
-        // For testing subprotocols. Cleanup of support files is blocked by DERBY-5618.
+        // For testing subprotocols. Only run on platforms where we can
+        // expect cleanup of support files to succeed (DERBY-5618).
         //
-        if ( !onWindows() )
+        if (enableSubprotocolTests())
         {
+            // Add a jar file to the classpath so that we can test the classpath subprotocol.
+            URL nast2Jar = SupportFilesSetup.getReadOnlyURL(NAST2_JAR_FILE);
+            result = new ClasspathSetup(result, nast2Jar);
+
             // Add the jar files needed for testing jar and classpath subprotocols.
             result = new SupportFilesSetup( result, SUPPORT_FILES_SOURCE, null, SUPPORT_FILES_TARGET, null );
-
-            //
-            // Add a jar file to the classpath so that we can test the classpath subprotocol.
-            //
-            File        currentDirectory = currentDirectory();
-            File        readOnlyDirectory = new File( currentDirectory, SupportFilesSetup.EXTIN );
-            File        nast2Jar = new File( readOnlyDirectory, NAST2_JAR_FILE );
-
-            try {
-                result = new ClasspathSetup( result, nast2Jar.toURI().toURL() );
-            }
-            catch (Exception e) { printStackTrace( e ); }
         }
         
         //
@@ -866,12 +872,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         ///////////////////////////////////////////////////////////////////////////////////
         //
-        // Vet databases accessed via subprotocols. Not run on Windows machines
-        // because of DERBY-5618.
+        // Vet databases accessed via subprotocols.
         //
         ///////////////////////////////////////////////////////////////////////////////////
 
-        if ( !onWindows() )
+        if (enableSubprotocolTests())
         {
             // database accessed via jar subprotocol
             vetProtocol( jarDBName( _credentialsDBLocation ) );

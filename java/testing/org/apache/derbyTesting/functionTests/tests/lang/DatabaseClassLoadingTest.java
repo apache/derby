@@ -29,7 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -46,6 +45,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -72,7 +72,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      * Ordering is important here so the fixtures are added
      * explicitly.
      */
-    public static Test suite()
+    public static Test suite() throws Exception
     {
         final TestSuite suite = new TestSuite("DatabaseClassLoadingTest");
         
@@ -117,8 +117,15 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testDatabaseInJar"))); 
 
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testDatabaseInClasspath")));
+            // DERBY-2162: Only run this test case on platforms that support
+            // the URLClassLoader.close() method. Otherwise, we won't be able
+            // to delete the jar file afterwards.
+            if (ClasspathSetup.supportsClose()) {
+                suite.addTest(SecurityManagerSetup.noSecurityManager(
+                    new ClasspathSetup(
+                        new DatabaseClassLoadingTest("testDatabaseInClasspath"),
+                        SupportFilesSetup.getReadOnlyURL("dclt.jar"))));
+            }
            
            // No security manager because the test uses getClass().getClassLoader()
            // in an installed jar to ensure that the class loader for
@@ -638,34 +645,11 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         readOnlyTest(ds);
     }
     
-    public void testDatabaseInClasspath() throws SQLException, MalformedURLException
+    public void testDatabaseInClasspath() throws SQLException
     {
         String dbName = "classpath:dbro";
         DataSource ds = JDBCDataSource.getDataSource(dbName);
-        
-        try {
-            ds.getConnection();
-            fail("opened database before it was on classpath");
-        } catch (SQLException e)
-        {
-           assertSQLState("XJ004", e);
-        }
-        
-        URL jarURL = SupportFilesSetup.getReadOnlyURL("dclt.jar");
-        
-        // DERBY-2179 - temp disable using the class loader
-        // (since due to DERBY-2162) it's not working anyway)
-        // need to re-write code not to assume there is no
-        // existing thread context loader.
-        //setContextClassLoader(jarURL);
-        try {
-            // Disabled due to DERBY-2162, running this opens
-            // the database thus accessing resources and means the
-            // jar file cannot be cleaned up.
-            // readOnlyTest(ds);
-        } finally {
-            //setContextClassLoader(null);
-        } 
+        readOnlyTest(ds);
     }
     
     /**
@@ -1330,18 +1314,5 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
 
         in.close();
         zos.closeEntry();
-    }
-    
-    private static void setContextClassLoader(final URL url)
-    {
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction<Void>() {
-            public Void run()  {
-                URLClassLoader cl = 
-                    url == null ? null : new URLClassLoader(new URL[] {url});
-                java.lang.Thread.currentThread().setContextClassLoader(cl);
-              return null;
-            }
-        });
     }
 }

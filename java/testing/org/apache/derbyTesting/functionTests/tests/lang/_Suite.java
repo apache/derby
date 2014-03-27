@@ -49,7 +49,7 @@ public class _Suite extends BaseTestCase  {
 		super(name);
 	}
 
-	public static Test suite() {
+    public static Test suite() throws Exception {
 
 		TestSuite suite = new TestSuite("lang");
         

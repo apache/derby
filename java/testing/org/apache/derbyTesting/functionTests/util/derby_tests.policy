@@ -294,6 +294,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 
   // Needed by NetworkServerTestSetup when probing ports.
   permission java.net.SocketPermission "localhost", "listen";
+
+  // Needed by ClasspathSetup for freeing resources.
+  permission java.lang.RuntimePermission "closeClassLoader";
 };
 
 //
@@ -378,6 +381,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // This permission is needed to call DriverManager.deregisterDriver()
   // on Java SE 8 and later.
   permission java.sql.SQLPermission "deregisterDriver";
+
+  // Needed by ClasspathSetup for freeing resources.
+  permission java.lang.RuntimePermission "closeClassLoader";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

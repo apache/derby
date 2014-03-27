@@ -19,10 +19,13 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -49,6 +52,7 @@ public class ClasspathSetup extends TestSetup
 
     private URL             _resource;
     private ClassLoader _originalClassLoader;
+    private URLClassLoader _newClassLoader;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -61,7 +65,7 @@ public class ClasspathSetup extends TestSetup
      * Add the indicated URL to the classpath.
      * </p>
      */
-    public  ClasspathSetup( Test test, URL resource )  throws Exception
+    public ClasspathSetup(Test test, URL resource)
     {
         super( test );
         
@@ -84,9 +88,9 @@ public class ClasspathSetup extends TestSetup
                  { 
                      _originalClassLoader = Thread.currentThread().getContextClassLoader();
 
-                     URLClassLoader newClassLoader = new URLClassLoader( new URL[] { _resource }, _originalClassLoader );
+                     _newClassLoader = new URLClassLoader( new URL[] { _resource }, _originalClassLoader );
 
-                     Thread.currentThread().setContextClassLoader( newClassLoader );
+                     Thread.currentThread().setContextClassLoader( _newClassLoader );
                      
                      return null;
                  }
@@ -94,22 +98,42 @@ public class ClasspathSetup extends TestSetup
              );
     }
     
-    protected void tearDown()
+    protected void tearDown() throws Exception
     {
         AccessController.doPrivileged
             (
-             new PrivilegedAction<Void>()
+             new PrivilegedExceptionAction<Void>()
              {
-                 public Void run()
+                 public Void run() throws IOException
                  { 
                      Thread.currentThread().setContextClassLoader( _originalClassLoader );
-                     
+
+                     // On Java 7 and higher, URLClassLoader implements the
+                     // Closable interface and has a close() method. Use that
+                     // method, if it's available, to free all resources
+                     // associated with the class loader. DERBY-2162.
+                     if (_newClassLoader instanceof Closeable) {
+                        ((Closeable) _newClassLoader).close();
+                     }
+
                      return null;
                  }
              }
              );
+
+        _originalClassLoader = null;
+        _newClassLoader = null;
+        _resource = null;
+    }
+
+    /**
+     * Check whether this platform supports closing a {@code URLClassLoader}.
+     *
+     * @return {@code true} if {@code URLClassLoader} has a {@code close()}
+     * method (Java 7 and higher), or {@code false} otherwise
+     */
+    public static boolean supportsClose() {
+        return Closeable.class.isAssignableFrom(URLClassLoader.class);
     }
 
 }
-
-

@@ -27,19 +27,13 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 
 
-public class FullCollationTests extends CollationTest {
-    
-    public FullCollationTests(String name) {
-        super(name);
-       
-    }
+public class FullCollationTests extends TestSuite {
 
-    
     /**
      * Return a suite that uses a single use database with
      * a primary fixture from this test plus all tests
      */
-    public static Test suite() 
+    public static Test suite() throws Exception
     {
         TestSuite suite = new TestSuite("FullCollationTests:territory=" +"no_NO");
         suite.addTest(new CollationTest("testNorwayCollation"));
