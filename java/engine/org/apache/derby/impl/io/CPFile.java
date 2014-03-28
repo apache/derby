@@ -26,12 +26,9 @@ import org.apache.derby.io.StorageFile;
 import java.io.InputStream;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 
 /**
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
@@ -95,21 +92,31 @@ class CPFile extends InputStreamFile
      */
     public InputStream getInputStream( ) throws FileNotFoundException
     {
-        URL url = getURL();
+        InputStream is = null;
+        ClassLoader cl = getContextClassLoader(Thread.currentThread());
+        if (cl != null) {
+            is = getResourceAsStream(cl, path);
+        }
 
-        if (url == null) {
+        // don't assume the context class loader is tied
+        // into the class loader that loaded this class.
+        if (is == null) {
+            cl = getClass().getClassLoader();
+            // Javadoc indicates implementations can use
+            // null as a return from Class.getClassLoader()
+            // to indicate the system/bootstrap classloader.
+            if (cl != null) {
+                is = getResourceAsStream(cl, path);
+            } else {
+                is = getSystemResourceAsStream(path);
+            }
+        }
+
+        if (is == null) {
             throw new FileNotFoundException(toString());
         }
 
-        try {
-            return openStream(url);
-        } catch (FileNotFoundException fnf) {
-            throw fnf;
-        } catch (IOException ioe) {
-            FileNotFoundException fnf = new FileNotFoundException(toString());
-            fnf.initCause(ioe);
-            throw fnf;
-        }
+        return is;
 
     } // end of getInputStream
     
@@ -169,17 +176,29 @@ class CPFile extends InputStreamFile
         });
     }
 
-    /** Privileged wrapper for {@code URL.openStream()}. */
-    private static InputStream openStream(final URL url) throws IOException {
-        try {
-            return AccessController.doPrivileged(
-                    new PrivilegedExceptionAction<InputStream>() {
-                public InputStream run() throws IOException {
-                    return url.openStream();
-                }
-            });
-        } catch (PrivilegedActionException pae) {
-            throw (IOException) pae.getCause();
-        }
+    /**
+     * Privileged wrapper for {@code ClassLoader.getResourceAsStream(String)}.
+     */
+    private static InputStream getResourceAsStream(
+            final ClassLoader cl, final String name) {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<InputStream>() {
+            public InputStream run() {
+                return cl.getResourceAsStream(name);
+            }
+        });
+    }
+
+    /**
+     * Privileged wrapper for
+     * {@code ClassLoader.getSystemResourceAsStream(String)}.
+     */
+    private static InputStream getSystemResourceAsStream(final String name) {
+        return AccessController.doPrivileged(
+                new PrivilegedAction<InputStream>() {
+            public InputStream run() {
+                return ClassLoader.getSystemResourceAsStream(name);
+            }
+        });
     }
 }
