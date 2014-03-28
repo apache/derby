@@ -26,7 +26,12 @@ import org.apache.derby.io.StorageFile;
 import java.io.InputStream;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 /**
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
@@ -90,30 +95,22 @@ class CPFile extends InputStreamFile
      */
     public InputStream getInputStream( ) throws FileNotFoundException
     {
-    	//System.out.println("HERE FOR " + toString());
-    	InputStream is = null;
-    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    	if (cl != null)
-    		is = cl.getResourceAsStream(path);
-    	
-       	// don't assume the context class loader is tied
-    	// into the class loader that loaded this class.
-    	if (is == null)
-    	{
-    		cl = getClass().getClassLoader();
-    		// Javadoc indicates implementations can use
-    		// null as a return from Class.getClassLoader()
-    		// to indicate the system/bootstrap classloader.
-    		if (cl != null)
-    			is = cl.getResourceAsStream(path);
-    		else
-    			is = ClassLoader.getSystemResourceAsStream(path);
-    	}
-    	
-    	if (is == null)
-    		throw new FileNotFoundException(toString());
-    	return is;
-    	
+        URL url = getURL();
+
+        if (url == null) {
+            throw new FileNotFoundException(toString());
+        }
+
+        try {
+            return openStream(url);
+        } catch (FileNotFoundException fnf) {
+            throw fnf;
+        } catch (IOException ioe) {
+            FileNotFoundException fnf = new FileNotFoundException(toString());
+            fnf.initCause(ioe);
+            throw fnf;
+        }
+
     } // end of getInputStream
     
 	/**
@@ -123,10 +120,10 @@ class CPFile extends InputStreamFile
      */
     public URL getURL() {
 
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        ClassLoader cl = getContextClassLoader(Thread.currentThread());
         URL myURL;
         if (cl != null) {
-            myURL = cl.getResource(path);
+            myURL = getResource(cl, path);
             if (myURL != null)
                 return myURL;
         }
@@ -138,9 +135,51 @@ class CPFile extends InputStreamFile
         // null as a return from Class.getClassLoader()
         // to indicate the system/bootstrap classloader.
         if (cl != null) {
-            return cl.getResource(path);
+            return getResource(cl, path);
         } else {
-            return ClassLoader.getSystemResource(path);
+            return getSystemResource(path);
+        }
+    }
+
+    /** Privileged wrapper for {@code Thread.getContextClassLoader()}. */
+    private static ClassLoader getContextClassLoader(final Thread thread) {
+        return AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            public ClassLoader run() {
+                return thread.getContextClassLoader();
+            }
+        });
+    }
+
+    /** Privileged wrapper for {@code ClassLoader.getResource(String)}. */
+    private static URL getResource(
+            final ClassLoader cl, final String name) {
+        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+            public URL run() {
+                return cl.getResource(name);
+            }
+        });
+    }
+
+    /** Privileged wrapper for {@code ClassLoader.getSystemResource(String)}. */
+    private static URL getSystemResource(final String name) {
+        return AccessController.doPrivileged(new PrivilegedAction<URL>() {
+            public URL run() {
+                return ClassLoader.getSystemResource(name);
+            }
+        });
+    }
+
+    /** Privileged wrapper for {@code URL.openStream()}. */
+    private static InputStream openStream(final URL url) throws IOException {
+        try {
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<InputStream>() {
+                public InputStream run() throws IOException {
+                    return url.openStream();
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
         }
     }
 }

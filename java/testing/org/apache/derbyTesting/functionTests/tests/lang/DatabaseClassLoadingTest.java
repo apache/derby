@@ -44,6 +44,7 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -114,17 +115,15 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 suite.addTest(new DatabaseClassLoadingTest(orderedTests[i]));
             }
        
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testDatabaseInJar"))); 
+            suite.addTest(new DatabaseClassLoadingTest("testDatabaseInJar"));
 
             // DERBY-2162: Only run this test case on platforms that support
             // the URLClassLoader.close() method. Otherwise, we won't be able
             // to delete the jar file afterwards.
             if (ClasspathSetup.supportsClose()) {
-                suite.addTest(SecurityManagerSetup.noSecurityManager(
-                    new ClasspathSetup(
+                suite.addTest(new ClasspathSetup(
                         new DatabaseClassLoadingTest("testDatabaseInClasspath"),
-                        SupportFilesSetup.getReadOnlyURL("dclt.jar"))));
+                        SupportFilesSetup.getReadOnlyURL("dclt.jar")));
             }
            
            // No security manager because the test uses getClass().getClassLoader()
@@ -638,7 +637,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     public void testDatabaseInJar() throws SQLException
     {
         File jarFile = SupportFilesSetup.getReadOnly("dclt.jar");
-        String dbName = "jar:(" + jarFile.getAbsolutePath() + ")dbro";
+        String dbName = "jar:(" +
+                PrivilegedFileOpsForTests.getAbsolutePath(jarFile) + ")dbro";
         
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         
