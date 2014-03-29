@@ -23,7 +23,11 @@ package org.apache.derby.impl.optional.lucene;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -41,12 +45,14 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.optional.LuceneUtils;
 import org.apache.derby.vti.Restriction.ColumnQualifier;
 import org.apache.derby.vti.VTITemplate;
 
@@ -91,6 +97,23 @@ public class LuceneSupport implements OptionalTool
     static  final   int TABLE_PART = 0;
     static  final   int COLUMN_PART = TABLE_PART + 1;
     static  final   int PART_COUNT = COLUMN_PART + 1;
+
+    // file which holds properties specific to a Lucene index
+    private static  final   String  PROPERTIES_FILE_NAME = "derby-lucene.properties";
+
+    // properties which go in that file
+
+    /** property identifying the static method which materializes an Analyzer for the index */
+    public  static  final   String  ANALYZER_MAKER = "derby.lucene.analyzer.maker";
+
+    /** class name of the Analyzer used for the index */
+    public  static  final   String  ANALYZER = "derby.lucene.analyzer";
+
+    /** version of Lucene used to create or recreate an index */
+    public  static  final   String  LUCENE_VERSION = "derby.lucene.version";
+	
+    /** system time when the index was created/updated */
+    public  static  final   String  UPDATE_TIMESTAMP = "derby.lucene.last.updated";
 	
     /////////////////////////////////////////////////////////////////////
     //
@@ -130,7 +153,10 @@ public class LuceneSupport implements OptionalTool
 		listFunction.append("schemaname varchar( 128 ),");
 		listFunction.append("tablename varchar( 128 ),");
 		listFunction.append("columnname varchar( 128 ),");
-		listFunction.append("lastupdated timestamp");
+		listFunction.append("lastupdated timestamp,");
+		listFunction.append("luceneversion varchar( 20 ),");
+		listFunction.append("analyzer varchar( 32672 ),");
+		listFunction.append("analyzermaker varchar( 32672 )");
 		listFunction.append(")");
 		listFunction.append("language java ");
 		listFunction.append("parameter style DERBY_JDBC_RESULT_SET ");
@@ -143,7 +169,8 @@ public class LuceneSupport implements OptionalTool
 		createProcedure.append("create procedure " + CREATE_INDEX );
 		createProcedure.append(" (schemaname varchar( 128 ),");
 		createProcedure.append("tablename varchar( 128 ),");
-		createProcedure.append("textcolumn varchar( 128 ))");
+		createProcedure.append("textcolumn varchar( 128 ),");
+		createProcedure.append("analyzerMaker varchar( 32672 ))");
 		createProcedure.append("parameter style java modifies sql data language java external name ");
 		createProcedure.append("'" + getClass().getName() + ".createIndex'");
 		
@@ -163,7 +190,8 @@ public class LuceneSupport implements OptionalTool
 		updateProcedure.append("create procedure " + UPDATE_INDEX );
 		updateProcedure.append(" (schemaname varchar( 128 ),");
 		updateProcedure.append("tablename varchar( 128 ),");
-		updateProcedure.append("textcolumn varchar( 128 ))");
+		updateProcedure.append("textcolumn varchar( 128 ),");
+		updateProcedure.append("analyzerMaker varchar( 32672 ))");
 		updateProcedure.append("parameter style java reads sql data language java external name ");
 		updateProcedure.append("'" + getClass().getName() + ".updateIndex'");
 		
@@ -300,11 +328,13 @@ public class LuceneSupport implements OptionalTool
 	 * @param schema Schema where the indexed column resides
 	 * @param table table where the indexed column resides
 	 * @param textcol the indexed column
+	 * @param analyzerMaker name of static method which instantiates an Analyzer. may be null.
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public static void updateIndex( String schema, String table, String textcol )
-        throws SQLException, IOException, PrivilegedActionException
+	public static void updateIndex( String schema, String table, String textcol, String analyzerMaker )
+        throws SQLException, IOException, PrivilegedActionException,
+               ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
         Connection              conn = getDefaultConnection();
 
@@ -316,7 +346,7 @@ public class LuceneSupport implements OptionalTool
             throw newSQLException( SQLState.LUCENE_INDEX_DOES_NOT_EXIST );
         }
 
-        createOrRecreateIndex( conn, schema, table, textcol, false );
+        createOrRecreateIndex( conn, schema, table, textcol, analyzerMaker, false );
 	}
 	
     /////////////////////////////////////////////////////////////////////
@@ -331,11 +361,13 @@ public class LuceneSupport implements OptionalTool
 	 * @param schema The schema of the column to index
 	 * @param table The table of the column to index
 	 * @param textcol The column to create the Lucene index on
+	 * @param analyzerMaker name of static method which instantiates an Analyzer. may be null.
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public static void createIndex( String schema, String table, String textcol )
-        throws SQLException, IOException, PrivilegedActionException
+	public static void createIndex( String schema, String table, String textcol, String analyzerMaker )
+        throws SQLException, IOException, PrivilegedActionException,
+               ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
         Connection              conn = getDefaultConnection();
         DatabaseMetaData    dbmd = conn.getMetaData();
@@ -343,7 +375,7 @@ public class LuceneSupport implements OptionalTool
         // First make sure that the text column exists and is a String type
         vetTextColumn( dbmd, schema, table, textcol );
 
-        createOrRecreateIndex( conn, schema, table, textcol, true );
+        createOrRecreateIndex( conn, schema, table, textcol, analyzerMaker, true );
 	}
 
 	/**
@@ -352,6 +384,7 @@ public class LuceneSupport implements OptionalTool
 	 * @param schema The schema of the column to index
 	 * @param table The table of the column to index
 	 * @param textcol The column to create the Lucene index on
+	 * @param analyzerMaker name of static method which instantiates an Analyzer. may be null.
 	 * @param create True if the index is to be created, false if it is to be recreated
 	 * @throws SQLException
 	 * @throws IOException
@@ -362,9 +395,11 @@ public class LuceneSupport implements OptionalTool
          String schema,
          String table,
          String textcol,
+         String analyzerMaker,
          boolean create
          )
-        throws SQLException, IOException, PrivilegedActionException
+        throws SQLException, IOException, PrivilegedActionException,
+               ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
         VTITemplate.ColumnDescriptor[] primaryKeys = getPrimaryKeys( conn, schema, table );
         if ( primaryKeys.length == 0 )
@@ -373,11 +408,28 @@ public class LuceneSupport implements OptionalTool
         }
         int             keyCount = 0;
 
+        File            propertiesFile = getIndexPropertiesFile( conn, schema, table, textcol );
+
         //
         // Drop the old index directory if we're recreating the index.
         // We do this after verifying that the key exists.
         //
-        if ( !create ) { dropIndexDirectories( schema, table, textcol ); }
+        if ( !create )
+        {
+            dropIndexDirectories( schema, table, textcol );
+        }
+
+        Version luceneVersion = LuceneUtils.currentVersion();
+
+        // get the Analyzer. use the default if the user didn't specify an override
+        if ( analyzerMaker == null ) { analyzerMaker = LuceneUtils.class.getName() + ".defaultAnalyzer"; }
+        Analyzer    analyzer = getAnalyzer( analyzerMaker );
+
+        Properties  indexProperties = new Properties();
+        indexProperties.setProperty( LUCENE_VERSION, luceneVersion.toString() );
+        indexProperties.setProperty( UPDATE_TIMESTAMP, Long.toString( System.currentTimeMillis() ) );
+        indexProperties.setProperty( ANALYZER_MAKER, analyzerMaker );
+        indexProperties.setProperty( ANALYZER, analyzer.getClass().getName() );
             
         StringBuilder   tableFunction = new StringBuilder();
         tableFunction.append( "create function " + makeTableFunctionName( schema, table, textcol ) + "\n" );
@@ -388,7 +440,7 @@ public class LuceneSupport implements OptionalTool
         ResultSet rs = null;
         IndexWriter iw = null;
         try {
-            iw = getIndexWriter( schema, table, textcol );
+            iw = getIndexWriter( luceneVersion, analyzer, schema, table, textcol );
 
             // select all keys and the textcol from this column, add to lucene index
             StringBuilder query = new StringBuilder("select ");
@@ -439,6 +491,8 @@ public class LuceneSupport implements OptionalTool
                     doc.add(new TextField( LuceneQueryVTI.TEXT_FIELD_NAME, textcolValue, Store.NO));
                 }
                 addDocument( iw, doc );
+
+                writeIndexProperties( propertiesFile, indexProperties );
             }
         }
         finally
@@ -969,6 +1023,76 @@ public class LuceneSupport implements OptionalTool
 
     /////////////////////////////////////////////////////////////////////
     //
+    //  MANAGE THE INDEX PROPERTIES FILE
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Get the handle on the file holding the index properties.
+     * </p>
+     */
+	static File getIndexPropertiesFile( Connection conn, String schema, String table, String textcol )
+        throws SQLException, IOException, PrivilegedActionException
+    {
+		File indexDir = new File( getIndexLocation( conn, schema, table, textcol ) );
+        File    propertiesFile = new File( indexDir, PROPERTIES_FILE_NAME );
+
+        return propertiesFile;
+    }
+    
+    /** Read the index properties file */
+    static  Properties readIndexProperties( final File file )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Properties>()
+             {
+                public Properties run() throws IOException
+                {
+                    if ( file == null ) { return null; }
+                    else
+                    {
+                        Properties  properties = new Properties();
+
+                        properties.load( new FileInputStream( file ) );
+                        
+                        return properties;
+                    }
+                }
+             }
+             );
+    }
+
+    /** Write the index properties file */
+    private static  void    writeIndexProperties( final File file, final Properties properties )
+        throws IOException, PrivilegedActionException
+    {
+        AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Object>()
+             {
+                public Object run() throws IOException
+                {
+                    if ( (file == null) || (properties == null) ) { return null; }
+                    else
+                    {
+                        FileOutputStream    fos = new FileOutputStream( file );
+
+                        properties.store( fos, null );
+                        fos.flush();
+                        fos.close();
+
+                        return null;
+                    }
+                }
+             }
+             );
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //
     //  SQL/JDBC SUPPORT
     //
     /////////////////////////////////////////////////////////////////////
@@ -1309,6 +1433,23 @@ public class LuceneSupport implements OptionalTool
              );
     }
 
+    /** Return true if the file exists */
+    static  boolean fileExists( final File file )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Boolean>()
+             {
+                public Boolean run() throws IOException
+                {
+                    if ( file == null ) { return false; }
+                    else { return file.exists(); }
+                }
+             }
+             ).booleanValue();
+    }
+
 	/**
 	 * Get the system property derby.system.home using the security manager.
 	 * @return Returns the value of the system property derby.system.home, or user.dir if not set.
@@ -1383,6 +1524,8 @@ public class LuceneSupport implements OptionalTool
 	 * Returns a Lucene IndexWriter, that writes inside the lucene directory inside the database
 	 * directory.
 	 * 
+	 * @param luceneVersion the version of Lucene being used
+	 * @param analyzer      the Analyzer being used
 	 * @param schema The schema of the indexed column
 	 * @param table The table of the indexed column
 	 * @param textcol The name of the column to be indexed
@@ -1390,6 +1533,8 @@ public class LuceneSupport implements OptionalTool
 	 */
 	private static IndexWriter getIndexWriter
         (
+         final Version  luceneVersion,
+         final  Analyzer    analyzer,
          final String schema,
          final String table,
          final String textcol
@@ -1405,10 +1550,8 @@ public class LuceneSupport implements OptionalTool
                      Directory dir = FSDirectory.open(new File( getIndexLocation( getDefaultConnection(), schema, table, textcol ) ) );
 
                      // allow this to be overridden in the configuration during load later.
-                     Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_45);
-                     IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_45,
-                                                                   analyzer);
-                     IndexWriter iw = new IndexWriter(dir, iwc);
+                     IndexWriterConfig iwc = new IndexWriterConfig( luceneVersion, analyzer );
+                     IndexWriter iw = new IndexWriter( dir, iwc );
 		
                      return iw;
                  }
@@ -1475,6 +1618,32 @@ public class LuceneSupport implements OptionalTool
                  public IndexReader run() throws SQLException, IOException
                  {
                      return DirectoryReader.open( FSDirectory.open( indexHome ) );
+                 }
+             }
+             );
+	}
+	
+	/**
+	 * Invoke a static method (possibly supplied by the user) to instantiate an Analyzer.
+     * The method has no arguments.
+	 */
+	static Analyzer getAnalyzer( final String analyzerMaker )
+        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
+               NoSuchMethodException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Analyzer>()
+             {
+                 public Analyzer run()
+                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                 {
+                     int    lastDotIdx = analyzerMaker.lastIndexOf( "." );
+                     Class<? extends Object>  klass = Class.forName( analyzerMaker.substring( 0, lastDotIdx ) );
+                     String methodName = analyzerMaker.substring( lastDotIdx + 1, analyzerMaker.length() );
+                     Method method = klass.getDeclaredMethod( methodName );
+                     
+                     return (Analyzer) method.invoke( null );
                  }
              }
              );

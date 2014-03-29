@@ -16,7 +16,7 @@
   limitations under the License.
 -->
 
-<project default="lucenesupport" basedir="../../../../../../../..">
+<project default="optional" basedir="../../../../../..">
 
 <!-- Set Properties -->
   <!-- User settings -->
@@ -31,11 +31,11 @@
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
-  <property name="cur.dir" value="impl/optional/lucene"/>
+  <property name="cur.dir" value="optional"/>
 
 <!-- Targets -->
 
-   <target name="lucenesupport">
+   <target name="optional">
     <javac
       source="1.6"
       target="1.6"

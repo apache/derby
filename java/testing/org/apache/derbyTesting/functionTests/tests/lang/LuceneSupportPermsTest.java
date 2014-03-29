@@ -39,11 +39,14 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -85,12 +88,16 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
-    private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText' )";
-    private static  final   String      UPDATE_POEMS_INDEX = "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText' )";
+    private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', null )";
+    private static  final   String      UPDATE_POEMS_INDEX = "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', null )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'poems', 'poemText' )";
 
     private static  final   long        MILLIS_IN_HOUR = 1000L * 60L * 60L;
     private static  final   long        MILLIS_IN_DAY = MILLIS_IN_HOUR * 24L;
+
+    private static  final   String      LUCENE_VERSION = "LUCENE_45";
+    private static  final   String      LANGUAGE = "en";
+    private static  final   String      COUNTRY = "US";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -127,7 +134,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     {
         TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(LuceneSupportPermsTest.class);
 
-        Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
+        Test        localizedTest = new LocaleTestSetup( suite, new Locale( LANGUAGE, COUNTRY ) );
+        Test        secureTest = new SecurityManagerSetup( localizedTest, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( secureTest, LEGAL_USERS, "LuceneSupportPermissions" );
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
@@ -162,7 +170,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, LOAD_TOOL );
 
         // can't update a non-existent index
-        expectExecutionError( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText' )" );
+        expectExecutionError
+            ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', null )" );
 
         // alice does not have permission to index a table owned by ruth
         expectExecutionError( aliceConnection, LACK_COLUMN_PRIV, INDEX_POEMS );
@@ -174,11 +183,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectExecutionError( ruthConnection, FUNCTION_EXISTS, INDEX_POEMS );
 
         // can't update a non-existent index
-        expectExecutionError( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'foo' )" );
-        expectExecutionError( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor' )" );
+        expectExecutionError( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'foo', null )" );
+        expectExecutionError
+            ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
         // but ruth can
@@ -188,8 +198,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              viewPoemsIndex,
              new String[][]
              {
-                 { "5", "5", "4", "0.3304931" },
-                 { "3", "3", "2", "0.2832798" },
+                 { "3", "3", "2", "0.22933942" },
+                 { "4", "4", "3", "0.22933942" },
+                 { "5", "5", "4", "0.26756266" },
              },
              false
              );
@@ -275,11 +286,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
-                { "5", "5", "4", "0.3304931" },
-                { "3", "3", "2", "0.2832798" },
+                { "3", "3", "2", "0.22933942" },
+                { "4", "4", "3", "0.22933942" },
+                { "5", "5", "4", "0.26756266" },
             };
 
         // now alice can view the index
@@ -353,9 +365,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectExecutionError( dboConnection, DOUBLE_LOAD_ILLEGAL, LOAD_TOOL );
 
         // cannot index non-existent table or column
-        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'foo', 'poemText' )" );
-        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'fooText' )" );
-        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'versionStamp' )" );
+        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'foo', 'poemText', null )" );
+        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'fooText', null )" );
+        expectExecutionError( ruthConnection, NOT_INDEXABLE, "call LuceneSupport.createIndex( 'ruth', 'poems', 'versionStamp', null )" );
 
         // cannot drop non-existent index
         expectExecutionError( ruthConnection, NONEXISTENT_OBJECT, "call LuceneSupport.dropIndex( 'ruth', 'foo', 'poemText' )" );
@@ -423,8 +435,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "order by i.rank desc\n",
              new String[][]
              {
-                 { "Walt Whitman", "0.3304931" },
-                 { "John Milton", "0.2832798" },
+                 { "Walt Whitman", "0.26756266" },
+                 { "Lord Byron", "0.22933942" },
+                 { "John Milton", "0.22933942" },
              },
              false
              );
@@ -469,6 +482,102 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         dropSchema( ruthConnection );
     }
     
+    /**
+     * <p>
+     * Test that you can change the Analyzer.
+     * </p>
+     */
+    public  void    test_006_changeAnalyzer()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        createSchema( ruthConnection, Types.INTEGER );
+        goodStatement( dboConnection, LOAD_TOOL );
+        goodStatement( ruthConnection, INDEX_POEMS );
+
+        // verify that we are the correct locale
+        assertResults
+            (
+             ruthConnection,
+             "values ( getDatabaseLocale() )",
+             new String[][]
+             {
+                 { LANGUAGE + "_" + COUNTRY },
+             },
+             false
+             );
+        
+
+        String  query =
+            "select p.originalAuthor, i.rank\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
+            "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
+            "order by i.rank desc\n";
+
+        assertResults
+            (
+             ruthConnection,
+             query,
+             new String[][]
+             {
+                 { "Walt Whitman", "0.26756266" },
+                 { "Lord Byron", "0.22933942" },
+                 { "John Milton", "0.22933942" },
+             },
+             false
+             );
+
+        // now switch the Analyzer and re-run the query
+        goodStatement
+            ( ruthConnection,
+              "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.LuceneUtils.standardAnalyzer' )" );
+
+        assertResults
+            (
+             ruthConnection,
+             query,
+             new String[][]
+             {
+                 { "Walt Whitman", "0.3304931" },
+                 { "John Milton", "0.2832798" },
+             },
+             false
+             );
+
+        //
+        // Add another index and inspect the values of listIndexes()
+        //
+        goodStatement( ruthConnection, "call LuceneSupport.createIndex( 'ruth', 'poems', 'originalAuthor', null )" );
+        assertResults
+            (
+             ruthConnection,
+             "select schemaName, tableName, columnName, luceneVersion, analyzer, analyzerMaker\n" +
+             "from table( LuceneSupport.listIndexes() ) l\n" +
+             "order by schemaName, tableName, columnName\n",
+             new String[][]
+             {
+                 {
+                     "RUTH", "POEMS", "ORIGINALAUTHOR", LUCENE_VERSION,
+                     "org.apache.lucene.analysis.en.EnglishAnalyzer",
+                     "org.apache.derby.optional.LuceneUtils.defaultAnalyzer",
+                 },
+                 {
+                     "RUTH", "POEMS", "POEMTEXT", LUCENE_VERSION,
+                     "org.apache.lucene.analysis.standard.StandardAnalyzer",
+                     "org.apache.derby.optional.LuceneUtils.standardAnalyzer",
+                 },
+             },
+             false
+             );
+
+        goodStatement( ruthConnection, DROP_POEMS_INDEX );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'poems', 'originalAuthor' )" );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        dropSchema( ruthConnection );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -478,6 +587,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private void    createSchema( Connection ruthConnection, int jdbcType )  throws Exception
     {
         createPoemsTable( ruthConnection, jdbcType );
+        createLocaleFunction( ruthConnection );
     }
     private void    createPoemsTable( Connection conn, int jdbcType )
         throws Exception
@@ -539,6 +649,18 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         ps.close();
     }
 
+    private void    createLocaleFunction( Connection conn )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create function getDatabaseLocale() returns varchar( 20 )\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.getDatabaseLocale()'\n"
+             );
+    }
+    
     private String  getType( int jdbcType ) throws Exception
     {
         switch( jdbcType )
@@ -636,6 +758,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private void    dropSchema( Connection ruthConnection )    throws Exception
     {
         goodStatement( ruthConnection, "drop table poems" );
+        goodStatement( ruthConnection, "drop function getDatabaseLocale" );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -644,6 +767,13 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** Get the database locale */
+    public  static  String  getDatabaseLocale()
+        throws SQLException
+    {
+        return ConnectionUtil.getCurrentLCC().getDatabase().getLocale().toString();
+    }
+    
     public  static  String  toString( byte[] value )
     {
         if ( value == null ) { return null; }

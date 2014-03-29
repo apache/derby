@@ -23,6 +23,7 @@ package org.apache.derby.impl.optional.lucene;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.Date;
@@ -30,8 +31,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Properties;
 
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.optional.LuceneUtils;
 import org.apache.derby.vti.RestrictedVTI;
 import org.apache.derby.vti.Restriction;
 import org.apache.derby.vti.Restriction.ColumnQualifier;
@@ -417,12 +420,16 @@ public class LuceneQueryVTI extends StringColumnVTI
             // make sure the user has SELECT privilege on all relevant columns of the underlying table
             vetPrivileges();
         
-            String indexhome = LuceneSupport.getIndexLocation( _connection, _schema, _table, _column);
+            String          indexhome = LuceneSupport.getIndexLocation( _connection, _schema, _table, _column);
+            File            propertiesFile = LuceneSupport.getIndexPropertiesFile( _connection, _schema, _table, _column );
+            Properties  indexProperties = LuceneSupport.readIndexProperties( propertiesFile );
+            String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
+            Analyzer    analyzer = LuceneSupport.getAnalyzer( analyzerMaker );
 				
             _indexReader = LuceneSupport.getIndexReader( new File( indexhome.toString() ) );
             _searcher = new IndexSearcher(_indexReader);
-            Analyzer analyzer = new StandardAnalyzer( Version.LUCENE_45 );
-            QueryParser qp = new QueryParser( Version.LUCENE_45, TEXT_FIELD_NAME, analyzer );
+
+            QueryParser qp = new QueryParser( LuceneUtils.currentVersion(), TEXT_FIELD_NAME, analyzer );
             Query luceneQuery = qp.parse( _queryText );
             TopScoreDocCollector tsdc = TopScoreDocCollector.create(1000, true);
             if ( _rankCutoff != 0 ) {
@@ -435,6 +442,10 @@ public class LuceneQueryVTI extends StringColumnVTI
         catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
         catch (ParseException pe) { throw LuceneSupport.wrap( pe ); }
         catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
+        catch (ClassNotFoundException cnfe) { throw LuceneSupport.wrap( cnfe ); }
+        catch (IllegalAccessException iae) { throw LuceneSupport.wrap( iae ); }
+        catch (InvocationTargetException ite) { throw LuceneSupport.wrap( ite ); }
+        catch (NoSuchMethodException nsme) { throw LuceneSupport.wrap( nsme ); }
     }
 
     /**

@@ -60,7 +60,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		Statement s = createStatement();
 	    
 		cSt = prepareCall
-            ( "call LuceneSupport.createIndex('lucenetest','titles','title')" );
+            ( "call LuceneSupport.createIndex('lucenetest','titles','title', null )" );
 	    assertUpdateCount(cSt, 0);
 	    
 	    String[][] expectedRows = new String[][]
@@ -125,7 +125,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		Statement s = createStatement();
 		
 		cSt = prepareCall
-            ( "call LuceneSupport.createIndex('lucenetest','titles','title')" );
+            ( "call LuceneSupport.createIndex('lucenetest','titles','title', null)" );
 	    assertUpdateCount(cSt, 0);
 
 	    JDBC.assertEmpty
@@ -150,7 +150,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              );
 	    
 		cSt = prepareCall
-            ( "call LuceneSupport.updateIndex('lucenetest','titles','title')" );
+            ( "call LuceneSupport.updateIndex('lucenetest','titles','title', null)" );
 	    assertUpdateCount(cSt, 0);
 
 	    String[][] expectedRows = new String[][]
@@ -178,11 +178,11 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		Statement s = createStatement();
 
 	    cSt = prepareCall
-            ( "call LuceneSupport.createIndex('lucenetest','titles','title')" );
+            ( "call LuceneSupport.createIndex('lucenetest','titles','title', null)" );
 	    assertUpdateCount(cSt, 0);
 	    
 		cSt = prepareCall
-            ( "call LuceneSupport.createIndex('lucenetest','titles','author')" );
+            ( "call LuceneSupport.createIndex('lucenetest','titles','author', null)" );
 	    assertUpdateCount(cSt, 0);
 	    
 	    // leave out lastmodified as the date will change

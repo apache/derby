@@ -53,8 +53,8 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
 
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
-    private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText' )";
-    private static  final   String      UPDATE_POEMS_INDEX = "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText' )";
+    private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', null )";
+    private static  final   String      UPDATE_POEMS_INDEX = "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', null )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'poems', 'poemText' )";
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -150,11 +150,12 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults",
+             "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults order by poemID",
              new String[][]
              {
-                 { "5", "5", "4", "0.3304931" },
-                 { "3", "3", "2", "0.2832798" },
+                 { "3", "3", "2", "0.22933942" },
+                 { "4", "4", "3", "0.22933942" },
+                 { "5", "5", "4", "0.26756266" },
              },
              false
              );

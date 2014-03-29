@@ -1072,7 +1072,7 @@
 
     <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
              bootclasspath="${bootClasspath}"
-             classpath="${bootClasspath};${osgi};${servlet24};${out.dir}"
+             classpath="${bootClasspath};${osgi};${servlet24};${out.dir};${jars.javadoc}"
              breakiterator="true"
              destdir="${public.api.dir}"
     	     Overview="${basedir}/published_api_overview.html"
