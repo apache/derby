@@ -501,10 +501,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "values ( getDatabaseLocale() )",
+             "values ( substr( getDatabaseLocale(), 1, 2 ) )",
              new String[][]
              {
-                 { LANGUAGE + "_" + COUNTRY },
+                 { LANGUAGE },
              },
              false
              );
