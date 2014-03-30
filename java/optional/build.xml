@@ -16,26 +16,44 @@
   limitations under the License.
 -->
 
-<project default="optional" basedir="../../../../../..">
+<!-- ==================================================================== -->
+<!--                       Apache Derby build file                        -->
+<!-- ==================================================================== -->
 
-<!-- Set Properties -->
+<project default="optional" basedir="../..">
+
+<!-- ==================================================================== -->
+<!--                           Set properties                             -->
+<!-- ==================================================================== -->
+
+  <property name="properties.dir" value="tools/ant/properties"/>
+
   <!-- User settings -->
   <property file="${user.home}/ant.properties"/>
-  <!-- Set property lib dir -->
-  <property name="properties.dir" value="tools/ant/properties"/>
+
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
+
   <!-- Compiler settings -->
-<property file="${properties.dir}/defaultcompiler.properties"/> 
+  <property file="${properties.dir}/defaultcompiler.properties"/>
   <property file="${properties.dir}/${build.compiler}.properties"/>
+
+  <!-- Parser properties -->
+  <property file="${properties.dir}/parser.properties"/>
+
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
   <property file="${properties.dir}/compilepath.properties"/>
   <property name="cur.dir" value="optional"/>
 
-<!-- Targets -->
+  <!-- Release and Version info -->
+  <property file="${properties.dir}/release.properties"/>
 
-   <target name="optional">
+<!--             ============ Begin Targets ==============                -->
+ 
+  <target name="optional"
+          description="Build Derby optional tools">
+
     <javac
       source="1.6"
       target="1.6"
@@ -47,7 +65,7 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
+      srcdir="${derby.optional.src.dir}:${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
@@ -58,6 +76,12 @@
       <include name="${derby.dir}/${cur.dir}/**"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
-   </target>
+
+  </target>
+
+<!--             ============= End Targets ==============                -->
+
+<!--             ============= End Project ==============                -->
+
 </project>
 

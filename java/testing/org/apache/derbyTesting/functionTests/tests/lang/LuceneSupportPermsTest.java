@@ -532,7 +532,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // now switch the Analyzer and re-run the query
         goodStatement
             ( ruthConnection,
-              "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.LuceneUtils.standardAnalyzer' )" );
+              "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
 
         assertResults
             (
@@ -561,12 +561,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
                  {
                      "RUTH", "POEMS", "ORIGINALAUTHOR", LUCENE_VERSION,
                      "org.apache.lucene.analysis.en.EnglishAnalyzer",
-                     "org.apache.derby.optional.LuceneUtils.defaultAnalyzer",
+                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
                  },
                  {
                      "RUTH", "POEMS", "POEMTEXT", LUCENE_VERSION,
                      "org.apache.lucene.analysis.standard.StandardAnalyzer",
-                     "org.apache.derby.optional.LuceneUtils.standardAnalyzer",
+                     "org.apache.derby.optional.api.LuceneUtils.standardAnalyzer",
                  },
              },
              false

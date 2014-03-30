@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.optional.LuceneUtils
+   Derby - Class org.apache.derby.optional.api.LuceneUtils
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.optional;
+package org.apache.derby.optional.api;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

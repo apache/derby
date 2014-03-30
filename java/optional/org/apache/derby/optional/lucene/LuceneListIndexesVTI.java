@@ -1,6 +1,6 @@
 /*
 
-   Class org.apache.derby.impl.optional.lucene.LuceneListIndexesVTI
+   Class org.apache.derby.optional.lucene.LuceneListIndexesVTI
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
 */
 
-package org.apache.derby.impl.optional.lucene;
+package org.apache.derby.optional.lucene;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -37,7 +37,7 @@ import org.apache.derby.vti.StringColumnVTI;
 
 /**
  * Provides a table interface to the Lucene indexes in this database.
- * See org.apache.derby.impl.optional.lucene.LuceneSupport.listIndexes.
+ * See org.apache.derby.optional.lucene.LuceneSupport.listIndexes.
  * 
  */
 public class LuceneListIndexesVTI extends StringColumnVTI

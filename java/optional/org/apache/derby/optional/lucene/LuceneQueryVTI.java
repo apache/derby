@@ -1,6 +1,6 @@
 /*
 
-   Class org.apache.derby.impl.optional.lucene.LuceneQueryVTI
+   Class org.apache.derby.optional.lucene.LuceneQueryVTI
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
 */
 
-package org.apache.derby.impl.optional.lucene;
+package org.apache.derby.optional.lucene;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.sql.Timestamp;
 import java.util.Properties;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.optional.LuceneUtils;
+import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derby.vti.RestrictedVTI;
 import org.apache.derby.vti.Restriction;
 import org.apache.derby.vti.Restriction.ColumnQualifier;

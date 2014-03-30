@@ -41,6 +41,5 @@
     <ant dir="${derby.engine.dir}/impl/db"/>
     <ant dir="${derby.engine.dir}/impl/load"/>
     <ant dir="${derby.engine.dir}/impl/jdbc"/>
-    <ant dir="${derby.engine.dir}/impl/optional/lucene"/>
   </target>
 </project>

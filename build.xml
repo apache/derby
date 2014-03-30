@@ -48,7 +48,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,optional,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -619,6 +619,10 @@
 	
   <target name="tools" depends="engine">
     <ant dir="${derby.tools.src.dir}"/>
+  </target>
+	
+  <target name="optional" depends="engine">
+    <ant dir="${derby.optional.src.dir}"/>
   </target>
 	
   <target name="storeless" depends="engine">

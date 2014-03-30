@@ -1,6 +1,6 @@
 /*
 
-   Class org.apache.derby.impl.optional.lucene.LuceneSupport
+   Class org.apache.derby.optional.lucene.LuceneSupport
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
 */
 
-package org.apache.derby.impl.optional.lucene;
+package org.apache.derby.optional.lucene;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -52,7 +52,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.optional.LuceneUtils;
+import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derby.vti.Restriction.ColumnQualifier;
 import org.apache.derby.vti.VTITemplate;
 
@@ -286,7 +286,7 @@ public class LuceneSupport implements OptionalTool
 	 * @return A result set in the form of LuceneQueryVTI table
 	 * @throws ParseException
 	 * @throws IOException
-	 * @see org.apache.derby.impl.optional.lucene.LuceneQueryVTI
+	 * @see org.apache.derby.optional.lucene.LuceneQueryVTI
 	 */
 	public static LuceneQueryVTI luceneQuery
         (
@@ -460,7 +460,7 @@ public class LuceneSupport implements OptionalTool
             tableFunction.append(",\n\tdocumentID int");
             tableFunction.append(",\n\trank real");
             tableFunction.append( "\n)\nlanguage java parameter style derby_jdbc_result_set contains sql\n" );
-            tableFunction.append( "external name 'org.apache.derby.impl.optional.lucene.LuceneSupport.luceneQuery'" );
+            tableFunction.append( "external name '" + LuceneSupport.class.getName() + ".luceneQuery'" );
 
             // now create the table function for this text column
             if ( create )

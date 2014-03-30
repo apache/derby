@@ -64,7 +64,7 @@ public  class   Java5SystemProcedures
     {
         { "databaseMetaData", "org.apache.derby.impl.tools.optional.DBMDWrapper" },
         { "foreignViews", "org.apache.derby.impl.tools.optional.ForeignDBViews" },
-        { "luceneSupport", "org.apache.derby.impl.optional.lucene.LuceneSupport" },
+        { "luceneSupport", "org.apache.derby.optional.lucene.LuceneSupport" },
         { "optimizerTracing", "org.apache.derby.impl.sql.compile.OptimizerTracer" },
         { "optimizerTracingViews", "org.apache.derby.impl.sql.compile.OptTraceViewer" },
     };
