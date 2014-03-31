@@ -50,6 +50,7 @@ import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.LoginTimeoutTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -131,7 +132,10 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
            // specific classes is correct. This operation is not allowed in general.
            suite.addTest(SecurityManagerSetup.noSecurityManager(
                    new DatabaseClassLoadingTest("testClassLoadOrdering")));
-           
+
+           // Add test cases accessing a classpath database when a login
+           // timeout has been specified.
+           suite.addTest(loginTimeoutSuite());
 
            test = new SupportFilesSetup(suite,
                    new String[] {
@@ -185,7 +189,46 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 }
         };
     }
-    
+
+    /**
+     * Create a test suite that verifies the fix for DERBY-6107. Connection
+     * attempts used to fail when trying to access a classpath database that
+     * lived in the context class loader, if a login timeout was used and a
+     * previous connection attempt had been made from a thread that did not
+     * have the database in its context class loader.
+     */
+    private static Test loginTimeoutSuite() throws Exception {
+        TestSuite suite = new TestSuite("Class loading with login timeout");
+
+        // First run a test when the database is not in the classpath.
+        // Expect the connection attempt to fail.
+        suite.addTest(
+            new DatabaseClassLoadingTest("testLoginTimeoutNotInClasspath"));
+
+        // Then try again with the database in the classpath. Should succeed.
+        // Failed before DERBY-6107.
+        //
+        // Only add this test case if we can close the URLClassLoader when
+        // we're done. Otherwise, we won't be able to delete the jar file
+        // afterwards. (DERBY-2162)
+        if (ClasspathSetup.supportsClose()) {
+            suite.addTest(
+                new ClasspathSetup(
+                    new DatabaseClassLoadingTest("testLoginTimeoutInClasspath"),
+                    SupportFilesSetup.getReadOnlyURL("dclt.jar")));
+        }
+
+        // Finally, check that the database cannot be found anymore after
+        // it has been removed from the classpath.
+        suite.addTest(
+            new DatabaseClassLoadingTest("testLoginTimeoutNotInClasspath"));
+
+        // All of this should be done with a login timeout. Set the timeout
+        // to a high value, so that the connection attempts don't actually
+        // time out.
+        return new LoginTimeoutTestSetup(suite, 100);
+    }
+
     /**
      * Test the routines fail before the jars that contain their
      * code have been installed and/or set in the classpath.
@@ -1187,9 +1230,58 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
         s.close();
     }
-    
-            
-  
+
+    /**
+     * Test that a classpath database is not found when it's not in the
+     * classpath and there is a login timeout.
+     * @see #loginTimeoutSuite()
+     */
+    public void testLoginTimeoutNotInClasspath() throws SQLException {
+        checkConnectionToClasspathDB(false);
+    }
+
+    /**
+     * Test that a classpath database is found when it's in the
+     * classpath and there is a login timeout.
+     * @see #loginTimeoutSuite()
+     */
+    public void testLoginTimeoutInClasspath() throws SQLException {
+        checkConnectionToClasspathDB(true);
+    }
+
+    /**
+     * Check if it is possible to connect to a classpath database.
+     *
+     * @param databaseInClasspath if {@code true}, expect that the database
+     * can be connected to; otherwise, expect that the database cannot be
+     * found.
+     */
+    private void checkConnectionToClasspathDB(boolean databaseInClasspath) {
+        String dbName = "classpath:dbro";
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        try {
+            ds.getConnection().close();
+            // We should only be able to get a connection if the database is
+            // in the classpath.
+            assertTrue(
+                "Could connect to database when it was not in the classpath",
+                databaseInClasspath);
+        } catch (SQLException sqle) {
+            // If the database is not in the classpath, we expect
+            // ERROR XJ004: Database 'classpath:dbro' not found.
+            if (databaseInClasspath) {
+                fail("Could not connect to the database", sqle);
+            } else {
+                assertSQLState("XJ004", sqle);
+            }
+        }
+
+        // If we managed to boot the database, shut it down again.
+        if (databaseInClasspath) {
+            JDBCDataSource.shutdownDatabase(ds);
+        }
+    }
+
     private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
     {        
         URL jar = SupportFilesSetup.getReadOnlyURL(resource);

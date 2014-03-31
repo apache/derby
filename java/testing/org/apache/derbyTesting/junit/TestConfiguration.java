@@ -1824,6 +1824,15 @@ public final class TestConfiguration {
         return connector.getLoginTimeout();
     }
 
+    /**
+     * Set the login timeout for the connector.
+     * @param seconds the login timeout in seconds
+     * @throws SQLException if the timeout cannot be set
+     */
+    public void setLoginTimeout(int seconds) throws SQLException {
+        connector.setLoginTimeout(seconds);
+    }
+
     public void waitForShutdownComplete(String physicalDatabaseName) {
         String path = getDatabasePath(physicalDatabaseName);
         boolean lockfilepresent = true;

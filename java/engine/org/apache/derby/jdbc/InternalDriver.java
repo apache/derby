@@ -39,9 +39,10 @@ import java.util.StringTokenizer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
@@ -94,8 +95,26 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     private static boolean deregister = true;
 
+    /**
+     * <p>
+     * An executor service used for executing connection attempts when a
+     * login timeout has been specified.
+     * </p>
+     *
+     * <p>
+     * DERBY-6107: Core pool size and keep alive timeout should be zero so
+     * that no threads are cached. By creating a fresh thread each time a
+     * task is submitted, we make sure that the task will run in a thread
+     * with the same context class loader as the thread that submitted the
+     * task. This is important for example when connecting to a database
+     * using the classpath subsubprotocol, and the database lives in the
+     * context class loader. If threads are cached, a task may execute in
+     * a thread that has a different context class loader.
+     * </p>
+     */
     private static final ExecutorService _executorPool =
-            Executors.newCachedThreadPool(new DaemonThreadFactory());
+            new ThreadPoolExecutor(0, Integer.MAX_VALUE, 0L, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(), new DaemonThreadFactory());
 
 	public static final InternalDriver activeDriver()
 	{
