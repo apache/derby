@@ -113,7 +113,7 @@ public class DbUtil {
 			
 			// Set value of column "id"
 			ps.setInt(1, ind);
-			// System.out.println("set int col 1 to " + ind);
+			// NsTest.logger.println("set int col 1 to " + ind);
 			
 			// Set value of column "t_char"
 			// scramble the string
@@ -121,87 +121,87 @@ public class DbUtil {
 			String cs2 = cs.substring(i1, 99) + cs.substring(0, i1);
 			int i2 = i1 < 89 ? i1 + 10 : i1;
 			ps.setString(2, cs2.substring(0, i2));
-			// System.out.println("set t_Char to " + cs2.substring(0,i2));
+			// NsTest.logger.println("set t_Char to " + cs2.substring(0,i2));
 			
-			// System.out.println("now setting date");
+			// NsTest.logger.println("now setting date");
 			// Set value of column "t_date"
 			dt.setTime(Math.abs(rand.nextLong() / 150000));
 			ps.setDate(3, dt);
-			// System.out.println("set t_date to " + dt.toString());
+			// NsTest.logger.println("set t_date to " + dt.toString());
 			
 			// Set value of column "t_decimal"
 			double t_dec = rand.nextDouble()
 			* Math.pow(10, Math.abs(rand.nextInt() % 6));
 			ps.setDouble(4, t_dec);
-			// System.out.println("set t_decimal to "+ t_dec);
+			// NsTest.logger.println("set t_decimal to "+ t_dec);
 			
 			// Set value of column "t_decimal_nn"
 			double t_dec_nn = rand.nextDouble();
 			ps.setDouble(5, t_dec_nn);
-			// System.out.println("set t_decimal_nn " + t_dec_nn);
+			// NsTest.logger.println("set t_decimal_nn " + t_dec_nn);
 			
 			// Set value of column "t_double"
 			double t_doub = rand.nextDouble()
 			* Math.pow(10, Math.abs(rand.nextInt() % 300));
 			ps.setDouble(6, t_doub);
-			// System.out.println("set t_double to "+ t_doub);
+			// NsTest.logger.println("set t_double to "+ t_doub);
 			
 			// Set value of column "t_float"
 			float t_flt = rand.nextFloat()
 			* (float) Math.pow(10, Math.abs(rand.nextInt() % 30));
 			ps.setFloat(7, t_flt);
-			// System.out.println("set t_float to " + t_flt);
+			// NsTest.logger.println("set t_float to " + t_flt);
 			
 			// Set value of column "t_int"
 			int t_intval = rand.nextInt();
 			ps.setInt(8, t_intval);
-			// System.out.println("set t_int to " + t_intval);
+			// NsTest.logger.println("set t_int to " + t_intval);
 			
 			// Set value of column "t_longint"
 			long t_longval = rand.nextLong();
 			ps.setLong(9, t_longval);
-			// System.out.println("set t_longint " + t_longval);
+			// NsTest.logger.println("set t_longint " + t_longval);
 			
 			// Set value of column "t_numeric_large"
 			double t_num_lrg = rand.nextDouble()
 			* Math.pow(10, Math.abs(rand.nextInt() % 20));
 			ps.setDouble(10, t_num_lrg);
-			// System.out.println("set t_numeric large to " + t_num_lrg);
+			// NsTest.logger.println("set t_numeric large to " + t_num_lrg);
 			
 			// Set value of column "t_real"
 			float t_fltval = rand.nextFloat()
 			* (float) Math.pow(10, Math.abs(rand.nextInt() % 7));
 			ps.setFloat(11, t_fltval);
-			// System.out.println("set t_real to " + t_fltval);
+			// NsTest.logger.println("set t_real to " + t_fltval);
 			
 			// Set value of column "t_smallint"
 			int t_smlint = rand.nextInt() % (256 * 128);
 			ps.setInt(12, t_smlint);
-			// System.out.println("set t_smallint to " + t_smlint);
+			// NsTest.logger.println("set t_smallint to " + t_smlint);
 			
 			// Set value of column "t_time"
 			tt.setTime(Math.abs(rand.nextInt()));
 			ps.setTime(13, tt);
-			// System.out.println("set t_time to " + tt.toString());
+			// NsTest.logger.println("set t_time to " + tt.toString());
 			
 			// Set value of column "t_timestamp"
 			ts.setTime(Math.abs(rand.nextLong() / 50000));
 			ps.setTimestamp(14, ts);
-			// System.out.println("set t_timestamp to " + ts.toString());
+			// NsTest.logger.println("set t_timestamp to " + ts.toString());
 			
 			// Set value of column "t_varchar"
 			ps.setString(15, cs.substring(Math.abs(rand.nextInt() % 100)));
-			// System.out.println("set t_varchar, now executing update stmt");
+			// NsTest.logger.println("set t_varchar, now executing update stmt");
 			try {
 				rowsAdded = ps.executeUpdate();
 			} catch (SQLException sqe) {
 				if (sqe.getSQLState().equalsIgnoreCase("40XL1")) {
-					System.out
+					NsTest.logger
 					.println("LOCK TIMEOUT obtained during insert - add_one_row() "
 							+ sqe.getSQLState());
 				}
 				else if (sqe.getSQLState().equalsIgnoreCase("23505")) {
-				    System.out
+				    NsTest.logger
 				    .println("prevented duplicate row - add_one_row(): "
 				            + sqe.getSQLState() + "; " + sqe.getMessage());
 
@@ -211,17 +211,17 @@ public class DbUtil {
 				
 			}
 			if (rowsAdded == 1) {
-				System.out.println(thread_id + " inserted 1 row with id "
+				NsTest.logger.println(thread_id + " inserted 1 row with id "
 						//+ id_ind + NsTest.SUCCESS);
                         + id_ind);
 			} else
-				System.out.println("FAIL: " + thread_id + " inserted " + rowsAdded + "rows");
+				NsTest.logger.println("FAIL: " + thread_id + " inserted " + rowsAdded + "rows");
 			
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("Exception when preparing or executing insert prepared stmt");
 			printException("executing/preparing insert stmt in dbUtil", e);
-			e.printStackTrace();
+			e.printStackTrace( NsTest.logger );
 			// ps.close();
 		}
 		
@@ -244,7 +244,7 @@ public class DbUtil {
 		conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 		long skey = pick_one(conn, thread_id);
 		if (skey == 0) { // means we did not find a row
-			System.out.println(thread_id
+			NsTest.logger.println(thread_id
 					+ " could not find a row to update or there was an error.");
 			return rowsUpdated;
 		}
@@ -363,27 +363,28 @@ public class DbUtil {
 			
 		} // end of switch(type)
 		
-		//System.out.println(thread_id + " attempting  to update col " + column
+		//NsTest.logger.println(thread_id + " attempting  to update col " + column
 		//		+ " to " + ds2);
 		try {
 			rowsUpdated = ps2.executeUpdate();
 		} catch (SQLException sqe) {
-			System.out.println(sqe.getSQLState() + " " + sqe.getErrorCode()
+			NsTest.logger.println(sqe.getSQLState() + " " + sqe.getErrorCode()
 					+ " " + sqe.getMessage());
-			sqe.printStackTrace();
+			if ( NsTest.justCountErrors() ) { NsTest.printException( DbUtil.class.getName(), sqe ); }
+			else { sqe.printStackTrace( NsTest.logger ); }
 		} catch (Exception e) {
 			printException("Error in update_one_row()", e);
-			e.printStackTrace();
+			e.printStackTrace( NsTest.logger );
 		} finally {
 			conn
 			.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 		}
 		
 		if (rowsUpdated > 0)
-			System.out.println(thread_id + " updated " + rowsUpdated
+			NsTest.logger.println(thread_id + " updated " + rowsUpdated
 					+ " row with serialkey " + skey + NsTest.SUCCESS);
 		else
-			System.out
+			NsTest.logger
 			.println(thread_id + " update failed, no such row exists");
 		
 	
@@ -408,17 +409,17 @@ public class DbUtil {
 			ps = conn
 			.prepareStatement(" delete from nstesttab where serialkey = ?");
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("Unexpected error preparing the statement in delete_one()");
 			printException("delete_one_row prepare ", e);
 			return rowsDeleted;
 		}
 		
 		long skey = pick_one(conn, thread_id);
-		//System.out.println(thread_id
+		//NsTest.logger.println(thread_id
 		//		+ " attempting  to delete a row with serialkey = " + skey);
 		if (skey == 0) { // means we did not find a row
-			System.out.println(thread_id
+			NsTest.logger.println(thread_id
 					+ " could not find a row to delete or there was an error.");
 			return rowsDeleted;
 		}
@@ -427,7 +428,7 @@ public class DbUtil {
 			ps.setLong(1, skey);
 			rowsDeleted = ps.executeUpdate();
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("Error in delete_one(): either with setLong() or executeUpdate");
 			printException("failure to execute delete stmt", e);
 		} finally {
@@ -437,10 +438,10 @@ public class DbUtil {
 		}
 		
 		if (rowsDeleted > 0)
-			System.out.println(thread_id + " deleted row with serialkey "
+			NsTest.logger.println(thread_id + " deleted row with serialkey "
 					+ skey + NsTest.SUCCESS);
 		else
-			System.out.println(thread_id + " delete for serialkey " + skey
+			NsTest.logger.println(thread_id + " delete for serialkey " + skey
 					+ " failed, no such row exists.");
 		
 		return rowsDeleted;
@@ -478,40 +479,47 @@ public class DbUtil {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
-		System.out.println(e.toString());
+        if ( NsTest.justCountErrors() )
+        {
+            NsTest.addError( e );
+            return;
+        }
+
+		NsTest.logger.println(e.toString());
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;
 			
 			if (se.getSQLState().equals("40001"))
-				System.out.println(getThreadName()
+				NsTest.logger.println(getThreadName()
 						+ " dbUtil --> deadlocked detected");
 			if (se.getSQLState().equals("40XL1"))
-				System.out.println(getThreadName()
+				NsTest.logger.println(getThreadName()
 						+ " dbUtil --> lock timeout exception");
 			if (se.getSQLState().equals("23500"))
-				System.out.println(getThreadName()
+				NsTest.logger.println(getThreadName()
 						+ " dbUtil --> duplicate key violation");
 			if (se.getNextException() != null) {
 				String m = se.getNextException().getSQLState();
-				System.out.println(se.getNextException().getMessage()
+				NsTest.logger.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
-				System.out.println(getThreadName()
+				NsTest.logger.println(getThreadName()
 						+ " dbUtil ---> Details of exception: " + se.toString()
 						+ " " + se.getErrorCode());
 			}
 		}
 		if (e.getMessage() == null) {
-			System.out.println(getThreadName()
+			NsTest.logger.println(getThreadName()
 					+ " dbUtil --> NULL error message detected");
-			System.out
+			NsTest.logger
 			.println(getThreadName()
 					+ " dbUtil --> Here is the NULL exection - "
 					+ e.toString());
-			System.out.println(getThreadName()
+			NsTest.logger.println(getThreadName()
 					+ " dbUtil --> Stack trace of the NULL exception - ");
-			e.printStackTrace(System.out);
+			if ( NsTest.justCountErrors() ) { NsTest.printException( DbUtil.class.getName(), e ); }
+			else { e.printStackTrace( NsTest.logger ); }
 		}
-		System.out.println(getThreadName() + " dbUtil ----> During " + where
+		NsTest.logger.println(getThreadName() + " dbUtil ----> During " + where
 				+ ", exception thrown was : " + e.toString());
 	}
 	

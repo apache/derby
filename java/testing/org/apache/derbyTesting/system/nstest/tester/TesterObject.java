@@ -53,7 +53,7 @@ public class TesterObject {
 	public TesterObject(String name) {
 		this.thread_id = name;
 		dbutil = new DbUtil(getThread_id());
-		System.out.println("==========> " + getThread_id()
+		NsTest.logger.println("==========> " + getThread_id()
 				+ " THREAD starting <======");
 	}
 
@@ -69,7 +69,7 @@ public class TesterObject {
 		Connection conn = null;
 		String jdbcurl = "";
 		try {
-			System.out.println(getThread_id()
+			NsTest.logger.println(getThread_id()
 					+ " is getting a connection to the database...");
 
 			if (NsTest.embeddedMode) {
@@ -79,19 +79,19 @@ public class TesterObject {
 					jdbcurl = NsTest.clientDbURL + ";" + NsTest.bootPwd;
 
 			}
-			System.out.println("-->Thread " + getThread_id()
+			NsTest.logger.println("-->Thread " + getThread_id()
 					+ " starting with url " + jdbcurl + " <--");
 			conn = DriverManager.getConnection(jdbcurl, NsTest.prop);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("FAIL: " + getThread_id()
+            e.printStackTrace( NsTest.logger );
+			NsTest.logger.println("FAIL: " + getThread_id()
 					+ " could not get the database connection");
 			printException("Failed getting database connection using "
 					+ jdbcurl, e);
 		}
 		// for statistical purposes, add one to the num of connections makde
 		NsTest.addStats(NsTest.CONNECTIONS_MADE, 1);
-		System.out.println("Connection number: " + NsTest.numConnections);
+		NsTest.logger.println("Connection number: " + NsTest.numConnections);
 		return conn; // null if there was a problem, else a valid connection
 	}
 
@@ -104,7 +104,7 @@ public class TesterObject {
 		try {
 			connex.setTransactionIsolation(level);
 		} catch (Exception e) {
-			System.out.println("FAIL: " + getThread_id()
+			NsTest.logger.println("FAIL: " + getThread_id()
 					+ " could not set isolation level");
 			printException("setting transaction isolation", e);
 		}
@@ -119,11 +119,11 @@ public class TesterObject {
 	// *******************************************************************************
 	public void closeConnection() {
 		try {
-			System.out.println(getThread_id()
+			NsTest.logger.println(getThread_id()
 					+ " is closing its connection to the database...");
 			connex.close();
 		} catch (Exception e) {
-			System.out.println("FAIL: " + getThread_id()
+			NsTest.logger.println("FAIL: " + getThread_id()
 					+ " could not close the database connection");
 			printException("closing database connection", e);
 		}
@@ -204,7 +204,7 @@ public class TesterObject {
 		ResultSet rSet = null;
 		Statement s = null;
 
-		System.out.println(getThread_id() + " is selecting " + numRowsToSelect
+		NsTest.logger.println(getThread_id() + " is selecting " + numRowsToSelect
 				+ " rows");
 		try {
 			// create the statement
@@ -219,7 +219,7 @@ public class TesterObject {
 					+ " t_varchar, serialkey from nstesttab where serialkey <= "
 					+ numRowsToSelect);
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("FAIL: doSelectOperation() had problems creating/executing query");
 			printException(
 					"FAIL: doSelectOperation() had problems creating/executing query",
@@ -285,16 +285,16 @@ public class TesterObject {
 		            numRowsSelected++;
 		        }
 		        NsTest.addStats(NsTest.SELECT, 1);
-		        System.out.println(this.thread_id + " selected " + numRowsSelected
+		        NsTest.logger.println(this.thread_id + " selected " + numRowsSelected
 		                + " rows");
 		    } catch (Exception e) {
-		        System.out
+		        NsTest.logger
 		        .println("FAIL: doSelectOperation() had problems working over the ResultSet");
 		        NsTest.addStats(NsTest.FAILED_SELECT, 1);
 		        printException("processing ResultSet during row data retrieval", e);
 		        rSet.close();
 		        s.close();
-		        System.out.println("Closed the select statement");
+		        NsTest.logger.println("Closed the select statement");
 		    }
 		}
 
@@ -303,10 +303,10 @@ public class TesterObject {
 			if ((rSet != null) && (s != null)) {
 				rSet.close();
 				s.close();
-				System.out.println("Closed the select statement");
+				NsTest.logger.println("Closed the select statement");
 			}
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("FAIL: doSelectOperation() had problems closing the ResultSet");
 			printException("closing ResultSet of query to get row data", e);
 		}
@@ -335,29 +335,35 @@ public class TesterObject {
 	// ***Method is synchronized so that the output file will contain sensible
 	// stack traces that are not mixed but one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
+        if ( NsTest.justCountErrors() )
+        {
+            NsTest.addError( e );
+            return;
+        }
+
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;
 
 			if (se.getSQLState().equals("40001"))
-				System.out.println("TObj --> deadlocked detected");
+				NsTest.logger.println("TObj --> deadlocked detected");
 			if (se.getSQLState().equals("40XL1"))
-				System.out.println("TObj --> lock timeout exception");
+				NsTest.logger.println("TObj --> lock timeout exception");
 			if (se.getSQLState().equals("23500"))
-				System.out.println("TObj --> duplicate key violation");
+				NsTest.logger.println("TObj --> duplicate key violation");
 			if (se.getNextException() != null) {
 				String m = se.getNextException().getSQLState();
-				System.out.println(se.getNextException().getMessage()
+				NsTest.logger.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
 			}
 		}
 		if (e.getMessage() == null) {
-			System.out.println("TObj -->NULL error message detected");
-			System.out.println("TObj -->Here is the NULL exception - "
+			NsTest.logger.println("TObj -->NULL error message detected");
+			NsTest.logger.println("TObj -->Here is the NULL exception - "
 					+ e.toString());
-			System.out.println("TObj -->Stack trace of the NULL exception - ");
-			e.printStackTrace(System.out);
+			NsTest.logger.println("TObj -->Stack trace of the NULL exception - ");
+			e.printStackTrace( NsTest.logger );
 		}
-		System.out.println("TObj -->At this point - " + where
+		NsTest.logger.println("TObj -->At this point - " + where
 				+ ", exception thrown was : " + e.getMessage());
 	}
 

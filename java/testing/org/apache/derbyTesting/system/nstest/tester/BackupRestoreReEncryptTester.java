@@ -85,7 +85,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			// Get the connection. It will be closed at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
-				System.out.println("FAIL: " + getThread_id()
+				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get the database connection");
 				return; // quit
 			}
@@ -101,18 +101,20 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			} catch (Exception e) {
 				message = getTimestamp() + "FAILED - BackUp thread doBackup"
 						+ getThread_id() + " threw " + e;
-				System.out.println(message);
+				NsTest.logger.println(message);
 				log(message);
 				printException("call to doBackup() in BackupThread ", e);
-				e.printStackTrace();
+                if ( NsTest.justCountErrors() ) { NsTest.printException( BackupRestoreReEncryptTester.class.getName(), e ); }
+				else { e.printStackTrace( NsTest.logger ); }
 			}
 
 			try {
 				doRestoreandReEncrypt();
 
 			} catch (SQLException e) {
-				e.printStackTrace();
-				System.out
+                if ( NsTest.justCountErrors() ) { NsTest.printException( BackupRestoreReEncryptTester.class.getName(), e ); }
+				else { e.printStackTrace( NsTest.logger ); }
+				NsTest.logger
 						.println("FAILED at doRestoreandReEncrypt() - BackUp thread "
 								+ getThread_id() + " threw " + e);
 				printException(
@@ -121,7 +123,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 						+ " call to doRestoreandReEncrypt() in BackupThread FAILED "
 						+ e.getSQLState() + " " + e);
 
-				e.printStackTrace(logger);
+				e.printStackTrace( logger );
 			}
 
 			// close the connection
@@ -152,7 +154,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
     
 		}// end of for (int i=0;...)
 
-		System.out.println("Thread " + getThread_id() + " is now terminating");
+		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
 
 	}// end of startTesting()
 
@@ -180,7 +182,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 					+ getThread_id() + " threw " + e;
 			log(message);
 			printException("call to doConsistCheck() in BackupThread ", e);
-			e.printStackTrace(logger);
+			e.printStackTrace( logger );
 		}
 		log("--------------------- B A C K U P  S E C T I O N  E N D ----------------------------");
 	}
@@ -226,12 +228,12 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			log(getTimestamp() + " Database restored successfully " + dbUrl);
 		} catch (SQLException e) {
 			log(getTimestamp() + " FAILURE ! to restore database " + dbUrl);
-			e.printStackTrace(logger);
+			e.printStackTrace( logger );
 
 		}
 
 		// Consistency check not required everytime
-		conn.close();
+		if ( conn != null ) { conn.close(); }
 		dbUrl = restoreDbURL + ";" + NsTest.bootPwd;
 		doConsistCheck(dbUrl, dbType);
 		// DERBY-1737, hence create a new connection
@@ -311,6 +313,6 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 		logger.write(msg + "\n");
 		logger.flush();
 
-		System.out.println(msg);
+		NsTest.logger.println(msg);
 	}
 }

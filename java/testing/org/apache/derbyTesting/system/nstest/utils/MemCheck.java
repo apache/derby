@@ -60,12 +60,12 @@ public class MemCheck extends Thread {
 				}
 				else
 				{
-					System.out.println("no more test threads, finishing memcheck thread also");
+					NsTest.logger.println("no more test threads, finishing memcheck thread also");
 					showmem();
 					stopNow=true;
 				}
 			} catch (java.lang.InterruptedException ie) {
-				System.out.println("memcheck: unexpected error in sleep");
+				NsTest.logger.println("memcheck: unexpected error in sleep");
 			}
 		}
 	}
@@ -78,13 +78,13 @@ public class MemCheck extends Thread {
 		Date d = null;
 		rt = Runtime.getRuntime();
 		d = new Date();
-		System.out.println("total memory: " + rt.totalMemory() + " free: "
+		NsTest.logger.println("total memory: " + rt.totalMemory() + " free: "
 				+ rt.freeMemory() + " " + d.toString());
 
 	}
 
 	public static void main(String argv[]) {
-		System.out.println("memCheck starting");
+		NsTest.logger.println("memCheck starting");
 		MemCheck mc = new MemCheck();
 		mc.run();
 	}

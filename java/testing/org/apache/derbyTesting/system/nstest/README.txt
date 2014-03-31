@@ -66,7 +66,18 @@ variable settings used in the test are set in this class. The user threads resid
 HOW TO RUN:
 ===========
 Usage:
-java org.apache.derbyTesting.system.nstest.NsTest DerbyClient|Embedded [small]
+
+    java org.apache.derbyTesting.system.nstest.NsTest [ DerbyClient | Embedded [ small ] ]
+
+If no arguments are specified, the test defaults to a client/server configuration (DerbyClient)
+
+The following flags can be set:
+
+    -Dderby.nstest.backupRestore=false    Turns off backup, restore, and re-encryption.
+
+    -Dderby.nstest.outputFile=fileName    Redirects output and errors to a file.
+
+    -Dderby.nstest.justCountErrors=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.
 
 The main class to invoke is org.apache.derbyTesting.system.nstest.NsTest. This class
 takes a String argument of "DerbyClient"/"Embedded", default is DerbyClient. The test requires

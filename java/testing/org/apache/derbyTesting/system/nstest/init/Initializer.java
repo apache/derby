@@ -52,7 +52,7 @@ public class Initializer {
 		// point, we just need to get a connection to the database
 		try {
 
-			System.out.println(thread_id
+			NsTest.logger.println(thread_id
 					+ " is getting a connection to the database...");
 
 			if (NsTest.embeddedMode) {
@@ -60,20 +60,20 @@ public class Initializer {
 						NsTest.prop);
 			} else {
 				if(NsTest.driver_type.equalsIgnoreCase("DerbyClient")) {
-					System.out.println("-->Using derby client url");
+					NsTest.logger.println("-->Using derby client url");
 					conn = DriverManager.getConnection(NsTest.clientDbURL,
 							NsTest.prop);
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("FAIL: " + thread_id
+			NsTest.logger.println("FAIL: " + thread_id
 					+ " could not get the database connection");
 			printException("getting database connection in startInserts()", e);
 		}
 
 		// add one to the statistics of client side connections made per jvm
 		NsTest.addStats(NsTest.CONNECTIONS_MADE, 1);
-		System.out.println("Connection number: " + NsTest.numConnections);
+		NsTest.logger.println("Connection number: " + NsTest.numConnections);
 
 		// set autocommit to false to keep transaction control in your hand
 		if (NsTest.AUTO_COMMIT_OFF) {
@@ -81,7 +81,7 @@ public class Initializer {
 
 				conn.setAutoCommit(false);
 			} catch (Exception e) {
-				System.out.println("FAIL: " + thread_id
+				NsTest.logger.println("FAIL: " + thread_id
 						+ "'s setAutoCommit() failed:");
 				printException("setAutoCommit() in Initializer", e);
 			}
@@ -90,10 +90,10 @@ public class Initializer {
 		while (insertsRemaining-- >= 0) {
 			try {
 				int numInserts = dbutil.add_one_row(conn, thread_id);
-				//System.out.println("Intializer.java: exited add_one_row: "
+				//NsTest.logger.println("Intializer.java: exited add_one_row: "
 				//		+ numInserts + " rows");
 			} catch (Exception e) {
-				System.out.println(" FAIL: " + thread_id
+				NsTest.logger.println(" FAIL: " + thread_id
 						+ " unexpected exception:");
 				printException("add_one_row() in Initializer", e);
 				break;
@@ -105,7 +105,7 @@ public class Initializer {
 			try {
 				conn.commit();
 			} catch (Exception e) {
-				System.out
+				NsTest.logger
 						.println("FAIL: " + thread_id + "'s commit() failed:");
 				printException("commit in Initializer", e);
 			}
@@ -120,25 +120,31 @@ public class Initializer {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
+        if ( NsTest.justCountErrors() )
+        {
+            NsTest.addError( e );
+            return;
+        }
+
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;
 
 			if (se.getSQLState().equals("40001"))
-				System.out.println("deadlocked detected");
+				NsTest.logger.println("deadlocked detected");
 			if (se.getSQLState().equals("40XL1"))
-				System.out.println(" lock timeout exception");
+				NsTest.logger.println(" lock timeout exception");
 			if (se.getSQLState().equals("23500"))
-				System.out.println(" duplicate key violation");
+				NsTest.logger.println(" duplicate key violation");
 			if (se.getNextException() != null) {
 				String m = se.getNextException().getSQLState();
-				System.out.println(se.getNextException().getMessage()
+				NsTest.logger.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
 			}
 		}
 		if (e.getMessage() == null) {
-			e.printStackTrace(System.out);
+			e.printStackTrace( NsTest.logger );
 		}
-		System.out.println("During - " + where
+		NsTest.logger.println("During - " + where
 				+ ", the exception thrown was : " + e.getMessage());
 	}
 

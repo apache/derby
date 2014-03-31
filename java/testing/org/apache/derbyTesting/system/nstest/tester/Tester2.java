@@ -63,7 +63,7 @@ public class Tester2 extends TesterObject {
 			//the connection will now open. It closes at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
-				System.out.println("FAIL: " + getThread_id()
+				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get database connection");
 				return; //quit
 			}
@@ -73,7 +73,7 @@ public class Tester2 extends TesterObject {
 			try {
 				connex.setAutoCommit(false);
 			} catch (Exception e) {
-				System.out.println("FAIL: " + getThread_id()
+				NsTest.logger.println("FAIL: " + getThread_id()
 						+ "'s setAutoCommit() failed:");
 				printException("setting AutoCommit in Tester2", e);
 			}
@@ -93,10 +93,10 @@ public class Tester2 extends TesterObject {
 				case 0: //do a select operation
 					try {
 						int numSelected = doSelectOperation(NsTest.MAX_LOW_STRESS_ROWS);
-						System.out.println(getThread_id() + " selected "
+						NsTest.logger.println(getThread_id() + " selected "
 								+ numSelected + " rows");
 					} catch (Exception e) {
-						System.out.println("doSelect in thread " + getThread_id()
+						NsTest.logger.println("doSelect in thread " + getThread_id()
 								+ " threw ");
 						printException("doSelectOperation() in Tester2", e);
 					}
@@ -117,7 +117,7 @@ public class Tester2 extends TesterObject {
 				try {
 					connex.commit();
 				} catch (Exception e) {
-					System.out.println("FAIL: " + getThread_id()
+					NsTest.logger.println("FAIL: " + getThread_id()
 							+ "'s commit() failed:");
 					printException("committing Xn in Tester2", e);
 				}
@@ -128,7 +128,7 @@ public class Tester2 extends TesterObject {
 
 		}//end of for (int i=0;...)
 
-		System.out.println("Thread " + getThread_id() + " is now terminating");
+		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
 
 	}//end of startTesting()
 

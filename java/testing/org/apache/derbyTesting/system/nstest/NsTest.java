@@ -20,10 +20,14 @@
  */
 package org.apache.derbyTesting.system.nstest;
 
+import java.util.HashMap;
 import java.util.Properties;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 
 import org.apache.derbyTesting.system.nstest.init.DbSetup;
@@ -53,8 +57,32 @@ import org.apache.derbyTesting.system.nstest.utils.MemCheck;
  * turning off Backup/Restore/Re-Encryption.
  */
 
-public class NsTest extends Thread {
+public class NsTest extends Thread
+{
+    private static  final   String  BACKUP_FLAG = "derby.nstest.backupRestore";
+    private static  final   String  OUTPUT_FILE = "derby.nstest.outputFile";
+    private static  final   String  JUST_COUNT_ERRORS = "derby.nstest.justCountErrors";
+    private static  final   String  QUIET = "derby.nstest.quiet";
+    
+    private static  final   String  USAGE =
+        "Usage:\n" +
+        "\n" +
+        "    java org.apache.derbyTesting.system.nstest.NsTest [ DerbyClient | Embedded [ small ] ]\n" +
+        "\n" +
+        "If no arguments are specified, the test defaults to a client/server configuration (DerbyClient)\n" +
+        "\n" +
+        "The following flags can be set:\n" +
+        "\n" +
+        "    -D" + BACKUP_FLAG + "=false    Turns off backup, restore, and re-encryption.\n" +
+        "\n" +
+        "    -D" + OUTPUT_FILE + "=fileName    Redirects output and errors to a file.\n" +
+        "\n" +
+        "    -D" + JUST_COUNT_ERRORS + "=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.\n";
 
+    private static  final   String  ERROR_BANNER1 = "//////////////////////////////////////////////////////////////\n";
+    private static  final   String  ERROR_BANNER2 = "//    ";
+    
+    
 	public static final String dbName = "nstestdb";
 
 	public static final String user = "nstest";
@@ -86,6 +114,10 @@ public class NsTest extends Thread {
 	public static final String embedDriver = new String(
 	"org.apache.derby.jdbc.EmbeddedDriver");
 
+    /* where to log messages */
+    private static  PrintStream         statisticsLogger;
+    public static NsTestPrintStream   logger;
+    
 	public static Properties prop = new Properties();
 
 	public static int INIT = 0;
@@ -186,15 +218,51 @@ public class NsTest extends Thread {
     
 	private static NsTest[] testThreads = null;
 
+    private static  boolean _justCountErrors;
+    private static  HashMap<String,NsTestError> _errors = new HashMap<String,NsTestError>();
+
+    private static  boolean _statisticsAlreadyPrinted = false;
+
 	public static int numActiveTestThreads() {
 		int activeThreadCount=0;
-		for (int i = 0; i < testThreads.length ; i++)
-		{
-			if (testThreads[i] != null && testThreads[i].isAlive())
-			activeThreadCount++;
-		}
+
+        if ( testThreads != null )
+        {
+            for (int i = 0; i < testThreads.length ; i++)
+            {
+                if (testThreads[i] != null && testThreads[i].isAlive())
+                    activeThreadCount++;
+            }
+        }
+        
 		return activeThreadCount;
 	}
+
+    public  static  boolean justCountErrors() { return _justCountErrors; }
+
+	public static synchronized void addError( Throwable t )
+    {
+        String  key = getStackTrace( t );
+
+        NsTestError error = _errors.get( key );
+        if ( error != null ) { error.increment(); }
+        else
+        {
+            error = new NsTestError( t );
+            _errors.put( key, error );
+        }
+	}
+    private static  String  getStackTrace( Throwable t )
+    {
+        StringWriter    sw = new StringWriter();
+        PrintWriter     pw = new PrintWriter( sw );
+
+        t.printStackTrace( pw );
+        pw.flush();
+        sw.flush();
+
+        return sw.toString();
+    }
 
 	public static synchronized void addStats(int type, int addValue) {
 		switch (type) {
@@ -259,7 +327,21 @@ public class NsTest extends Thread {
 	//
 	// ****************************************************************************
 	public static void main(String[] args) throws SQLException, IOException,
-	InterruptedException, Exception, Throwable {
+	InterruptedException, Exception, Throwable
+    {
+		String outputFile = System.getProperty( OUTPUT_FILE );
+        statisticsLogger = System.out;
+        if ( outputFile != null )
+        {
+            statisticsLogger = new PrintStream( outputFile );
+        }
+
+        _justCountErrors = Boolean.getBoolean( JUST_COUNT_ERRORS );
+
+        logger = new NsTestPrintStream( statisticsLogger, !_justCountErrors );
+
+        // add a shutdown hook to print statistics if someone types control-c to kill the test
+        Runtime.getRuntime().addShutdownHook( new Thread( new ShutdownHook() ) );
 
 		Connection conn = null;
 		if (args.length >= 1) {
@@ -270,7 +352,7 @@ public class NsTest extends Thread {
 				printUsage();
 				return;
 			}
-			System.out.println("Test nstest starting....., using driver: "
+			logger.println("Test nstest starting....., using driver: "
 					+ driver_type);
 		} else {
 			driver_type = "DerbyClient";
@@ -279,7 +361,7 @@ public class NsTest extends Thread {
 			String testConfiguration = args [1];
 			if (testConfiguration.equalsIgnoreCase("small"))
 			{
-				System.out.println("using small config");
+				logger.println("using small config");
 				setSmallConfig();
 			}    
 		}
@@ -288,17 +370,17 @@ public class NsTest extends Thread {
 		String jdbcUrl = "";
 		try {
 			if (driver_type.equalsIgnoreCase("Embedded")) {
-				// System.out.println("Driver embedd : " + driver_type);
-				System.out.println("Loading the embedded driver...");
+				// logger.println("Driver embedd : " + driver_type);
+				logger.println("Loading the embedded driver...");
 				Class.forName(embedDriver).newInstance();
 				jdbcUrl = embedDbURL + ";" + dataEncypt + ";" + bootPwd;
 				embeddedMode = true;
 			} else {
-				System.out.println("Driver type : " + driver_type);
-				System.out.println("Loading the Derby Client driver..."
+				logger.println("Driver type : " + driver_type);
+				logger.println("Loading the Derby Client driver..."
 						+ driver);
 				Class.forName(driver).newInstance();
-				System.out.println("Client Driver loaded");
+				logger.println("Client Driver loaded");
 				jdbcUrl = clientDbURL + ";" + dataEncypt + ";" + bootPwd;
 			}
 			if ((!embeddedMode) && START_SERVER_IN_SAME_VM) {
@@ -306,37 +388,37 @@ public class NsTest extends Thread {
 			}
 			prop.setProperty("user", user);
 			prop.setProperty("password", password);
-			System.out
+			logger
 			.println("Getting a connection using the url: " + jdbcUrl);
-			System.out.println("JDBC url= " + jdbcUrl);
+			logger.println("JDBC url= " + jdbcUrl);
 			conn = DriverManager.getConnection(jdbcUrl, prop);
 
 		} catch (SQLException sqe) {
 
-			System.out.println("\n\n " + sqe + sqe.getErrorCode() + " "
+			logger.println("\n\n " + sqe + sqe.getErrorCode() + " "
 					+ sqe.getSQLState());
 			if ((sqe.getErrorCode() == 40000)
 					|| sqe.getSQLState().equalsIgnoreCase("08001")) {
-				System.out
+				logger
 				.println("\n Unable to connect, test cannot proceed. Please verify if the Network Server is started on port 1900.");
 				// sqe.printStackTrace();
 				return;
 			}
 
 		} catch (ClassNotFoundException cnfe) {
-			System.out.println("Driver not found: " + cnfe.getMessage());
-			cnfe.printStackTrace();
+			logger.println("Driver not found: " + cnfe.getMessage());
+			cnfe.printStackTrace( logger );
 			return;
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Unexpected Failure");
+			e.printStackTrace( logger );
+			logger.println("Unexpected Failure");
 			printException("nstest.main() method ==> ", e);
 		}
 
 		// create test schema if it does not already exist
 		if (DbSetup.doIt(conn) == false) {
-			System.out.println("Error in dbSetup, test will exit");
+			logger.println("Error in dbSetup, test will exit");
 			System.exit(1);
 		}
 
@@ -344,7 +426,7 @@ public class NsTest extends Thread {
 		try {
 			conn.close();
 		} catch (Exception e) {
-			System.out
+			logger
 			.println("FAIL - Error closing the connection in nstest.main():");
 			printException("Closing connection in nstest.main()", e);
 		}
@@ -352,7 +434,7 @@ public class NsTest extends Thread {
 		// check memory in separate thread-- allows us to monitor usage during
 		// database calls
 		// 200,000 msec = 3min, 20 sec delay between checks
-		System.out.println("Starting memory checker thread");
+		logger.println("Starting memory checker thread");
 		MemCheck mc = new MemCheck(200000);
 		mc.start();
 
@@ -371,7 +453,7 @@ public class NsTest extends Thread {
 
 		if (NsTest.schemaCreated == false) {
 			// Table was created by this object, so we need to load it
-			System.out
+			logger
 			.println("Kicking off initialization threads that will populate the test table");
 			NsTest initThreads[] = new NsTest[INIT_THREADS];
 
@@ -391,7 +473,7 @@ public class NsTest extends Thread {
 		// created the schema
 		if (NsTest.schemaCreated) // true means that the schema was created by
 			// another jvm
-			System.out
+			logger
 			.println("Schema has already been created by another process!");
 
 		// The following 2 lines are used when you want to only create the test
@@ -399,7 +481,7 @@ public class NsTest extends Thread {
 		// not need to create one of their own.
 		// The CREATE_DATABASE_ONLY FLAG is set with the rest of the flags
 		if (CREATE_DATABASE_ONLY) {
-			System.out
+			logger
 			.println("Finished creating the database, TEST THREADS WILL NOT RUN!!");
 			// Finally also stop the memory checker thread, else the test will
 			// remain hung!
@@ -413,12 +495,12 @@ public class NsTest extends Thread {
 		// Now kick off the actual test threads that will do the work for us.
 		// Note that we use the value TESTER when initializing the threads.
 		// The total number of threads is NUMTESTER1+NUMTESTER2+NUMTESTER3
-		System.out
+		logger
 		.println("Kicking off test threads that will work over the test table");
 
 		int numTestThread = 0;
 		int maxTestThreads = 0;
-		String runBackup = System.getProperty("derby.nstest.backupRestore");
+		String runBackup = System.getProperty( BACKUP_FLAG );
 		if ((runBackup != null) && (runBackup.equalsIgnoreCase("false")))
 				maxTestThreads = NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
 		else
@@ -433,7 +515,7 @@ public class NsTest extends Thread {
 			// Check for property setting to decide the need for starting
 			// BackupRestore thread
 			if ((runBackup != null) && (runBackup.equalsIgnoreCase("false"))) {
-				System.out.println("BackupRestore Thread not started...");
+				logger.println("BackupRestore Thread not started...");
 			} else {
 				// Otherwise, start the BackupRestore Thread by default
 				testThreads[numTestThread] = new NsTest(BACKUP, numTestThread);
@@ -463,44 +545,128 @@ public class NsTest extends Thread {
 		}
 
 		// Wait for the test threads to finish and join back
-		for (int j = 0; j < maxTestThreads; j++) {
-			System.out.println("Waiting for thread " + j
-					+ " to join back/finish");
+		for (int j = 0; j < maxTestThreads; j++)
+        {
+            logger.println("Waiting for thread " + j+ " to join back/finish");
 			testThreads[j].join();
 		}
 
 		// Print statistics
-		System.out.println("");
-		System.out.println("STATISTICS OF OPERATIONS DONE");
-		System.out.println("-----------------------------");
-		System.out.println("");
-		System.out.println("SUCCESSFUL: ");
-		System.out.println("	Number of INSERTS = " + numInserts);
-		System.out.println("	Number of UPDATES = " + numUpdates);
-		System.out.println("	Number of DELETES = " + numDeletes);
-		System.out.println("	Number of SELECTS = " + numSelects);
-		System.out.println("");
-		System.out.println("FAILED: ");
-		System.out.println("	Number of failed INSERTS = " + numFailedInserts);
-		System.out.println("	Number of failed UPDATES = " + numFailedUpdates);
-		System.out.println("	Number of failed DELETES = " + numFailedDeletes);
-		System.out.println("	Number of failed SELECTS = " + numFailedSelects);
-		System.out.println("");
-		System.out.println("  Note that this may not be the same as the server side connections made\n"
-				+ "   to the database especially if connection pooling is employed");
-		System.out.println("");
-		System.out
-		.println("NOTE: Failing operations could be because of locking issue that are\n"
-				+ "directly related to the application logic.  They are not necessarily bugs.");
+        printStatistics();
 
 		// Finally also stop the memory checker thread
 		mc.stopNow = true;
 		mc.join();
 
-		System.out
+		logger
 		.println("End of test nstest! Look for 'FAIL' messages in the output and derby.log");
 
 	}// end of main
+
+    public  static  void    printStatistics()
+    {
+        if ( _statisticsAlreadyPrinted ) { return; }
+        else { _statisticsAlreadyPrinted = true; }
+
+		statisticsLogger.println("");
+		statisticsLogger.println("STATISTICS OF OPERATIONS DONE");
+		statisticsLogger.println("-----------------------------");
+		statisticsLogger.println("");
+		statisticsLogger.println("SUCCESSFUL: ");
+		statisticsLogger.println("	Number of INSERTS = " + numInserts);
+		statisticsLogger.println("	Number of UPDATES = " + numUpdates);
+		statisticsLogger.println("	Number of DELETES = " + numDeletes);
+		statisticsLogger.println("	Number of SELECTS = " + numSelects);
+		statisticsLogger.println("");
+		statisticsLogger.println("FAILED: ");
+		statisticsLogger.println("	Number of failed INSERTS = " + numFailedInserts);
+		statisticsLogger.println("	Number of failed UPDATES = " + numFailedUpdates);
+		statisticsLogger.println("	Number of failed DELETES = " + numFailedDeletes);
+		statisticsLogger.println("	Number of failed SELECTS = " + numFailedSelects);
+		statisticsLogger.println("");
+		statisticsLogger.println("  Note that this may not be the same as the server side connections made\n"
+				+ "   to the database especially if connection pooling is employed");
+		statisticsLogger.println("");
+		statisticsLogger
+		.println("NOTE: Failing operations could be because of locking issue that are\n"
+				+ "directly related to the application logic.  They are not necessarily bugs.");
+
+        if ( _errors.size() > 0 )
+        {
+            countAndPrintSQLStates();
+            for ( String key  : _errors.keySet() )
+            {
+                printError( key );
+            }
+        }
+    }
+
+    /** Count and print the number of times each SQLState was seen in an error */
+    private static  void    countAndPrintSQLStates()
+    {
+        HashMap<String,int[]>   results = new HashMap<String,int[]>();
+
+        // count the number of times each SQL state was seen
+        for ( String key  : _errors.keySet() )
+        {
+            NsTestError error = _errors.get( key );
+            int         count = error.count();
+            Throwable   throwable = error.throwable();
+            if ( throwable instanceof SQLException )
+            {
+                SQLException    se = (SQLException) throwable;
+                String          sqlState = se.getSQLState();
+
+                if ( sqlState != null )
+                {
+                    int[]   holder = results.get( sqlState );
+                    if ( holder == null )
+                    {
+                        holder = new int[] { count };
+                        results.put( sqlState, holder );
+                    }
+                    else { holder[ 0 ] += count; }
+                }
+            }
+        }
+
+        // now print the counts
+        statisticsLogger.println( "\n" );
+        for ( String sqlState : results.keySet() )
+        {
+            statisticsLogger.println("	Number of " + sqlState + " = " + results.get( sqlState )[ 0 ] );
+        }
+        statisticsLogger.println( "\n" );
+    }
+
+    private static  void    printError( String key )
+    {
+        String          stackTrace = key;
+        NsTestError error = _errors.get( key );
+        Throwable   throwable = error.throwable();
+        int             count = error.count();
+        String      sqlState = (throwable instanceof SQLException) ? 
+            ((SQLException) throwable).getSQLState() : null;
+
+        StringBuilder   buffer = new StringBuilder();
+
+        buffer.append( ERROR_BANNER1 );
+        buffer.append( ERROR_BANNER2 );
+        buffer.append( "\n" );
+        buffer.append( ERROR_BANNER2 );
+        buffer.append( "Count = " + count );
+        if ( sqlState != null ) { buffer.append( ", SQLState = " + sqlState ); }
+        buffer.append( ", Message = " + throwable.getMessage() );
+        buffer.append( "\n" );
+        buffer.append( ERROR_BANNER2 );
+        buffer.append( "\n" );
+        buffer.append( ERROR_BANNER1 );
+        buffer.append( "\n" );
+        buffer.append( stackTrace );
+        buffer.append( "\n" );
+
+        statisticsLogger.println( buffer.toString() );
+    }
 
 	// ****************************************************************************
 	//
@@ -540,7 +706,7 @@ public class NsTest extends Thread {
 	// ****************************************************************************
 	public void run() {
 
-		System.out.println(this.getName() + " is now running");
+		logger.println(this.getName() + " is now running");
 
 		if (this.type == INIT) {
 			Initializer Init = new Initializer(this.getName());
@@ -564,22 +730,22 @@ public class NsTest extends Thread {
 				Tstr4 = new BackupRestoreReEncryptTester(
 						"BackupRestoreReEncrypt" + this.getName());
 			} catch (IOException ioe) {
-				System.out
+				logger
 				.println(ioe
 						+ "=====> Unable to create backup log file, test cannot proceed ");
-				ioe.printStackTrace();
+				ioe.printStackTrace( logger );
 				return;
 			}
 			Tstr4.startTesting();
 
 		} else {
-			System.out
+			logger
 			.println("FAIL: Invalid thread type, should be INIT or TESTERx or BACKUP");
-			System.out.println("You should check the code and restart");
+			logger.println("You should check the code and restart");
 			return;
 		}
 
-		System.out.println(this.getName() + " finished and is now exiting");
+		logger.println(this.getName() + " finished and is now exiting");
 
 	}// end of run()
 
@@ -589,30 +755,37 @@ public class NsTest extends Thread {
 	// ***Method is synchronized so that the output file will contain sensible
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
-	public static synchronized void printException(String where, Exception e) {
+    public static synchronized void printException(String where, Exception e)
+    {
+        if ( justCountErrors() )
+        {
+            addError( e );
+            return;
+        }
+        
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;
 			if (se.getSQLState() != null) { // SQLSTATE is NULL for a
 				if (se.getSQLState().equals("40001"))
-					System.out.println("deadlocked detected");
+					logger.println("deadlocked detected");
 				if (se.getSQLState().equals("40XL1"))
-					System.out.println(" lock timeout exception");
+					logger.println(" lock timeout exception");
 				if (se.getSQLState().equals("23500"))
-					System.out.println(" duplicate key violation");
+					logger.println(" duplicate key violation");
 			}
 			if (se.getNextException() != null) {
 				String m = se.getNextException().getSQLState();
-				System.out.println(se.getNextException().getMessage()
+				logger.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
 			}
 		}
 		if (e.getMessage() == null) {
-			System.out.println("NULL error message detected");
-			System.out.println("Here is the NULL exection - " + e.toString());
-			System.out.println("Stack trace of the NULL exception - ");
-			e.printStackTrace(System.out);
+			logger.println("NULL error message detected");
+			logger.println("Here is the NULL exection - " + e.toString());
+			logger.println("Stack trace of the NULL exception - ");
+			e.printStackTrace( logger );
 		}
-		System.out.println("At this point - " + where
+		logger.println("At this point - " + where
 				+ ", exception thrown was : " + e.getMessage());
 
 	}
@@ -631,16 +804,24 @@ public class NsTest extends Thread {
 			nsw.start();
 			Thread.sleep(10000);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace( logger );
 			throw e;
 		}
 
 	}
 
-	public static void printUsage() {
-		System.out.println("Usage:");
-		System.out
-		.println("java org.apache.derbyTesting.system.nstest.NsTest DerbyClient|Embedded");
-		System.out.println("\nNo argument/Default value is 'DerbyClient'");
+	public static void printUsage()
+    {
+        _statisticsAlreadyPrinted = true;
+        System.out.println( USAGE );
 	}
+
+    public  static  class   ShutdownHook    implements  Runnable
+    {
+        public  void    run()
+        {
+            NsTest.printStatistics();
+        }
+    }
+    
 }

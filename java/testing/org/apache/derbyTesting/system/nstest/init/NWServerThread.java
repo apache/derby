@@ -25,6 +25,8 @@ import java.net.InetAddress;
 
 import org.apache.derby.drda.NetworkServerControl;
 
+import org.apache.derbyTesting.system.nstest.NsTest;
+
 /**
  * NWServerThread: Start a Network Server in a new Thread, based on the
  * NsTest.START_SERVER_IN_SAME_VM setting
@@ -51,9 +53,10 @@ public class NWServerThread extends Thread {
 			inetaddr = InetAddress.getByName(address);
 
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 					.println("Invalid host address passed, cannot start server");
-			e.printStackTrace();
+			if ( NsTest.justCountErrors() ) { NsTest.printException( NWServerThread.class.getName(), e ); }
+            else { e.printStackTrace( NsTest.logger ); }
 			throw e;
 		}
 	}
@@ -65,12 +68,13 @@ public class NWServerThread extends Thread {
 	public void run() {
 		try {
 			NetworkServerControl nsw = new NetworkServerControl(inetaddr, port);
-			nsw.start(new PrintWriter(System.out));
-			System.out.println("===> Derby Network Server on " + address + ":"
+			nsw.start(new PrintWriter(NsTest.logger));
+			NsTest.logger.println("===> Derby Network Server on " + address + ":"
 					+ port + " <===");
 		} catch (Exception e) {
 			;
-			e.printStackTrace();
+            if ( NsTest.justCountErrors() ) { NsTest.printException( NWServerThread.class.getName(), e ); }
+			else { e.printStackTrace( NsTest.logger ); }
 		}
 	}
 }

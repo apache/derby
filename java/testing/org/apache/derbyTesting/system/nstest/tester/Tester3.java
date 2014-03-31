@@ -61,7 +61,7 @@ public class Tester3 extends TesterObject {
 			//Get the connection.  It will be closed at the end of the loop
 			connex = getConnection();
 			if (connex == null) {
-				System.out.println("FAIL: " + getThread_id()
+				NsTest.logger.println("FAIL: " + getThread_id()
 						+ " could not get the database connection");
 				return; //quit
 			}
@@ -73,9 +73,9 @@ public class Tester3 extends TesterObject {
 			//Now select nstest.NUM_HIGH_STRESS_ROWS number of rows
 			try {
 				int numSelected = doSelectOperation(NsTest.NUM_HIGH_STRESS_ROWS);
-				System.out.println(getThread_id()+" Tester3: Rows selected "+numSelected);
+				NsTest.logger.println(getThread_id()+" Tester3: Rows selected "+numSelected);
 			} catch (Exception e) {
-				System.out.println("doSelect in thread " + getThread_id()
+				NsTest.logger.println("doSelect in thread " + getThread_id()
 						+ " threw ");
 				printException("doSelectOperation() in Tester3 of "+getThread_id(), e);
 			}
@@ -87,7 +87,7 @@ public class Tester3 extends TesterObject {
 
 		}//end of for (int i=0;...)
 
-		System.out.println("Thread " + getThread_id() + " is now terminating");
+		NsTest.logger.println("Thread " + getThread_id() + " is now terminating");
 
 	}//end of startTesting()
 

@@ -41,12 +41,12 @@ public class DbSetup {
 		ResultSet rs = null;
 		boolean finished = false;
 
-		System.out.println("dbSetup.doIt() starting...");
+		NsTest.logger.println("dbSetup.doIt() starting...");
 
 		try {
 			conn.setAutoCommit(false);
 		} catch (Exception e) {
-			System.out.println("FAIL - setAutoCommit() failed:");
+			NsTest.logger.println("FAIL - setAutoCommit() failed:");
 			printException("setting autocommit in dbSetup", e);
 			return (false);
 		}
@@ -57,13 +57,13 @@ public class DbSetup {
 					+ " where tablename = 'NSTESTTAB'");
 			if (rs.next()) {
 				rs.close();
-				System.out.println("table 'NSTESTTAB' already exists");
+				NsTest.logger.println("table 'NSTESTTAB' already exists");
 				finished = true;
 				NsTest.schemaCreated = true; // indicates to other classes
 				// that the schema already exists
 			}
 		} catch (Exception e) {
-			System.out
+			NsTest.logger
 			.println("dbSetup.doIt() check existance of table: FAIL -- unexpected exception:");
 			printException(
 					"executing query or processing resultSet to check for table existence",
@@ -74,7 +74,7 @@ public class DbSetup {
 		// if we reach here then the table does not exist, so we create it
 		if (finished == false) {
 			try {
-				System.out
+				NsTest.logger
 				.println("creating table 'NSTESTTAB' and corresponding indices");
 				s.execute("create table nstesttab (" + "id int,"
 						+ "t_char char(100)," + "t_date date,"
@@ -112,7 +112,7 @@ public class DbSetup {
 				s
 				.execute("create index t_serialkey_ind on nstesttab (serialkey)");
 
-				System.out
+				NsTest.logger
 				.println("creating table 'NSTRIGTAB' and corresponding indices");
 				s.execute("create table NSTRIGTAB (" + "id int,"
 						+ "t_char char(100)," + "t_date date,"
@@ -135,8 +135,9 @@ public class DbSetup {
 						+ "OLDROW.T_clob,OLDROW.T_blob, "
 						+ "OLDROW.serialkey)");
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.out
+                if ( NsTest.justCountErrors() ) { NsTest.printException( DbSetup.class.getName(), e ); }
+				else { e.printStackTrace( NsTest.logger ); }
+				NsTest.logger
 				.println("FAIL - unexpected exception in dbSetup.doIt() while creating schema:");
 				printException("executing statements to create schema", e);
 				return (false);
@@ -155,28 +156,34 @@ public class DbSetup {
 	// stack traces that are not
 	// ****mixed but rather one exception printed at a time
 	public static synchronized void printException(String where, Exception e) {
+        if ( NsTest.justCountErrors() )
+        {
+            NsTest.addError( e );
+            return;
+        }
+
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;
 
 			if (se.getSQLState().equals("40001"))
-				System.out.println("deadlocked detected");
+				NsTest.logger.println("deadlocked detected");
 			if (se.getSQLState().equals("40XL1"))
-				System.out.println(" lock timeout exception");
+				NsTest.logger.println(" lock timeout exception");
 			if (se.getSQLState().equals("23500"))
-				System.out.println(" duplicate key violation");
+				NsTest.logger.println(" duplicate key violation");
 			if (se.getNextException() != null) {
 				String m = se.getNextException().getSQLState();
-				System.out.println(se.getNextException().getMessage()
+				NsTest.logger.println(se.getNextException().getMessage()
 						+ " SQLSTATE: " + m);
 			}
 		}
 		if (e.getMessage() == null) {
-			System.out.println("NULL error message detected");
-			System.out.println("Here is the NULL exection - " + e.toString());
-			System.out.println("Stack trace of the NULL exception - ");
-			e.printStackTrace(System.out);
+			NsTest.logger.println("NULL error message detected");
+			NsTest.logger.println("Here is the NULL exection - " + e.toString());
+			NsTest.logger.println("Stack trace of the NULL exception - ");
+			e.printStackTrace( NsTest.logger );
 		}
-		System.out.println("During " + where + ", exception thrown was : "
+		NsTest.logger.println("During " + where + ", exception thrown was : "
 				+ e.getMessage());
 	}
 
