@@ -2354,12 +2354,19 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         BaseJDBCTestCase.dumpRs(tec.getOldRowSet(), out);
         out.println("\nAFTER RESULT SET");
         BaseJDBCTestCase.dumpRs(tec.getNewRowSet(), out);
-    }
+    }   
 
 
+    /** 
+     * Compare the expected output with the fired triggers' output
+     * and reset the print stream used for this purpose.
+     */
     private static void assertTriggerOutput(String expected) {
-        // reset the print stream and compare.
-        assertEquals(expected, outs.toString());
+        // Windows: get rid of any carriage returns added by println in output 
+        // before we compare since our expected output contains only newlines.
+        String got = outs.toString().replaceAll("\r", "");
+        
+        assertEquals(expected, got);
         outs.reset();
     }
 
