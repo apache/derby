@@ -86,6 +86,7 @@ public class DbSetup {
 						+ "t_timestamp timestamp," + "t_varchar varchar(100),"
 						+ "t_clob clob(1K)," + "t_blob blob(10K),"
 						+ "serialkey bigint generated always as identity, "
+						+ "sequenceColumn bigint, "
 						+ "unique (serialkey)) ");
 
 				s.execute("create index t_char_ind on nstesttab ( t_char)");
@@ -112,6 +113,9 @@ public class DbSetup {
 				s
 				.execute("create index t_serialkey_ind on nstesttab (serialkey)");
 
+                NsTest.logger.println( "Creating nstesttab_seq sequence" );
+                s.execute( "create sequence nstesttab_seq as bigint start with 0" );
+
 				NsTest.logger
 				.println("creating table 'NSTRIGTAB' and corresponding indices");
 				s.execute("create table NSTRIGTAB (" + "id int,"
@@ -123,7 +127,8 @@ public class DbSetup {
 						+ "t_smallint smallint," + "t_time time,"
 						+ "t_timestamp timestamp," + "t_varchar varchar(100),"
 						+ "t_clob clob(1K)," + "t_blob blob(10K),"
-						+ "serialkey bigint )");
+						+ "serialkey bigint, "
+						+ "sequenceColumn bigint )");
 				// create trigger
 				s.execute("CREATE TRIGGER NSTEST_TRIG AFTER DELETE ON nstesttab "
 						+ "REFERENCING OLD AS OLDROW FOR EACH ROW MODE DB2SQL "
@@ -133,7 +138,8 @@ public class DbSetup {
 						+ "OLDROW.T_FLOAT, OLDROW.T_INT,OLDROW.T_LONGINT, OLDROW.T_numeric_large,"
 						+ "OLDROW.T_real,OLDROW.T_smallint,OLDROW.T_time,OLDROW.T_timestamp,OLDROW.T_varchar,"
 						+ "OLDROW.T_clob,OLDROW.T_blob, "
-						+ "OLDROW.serialkey)");
+						+ "OLDROW.serialkey, "
+						+ "OLDROW.sequenceColumn )");
 			} catch (Exception e) {
                 if ( NsTest.justCountErrors() ) { NsTest.printException( DbSetup.class.getName(), e ); }
 				else { e.printStackTrace( NsTest.logger ); }

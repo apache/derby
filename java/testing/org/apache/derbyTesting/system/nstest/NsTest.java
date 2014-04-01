@@ -29,6 +29,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.sql.Timestamp;
 
 import org.apache.derbyTesting.system.nstest.init.DbSetup;
 import org.apache.derbyTesting.system.nstest.init.Initializer;
@@ -38,6 +39,7 @@ import org.apache.derbyTesting.system.nstest.tester.Tester1;
 import org.apache.derbyTesting.system.nstest.tester.Tester2;
 import org.apache.derbyTesting.system.nstest.tester.Tester3;
 import org.apache.derbyTesting.system.nstest.utils.MemCheck;
+import org.apache.derbyTesting.system.nstest.utils.SequenceReader;
 
 /**
  * NsTest - the main class to start the tests The main test settings are as
@@ -63,6 +65,8 @@ public class NsTest extends Thread
     private static  final   String  OUTPUT_FILE = "derby.nstest.outputFile";
     private static  final   String  JUST_COUNT_ERRORS = "derby.nstest.justCountErrors";
     private static  final   String  QUIET = "derby.nstest.quiet";
+
+    private static  final   long    MILLIS_PER_MINUTE = 1000L * 60L;
     
     private static  final   String  USAGE =
         "Usage:\n" +
@@ -222,6 +226,9 @@ public class NsTest extends Thread
     private static  HashMap<String,NsTestError> _errors = new HashMap<String,NsTestError>();
 
     private static  boolean _statisticsAlreadyPrinted = false;
+    private static  long        _maxSequenceCounter;
+    private static  long        _startTimestamp;
+    private static  long        _endTimestamp;
 
 	public static int numActiveTestThreads() {
 		int activeThreadCount=0;
@@ -237,6 +244,11 @@ public class NsTest extends Thread
         
 		return activeThreadCount;
 	}
+
+    public  static  void    updateSequenceTracker( long newValue )
+    {
+        _maxSequenceCounter = newValue;
+    }
 
     public  static  boolean justCountErrors() { return _justCountErrors; }
 
@@ -329,6 +341,8 @@ public class NsTest extends Thread
 	public static void main(String[] args) throws SQLException, IOException,
 	InterruptedException, Exception, Throwable
     {
+        _startTimestamp = System.currentTimeMillis();
+
 		String outputFile = System.getProperty( OUTPUT_FILE );
         statisticsLogger = System.out;
         if ( outputFile != null )
@@ -483,7 +497,7 @@ public class NsTest extends Thread
 		if (CREATE_DATABASE_ONLY) {
 			logger
 			.println("Finished creating the database, TEST THREADS WILL NOT RUN!!");
-			// Finally also stop the memory checker thread, else the test will
+			// Finally also stop the memory checker and sequence threads, else the test will
 			// remain hung!
 			mc.stopNow = true;
 			mc.join();
@@ -544,12 +558,22 @@ public class NsTest extends Thread
 
 		}
 
+		// check sequence value thread
+		// 60,000 msec = 1 minute delay between checks
+		logger.println("Starting sequence reader thread");
+		SequenceReader  sequenceReader = new SequenceReader( DriverManager.getConnection( jdbcUrl, prop ), 60000 );
+		sequenceReader.start();
+
 		// Wait for the test threads to finish and join back
 		for (int j = 0; j < maxTestThreads; j++)
         {
             logger.println("Waiting for thread " + j+ " to join back/finish");
 			testThreads[j].join();
 		}
+
+        // stop the sequence reader thread
+		sequenceReader.stopNow = true;
+		sequenceReader.join();
 
 		// Print statistics
         printStatistics();
@@ -568,10 +592,16 @@ public class NsTest extends Thread
         if ( _statisticsAlreadyPrinted ) { return; }
         else { _statisticsAlreadyPrinted = true; }
 
+        _endTimestamp = System.currentTimeMillis();
+
 		statisticsLogger.println("");
 		statisticsLogger.println("STATISTICS OF OPERATIONS DONE");
 		statisticsLogger.println("-----------------------------");
-		statisticsLogger.println("");
+		statisticsLogger.println("\n\n");
+		statisticsLogger.println( "Start time = " + (new Timestamp( _startTimestamp )).toString() );
+		statisticsLogger.println( "End time = " + (new Timestamp( _endTimestamp )).toString() );
+		statisticsLogger.println( "Duration = " + ( (_endTimestamp - _startTimestamp) / MILLIS_PER_MINUTE ) + " minutes" );
+		statisticsLogger.println("\n\n");
 		statisticsLogger.println("SUCCESSFUL: ");
 		statisticsLogger.println("	Number of INSERTS = " + numInserts);
 		statisticsLogger.println("	Number of UPDATES = " + numUpdates);
@@ -591,6 +621,8 @@ public class NsTest extends Thread
 		.println("NOTE: Failing operations could be because of locking issue that are\n"
 				+ "directly related to the application logic.  They are not necessarily bugs.");
 
+        statisticsLogger.println( "\nMax sequence counter peeked at = " + _maxSequenceCounter + "\n" );
+        
         if ( _errors.size() > 0 )
         {
             countAndPrintSQLStates();

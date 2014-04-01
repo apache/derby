@@ -96,8 +96,8 @@ public class DbUtil {
 					+ " t_date, t_decimal, t_decimal_nn, t_double, "
 					+ " t_float, t_int, t_longint, t_numeric_large,"
 					+ " t_real, t_smallint, t_time, t_timestamp,"
-					+ " t_varchar,t_clob,t_blob) values ("
-					+ " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,cast('00000000000000000000000000000000031' as clob(1K)),cast(X'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000031' as blob(10K)))");
+					+ " t_varchar,t_clob,t_blob,sequenceColumn) values ("
+					+ " ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,cast('00000000000000000000000000000000031' as clob(1K)),cast(X'000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000031' as blob(10K)), next value for nstesttab_seq)");
 			
 			Random rand = new Random();
 			
@@ -195,19 +195,26 @@ public class DbUtil {
 			try {
 				rowsAdded = ps.executeUpdate();
 			} catch (SQLException sqe) {
-				if (sqe.getSQLState().equalsIgnoreCase("40XL1")) {
-					NsTest.logger
-					.println("LOCK TIMEOUT obtained during insert - add_one_row() "
-							+ sqe.getSQLState());
-				}
-				else if (sqe.getSQLState().equalsIgnoreCase("23505")) {
-				    NsTest.logger
-				    .println("prevented duplicate row - add_one_row(): "
-				            + sqe.getSQLState() + "; " + sqe.getMessage());
+                if ( NsTest.justCountErrors() )
+                {
+                    NsTest.addError( sqe );
+                }
+                else
+                {
+                    if (sqe.getSQLState().equalsIgnoreCase("40XL1")) {
+                        NsTest.logger
+                            .println("LOCK TIMEOUT obtained during insert - add_one_row() "
+                                     + sqe.getSQLState());
+                    }
+                    else if (sqe.getSQLState().equalsIgnoreCase("23505")) {
+                        NsTest.logger
+                            .println("prevented duplicate row - add_one_row(): "
+                                     + sqe.getSQLState() + "; " + sqe.getMessage());
 
-				} else {
-					throw sqe;
-				}
+                    } else {
+                        throw sqe;
+                    }
+                }
 				
 			}
 			if (rowsAdded == 1) {

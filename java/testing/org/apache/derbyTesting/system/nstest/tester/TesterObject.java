@@ -216,7 +216,7 @@ public class TesterObject {
 					+ " t_date, t_decimal, t_decimal_nn, t_double, "
 					+ " t_float, t_int, t_longint, t_numeric_large,"
 					+ " t_real, t_smallint, t_time, t_timestamp,"
-					+ " t_varchar, serialkey from nstesttab where serialkey <= "
+					+ " t_varchar, serialkey, sequenceColumn from nstesttab where serialkey <= "
 					+ numRowsToSelect);
 		} catch (Exception e) {
 			NsTest.logger
@@ -281,6 +281,9 @@ public class TesterObject {
 
 		            // get value of column serialkey
 		            long lg2 = rSet.getLong(16);
+
+		            // get value of sequence column
+		            long lg3 = rSet.getLong(17);
 
 		            numRowsSelected++;
 		        }
