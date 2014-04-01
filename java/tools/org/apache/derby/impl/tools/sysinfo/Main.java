@@ -881,7 +881,11 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
                                    "org/apache/derby/info/" +
                                     org.apache.derby.iapi.services.info.ProductGenusNames.DNC +
-                                    ".properties"
+                                    ".properties",
+
+                                   "org/apache/derby/optional/" +
+                                    org.apache.derby.iapi.services.info.ProductGenusNames.OPTIONALTOOLS +
+                                    ".properties",
                                 };
 
     /**

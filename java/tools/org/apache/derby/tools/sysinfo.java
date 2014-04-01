@@ -80,6 +80,12 @@ public class sysinfo {
 	 */
 	public static final String CLIENT="dnc";
 
+	/**
+	 *	The genus name for the optional tools code. Use this to determine the version of 
+		code in derbyoptionaltools.jar
+	 */
+	public static final String OPTIONALTOOLS="optionaltools";
+
 
 	/**
 		gets the major version of the Apache Derby embedded code.

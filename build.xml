@@ -1362,7 +1362,7 @@
 
   <target
       name="buildjars"
-      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"
+      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyoptionaltoolsjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"
       description="Build all of the Derby jar files."
   />
 
@@ -1586,6 +1586,45 @@
     </jar>
   </target>
 
+<!-- - - - - - - - - - - - -  derbyoptionaltools.jar target - - - - - - - - - - -->
+
+  <target name="derbyoptionaltoolsjar" depends="setsanityname">
+
+    <echo level="info" message="Beginning derbyoptionaltools.jar ${sanity.name} build"/>
+
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+
+    <echo level="info" message=" creating new tools.properties file "/>
+    <antcall target="infowriter">
+      <param name="info.buildnumber" value="${changenumber}"/>
+      <param name="info.iname" value="Apache Derby Optional Tools"/>
+      <param name="info.ename" value="Apache Derby"/>
+      <param name="info.productfile" value="derbyoptionaltools.jar"/>
+      <param name="info.file" value="${out.dir}/org/apache/derby/optional/optionaltools.properties"/>
+    </antcall>
+
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
+    <antcall target="make-locale-classpath-manifest">
+        <param name="manifest.file" value="${derby.jar.dir}/lists/smfoptionaltools.mf"/>
+        <param name="manifest.mode" value="replace"/>
+    </antcall>
+
+    <delete file="${derby.jar.dir}/derbyoptionaltools.jar"/>
+    <jar destfile="${derby.jar.dir}/derbyoptionaltools.jar"
+         basedir="${out.dir}"
+         includes="org/apache/derby/optional/**"
+         manifest="${derby.jar.dir}/lists/smfoptionaltools.mf"
+         compress="true"
+         filesonly="true">
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**"/>
+    </jar>
+  </target>
+
 <!-- - - - - - - - - - - - - - derbynet.jar target - - - - - - - - - - - -->
 
   <target name="derbynetjar" depends="setsanityname">
@@ -1755,7 +1794,7 @@
     
     <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
       <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
-      <attribute name="Class-Path" value="derby.jar derbyclient.jar derbytools.jar derbynet.jar"/>
+      <attribute name="Class-Path" value="derby.jar derbyclient.jar derbytools.jar derbynet.jar derbyoptionaltools.jar"/>
     </manifest> 
  	
     <jar destfile="${derby.jar.dir}/derbyrun.jar"

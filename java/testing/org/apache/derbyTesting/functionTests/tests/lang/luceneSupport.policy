@@ -140,13 +140,6 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // This permission is needed to call DriverManager.deregisterDriver()
   // on Java SE 8 and later.
   permission java.sql.SQLPermission "deregisterDriver";
-
-  // extra permissions needed for the Lucene plugin
-  permission java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read";
-  permission java.util.PropertyPermission "user.dir", "read";
-  permission java.lang.RuntimePermission "accessDeclaredMembers";
-  permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
-  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
 };
 
 //
@@ -452,6 +445,23 @@ grant codeBase "${derbyTesting.ppcodeclasses}" {
 
   // Allows reading support files in 'extin'
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+};
+
+//
+// Permissions for the optional tools (derbyoptionaltools.jar)
+//
+grant codeBase "${derbyTesting.codejar}derbyoptionaltools.jar" {
+  permission java.util.PropertyPermission "derby.system.home", "read";
+
+  // all databases under derby.system.home 
+  permission java.io.FilePermission "${derby.system.home}${/}dbsqlauth${/}lucene", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}dbsqlauth${/}lucene${/}-", "read,write,delete";
+
+  permission java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read";
+  permission java.util.PropertyPermission "user.dir", "read";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.RuntimePermission "accessClassInPackage.sun.misc";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
 };
 
 // Permissions for the Lucene plugin

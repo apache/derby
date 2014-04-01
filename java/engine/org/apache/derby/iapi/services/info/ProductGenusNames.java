@@ -60,6 +60,11 @@ public interface ProductGenusNames
 	public static String DNC = "dnc";
 	public static String DNC_INFO = "/org/apache/derby/info/dnc.properties";
 
+
+	/**Genus name for optional tools */
+	public static String OPTIONALTOOLS = "optionaltools";
+	public static String OPTIONAL_TOOLS_INFO = "/org/apache/derby/optional/optionaltools.properties";
+
 }
 
 
