@@ -31,33 +31,27 @@ import java.util.zip.ZipEntry;
  * This class provides a jar file based implementation of the StorageFile interface. It is used by the
  * database engine to access persistent data and transaction logs under the jar subsubprotocol.
  */
-class JarDBFile extends InputStreamFile
+class JarDBFile extends InputStreamFile<JarStorageFactory>
 {
-
-    private final JarStorageFactory storageFactory;
 
     JarDBFile( JarStorageFactory storageFactory, String path)
     {
         super( storageFactory, path);
-        this.storageFactory = storageFactory;
     }
 
     JarDBFile( JarStorageFactory storageFactory, String parent, String name)
     {
         super( storageFactory, parent, name);
-        this.storageFactory = storageFactory;
     }
 
     JarDBFile( JarDBFile dir, String name)
     {
         super( dir,name);
-        this.storageFactory = dir.storageFactory;
     }
 
     private JarDBFile( JarStorageFactory storageFactory, String child, int pathLen)
     {
         super( storageFactory, child, pathLen);
-        this.storageFactory = storageFactory;
     }
 
     /**

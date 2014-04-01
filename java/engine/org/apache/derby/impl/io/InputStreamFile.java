@@ -37,15 +37,17 @@ import org.apache.derby.iapi.error.StandardException;
 /**
  * This class provides the base for read-only stream implementations of the StorageFile interface. It is used with the
  * classpath, jar, http, and https subsubprotocols
+ * @param <F> the storage factory class used by the subsubprotocol
  */
-abstract class InputStreamFile implements StorageFile
+abstract class InputStreamFile<F extends BaseStorageFactory>
+    implements StorageFile
 {
 
     final String path;
     final int nameStart; // getName() = path.substring( nameStart)
-    final BaseStorageFactory storageFactory;
+    final F storageFactory;
 
-    InputStreamFile( BaseStorageFactory storageFactory, String path)
+    InputStreamFile(F storageFactory, String path)
     {
         this.storageFactory = storageFactory;
         if( path == null || path.length() == 0)
@@ -55,7 +57,8 @@ abstract class InputStreamFile implements StorageFile
         }
         else
         {
-            StringBuffer sb = new StringBuffer( storageFactory.separatedDataDirectory);
+            StringBuilder sb =
+                    new StringBuilder(storageFactory.separatedDataDirectory);
             if( File.separatorChar != '/')
                 sb.append( path.replace( File.separatorChar, '/'));
             else
@@ -65,10 +68,11 @@ abstract class InputStreamFile implements StorageFile
         }
     }
 
-    InputStreamFile( BaseStorageFactory storageFactory, String parent, String name)
+    InputStreamFile(F storageFactory, String parent, String name)
     {
         this.storageFactory = storageFactory;
-        StringBuffer sb = new StringBuffer( storageFactory.separatedDataDirectory);
+        StringBuilder sb =
+                new StringBuilder(storageFactory.separatedDataDirectory);
         if( File.separatorChar != '/')
         {
             sb.append( parent.replace( File.separatorChar, '/'));
@@ -85,10 +89,10 @@ abstract class InputStreamFile implements StorageFile
         nameStart = this.path.lastIndexOf( '/') + 1;
     }
 
-    InputStreamFile( InputStreamFile dir, String name)
+    InputStreamFile(InputStreamFile<F> dir, String name)
     {
         this.storageFactory = dir.storageFactory;
-        StringBuffer sb = new StringBuffer( dir.path);
+        StringBuilder sb = new StringBuilder(dir.path);
         sb.append( '/');
         if( File.separatorChar != '/')
             sb.append( name.replace( File.separatorChar, '/'));
@@ -98,13 +102,14 @@ abstract class InputStreamFile implements StorageFile
         nameStart = this.path.lastIndexOf( '/') + 1;
     }
 
-    InputStreamFile( BaseStorageFactory storageFactory, String child, int pathLen)
+    InputStreamFile(F storageFactory, String child, int pathLen)
     {
         this.storageFactory = storageFactory;
         path = child.substring( 0, pathLen);
         nameStart = this.path.lastIndexOf( '/') + 1;
     }
 
+    @Override
     public boolean equals( Object other)
     {
         if( other == null || ! getClass().equals( other.getClass()))
@@ -113,6 +118,7 @@ abstract class InputStreamFile implements StorageFile
         return path.equals( otherFile.path);
     }
 
+    @Override
     public int hashCode()
     {
         return path.hashCode();
@@ -394,6 +400,7 @@ abstract class InputStreamFile implements StorageFile
      *
      * @return the file name
      */
+    @Override
     public String toString()
     {
         return path;

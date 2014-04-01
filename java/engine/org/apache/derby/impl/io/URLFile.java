@@ -22,48 +22,38 @@
 package org.apache.derby.impl.io;
 
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.io.StorageRandomAccessFile;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 
 import java.net.URL;
 
 /**
- * This class provides a class path based implementation of the StorageFile interface. It is used by the
- * database engine to access persistent data and transaction logs under the classpath subsubprotocol.
+ * This class provides a http based implementation of the StorageFile interface. It is used by the
+ * database engine to access persistent data and transaction logs under the http and https subsubprotocols.
  */
-class URLFile extends InputStreamFile
+class URLFile extends InputStreamFile<URLStorageFactory>
 {
-
-    private final URLStorageFactory storageFactory;
 
     URLFile( URLStorageFactory storageFactory, String path)
     {
         super( storageFactory, path);
-        this.storageFactory = storageFactory;
     }
 
     URLFile( URLStorageFactory storageFactory, String parent, String name)
     {
         super( storageFactory, parent, name);
-        this.storageFactory = storageFactory;
     }
 
     URLFile( URLFile dir, String name)
     {
         super( dir,name);
-        this.storageFactory = dir.storageFactory;
     }
 
     private URLFile( URLStorageFactory storageFactory, String child, int pathLen)
     {
         super( storageFactory, child, pathLen);
-        this.storageFactory = storageFactory;
     }
 
     /**

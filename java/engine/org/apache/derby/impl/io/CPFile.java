@@ -34,33 +34,27 @@ import java.security.PrivilegedAction;
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
  * database engine to access persistent data and transaction logs under the classpath subsubprotocol.
  */
-class CPFile extends InputStreamFile
+class CPFile extends InputStreamFile<CPStorageFactory>
 {
 
-    private final CPStorageFactory storageFactory;
- 
     CPFile( CPStorageFactory storageFactory, String path)
     {
         super( storageFactory, path);
-        this.storageFactory = storageFactory;
     }
 
     CPFile( CPStorageFactory storageFactory, String parent, String name)
     {
         super( storageFactory, parent, name);
-        this.storageFactory = storageFactory;
     }
 
     CPFile( CPFile dir, String name)
     {
         super( dir,name);
-        this.storageFactory = dir.storageFactory;
     }
 
     private CPFile( CPStorageFactory storageFactory, String child, int pathLen)
     {
         super( storageFactory, child, pathLen);
-        this.storageFactory = storageFactory;
     }
 
     /**
