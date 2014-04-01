@@ -161,11 +161,6 @@ public class VirtualFile
         return PathUtil.getBaseName(path);
     }
 
-    public java.net.URL getURL()
-            throws java.net.MalformedURLException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
     /**
      * Creates the the file denoted by this virtual file object.
      *

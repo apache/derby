@@ -122,15 +122,12 @@ class CPFile extends InputStreamFile
     
 	/**
      * Return a URL for this file (resource).
-     * 
-     * @see org.apache.derby.io.StorageFile#getURL()
      */
-    public URL getURL() {
+    private URL getURL() {
 
         ClassLoader cl = getContextClassLoader(Thread.currentThread());
-        URL myURL;
         if (cl != null) {
-            myURL = getResource(cl, path);
+            URL myURL = getResource(cl, path);
             if (myURL != null)
                 return myURL;
         }

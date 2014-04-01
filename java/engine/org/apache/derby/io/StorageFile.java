@@ -25,8 +25,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
-import java.net.MalformedURLException;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
@@ -130,14 +128,6 @@ public interface StorageFile
      * @return The last segment in the path name, "" if the path name sequence is empty.
      */
     public String getName();
-    
-    /**
-     * Get a URL representing this file. A valid URL does not indicate the file exists,
-     * it may just be a URL that will fail on opening. Some implementations
-     * return null if the file does not exist. 
-     * @throws MalformedURLException File cannot be represented as a URL.
-     */
-    public URL getURL() throws MalformedURLException;
     
     /**
      * If the named file does not already exist then create it as an empty normal file.

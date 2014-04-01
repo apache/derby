@@ -27,8 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import org.apache.derby.iapi.error.StandardException;
 
 /**
@@ -361,12 +359,6 @@ class CorruptFile implements StorageFile {
 	protected StorageFile getRealFileInstance()
 	{
 		return realFile;
-	}
-	/**
-	 * @see org.apache.derby.io.StorageFile#getURL()
-	 */
-	public URL getURL() throws MalformedURLException {
-		throw new MalformedURLException(toString());
 	}
 
     public void limitAccessToOwner() throws IOException {

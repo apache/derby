@@ -34,8 +34,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -437,14 +435,6 @@ class DirFile extends File implements StorageFile
         // whether or not we succeeded.
         return delete();
     } // end of deleteAll
-
-	/**
-	 * @see org.apache.derby.io.StorageFile#getURL()
-	 */
-	public URL getURL() throws MalformedURLException {
-		
-		return toURI().toURL();
-	}
 
     public void limitAccessToOwner() throws IOException {
         FileUtil.limitAccessToOwner(this);
