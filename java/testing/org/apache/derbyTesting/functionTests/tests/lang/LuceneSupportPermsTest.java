@@ -91,6 +91,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', null )";
     private static  final   String      UPDATE_POEMS_INDEX = "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', null )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'poems', 'poemText' )";
+    private static  final   String      DROP_PRIMARY_KEY = "alter table poems drop constraint poemsKey";
 
     private static  final   long        MILLIS_IN_HOUR = 1000L * 60L * 60L;
     private static  final   long        MILLIS_IN_DAY = MILLIS_IN_HOUR * 24L;
@@ -227,9 +228,14 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // ruth can update the index
         goodStatement( ruthConnection, UPDATE_POEMS_INDEX );
 
-        // dropping the key prevents you from re-indexing
-        goodStatement( ruthConnection, "alter table poems drop constraint poemsKey" );
-        expectExecutionError( ruthConnection, NO_PRIMARY_KEY, UPDATE_POEMS_INDEX );
+        // dropping the key does NOT prevent you from re-indexing
+        goodStatement( ruthConnection, DROP_PRIMARY_KEY );
+        goodStatement( ruthConnection, UPDATE_POEMS_INDEX );
+
+        // but dropping a key column DOES prevent you from re-indexing and from selecting
+        goodStatement( ruthConnection, "alter table poems drop column versionStamp" );
+        expectExecutionError( ruthConnection, COLUMN_OUT_OF_SCOPE, UPDATE_POEMS_INDEX );
+        expectExecutionError( ruthConnection, COLUMN_OUT_OF_SCOPE, viewPoemsIndex );
         
         // ruth can drop the index
         goodStatement( ruthConnection, DROP_POEMS_INDEX );
@@ -243,6 +249,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         // redundant drop fails, however
         expectExecutionError( ruthConnection, NONEXISTENT_OBJECT, DROP_POEMS_INDEX );
+
+        // verify that a primary key is necessary in order to index a table
+        dropSchema( ruthConnection );
+        createSchema( ruthConnection, Types.INTEGER );
+        goodStatement( ruthConnection, DROP_PRIMARY_KEY );
+        expectExecutionError( ruthConnection, NO_PRIMARY_KEY, INDEX_POEMS );
 
         // ruth cannot unload the tool
         expectExecutionError( ruthConnection, LACK_EXECUTE_PRIV, UNLOAD_TOOL );
@@ -578,6 +590,171 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         dropSchema( ruthConnection );
     }
 
+    /**
+     * <p>
+     * Test that you can index views and index tables with alternative column lists.
+     * </p>
+     */
+    public  void    test_007_indexViews()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        createSchema( ruthConnection, Types.INTEGER );
+        createPoemView( ruthConnection );
+        goodStatement( dboConnection, LOAD_TOOL );
+        goodStatement( ruthConnection, INDEX_POEMS );
+
+        // must supply some key columns if you're going to index a view
+        expectExecutionError
+            (
+             ruthConnection,
+             NO_PRIMARY_KEY,
+             "call LuceneSupport.createIndex( 'ruth', 'poemView', 'poemText', null )"
+             );
+
+        // now index the view
+        goodStatement
+            (
+             ruthConnection,
+             "call LuceneSupport.createIndex( 'ruth', 'poemView', 'poemText', null, 'poemID', 'versionStamp' )"
+             );
+
+        // can't create a second index by the same name
+        expectExecutionError
+            (
+             ruthConnection,
+             FUNCTION_EXISTS,
+             "call LuceneSupport.createIndex( 'ruth', 'poemView', 'poemText', null, 'poemID' )"
+             );
+
+        // vet index contents
+        String  selectFromViewIndex =
+            "select p.originalAuthor, i.rank\n" +
+            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 0 ) ) i\n" +
+            "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
+            "order by i.rank desc\n";
+        assertResults
+            (
+             ruthConnection,
+             selectFromViewIndex,
+             new String[][]
+             {
+                 { "Walt Whitman", "0.26756266" },
+                 { "Lord Byron", "0.22933942" },
+                 { "John Milton", "0.22933942" },
+             },
+             false
+             );
+
+        // vet index list
+        String  selectIndexes =
+            "select schemaName, tableName, columnName, analyzerMaker\n" +
+            "from table( LuceneSupport.listIndexes() ) l\n" +
+            "order by schemaName, tableName, columnName\n";
+        assertResults
+            (
+             ruthConnection,
+             selectIndexes,
+             new String[][]
+             {
+                 {
+                     "RUTH", "POEMS", "POEMTEXT",
+                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                 },
+                 {
+                     "RUTH", "POEMVIEW", "POEMTEXT",
+                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                 },
+             },
+             false
+             );
+
+        // update the view index, changing its analyzer
+        goodStatement
+            (
+             ruthConnection,
+             "call LuceneSupport.updateIndex( 'ruth', 'poemView', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )"
+             );
+        assertResults
+            (
+             ruthConnection,
+             selectFromViewIndex,
+             new String[][]
+             {
+                 { "Walt Whitman", "0.3304931" },
+                 { "John Milton", "0.2832798" },
+             },
+             false
+             );
+        assertResults
+            (
+             ruthConnection,
+             selectIndexes,
+             new String[][]
+             {
+                 {
+                     "RUTH", "POEMS", "POEMTEXT",
+                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                 },
+                 {
+                     "RUTH", "POEMVIEW", "POEMTEXT",
+                     "org.apache.derby.optional.api.LuceneUtils.standardAnalyzer",
+                 },
+             },
+             false
+             );
+
+        // drop the index on the view
+        goodStatement
+            (
+             ruthConnection,
+             "call LuceneSupport.dropIndex( 'ruth', 'poemView', 'poemText' )"
+             );
+        assertResults
+            (
+             ruthConnection,
+             selectIndexes,
+             new String[][]
+             {
+                 {
+                     "RUTH", "POEMS", "POEMTEXT",
+                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                 },
+             },
+             false
+             );
+
+        // now drop the index on the table and create one with just one key column
+        goodStatement( ruthConnection, DROP_POEMS_INDEX );
+        goodStatement
+            (
+             ruthConnection,
+             "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', null, 'poemID' )"
+             );
+        assertResults
+            (
+             ruthConnection,
+             "select *\n" +
+             "from table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
+             "order by i.rank desc\n",
+             new String[][]
+             {
+                 { "5", "4", "0.26756266" },
+                 { "4", "3", "0.22933942" },
+                 { "3", "2", "0.22933942" },
+             },
+             false
+             );
+        
+        goodStatement( ruthConnection, DROP_POEMS_INDEX );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        goodStatement( ruthConnection, "drop view poemView" );
+        dropSchema( ruthConnection );
+    }
+
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -649,6 +826,16 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         ps.close();
     }
 
+    private void    createPoemView( Connection conn )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create view poemView as select poemID, versionStamp, poemText from poems"
+             );
+    }
+    
     private void    createLocaleFunction( Connection conn )
         throws Exception
     {

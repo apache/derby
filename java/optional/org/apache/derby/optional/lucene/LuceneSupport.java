@@ -170,8 +170,9 @@ public class LuceneSupport implements OptionalTool
 		createProcedure.append(" (schemaname varchar( 128 ),");
 		createProcedure.append("tablename varchar( 128 ),");
 		createProcedure.append("textcolumn varchar( 128 ),");
-		createProcedure.append("analyzerMaker varchar( 32672 ))");
-		createProcedure.append("parameter style java modifies sql data language java external name ");
+		createProcedure.append("analyzerMaker varchar( 32672 ),");
+		createProcedure.append("keyColumns varchar( 32672 )...)");
+		createProcedure.append("parameter style derby modifies sql data language java external name ");
 		createProcedure.append("'" + getClass().getName() + ".createIndex'");
 		
 		executeDDL( conn, createProcedure.toString() );
@@ -359,13 +360,21 @@ public class LuceneSupport implements OptionalTool
 	 * Create a Lucene index on the specified column.
 	 *  
 	 * @param schema The schema of the column to index
-	 * @param table The table of the column to index
+	 * @param table The table or view containing the indexable column
 	 * @param textcol The column to create the Lucene index on
 	 * @param analyzerMaker name of static method which instantiates an Analyzer. may be null.
+	 * @param keyColumns names of key columns if we're indexing a column in a view
 	 * @throws SQLException
 	 * @throws IOException
 	 */
-	public static void createIndex( String schema, String table, String textcol, String analyzerMaker )
+	public static void createIndex
+        (
+         String schema,
+         String table,
+         String textcol,
+         String analyzerMaker,
+         String... keyColumns
+         )
         throws SQLException, IOException, PrivilegedActionException,
                ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
@@ -375,7 +384,7 @@ public class LuceneSupport implements OptionalTool
         // First make sure that the text column exists and is a String type
         vetTextColumn( dbmd, schema, table, textcol );
 
-        createOrRecreateIndex( conn, schema, table, textcol, analyzerMaker, true );
+        createOrRecreateIndex( conn, schema, table, textcol, analyzerMaker, true, keyColumns );
 	}
 
 	/**
@@ -396,12 +405,24 @@ public class LuceneSupport implements OptionalTool
          String table,
          String textcol,
          String analyzerMaker,
-         boolean create
+         boolean create,
+         String... keyColumns
          )
         throws SQLException, IOException, PrivilegedActionException,
                ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
-        VTITemplate.ColumnDescriptor[] primaryKeys = getPrimaryKeys( conn, schema, table );
+        VTITemplate.ColumnDescriptor[] primaryKeys = new VTITemplate.ColumnDescriptor[ 0 ];
+
+        // can't override keys when the index is updated
+        if ( !create )
+        { primaryKeys = getKeys( conn, schema, table, textcol ); }
+        // use the supplied keys if possible
+        else if ( (keyColumns != null) && (keyColumns.length > 0) )
+        { primaryKeys = getKeys( conn, schema, table, keyColumns ); }
+        else
+        { primaryKeys = getPrimaryKeys( conn, schema, table  ); }
+
+        // can't create an index without specifying keys for joining it back to Derby data
         if ( primaryKeys.length == 0 )
         {
             throw newSQLException( SQLState.LUCENE_NO_PRIMARY_KEY );
@@ -447,7 +468,7 @@ public class LuceneSupport implements OptionalTool
         
             for ( VTITemplate.ColumnDescriptor keyDesc : primaryKeys )
             {
-                String  keyName = keyDesc.columnName;
+                String  keyName = derbyIdentifier( keyDesc.columnName );
                 if ( keyCount > 0 ) { query.append( ", " ); }
                 query.append( keyName );
 
@@ -1332,6 +1353,115 @@ public class LuceneSupport implements OptionalTool
 
         return result;
     }
+
+    /**
+     * Return the key columns for an existing LuceneQueryVTI table function.
+     */
+    private static  VTITemplate.ColumnDescriptor[] getKeys
+        (
+         Connection conn,
+         String schema,
+         String table,
+         String textcol
+         )
+        throws SQLException
+    {
+        schema = derbyIdentifier( schema );
+        String  functionName = makeUnqualifiedTableFunctionName( table, textcol );
+        ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
+
+        ResultSet   rs = conn.getMetaData().getFunctionColumns( null, schema, functionName, "%" );
+        try {
+            while ( rs.next() )
+            {
+                if ( rs.getInt( "COLUMN_TYPE" ) == DatabaseMetaData.functionColumnResult )
+                {
+                    VTITemplate.ColumnDescriptor   keyDescriptor = new VTITemplate.ColumnDescriptor
+                        (
+                         rs.getString( "COLUMN_NAME" ),
+                         rs.getInt( "DATA_TYPE" ),
+                         rs.getInt( "PRECISION" ),
+                         rs.getInt( "SCALE" ),
+                         rs.getString( "TYPE_NAME" ),
+                         rs.getInt( "ORDINAL_POSITION" )
+                         );
+                    keyArray.add( keyDescriptor );
+                }
+            }
+        }
+        finally
+        {
+            rs.close();
+        }
+        
+        VTITemplate.ColumnDescriptor[] temp = new VTITemplate.ColumnDescriptor[ keyArray.size() ];
+        keyArray.toArray( temp );
+        Arrays.sort( temp );
+
+        // remove the last two columns, which are not keys. they are the DOCUMENT_ID and RANK columns.
+        int     count = temp.length - 2;
+        VTITemplate.ColumnDescriptor[] result = new VTITemplate.ColumnDescriptor[ count ];
+        for ( int i = 0; i < count; i++ ) { result[ i ] = temp[ i ]; }
+
+        return result;
+    }
+    
+    /**
+     * Return column information for a proposed set of keys.
+     */
+    private static  VTITemplate.ColumnDescriptor[] getKeys
+        (
+         Connection conn,
+         String schema,
+         String table,
+         String... keyColumns
+         )
+        throws SQLException
+    {
+        String      qualifiedName = makeTableName( schema, table );
+        StringBuilder   buffer = new StringBuilder();
+
+        buffer.append( "select " );
+        int counter = 0;
+        for ( String key : keyColumns )
+        {
+            if ( counter > 0 ) { buffer.append( ", " ); }
+            counter++;
+            buffer.append( derbyIdentifier( key ) );
+        }
+        buffer.append( "\nfrom " + qualifiedName );
+        buffer.append( "\nwhere 1=2" );
+
+        ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
+
+        ResultSet   rs = conn.prepareStatement( buffer.toString() ).executeQuery();
+        ResultSetMetaData   rsmd = rs.getMetaData();
+        try {
+            for ( int keyPosition = 1; keyPosition <= rsmd.getColumnCount(); keyPosition++ )
+            {
+                VTITemplate.ColumnDescriptor   keyDescriptor = new VTITemplate.ColumnDescriptor
+                    (
+                     rsmd.getColumnName( keyPosition ),
+                     rsmd.getColumnType( keyPosition ),
+                     rsmd.getPrecision( keyPosition ),
+                     rsmd.getScale( keyPosition ),
+                     rsmd.getColumnTypeName( keyPosition ),
+                     keyPosition
+                     );
+                keyArray.add( keyDescriptor );
+            }
+        }
+        finally
+        {
+            rs.close();
+        }
+        
+        VTITemplate.ColumnDescriptor[] result = new VTITemplate.ColumnDescriptor[ keyArray.size() ];
+        keyArray.toArray( result );
+
+        return result;
+    }
+    
 
     /////////////////////////////////////////////////////////////////////
     //

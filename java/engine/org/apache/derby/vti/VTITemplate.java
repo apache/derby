@@ -387,6 +387,7 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
             this.ordinalPosition = ordinalPosition;
         }
 
+        /** Sort on ordinalPosition */
         public  int compareTo( ColumnDescriptor that ) { return this.ordinalPosition - that.ordinalPosition; }
         public  boolean equals( Object other )
         {
@@ -395,6 +396,7 @@ public abstract class VTITemplate   implements ResultSet, AwareVTI
             else { return (compareTo( (ColumnDescriptor) other ) == 0); }
         }
         public  int hashCode()  { return columnName.hashCode(); }
+        public  String  toString() { return columnName; }
     }
 
 }
