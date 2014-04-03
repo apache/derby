@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
@@ -135,6 +136,8 @@ public class LuceneSupport implements OptionalTool
 	 */
 	public void loadTool(String... configurationParameters) throws SQLException
     {
+        forbidReadOnlyConnections();
+        
         Connection  conn = getDefaultConnection();
         mustBeDBO( conn );
 
@@ -221,6 +224,8 @@ public class LuceneSupport implements OptionalTool
 	public void unloadTool(String... configurationParameters)
         throws SQLException
     {
+        forbidReadOnlyConnections();
+        
         Connection  conn = getDefaultConnection();
         mustBeDBO( conn );
 
@@ -337,6 +342,8 @@ public class LuceneSupport implements OptionalTool
         throws SQLException, IOException, PrivilegedActionException,
                ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
+        forbidReadOnlyConnections();
+
         Connection              conn = getDefaultConnection();
 
         // only the dbo or the schema owner can perform this function
@@ -378,6 +385,8 @@ public class LuceneSupport implements OptionalTool
         throws SQLException, IOException, PrivilegedActionException,
                ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
     {
+        forbidReadOnlyConnections();
+        
         Connection              conn = getDefaultConnection();
         DatabaseMetaData    dbmd = conn.getMetaData();
 
@@ -551,6 +560,8 @@ public class LuceneSupport implements OptionalTool
 	public static void dropIndex( String schema, String table, String textcol )
         throws SQLException, IOException, PrivilegedActionException
     {
+        forbidReadOnlyConnections();
+        
         getDefaultConnection().prepareStatement
             (
              "drop function " + makeTableFunctionName( schema, table, textcol )
@@ -1117,6 +1128,18 @@ public class LuceneSupport implements OptionalTool
     //  SQL/JDBC SUPPORT
     //
     /////////////////////////////////////////////////////////////////////
+
+    /**
+     * Raise an error if the connection is readonly.
+     */
+    private static  void    forbidReadOnlyConnections()
+        throws SQLException
+    {
+        if ( ConnectionUtil.getCurrentLCC().getAuthorizer().isReadOnlyConnection() )
+        {
+            throw newSQLException( SQLState.AUTH_WRITE_WITH_READ_ONLY_CONNECTION );
+        }
+    }
 
 	/**
 	 * Get a connection to the database
