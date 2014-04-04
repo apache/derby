@@ -79,6 +79,8 @@ The following flags can be set:
 
     -Dderby.nstest.justCountErrors=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.
 
+    -Dderby.nstest.durationInMinutes=$number    Run for this number of minutes.
+
 The main class to invoke is org.apache.derbyTesting.system.nstest.NsTest. This class
 takes a String argument of "DerbyClient"/"Embedded", default is DerbyClient. The test requires
 the Network Server to be started on port 1900 to begin the run. 

@@ -65,6 +65,7 @@ public class NsTest extends Thread
     private static  final   String  OUTPUT_FILE = "derby.nstest.outputFile";
     private static  final   String  JUST_COUNT_ERRORS = "derby.nstest.justCountErrors";
     private static  final   String  QUIET = "derby.nstest.quiet";
+    private static  final   String  DURATION = "derby.nstest.durationInMinutes";
 
     private static  final   long    MILLIS_PER_MINUTE = 1000L * 60L;
     
@@ -81,7 +82,9 @@ public class NsTest extends Thread
         "\n" +
         "    -D" + OUTPUT_FILE + "=fileName    Redirects output and errors to a file.\n" +
         "\n" +
-        "    -D" + JUST_COUNT_ERRORS + "=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.\n";
+        "    -D" + JUST_COUNT_ERRORS + "=true    Makes the test run quietly at steady-state, counting errors, and printing a summary at the end.\n" +
+        "\n" +
+        "    -D" + DURATION + "=$number    Run for this number of minutes.\n";
 
     private static  final   String  ERROR_BANNER1 = "//////////////////////////////////////////////////////////////\n";
     private static  final   String  ERROR_BANNER2 = "//    ";
@@ -225,6 +228,8 @@ public class NsTest extends Thread
     private static  boolean _justCountErrors;
     private static  HashMap<String,NsTestError> _errors = new HashMap<String,NsTestError>();
 
+    private static  long    _duration;
+    
     private static  boolean _statisticsAlreadyPrinted = false;
     private static  long        _maxSequenceCounter;
     private static  long        _startTimestamp;
@@ -350,6 +355,12 @@ public class NsTest extends Thread
             statisticsLogger = new PrintStream( outputFile );
         }
 
+		String duration = System.getProperty( DURATION );
+        if ( duration != null )
+        {
+            _duration = Long.parseLong( duration ) * MILLIS_PER_MINUTE;
+        }
+
         _justCountErrors = Boolean.getBoolean( JUST_COUNT_ERRORS );
 
         logger = new NsTestPrintStream( statisticsLogger, !_justCountErrors );
@@ -380,6 +391,13 @@ public class NsTest extends Thread
 			}    
 		}
         
+		TimerThread timerThread = null;
+        if ( _duration > 0L )
+        {
+            timerThread = new TimerThread( _duration );
+            timerThread.start();
+        }
+
 		// Load the driver and get a connection to the database
 		String jdbcUrl = "";
 		try {
@@ -571,8 +589,16 @@ public class NsTest extends Thread
 			testThreads[j].join();
 		}
 
+        if ( timerThread != null )
+        {
+            timerThread.stopNow();
+            timerThread.interrupt();
+            timerThread.join();
+        }
+
         // stop the sequence reader thread
 		sequenceReader.stopNow = true;
+		sequenceReader.interrupt();
 		sequenceReader.join();
 
 		// Print statistics
