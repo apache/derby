@@ -51,6 +51,7 @@ public class Changes10_11 extends UpgradeChange
     private static  final   String  NOT_IMPLEMENTED = "0A000";
     private static  final   String  NO_ROWS_AFFECTED = "02000";
     private static  final   String  UNKNOWN_OPTIONAL_TOOL = "X0Y88";
+    private static  final   String  UNRECOGNIZED_PROCEDURE = "42Y03";
 
     //////////////////////////////////////////////////////////////////
     //
@@ -414,6 +415,22 @@ public class Changes10_11 extends UpgradeChange
         Properties  properties = TestConfiguration.getSystemProperties();
         if ( getBooleanProperty( properties, TestConfiguration.KEY_OMIT_LUCENE ) )  { return; }
 
+        Version initialVersion = new Version( getOldMajor(), getOldMinor(), 0, 0 );
+        Version firstVersionHavingBooleanType = new Version( 10, 7, 0, 0 );
+        Version firstVersionHavingOptionalTools = new Version( 10, 10, 0, 0 );
+
+        boolean hasBooleanDatatype = initialVersion.compareTo( firstVersionHavingBooleanType ) >= 0;
+        boolean hasOptionalTools  = initialVersion.compareTo( firstVersionHavingOptionalTools ) >= 0;
+
+        String  originalSQLState;
+        if ( !hasBooleanDatatype ) { originalSQLState = SYNTAX_ERROR; }
+        else if ( !hasOptionalTools ) { originalSQLState = UNRECOGNIZED_PROCEDURE; }
+        else { originalSQLState = UNKNOWN_OPTIONAL_TOOL; }
+
+        String  softUpgradeSQLState;
+        if ( !hasOptionalTools ) { softUpgradeSQLState = UNRECOGNIZED_PROCEDURE; }
+        else { softUpgradeSQLState = HARD_UPGRADE_REQUIRED; }
+
         String loadTool = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
         String unloadTool = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
 
@@ -422,10 +439,10 @@ public class Changes10_11 extends UpgradeChange
         {
             case PH_CREATE:
             case PH_POST_SOFT_UPGRADE:
-                assertStatementError( UNKNOWN_OPTIONAL_TOOL, statement, loadTool );
+                assertStatementError( originalSQLState, statement, loadTool );
                 break;
             case PH_SOFT_UPGRADE:
-                assertStatementError( HARD_UPGRADE_REQUIRED, statement, loadTool );
+                assertStatementError( softUpgradeSQLState, statement, loadTool );
                 break;
             case PH_HARD_UPGRADE:
                 statement.executeUpdate( loadTool );
