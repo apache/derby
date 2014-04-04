@@ -27,9 +27,11 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -48,6 +50,7 @@ public class Changes10_11 extends UpgradeChange
     private static  final   String  HARD_UPGRADE_REQUIRED = "XCL47";
     private static  final   String  NOT_IMPLEMENTED = "0A000";
     private static  final   String  NO_ROWS_AFFECTED = "02000";
+    private static  final   String  UNKNOWN_OPTIONAL_TOOL = "X0Y88";
 
     //////////////////////////////////////////////////////////////////
     //
@@ -378,6 +381,7 @@ public class Changes10_11 extends UpgradeChange
         }
     }
 
+    /** Test the MERGE statement introduced by 10.11 */
     public void testMerge() throws Exception
     {
         String mergeStatement =
@@ -402,6 +406,38 @@ public class Changes10_11 extends UpgradeChange
                 expectExecutionWarning( getConnection(), NO_ROWS_AFFECTED, mergeStatement );
                 break;
         }
+    }
+
+    /** Test the Lucene plugin */
+    public void testLuceneSupport() throws Exception
+    {
+        Properties  properties = TestConfiguration.getSystemProperties();
+        if ( getBooleanProperty( properties, TestConfiguration.KEY_OMIT_LUCENE ) )  { return; }
+
+        String loadTool = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
+        String unloadTool = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
+
+        Statement statement = createStatement();
+        switch (getPhase())
+        {
+            case PH_CREATE:
+            case PH_POST_SOFT_UPGRADE:
+                assertStatementError( UNKNOWN_OPTIONAL_TOOL, statement, loadTool );
+                break;
+            case PH_SOFT_UPGRADE:
+                assertStatementError( HARD_UPGRADE_REQUIRED, statement, loadTool );
+                break;
+            case PH_HARD_UPGRADE:
+                statement.executeUpdate( loadTool );
+                statement.executeUpdate( unloadTool );
+                break;
+        }
+    }
+
+    /** Return the boolean value of a system property */
+    private static  boolean getBooleanProperty( Properties properties, String key )
+    {
+        return Boolean.valueOf( properties.getProperty( key ) ).booleanValue();
     }
 
     /**

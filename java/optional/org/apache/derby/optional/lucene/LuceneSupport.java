@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
@@ -137,6 +138,13 @@ public class LuceneSupport implements OptionalTool
 	public void loadTool(String... configurationParameters) throws SQLException
     {
         forbidReadOnlyConnections();
+
+        // not allowed during soft-upgrade
+        try {
+            ConnectionUtil.getCurrentLCC().getDataDictionary().checkVersion
+                ( DataDictionary.DD_VERSION_DERBY_10_11, "luceneSupport" );
+        }
+        catch (StandardException se)    { throw sqlException( se ); }
         
         Connection  conn = getDefaultConnection();
         mustBeDBO( conn );
