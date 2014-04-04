@@ -1095,8 +1095,10 @@ public class LuceneSupport implements OptionalTool
                     else
                     {
                         Properties  properties = new Properties();
+                        FileInputStream fis = new FileInputStream( file );
 
-                        properties.load( new FileInputStream( file ) );
+                        properties.load( fis );
+                        fis.close();
                         
                         return properties;
                     }
@@ -1516,9 +1518,11 @@ public class LuceneSupport implements OptionalTool
      * and files underneath it first.
      */
     static  boolean deleteFile( File file )
-        throws IOException, PrivilegedActionException
+        throws IOException, SQLException, PrivilegedActionException
     {
         boolean retval = true;
+
+        if ( !fileExists( file ) ) { return false; }
         
         if ( isDirectory( file ) )
         {
@@ -1547,15 +1551,22 @@ public class LuceneSupport implements OptionalTool
 
     /** Really delete a file */
     private static  boolean clobberFile( final File file )
-        throws IOException, PrivilegedActionException
+        throws IOException, SQLException, PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Boolean>()
              {
-                public Boolean run() throws IOException
+                 public Boolean run() throws IOException, SQLException
                 {
-                    return file.delete();
+                    boolean result = file.delete();
+
+                    if ( !result )
+                    {
+                        throw newSQLException( SQLState.UNABLE_TO_DELETE_FILE, file.getAbsolutePath() );
+                    }
+
+                    return result;
                 }
              }
              ).booleanValue();
