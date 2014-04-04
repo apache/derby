@@ -21,17 +21,16 @@
 
 package org.apache.derbyTesting.functionTests.util;
 
-import org.apache.derby.iapi.db.*;
 import java.sql.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * Methods for testing triggers
  */
 public class Triggers
 {
-	private Triggers()
+    private static final String RESULT_SET_NOT_OPEN = "XCL16";
+
+    private Triggers()
 	{
 	}
 
@@ -93,9 +92,18 @@ public class Triggers
 		if (stmt.execute(text))
 		{
 			ResultSet rs = stmt.getResultSet();
-			while (rs.next())
-			{}
-			rs.close();
+            try {
+                while (rs.next()) {}
+            } catch (SQLException e) {
+                if (RESULT_SET_NOT_OPEN.equals(e.getSQLState())) {
+                    // Some side effect (stored proc?) made the rs close,
+                    // bail out
+                } else {
+                    throw e;
+                }
+            } finally {
+                rs.close();
+            }
 		}
 		stmt.close();
 		conn.close();
