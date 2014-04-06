@@ -83,6 +83,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 	private static  final   String      DOUBLE_LOAD_ILLEGAL         = "42XBG";
 	private static  final   String      DOUBLE_UNLOAD_ILLEGAL       = "42XBH";
 	private static  final   String      BAD_DIRECTORY                      = "42XBI";
+	private static  final   String      BAD_COLUMN_NAME                 = "42XBJ";
 
     private static  final   String      POLICY_FILE = "org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy";
 
@@ -441,10 +442,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select p.originalAuthor, i.rank\n" +
+             "select p.originalAuthor, i.score\n" +
              "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
-             "order by i.rank desc\n",
+             "order by i.score desc\n",
              new String[][]
              {
                  { "Walt Whitman", "0.26756266" },
@@ -523,10 +524,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         
 
         String  query =
-            "select p.originalAuthor, i.rank\n" +
+            "select p.originalAuthor, i.score\n" +
             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
-            "order by i.rank desc\n";
+            "order by i.score desc\n";
 
         assertResults
             (
@@ -631,10 +632,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         // vet index contents
         String  selectFromViewIndex =
-            "select p.originalAuthor, i.rank\n" +
+            "select p.originalAuthor, i.score\n" +
             "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
-            "order by i.rank desc\n";
+            "order by i.score desc\n";
         assertResults
             (
              ruthConnection,
@@ -738,7 +739,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              ruthConnection,
              "select *\n" +
              "from table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
-             "order by i.rank desc\n",
+             "order by i.score desc\n",
              new String[][]
              {
                  { "5", "4", "0.26756266" },
@@ -754,7 +755,53 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         dropSchema( ruthConnection );
     }
 
+    /**
+     * <p>
+     * Test that you can't create an index involving a column with the same name
+     * as one of the system-supplied column names (documentID and score).
+     * </p>
+     */
+    public  void    test_008_columnNames()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
 
+        goodStatement( dboConnection, LOAD_TOOL );
+
+        goodStatement( ruthConnection, "create table badTable1( keyCol int primary key, score clob )" );
+        goodStatement( ruthConnection, "create table badTable2( keyCol int primary key, documentID clob )" );
+        goodStatement( ruthConnection, "create table badTable3( score int primary key, textCol clob )" );
+        goodStatement( ruthConnection, "create table badTable4( documentID int primary key, textCol clob )" );
+
+        expectExecutionError
+            (
+             ruthConnection, BAD_COLUMN_NAME,
+             "call LuceneSupport.createIndex( 'ruth', 'badTable1', 'score', null )"
+             );
+        expectExecutionError
+            (
+             ruthConnection, BAD_COLUMN_NAME,
+             "call LuceneSupport.createIndex( 'ruth', 'badTable2', 'documentID', null )"
+             );
+        expectExecutionError
+            (
+             ruthConnection, BAD_COLUMN_NAME,
+             "call LuceneSupport.createIndex( 'ruth', 'badTable3', 'textCol', null )"
+             );
+        expectExecutionError
+            (
+             ruthConnection, BAD_COLUMN_NAME,
+             "call LuceneSupport.createIndex( 'ruth', 'badTable4', 'textCol', null )"
+             );
+
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        goodStatement( ruthConnection, "drop table badTable1" );
+        goodStatement( ruthConnection, "drop table badTable2" );
+        goodStatement( ruthConnection, "drop table badTable3" );
+        goodStatement( ruthConnection, "drop table badTable4" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

@@ -169,10 +169,10 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         goodStatement( readWriteConnection, INDEX_POEMS );
 
         String  readPoemsIndex =
-            "select p.originalAuthor, i.rank\n" +
+            "select p.originalAuthor, i.score\n" +
             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
-            "order by i.rank desc\n";
+            "order by i.score desc\n";
         String[][]  defaultPoemResults =
             new String[][]
             {

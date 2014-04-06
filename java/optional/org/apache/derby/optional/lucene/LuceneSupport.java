@@ -95,6 +95,10 @@ public class LuceneSupport implements OptionalTool
 
     private static  final   String  LUCENE_DIR = "lucene";
 
+    // names of columns in all query table functions
+    private static  final   String  SCORE = "SCORE";
+    private static  final   String  DOCUMENT_ID = "DOCUMENTID";
+
     // for decomposing a function name into the table and column parts
     static  final   int TABLE_PART = 0;
     static  final   int COLUMN_PART = TABLE_PART + 1;
@@ -296,7 +300,7 @@ public class LuceneSupport implements OptionalTool
 	 * Query a Lucene index created by createIndex
 	 * 
 	 * @param queryText a Lucene query, see the Lucene classic queryparser syntax 
-	 * @param rankCutoff Return results only below this rank
+	 * @param scoreCeiling Return results only below this score
 	 * @return A result set in the form of LuceneQueryVTI table
 	 * @throws ParseException
 	 * @throws IOException
@@ -305,11 +309,11 @@ public class LuceneSupport implements OptionalTool
 	public static LuceneQueryVTI luceneQuery
         (
          String queryText,
-         double rankCutoff
+         float scoreCeiling
          )
         throws ParseException, IOException, SQLException
     {
-		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, rankCutoff );
+		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, scoreCeiling );
 		return lqvti;
 	}
 	
@@ -444,8 +448,15 @@ public class LuceneSupport implements OptionalTool
         {
             throw newSQLException( SQLState.LUCENE_NO_PRIMARY_KEY );
         }
-        int             keyCount = 0;
 
+        // don't let the user create a table function with duplicate column names
+        vetColumnName( textcol );
+        for ( VTITemplate.ColumnDescriptor key : primaryKeys )
+        {
+            vetColumnName(  key.columnName );
+        }
+        
+        int             keyCount = 0;
         File            propertiesFile = getIndexPropertiesFile( conn, schema, table, textcol );
 
         //
@@ -471,7 +482,7 @@ public class LuceneSupport implements OptionalTool
             
         StringBuilder   tableFunction = new StringBuilder();
         tableFunction.append( "create function " + makeTableFunctionName( schema, table, textcol ) + "\n" );
-        tableFunction.append( "( query varchar( 32672 ), rankCutoff double )\n" );
+        tableFunction.append( "( query varchar( 32672 ), scoreCeiling real )\n" );
         tableFunction.append( "returns table\n(" );
 
         PreparedStatement   ps = null;
@@ -495,8 +506,8 @@ public class LuceneSupport implements OptionalTool
                 tableFunction.append( "\n\t" + keyName + " " + keyType );
                 keyCount++;
             }
-            tableFunction.append(",\n\tdocumentID int");
-            tableFunction.append(",\n\trank real");
+            tableFunction.append(",\n\t" + DOCUMENT_ID + " int");
+            tableFunction.append(",\n\t" + SCORE + " real");
             tableFunction.append( "\n)\nlanguage java parameter style derby_jdbc_result_set contains sql\n" );
             tableFunction.append( "external name '" + LuceneSupport.class.getName() + ".luceneQuery'" );
 
@@ -1000,6 +1011,25 @@ public class LuceneSupport implements OptionalTool
     /////////////////////////////////////////////////////////////////////
 
     /**
+     * A Lucene query table function already has system-supplied columns
+     * named documentID and score. These can't be the names of the key
+     * or text columns supplied by the user.
+     */
+    private static  void    vetColumnName( String columnName )
+        throws SQLException
+    {
+        String  derbyColumnName = derbyIdentifier( columnName );
+
+        if (
+            DOCUMENT_ID.equals( derbyColumnName ) ||
+            SCORE.equals( derbyColumnName )
+            )
+        {
+            throw newSQLException( SQLState.LUCENE_BAD_COLUMN_NAME, derbyColumnName );
+        }
+    }
+
+    /**
      * Return the qualified name of the table.
      */
 	static String   makeTableName( String schema, String table )
@@ -1431,7 +1461,7 @@ public class LuceneSupport implements OptionalTool
         keyArray.toArray( temp );
         Arrays.sort( temp );
 
-        // remove the last two columns, which are not keys. they are the DOCUMENT_ID and RANK columns.
+        // remove the last two columns, which are not keys. they are the DOCUMENTID and SCORE columns.
         int     count = temp.length - 2;
         VTITemplate.ColumnDescriptor[] result = new VTITemplate.ColumnDescriptor[ count ];
         for ( int i = 0; i < count; i++ ) { result[ i ] = temp[ i ]; }

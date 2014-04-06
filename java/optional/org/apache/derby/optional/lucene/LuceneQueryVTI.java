@@ -86,7 +86,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     // constructor args
     private Connection  _connection;
     private String  _queryText;
-    private double  _rankCutoff;
+    private float   _scoreCeiling;
 
     private String      _schema;
     private String      _table;
@@ -101,7 +101,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     private int _minKeyID;
     private int _maxKeyID;
     private int _docIDColumnID;
-    private int _rankColumnID;
+    private int _scoreColumnID;
 	
     /////////////////////////////////////////////////////////////////////
     //
@@ -115,7 +115,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	LuceneQueryVTI
         (
          String queryText,
-         double rankCutoff
+         float scoreCeiling
          )
         throws SQLException
     {
@@ -123,7 +123,7 @@ public class LuceneQueryVTI extends StringColumnVTI
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;
-        _rankCutoff = rankCutoff;
+        _scoreCeiling = scoreCeiling;
 	}
 
     /////////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	 * columns:
 	 * 1 ... $_maxKeyID == key columns
 	 * $_maxKeyID + 1 == lucene docId
-	 * $_maxKeyID + 2 == lucene rank
+	 * $_maxKeyID + 2 == lucene score
 	 */
 	public String getRawColumn( int columnid ) throws SQLException
     {
@@ -154,7 +154,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     public  float   getFloat( int columnid )    throws SQLException
     {
 		try {
-            if ( columnid == _rankColumnID ) { return getScoreDoc().score; }
+            if ( columnid == _scoreColumnID ) { return getScoreDoc().score; }
 			else if ( isKeyID( columnid ) )
             {
                 Number  number = getNumberValue( columnid );
@@ -412,8 +412,8 @@ public class LuceneQueryVTI extends StringColumnVTI
             for ( int i = 0; i < returnColumns.length; i++ ) { columnNames[ i ] = returnColumns[ i ].columnName; }
             setColumnNames( columnNames );
 
-            _rankColumnID = getColumnCount();
-            _docIDColumnID = _rankColumnID - 1;
+            _scoreColumnID = getColumnCount();
+            _docIDColumnID = _scoreColumnID - 1;
             _maxKeyID = _docIDColumnID - 1;
             _minKeyID = 1;
             
@@ -432,8 +432,8 @@ public class LuceneQueryVTI extends StringColumnVTI
             QueryParser qp = new QueryParser( LuceneUtils.currentVersion(), TEXT_FIELD_NAME, analyzer );
             Query luceneQuery = qp.parse( _queryText );
             TopScoreDocCollector tsdc = TopScoreDocCollector.create(1000, true);
-            if ( _rankCutoff != 0 ) {
-                tsdc = TopScoreDocCollector.create(1000, new ScoreDoc(0, (float) _rankCutoff ), true);
+            if ( _scoreCeiling != 0 ) {
+                tsdc = TopScoreDocCollector.create(1000, new ScoreDoc(0, _scoreCeiling ), true);
             }
             _searcher.search(luceneQuery, tsdc);
             TopDocs topdocs = tsdc.topDocs();

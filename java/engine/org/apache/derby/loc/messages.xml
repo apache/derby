@@ -2370,6 +2370,12 @@ Guide.
                 <arg>directoryName</arg>
             </msg>
 
+	        <msg>
+                <name>42XBJ</name>
+                <text>Cannot create a Lucene index involving a column named '{0}'. Try renaming the column by declaring a view.</text>
+                <arg>columnName</arg>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
