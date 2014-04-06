@@ -190,7 +190,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults order by poemID";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
         // but ruth can
@@ -299,7 +299,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 0 ) ) luceneResults order by poemid";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
                 { "3", "3", "2", "0.22933942" },
@@ -443,7 +443,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select p.originalAuthor, i.score\n" +
-             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
+             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
              "order by i.score desc\n",
              new String[][]
@@ -525,7 +525,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         String  query =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
 
@@ -633,7 +633,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // vet index contents
         String  selectFromViewIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 1000, 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         assertResults
@@ -738,7 +738,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select *\n" +
-             "from table ( ruth.poems__poemText( 'star', 0 ) ) i\n" +
+             "from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
              "order by i.score desc\n",
              new String[][]
              {

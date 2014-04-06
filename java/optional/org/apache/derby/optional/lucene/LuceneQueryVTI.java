@@ -86,6 +86,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     // constructor args
     private Connection  _connection;
     private String  _queryText;
+    private int         _windowSize;
     private float   _scoreCeiling;
 
     private String      _schema;
@@ -115,6 +116,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	LuceneQueryVTI
         (
          String queryText,
+         int    windowSize,
          float scoreCeiling
          )
         throws SQLException
@@ -123,6 +125,7 @@ public class LuceneQueryVTI extends StringColumnVTI
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;
+        _windowSize = windowSize;
         _scoreCeiling = scoreCeiling;
 	}
 
@@ -431,9 +434,9 @@ public class LuceneQueryVTI extends StringColumnVTI
 
             QueryParser qp = new QueryParser( LuceneUtils.currentVersion(), TEXT_FIELD_NAME, analyzer );
             Query luceneQuery = qp.parse( _queryText );
-            TopScoreDocCollector tsdc = TopScoreDocCollector.create(1000, true);
+            TopScoreDocCollector tsdc = TopScoreDocCollector.create( _windowSize, true);
             if ( _scoreCeiling != 0 ) {
-                tsdc = TopScoreDocCollector.create(1000, new ScoreDoc(0, _scoreCeiling ), true);
+                tsdc = TopScoreDocCollector.create( _windowSize, new ScoreDoc( 0, _scoreCeiling ), true );
             }
             _searcher.search(luceneQuery, tsdc);
             TopDocs topdocs = tsdc.topDocs();

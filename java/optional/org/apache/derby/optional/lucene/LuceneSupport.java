@@ -309,11 +309,12 @@ public class LuceneSupport implements OptionalTool
 	public static LuceneQueryVTI luceneQuery
         (
          String queryText,
+         int    windowSize,
          float scoreCeiling
          )
         throws ParseException, IOException, SQLException
     {
-		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, scoreCeiling );
+		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, windowSize, scoreCeiling );
 		return lqvti;
 	}
 	
@@ -482,7 +483,7 @@ public class LuceneSupport implements OptionalTool
             
         StringBuilder   tableFunction = new StringBuilder();
         tableFunction.append( "create function " + makeTableFunctionName( schema, table, textcol ) + "\n" );
-        tableFunction.append( "( query varchar( 32672 ), scoreCeiling real )\n" );
+        tableFunction.append( "( query varchar( 32672 ), windowSize int, scoreCeiling real )\n" );
         tableFunction.append( "returns table\n(" );
 
         PreparedStatement   ps = null;

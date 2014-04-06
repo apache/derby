@@ -72,7 +72,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes', 0 ) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes', 1000, 0 ) ) luceneResults"
               ),
              expectedRows
              );
@@ -85,7 +85,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes', .75 ) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes', 1000, .75 ) ) luceneResults"
               ),
              expectedRows
              );
@@ -94,7 +94,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes',  0.5) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes',  1000, 0.5) ) luceneResults"
               )
              );
 
@@ -108,7 +108,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select title, author, publisher, documentID\n" +
-              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', 0 ) ) l\n" +
+              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', 1000, 0 ) ) l\n" +
               "where t.id = l.id\n" 
               ),
              expectedRows
@@ -133,7 +133,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, 0 ) ) luceneResults\n"
               )
              );
 	    
@@ -145,7 +145,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, 0 ) ) luceneResults\n"
               )
              );
 	    
@@ -162,7 +162,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, 0 ) ) luceneResults\n"
               ),
              expectedRows
              );
