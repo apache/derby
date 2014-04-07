@@ -86,6 +86,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     // constructor args
     private Connection  _connection;
     private String  _queryText;
+    private String  _queryParserMaker;
     private int         _windowSize;
     private float   _scoreCeiling;
 
@@ -116,6 +117,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	LuceneQueryVTI
         (
          String queryText,
+         String queryParserMaker,
          int    windowSize,
          float scoreCeiling
          )
@@ -125,6 +127,7 @@ public class LuceneQueryVTI extends StringColumnVTI
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;
+        _queryParserMaker = queryParserMaker;
         _windowSize = windowSize;
         _scoreCeiling = scoreCeiling;
 	}
@@ -428,11 +431,20 @@ public class LuceneQueryVTI extends StringColumnVTI
             Properties  indexProperties = LuceneSupport.readIndexProperties( propertiesFile );
             String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
             Analyzer    analyzer = LuceneSupport.getAnalyzer( analyzerMaker );
-				
+
             _indexReader = LuceneSupport.getIndexReader( new File( indexhome.toString() ) );
             _searcher = new IndexSearcher(_indexReader);
 
-            QueryParser qp = new QueryParser( LuceneUtils.currentVersion(), TEXT_FIELD_NAME, analyzer );
+            QueryParser qp = LuceneSupport.getQueryParser
+                (
+                 _queryParserMaker == null ?
+                 LuceneUtils.class.getName() + ".defaultQueryParser" : _queryParserMaker,
+                 
+                 LuceneUtils.currentVersion(),
+                 TEXT_FIELD_NAME,
+                 analyzer
+                 );
+				
             Query luceneQuery = qp.parse( _queryText );
             TopScoreDocCollector tsdc = TopScoreDocCollector.create( _windowSize, true);
             if ( _scoreCeiling != 0 ) {

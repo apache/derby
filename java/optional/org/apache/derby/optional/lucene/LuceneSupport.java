@@ -73,6 +73,7 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -309,12 +310,13 @@ public class LuceneSupport implements OptionalTool
 	public static LuceneQueryVTI luceneQuery
         (
          String queryText,
+         String queryParserMaker,
          int    windowSize,
          float scoreCeiling
          )
         throws ParseException, IOException, SQLException
     {
-		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, windowSize, scoreCeiling );
+		LuceneQueryVTI lqvti = new LuceneQueryVTI( queryText, queryParserMaker, windowSize, scoreCeiling );
 		return lqvti;
 	}
 	
@@ -483,7 +485,7 @@ public class LuceneSupport implements OptionalTool
             
         StringBuilder   tableFunction = new StringBuilder();
         tableFunction.append( "create function " + makeTableFunctionName( schema, table, textcol ) + "\n" );
-        tableFunction.append( "( query varchar( 32672 ), windowSize int, scoreCeiling real )\n" );
+        tableFunction.append( "( query varchar( 32672 ), queryParserMaker varchar( 32672 ), windowSize int, scoreCeiling real )\n" );
         tableFunction.append( "returns table\n(" );
 
         PreparedStatement   ps = null;
@@ -1847,6 +1849,42 @@ public class LuceneSupport implements OptionalTool
                      Method method = klass.getDeclaredMethod( methodName );
                      
                      return (Analyzer) method.invoke( null );
+                 }
+             }
+             );
+	}
+	
+	/**
+	 * Invoke a static method (possibly supplied by the user) to instantiate a QueryParser.
+     *
+     * @param queryParserMaker  Full name of public, static method whicn instantiates a QueryParser given the following arguments.
+     * @param version   Lucene version.
+     * @param fieldName Name of field holding the indexed text.
+     * @param analyzer  Analyzer used to index the text.
+	 */
+	static QueryParser getQueryParser
+        (
+         final String queryParserMaker,
+         final Version version,
+         final String fieldName,
+         final Analyzer analyzer
+         )
+        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
+               NoSuchMethodException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<QueryParser>()
+             {
+                 public QueryParser run()
+                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                 {
+                     int    lastDotIdx = queryParserMaker.lastIndexOf( "." );
+                     Class<? extends Object>  klass = Class.forName( queryParserMaker.substring( 0, lastDotIdx ) );
+                     String methodName = queryParserMaker.substring( lastDotIdx + 1, queryParserMaker.length() );
+                     Method method = klass.getDeclaredMethod( methodName, Version.class, String.class, Analyzer.class );
+                     
+                     return (QueryParser) method.invoke( null, version, fieldName, analyzer );
                  }
              }
              );

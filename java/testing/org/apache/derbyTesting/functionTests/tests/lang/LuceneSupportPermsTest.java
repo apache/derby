@@ -40,8 +40,16 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -190,7 +198,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) luceneResults order by poemID";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
         // but ruth can
@@ -299,7 +307,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) luceneResults order by poemid";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
                 { "3", "3", "2", "0.22933942" },
@@ -443,7 +451,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select p.originalAuthor, i.score\n" +
-             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
+             "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
              "order by i.score desc\n",
              new String[][]
@@ -525,7 +533,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         String  query =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
 
@@ -633,7 +641,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // vet index contents
         String  selectFromViewIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 1000, 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', null, 1000, 0 ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         assertResults
@@ -738,7 +746,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select *\n" +
-             "from table ( ruth.poems__poemText( 'star', 1000, 0 ) ) i\n" +
+             "from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
              "order by i.score desc\n",
              new String[][]
              {
@@ -802,6 +810,152 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( ruthConnection, "drop table badTable4" );
     }
     
+   /**
+     * <p>
+     * Test changes to the arguments to the searching table function.
+     * </p>
+     */
+    public  void    test_009_searchArgs()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        loadTestTable( ruthConnection );
+        
+        goodStatement( dboConnection, LOAD_TOOL );
+        goodStatement( ruthConnection, "call LuceneSupport.createIndex( 'ruth', 'textTable', 'textCol', null )" );
+
+        // get all the matches
+        assertResults
+            (
+             ruthConnection,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0 ) ) t",
+             new String[][]
+             {
+                 { "10", "9", "2.2791052" },
+                 { "9", "8", "1.6305782" },
+                 { "8", "7", "1.1616905" },
+                 { "7", "6", "0.97469425" },
+                 { "6", "5", "0.6597747" },
+                 { "5", "4", "0.49575216" },
+                 { "4", "3", "0.33803377" },
+                 { "3", "2", "0.17799875" },
+                 { "2", "1", "0.09289266" },
+                 { "1", "0", "0.035006654" },
+             },
+             false
+             );
+        
+        // get an initial 3-row window of the top results
+        assertResults
+            (
+             ruthConnection,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 3, 0 ) ) t",
+             new String[][]
+             {
+                 { "10", "9", "2.2791052" },
+                 { "9", "8", "1.6305782" },
+                 { "8", "7", "1.1616905" },
+             },
+             false
+             );
+        
+        // get the next 4-row window of results
+        assertResults
+            (
+             ruthConnection,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 4, 1.0 ) ) t",
+             new String[][]
+             {
+                 { "7", "6", "0.97469425" },
+                 { "6", "5", "0.6597747" },
+                 { "5", "4", "0.49575216" },
+                 { "4", "3", "0.33803377" },
+             },
+             false
+             );
+
+        // get the final window of results
+        assertResults
+            (
+             ruthConnection,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0.2 ) ) t",
+             new String[][]
+             {
+                 { "3", "2", "0.17799875" },
+                 { "2", "1", "0.09289266" },
+                 { "1", "0", "0.035006654" },
+             },
+             false
+             );
+        
+        // try a different query parser
+        assertResults
+            (
+             ruthConnection,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.constantStringQueryParser', 100, 0 ) ) t",
+             new String[][]
+             {
+                 { "1", "0", "1.597837" },
+                 { "2", "1", "0.9986481" },
+                 { "3", "2", "0.7989185" },
+                 { "4", "3", "0.7989185" },
+                 { "5", "4", "0.69905365" },
+                 { "6", "5", "0.59918886" },
+                 { "7", "6", "0.59918886" },
+                 { "8", "7", "0.49932405" },
+                 { "9", "8", "0.49932405" },
+                 { "10", "9", "0.49932405" },
+             },
+             false
+             );
+        
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        unloadTestTable( ruthConnection );
+    }
+    private void    loadTestTable( Connection conn ) throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create table textTable( keyCol int primary key, textCol clob )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into textTable values\n" +
+             "( 1, 'one' ),\n" +
+             "( 2, 'one two' ),\n" +
+             "( 3, 'one two three' ),\n" +
+             "( 4, 'one two three four' ),\n" +
+             "( 5, 'one two three four five' ),\n" +
+             "( 6, 'one two three four five six' ),\n" +
+             "( 7, 'one two three four five six seven' ),\n" +
+             "( 8, 'one two three four five six seven eight' ),\n" +
+             "( 9, 'one two three four five six seven eight nine' ),\n" +
+             "( 10, 'one two three four five six seven eight nine ten' ),\n" +
+             "( 101, 'bricks' ),\n" +
+             "( 102, 'bricks and mortar' ),\n" +
+             "( 103, 'bricks and mortar, tea' ),\n" +
+             "( 104, 'bricks and mortar, tea, tears' ),\n" +
+             "( 105, 'bricks and mortar, tea, tears, turtle' ),\n" +
+             "( 106, 'bricks and mortar, tea, tears, turtle, soup' ),\n" +
+             "( 107, 'bricks and mortar, tea, tears, turtle, soup, when in the course' ),\n" +
+             "( 108, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events' ),\n" +
+             "( 109, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want' ),\n" +
+             "( 110, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want better cell coverage' )\n"
+             );
+    }
+    private void    unloadTestTable( Connection conn ) throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "drop table textTable"
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -1047,6 +1201,17 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         return result;
     }
+
+    /** Alternative QueryParser maker, which forces the text to be a constant string */
+    public  static  QueryParser constantStringQueryParser
+        (
+         Version version,
+         String fieldName,
+         Analyzer analyzer
+         )
+    {
+        return new ConstantQueryParser( version, fieldName, analyzer );
+    }
     
     /**
      * Delete a file. If it's a directory, recursively delete all directories
@@ -1112,6 +1277,30 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
                 }
              }
              );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  static  class   ConstantQueryParser extends QueryParser
+    {
+        public  ConstantQueryParser
+            (
+             Version version,
+             String fieldName,
+             Analyzer analyzer
+             )
+        {
+            super( version, fieldName, analyzer );
+        }
+
+        public Query parse( String query )  throws ParseException
+        {
+            return super.parse( "one" );
+        }
     }
 
 }

@@ -82,6 +82,9 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       	<pathelement path="${junit}"/>
+        <pathelement path="${lucene_core}"/>
+        <pathelement path="${lucene_a_co}"/>
+        <pathelement path="${lucene_qp}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <compilerarg value="-Xlint"/>

@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
@@ -159,6 +160,21 @@ public abstract class LuceneUtils
     public  static  Analyzer    standardAnalyzer()
     {
         return new StandardAnalyzer( currentVersion() );
+    }
+    
+    /**
+     * <p>
+     * Get the default, classic QueryParser.
+     * </p>
+     */
+    public  static  QueryParser defaultQueryParser
+        (
+         Version version,
+         String fieldName,
+         Analyzer analyzer
+         )
+    {
+        return new QueryParser( version, fieldName, analyzer );
     }
     
     /////////////////////////////////////////////////////////////////
