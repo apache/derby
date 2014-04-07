@@ -23,7 +23,6 @@ package org.apache.derby.iapi.services.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.AclEntry;
@@ -40,20 +39,17 @@ import java.util.Collections;
 final class FilePermissionServiceImpl implements FilePermissionService {
     public boolean limitAccessToOwner(File file) throws IOException {
         Path fileP = file.toPath();
-        FileStore fileStore = Files.getFileStore(fileP);
 
         // If we have a posix view, just return and fall back on
         // the JDK 6 approach.
-        if (fileStore.supportsFileAttributeView(PosixFileAttributeView.class)) {
+        PosixFileAttributeView posixView = Files.getFileAttributeView(
+                fileP, PosixFileAttributeView.class);
+        if (posixView != null) {
             return false;
         }
 
-        if (!fileStore.supportsFileAttributeView(AclFileAttributeView.class)) {
-            return false;
-        }
-
-        AclFileAttributeView aclView =
-                Files.getFileAttributeView(fileP, AclFileAttributeView.class);
+        AclFileAttributeView aclView = Files.getFileAttributeView(
+                fileP, AclFileAttributeView.class);
         if (aclView == null) {
             return false;
         }
