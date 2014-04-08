@@ -2376,6 +2376,13 @@ Guide.
                 <arg>columnName</arg>
             </msg>
 
+	        <msg>
+                <name>42XBK</name>
+                <text>The current Lucene version '{0}' cannot read an index created by Lucene version '{1}'.</text>
+                <arg>luceneVersion</arg>
+                <arg>indexVersion</arg>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>

@@ -72,6 +72,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static  final   String      LUCENE_VERSION_PROPERTY = "derby.tests.lucene.version";
+    private static  String              LUCENE_VERSION = "LUCENE_45";
+
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
@@ -105,7 +108,6 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private static  final   long        MILLIS_IN_HOUR = 1000L * 60L * 60L;
     private static  final   long        MILLIS_IN_DAY = MILLIS_IN_HOUR * 24L;
 
-    private static  final   String      LUCENE_VERSION = "LUCENE_45";
     private static  final   String      LANGUAGE = "en";
     private static  final   String      COUNTRY = "US";
 
@@ -142,6 +144,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
+        String      luceneVersion = getSystemProperty( LUCENE_VERSION_PROPERTY );
+        if ( luceneVersion != null ) { LUCENE_VERSION = luceneVersion; }
+        
         TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(LuceneSupportPermsTest.class);
 
         Test        localizedTest = new LocaleTestSetup( suite, new Locale( LANGUAGE, COUNTRY ) );

@@ -432,6 +432,8 @@ public class LuceneQueryVTI extends StringColumnVTI
             String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
             Analyzer    analyzer = LuceneSupport.getAnalyzer( analyzerMaker );
 
+            vetLuceneVersion( indexProperties.getProperty( LuceneSupport.LUCENE_VERSION ) );
+
             _indexReader = LuceneSupport.getIndexReader( new File( indexhome.toString() ) );
             _searcher = new IndexSearcher(_indexReader);
 
@@ -465,8 +467,33 @@ public class LuceneQueryVTI extends StringColumnVTI
 
     /**
      * <p>
+     * Make sure that the index wasn't created with a Lucene version from
+     * the future.
+     * </p>
+     */
+    private void    vetLuceneVersion( String indexVersionString )
+        throws SQLException
+    {
+        Version     currentVersion = LuceneUtils.currentVersion();
+        Version     indexVersion = null;
+
+        try {
+            indexVersion = Version.valueOf( indexVersionString );
+        }
+        catch (Exception e) {}
+
+        if ( (indexVersion == null) || !currentVersion.onOrAfter( indexVersion ) )
+        {
+            throw LuceneSupport.newSQLException
+                ( SQLState.LUCENE_BAD_VERSION, currentVersion.toString(), indexVersionString );
+        }
+    }
+
+    /**
+     * <p>
      * Make sure that the user has SELECT privilege on the text column and on all
      * the key columns of the underlying table.
+     * </p>
      */
     private void    vetPrivileges() throws SQLException
     {
