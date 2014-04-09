@@ -753,7 +753,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	}
 	
 	private static void tryTstingClasspath(StringBuffer successes, StringBuffer failures) {
-        tryMyClasspath("org.apache.derbyTesting.junit.BaseTestCase", "", successes, failures);
+        // use a class that is not dependent on junit
+        tryMyClasspath("org.apache.derbyTesting.junit.XATestUtil", "", successes, failures);
     }
 
 	private static void tryMyClasspath(String cn, String library, StringBuffer successes, StringBuffer failures) {
