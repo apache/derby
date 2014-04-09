@@ -50,6 +50,7 @@ import java.util.Properties;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
+import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -634,7 +635,7 @@ public class LuceneSupport implements OptionalTool
     /** Turn a StandardException into a SQLException */
     public  static  SQLException    sqlException( StandardException se )
     {
-        return new SQLException( se.getMessage(), se.getSQLState() );
+        return PublicAPI.wrapStandardException( se );
     }
 
     /** Wrap an external exception */
@@ -1115,7 +1116,7 @@ public class LuceneSupport implements OptionalTool
     }
     
     /** Read the index properties file */
-    static  Properties readIndexProperties( final File file )
+    private static  Properties readIndexProperties( final File file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -1124,20 +1125,25 @@ public class LuceneSupport implements OptionalTool
              {
                 public Properties run() throws IOException
                 {
-                    if ( file == null ) { return null; }
-                    else
-                    {
-                        Properties  properties = new Properties();
-                        FileInputStream fis = new FileInputStream( file );
-
-                        properties.load( fis );
-                        fis.close();
-                        
-                        return properties;
-                    }
+                    return readIndexPropertiesNoPrivs( file );
                 }
              }
              );
+    }
+
+    /** Read the index properties file */
+    static  Properties readIndexPropertiesNoPrivs( File file )
+        throws IOException
+    {
+        if ( file == null ) { return null; }
+        
+        Properties  properties = new Properties();
+        FileInputStream fis = new FileInputStream( file );
+
+        properties.load( fis );
+        fis.close();
+                        
+        return properties;
     }
 
     /** Write the index properties file */
@@ -1550,7 +1556,7 @@ public class LuceneSupport implements OptionalTool
      * Delete a file. If it's a directory, recursively delete all directories
      * and files underneath it first.
      */
-    static  boolean deleteFile( File file )
+    private static  boolean deleteFile( File file )
         throws IOException, SQLException, PrivilegedActionException
     {
         boolean retval = true;
@@ -1566,7 +1572,7 @@ public class LuceneSupport implements OptionalTool
     }
 
     /** Return true if the file is a directory */
-    static  boolean isDirectory( final File file )
+    private static  boolean isDirectory( final File file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -1605,24 +1611,8 @@ public class LuceneSupport implements OptionalTool
              ).booleanValue();
     }
 
-    /** Get the timestamp when the file was last modified */
-    public static  long getLastModified( final File file )
-        throws PrivilegedActionException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<Long>()
-             {
-                public Long run()
-                {
-                    return file.lastModified();
-                }
-             }
-             ).longValue();
-    }
-
     /** List files */
-    static  File[]  listFiles( final File file, final FileFilter fileFilter )
+    private static  File[]  listFiles( final File file, final FileFilter fileFilter )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -1639,7 +1629,7 @@ public class LuceneSupport implements OptionalTool
     }
 
     /** Return true if the file exists */
-    static  boolean fileExists( final File file )
+    private static  boolean fileExists( final File file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -1809,30 +1799,10 @@ public class LuceneSupport implements OptionalTool
     }
 
 	/**
-	 * Returns a Lucene IndexReader, which reads from the indicated Lucene index.
-	 * 
-	 * @param indexHome The directory holding the Lucene index.
-	 */
-	static IndexReader getIndexReader( final File indexHome )
-        throws IOException, PrivilegedActionException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<IndexReader>()
-             {
-                 public IndexReader run() throws SQLException, IOException
-                 {
-                     return DirectoryReader.open( FSDirectory.open( indexHome ) );
-                 }
-             }
-             );
-	}
-	
-	/**
 	 * Invoke a static method (possibly supplied by the user) to instantiate an Analyzer.
      * The method has no arguments.
 	 */
-	static Analyzer getAnalyzer( final String analyzerMaker )
+	private static Analyzer getAnalyzer( final String analyzerMaker )
         throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
                NoSuchMethodException, PrivilegedActionException
     {
@@ -1843,51 +1813,26 @@ public class LuceneSupport implements OptionalTool
                  public Analyzer run()
                      throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
                  {
-                     int    lastDotIdx = analyzerMaker.lastIndexOf( "." );
-                     Class<? extends Object>  klass = Class.forName( analyzerMaker.substring( 0, lastDotIdx ) );
-                     String methodName = analyzerMaker.substring( lastDotIdx + 1, analyzerMaker.length() );
-                     Method method = klass.getDeclaredMethod( methodName );
-                     
-                     return (Analyzer) method.invoke( null );
+                     return getAnalyzerNoPrivs( analyzerMaker );
                  }
              }
              );
 	}
 	
 	/**
-	 * Invoke a static method (possibly supplied by the user) to instantiate a QueryParser.
-     *
-     * @param queryParserMaker  Full name of public, static method whicn instantiates a QueryParser given the following arguments.
-     * @param version   Lucene version.
-     * @param fieldName Name of field holding the indexed text.
-     * @param analyzer  Analyzer used to index the text.
+	 * Invoke a static method (possibly supplied by the user) to instantiate an Analyzer.
+     * The method has no arguments.
 	 */
-	static QueryParser getQueryParser
-        (
-         final String queryParserMaker,
-         final Version version,
-         final String fieldName,
-         final Analyzer analyzer
-         )
+	static Analyzer getAnalyzerNoPrivs( String analyzerMaker )
         throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
-               NoSuchMethodException, PrivilegedActionException
+               NoSuchMethodException
     {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<QueryParser>()
-             {
-                 public QueryParser run()
-                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
-                 {
-                     int    lastDotIdx = queryParserMaker.lastIndexOf( "." );
-                     Class<? extends Object>  klass = Class.forName( queryParserMaker.substring( 0, lastDotIdx ) );
-                     String methodName = queryParserMaker.substring( lastDotIdx + 1, queryParserMaker.length() );
-                     Method method = klass.getDeclaredMethod( methodName, Version.class, String.class, Analyzer.class );
+        int    lastDotIdx = analyzerMaker.lastIndexOf( "." );
+        Class<? extends Object>  klass = Class.forName( analyzerMaker.substring( 0, lastDotIdx ) );
+        String methodName = analyzerMaker.substring( lastDotIdx + 1, analyzerMaker.length() );
+        Method method = klass.getDeclaredMethod( methodName );
                      
-                     return (QueryParser) method.invoke( null, version, fieldName, analyzer );
-                 }
-             }
-             );
+        return (Analyzer) method.invoke( null );
 	}
 	
 }

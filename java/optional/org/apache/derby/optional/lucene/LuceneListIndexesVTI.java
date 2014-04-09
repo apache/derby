@@ -24,7 +24,9 @@ package org.apache.derby.optional.lucene;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -79,15 +81,15 @@ public class LuceneListIndexesVTI extends StringColumnVTI
         DirFilter   dirFilter = new DirFilter();
         ArrayList<File> allIndexes = new ArrayList<File>();
 
-        File[]  schemas = LuceneSupport.listFiles( luceneDir, dirFilter );
+        File[]  schemas = listFiles( luceneDir, dirFilter );
         if ( schemas != null )
         {
             for ( File schema : schemas )
             {
-                File[]  tables = LuceneSupport.listFiles( schema, dirFilter );
+                File[]  tables = listFiles( schema, dirFilter );
                 for ( File table : tables )
                 {
-                    File[]  indexes = LuceneSupport.listFiles( table, dirFilter );
+                    File[]  indexes = listFiles( table, dirFilter );
                     for ( File index : indexes )
                     {
                         allIndexes.add( index );
@@ -152,13 +154,6 @@ public class LuceneListIndexesVTI extends StringColumnVTI
                  new Integer( getColumnCount() )
                  );
         }
-            /*
-            try {
-                DateFormat df = DateFormat.getDateTimeInstance();
-                return df.format( LuceneSupport.getLastModified( columnDir ) );
-            }
-            catch (Exception e) { throw LuceneSupport.wrap( e ); }
-            */
 	}
 
     /** Get the timestamp value of the 1-based column id */
@@ -218,13 +213,46 @@ public class LuceneListIndexesVTI extends StringColumnVTI
             try {
                 readSchemaTableColumn();
                 File    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, column );
-                rowProperties = LuceneSupport.readIndexProperties( indexPropertiesFile );
+                rowProperties = readIndexProperties( indexPropertiesFile );
             }
             catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
             catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
         }
 
         return rowProperties;
+    }
+
+    /** List files */
+    private static  File[]  listFiles( final File file, final FileFilter fileFilter )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<File[]>()
+             {
+                public File[] run() throws IOException
+                {
+                    if ( fileFilter == null )   { return file.listFiles(); }
+                    else { return file.listFiles( fileFilter ); }
+                }
+             }
+             );
+    }
+
+    /** Read the index properties file */
+    private static  Properties readIndexProperties( final File file )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Properties>()
+             {
+                public Properties run() throws IOException
+                {
+                    return LuceneSupport.readIndexPropertiesNoPrivs( file );
+                }
+             }
+             );
     }
 
 }

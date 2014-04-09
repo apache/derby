@@ -1608,9 +1608,17 @@
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
+    <manifest file="${derby.jar.dir}/lists/smfoptionaltools.mf">
+      <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
+      <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
+      <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
+      <attribute name="Bundle-ManifestVersion" value="2"/>
+      <attribute name="Sealed" value="true"/>
+    </manifest> 
+
     <antcall target="make-locale-classpath-manifest">
         <param name="manifest.file" value="${derby.jar.dir}/lists/smfoptionaltools.mf"/>
-        <param name="manifest.mode" value="replace"/>
+        <param name="manifest.mode" value="update"/>
     </antcall>
 
     <delete file="${derby.jar.dir}/derbyoptionaltools.jar"/>

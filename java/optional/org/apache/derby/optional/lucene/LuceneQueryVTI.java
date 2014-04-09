@@ -24,7 +24,10 @@ package org.apache.derby.optional.lucene;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -428,16 +431,16 @@ public class LuceneQueryVTI extends StringColumnVTI
         
             String          indexhome = LuceneSupport.getIndexLocation( _connection, _schema, _table, _column);
             File            propertiesFile = LuceneSupport.getIndexPropertiesFile( _connection, _schema, _table, _column );
-            Properties  indexProperties = LuceneSupport.readIndexProperties( propertiesFile );
+            Properties  indexProperties = readIndexProperties( propertiesFile );
             String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
-            Analyzer    analyzer = LuceneSupport.getAnalyzer( analyzerMaker );
+            Analyzer    analyzer = getAnalyzer( analyzerMaker );
 
             vetLuceneVersion( indexProperties.getProperty( LuceneSupport.LUCENE_VERSION ) );
 
-            _indexReader = LuceneSupport.getIndexReader( new File( indexhome.toString() ) );
+            _indexReader = getIndexReader( new File( indexhome.toString() ) );
             _searcher = new IndexSearcher(_indexReader);
 
-            QueryParser qp = LuceneSupport.getQueryParser
+            QueryParser qp = getQueryParser
                 (
                  _queryParserMaker == null ?
                  LuceneUtils.class.getName() + ".defaultQueryParser" : _queryParserMaker,
@@ -519,4 +522,97 @@ public class LuceneQueryVTI extends StringColumnVTI
         return ( (columnid > 0) && (columnid <= _maxKeyID) );
     }
     
+	/**
+	 * Invoke a static method (possibly supplied by the user) to instantiate a QueryParser.
+     *
+     * @param queryParserMaker  Full name of public, static method whicn instantiates a QueryParser given the following arguments.
+     * @param version   Lucene version.
+     * @param fieldName Name of field holding the indexed text.
+     * @param analyzer  Analyzer used to index the text.
+	 */
+	private static QueryParser getQueryParser
+        (
+         final String queryParserMaker,
+         final Version version,
+         final String fieldName,
+         final Analyzer analyzer
+         )
+        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
+               NoSuchMethodException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<QueryParser>()
+             {
+                 public QueryParser run()
+                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                 {
+                     int    lastDotIdx = queryParserMaker.lastIndexOf( "." );
+                     Class<? extends Object>  klass = Class.forName( queryParserMaker.substring( 0, lastDotIdx ) );
+                     String methodName = queryParserMaker.substring( lastDotIdx + 1, queryParserMaker.length() );
+                     Method method = klass.getDeclaredMethod( methodName, Version.class, String.class, Analyzer.class );
+                     
+                     return (QueryParser) method.invoke( null, version, fieldName, analyzer );
+                 }
+             }
+             );
+	}
+	
+	/**
+	 * Returns a Lucene IndexReader, which reads from the indicated Lucene index.
+	 * 
+	 * @param indexHome The directory holding the Lucene index.
+	 */
+	private static IndexReader getIndexReader( final File indexHome )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<IndexReader>()
+             {
+                 public IndexReader run() throws SQLException, IOException
+                 {
+                     return DirectoryReader.open( FSDirectory.open( indexHome ) );
+                 }
+             }
+             );
+	}
+	
+    /** Read the index properties file */
+    private static  Properties readIndexProperties( final File file )
+        throws IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Properties>()
+             {
+                public Properties run() throws IOException
+                {
+                    return LuceneSupport.readIndexPropertiesNoPrivs( file );
+                }
+             }
+             );
+    }
+
+	/**
+	 * Invoke a static method (possibly supplied by the user) to instantiate an Analyzer.
+     * The method has no arguments.
+	 */
+	private static Analyzer getAnalyzer( final String analyzerMaker )
+        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
+               NoSuchMethodException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Analyzer>()
+             {
+                 public Analyzer run()
+                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                 {
+                     return LuceneSupport.getAnalyzerNoPrivs( analyzerMaker );
+                 }
+             }
+             );
+	}
+	
 }
