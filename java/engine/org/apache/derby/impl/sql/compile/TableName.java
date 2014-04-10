@@ -102,8 +102,7 @@ public class TableName extends QueryTreeNode
 	 *
 	 * @return true if this instance was initialized with not null schemaName
 	 */
-	
-    boolean hasSchema(){
+    public boolean hasSchema() {
 		return hasSchema;
 	}
 

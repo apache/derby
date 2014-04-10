@@ -21,7 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -724,9 +723,7 @@ class CreateTriggerNode extends DDLStatementNode
         Collections.sort(tabs, OFFSET_COMPARATOR);
         for (FromBaseTable fromTable : tabs) {
             String baseTableName = fromTable.getBaseTableName();
-            if (baseTableName == null
-                    || (!baseTableName.equals(oldTableName)
-                            && !baseTableName.equals(newTableName))) {
+            if (!isTransitionTable(fromTable)) {
                 // baseTableName is not the NEW or OLD table, so no need
                 // to do anything. Skip this table.
                 continue;
@@ -761,6 +758,28 @@ class CreateTriggerNode extends DDLStatementNode
         newText.append(originalText, start, originalText.length());
 
         return newText.toString();
+    }
+
+    /**
+     * Check if a table represents one of the transition tables.
+     *
+     * @param fbt the table to check
+     * @return {@code true} if {@code fbt} represents either the old or
+     *   the new transition table, {@code false} otherwise
+     */
+    private boolean isTransitionTable(FromBaseTable fbt) {
+        // DERBY-6540: It can only be a transition table if the name
+        // is not schema qualified.
+        if (!fbt.getOrigTableName().hasSchema()) {
+            String baseTableName = fbt.getBaseTableName();
+            if (baseTableName != null) {
+                return baseTableName.equals(oldTableName) ||
+                        baseTableName.equals(newTableName);
+            }
+        }
+
+        // Table name didn't match a transition table.
+        return false;
     }
 
     /*

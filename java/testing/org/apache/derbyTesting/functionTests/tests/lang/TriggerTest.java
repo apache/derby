@@ -2324,4 +2324,92 @@ public class TriggerTest extends BaseJDBCTestCase {
     public static ResultSet dummyTableFunction() {
         return null;
     }
+
+    public void testDerby6540TransitionTableNameClash() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6540_t1(x int)");
+        s.execute("create table d6540_t2(y int)");
+        s.execute("create table d6540_t3(z int)");
+
+        // Test name clash for statement level triggers.
+
+        // The following statement used to fail before DERBY-6540 because
+        // APP.D6540_T2 was mistaken for the transition table D6540_T2. Since
+        // the transition table does not have a column Y, it would fail with
+        // an error message saying that column Y is not in any table in the
+        // FROM list.
+        s.execute("create trigger d6540_tr after insert on d6540_t1 "
+                + "referencing new table as d6540_t2 "
+                + "insert into d6540_t3 select x from d6540_t2 "
+                + "union all select y from app.d6540_t2");
+
+        // Verify that the trigger does what it is supposed to do.
+        PreparedStatement selT3
+                = prepareStatement("select * from d6540_t3 order by z");
+        JDBC.assertEmpty(selT3.executeQuery());
+
+        s.execute("insert into d6540_t1 values 1");
+        JDBC.assertSingleValueResultSet(selT3.executeQuery(), "1");
+
+        s.execute("insert into d6540_t2 values 2, 3");
+        s.execute("insert into d6540_t1 values 4, 5");
+        JDBC.assertFullResultSet(
+                selT3.executeQuery(),
+                new String[][] { {"1"}, {"2"}, {"3"}, {"4"}, {"5"} });
+
+        // Revert tables to clean state before we go on.
+        s.execute("truncate table d6540_t1");
+        s.execute("truncate table d6540_t2");
+        s.execute("truncate table d6540_t3");
+        s.execute("drop trigger d6540_tr");
+
+        // Test name clash for row level triggers.
+
+        // The following statement used to fail before DERBY-6540, with an
+        // error message saying that column Y was not in any of the tables
+        // in the FROM list.
+        s.execute("create trigger d6540_tr after insert on d6540_t1 "
+                + "referencing new as d6540_t2 for each row "
+                + "insert into d6540_t3 select * from app.d6540_t2 "
+                + "where d6540_t2.x = app.d6540_t2.y");
+
+        // Verify that the trigger works.
+        JDBC.assertEmpty(selT3.executeQuery());
+
+        s.execute("insert into d6540_t1 values 1");
+        JDBC.assertEmpty(selT3.executeQuery());
+
+        s.execute("insert into d6540_t2 values 1, 2, 3");
+        s.execute("insert into d6540_t1 values 2, 3, 4");
+        JDBC.assertFullResultSet(
+                selT3.executeQuery(), new String[][] { {"2"}, {"3"} });
+
+        // Verify that row level triggers still don't need to qualify
+        // table names that are the same as a transition variable, if they
+        // appear in the from list (since the transition variable cannot be
+        // used in the from list, so there is no ambiguity).
+        s.execute("drop trigger d6540_tr");
+        s.execute("create table d6540_t4(c1 int, c2 int)");
+        s.execute("create trigger d6540_tr after insert on d6540_t1 "
+                + "referencing new as d6540_t2 for each row "
+                + "insert into d6540_t4 select y, d6540_t2.x from d6540_t2");
+        s.execute("insert into d6540_t1 values 1");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d6540_t4 order by c1"),
+                new String[][] {
+                    { "1", "1" },
+                    { "2", "1" },
+                    { "3", "1" },
+                });
+
+        // Finally, verify that a transition table or transition variable
+        // cannot have a schema.
+        assertCompileError(SYNTAX_ERROR,
+                "create trigger d6540_tr1 after insert on d6540_t1 "
+                + "referencing new table as app.n values 1");
+        assertCompileError(SYNTAX_ERROR,
+                "create trigger d6540_tr2 after insert on d6540_t1 "
+                + "referencing new as app.n for each row values 1");
+    }
 }

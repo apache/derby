@@ -4879,9 +4879,8 @@ public final class	DataDictionaryImpl
             for (ColumnReference ref : refs)
 			{
 				TableName tableName = ref.getQualifiedTableName();
-				if ((tableName == null) ||
-					((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&
-					(newReferencingName == null || !newReferencingName.equals(tableName.getTableName()))))
+                if (!isTransitionVariable(
+                        tableName, oldReferencingName, newReferencingName))
 				{
 					continue;
 				}
@@ -4970,9 +4969,8 @@ public final class	DataDictionaryImpl
         for (ColumnReference ref : refs)
 		{
 			TableName tableName = ref.getQualifiedTableName();
-			if ((tableName == null) ||
-				((oldReferencingName == null || !oldReferencingName.equals(tableName.getTableName())) &&
-				(newReferencingName == null || !newReferencingName.equals(tableName.getTableName()))))
+            if (!isTransitionVariable(
+                    tableName, oldReferencingName, newReferencingName))
 			{
 				continue;
 			}
@@ -5051,6 +5049,37 @@ public final class	DataDictionaryImpl
 		}
 		return newText.toString();
 	}
+
+    /**
+     * Check if a table name is actually a transition variable.
+     *
+     * @param tableName the table name to check
+     * @param oldReferencingName the name of the old transition variable
+     * @param newReferencingName the name of the new transition variable
+     * @return {@code true} if the table name is a transition variable,
+     *   {@code false} otherwise
+     */
+    private static boolean isTransitionVariable(TableName tableName,
+            String oldReferencingName, String newReferencingName) {
+        if (tableName != null) {
+            if (tableName.hasSchema()) {
+                // DERBY-6540: Schema-qualified names are not transition
+                // variables.
+                return false;
+            }
+
+            // If there is no schema, and the name is equal to the old or
+            // the new transition variable, then it is a transition variable.
+            String name = tableName.getTableName();
+            if (name != null) {
+                return name.equals(oldReferencingName)
+                        || name.equals(newReferencingName);
+            }
+        }
+
+        // Otherwise, it is not a transition variable.
+        return false;
+    }
 
 	/*
 	 * The arrary passed will have either -1 or a column position as it's 
