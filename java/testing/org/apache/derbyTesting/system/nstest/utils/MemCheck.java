@@ -77,9 +77,12 @@ public class MemCheck extends Thread {
 		Runtime rt = null;
 		Date d = null;
 		rt = Runtime.getRuntime();
+        long    totalMemory = rt.totalMemory();
+        long    freeMemory = rt.freeMemory();
 		d = new Date();
-		NsTest.logger.println("total memory: " + rt.totalMemory() + " free: "
-				+ rt.freeMemory() + " " + d.toString());
+        NsTest.updateMemoryTracker( totalMemory, freeMemory, d );
+		NsTest.logger.println("total memory: " + totalMemory + " free: "
+				+ freeMemory + " " + d.toString());
 
 	}
 

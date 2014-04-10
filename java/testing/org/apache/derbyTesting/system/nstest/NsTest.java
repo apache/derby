@@ -22,6 +22,7 @@ package org.apache.derbyTesting.system.nstest;
 
 import java.util.HashMap;
 import java.util.Properties;
+import java.util.Date;
 import java.sql.SQLException;
 import java.sql.DriverManager;
 import java.io.IOException;
@@ -235,6 +236,10 @@ public class NsTest extends Thread
     private static  long        _startTimestamp;
     private static  long        _endTimestamp;
 
+    private static  long        _totalMemory;
+    private static  long        _freeMemory;
+    private static  Date        _lastMemoryCheckTime;
+
 	public static int numActiveTestThreads() {
 		int activeThreadCount=0;
 
@@ -249,6 +254,14 @@ public class NsTest extends Thread
         
 		return activeThreadCount;
 	}
+
+    public  static  void    updateMemoryTracker
+        ( long newTotalMemory, long newFreeMemory, Date newTimestamp )
+    {
+        _totalMemory = newTotalMemory;
+        _freeMemory = newFreeMemory;
+        _lastMemoryCheckTime = newTimestamp;
+    }
 
     public  static  void    updateSequenceTracker( long newValue )
     {
@@ -649,6 +662,8 @@ public class NsTest extends Thread
 
         statisticsLogger.println( "\nMax sequence counter peeked at = " + _maxSequenceCounter + "\n" );
         
+        statisticsLogger.println( "\nLast total memory = " + _totalMemory + ", last free memory = " + _freeMemory + " as measured at " + _lastMemoryCheckTime + "\n" );
+
         if ( _errors.size() > 0 )
         {
             countAndPrintSQLStates();
@@ -818,6 +833,7 @@ public class NsTest extends Thread
         if ( justCountErrors() )
         {
             addError( e );
+            vetError( e );
             return;
         }
         
@@ -846,7 +862,33 @@ public class NsTest extends Thread
 		logger.println("At this point - " + where
 				+ ", exception thrown was : " + e.getMessage());
 
+        vetError( e );
 	}
+
+    /**
+     * Analyze an error which is being reported. Currently, all this
+     * does is check for OutOfMemoryErrors. If we see an OutOfMemoryError,
+     * we kill the JVM since we will just get cascading noise after we exhaust
+     * memory.
+     */
+    private static  void    vetError( Throwable t )
+    {
+        if ( t == null ) { return; }
+        
+        if ( t instanceof OutOfMemoryError )
+        {
+            printStatistics();
+            Runtime.getRuntime().halt( 0 );
+        }
+
+        vetError( t.getCause() );
+
+        if ( t instanceof SQLException )
+        {
+            SQLException    sqlException = (SQLException) t;
+            vetError( sqlException.getNextException() );
+        }
+    }
 
 	public static String getDriverURL() {
 		if (driver_type.equalsIgnoreCase("DerbyClient")) {
