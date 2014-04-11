@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -30,6 +31,7 @@ import junit.framework.TestSuite;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -49,8 +51,11 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	
 	public static Test suite() {
 		TestSuite suite = new TestSuite("LuceneSupportTest");
+
+        Test    baseTest = TestConfiguration.embeddedSuite(LuceneSupportTest.class);
+        Test        localizedTest = new LocaleTestSetup( baseTest, new Locale( "en", "US" ) );
 		
-		suite.addTest(SecurityManagerSetup.noSecurityManager(TestConfiguration.embeddedSuite(LuceneSupportTest.class)));
+		suite.addTest(SecurityManagerSetup.noSecurityManager(localizedTest));
  
 		return suite;
 	}
@@ -58,6 +63,26 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	public void testCreateAndQueryIndex() throws Exception {
 		CallableStatement cSt;
 		Statement s = createStatement();
+
+        // verify that we are in an en Locale
+        getConnection().prepareStatement
+            (
+             "create function getDatabaseLocale() returns varchar( 20 )\n" +
+             "language java parameter style java reads sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.getDatabaseLocale()'\n"
+             ).executeUpdate();
+	    JDBC.assertFullResultSet
+            (
+             s.executeQuery
+             (
+              "values ( substr( getDatabaseLocale(), 1, 2 ) )"
+              ),
+             new String[][]
+             {
+                 { "en" }
+             }
+             );
+        getConnection().prepareStatement( "drop function getDatabaseLocale" ).executeUpdate();
 	    
 		cSt = prepareCall
             ( "call LuceneSupport.createIndex('lucenetest','titles','title', null )" );

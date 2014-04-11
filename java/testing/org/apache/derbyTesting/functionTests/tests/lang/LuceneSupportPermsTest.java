@@ -149,13 +149,13 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         
         TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(LuceneSupportPermsTest.class);
 
-        Test        localizedTest = new LocaleTestSetup( suite, new Locale( LANGUAGE, COUNTRY ) );
-        Test        secureTest = new SecurityManagerSetup( localizedTest, POLICY_FILE );
+        Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( secureTest, LEGAL_USERS, "LuceneSupportPermissions" );
         Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
+        Test        localizedTest = new LocaleTestSetup( authorizedTest, new Locale( LANGUAGE, COUNTRY ) );
 
-        return authorizedTest;
+        return localizedTest;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
