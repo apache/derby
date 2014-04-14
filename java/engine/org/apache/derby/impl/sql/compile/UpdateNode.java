@@ -1538,7 +1538,12 @@ public final class UpdateNode extends DMLModStatementNode
 		{
 			boolean foundMatchingTable = false;			
 
-			if (column.getTableName() != null) {
+            //
+            // The check for whether we are in the matching clause fixes
+            // the bug tracked by MergeStatementTest.test_060_transitionTableSimpleColumn().
+            // That bug was addressed by derby-3155-53-aa-transitionSimpleColumn.diff.
+            //
+			if ( (column.getTableName() != null) && (!inMatchingClause()) ) {
                 for (ResultSetNode rsn : ((SelectNode)resultSet).fromList) {
                     FromTable fromTable = (FromTable)rsn;
 

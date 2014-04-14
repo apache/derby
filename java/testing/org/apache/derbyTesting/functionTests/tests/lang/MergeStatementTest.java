@@ -9436,6 +9436,70 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, "drop function mb_059" );
     }
     
+    /**
+     * <p>
+     * Test that the UPDATE actions of MERGE statements work with
+     * trigger transition tables and simple column expressions from the transition tables.
+     * </p>
+     */
+    public  void    test_060_transitionTableSimpleColumn()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create table t1_060( x int, x1 int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t2_060( y int, y1 int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create trigger tr1 after insert on t1_060\n" +
+             "referencing new table as new\n" +
+             "merge into t2_060\n" +
+             "using new on x1 = y1\n" +
+             "when matched then update set y = x\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t2_060 values ( 1, 100 ), ( 2, 200 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into t1_060 values ( 1000, 100 ), ( 3000, 300 )"
+             );
+
+        // verify the results
+        assertResults
+            (
+             dboConnection,
+             "select * from t2_060 order by y, y1",
+             new String[][]
+             {
+                 { "2", "200" },
+                 { "1000", "100" },
+             },
+             false
+             );
+
+        //
+        // Drop schema
+        //
+        goodStatement( dboConnection, "drop table t1_060" );
+        goodStatement( dboConnection, "drop table t2_060" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // ROUTINES
