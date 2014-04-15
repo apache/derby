@@ -71,6 +71,10 @@ public class Tester1 extends TesterObject {
 			NsTest.logger.println("FAIL: " + getThread_id()
 					+ "'s setAutoCommit() failed:");
 			printException("setting AutoCommit", e);
+
+            // if you can't change the autocommit state, the connection is unusable.
+            // get out of here.
+            return;
 		}
 
 		// also set isolation level to Connection.TRANSACTION_READ_UNCOMMITTED
@@ -104,6 +108,9 @@ public class Tester1 extends TesterObject {
 					printException("doSelectOperation()", e);
                     if ( NsTest.justCountErrors() ) { NsTest.printException( Tester1.class.getName(), e ); }
 					else { e.printStackTrace( NsTest.logger ); }
+
+                    // if the connection is dead, there's no point in hanging around
+                    if ( NsTest.deadConnection( e ) ) { return; }
 				}
 				break;
 
@@ -112,6 +119,7 @@ public class Tester1 extends TesterObject {
 			case 3: // do Insert/Update/Delete operations
 				for (int j = 0; j < NsTest.MAX_LOW_STRESS_ROWS; j++) {
 					doIUDOperation();
+                    if ( deadConnection() ) { return; }
 				}
 				break;
 			}
@@ -126,6 +134,10 @@ public class Tester1 extends TesterObject {
 				NsTest.logger
 						.println("FAIL: " + getThread_id() + "'s commit() failed:");
 				printException("committing Xn in Tester1", e);
+
+                // if you can't commit, the connection is unusable.
+                // get out of here.
+                return;
 			}
 		}// end of for (int i=0;...)
 

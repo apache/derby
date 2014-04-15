@@ -89,6 +89,8 @@ public class NsTest extends Thread
 
     private static  final   String  ERROR_BANNER1 = "//////////////////////////////////////////////////////////////\n";
     private static  final   String  ERROR_BANNER2 = "//    ";
+
+    public  static  final   String  DEAD_CONNECTION = "08003";
     
     
 	public static final String dbName = "nstestdb";
@@ -909,6 +911,19 @@ public class NsTest extends Thread
 		}
 
 	}
+
+    /** Return true if the connection is dead */
+    public  static  boolean deadConnection( Throwable t )
+    {
+        if ( t instanceof SQLException )
+        {
+            SQLException    se = (SQLException) t;
+
+            if ( DEAD_CONNECTION.equals( se.getSQLState() ) ) { return true; }
+        }
+
+        return false;
+    }
 
 	public static void printUsage()
     {

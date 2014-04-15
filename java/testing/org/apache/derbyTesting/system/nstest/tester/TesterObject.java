@@ -39,6 +39,7 @@ import org.apache.derbyTesting.system.nstest.utils.DbUtil;
 public class TesterObject {
 
 	private String thread_id;
+    private boolean _deadConnection = false;
 
 	protected Connection connex = null;
 
@@ -152,6 +153,7 @@ public class TesterObject {
 					NsTest.addStats(NsTest.FAILED_INSERT, 1);
 			} catch (Exception e) {
 				printException("executing add_one_row()", e);
+                if ( NsTest.deadConnection( e ) ) { markDeadConnection(); }
 			}
 
 			break;
@@ -224,7 +226,10 @@ public class TesterObject {
 			printException(
 					"FAIL: doSelectOperation() had problems creating/executing query",
 					e);
-			s.close();
+            if ( rSet != null ) { rSet.close(); }
+			if ( s != null ) { s.close(); }
+
+            return numRowsSelected;
 		}
 
 		if (rSet != null) {
@@ -295,8 +300,8 @@ public class TesterObject {
 		        .println("FAIL: doSelectOperation() had problems working over the ResultSet");
 		        NsTest.addStats(NsTest.FAILED_SELECT, 1);
 		        printException("processing ResultSet during row data retrieval", e);
-		        rSet.close();
-		        s.close();
+		        if ( rSet != null ) { rSet.close(); }
+		        if ( s != null ) { s.close(); }
 		        NsTest.logger.println("Closed the select statement");
 		    }
 		}
@@ -378,5 +383,9 @@ public class TesterObject {
 	public String getThread_id() {
 		return thread_id;
 	}
+
+    public  void    markDeadConnection() { _deadConnection = true; }
+
+    public  boolean deadConnection() { return _deadConnection; }
 
 }

@@ -76,6 +76,10 @@ public class Tester2 extends TesterObject {
 				NsTest.logger.println("FAIL: " + getThread_id()
 						+ "'s setAutoCommit() failed:");
 				printException("setting AutoCommit in Tester2", e);
+                
+                // if you can't change the autocommit state, the connection is unusable.
+                // get out of here.
+                return;
 			}
 
 			//also set isolation level to Connection.TRANSACTION_READ_UNCOMMITTED to reduce number of
@@ -120,6 +124,10 @@ public class Tester2 extends TesterObject {
 					NsTest.logger.println("FAIL: " + getThread_id()
 							+ "'s commit() failed:");
 					printException("committing Xn in Tester2", e);
+                    
+                    // if you can't commit, the connection is unusable.
+                    // get out of here.
+                    return;
 				}
 			}//end of for(int numOp=1...)
 
