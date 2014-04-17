@@ -96,6 +96,19 @@ public class TesterObject {
 		return conn; // null if there was a problem, else a valid connection
 	}
 
+    /** Get a new connection and raise an error if this can't be done */
+    public  Connection  getNewConnection()
+    {
+        Connection  conn = getConnection();
+
+        if ( conn == null )
+        {
+            throw new RuntimeException( "Could not get a connection!" );
+        }
+
+        return conn;
+    }
+
 	// *******************************************************************************
 	//
 	// Sets the isolation level to that indicated.
@@ -141,6 +154,8 @@ public class TesterObject {
 	public void doIUDOperation() {
 		// decide Insert, Update or Delete
 		int decider = (int) (Math.random() * 100) % 3;
+
+        if ( connex == null ) { connex = getNewConnection(); }
 
 		switch (decider) {
 
