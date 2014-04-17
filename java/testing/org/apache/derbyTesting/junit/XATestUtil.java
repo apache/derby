@@ -31,6 +31,8 @@ import java.util.Arrays;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 
+// Note: this class is used as indicator class in sysinfo for the 
+// presence of org.apache.derbyTesting package classes.
 public class XATestUtil {
     
     /**
