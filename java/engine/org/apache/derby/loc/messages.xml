@@ -2213,7 +2213,7 @@ Guide.
 
             <msg>
                 <name>42XA7</name>
-                <text>'{0}' is a generated column. You cannot change its default value.</text>
+                <text>'{0}' is a generated or identity column. You cannot change its default value.</text>
                 <arg>columnName</arg>
             </msg>
 

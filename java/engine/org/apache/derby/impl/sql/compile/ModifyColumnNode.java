@@ -372,7 +372,7 @@ class ModifyColumnNode extends ColumnDefinitionNode
         { defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo(); }
         else
         {
-            if ( cd.hasGenerationClause() )
+            if ( cd.hasGenerationClause() || cd.isAutoincrement() )
             {
 				throw StandardException.newException( SQLState.LANG_GEN_COL_DEFAULT, cd.getColumnName() );
             }
