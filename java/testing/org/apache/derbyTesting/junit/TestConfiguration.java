@@ -950,6 +950,19 @@ public final class TestConfiguration {
      */
     public static Test sqlAuthorizationDecoratorSingleUse(Test test)
     {
+        return sqlAuthorizationDecoratorSingleUse( test, DEFAULT_DBNAME_SQL, true );
+    }
+    
+    /**
+     * Same as sqlAuthorizationDecoratorSingleUse, except that you can name the database yourself.
+     *
+     * @param test Test to be decorated
+     * @return decorated test.
+     *
+     * @see TestConfiguration#sqlAuthorizationDecorator(Test test)
+     */
+    public static Test sqlAuthorizationDecoratorSingleUse(Test test, String dbName, boolean removeDatabase)
+    {
         // Set the SQL authorization mode as a database property
         // with a modified DatabasePropertyTestSetup that does not
         // reset it.
@@ -958,14 +971,20 @@ public final class TestConfiguration {
         Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
                 test, sqlAuth, true);
 
-        setSQLAuthMode = new DatabaseChangeSetup(
-            new DropDatabaseSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL) {
-                protected void tearDown() throws Exception {
-                    // test responsible for shutdown
-                    removeDatabase();
-                }
-            },
-            DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true);
+        if ( removeDatabase )
+        {
+            setSQLAuthMode =
+                new DropDatabaseSetup(setSQLAuthMode, dbName)
+                {
+                    protected void tearDown() throws Exception {
+                        // test responsible for shutdown
+                        removeDatabase();
+                    }
+                };
+        }
+        
+        setSQLAuthMode = new DatabaseChangeSetup
+            ( setSQLAuthMode, dbName, dbName, true );
 
         return changeUserDecorator(setSQLAuthMode,
                                    DerbyConstants.TEST_DBO,

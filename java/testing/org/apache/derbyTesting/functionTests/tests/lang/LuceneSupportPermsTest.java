@@ -75,6 +75,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private static  final   String      LUCENE_VERSION_PROPERTY = "derby.tests.lucene.version";
     private static  String              LUCENE_VERSION = "LUCENE_45";
 
+    private static  final   String      DB_NAME = "lucenesupportpermsdb";
+
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
@@ -152,10 +154,17 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( secureTest, LEGAL_USERS, "LuceneSupportPermissions" );
-        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
+        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecoratorSingleUse( authenticatedTest, DB_NAME, false );
         Test        localizedTest = new LocaleTestSetup( authorizedTest, new Locale( LANGUAGE, COUNTRY ) );
 
         return localizedTest;
+    }
+
+    protected void tearDown()
+        throws Exception
+    {
+        TestConfiguration.getCurrent().shutdownEngine();
+        super.tearDown();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

@@ -39,10 +39,13 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Properties;
+import org.apache.lucene.analysis.Analyzer;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -69,9 +72,13 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     private static  final   String      READ_WRITE_USER = "READWRITEUSER";
     private static  final   String[]    LEGAL_USERS = { RUTH, READ_ONLY_USER, READ_WRITE_USER };
 
+    private static  final   String      ENGLISH_ANALYZER =
+        "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getEnglishAnalyzer";
+
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
-    private static  final   String      INDEX_POEMS = "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', null )";
+    private static  final   String      INDEX_POEMS =
+        "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', '" + ENGLISH_ANALYZER + "' )";
     private static  final   String      UPDATE_POEMS_INDEX =
         "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'poems', 'poemText' )";
@@ -118,8 +125,9 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
             ( unsecureTest, LEGAL_USERS, "LuceneCoarsePermissions" );
 
         Test        coarseTest = new DatabasePropertyTestSetup( authenticatedTest, makeProperties() );
+        Test        singleUseTest = TestConfiguration.singleUseDatabaseDecorator( coarseTest );
 
-        return coarseTest;
+        return singleUseTest;
     }
     private static  Properties  makeProperties()
     {
@@ -201,7 +209,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         String[][]  defaultIndexList =
             new String[][]
             {
-                { "RUTH", "POEMS", "POEMTEXT", "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer" },
+                { "RUTH", "POEMS", "POEMTEXT", ENGLISH_ANALYZER },
             };
 
         assertResults
@@ -289,6 +297,20 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         dropSchema( ruthConnection );
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // EXTERNAL ENTRY POINTS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Return the Analyzer for an English Locale */
+    public  static  Analyzer    getEnglishAnalyzer()
+        throws Exception
+    {
+        return LuceneUtils.getAnalyzerForLocale( Locale.US );
+    }
+    
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
