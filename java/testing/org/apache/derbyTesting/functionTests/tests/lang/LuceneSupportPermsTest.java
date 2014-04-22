@@ -97,6 +97,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 	private static  final   String      DOUBLE_UNLOAD_ILLEGAL       = "42XBH";
 	private static  final   String      BAD_DIRECTORY                      = "42XBI";
 	private static  final   String      BAD_COLUMN_NAME                 = "42XBJ";
+    private static  final   String      NONEXISTENT_TABLE_FUNCTION  ="42ZB4";
 
     private static  final   String      POLICY_FILE = "org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy";
 
@@ -509,9 +510,13 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         assertTrue( deleteFile( poemTextIndexDirectory ) );
 
-        // can't update the index if the directory has disappeared
-        expectExecutionError( ruthConnection, BAD_DIRECTORY, UPDATE_POEMS_INDEX );
-        expectExecutionError( ruthConnection, BAD_DIRECTORY, DROP_POEMS_INDEX );
+        // but that doesn't stop you from deleting the index
+        goodStatement( ruthConnection, DROP_POEMS_INDEX );
+        expectCompilationError
+            (
+             ruthConnection, NONEXISTENT_TABLE_FUNCTION,
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0 ) ) t"
+             );
 
         goodStatement( dboConnection, UNLOAD_TOOL );
         dropSchema( ruthConnection );

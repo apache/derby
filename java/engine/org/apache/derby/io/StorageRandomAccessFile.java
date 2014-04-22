@@ -126,4 +126,7 @@ public interface StorageRandomAccessFile extends DataInput, DataOutput
      * <code>b.length - off</code>
      */
     public int read(byte[] b, int off, int len) throws IOException;
+
+    /** Clone this file abstraction */
+    public  StorageRandomAccessFile clone();
 }

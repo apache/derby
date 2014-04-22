@@ -318,20 +318,19 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private void    createSchema( Connection conn )  throws Exception
+    public  static void    createSchema( Connection conn )  throws Exception
     {
         createPoemsTable( conn );
     }
-    private void    dropSchema( Connection conn )   throws Exception
+    public  static void    dropSchema( Connection conn )   throws Exception
     {
-        goodStatement( conn, "drop table poems" );
+        conn.prepareStatement( "drop table poems" ).execute();
     }
-    private void    createPoemsTable( Connection conn )
+    public static void    createPoemsTable( Connection conn )
         throws Exception
     {
-        goodStatement
+        conn.prepareStatement
             (
-             conn,
              "create table poems\n" +
              "(\n" +
              "    poemID int,\n" +
@@ -341,7 +340,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
              "    poemText            clob,\n" +
              "    constraint poemsKey primary key( poemID, versionStamp )\n" +
              ")\n"
-             );
+             ).execute();
 
         PreparedStatement   ps = conn.prepareStatement( "insert into poems values ( ?, ?, ?, ?, ? )" );
 

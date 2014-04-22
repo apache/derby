@@ -37,6 +37,9 @@ import java.io.FileNotFoundException;
  */
 class DirRandomAccessFile extends RandomAccessFile implements StorageRandomAccessFile
 {
+    // for cloning
+    private final   File    _name;
+    private final   String  _mode;
 
     /**
      * Construct a StorageRandomAccessFileImpl.
@@ -55,6 +58,20 @@ class DirRandomAccessFile extends RandomAccessFile implements StorageRandomAcces
     DirRandomAccessFile( File name, String mode) throws FileNotFoundException
     {
         super( name, mode);
+        _name = name;
+        _mode = mode;
+    }
+
+    /** Clone this file abstaction */
+    public  DirRandomAccessFile clone()
+    {
+        try {
+            return new DirRandomAccessFile( _name, _mode );
+        }
+        catch (IOException ioe)
+        {
+            throw new RuntimeException( ioe.getMessage(), ioe );
+        }
     }
 
     /**

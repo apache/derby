@@ -64,6 +64,7 @@ public class LuceneSuite extends BaseTestCase
             suite.addTest(LuceneSupportPermsTest.suite());
             suite.addTest(LuceneCollationTest.suite());
             suite.addTest(LuceneCoarseAuthorizationTest.suite());
+            suite.addTest(LuceneInMemoryTest.suite());
         }
 
         return suite;

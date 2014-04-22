@@ -39,6 +39,8 @@ public class VirtualRandomAccessFile
 
     /** The source entry. */
     private final DataStoreEntry entry;
+    /** whether the file is read-only */
+    private final   boolean _readOnly;
     /** Current position / file pointer. */
     private long fp;
     /** Stream used to read from the source entry. */
@@ -68,6 +70,7 @@ public class VirtualRandomAccessFile
     public VirtualRandomAccessFile(DataStoreEntry entry, boolean readOnly)
             throws FileNotFoundException {
         this.entry = entry;
+        _readOnly = readOnly;
         bIn = entry.getInputStream();
         bIn.setPosition(0L);
         dIs = new DataInputStream(bIn);
@@ -79,6 +82,17 @@ public class VirtualRandomAccessFile
             bOut = entry.getOutputStream(true);
             bOut.setPosition(0L);
             dOs = new DataOutputStream(bOut);
+        }
+    }
+
+    public  VirtualRandomAccessFile clone()
+    {
+        try {
+            return new VirtualRandomAccessFile( entry, _readOnly );
+        }
+        catch (IOException ioe)
+        {
+            throw new RuntimeException( ioe.getMessage(), ioe );
         }
     }
 

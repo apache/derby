@@ -21,7 +21,6 @@
 
 package org.apache.derby.optional.lucene;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,6 +35,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Properties;
 
+import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derby.vti.RestrictedVTI;
@@ -429,16 +429,16 @@ public class LuceneQueryVTI extends StringColumnVTI
             // make sure the user has SELECT privilege on all relevant columns of the underlying table
             vetPrivileges();
         
-            String          indexhome = LuceneSupport.getIndexLocation( _connection, _schema, _table, _column);
-            File            propertiesFile = LuceneSupport.getIndexPropertiesFile( _connection, _schema, _table, _column );
+            DerbyLuceneDir  derbyLuceneDir = LuceneSupport.getDerbyLuceneDir( _connection, _schema, _table, _column );
+            StorageFile propertiesFile = LuceneSupport.getIndexPropertiesFile( derbyLuceneDir );
             Properties  indexProperties = readIndexProperties( propertiesFile );
             String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
             Analyzer    analyzer = getAnalyzer( analyzerMaker );
 
             vetLuceneVersion( indexProperties.getProperty( LuceneSupport.LUCENE_VERSION ) );
 
-            _indexReader = getIndexReader( new File( indexhome.toString() ) );
-            _searcher = new IndexSearcher(_indexReader);
+            _indexReader = getIndexReader( derbyLuceneDir );
+            _searcher = new IndexSearcher( _indexReader );
 
             QueryParser qp = getQueryParser
                 (
@@ -455,9 +455,8 @@ public class LuceneQueryVTI extends StringColumnVTI
             if ( _scoreCeiling != 0 ) {
                 tsdc = TopScoreDocCollector.create( _windowSize, new ScoreDoc( 0, _scoreCeiling ), true );
             }
-            _searcher.search(luceneQuery, tsdc);
-            TopDocs topdocs = tsdc.topDocs();
-            _hits = topdocs.scoreDocs;
+
+            searchAndScore( luceneQuery, tsdc );
         }
         catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
         catch (ParseException pe) { throw LuceneSupport.wrap( pe ); }
@@ -563,7 +562,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	 * 
 	 * @param indexHome The directory holding the Lucene index.
 	 */
-	private static IndexReader getIndexReader( final File indexHome )
+	private static IndexReader getIndexReader( final DerbyLuceneDir dir )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -572,14 +571,14 @@ public class LuceneQueryVTI extends StringColumnVTI
              {
                  public IndexReader run() throws SQLException, IOException
                  {
-                     return DirectoryReader.open( FSDirectory.open( indexHome ) );
+                     return DirectoryReader.open( dir );
                  }
              }
              );
 	}
 	
     /** Read the index properties file */
-    private static  Properties readIndexProperties( final File file )
+    private static  Properties readIndexProperties( final StorageFile file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -615,4 +614,24 @@ public class LuceneQueryVTI extends StringColumnVTI
              );
 	}
 	
+    /** Read the index properties file */
+    private void    searchAndScore( final Query luceneQuery, final TopScoreDocCollector tsdc )
+        throws IOException, PrivilegedActionException
+    {
+        AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Object>()
+             {
+                public Object run() throws IOException
+                {
+                    _searcher.search( luceneQuery, tsdc );
+                    TopDocs topdocs = tsdc.topDocs();
+                    _hits = topdocs.scoreDocs;
+
+                    return null;
+                }
+             }
+             );
+    }
+
 }

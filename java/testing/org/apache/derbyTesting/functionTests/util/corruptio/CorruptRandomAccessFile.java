@@ -57,6 +57,11 @@ public class CorruptRandomAccessFile implements StorageRandomAccessFile
 		this.realFile = realFile;
     }
 
+    public  CorruptRandomAccessFile clone()
+    {
+        return new CorruptRandomAccessFile( realRaf.clone(), realFile );
+    }
+
 	
 	/**
      * Closes this file.

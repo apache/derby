@@ -21,8 +21,6 @@
 
 package org.apache.derby.optional.lucene;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -33,6 +31,9 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
+
+import org.apache.derby.io.StorageFactory;
+import org.apache.derby.io.StorageFile;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.vti.StringColumnVTI;
@@ -45,7 +46,7 @@ import org.apache.derby.vti.StringColumnVTI;
 public class LuceneListIndexesVTI extends StringColumnVTI
 {
     private Connection  connection;
-	private File[] indexes;
+	private StorageFile[] indexes;
 	private int row = -1;
 
     private String      schema;
@@ -75,22 +76,21 @@ public class LuceneListIndexesVTI extends StringColumnVTI
               );
 		
         connection = LuceneSupport.getDefaultConnection();
-		String dir = LuceneSupport.getIndexLocation( connection, null, null, null );
+        StorageFactory  dir = LuceneSupport.getStorageFactory( connection );
 		
-		File luceneDir = new File(dir);
-        DirFilter   dirFilter = new DirFilter();
-        ArrayList<File> allIndexes = new ArrayList<File>();
+		StorageFile luceneDir = dir.newStorageFile( LuceneSupport.LUCENE_DIR );
+        ArrayList<StorageFile> allIndexes = new ArrayList<StorageFile>();
 
-        File[]  schemas = listFiles( luceneDir, dirFilter );
+        StorageFile[]  schemas = listDirectories( dir, luceneDir );
         if ( schemas != null )
         {
-            for ( File schema : schemas )
+            for ( StorageFile schema : schemas )
             {
-                File[]  tables = listFiles( schema, dirFilter );
-                for ( File table : tables )
+                StorageFile[]  tables = listDirectories( dir, schema );
+                for ( StorageFile table : tables )
                 {
-                    File[]  indexes = listFiles( table, dirFilter );
-                    for ( File index : indexes )
+                    StorageFile[]  indexes = listDirectories( dir, table );
+                    for ( StorageFile index : indexes )
                     {
                         allIndexes.add( index );
                     }
@@ -98,7 +98,7 @@ public class LuceneListIndexesVTI extends StringColumnVTI
             }
         }
 
-        indexes = new File[ allIndexes.size() ];
+        indexes = new StorageFile[ allIndexes.size() ];
         allIndexes.toArray( indexes );
 	}
 
@@ -177,23 +177,17 @@ public class LuceneListIndexesVTI extends StringColumnVTI
         catch (NumberFormatException nfe) { throw LuceneSupport.wrap( nfe ); }
     }
     
-	
-    public  static  class   DirFilter   implements  FileFilter
-    {
-        public  boolean accept( File file ) { return file.isDirectory(); }
-    }
-
     /** Fill in the schema, table, and column names */
     private void    readSchemaTableColumn()
         throws SQLException
     {
         if ( column != null ) { return; }
         
-        File    columnDir = indexes[ row ];
+        StorageFile    columnDir = indexes[ row ];
         column = columnDir.getName();
-        File    tableDir = columnDir.getParentFile();
+        StorageFile    tableDir = columnDir.getParentDir();
         table = tableDir.getName();
-        File    schemaDir = tableDir.getParentFile();
+        StorageFile    schemaDir = tableDir.getParentDir();
         schema = schemaDir.getName();
     }
 
@@ -212,7 +206,7 @@ public class LuceneListIndexesVTI extends StringColumnVTI
         {
             try {
                 readSchemaTableColumn();
-                File    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, column );
+                StorageFile    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, column );
                 rowProperties = readIndexProperties( indexPropertiesFile );
             }
             catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
@@ -223,24 +217,35 @@ public class LuceneListIndexesVTI extends StringColumnVTI
     }
 
     /** List files */
-    private static  File[]  listFiles( final File file, final FileFilter fileFilter )
+    private static  StorageFile[]  listDirectories( final StorageFactory storageFactory, final StorageFile dir )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
-             new PrivilegedExceptionAction<File[]>()
+             new PrivilegedExceptionAction<StorageFile[]>()
              {
-                public File[] run() throws IOException
+                public StorageFile[] run() throws IOException
                 {
-                    if ( fileFilter == null )   { return file.listFiles(); }
-                    else { return file.listFiles( fileFilter ); }
+                    ArrayList<StorageFile>  subdirectories = new ArrayList<StorageFile>();
+                    String[]    fileNames = dir.list();
+
+                    for ( String fileName : fileNames )
+                    {
+                        StorageFile candidate = storageFactory.newStorageFile( dir, fileName );
+                        if ( candidate.isDirectory() ) { subdirectories.add( candidate ); }
+                    }
+
+                    StorageFile[]   result = new StorageFile[ subdirectories.size() ];
+                    subdirectories.toArray( result );
+                    
+                    return result;
                 }
              }
              );
     }
 
     /** Read the index properties file */
-    private static  Properties readIndexProperties( final File file )
+    private static  Properties readIndexProperties( final StorageFile file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged

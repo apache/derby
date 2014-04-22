@@ -22,9 +22,8 @@
 package org.apache.derby.optional.lucene;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -52,8 +51,13 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.io.StorageFactory;
+import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derby.vti.Restriction.ColumnQualifier;
@@ -95,7 +99,7 @@ public class LuceneSupport implements OptionalTool
     private static  final   String  UPDATE_INDEX = LUCENE_SCHEMA + "." + "updateIndex";
     private static  final   String  SEPARATOR = "__";
 
-    private static  final   String  LUCENE_DIR = "lucene";
+    static  final   String  LUCENE_DIR = "lucene";
 
     // names of columns in all query table functions
     private static  final   String  SCORE = "SCORE";
@@ -286,7 +290,9 @@ public class LuceneSupport implements OptionalTool
         // Now delete the Lucene subdirectory;
         //
         try {
-            deleteFile( new File( getLuceneDirectory( conn ) ) );
+            StorageFactory  storageFactory = getStorageFactory( conn );
+            StorageFile     luceneDir = storageFactory.newStorageFile( LUCENE_DIR );
+            if ( exists( luceneDir ) ) { deleteFile( luceneDir ); }
         }
         catch (IOException ioe) { throw wrap( ioe ); }
         catch (PrivilegedActionException pae) { throw wrap( pae ); }
@@ -461,7 +467,7 @@ public class LuceneSupport implements OptionalTool
         }
         
         int             keyCount = 0;
-        File            propertiesFile = getIndexPropertiesFile( conn, schema, table, textcol );
+        StorageFile propertiesFile = getIndexPropertiesFile( conn, schema, table, textcol );
 
         //
         // Drop the old index directory if we're recreating the index.
@@ -473,6 +479,9 @@ public class LuceneSupport implements OptionalTool
         }
 
         Version luceneVersion = LuceneUtils.currentVersion();
+
+        // create the new directory
+        DerbyLuceneDir  derbyLuceneDir = getDerbyLuceneDir( conn, schema, table, textcol );
 
         // get the Analyzer. use the default if the user didn't specify an override
         if ( analyzerMaker == null ) { analyzerMaker = LuceneUtils.class.getName() + ".defaultAnalyzer"; }
@@ -493,7 +502,7 @@ public class LuceneSupport implements OptionalTool
         ResultSet rs = null;
         IndexWriter iw = null;
         try {
-            iw = getIndexWriter( luceneVersion, analyzer, schema, table, textcol );
+            iw = getIndexWriter( luceneVersion, analyzer, derbyLuceneDir );
 
             // select all keys and the textcol from this column, add to lucene index
             StringBuilder query = new StringBuilder("select ");
@@ -601,16 +610,12 @@ public class LuceneSupport implements OptionalTool
 	private static void dropIndexDirectories( String schema, String table, String textcol )
         throws SQLException, IOException, PrivilegedActionException
     {
-		File indexDir = new File(getIndexLocation( getDefaultConnection(), schema, table, textcol ) );
-		File tableDir = indexDir.getParentFile();
-        File schemaDir = tableDir.getParentFile();
-		
-		if ( !isDirectory( indexDir ) )
-        {
-			throw newSQLException
-                ( SQLState.LUCENE_BAD_INDEX, indexDir.getAbsolutePath() );
-		}
+        DerbyLuceneDir  derbyLuceneDir = getDerbyLuceneDir( getDefaultConnection(), schema, table, textcol );
 
+        StorageFile indexDir = derbyLuceneDir.getDirectory();
+		StorageFile tableDir = indexDir.getParentDir();
+        StorageFile schemaDir = tableDir.getParentDir();
+		
         deleteFile( indexDir );
         if ( isEmpty( tableDir ) )
         {
@@ -1106,48 +1111,42 @@ public class LuceneSupport implements OptionalTool
      * Get the handle on the file holding the index properties.
      * </p>
      */
-	static File getIndexPropertiesFile( Connection conn, String schema, String table, String textcol )
+	static StorageFile getIndexPropertiesFile( Connection conn, String schema, String table, String textcol )
         throws SQLException, IOException, PrivilegedActionException
     {
-		File indexDir = new File( getIndexLocation( conn, schema, table, textcol ) );
-        File    propertiesFile = new File( indexDir, PROPERTIES_FILE_NAME );
+        return getIndexPropertiesFile( getDerbyLuceneDir( conn, schema, table, textcol ) );
+    }
+    
+    /**
+     * <p>
+     * Get the handle on the file holding the index properties.
+     * </p>
+     */
+	static StorageFile getIndexPropertiesFile( DerbyLuceneDir dir )
+        throws SQLException, IOException, PrivilegedActionException
+    {
+        StorageFile         propertiesFile = dir.getFile( PROPERTIES_FILE_NAME );
 
         return propertiesFile;
     }
     
     /** Read the index properties file */
-    private static  Properties readIndexProperties( final File file )
-        throws IOException, PrivilegedActionException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<Properties>()
-             {
-                public Properties run() throws IOException
-                {
-                    return readIndexPropertiesNoPrivs( file );
-                }
-             }
-             );
-    }
-
-    /** Read the index properties file */
-    static  Properties readIndexPropertiesNoPrivs( File file )
+    static  Properties readIndexPropertiesNoPrivs( StorageFile file )
         throws IOException
     {
         if ( file == null ) { return null; }
         
         Properties  properties = new Properties();
-        FileInputStream fis = new FileInputStream( file );
+        InputStream is = file.getInputStream();
 
-        properties.load( fis );
-        fis.close();
+        properties.load( is );
+        is.close();
                         
         return properties;
     }
 
     /** Write the index properties file */
-    private static  void    writeIndexProperties( final File file, final Properties properties )
+    private static  void    writeIndexProperties( final StorageFile file, final Properties properties )
         throws IOException, PrivilegedActionException
     {
         AccessController.doPrivileged
@@ -1159,11 +1158,11 @@ public class LuceneSupport implements OptionalTool
                     if ( (file == null) || (properties == null) ) { return null; }
                     else
                     {
-                        FileOutputStream    fos = new FileOutputStream( file );
+                        OutputStream    os = file.getOutputStream();
 
-                        properties.store( fos, null );
-                        fos.flush();
-                        fos.close();
+                        properties.store( os, null );
+                        os.flush();
+                        os.close();
 
                         return null;
                     }
@@ -1349,26 +1348,6 @@ public class LuceneSupport implements OptionalTool
     	ddl.close();
     }
 	
-	private static String getDerbySystemHome() throws IOException {
-        try {
-            return AccessController
-                    .doPrivileged(new PrivilegedExceptionAction<String>() {
-                        public String run() throws IOException {
-                        	String dir = System.getProperty("derby.system.home");
-                        	if (dir == null) {
-                                return System.getProperty("user.dir");	
-                        	} else {
-                        		return dir;
-                        	}
-                        }
-                    });
-        } catch (PrivilegedActionException pae) {
-            throw (IOException) pae.getCause();
-        } catch (SecurityException se) {
-            throw (IOException) se.getCause();
-        }
-	}
-	
     /** Convert a raw string into a properly cased and escaped Derby identifier */
     private static  String  derbyIdentifier( String rawString )
         throws SQLException
@@ -1542,54 +1521,43 @@ public class LuceneSupport implements OptionalTool
     /////////////////////////////////////////////////////////////////////
 
     /** Return true if the directory is empty */
-    private static  boolean isEmpty( File dir )
+    private static  boolean isEmpty( final StorageFile dir )
         throws IOException, PrivilegedActionException
     {
-        File[]  contents = listFiles( dir, null );
+        String[]  contents = AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<String[]>()
+             {
+                 public String[] run() throws IOException, SQLException
+                {
+                    return dir.list();
+                }
+             }
+             );
 
         if ( contents == null ) { return true; }
         else if ( contents.length == 0 ) { return true; }
         else { return false; }
     }
 
-    /**
-     * Delete a file. If it's a directory, recursively delete all directories
-     * and files underneath it first.
-     */
-    private static  boolean deleteFile( File file )
-        throws IOException, SQLException, PrivilegedActionException
-    {
-        boolean retval = true;
-
-        if ( !fileExists( file ) ) { return false; }
-        
-        if ( isDirectory( file ) )
-        {
-            for ( File child : listFiles( file, null ) ) { retval = retval && deleteFile( child ); }
-        }
-
-        return retval && clobberFile( file );
-    }
-
-    /** Return true if the file is a directory */
-    private static  boolean isDirectory( final File file )
+    /** Return true if the file exists */
+    private static  boolean exists( final StorageFile file )
         throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Boolean>()
              {
-                public Boolean run() throws IOException
+                 public Boolean run() throws IOException, SQLException
                 {
-                    if ( file == null ) { return false; }
-                    else { return file.isDirectory(); }
+                    return file.exists();
                 }
              }
              ).booleanValue();
     }
 
     /** Really delete a file */
-    private static  boolean clobberFile( final File file )
+    private static  boolean deleteFile( final StorageFile file )
         throws IOException, SQLException, PrivilegedActionException
     {
         return AccessController.doPrivileged
@@ -1598,11 +1566,11 @@ public class LuceneSupport implements OptionalTool
              {
                  public Boolean run() throws IOException, SQLException
                 {
-                    boolean result = file.delete();
+                    boolean result = file.isDirectory() ? file.deleteAll() : file.delete();
 
                     if ( !result )
                     {
-                        throw newSQLException( SQLState.UNABLE_TO_DELETE_FILE, file.getAbsolutePath() );
+                        throw newSQLException( SQLState.UNABLE_TO_DELETE_FILE, file.getPath() );
                     }
 
                     return result;
@@ -1611,94 +1579,6 @@ public class LuceneSupport implements OptionalTool
              ).booleanValue();
     }
 
-    /** List files */
-    private static  File[]  listFiles( final File file, final FileFilter fileFilter )
-        throws IOException, PrivilegedActionException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<File[]>()
-             {
-                public File[] run() throws IOException
-                {
-                    if ( fileFilter == null )   { return file.listFiles(); }
-                    else { return file.listFiles( fileFilter ); }
-                }
-             }
-             );
-    }
-
-    /** Return true if the file exists */
-    private static  boolean fileExists( final File file )
-        throws IOException, PrivilegedActionException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<Boolean>()
-             {
-                public Boolean run() throws IOException
-                {
-                    if ( file == null ) { return false; }
-                    else { return file.exists(); }
-                }
-             }
-             ).booleanValue();
-    }
-
-	/**
-	 * Get the system property derby.system.home using the security manager.
-	 * @return Returns the value of the system property derby.system.home, or user.dir if not set.
-	 * @throws IOException
-	 */
-	/**
-	 * Provides the location of the directories used to name the individual Lucene index directories
-	 * for each column using the scheme 'schema_table_column'. The path should be inside the current
-	 * database directory.
-	 */
-	static String getIndexLocation( Connection conn, String schema, String table, String textcol )
-        throws IOException, SQLException
-    {
-		StringBuilder derbyHome = new StringBuilder();
-
-        derbyHome.append( getLuceneDirectory( conn ) );
-		
-        if ( schema != null )
-        {
-            schema = derbyIdentifier( schema );
-                
-            derbyHome.append(File.separator);
-            derbyHome.append(schema);
-
-            if ( table != null )
-            {
-                table = derbyIdentifier( table );
-                    
-                derbyHome.append(File.separator);
-                derbyHome.append(table);
-
-                if ( textcol != null )
-                {
-                    textcol = derbyIdentifier( textcol );
-                        
-                    derbyHome.append(File.separator);
-                    derbyHome.append(textcol);
-                }
-            }
-        }
-		
-        return derbyHome.toString();
-	}
-
-    /** Get the location of the Lucene subdirectory */
-    private static  String getLuceneDirectory( Connection conn )
-        throws IOException, SQLException
-    {
-        EmbedConnection embedConnection = (EmbedConnection) conn;
-        String dbname = embedConnection.getDBName();
-
-        return getDerbySystemHome() + File.separator + dbname + File.separator + LUCENE_DIR;
-    }
-    
     /** Forbid invalid character */
     private static  void    forbidCharacter( String schema, String table, String textcol, String invalidCharacter )
         throws SQLException
@@ -1730,9 +1610,7 @@ public class LuceneSupport implements OptionalTool
         (
          final Version  luceneVersion,
          final  Analyzer    analyzer,
-         final String schema,
-         final String table,
-         final String textcol
+         final DerbyLuceneDir   derbyLuceneDir
          )
         throws SQLException, IOException, PrivilegedActionException
     {
@@ -1742,11 +1620,9 @@ public class LuceneSupport implements OptionalTool
              {
                  public IndexWriter run() throws SQLException, IOException
                  {
-                     Directory dir = FSDirectory.open(new File( getIndexLocation( getDefaultConnection(), schema, table, textcol ) ) );
-
                      // allow this to be overridden in the configuration during load later.
                      IndexWriterConfig iwc = new IndexWriterConfig( luceneVersion, analyzer );
-                     IndexWriter iw = new IndexWriter( dir, iwc );
+                     IndexWriter iw = new IndexWriter( derbyLuceneDir, iwc );
 		
                      return iw;
                  }
@@ -1834,5 +1710,57 @@ public class LuceneSupport implements OptionalTool
                      
         return (Analyzer) method.invoke( null );
 	}
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  DERBY STORE
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Get the handle on the Lucene directory inside the database.
+     * </p>
+     */
+	static DerbyLuceneDir getDerbyLuceneDir( Connection conn, String schema, String table, String textcol )
+        throws SQLException
+    {
+        StorageFactory  storageFactory = getStorageFactory( conn );
+        String  relativePath = getRelativeIndexPath( schema, table, textcol );
+        DerbyLuceneDir  result = DerbyLuceneDir.getDirectory( storageFactory, relativePath );
+
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Get the relative path of the index in the database.
+     * </p>
+     */
+    private static String getRelativeIndexPath( String schema, String table, String textcol )
+        throws SQLException
+    {
+        return
+            LUCENE_DIR + File.separator +
+            derbyIdentifier( schema ) + File.separator +
+            derbyIdentifier( table ) + File.separator +
+            derbyIdentifier( textcol ) + File.separator;
+    }
+
+    
+    /** Get the StorageFactory of the connected database */
+    static  StorageFactory  getStorageFactory( Connection conn )
+        throws SQLException
+    {
+        try {
+            Object monitor = Monitor.findService
+                ( Property.DATABASE_MODULE, ((EmbedConnection) conn).getDBName() ) ;
+            DataFactory dataFactory = (DataFactory) Monitor.findServiceModule( monitor, DataFactory.MODULE );
+
+            return dataFactory.getStorageFactory();
+        }
+        catch (StandardException se) { throw wrap( se ); }
+    }
+
 	
 }

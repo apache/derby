@@ -1,0 +1,350 @@
+/*
+
+   Class org.apache.derby.optional.lucene.LuceneSupport
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
+package org.apache.derby.optional.lucene;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
+
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.IndexInput;
+import org.apache.lucene.store.IndexOutput;
+import org.apache.lucene.store.IOContext;
+import org.apache.lucene.store.SingleInstanceLockFactory;
+
+import org.apache.derby.io.StorageFactory;
+import org.apache.derby.io.StorageFile;
+import org.apache.derby.shared.common.reference.SQLState;
+
+/**
+ * <p>
+ * Derby implementation of Lucene Directory.
+ * </p>
+ */
+class DerbyLuceneDir extends Directory
+{
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  CONSTANTS
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  STATE
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    // constructor args
+    private final   StorageFactory  _storageFactory;
+    private final   StorageFile     _directory;
+
+    // files open for output which may need to be sync'd
+    private HashMap<String,DerbyIndexOutput>    _outputFiles = new HashMap<String,DerbyIndexOutput>();
+
+    private boolean _closed = false;
+
+    // only supply one DerbyLuceneDir per database
+    private static  HashMap<String,DerbyLuceneDir>  _openDirectories = new HashMap<String,DerbyLuceneDir>();
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  CONSTRUCTOR AND FACTORY METHODS
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Lookup a directory, creating its path as necessary.
+     * </p>
+     */
+    static  synchronized    DerbyLuceneDir  getDirectory( StorageFactory storageFactory, String directoryPath )
+        throws SQLException
+    {
+        try {
+            DerbyLuceneDir  candidate = new DerbyLuceneDir( storageFactory, directoryPath );
+            String              key = getKey( candidate );
+            DerbyLuceneDir  result = _openDirectories.get( key );
+
+            if ( result == null )
+            {
+                result = candidate;
+                result.setLockFactory( new SingleInstanceLockFactory() );
+                _openDirectories.put( key, result );
+            }
+
+            createPath( result._directory );
+
+            return result;
+        }
+        catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
+        catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
+    }
+
+    /**
+     * <p>
+     * Remove a directory from the map.
+     * </p>
+     */
+    private static  synchronized    void    removeDir( DerbyLuceneDir dir )
+    {
+        _openDirectories.remove( getKey( dir ) );
+    }
+
+    /** Get the key associated with a directory */
+    private static  String  getKey( DerbyLuceneDir dir ) { return dir._directory.getPath(); }
+    
+    /**
+     * <p>
+     * Construct from the database StorageFactory and a directory path
+     * of the form lucene/$schemaName/$tableName/$columnName.
+     * Creates the directory if it does not already exist.
+     * </p>
+     */
+    private DerbyLuceneDir( StorageFactory storageFactory, String directoryPath )
+    {
+        _storageFactory = storageFactory;
+        _directory = _storageFactory.newStorageFile( directoryPath );
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  WRAPPERS FOR StorageFactory METHODS
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Get a file in this directory.
+     * </p>
+     */
+    StorageFile     getFile( String fileName )
+    {
+        return _storageFactory.newStorageFile( _directory, fileName );
+    }
+
+    /**
+     * <p>
+     * Get the Derby directory backing this Lucene directory.
+     * </p>
+     */
+    StorageFile getDirectory()
+    {
+        return _directory;
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  Directory METHODS
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Close this directory and remove it from the map of open directories.
+     * </p>
+     */
+    public void close()    throws IOException
+    {
+        // close the output files
+        for ( String fileName : _outputFiles.keySet() )
+        {
+            _outputFiles.get( fileName ).close();
+        }
+
+        _outputFiles.clear();
+        _closed = true;
+        removeDir( this );
+    }
+
+    /**  Create a new, empty file for writing */
+    public DerbyIndexOutput createOutput
+        ( String name, IOContext context )
+        throws IOException
+    {
+        checkIfClosed();
+
+        DerbyIndexOutput    indexOutput = _outputFiles.get( name );
+        if ( indexOutput != null )
+        {
+            indexOutput.close();
+        }
+
+        StorageFile file = getStorageFile( name );
+        if ( file.exists() ) { deleteFile( name ); }
+        
+        indexOutput = new DerbyIndexOutput( file, this );
+        _outputFiles.put( name, indexOutput );
+
+        return indexOutput;
+    }
+
+    public void deleteFile( String name ) throws IOException
+    {
+        checkIfClosed();
+        
+        StorageFile file = getStorageFile( name );
+
+        if ( file.exists() )
+        {
+            if ( !file.delete() )
+            {
+                throw newIOException( SQLState.UNABLE_TO_DELETE_FILE, file.getPath() );
+            }
+        }
+    }
+
+    public boolean fileExists( String name )  throws IOException
+    {
+        checkIfClosed();
+        
+        return getStorageFile( name ).exists();
+    }
+
+    public long fileLength( String name ) throws IOException
+    {
+        checkIfClosed();
+        
+        DerbyIndexInput indexInput = openInput( name, null );
+
+        try {
+            return indexInput.length();
+        }
+        finally
+        {
+            indexInput.close();
+        }
+    }
+
+    public String[] listAll()   throws IOException
+    {
+        checkIfClosed();
+        
+        return _directory.list();
+    }
+
+    public DerbyIndexInput openInput
+        ( String name, IOContext context )
+        throws IOException
+    {
+        checkIfClosed();
+        
+        StorageFile file = getStorageFile( name );
+        if ( !file.exists() )
+        {
+            throw new FileNotFoundException( file.getPath() );
+        }
+
+        return getIndexInput( file );
+    }
+
+    public void sync( Collection<String> names )
+        throws IOException
+    {
+        for ( String name : names )
+        {
+            DerbyIndexOutput    indexOutput = _outputFiles.get( name );
+
+            if ( indexOutput != null )
+            {
+                indexOutput.flush();
+            }
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  FOR USE WHEN CLOSING CHILD FILES
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /** Remove the named file from the list of output files */
+    void    removeIndexOutput( String name )
+    {
+        _outputFiles.remove( name );
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    //
+    //  MINIONS
+    //
+    /////////////////////////////////////////////////////////////////////
+
+    /** Get a DerbyIndexInput on the named file */
+    private DerbyIndexInput getIndexInput( String name )
+        throws IOException
+    {
+        return getIndexInput( getStorageFile( name ) );
+    }
+    private DerbyIndexInput getIndexInput( StorageFile file )
+        throws IOException
+    {
+        return new DerbyIndexInput( file );
+    }
+
+    /** Turn a file name into a StorageFile handle */
+    private StorageFile getStorageFile( String name )
+    {
+        return _storageFactory.newStorageFile( _directory, name );
+    }
+
+    /** Make an IOException with the given SQLState and args */
+    private IOException newIOException( String sqlState, Object... args )
+    {
+        return new IOException( LuceneSupport.newSQLException( sqlState, args ).getMessage() );
+    }
+
+    /** Raise an exception if this directory is closed */
+    private void    checkIfClosed() throws IOException
+    {
+        if ( _closed )
+        {
+            throw newIOException( SQLState.DATA_CONTAINER_CLOSED );
+        }
+    }
+
+	/**
+	 * Create the path if necessary.
+	 */
+    private static void createPath( final StorageFile directory )
+        throws IOException, PrivilegedActionException
+    {
+        AccessController.doPrivileged
+            (
+             new PrivilegedExceptionAction<Object>()
+             {
+                 public Object run() throws IOException
+                 {
+                     directory.mkdirs();
+                     return null;
+                 }
+             }
+             );
+    }
+
+}
+
