@@ -455,6 +455,7 @@ public final class	DataDictionaryImpl
 	private static final String[] sysUtilFunctionsWithPublicAccess = { 
 												"SYSCS_GET_RUNTIMESTATISTICS", 
 												"SYSCS_PEEK_AT_SEQUENCE",
+												"SYSCS_PEEK_AT_IDENTITY",
 												};
 	
 	/**
@@ -10286,6 +10287,30 @@ public final class	DataDictionaryImpl
         }
     }
     
+    public Long peekAtIdentity( String schemaName, String tableName )
+        throws StandardException
+    {
+        LanguageConnectionContext lcc = getLCC();
+        TransactionController tc = lcc.getTransactionExecute();
+        SchemaDescriptor    sd = getSchemaDescriptor( schemaName, tc, true );
+        TableDescriptor td = getTableDescriptor( tableName, sd, tc );
+
+        if ( td == null )
+        {
+            throw StandardException.newException
+                (
+                 SQLState.LANG_OBJECT_NOT_FOUND_DURING_EXECUTION, "TABLE",
+                 ( schemaName + "." + tableName)
+                 );
+        }
+
+        return peekAtSequence
+            (
+             SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME,
+             TableDescriptor.makeSequenceName( td.getUUID() )
+             );
+    }
+        
     public Long peekAtSequence( String schemaName, String sequenceName )
         throws StandardException
     {
@@ -11342,6 +11367,8 @@ public final class	DataDictionaryImpl
         create_10_9_system_procedures( tc, newlyCreatedRoutines );
         // add 10.10 specific system procedures
         create_10_10_system_procedures( tc, newlyCreatedRoutines );
+        // add 10.11 specific system procedures
+        create_10_11_system_procedures( tc, newlyCreatedRoutines );
     }
 
     /**
@@ -13259,6 +13286,49 @@ public final class	DataDictionaryImpl
         
     }
 
+    /**
+     * <p>
+     * Create system procedures that are part of the SYSCS_UTIL schema, added in version 10.11.
+     * </p>
+     *
+     * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
+     **/
+    void create_10_11_system_procedures( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
+        throws StandardException
+    {
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
+        // BIGINT
+        // SYSCS_UTIL.SYSCS_PEEK_AT_IDENTITY( VARCHAR(128), VARCHAR(128) )
+
+        {
+            // procedure argument names
+            String[] arg_names = { "schemaName", "tableName" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+                };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_PEEK_AT_IDENTITY",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+                RoutineAliasInfo.READS_SQL_DATA,
+                false,
+                false,
+                DataTypeDescriptor.getCatalogType( Types.BIGINT ),
+                newlyCreatedRoutines,
+                tc);
+        }
+    }
+
 
 	/*
 	** Priv block code to load net work server meta data queries.
@@ -14311,4 +14381,72 @@ public final class	DataDictionaryImpl
             int formatId, byte[] columnBitMap) {
         return new DDColumnDependableFinder(formatId, columnBitMap);
     }
+
+    /**
+     * Create sequence generators for all identity columns on upgrade to 10.11.
+     */
+    void    createIdentitySequences( TransactionController tc )
+        throws StandardException
+    {
+        Hashtable<UUID,TableDescriptor> tableMap = hashAllTableDescriptorsByTableId( tc );
+
+        for ( UUID tableID : tableMap.keySet() )
+        {
+            TableDescriptor td = getTableDescriptor( tableID );
+            ColumnDescriptorList    cdl = td.getColumnDescriptorList();
+
+            for ( ColumnDescriptor cd : cdl )
+            {
+                if ( cd.isAutoincrement() )
+                {
+                    createIdentitySequence( td, cd, tc );
+                }
+            }
+        }
+    }
+
+    /**
+     * Create a sequence generator for an identity column on upgrade to 10.11.
+     */
+    private void    createIdentitySequence
+        (
+         TableDescriptor td,
+         ColumnDescriptor cd,   // the identity column
+         TransactionController tc
+         )
+        throws StandardException
+    {
+        DataTypeDescriptor  dtd = cd.getType();
+        long[]      bounds = dtd.getNumericBounds();
+        long    currentValue = cd.getAutoincValue();
+        long    initialValue = cd.getAutoincStart();
+        long    minValue = bounds[ DataTypeDescriptor.MIN_VALUE_IDX ];
+        long    maxValue = bounds[ DataTypeDescriptor.MAX_VALUE_IDX ];
+        long    stepValue = cd.getAutoincInc();
+        SchemaDescriptor    sd = getSystemSchemaDescriptor();
+
+        SequenceDescriptor  seqDef = getDataDescriptorGenerator().newSequenceDescriptor
+            (
+             sd,
+             getUUIDFactory().createUUID(),
+             TableDescriptor.makeSequenceName( td.getUUID() ),
+             dtd,
+             new Long( currentValue ),
+             initialValue,
+             minValue,
+             maxValue,
+             stepValue,
+             false         // whether the sequence can wrap-around
+             );
+
+        addDescriptor
+            (
+             seqDef,
+             null,  // parent
+             DataDictionary.SYSSEQUENCES_CATALOG_NUM,
+             false, // duplicatesAllowed
+             tc
+             );
+    }
+
 }

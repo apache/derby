@@ -241,7 +241,7 @@ public final class TypeId
             StoredFormatIds.TINYINT_TYPE_ID,
             StoredFormatIds.TINYINT_TYPE_ID_IMPL);
 
-        private static final TypeId BIGINT_ID = create(
+        public static final TypeId BIGINT_ID = create(
             StoredFormatIds.BIGINT_TYPE_ID,
             StoredFormatIds.BIGINT_TYPE_ID_IMPL);
 

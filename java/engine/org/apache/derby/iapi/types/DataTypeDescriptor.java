@@ -91,7 +91,10 @@ public final class DataTypeDescriptor implements Formatable
      */
     public static final DataTypeDescriptor SMALLINT_NOT_NULL =
         SMALLINT.getNullabilityType(false);
-     
+
+    public  static  final   int MIN_VALUE_IDX = 0;
+    public  static  final   int MAX_VALUE_IDX = MIN_VALUE_IDX + 1;
+    public  static  final   int MAX_MIN_ARRAY_SIZE = MAX_VALUE_IDX + 1;
 
 	/*
 	** Static creators
@@ -1889,5 +1892,38 @@ public final class DataTypeDescriptor implements Formatable
         }
         return name;    
     }
+
+    /**
+     * Get the maximum and minimum value for a fixed numeric type.
+     * Throws an unimplemented feature exception for a non-numeric type.
+     */
+    public  long[]  getNumericBounds()
+        throws StandardException
+    {
+        long[]  retval = new long[ MAX_MIN_ARRAY_SIZE ];
+
+        if ( getTypeId().equals( TypeId.SMALLINT_ID ) )
+        {
+            retval[ MIN_VALUE_IDX ] = Long.valueOf( Short.MIN_VALUE );
+            retval[ MAX_VALUE_IDX ] = Long.valueOf( Short.MAX_VALUE );
+        }
+        else if ( getTypeId().equals( TypeId.INTEGER_ID ) )
+        {
+            retval[ MIN_VALUE_IDX ] = Long.valueOf( Integer.MIN_VALUE );
+            retval[ MAX_VALUE_IDX ] = Long.valueOf( Integer.MAX_VALUE );
+        } else if ( getTypeId().equals( TypeId.BIGINT_ID ) )
+        {
+            // Could only be BIGINT
+            retval[ MIN_VALUE_IDX ] = Long.MIN_VALUE;
+            retval[ MAX_VALUE_IDX ] = Long.MAX_VALUE;
+        }
+        else
+        {
+            throw StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+        }
+
+        return retval;
+    }
+    
 }
 

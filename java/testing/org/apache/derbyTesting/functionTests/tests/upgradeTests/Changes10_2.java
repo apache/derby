@@ -336,6 +336,7 @@ public class Changes10_2 extends UpgradeChange {
                     {"SYSCS_GET_RUNTIMESTATISTICS"},
                     {"SYSCS_INPLACE_COMPRESS_TABLE"},
                     {"SYSCS_MODIFY_PASSWORD"},
+                    {"SYSCS_PEEK_AT_IDENTITY"},
                     {"SYSCS_PEEK_AT_SEQUENCE"},
                     {"SYSCS_SET_RUNTIMESTATISTICS"},
                     {"SYSCS_SET_STATISTICS_TIMING"},

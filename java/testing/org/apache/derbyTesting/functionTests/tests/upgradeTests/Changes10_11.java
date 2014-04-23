@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -448,6 +449,105 @@ public class Changes10_11 extends UpgradeChange
                 statement.executeUpdate( loadTool );
                 statement.executeUpdate( unloadTool );
                 break;
+        }
+    }
+
+    /** Test the addition of sequence generators to back identity columns */
+    public void testIdentitySequence() throws Exception
+    {
+        Properties  properties = TestConfiguration.getSystemProperties();
+        if ( getBooleanProperty( properties, TestConfiguration.KEY_OMIT_LUCENE ) )  { return; }
+
+        Version initialVersion = new Version( getOldMajor(), getOldMinor(), 0, 0 );
+        Version firstVersionHavingSequences = new Version( 10, 6, 0, 0 );
+        boolean hasSequences = initialVersion.compareTo( firstVersionHavingSequences ) >= 0;
+
+        Statement statement = createStatement();
+
+        String  peek = "values syscs_util.syscs_peek_at_identity( 'APP', 'IDSEQ1' )";
+        
+        switch ( getPhase() )
+        {
+            case PH_CREATE:
+                statement.executeUpdate
+                    (
+                     "create function uuidToSequenceName( uuid char( 36 ) ) returns varchar( 128 )\n" +
+                     "language java parameter style java no sql\n" +
+                     "external name 'org.apache.derbyTesting.functionTests.tests.lang.IdentitySequenceTest.uuidToSequenceName'\n"
+                     );
+                statement.executeUpdate
+                    ( "create table idseq1( a int generated always as identity ( start with 10, increment by 20 ), b int )" );
+                statement.executeUpdate( "insert into idseq1( b ) values ( 1 ), ( 20 )" );
+                if ( hasSequences ) { assertEquals( 0, countSequences( statement ) ); }
+                assertStatementError( UNRECOGNIZED_PROCEDURE, statement, peek );
+                break;
+            case PH_POST_SOFT_UPGRADE:
+                statement.executeUpdate( "create table idseq2( a int generated always as identity, b int )" );
+                if ( hasSequences ) { assertEquals( 0, countSequences( statement ) ); }
+                assertStatementError( UNRECOGNIZED_PROCEDURE, statement, peek );
+                break;
+            case PH_SOFT_UPGRADE:
+                statement.executeUpdate( "create table idseq3( a int generated always as identity, b int )" );
+                if ( hasSequences ) { assertEquals( 0, countSequences( statement ) ); }
+                assertStatementError( UNRECOGNIZED_PROCEDURE, statement, peek );
+                break;
+            case PH_HARD_UPGRADE:
+                statement.executeUpdate( "create table idseq4( a int generated always as identity, b int )" );
+                assertEquals
+                    (
+                     4,
+                     count
+                     (
+                      statement,
+                      "select count(*)\n" +
+                      "from sys.systables t, sys.syssequences s\n" +
+                      "where uuidToSequenceName( t.tableid ) = s.sequencename\n" +
+                      "and t.tablename like 'IDSEQ%'"
+                      )
+                     );
+                JDBC.assertFullResultSet
+                    (
+                     statement.executeQuery( peek ),
+                     new String[][]
+                     {
+                         { "50" },
+                     }
+                     );
+                JDBC.assertFullResultSet
+                    (
+                     statement.executeQuery
+                     (
+                      "select sch.schemaName,\n" +
+                      "s.currentvalue, s.startvalue, s.minimumvalue, s.maximumvalue, s.increment, s.cycleoption\n" +
+                      "from sys.sysschemas sch, sys.systables t, sys.syssequences s\n" +
+                      "where t.tablename = 'IDSEQ1'\n" +
+                      "and uuidToSequenceName( t.tableid ) = s.sequencename\n" +
+                      "and sch.schemaid = s.schemaid\n"
+                      ),
+                     new String[][]
+                     {
+                         { "SYS", "50", "10", "-2147483648", "2147483647", "20", "N" },
+                     }
+                     );
+                break;
+        }
+    }
+    private int countSequences( Statement statement )
+        throws Exception
+    {
+        return count( statement, "select count(*) from sys.syssequences" );
+    }
+    private int count( Statement statement, String query ) throws Exception
+    {
+        ResultSet   rs = statement.executeQuery( query );
+        rs.next();
+
+        try {
+            return rs.getInt( 1 );
+        }
+        finally
+        {
+            rs.close();
         }
     }
 

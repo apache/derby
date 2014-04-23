@@ -2323,6 +2323,11 @@ Guide.
             </msg>
 
 	        <msg>
+                <name>42XAR</name>
+                <text>The NEXT VALUE operator may not be used on a system-owned sequence generator.</text>
+            </msg>
+
+	        <msg>
                 <name>42XBA</name>
                 <text>The schema, table or column does not exist or the column is not a string type.</text>
             </msg>

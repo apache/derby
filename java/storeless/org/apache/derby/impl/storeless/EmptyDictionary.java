@@ -758,6 +758,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// Auto-generated method stub
     }
     
+    public Long peekAtIdentity( String schemaName, String tableName )
+        throws StandardException
+    {
+		return null;
+    }
+    
     public Long peekAtSequence( String schemaName, String sequenceName )
         throws StandardException
     {

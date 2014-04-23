@@ -516,6 +516,13 @@ public	class DD_Version implements	Formatable
               bootingDictionary.getNonCoreTIByNumber(
                 DataDictionary.SYSTRIGGERS_CATALOG_NUM).getCatalogRowFactory(),
                 new int[] { 18 }, tc);
+            
+            // On ugrade from versions before 10.11, create system procedures
+            // added in 10.11.
+            bootingDictionary.create_10_11_system_procedures( tc, newlyCreatedRoutines );
+
+            // Add a sequence generator for every identity column
+            bootingDictionary.createIdentitySequences( tc );
         }
 
         // Grant PUBLIC access to some system routines

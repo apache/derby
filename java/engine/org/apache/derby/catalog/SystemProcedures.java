@@ -2362,4 +2362,20 @@ public class SystemProcedures  {
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
 
+    /**
+     * Peek at the current value of an identity generator without advancing it.
+     *
+     * @param schemaName    The name of the schema holding the table.
+     * @param tableName    The name of the table in that schema.
+     *
+     * @exception SQLException if a database error occurs
+     **/
+    public static Long SYSCS_PEEK_AT_IDENTITY( String schemaName, String tableName )
+        throws SQLException
+    {
+        try {
+            return ConnectionUtil.getCurrentLCC().getDataDictionary().peekAtIdentity( schemaName, tableName );
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+
 }

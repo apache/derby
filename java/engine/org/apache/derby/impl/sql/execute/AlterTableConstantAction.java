@@ -1448,6 +1448,16 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 lcc, columnDescriptor.getDefaultDescriptor(dd));
 		}
 
+        // If the column is an identity column (and the dictionary is at least version 10.11),
+        // then we need to drop the system-generated sequence backing it.
+        if (
+            columnDescriptor.isAutoincrement() &&
+            dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )
+            )
+        {
+            DropTableConstantAction.dropIdentitySequence( dd, td, activation );
+        }
+
 		//Now go through each trigger on this table and see if the column 
 		//being dropped is part of it's trigger columns or trigger action 
 		//columns which are used through REFERENCING clause
@@ -2192,8 +2202,27 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 					 columnInfo[ix].autoincStart, false);
-		} 
+		}
 		// else we are simply changing the default value
+
+		if (
+            (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) ||
+            (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
+            )
+        {
+            //
+            // If we're at level 10.11 or higher, we re-create the sequence generator
+            // for the auto-increment column. See derby-6542.
+            //
+            if ( dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null ) )
+            {
+                DropTableConstantAction.dropIdentitySequence( dd, td, activation );
+
+                CreateSequenceConstantAction   csca = CreateTableConstantAction.makeCSCA
+                    ( columnInfo[ix], TableDescriptor.makeSequenceName( td.getUUID() ) );
+                csca.executeConstantAction( activation );
+            }
+        }
 	}
 	
     /**

@@ -1521,5 +1521,11 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		}
 	}
     
+    /** Make the name of an identity sequence generator from a table ID */
+    public  static  String  makeSequenceName( UUID tableID )
+    {
+        return tableID.toANSIidentifier();
+    }
+
 }
 

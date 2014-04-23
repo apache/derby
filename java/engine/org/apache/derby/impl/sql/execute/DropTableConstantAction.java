@@ -152,7 +152,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 				lcc.dropDeclaredGlobalTempTable(tableName);
 				return;
 			}
-    }
+        }
 
 		/* Lock the table before we access the data dictionary
 		 * to prevent deadlocks.
@@ -196,6 +196,19 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		
         for (ColumnDescriptor cd : cdl)
 		{
+            //
+            // If we are at level 10.11 or higher, then we need to drop the
+            // sequence generator which backs the identity column.
+            // See DERBY-6542.
+            //
+            if (
+                cd.isAutoincrement() &&
+                dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )
+                )
+            {
+                dropIdentitySequence( dd, td, activation );
+            }
+            
 			// If column has a default we drop the default and
 			// any dependencies
 			if (cd.getDefaultInfo() != null)
@@ -277,6 +290,19 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 		tc.dropConglomerate(heapId);
 
 	}
+
+    /** Drop the sequence generator backing an identity column */
+    public  static  void    dropIdentitySequence
+        ( DataDictionary dataDictionary, TableDescriptor tableDescriptor, Activation activation )
+        throws StandardException
+    {
+        DropSequenceConstantAction  dsca = new DropSequenceConstantAction
+            (
+             dataDictionary.getSystemSchemaDescriptor(),
+             TableDescriptor.makeSequenceName( tableDescriptor.getUUID() )
+             );
+        dsca.executeConstantAction( activation );
+    }
 
 	private void dropAllConstraintDescriptors(TableDescriptor td, Activation activation)
 		throws StandardException

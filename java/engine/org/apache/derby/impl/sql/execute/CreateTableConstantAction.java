@@ -44,6 +44,9 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -272,30 +275,47 @@ class CreateTableConstantAction extends DDLConstantAction
 			}
 
 			if (columnInfo[ix].autoincInc != 0)//dealing with autoinc column
-			columnDescriptor = new ColumnDescriptor(
-				                   columnInfo[ix].name,
-								   index++,
-								   columnInfo[ix].dataType,
-								   columnInfo[ix].defaultValue,
-								   columnInfo[ix].defaultInfo,
-								   td,
-								   defaultUUID,
-								   columnInfo[ix].autoincStart,
-								   columnInfo[ix].autoincInc,
-								   columnInfo[ix].autoinc_create_or_modify_Start_Increment
-							   );
-			else
-				columnDescriptor = new ColumnDescriptor(
-		                   columnInfo[ix].name,
-						   index++,
-						   columnInfo[ix].dataType,
-						   columnInfo[ix].defaultValue,
-						   columnInfo[ix].defaultInfo,
-						   td,
-						   defaultUUID,
-						   columnInfo[ix].autoincStart,
-						   columnInfo[ix].autoincInc
-					   );
+            {
+                columnDescriptor = new ColumnDescriptor
+                    (
+                     columnInfo[ix].name,
+                     index++,
+                     columnInfo[ix].dataType,
+                     columnInfo[ix].defaultValue,
+                     columnInfo[ix].defaultInfo,
+                     td,
+                     defaultUUID,
+                     columnInfo[ix].autoincStart,
+                     columnInfo[ix].autoincInc,
+                     columnInfo[ix].autoinc_create_or_modify_Start_Increment
+                     );
+
+                //
+                // If we're at level 10.11 or higher, we create a sequence generator
+                // for the auto-increment column. See derby-6542.
+                //
+                if ( dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null ) )
+                {
+                    CreateSequenceConstantAction    csca = makeCSCA
+                        ( columnInfo[ ix ], TableDescriptor.makeSequenceName( toid ) );
+                    csca.executeConstantAction( activation );
+                }
+            }
+            else
+            {
+				columnDescriptor = new ColumnDescriptor
+                    (
+                     columnInfo[ix].name,
+                     index++,
+                     columnInfo[ix].dataType,
+                     columnInfo[ix].defaultValue,
+                     columnInfo[ix].defaultInfo,
+                     td,
+                     defaultUUID,
+                     columnInfo[ix].autoincStart,
+                     columnInfo[ix].autoincInc
+                     );
+            }
 
 			cdlArray[ix] = columnDescriptor;
 		}
@@ -388,5 +408,27 @@ class CreateTableConstantAction extends DDLConstantAction
 
 	}
 
+    /** Create a sequence generator for an identity column */
+    public  static CreateSequenceConstantAction    makeCSCA
+        ( ColumnInfo info, String sequenceName )
+        throws StandardException
+    {
+        DataTypeDescriptor  dtd = info.dataType;
+        long[]      bounds = dtd.getNumericBounds();
+        long    minValue = bounds[ DataTypeDescriptor.MIN_VALUE_IDX ];
+        long    maxValue = bounds[ DataTypeDescriptor.MAX_VALUE_IDX ];
+
+        return new CreateSequenceConstantAction
+            (
+             SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME,
+             sequenceName,
+             dtd,
+             info.autoincStart,
+             info.autoincInc,
+             maxValue,
+             minValue,
+             false
+             );
+    }
 
 }

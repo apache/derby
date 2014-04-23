@@ -1849,6 +1849,14 @@ public interface DataDictionary
 
     /**
      * <p>
+     * Peek at the next value which will be returned by an identity generator.
+     * </p>
+     */
+    public Long peekAtIdentity( String schemaName, String tableName )
+        throws StandardException;
+
+    /**
+     * <p>
      * Peek at the next value which will be returned by a sequence generator.
      * </p>
      */

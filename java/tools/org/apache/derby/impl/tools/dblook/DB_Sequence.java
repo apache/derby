@@ -61,10 +61,12 @@ public class DB_Sequence
 	public static void doSequences( Connection conn )
 		throws SQLException
     {
+        // exclude system-generated sequences. see DERBY-6542.
 		PreparedStatement ps = conn.prepareStatement
             (
              "SELECT SCHEMAID, SEQUENCENAME, SEQUENCEDATATYPE, STARTVALUE, MINIMUMVALUE, MAXIMUMVALUE, INCREMENT, CYCLEOPTION\n" +
-             "FROM SYS.SYSSEQUENCES"
+             "FROM SYS.SYSSEQUENCES\n" +
+             "WHERE CAST( SCHEMAID AS CHAR( 36) ) != '8000000d-00d0-fd77-3ed8-000a0a0b1900'"
              );
         ResultSet rs = ps.executeQuery();
 

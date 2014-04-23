@@ -167,6 +167,7 @@ SYSCS_UTIL    |SYSCS_GET_RUNTIMESTATISTICS |org.apache.derby.catalog.SystemPro&
 SYSCS_UTIL    |SYSCS_GET_USER_ACCESS       |org.apache.derby.catalog.SystemPro&
 SYSCS_UTIL    |SYSCS_GET_XPLAIN_MODE       |org.apache.derby.catalog.SystemPro&
 SYSCS_UTIL    |SYSCS_GET_XPLAIN_SCHEMA     |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_PEEK_AT_IDENTITY      |org.apache.derby.catalog.SystemPro&
 SYSCS_UTIL    |SYSCS_PEEK_AT_SEQUENCE      |org.apache.derby.catalog.SystemPro&
 SYSIBM        |BLOBCREATELOCATOR           |org.apache.derby.impl.jdbc.LOBStor&
 SYSIBM        |BLOBGETBYTES                |org.apache.derby.impl.jdbc.LOBStor&

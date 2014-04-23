@@ -92,7 +92,16 @@ class NextSequenceNode extends ValueNode {
 
         if ( sequenceDescriptor == null )
         {
-                throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "SEQUENCE", sequenceName.getFullTableName());
+            throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "SEQUENCE", sequenceName.getFullTableName());
+        }
+
+        //
+        // System sequences can only be operated at runtime when inserting
+        // a new identity value. See DERBY-6542.
+        //
+        if ( sd.isSystemSchema() )
+        {
+            throw StandardException.newException( SQLState.LANG_SYSTEM_SEQUENCE );
         }
 
         // set the datatype of the value node

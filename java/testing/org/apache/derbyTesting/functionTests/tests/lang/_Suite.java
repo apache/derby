@@ -247,6 +247,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NewOptimizerOverridesTest.suite());
         suite.addTest(XMLOptimizerTraceTest.suite());
         suite.addTest(MergeStatementTest.suite());
+        suite.addTest(IdentitySequenceTest.suite());
         suite.addTest(NestedCommitTest.suite());
         suite.addTest(ForeignKeysNonSpsTest.suite());
         suite.addTest(LOBDB2compatibilityTest.suite());
