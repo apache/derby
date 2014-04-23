@@ -183,6 +183,7 @@ public class TesterObject {
 					NsTest.addStats(NsTest.FAILED_UPDATE, 1);
 			} catch (Exception e) {
 				printException("executing update_one_row", e);
+                if ( NsTest.deadConnection( e ) ) { markDeadConnection(); }
 			}
 			break;
 
@@ -196,6 +197,7 @@ public class TesterObject {
 					NsTest.addStats(NsTest.FAILED_DELETE, 1);
 			} catch (Exception e) {
 				printException("executing delete_one_row()", e);
+                if ( NsTest.deadConnection( e ) ) { markDeadConnection(); }
 			}
 			break;
 

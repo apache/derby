@@ -42,6 +42,8 @@ public  class   NsTestError
 
     private Throwable   _throwable;
     private int             _count;
+    private long            _firstOccurrenceTime;
+    private long            _lastOccurrenceTime;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -54,6 +56,8 @@ public  class   NsTestError
     {
         _throwable = throwable;
         _count = 1;
+        _firstOccurrenceTime = System.currentTimeMillis();
+        _lastOccurrenceTime = _firstOccurrenceTime;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -67,6 +71,12 @@ public  class   NsTestError
 
     /** Get the number of times this error was seen */
     public  int count() { return _count; }
+
+    /** Get the timestamp of the first occurrence */
+    public  long    getFirstOccurrenceTime() { return _firstOccurrenceTime; }
+
+    /** Get the timestamp of the last occurrence */
+    public  long    getLastOccurrenceTime() { return _lastOccurrenceTime; }
   
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -75,7 +85,11 @@ public  class   NsTestError
     ///////////////////////////////////////////////////////////////////////////////////
 
     /** Increment the number of times this error was seen */
-    public  void    increment() { _count++; }
+    public  void    increment()
+    {
+        _count++;
+        _lastOccurrenceTime = System.currentTimeMillis();
+    }
     
 }
 

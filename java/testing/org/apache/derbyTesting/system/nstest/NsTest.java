@@ -720,6 +720,8 @@ public class NsTest extends Thread
         NsTestError error = _errors.get( key );
         Throwable   throwable = error.throwable();
         int             count = error.count();
+        Timestamp   firstOccurrenceTime = new Timestamp( error.getFirstOccurrenceTime() );
+        Timestamp   lastOccurrenceTime = new Timestamp( error.getLastOccurrenceTime() );
         String      sqlState = (throwable instanceof SQLException) ? 
             ((SQLException) throwable).getSQLState() : null;
 
@@ -732,6 +734,12 @@ public class NsTest extends Thread
         buffer.append( "Count = " + count );
         if ( sqlState != null ) { buffer.append( ", SQLState = " + sqlState ); }
         buffer.append( ", Message = " + throwable.getMessage() );
+        buffer.append( "\n" );
+        buffer.append( ERROR_BANNER2 );
+        buffer.append( "\n" );
+        buffer.append( ERROR_BANNER2 );
+        buffer.append( "First occurrence at " + firstOccurrenceTime );
+        buffer.append( ", last occurrence at " + lastOccurrenceTime );
         buffer.append( "\n" );
         buffer.append( ERROR_BANNER2 );
         buffer.append( "\n" );
