@@ -36,7 +36,6 @@ import java.net.URL;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	A set of public static methods for dealing with File objects.
@@ -483,21 +482,43 @@ public abstract class FileUtil {
     }
 
     /**
+     * <p>
      * Use when creating new files. If running on Unix,
      * limit read and write permissions on {@code file} to owner if {@code
      * derby.storage.useDefaultFilePermissions == false}.
-     * <p/>
+     * </p>
+     *
+     * <p>
      * If the property is not specified, we use restrictive permissions anyway
      * iff running with the server server started from the command line.
-     * <p/>
+     * </p>
+     *
+     * <p>
      * On Unix, this is equivalent to running with umask 0077.
-     * <p/>
+     * </p>
+     *
+     * <p>
      * On Windows, with FAT/FAT32, we lose, since the fs does not support
      * permissions, only a read-only flag.
-     * <p/>
+     * </p>
+     *
+     * <p>
      * On Windows, with NTFS with ACLs, if running with Java 7 or higher, we
      * limit access also for Windows using the new {@code
      * java.nio.file.attribute} package.
+     * </p>
+     *
+     * <p>
+     * When restricted file access is enabled (either explicitly or by
+     * default) errors are handled like this: When running on JDK 7 or higher,
+     * and the file system can be accessed either via a PosixFileAttributeView
+     * or via an AclFileAttributeView, any IOException reported when trying
+     * to restrict the permissions will also be thrown by this method. In
+     * all other cases, it will do its best to limit the permissions using
+     * the {@code java.io.File} methods ({@code setReadable()},
+     * {@code setWritable()}, {@code setExecutable()}), but it won't throw
+     * any exceptions if the permissions cannot be set that way.
+     * </p>
      *
      * @param file assumed to be just created
      * @throws IOException if an I/O error happens when trying to change the
@@ -525,65 +546,67 @@ public abstract class FileUtil {
             }
         }
 
-        if (limitAccessToOwnerViaACLs(file)) {
+        // First attempt to limit access using the java.io.File class.
+        // If it is successful, that's it and we're done.
+        if (limitAccessToOwnerViaFile(file)) {
             return;
         }
 
-        //
+        // We couldn't limit the access using the java.io.File class. Try
+        // again with a FileAttributeView if it is supported. We may have
+        // more luck with that approach. For example, with NTFS on Windows,
+        // the java.io.File class won't be able to limit access, but the
+        // FileAttributeView will.
+        limitAccessToOwnerViaFileAttributeView(file);
+    }
+
+    /**
+     * Limit access to owner using methods in the {@code java.io.File} class.
+     * Those methods are available on all Java versions from 6 and up, but
+     * they are not fully functional on all file systems.
+     *
+     * @param file the file to limit access to
+     * @return {@code true} on success, or {@code false} if some of the
+     * permissions could not be changed
+     */
+    private static boolean limitAccessToOwnerViaFile(File file) {
+
         // First switch off all write access
-        //
-        assertTrue(file.setWritable(false, false));
+        boolean success = file.setWritable(false, false);
 
-        //
         // Next, switch on write again, but for owner only
-        //
-        assertTrue(file.setWritable(true, true));
+        success &= file.setWritable(true, true);
 
-        //
         // First switch off all read access
-        //
-        assertTrue(file.setReadable(false, false));
+        success &= file.setReadable(false, false);
 
-        //
         // Next, switch on read access again, but for owner only
-        //
-        assertTrue(file.setReadable(true, true));
+        success &= file.setReadable(true, true);
 
         if (file.isDirectory()) {
-            //
             // First switch off all exec access
-            //
-            assertTrue(file.setExecutable(false, false));
+            success &= file.setExecutable(false, false);
 
-            //
             // Next, switch on exec again, but for owner only
-            //
-            assertTrue(file.setExecutable(true, true));
+            success &= file.setExecutable(true, true);
         }
+
+        return success;
     }
 
-    private static void assertTrue(boolean b) {
-        // We should always have the permission to modify the access since have
-        // just created the file. On some file systems, some operations will
-        // not work, though, notably FAT/FAT32, as well as NTFS on java < 7, so
-        // we ignore it the failure.
-        if (SanityManager.DEBUG) {
-            if (!b) {
-                String os =
-                    PropertyUtil.getSystemProperty("os.name").toLowerCase();
-
-                if (os.indexOf("windows") >= 0) {
-                    // expect this to fail, Java 6 on Windows doesn't cut it,
-                    // known not to work.
-                } else {
-                    SanityManager.THROWASSERT(
-                        "File.set{RWX} failed on this file system");
-                }
-            }
-        }
-    }
-
-    private static boolean limitAccessToOwnerViaACLs(File file)
+    /**
+     * Limit access to owner using a
+     * {@code java.nio.file.attribute.FileAttributeView}.
+     * Such views are only available on Java 7 and higher, and only on
+     * file systems that support changing file permissions. Currently,
+     * this is supported on POSIX file systems and file systems that
+     * maintain access control lists (ACLs).
+     *
+     * @param file the file to limit access to
+     * @return {@code true} on success, or {@code false} if some of the
+     * permissions could not be changed
+     */
+    private static boolean limitAccessToOwnerViaFileAttributeView(File file)
             throws IOException {
 
         // See if we are running on JDK 7 so we can deny access

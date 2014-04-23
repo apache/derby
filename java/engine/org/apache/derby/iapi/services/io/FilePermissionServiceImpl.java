@@ -30,44 +30,71 @@ import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.Collections;
+import java.util.EnumSet;
 
 /**
- * Class that limits file permissions using an {@code AclFileAttributeView}.
+ * <p>
+ * Class that limits file permissions using a {@code PosixFileAttributeView}
+ * or an {@code AclFileAttributeView}.
+ * </p>
+ *
+ * <p>
  * For use by {@link FileUtil#limitAccessToOwner(File)}.
+ * </p>
  */
 final class FilePermissionServiceImpl implements FilePermissionService {
     public boolean limitAccessToOwner(File file) throws IOException {
         Path fileP = file.toPath();
 
-        // If we have a posix view, just return and fall back on
-        // the JDK 6 approach.
         PosixFileAttributeView posixView = Files.getFileAttributeView(
                 fileP, PosixFileAttributeView.class);
         if (posixView != null) {
-            return false;
+
+            // This is a POSIX file system. Usually,
+            // FileUtil.limitAccessToOwnerViaFile() will successfully set
+            // the permissions on such file systems using the java.io.File
+            // class, so we don't get here. If, however, that approach failed,
+            // we try again here using a PosixFileAttributeView. That's likely
+            // to fail too, but at least now we will get an IOException that
+            // explains why it failed.
+
+            EnumSet<PosixFilePermission> perms = EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE);
+
+            if (file.isDirectory()) {
+                perms.add(PosixFilePermission.OWNER_EXECUTE);
+            }
+
+            posixView.setPermissions(perms);
+
+            return true;
         }
 
         AclFileAttributeView aclView = Files.getFileAttributeView(
                 fileP, AclFileAttributeView.class);
-        if (aclView == null) {
-            return false;
+        if (aclView != null) {
+
+            // Since we have an AclFileAttributeView which is not a
+            // PosixFileAttributeView, we probably have an NTFS file
+            // system.
+
+            // Remove existing ACEs, build a new one which simply
+            // gives all possible permissions to current owner.
+            AclEntry ace = AclEntry.newBuilder()
+                    .setPrincipal(Files.getOwner(fileP))
+                    .setType(AclEntryType.ALLOW)
+                    .setPermissions(EnumSet.allOf(AclEntryPermission.class))
+                    .build();
+
+            aclView.setAcl(Collections.singletonList(ace));
+
+            return true;
         }
 
-        // Since we have an AclFileAttributeView which is not a
-        // PosixFileAttributeView, we probably have an NTFS file
-        // system.
-
-        // Remove existing ACEs, build a new one which simply
-        // gives all possible permissions to current owner.
-        AclEntry ace = AclEntry.newBuilder()
-                .setPrincipal(Files.getOwner(fileP))
-                .setType(AclEntryType.ALLOW)
-                .setPermissions(AclEntryPermission.values())
-                .build();
-
-        aclView.setAcl(Collections.singletonList(ace));
-
-        return true;
+        // We don't know how to set permissions on this file system.
+        return false;
     }
 }
