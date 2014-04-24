@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.system.nstest;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Date;
@@ -668,10 +669,15 @@ public class NsTest extends Thread
 
         if ( _errors.size() > 0 )
         {
+            // sort the errors by the timestamps of their first occurrences
+            NsTestError[]   errors = new NsTestError[ _errors.size() ];
+            _errors.values().toArray( errors );
+            Arrays.sort( errors );
+            
             countAndPrintSQLStates();
-            for ( String key  : _errors.keySet() )
+            for ( NsTestError error  : errors )
             {
-                printError( key );
+                printError( error );
             }
         }
     }
@@ -714,11 +720,10 @@ public class NsTest extends Thread
         statisticsLogger.println( "\n" );
     }
 
-    private static  void    printError( String key )
+    private static  void    printError( NsTestError error )
     {
-        String          stackTrace = key;
-        NsTestError error = _errors.get( key );
         Throwable   throwable = error.throwable();
+        String          stackTrace = getStackTrace( throwable );
         int             count = error.count();
         Timestamp   firstOccurrenceTime = new Timestamp( error.getFirstOccurrenceTime() );
         Timestamp   lastOccurrenceTime = new Timestamp( error.getLastOccurrenceTime() );

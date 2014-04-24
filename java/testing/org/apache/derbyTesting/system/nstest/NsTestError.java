@@ -26,7 +26,7 @@ package org.apache.derbyTesting.system.nstest;
  * HashMap keyed by the error's stack trace.
  * </p>
  */
-public  class   NsTestError
+public  class   NsTestError implements Comparable<NsTestError>
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -78,6 +78,26 @@ public  class   NsTestError
     /** Get the timestamp of the last occurrence */
     public  long    getLastOccurrenceTime() { return _lastOccurrenceTime; }
   
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // Comparable BEHAVIOR
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  int compareTo( NsTestError that )
+    {
+        if ( that == null ) { return -1; }
+        else
+        {
+            long    thisVal = this._firstOccurrenceTime;
+            long    thatVal = that._firstOccurrenceTime;
+
+            if ( thisVal < thatVal ) { return -1; }
+            else if ( thisVal > thatVal ) { return 1; }
+            else { return 0; }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // OTHER BEHAVIOR
