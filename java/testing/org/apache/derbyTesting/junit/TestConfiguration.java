@@ -759,13 +759,7 @@ public final class TestConfiguration {
         String dbName = generateUniqueDatabaseName();
 
         return new DatabaseChangeSetup(
-            new DropDatabaseSetup(test, dbName)
-            {
-                protected void tearDown() throws Exception {
-                    // test responsible for shutdown
-                    removeDatabase();
-                }
-            },
+            new DropDatabaseSetup(test, dbName, false),
             dbName, dbName, true);
     }
 
@@ -833,13 +827,7 @@ public final class TestConfiguration {
         )
     {
         return new DatabaseChangeSetup(
-            new DropDatabaseSetup(test, logicalDbName)
-            {
-                protected void tearDown() throws Exception {
-                    // the test is responsible for shutdown
-                    removeDatabase();
-                }
-            },
+            new DropDatabaseSetup(test, logicalDbName, false),
             logicalDbName,
             generateUniqueDatabaseName(),
             defaultDB);
@@ -863,13 +851,7 @@ public final class TestConfiguration {
         String logicalDbName, String physicalDbName )
     {
         return new DatabaseChangeSetup(
-            new DropDatabaseSetup(test, logicalDbName)
-            {
-                protected void tearDown() throws Exception {
-                    // the test is responsible for shutdown
-                    removeDatabase();
-                }
-            },
+            new DropDatabaseSetup(test, logicalDbName, false),
             logicalDbName,
             physicalDbName,
             false);
@@ -950,18 +932,25 @@ public final class TestConfiguration {
      */
     public static Test sqlAuthorizationDecoratorSingleUse(Test test)
     {
-        return sqlAuthorizationDecoratorSingleUse( test, DEFAULT_DBNAME_SQL, true );
+        return sqlAuthorizationDecoratorSingleUse(
+                test, DEFAULT_DBNAME_SQL, false);
     }
     
     /**
-     * Same as sqlAuthorizationDecoratorSingleUse, except that you can name the database yourself.
+     * Same as sqlAuthorizationDecoratorSingleUse, except that you can name
+     * the database yourself, and you can choose whether or not the decorator
+     * should shut down the database before it attempts to drop it.
      *
      * @param test Test to be decorated
+     * @param dbName The name of the database to use in the test
+     * @param shutdownDatabase Whether or not to shut down the database
+     *   before it is dropped
      * @return decorated test.
      *
      * @see TestConfiguration#sqlAuthorizationDecorator(Test test)
      */
-    public static Test sqlAuthorizationDecoratorSingleUse(Test test, String dbName, boolean removeDatabase)
+    public static Test sqlAuthorizationDecoratorSingleUse(
+            Test test, String dbName, boolean shutdownDatabase)
     {
         // Set the SQL authorization mode as a database property
         // with a modified DatabasePropertyTestSetup that does not
@@ -971,17 +960,8 @@ public final class TestConfiguration {
         Test setSQLAuthMode = DatabasePropertyTestSetup.getNoTeardownInstance(
                 test, sqlAuth, true);
 
-        if ( removeDatabase )
-        {
-            setSQLAuthMode =
-                new DropDatabaseSetup(setSQLAuthMode, dbName)
-                {
-                    protected void tearDown() throws Exception {
-                        // test responsible for shutdown
-                        removeDatabase();
-                    }
-                };
-        }
+        setSQLAuthMode = new DropDatabaseSetup(
+                setSQLAuthMode, dbName, shutdownDatabase);
         
         setSQLAuthMode = new DatabaseChangeSetup
             ( setSQLAuthMode, dbName, dbName, true );

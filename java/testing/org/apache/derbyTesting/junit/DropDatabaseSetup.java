@@ -32,17 +32,33 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
  */
 class DropDatabaseSetup extends BaseTestSetup {
 
-    final String logicalDBName;
+    private final String logicalDBName;
+    private final boolean shutdownBeforeDrop;
+
     DropDatabaseSetup(Test test, String logicalDBName) {
+        this(test, logicalDBName, true);
+    }
+
+    DropDatabaseSetup(Test test, String logicalDBName, boolean shutdown) {
         super(test);
         this.logicalDBName = logicalDBName;
-     }
+        this.shutdownBeforeDrop = shutdown;
+    }
     
     /**
      * Shutdown the database and then remove all of its files.
      */
+    @Override
     protected void tearDown() throws Exception {
-        
+        if (shutdownBeforeDrop) {
+            shutdownDatabase();
+        }
+
+        removeDatabase();
+    }
+
+    private void shutdownDatabase() throws SQLException {
+
         TestConfiguration config = TestConfiguration.getCurrent();
         
         // Ensure the database is booted
@@ -72,8 +88,6 @@ class DropDatabaseSetup extends BaseTestSetup {
             DataSource ds = JDBCDataSource.getDataSourceLogical(logicalDBName);
             JDBCDataSource.shutdownDatabase(ds);
         }
-
-        removeDatabase();
     }
 
     void removeDatabase()

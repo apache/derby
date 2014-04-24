@@ -155,17 +155,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
             ( secureTest, LEGAL_USERS, "LuceneSupportPermissions" );
-        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecoratorSingleUse( authenticatedTest, DB_NAME, false );
+        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecoratorSingleUse( authenticatedTest, DB_NAME, true );
         Test        localizedTest = new LocaleTestSetup( authorizedTest, new Locale( LANGUAGE, COUNTRY ) );
 
         return localizedTest;
-    }
-
-    protected void tearDown()
-        throws Exception
-    {
-        TestConfiguration.getCurrent().shutdownEngine();
-        super.tearDown();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
