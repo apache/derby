@@ -3762,7 +3762,7 @@ Guide.
 
             <msg>
                 <name>X0Y84.T</name>
-                <text>Too much contention on sequence {0}. This is probably caused by an uncommitted scan of the SYS.SYSSEQUENCES catalog. Do not query this catalog directly. Instead, use the SYSCS_UTIL.SYSCS_PEEK_AT_SEQUENCE function to view the current value of a query generator.</text>
+                <text>Too much contention on sequence {0}. This is probably caused by an uncommitted scan of the SYS.SYSSEQUENCES catalog. Do not query this catalog directly. Instead, use the SYSCS_UTIL.SYSCS_PEEK_AT_SEQUENCE function to view the current value of a sequence generator.</text>
                 <arg>sequenceName</arg>
             </msg>
 
