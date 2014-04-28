@@ -452,9 +452,9 @@ public static String[][]SQLData =
                                 // whether today or yesterday was used. Accept
                                 // both.
                                 String[] expectedValues = {
-                                    expected.replace(
+                                    replace(expected, 
                                       "TODAY", new Date(startTime).toString()),
-                                    expected.replace(
+                                    replace(expected,
                                       "TODAY", new Date(finishTime).toString()),
                                 };
 
@@ -1309,5 +1309,21 @@ public static String[][]SQLData =
      */
     public static Test suite() {
         return TestConfiguration.defaultSuite(CastingTest.class);
+    }
+    
+    private static String replace(String targetStr, String orgStr, String replaceStr)
+    {
+        if (JDBC.vmSupportsJSR169())
+        {
+            int startind = targetStr.indexOf(orgStr);
+            int orgstrlength = orgStr.length(); 
+            int endind = startind + orgstrlength;
+            String startchunk = targetStr.substring(0, startind);
+            String endchunk = targetStr.substring(endind);
+            String returnStr=startchunk + replaceStr + endchunk;
+            return returnStr;
+        }
+        else
+            return (targetStr.replace(orgStr, replaceStr));
     }
 }
