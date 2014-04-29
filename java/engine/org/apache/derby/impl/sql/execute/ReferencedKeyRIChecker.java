@@ -74,7 +74,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 	 * If a foreign key is found, an exception is thrown.
 	 * If not, the scan is closed.
 	 *
-     * @para, a     the activation
+     * @param a     the activation
 	 * @param row	the row to check
      * @param restrictCheckOnly
 	 *
