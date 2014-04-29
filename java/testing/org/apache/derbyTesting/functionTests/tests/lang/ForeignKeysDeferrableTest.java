@@ -51,7 +51,7 @@ import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
  * of the constraint (a {@code <match predicate>}) but does not defer the
  * referential actions of the referential constraint.
  * <p/>
- * NOTE 52 — For example, if a referential update action such as ON UPDATE
+ * NOTE 52 - For example, if a referential update action such as ON UPDATE
  * CASCADE is specified, then any UPDATE operation on the referenced table will
  * be cascaded to the referencing table as part of the UPDATE operation, even
  * if the referential constraint is deferred. Consequently, the referential
@@ -63,7 +63,7 @@ import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
  * constraint. Any such violations of the constraint will be detected when the
  * referential constraint is eventually checked, at or before a commit.
  * <p/>
- * NOTE 53 — Even if constraint checking is not deferred, ON UPDATE
+ * NOTE 53 - Even if constraint checking is not deferred, ON UPDATE
  * RESTRICT is a stricter condition than ON UPDATE NO ACTION. ON UPDATE
  * RESTRICT prohibits an update to a particular row if there are any
  * matching rows; ON UPDATE NO ACTION does not perform its constraint
