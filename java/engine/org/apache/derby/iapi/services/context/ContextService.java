@@ -560,10 +560,6 @@ public final class ContextService //OLD extends Hashtable
                 final Thread fActive = active;
 				if (cm.setInterrupted(c))
                 {
-                    // DERBY-6352; in some cases a SecurityException is seen
-                    // demanding an explicit granting of modifyThread
-                    // permission, which should not be needed for Derby, as we
-                    // should not have any system threads.
                     try {
                         AccessController.doPrivileged(
                                 new PrivilegedAction() {
@@ -573,25 +569,8 @@ public final class ContextService //OLD extends Hashtable
                                     }
                                 });
                     } catch (java.security.AccessControlException ace) {
-                        // if sane, ASSERT and stop. The Assert will
-                        // cause info on all current threads to be printed to
-                        // the console, and we're also adding details about
-                        // the thread causing the security exception.
-                        // if insane, rethrow, and if an IBM JVM, do a jvmdump
-                        if (SanityManager.DEBUG)
-                        {
-                            SanityManager.THROWASSERT("unexpectedly needing " +
-                                    "an extra permission, for thread: " +
-                                    fActive.getName() + " with state: "+
-                                    fActive.getState());
-                            ace.printStackTrace();
-                        }
-                        else {
-                            if (JVMInfo.isIBMJVM()) {
-                                JVMInfo.javaDump();
-                            }
-                            throw ace;
-                        }
+                        // DERBY-6352; if we see an exception here, just
+                        // swallow it, leaving the thread to finish
                     }
                 }
 			}
