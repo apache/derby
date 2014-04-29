@@ -21,25 +21,17 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.LanguageProperties;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
+import org.apache.derby.iapi.store.access.ConglomerateController;
+import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.LanguageProperties;
-
-import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.GenericScanController;
-import org.apache.derby.iapi.store.access.GroupFetchScanController;
-import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
  * Do a merge run comparing all the foreign keys from the
@@ -66,8 +58,16 @@ public class RIBulkChecker
 	private static final int GREATER_THAN = 1;
 	private static final int LESS_THAN = -1;
 
-	private FKInfo			fkInfo;
-	private GroupFetchScanController	referencedKeyScan;
+    private final long            fkCID;
+    private final long            pkCID;
+    private final String          schemaName;
+    private final String          tableName;
+    private final UUID            constraintId;
+    private BackingStoreHashtable deferredRowsHashTable; // cached value
+    private final LanguageConnectionContext lcc;
+    private final boolean deferred; // constraint is deferred
+
+    private GroupFetchScanController    referencedKeyScan;
 	private DataValueDescriptor[][]		referencedKeyRowArray;
 	private GroupFetchScanController	foreignKeyScan;
 	private DataValueDescriptor[][]		foreignKeyRowArray;
@@ -80,10 +80,10 @@ public class RIBulkChecker
 	private int				lastRefRowIndex;
 	private int				lastFKRowIndex;
 	private ExecRow			firstRowToFail;
-
     /**
      * Create a RIBulkChecker
 	 * 
+     * @param a                     the activation
 	 * @param referencedKeyScan		scan of the referenced key's
 	 *								backing index.  must be unique
 	 * @param foreignKeyScan		scan of the foreign key's
@@ -95,23 +95,44 @@ public class RIBulkChecker
 	 * @param unreferencedCC	put unreferenced keys here
 	 * @param firstRowToFail		the first row that fails the constraint
 	 *								is copied to this, if non-null
+     * @param schemaName            schema name of the table we insert into
+     * @param tableName             table name of the table we insert into
+     * @param constraintId          constraint id of the foreign constraint
+     * @param deferrable            {@code true} if the constraint is deferrable
+     * @param fkCID                 conglomerate id of the foreign key
+     *                              supporting index
+     * @param pkCID                 conglomerate id of the referenced primary
+     *                              key or unique index.
+     * @throws org.apache.derby.iapi.error.StandardException
+     *
      */
     public RIBulkChecker
 	(
+            Activation                  a,
 			GroupFetchScanController    referencedKeyScan,
 			GroupFetchScanController	foreignKeyScan,
 			ExecRow					    templateRow,
 			boolean					    quitOnFirstFailure,
 			ConglomerateController	    unreferencedCC,
-			ExecRow					    firstRowToFail
-	)
+            ExecRow                     firstRowToFail,
+            String                      schemaName,
+            String                      tableName,
+            UUID                        constraintId,
+            boolean                     deferrable,
+            long                        fkCID,
+            long                        pkCID
+    ) throws StandardException
 	{
-		this.referencedKeyScan = referencedKeyScan;
+        this.referencedKeyScan = referencedKeyScan;
 		this.foreignKeyScan = foreignKeyScan;
 		this.quitOnFirstFailure = quitOnFirstFailure;
 		this.unreferencedCC = unreferencedCC;
 		this.firstRowToFail = firstRowToFail;
-
+        this.constraintId = constraintId;
+        this.fkCID = fkCID;
+        this.pkCID = pkCID;
+        this.schemaName = schemaName;
+        this.tableName = tableName;
 		foreignKeyRowArray		= new DataValueDescriptor[LanguageProperties.BULK_FETCH_DEFAULT_INT][];
 		foreignKeyRowArray[0]	= templateRow.getRowArrayClone();
 		referencedKeyRowArray	= new DataValueDescriptor[LanguageProperties.BULK_FETCH_DEFAULT_INT][];
@@ -120,10 +141,16 @@ public class RIBulkChecker
 		numColumns = templateRow.getRowArray().length - 1;
 		currFKRowIndex = -1; 
 		currRefRowIndex = -1; 
+
+        this.lcc = a.getLanguageConnectionContext();
+        this.deferred = deferrable && lcc.isEffectivelyDeferred(
+                lcc.getCurrentSQLSessionContext(a), constraintId);
 	}
 
 	/**
-	 * Perform the check.
+     * Perform the check. If deferred constraint mode, the numbers of failed
+     * rows returned will be always be 0 (but any violating keys will have been
+     * saved for later checking).
 	 *
 	 * @return the number of failed rows
 	 *
@@ -168,7 +195,7 @@ public class RIBulkChecker
 					failure(foreignKey);
 					if (quitOnFirstFailure)
 					{
-							return 1;
+                            return failedCounter;
 					}
 				} while ((foreignKey = getNextFK()) != null);
 				return failedCounter;
@@ -183,7 +210,7 @@ public class RIBulkChecker
 						failure(foreignKey);
 						if (quitOnFirstFailure)
 						{
-							return 1;
+                            return failedCounter;
 						}
 					} while ((foreignKey = getNextFK()) != null);
 					return failedCounter;
@@ -195,7 +222,7 @@ public class RIBulkChecker
 				failure(foreignKey);
 				if (quitOnFirstFailure)
 				{
-					return 1;
+                    return failedCounter;
 				}
 			}	
 		}
@@ -258,21 +285,36 @@ public class RIBulkChecker
 	private void failure(DataValueDescriptor[] foreignKeyRow)
 		throws StandardException
 	{
-		if (failedCounter == 0)
-		{
-			if (firstRowToFail != null)
-			{
-				firstRowToFail.setRowArray(foreignKeyRow);
-				// clone it
-				firstRowToFail.setRowArray(firstRowToFail.getRowArrayClone());
-			}
-		}
-			
-		failedCounter++;
-		if (unreferencedCC != null)
-		{
-            unreferencedCC.insert(foreignKeyRow);
-		}
+        if (deferred) {
+            deferredRowsHashTable =
+                    DeferredConstraintsMemory.rememberFKViolation(
+                            lcc,
+                            deferredRowsHashTable,
+                            fkCID,
+                            pkCID,
+                            constraintId,
+                            foreignKeyRow,
+                            schemaName,
+                            tableName);
+
+        } else {
+            if (failedCounter == 0)
+            {
+                if (firstRowToFail != null)
+                {
+                    firstRowToFail.setRowArray(foreignKeyRow);
+                    // clone it
+                    firstRowToFail.setRowArray(
+                        firstRowToFail.getRowArrayClone());
+                }
+            }
+
+            failedCounter++;
+            if (unreferencedCC != null)
+            {
+                unreferencedCC.insert(foreignKeyRow);
+            }
+        }
 	}	
 	/*
 	** Returns true if any of the foreign keys are null

@@ -77,6 +77,7 @@ import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -298,7 +299,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                             tableName,
                             deferredChecks,
                             violatingCheckConstraints,
-                            rl);
+                            rl,
+                            new CheckInfo[1] /* dummy */);
             violatingCheckConstraints.clear();
         }
     }
@@ -942,7 +944,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		{
 			if (fkChecker == null)
 			{
-				fkChecker = new RISetChecker(tc, fkInfoArray);
+                fkChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
 			{
@@ -1025,7 +1027,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 				if (fkChecker != null)
 				{
-					fkChecker.doFKCheck(row);
+                    fkChecker.doFKCheck(activation, row);
 				}
 
 				// Objectify any streaming columns that are indexed.
@@ -1058,7 +1060,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                             tableName,
                             deferredChecks,
                             violatingCheckConstraints,
-                            offendingRow);
+                            offendingRow,
+                            new CheckInfo[1] /* dummy */);
                 }
 			}
 
@@ -1179,7 +1182,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                                 tableName,
                                 deferredChecks,
                                 violatingCheckConstraints,
-                                offendingRow);
+                                offendingRow,
+                                new CheckInfo[1]);
                     }
 				}
 			} finally
@@ -1202,7 +1206,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					rs.open();
 					while ((deferredRowBuffer = rs.getNextRow()) != null)
 					{
-						fkChecker.doFKCheck(deferredRowBuffer);
+                        fkChecker.doFKCheck(activation, deferredRowBuffer);
 					}
 				} finally
 				{
@@ -1713,12 +1717,19 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				** magic.  It will do a merge on the two indexes. 
 				*/	
 				ExecRow firstFailedRow = template.getClone();
-				RIBulkChecker riChecker = new RIBulkChecker(refScan, 
+                RIBulkChecker riChecker = new RIBulkChecker(activation,
+                                            refScan,
 											fkScan, 
 											template, 	
 											true, 				// fail on 1st failure
 											(ConglomerateController)null,
-											firstFailedRow);
+                                            firstFailedRow,
+                                            fkInfo.schemaName,
+                                            fkInfo.tableName,
+                                            fkInfo.fkIds[0],
+                                            fkInfo.deferrable[0],
+                                            fkConglom,
+                                            pkConglom);
 	
 				int numFailures = riChecker.doCheck();
 				if (numFailures > 0)
@@ -1850,7 +1861,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
                 indexOrConstraintName = conDesc.getConstraintName();
                 deferred = lcc.isEffectivelyDeferred(
-                        activation, cd.getConglomerateNumber());
+                        lcc.getCurrentSQLSessionContext(activation),
+                        cd.getConglomerateNumber());
                 deferrable = conDesc.deferrable();
             }
 
@@ -2414,7 +2426,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					ConstraintDescriptor conDesc = 
                         dd.getConstraintDescriptor(td, cd.getUUID());
 					indexOrConstraintName = conDesc.getConstraintName();
-                    deferred = lcc.isEffectivelyDeferred(activation,
+                    deferred = lcc.isEffectivelyDeferred(
+                            lcc.getCurrentSQLSessionContext(activation),
                             cd.getConglomerateNumber());
                     uniqueDeferrable = conDesc.deferrable();
 				}

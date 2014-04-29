@@ -21,18 +21,19 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * Generic implementation of a Referential Integrity
@@ -46,20 +47,30 @@ public abstract class GenericRIChecker
 	protected DynamicCompiledOpenConglomInfo refDcoci;
 	protected StaticCompiledOpenConglomInfo refScoci;
 	protected TransactionController		tc;
+    protected LanguageConnectionContext lcc;
 
-	private Hashtable<Long,ScanController> 		scanControllers;
-	private int				numColumns;
-	private	IndexRow		indexQualifierRow;
+    /**
+     * Cached value (for efficiency) of the intermediate table of violations
+     * we use in the presence of deferred FK constraints.
+     */
+    protected BackingStoreHashtable deferredRowsHashTable;
+
+    private final Hashtable<Long,ScanController> scanControllers;
+    private final int numColumns;
+    final IndexRow indexQualifierRow;
 
 	/**
+     * @param lcc       the language connection context
 	 * @param tc		the xact controller
 	 * @param fkinfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	GenericRIChecker(TransactionController tc, FKInfo fkinfo)
-		throws StandardException
+    GenericRIChecker(LanguageConnectionContext lcc,
+                     TransactionController tc,
+                     FKInfo fkinfo) throws StandardException
 	{
+        this.lcc = lcc;
 		this.fkInfo = fkinfo;
 		this.tc = tc;
 		scanControllers = new Hashtable<Long,ScanController>();
@@ -80,15 +91,20 @@ public abstract class GenericRIChecker
 	/**
 	 * Check the validity of this row
 	 *
+     * @param a     the activation
 	 * @param row	the row to check
+     * @param restrictCheckOnly If {@code true}, only perform check if the
+     *              constraint action is RESTRICT.
 	 *
 	 * @exception StandardException on error
 	 */
-	abstract void doCheck(ExecRow row, boolean restrictCheckOnly) throws StandardException;
+    abstract void doCheck(Activation a,
+                          ExecRow row,
+                          boolean restrictCheckOnly) throws StandardException;
 
-	public void doCheck(ExecRow row) throws StandardException
+    public void doCheck(Activation a, ExecRow row) throws StandardException
 	{
-		doCheck(row, false); //Check all the referential Actions
+        doCheck(a, row, false); //Check all the referential Actions
 	}
 
 	/**
@@ -125,7 +141,7 @@ public abstract class GenericRIChecker
 	{
 		int				isoLevel = getRICheckIsolationLevel();
 		ScanController 	scan;
-		Long			hashKey = new Long(conglomNumber);
+        Long            hashKey = Long.valueOf(conglomNumber);
 
 		/*
 		** If we haven't already opened this scan controller,

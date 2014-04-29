@@ -469,8 +469,8 @@ class IndexChanger
             // waiting for any locks; we will just presume any lock conflicts
             // constitute duplicates (not always the case), and check those keys
             // again at commit time.
-            final boolean deferred =
-                    lcc.isEffectivelyDeferred(activation, indexCID);
+            final boolean deferred = lcc.isEffectivelyDeferred(
+                    lcc.getCurrentSQLSessionContext(activation), indexCID);
 
             ScanController idxScan = tc.openScan(
                     indexCID,
@@ -524,7 +524,9 @@ class IndexChanger
             }
 
             if (duplicate) {
-                if (lcc.isEffectivelyDeferred(activation, indexCID)) {
+                if (lcc.isEffectivelyDeferred(
+                        lcc.getCurrentSQLSessionContext(activation),
+                        indexCID)) {
                     // Save duplicate row so we can check at commit time there is
                     // no longer any duplicate.
 

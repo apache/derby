@@ -906,6 +906,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ConstraintDescriptorList			activeList = dd.getActiveConstraintDescriptors(cdl);
 		int[]								rowMap = getRowMap(readColsBitSet, td);
         int[]                               raRules;
+        boolean[]                           deferrable;
+        UUID[]                              fkIds;
 		ArrayList<String>              refTableNames = new ArrayList<String>(1);
 		ArrayList<Long>               refIndexConglomNum = new ArrayList<Long>(1);
 		ArrayList<Integer>            refActions = new ArrayList<Integer>(1);
@@ -926,13 +928,16 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				type = FKInfo.FOREIGN_KEY;
 				refcd = ((ForeignKeyConstraintDescriptor)cd).getReferencedConstraint();
 				uuids = new UUID[1];
+                deferrable = new boolean[1];
+                fkIds = new UUID[1];
 				conglomNumbers = new long[1];
 				fkNames = new String[1];
 				isSelfReferencingFK = new boolean[1];
 				raRules = new int[1];
-				fkSetupArrays(dd, (ForeignKeyConstraintDescriptor)cd, 
-						0, uuids, conglomNumbers, 
-						fkNames, isSelfReferencingFK, raRules);
+                fkSetupArrays(
+                    dd, (ForeignKeyConstraintDescriptor)cd,
+                    0, uuids, conglomNumbers,
+                    fkNames, isSelfReferencingFK, raRules, deferrable, fkIds);
 
 				// oops, get the right constraint name -- for error
 				// handling we want the FK name, not refcd name
@@ -958,6 +963,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				}
 
 				uuids = new UUID[size];
+                deferrable = new boolean[size];
+                fkIds = new UUID[size];
 				fkNames = new String[size];
 				conglomNumbers = new long[size];
 				isSelfReferencingFK = new boolean[size];
@@ -971,9 +978,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				{
                     ForeignKeyConstraintDescriptor fkcd =
                         (ForeignKeyConstraintDescriptor) fkcdl.elementAt(inner);
-					fkSetupArrays(dd, fkcd,
-								inner, uuids, conglomNumbers, fkNames,
-								isSelfReferencingFK, raRules);
+                    fkSetupArrays(
+                        dd, fkcd,
+                        inner, uuids, conglomNumbers, fkNames,
+                        isSelfReferencingFK, raRules, deferrable, fkIds);
+
 					if((raRules[inner] == StatementType.RA_CASCADE) || 
 					   (raRules[inner] ==StatementType.RA_SETNULL))
 					{
@@ -1007,8 +1016,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			ConglomerateDescriptor pkIndexConglom = pktd.getConglomerateDescriptor(pkuuid);
 
 			TableDescriptor refTd = cd.getTableDescriptor();
+
             fkList.add(new FKInfo(
 									fkNames,							// foreign key names
+                                    cd.getSchemaDescriptor().getSchemaName(),
 									refTd.getName(),				// table being modified
 									statementType,						// INSERT|UPDATE|DELETE
 									type,								// FOREIGN_KEY|REFERENCED_KEY
@@ -1020,7 +1031,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 									remapReferencedColumns(cd, rowMap),	// column referened by key
 									dd.getRowLocationTemplate(getLanguageConnectionContext(), refTd),
 									                                // row location template  for table being modified 
-									raRules));	// referential action rules
+                                    raRules,// referential action rules
+                                    deferrable,
+                                    fkIds));
 
 		}
 		
@@ -1064,12 +1077,16 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		long[]								conglomNumbers,
 		String[]							fkNames,
 		boolean[]							isSelfReferencingFK,
-		int[]                               raRules
+        int[]                               raRules,
+        boolean[]                           isDeferrable,
+        UUID[]                              fkIds
 	)
 		throws StandardException
 	{
 		fkNames[index] = fkcd.getConstraintName();
 		uuids[index] = fkcd.getIndexId();
+        isDeferrable[index] = fkcd.deferrable();
+        fkIds[index] = fkcd.getUUID();
 		conglomNumbers[index] = fkcd.getIndexConglomerateDescriptor(dd).getConglomerateNumber();
 		isSelfReferencingFK[index] = fkcd.isSelfReferencingFK();
 		if(statementType == StatementType.DELETE)

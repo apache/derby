@@ -313,7 +313,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		{
 			if (fkChecker == null)
 			{
-				fkChecker = new RISetChecker(tc, fkInfoArray);
+                fkChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
 			{
@@ -389,7 +389,7 @@ class DeleteResultSet extends DMLWriteResultSet
 			{
 				if (fkChecker != null)
 				{
-					fkChecker.doPKCheck(row, false);
+                    fkChecker.doPKCheck(activation, row, false);
 				}
 
 				baseRowLocation = 
@@ -556,7 +556,8 @@ class DeleteResultSet extends DMLWriteResultSet
                 ExecRow defRLRow;
                 while ((defRLRow = rs.getNextRow()) != null)
 				{
-                    fkChecker.doPKCheck(defRLRow, restrictCheckOnly);
+                    fkChecker.doPKCheck(
+                        activation, defRLRow, restrictCheckOnly);
 				}
 			} finally
 			{

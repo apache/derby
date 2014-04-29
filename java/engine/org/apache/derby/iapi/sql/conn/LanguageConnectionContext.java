@@ -45,7 +45,6 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
 import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory;
@@ -1309,40 +1308,43 @@ public interface LanguageConnectionContext extends Context {
                                  UUID constraintId,
                                  boolean deferred) throws StandardException;
 
+
     /**
-     * Get the constraint mode set, if any.
+     * Determines if a unique or primary key constraint currently has deferred
+     * mode.
      *
-     * @param a         Activation
-     * @param conglomId The conglomerate id of the backing index
-     * @return         {@code true} if the constraint mode
-     *                  for this constraint/index is effectively
-     *                  deferred, {@code false} if it is immediate.
-     * @throws StandardException standard error policy
+     * @param sc       The session context for which we are asking the status
+     * @param indexCID The conglomerate id of the supporting index of the
+     *                 constraint.
+     * @return         {@code true} if the constraint is deferred
+     * @throws StandardException
+     *                 Standard error policy
      */
-    public boolean isEffectivelyDeferred(Activation a, long conglomId)
+    public boolean isEffectivelyDeferred(SQLSessionContext sc, long indexCID)
             throws StandardException;
 
     /**
-     * Get the constraint mode set, if any.
+     * Determines if a check or foreign key constraint has deferred
+     * mode.
      *
-     * @param a         Activation
-     * @param constraintId The constraint id
-     * @return         {@code true} if the constraint mode
-     *                  for this constraint/index is effectively
-     *                  deferred, {@code false} if it is immediate.
-     * @throws StandardException standard error policy
+     * @param sc           The SQL session context for which we are asking the status
+     * @param constraintId The constraint id we are inquiring about.
+     * @return             {@code true} if the constraint is deferred
+     * @throws StandardException
+     *                     Standard error policy
      */
-    public boolean isEffectivelyDeferred(Activation a, UUID constraintId)
+    public boolean isEffectivelyDeferred(SQLSessionContext sc, UUID constraintId)
             throws StandardException;
 
     /**
-     * Set the constraint mode for all deferrable constraints to
-     * {@code deferred}.
-     * If {@code deferred} is {@code false}, to immediate checking,
-     * if {@code true} to deferred checking.
+     * Set the constraint mode of all deferrable constraints to the value of
+     * {@code deferred}. If the value is {@code false}, this method might
+     * throw with a constraint violation error, i.e. if some constraint
+     * has deferred mode before this call and had seen violations.
      *
-     * @param a        Activation
-     * @param deferred The new constraint mode
+     * @param a         The activation
+     * @param deferred  The value which holds the constraint mode
+     * @throws          StandardException Standard error policy
      */
     public void setDeferredAll(Activation a, boolean deferred)
             throws StandardException;
@@ -1376,4 +1378,11 @@ public interface LanguageConnectionContext extends Context {
      */
     public void forgetDeferredConstraintsData(long conglomId)
             throws StandardException;
+
+    /**
+     * Get the SQL session context of the given activation.
+     * @param activation The activation
+     * @return           The SQL session object
+     */
+    public SQLSessionContext getCurrentSQLSessionContext(Activation activation);
 }

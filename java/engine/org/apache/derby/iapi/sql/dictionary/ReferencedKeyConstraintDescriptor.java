@@ -150,16 +150,16 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 
 
 	/**
-	 * Am I referenced by a FK on another table?
+     * Am I referenced by a FK on another table? Return the list of those
+     * foreign constraints.
 	 * @param type ConstraintDescriptor.(ENABLED|DISABLED|ALL)
-	 * @return	true/false
+     * @return  list of constraints
 	 * @exception StandardException on error
 	 */
-	public boolean hasNonSelfReferencingFK(int type) 
+    public ConstraintDescriptorList getNonSelfReferencingFK(int type)
 		throws StandardException
 	{
-
-		boolean hasNonSelfReferenceFk = false;
+        ConstraintDescriptorList result = new ConstraintDescriptorList();
 
 		if (SanityManager.DEBUG)
 		{
@@ -167,10 +167,8 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 		}
 	
 		ForeignKeyConstraintDescriptor fkcd;
-		// Get a full list of referencing keys,
-		ConstraintDescriptorList cdl = getForeignKeyConstraints(type);
 
-        for (ConstraintDescriptor cd : cdl)
+        for (ConstraintDescriptor cd : getForeignKeyConstraints(type))
 		{
 			if (! (cd instanceof ForeignKeyConstraintDescriptor))
 			{
@@ -180,11 +178,10 @@ public class ReferencedKeyConstraintDescriptor extends KeyConstraintDescriptor
 			fkcd = (ForeignKeyConstraintDescriptor) cd;
 			if(!(fkcd.getTableId().equals(getTableId())))
 			{
-				hasNonSelfReferenceFk = true;
-				break;
+                result.add(fkcd);
 			}
 		}
-		return hasNonSelfReferenceFk;
+        return result;
 	}
 
 

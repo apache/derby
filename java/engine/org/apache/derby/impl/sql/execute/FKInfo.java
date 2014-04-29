@@ -21,28 +21,20 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
-
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-
-import java.io.StreamCorruptedException;
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
 import java.io.IOException;
-
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.io.StreamCorruptedException;
 import java.util.Vector;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.ArrayUtil;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This is a simple class used to store the run time information
@@ -60,7 +52,7 @@ public class FKInfo implements Formatable
 	**	also write/read them with the writeExternal()/readExternal()
 	**	methods.
 	**
-	**	If, inbetween releases, you add more fields to this class,
+    **  If, between releases, you add more fields to this class,
 	**	then you should bump the version number emitted by the getTypeFormatId()
 	**	method.  OR, since this is something that is used
 	**	in stored prepared statements, it is ok to change it
@@ -75,18 +67,24 @@ public class FKInfo implements Formatable
 	/*
 	** See the constructor for the meaning of these fields
 	*/
-    String[]            fkConstraintNames;
+    String              schemaName;
     String              tableName;
     int                 type;
-    UUID                refUUID;
+    UUID                refUUID; // index index conglomerate uuid
     long                refConglomNumber;
-    private UUID[]      fkUUIDs;
-    long[]              fkConglomNumbers;
-    boolean[]           fkIsSelfReferencing;
-    int[]               colArray;
     int                 stmtType;
     RowLocation         rowLocation;
+
+    // These arrays all have the same cardinality, either 1 (foreign key), or
+    // the number of FKs referencing this referenced key
+    String[]            fkConstraintNames;
+    private UUID[]      fkUUIDs; // the index conglomerate uuids
+    long[]              fkConglomNumbers;
+    UUID[]              fkIds; // the constraint uuids
+    boolean[]           fkIsSelfReferencing;
+    int[]               colArray;
     int[]               raRules;
+    boolean[]           deferrable;
 
 	/**
 	 * Niladic constructor for Formattable
@@ -94,32 +92,36 @@ public class FKInfo implements Formatable
 	public FKInfo() {}
 
 	/**
-	 * Consructor for FKInfo
+     * Constructor for FKInfo
 	 *
 	 * @param fkConstraintNames the foreign key constraint names
+     * @param schemaName the name of the schema of the table being modified
 	 * @param tableName	the name of the table being modified
 	 * @param stmtType	the type of the statement: e.g. StatementType.INSERT
 	 * @param type either FKInfo.REFERENCED_KEY or FKInfo.FOREIGN_KEY
 	 * @param refUUID UUID of the referenced constraint
-	 * @param refConglomNumber congomerate number of the referenced key
+     * @param refConglomNumber conglomerate number of the referenced key
 	 * @param fkUUIDs an array of fkUUIDs of backing indexes.  if
 	 *			FOREIGN_KEY, then just one element, the backing
-	 *			index of the referrenced keys.  if REFERENCED_KEY,
+     *          index of the referenced keys.  if REFERENCED_KEY,
 	 *			then all the foreign keys
 	 * @param fkConglomNumbers array of conglomerate numbers, corresponds
 	 *			to fkUUIDs
 	 * @param fkIsSelfReferencing array of conglomerate booleans indicating
-	 *			whether the fk references a key in the same table
+     *          whether the foreign key references a key in the same table
 	 * @param colArray map of columns to the base row that DML
 	 * 			is changing.  1 based.  Note that this maps the
 	 *			constraint index to a row in the target table of
-	 *			the current dml operation.
+     *          the current DML operation.
 	 * @param rowLocation a row location template for the target table
 	 *			used to pass in a template row to tc.openScan()
+     * @param raRules referential action rules
+     * @param deferrable the corresponding constraint is deferrable
 	 */
 	public FKInfo(
 					String[]			fkConstraintNames,
-					String				tableName,
+                    String              schemaName,
+                    String              tableName,
 					int					stmtType,
 					int					type,
 					UUID				refUUID,
@@ -129,11 +131,14 @@ public class FKInfo implements Formatable
 					boolean[]			fkIsSelfReferencing,
 					int[]				colArray,
 					RowLocation			rowLocation,
-					int[]               raRules
+                    int[]               raRules,
+                    boolean[]           deferrable,
+                    UUID[]              fkIds
 					)
 	{
         this.fkConstraintNames = ArrayUtil.copy(fkConstraintNames);
 		this.tableName = tableName;
+        this.schemaName = schemaName;
 		this.stmtType = stmtType;
 		this.type = type;
 		this.refUUID = refUUID;
@@ -144,6 +149,8 @@ public class FKInfo implements Formatable
         this.colArray = ArrayUtil.copy(colArray);
 		this.rowLocation = rowLocation;
         this.raRules = ArrayUtil.copy(raRules);
+        this.deferrable = ArrayUtil.copy(deferrable);
+        this.fkIds = ArrayUtil.copy(fkIds);
 
 		if (SanityManager.DEBUG)
 		{
@@ -175,7 +182,7 @@ public class FKInfo implements Formatable
 	 *
  	 * @param fkInfo	        array of fkinfos
 	 * @param cols	            array of columns
-	 * @param addAllTypeIsFK	take all with type == FORIEGN_KEY
+     * @param addAllTypeIsFK    take all with type == FOREIGN_KEY
 	 *
 	 * @return array of relevant fkinfos
 	 */
@@ -276,7 +283,7 @@ public class FKInfo implements Formatable
 		ArrayUtil.writeBooleanArray(out, fkIsSelfReferencing);
 		ArrayUtil.writeIntArray(out, colArray);
 		ArrayUtil.writeIntArray(out, raRules);
-		
+        ArrayUtil.writeBooleanArray(out, deferrable);
 	}
 
 	/**
@@ -318,6 +325,7 @@ public class FKInfo implements Formatable
 			fkIsSelfReferencing = ArrayUtil.readBooleanArray(in);
 			colArray = ArrayUtil.readIntArray(in);
 			raRules = ArrayUtil.readIntArray(in);
+            deferrable = ArrayUtil.readBooleanArray(in);
 		}
 		catch (StandardException exception)
 		{
@@ -330,7 +338,7 @@ public class FKInfo implements Formatable
 	 *
 	 *	@return	the formatID of this class
 	 */
-	public	int	getTypeFormatId()	{ return StoredFormatIds.FK_INFO_V01_ID; }
+    public  int getTypeFormatId()   { return StoredFormatIds.FK_INFO_V01_ID; }
 
 	//////////////////////////////////////////////////////////////
 	//
@@ -341,7 +349,7 @@ public class FKInfo implements Formatable
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer str = new StringBuffer();
+            StringBuilder str = new StringBuilder();
 			str.append("\nTableName:\t\t\t");
 			str.append(tableName);
 
@@ -401,7 +409,17 @@ public class FKInfo implements Formatable
 			}
 			str.append(")\n");
 
-			return str.toString();
+            str.append("\nDeferrable array:\t\t\t(");
+            for (int i = 0; i < deferrable.length; i++)
+            {
+                if (i > 0)
+                    str.append(",");
+
+                str.append(colArray[i]);
+            }
+            str.append(")\n");
+
+            return str.toString();
 		}
 		else
 		{

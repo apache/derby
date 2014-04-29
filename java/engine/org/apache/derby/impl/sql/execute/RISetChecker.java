@@ -21,12 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Checks a set or referential integrity constraints.  Used
@@ -36,15 +36,18 @@ import org.apache.derby.iapi.store.access.TransactionController;
 public class RISetChecker
 {
 	private GenericRIChecker[] 	checkers;
+    LanguageConnectionContext lcc;
 
 	/**
+     * @param lcc       the language connection context
 	 * @param tc		the xact controller
 	 * @param fkInfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public RISetChecker(TransactionController tc, FKInfo fkInfo[])
-		throws StandardException
+    public RISetChecker(LanguageConnectionContext lcc,
+                        TransactionController tc,
+                        FKInfo fkInfo[]) throws StandardException
 	{
 		if (fkInfo == null)
 		{
@@ -52,12 +55,15 @@ public class RISetChecker
 		}
 
 		checkers = new GenericRIChecker[fkInfo.length];
+        this.lcc = lcc;
 
 		for (int i = 0; i < fkInfo.length; i++)
 		{
 			checkers[i] = (fkInfo[i].type == FKInfo.FOREIGN_KEY) ?
-				(GenericRIChecker)new ForeignKeyRIChecker(tc, fkInfo[i]) :
-				(GenericRIChecker)new ReferencedKeyRIChecker(tc, fkInfo[i]);
+                (GenericRIChecker)new ForeignKeyRIChecker(
+                    lcc, tc, fkInfo[i]) :
+                (GenericRIChecker)new ReferencedKeyRIChecker(
+                    lcc, tc, fkInfo[i]);
 		}
 	}
 
@@ -85,7 +91,9 @@ public class RISetChecker
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
-	public void doPKCheck(ExecRow row, boolean restrictCheckOnly) throws StandardException
+    public void doPKCheck(Activation a,
+                          ExecRow row,
+                          boolean restrictCheckOnly) throws StandardException
 	{
 		if (checkers == null)
 			return;
@@ -94,7 +102,7 @@ public class RISetChecker
 		{
 			if (checkers[i] instanceof ReferencedKeyRIChecker)
 			{
-				checkers[i].doCheck(row,restrictCheckOnly);
+                checkers[i].doCheck(a, row,restrictCheckOnly);
 			}
 		}
 	}
@@ -104,12 +112,13 @@ public class RISetChecker
 	 * that there are no foreign keys in the passed
 	 * in row that have invalid values.
 	 *
+     * @param a     the activation
 	 * @param row	the row to check
 	 *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
-	public void doFKCheck(ExecRow row) throws StandardException
+    public void doFKCheck(Activation a, ExecRow row) throws StandardException
 	{
 		if (checkers == null)
 			return;
@@ -118,7 +127,7 @@ public class RISetChecker
 		{
 			if (checkers[i] instanceof ForeignKeyRIChecker)
 			{
-				checkers[i].doCheck(row);
+                checkers[i].doCheck(a, row);
 			}
 		}
 	}
@@ -126,13 +135,17 @@ public class RISetChecker
 	/**
 	 * Execute the specific RI check on the passed in row.
 	 *
+     * @param a     the activation
 	 * @param index	index into fkInfo
 	 * @param row		the row to check
 	 *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
-	public void doRICheck(int index, ExecRow row, boolean restrictCheckOnly) throws StandardException
+    public void doRICheck(Activation a,
+                          int index,
+                          ExecRow row,
+                          boolean restrictCheckOnly) throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -148,7 +161,7 @@ public class RISetChecker
 			}
 		}
 
-		checkers[index].doCheck(row, restrictCheckOnly);
+        checkers[index].doCheck(a, row, restrictCheckOnly);
 	}
 
 	/**

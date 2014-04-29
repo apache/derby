@@ -22,10 +22,8 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
@@ -37,7 +35,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
@@ -57,14 +54,15 @@ import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -86,6 +84,7 @@ import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 import org.apache.derby.impl.sql.compile.StatementNode;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  *	This class  describes actions that are ALWAYS performed for an
@@ -316,24 +315,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         boolean						tableScanned = false;
 
         if (compressTable || truncateTable) {
-            final HashMap<Long, DeferredConstraintsMemory.ValidationInfo> vis =
-                    lcc.getDeferredHashTables();
-            td = dd.getTableDescriptor(tableId);
-            final DeferredConstraintsMemory.ValidationInfo vi =
-                    vis.get(td.getHeapConglomerateId());
-
-            if (td == null) {
-                throw StandardException.newException(
-                    SQLState.LANG_TABLE_NOT_FOUND_DURING_EXECUTION, tableName);
-            }
-
-            if (vi != null &&
-                vi instanceof DeferredConstraintsMemory.CheckInfo) {
-                // We can not use row locations when re-visiting offending
-                // rows in this table, since we are truncating or compressing.
-                ((DeferredConstraintsMemory.CheckInfo)vi).
-                    setInvalidatedRowLocations();
-            }
+            DeferredConstraintsMemory.compressOrTruncate(
+                    lcc, tableId, tableName);
         }
 
         //Following if is for inplace compress. Compress using temporary
@@ -2438,18 +2421,34 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 
 
-		//truncate table is not allowed if there are any tables referencing it.
-		//except if it is self referencing.
-		ConstraintDescriptorList cdl = dd.getConstraintDescriptors(td);
-		for(int index = 0; index < cdl.size(); index++)
-		{
-			ConstraintDescriptor cd = cdl.elementAt(index);
+        // Truncate table is not allowed if there are any tables referencing it.
+        // except if it is self referencing, or if the constraint is deferred
+        // and the ON DELETE action is NO ACTION.
+        for(ConstraintDescriptor cd : dd.getConstraintDescriptors(td)) {
 			if (cd instanceof ReferencedKeyConstraintDescriptor)
 			{
-				ReferencedKeyConstraintDescriptor rfcd = (ReferencedKeyConstraintDescriptor) cd;
-				if(rfcd.hasNonSelfReferencingFK(ConstraintDescriptor.ENABLED))
-				{
-					throw StandardException.newException(SQLState.LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE,td.getName());
+                final ReferencedKeyConstraintDescriptor rfcd =
+                    (ReferencedKeyConstraintDescriptor)cd;
+
+                for (ConstraintDescriptor fkcd :
+                     rfcd.getNonSelfReferencingFK(ConstraintDescriptor.ENABLED))
+                {
+                    final ForeignKeyConstraintDescriptor fk =
+                            (ForeignKeyConstraintDescriptor)fkcd;
+
+                    if (fk.deferrable() &&
+                        lcc.isEffectivelyDeferred(
+                                lcc.getCurrentSQLSessionContext(activation),
+                                fk.getUUID()) &&
+                        fk.getRaDeleteRule() == StatementType.RA_NOACTION) {
+                        // Allowed. We will update the indexCID later, see
+                        // updateIndex, so we know where to look when
+                        // checking time comes.
+                    } else {
+                        throw StandardException.newException(
+                            SQLState.LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE,
+                            td.getName());
+                    }
 				}
 			}
 		}
@@ -2771,6 +2770,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		// Drop the old conglomerate
 		tc.dropConglomerate(indexConglomerateNumbers[index]);
+
+        DeferredConstraintsMemory.updateIndexCIDs(
+                lcc,
+                truncateTable,
+                indexConglomerateNumbers[index],
+                newIndexCongloms[index]);
+
 	}
 
 

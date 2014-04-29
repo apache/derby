@@ -27,8 +27,10 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -127,20 +129,28 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             cd.getConstraintName());
                 }
 
-                if (cd instanceof KeyConstraintDescriptor) {
-                    // Set unique, primary key and foreign key constraints
+                if (cd instanceof ForeignKeyConstraintDescriptor ||
+                    cd instanceof CheckConstraintDescriptor) {
 
-                    lcc.setConstraintDeferred(activation,
-                                    ((KeyConstraintDescriptor)cd).
-                                        getIndexConglomerateDescriptor(dd).
-                                        getConglomerateNumber(),
-                                    deferred);
+                    // Set check constraints and FKs
+                    lcc.setConstraintDeferred(
+                        activation,
+                        ( cd instanceof CheckConstraintDescriptor ?
+                          cd.getTableDescriptor().getHeapConglomerateId() :
+                          ((KeyConstraintDescriptor)cd).
+                          getIndexConglomerateDescriptor(dd).
+                          getConglomerateNumber() ),
+                        cd.getUUID(),
+                        deferred);
+
                 } else {
-                    // Set check constraints
+                    // Set unique, primary key
+
                     lcc.setConstraintDeferred(
                             activation,
-                            cd.getTableDescriptor().getHeapConglomerateId(),
-                            cd.getUUID(),
+                            ((KeyConstraintDescriptor)cd).
+                                    getIndexConglomerateDescriptor(dd).
+                                    getConglomerateNumber(),
                             deferred);
                 }
             }

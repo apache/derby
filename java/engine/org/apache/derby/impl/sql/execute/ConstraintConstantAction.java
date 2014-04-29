@@ -22,12 +22,12 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -36,7 +36,6 @@ import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -44,7 +43,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
-import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.ValidationInfo;
 import org.apache.derby.impl.store.access.heap.HeapRowLocation;
 import org.apache.derby.shared.common.sanity.SanityManager;
 /**
@@ -152,6 +150,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
 	 */
 	static void validateFKConstraint
 	(
+        Activation                          activation,
 		TransactionController				tc,
 		DataDictionary						dd,
 		ForeignKeyConstraintDescriptor		fk,
@@ -229,12 +228,22 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                         ScanController.GT             	// stopSearchOp 
                         );
 
-			RIBulkChecker riChecker = new RIBulkChecker(refScan, 
-										fkScan, 
-										indexTemplateRow, 	
-										true, 				// fail on 1st failure
-										(ConglomerateController)null,
-										(ExecRow)null);
+            RIBulkChecker riChecker = new RIBulkChecker(
+                    activation,
+                    refScan,
+                    fkScan,
+                    indexTemplateRow,
+                    true,               // fail on 1st failure
+                    (ConglomerateController)null,
+                    (ExecRow)null,
+                    fk.getTableDescriptor().getSchemaName(),
+                    fk.getTableDescriptor().getName(),
+                    fk.getUUID(),
+                    fk.deferrable(),
+                    fk.getIndexConglomerateDescriptor(dd).
+                        getConglomerateNumber(),
+                    refcd.getIndexConglomerateDescriptor(dd).
+                        getConglomerateNumber());
 
 			int numFailures = riChecker.doCheck();
 			if (numFailures > 0)
@@ -340,6 +349,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                         // violating rows, so for now, just pretend we know one,
                         // then invalidate the row location information forcing
                         // full table check at validation time
+                        CheckInfo newCi[] = new CheckInfo[1];
                         DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
                                 td.getHeapConglomerateId(),
@@ -347,12 +357,9 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                                 td.getName(),
                                 null,
                                 violatingConstraints,
-                                new HeapRowLocation() /* dummy */);
-                        HashMap<Long, ValidationInfo>
-                                hashTables = lcc.getDeferredHashTables();
-                        CheckInfo ci = (CheckInfo)hashTables.get(
-                                Long.valueOf(td.getHeapConglomerateId()));
-                        ci.setInvalidatedRowLocations();
+                                new HeapRowLocation() /* dummy */,
+                                newCi);
+                        newCi[0].setInvalidatedRowLocations();
 
                     } else {
                         throw StandardException.newException(

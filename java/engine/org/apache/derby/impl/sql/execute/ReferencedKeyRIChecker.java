@@ -21,16 +21,18 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.StatementUtil;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.StatementUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A Referential Integrity checker for a change
@@ -43,15 +45,17 @@ import org.apache.derby.iapi.sql.StatementType;
 public class ReferencedKeyRIChecker extends GenericRIChecker
 {
 	/**
+     * @param lcc       the language connection context
 	 * @param tc		the xact controller
 	 * @param fkinfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	ReferencedKeyRIChecker(TransactionController tc, FKInfo fkinfo)
-		throws StandardException
+    ReferencedKeyRIChecker(LanguageConnectionContext lcc,
+                           TransactionController tc,
+                           FKInfo fkinfo) throws StandardException
 	{
-		super(tc, fkinfo);
+        super(lcc, tc, fkinfo);
 
 		if (SanityManager.DEBUG)
 		{
@@ -70,12 +74,16 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 	 * If a foreign key is found, an exception is thrown.
 	 * If not, the scan is closed.
 	 *
+     * @para, a     the activation
 	 * @param row	the row to check
+     * @param restrictCheckOnly
 	 *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
-	void doCheck(ExecRow row, boolean restrictCheckOnly) throws StandardException
+    void doCheck(Activation a,
+                 ExecRow row,
+                 boolean restrictCheckOnly) throws StandardException
 	{
 		/*
 		** If any of the columns are null, then the
@@ -105,12 +113,36 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 			if (scan.next())
 			{
 				close();
-				StandardException se = StandardException.newException(SQLState.LANG_FK_VIOLATION, fkInfo.fkConstraintNames[i],
-										fkInfo.tableName,
-										StatementUtil.typeName(fkInfo.stmtType),
-										RowUtil.toString(row, fkInfo.colArray));
 
-				throw se;
+                final UUID fkId = fkInfo.fkIds[i];
+
+                // Only considering deferring if we don't have RESTRICT, i.e.
+                // NO ACTION. CASCADE and SET NULL handled elsewhere.
+                if (fkInfo.deferrable[i] &&
+                    fkInfo.raRules[i] != StatementType.RA_RESTRICT &&
+                        lcc.isEffectivelyDeferred(
+                                lcc.getCurrentSQLSessionContext(a), fkId)) {
+                    deferredRowsHashTable =
+                            DeferredConstraintsMemory.rememberFKViolation(
+                                    lcc,
+                                    deferredRowsHashTable,
+                                    fkInfo.fkConglomNumbers[i],
+                                    fkInfo.refConglomNumber,
+                                    fkInfo.fkIds[i],
+                                    indexQualifierRow.getRowArray(),
+                                    fkInfo.schemaName,
+                                    fkInfo.tableName);
+                } else {
+
+                    StandardException se = StandardException.newException(
+                            SQLState.LANG_FK_VIOLATION,
+                            fkInfo.fkConstraintNames[i],
+                            fkInfo.tableName,
+                            StatementUtil.typeName(fkInfo.stmtType),
+                            RowUtil.toString(row, fkInfo.colArray));
+
+                    throw se;
+                }
 			}
 			/*
 			** Move off of the current row to release any locks.

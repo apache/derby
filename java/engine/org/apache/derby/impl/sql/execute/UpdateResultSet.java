@@ -48,6 +48,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLRef;
+import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -358,7 +359,7 @@ class UpdateResultSet extends DMLWriteResultSet
 		{
 			if (riChecker == null)
 			{
-				riChecker = new RISetChecker(tc, fkInfoArray);
+                riChecker = new RISetChecker(lcc, tc, fkInfoArray);
 			}
 			else
 			{
@@ -517,7 +518,8 @@ class UpdateResultSet extends DMLWriteResultSet
                                 constants.getTableName(),
                                 deferredChecks,
                                 violatingCheckConstraints,
-                                baseRowLocation);
+                                baseRowLocation,
+                                new CheckInfo[1]);
                     }
 				}
 
@@ -593,7 +595,8 @@ class UpdateResultSet extends DMLWriteResultSet
                             constants.getTableName(),
                             deferredChecks,
                             violatingCheckConstraints,
-                            baseRowLocation);
+                            baseRowLocation,
+                            new CheckInfo[1]);
                 }
 
 				RowUtil.copyRefColumns(newBaseRow,
@@ -611,7 +614,7 @@ class UpdateResultSet extends DMLWriteResultSet
 					** a referenced key, we'll be updating in deferred
 					** mode, so we wont get here.
 					*/
-					riChecker.doFKCheck(newBaseRow);
+                    riChecker.doFKCheck(activation, newBaseRow);
 				}
 
 				source.updateRow(newBaseRow, rowChanger);
@@ -885,7 +888,8 @@ class UpdateResultSet extends DMLWriteResultSet
                                 constants.getTableName(),
                                 deferredChecks,
                                 violatingCheckConstraints,
-                                baseRowLocation);
+                                baseRowLocation,
+                                new CheckInfo[1]);
                     }
 
 					/* Get the base row at the given RowLocation */
@@ -958,7 +962,8 @@ class UpdateResultSet extends DMLWriteResultSet
 										fkInfoArray[i].colArray, 
 										insertedRowHolder))
 						{
-							riChecker.doRICheck(i, deletedRow, restrictCheckOnly);
+                            riChecker.doRICheck(
+                                activation, i, deletedRow, restrictCheckOnly);
 						}
 					}	
 				}
@@ -1002,7 +1007,8 @@ class UpdateResultSet extends DMLWriteResultSet
 										fkInfoArray[i].colArray, 
 										deletedRowHolder))
 						{
-							riChecker.doRICheck(i, insertedRow, restrictCheckOnly);
+                            riChecker.doRICheck(
+                                activation, i, insertedRow, restrictCheckOnly);
 						}
 					}	
 				}

@@ -747,6 +747,8 @@ public interface SQLState {
     String LANG_DEFERRED_CHECK_CONSTRAINT_T                            = "23514.T.1";
     String LANG_DEFERRED_CHECK_CONSTRAINT_S                            = "23515.S.1";
 
+    String LANG_DEFERRED_FK_CONSTRAINT_T                               = "23516.T.1";
+    String LANG_DEFERRED_FK_CONSTRAINT_S                               = "23517.S.1";
 	// From SQL/XML[2006] spec; there are others, but
 	// these are the ones we actually use with our
 	// current XML support.

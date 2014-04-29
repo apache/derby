@@ -295,8 +295,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
                 dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
                                 "DEFERRED CONSTRAINTS");
 
-                if (constraintType == DataDictionary.FOREIGNKEY_CONSTRAINT ||
-                    constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
+                if (constraintType == DataDictionary.NOTNULL_CONSTRAINT ||
                     !characteristics[2] /* not enforced */) {
 
                     // Remove when feature DERBY-532 is completed
@@ -391,7 +390,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				if ( (! forCreateTable) && 
 					 dd.activeConstraint( conDesc ) )
 				{
-					validateFKConstraint(tc, 
+                    validateFKConstraint(activation,
+                                         tc,
 										 dd, 
 										 (ForeignKeyConstraintDescriptor)conDesc, 
 										 referencedConstraint,

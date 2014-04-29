@@ -21,15 +21,16 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.StatementUtil;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.StatementUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A Referential Integrity checker for a foreign
@@ -41,15 +42,18 @@ import org.apache.derby.iapi.store.access.TransactionController;
 public class ForeignKeyRIChecker extends GenericRIChecker
 {
 	/**
+     * @param lcc       the language connection context
 	 * @param tc		the xact controller
 	 * @param fkinfo	the foreign key information 
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	ForeignKeyRIChecker(TransactionController tc, FKInfo fkinfo)
-		throws StandardException
+    ForeignKeyRIChecker(
+        LanguageConnectionContext lcc,
+        TransactionController tc,
+        FKInfo fkinfo) throws StandardException
 	{
-		super(tc, fkinfo);
+        super(lcc, tc, fkinfo);
 
 		if (SanityManager.DEBUG)
 		{
@@ -68,12 +72,16 @@ public class ForeignKeyRIChecker extends GenericRIChecker
 	 * when this method returns.  The lock is held until
 	 * the next call to doCheck() or close().
 	 *
+     * @param a     the activation
 	 * @param row	the row to check
+     * @param restrictCheckOnly
 	 *
-	 * @exception StandardException on unexped error, or
+     * @exception StandardException on unexpected error, or
 	 *		on a foreign key violation
 	 */
-	void doCheck(ExecRow row, boolean restrictCheckOnly) throws StandardException
+    void doCheck(Activation a,
+                 ExecRow row,
+                 boolean restrictCheckOnly) throws StandardException
 	{
 
 		if(restrictCheckOnly) //RESTRICT rule checks are not valid here.
@@ -95,13 +103,32 @@ public class ForeignKeyRIChecker extends GenericRIChecker
 		ScanController scan = getScanController(fkInfo.refConglomNumber, refScoci, refDcoci, row);
 		if (!scan.next())
 		{
-			close();
-			StandardException se = StandardException.newException(SQLState.LANG_FK_VIOLATION, fkInfo.fkConstraintNames[0],
-										fkInfo.tableName,
-										StatementUtil.typeName(fkInfo.stmtType),
-										RowUtil.toString(row, fkInfo.colArray));
+            final UUID fkId = fkInfo.fkIds[0];
+            close();
 
-			throw se;
+            if (fkInfo.deferrable[0] &&
+                lcc.isEffectivelyDeferred(lcc.getCurrentSQLSessionContext(a),
+                        fkId)) {
+                deferredRowsHashTable =
+                        DeferredConstraintsMemory.rememberFKViolation(
+                                lcc,
+                                deferredRowsHashTable,
+                                fkInfo.fkConglomNumbers[0],
+                                fkInfo.refConglomNumber,
+                                fkInfo.fkIds[0],
+                                indexQualifierRow.getRowArray(),
+                                fkInfo.schemaName,
+                                fkInfo.tableName);
+            } else {
+                StandardException se = StandardException.newException(
+                        SQLState.LANG_FK_VIOLATION,
+                        fkInfo.fkConstraintNames[0],
+                        fkInfo.tableName,
+                        StatementUtil.typeName(fkInfo.stmtType),
+                        RowUtil.toString(row, fkInfo.colArray));
+                throw se;
+            }
+
 		}
 		
 		/*

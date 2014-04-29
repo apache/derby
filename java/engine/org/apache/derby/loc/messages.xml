@@ -900,7 +900,7 @@ Guide.
 
             <msg>
                 <name>23514.T.1</name>
-                <text>The transaction was aborted because of a deferred constraint violation: Check constraint identified by '{0}' defined on '{1}' as '{2}'.</text>
+                <text>The transaction was aborted because of a deferred constraint violation: Check constraint identified by '{0}' defined on {1} as '{2}'.</text>
                 <arg>indexOrConstraintName</arg>
                 <arg>tableName</arg>
                 <arg>constraintText</arg>
@@ -908,10 +908,30 @@ Guide.
 
             <msg>
                 <name>23515.S.1</name>
-                <text>Deferred constraint violation: Check constraint identified by '{0}' defined on '{1}' as '{2}'.</text>
+                <text>Deferred constraint violation: Check constraint identified by '{0}' defined on {1} as '{2}'.</text>
                 <arg>indexOrConstraintName</arg>
                 <arg>tableName</arg>
                 <arg>constraintText</arg>
+            </msg>
+
+            <msg>
+                <name>23516.T.1</name>
+                <text>The transaction was aborted because of a deferred constraint violation: Foreign key '{0}' defined on {1} referencing referencing constraint '{2}' defined on {3}, key '{4}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>keyName</arg>
+            </msg>
+
+            <msg>
+                <name>23517.S.1</name>
+                <text>Deferred constraint violation: Foreign key constraint '{0}' defined on {1} referencing constraint '{2}' defined on {3}, key '{4}'.</text>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>indexOrConstraintName</arg>
+                <arg>tableName</arg>
+                <arg>keyName</arg>
             </msg>
 
         </family>

@@ -254,6 +254,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CurrentSchemaTest.suite());
         suite.addTest(Test_6496.suite());
         suite.addTest(ConstraintCharacteristicsTest.suite());
+        suite.addTest(ForeignKeysDeferrableTest.suite());
         suite.addTest(DB2IsolationLevelsTest.suite());
         suite.addTest(LuceneSuite.suite());
         suite.addTest(ConsistencyCheckerTest.suite());

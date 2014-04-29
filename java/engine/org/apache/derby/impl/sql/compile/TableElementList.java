@@ -1054,12 +1054,19 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 						constraintType, dd);
 				} 
                 else 
-                {
+                {   // PRIMARY KEY, FOREIGN KEY
+                    // For foreign key constraint we do no mark the
+                    // index as deferrable; since checking isn't done on
+                    // duplicate keys there.
 					indexAction = genIndexAction(
 						forCreateTable,
 						constraintDN.requiresUniqueIndex(), false,
-                        cChars[0], // deferrable
-                        cChars[1], // initiallyDeferred?
+                        cChars[0] &                     // deferrable ?
+                                (constraintType !=
+                                 DataDictionary.FOREIGNKEY_CONSTRAINT),
+                        cChars[1] &                     // initiallyDeferred ?
+                                (constraintType !=
+                                 DataDictionary.FOREIGNKEY_CONSTRAINT),
 						null, constraintDN,
 						columnNames, true, tableSd, tableName,
 						constraintType, dd);

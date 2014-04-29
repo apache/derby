@@ -1228,7 +1228,19 @@ public abstract class BaseJDBCTestCase
         assertStatementError(new String[] {sqlState},st,query);
     }
         
-   
+    /**
+     * Assert that that a commit fails with the given error
+     * @param sqlState state
+     * @param c        the connection
+     */
+    public static void assertCommitError(String sqlState, Connection c) {
+        try {
+            c.commit();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState(sqlState, e);
+        }
+    }
    
     /**
      * Assert that the query fails (either in compilation,
@@ -1660,7 +1672,7 @@ public abstract class BaseJDBCTestCase
         s.close();
     }
 
-    protected static void dumpRs(ResultSet s) throws SQLException {
+    public static void dumpRs(ResultSet s) throws SQLException {
         dumpRs(s, System.out);
     }
 
@@ -1697,7 +1709,7 @@ public abstract class BaseJDBCTestCase
      * Assert that the statement returns the correct results.
      */
     protected void assertResults( Connection conn, String query, String[][] rows, boolean trimResults )
-        throws Exception
+        throws SQLException
     {
         PreparedStatement   ps = chattyPrepare( conn, query );
         ResultSet                   rs = ps.executeQuery();
@@ -1712,7 +1724,7 @@ public abstract class BaseJDBCTestCase
      * Assert that the ResultSet returns the desired rows.
      */
     protected void assertResults( ResultSet rs, String[][] rows, boolean trimResults )
-        throws Exception
+        throws SQLException
     {
         int     rowCount = rows.length;
 

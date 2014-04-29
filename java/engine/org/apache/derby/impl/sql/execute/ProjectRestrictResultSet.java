@@ -22,27 +22,19 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Enumeration;
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.StreamStorable;
-
+import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.StatementContext;
-
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.sql.execute.RowChanger;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLRef;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 
 /**
@@ -79,10 +71,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	private boolean shortCircuitOpen;
 
 	private ExecRow projRow;
-    private boolean validatingCheckConstraint;
-    private long validatingBaseTableCID;
-    DeferredConstraintsMemory.CheckInfo ci;
-    Enumeration rowLocations;
+    private final boolean validatingCheckConstraint;
+    private final long validatingBaseTableCID;
+    Enumeration<Object> rowLocations;
 
     // class interface
     //
@@ -179,11 +170,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		}
 
         if (validatingCheckConstraint) {
-            ci = (DeferredConstraintsMemory.CheckInfo)activation.
-                getLanguageConnectionContext().
-                getDeferredHashTables().get(
-                    Long.valueOf(validatingBaseTableCID));
-            rowLocations = ci.infoRows.elements();
+            rowLocations = DeferredConstraintsMemory.
+                getDeferredCheckConstraintLocations(
+                        activation, validatingBaseTableCID);
         }
 
 

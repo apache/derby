@@ -304,9 +304,7 @@ public class Changes10_11 extends UpgradeChange
             "create table t532(i int not null primary key deferrable)",
             "create table t532(i int unique deferrable)",
             "create table t532(i int not null unique deferrable)",
-            "create table t532(i int check (i > 0) deferrable)"};
-
-        String[] cDeferrableColNotYet = new String[]{
+            "create table t532(i int check (i > 0) deferrable)",
             "create table t532(i int references referenced(i) deferrable)"};
 
         String[] cDeferrableTab = new String[]{
@@ -314,9 +312,7 @@ public class Changes10_11 extends UpgradeChange
             "create table t532(i int, constraint c unique(i) deferrable)",
             "create table t532(i int not null, constraint c unique(i) " + 
                 "deferrable)",
-            "create table t532(i int, constraint c check (i > 0) deferrable)"};
-        
-        String[] cDeferrableTabNotYet = new String[]{
+            "create table t532(i int, constraint c check (i > 0) deferrable)",
             "create table t532(i int, constraint c foreign key(i) " + 
                 "references referenced(i) deferrable)"};
 
@@ -331,11 +327,6 @@ public class Changes10_11 extends UpgradeChange
                     assertStatementError(SYNTAX_ERROR, st, s);
                     assertStatementError(SYNTAX_ERROR, st, s);
                 }
-                
-                for (String s : cDeferrableColNotYet) {
-                    assertStatementError(SYNTAX_ERROR, st, s);
-                    assertStatementError(SYNTAX_ERROR, st, s);
-                }
                 break;
                 
             case PH_POST_SOFT_UPGRADE:
@@ -343,20 +334,10 @@ public class Changes10_11 extends UpgradeChange
                     assertStatementError(SYNTAX_ERROR, st, s);
                     assertStatementError(SYNTAX_ERROR, st, s);
                 }
-
-                for (String s : cDeferrableColNotYet) {
-                    assertStatementError(SYNTAX_ERROR, st, s);
-                    assertStatementError(SYNTAX_ERROR, st, s);
-                }
                 break;
                 
             case PH_SOFT_UPGRADE:
                 for (String s : cDeferrableCol) {
-                    assertStatementError(HARD_UPGRADE_REQUIRED, st, s);
-                    assertStatementError(HARD_UPGRADE_REQUIRED, st, s);
-                }
-                
-                for (String s : cDeferrableColNotYet) {
                     assertStatementError(HARD_UPGRADE_REQUIRED, st, s);
                     assertStatementError(HARD_UPGRADE_REQUIRED, st, s);
                 }
@@ -369,12 +350,6 @@ public class Changes10_11 extends UpgradeChange
                     st.execute(s);
                     rollback();
                 }
-
-                for (String s : cDeferrableColNotYet) {
-                    assertStatementError(NOT_IMPLEMENTED, st, s);
-                    assertStatementError(NOT_IMPLEMENTED, st, s);
-                }
-                
                 break;
             }
         } finally {

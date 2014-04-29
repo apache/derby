@@ -885,7 +885,8 @@ public final class SQLBoolean
             final UUID constrId = (UUID)ps.getSavedObject(savedUUIDIdx);
             final LanguageConnectionContext lcc =
                 a.getLanguageConnectionContext();
-            final boolean isDeferred = lcc.isEffectivelyDeferred(a, constrId);
+            final boolean isDeferred = lcc.isEffectivelyDeferred(
+                   lcc.getCurrentSQLSessionContext(a), constrId);
 
             if (!isDeferred) {
                 throw StandardException.newException(
