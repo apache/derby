@@ -517,7 +517,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 			int actionOffset,
 			TableDescriptor td,
 			int triggerEventMask,
-			boolean createTriggerTime)
+            boolean createTriggerTime,
+            List<int[]> replacements)
 	throws StandardException {
 		// Auto-generated method stub
 		return null;

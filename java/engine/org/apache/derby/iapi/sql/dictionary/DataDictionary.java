@@ -1309,6 +1309,16 @@ public interface DataDictionary
 	 * 	false if here because an invalidated row level trigger with 
 	 *  REFERENCEd columns has been fired and hence trigger action
 	 *  sql associated with SPSDescriptor may be invalid too.
+     *
+     * @param replacements a list that will be populated with objects that
+     *  describe how {@code triggerDefinition} has been transformed into
+     *  the returned SQL text. Each element in the list will contain four
+     *  integers. The first two describe the begin and end offset of the
+     *  replaced text in the {@code triggerDefinition}. The last two describe
+     *  the begin and end offset of the replacement text in the returned
+     *  string. The begin offsets are inclusive, whereas the end offsets are
+     *  exclusive. The list can be {@code null} if the caller does not care
+     *  about this information.
 	 * 
 	 * @return Transformed trigger action sql
 	 * @throws StandardException
@@ -1323,7 +1333,8 @@ public interface DataDictionary
 			int actionOffset,
 			TableDescriptor triggerTableDescriptor,
 			int triggerEventMask,
-			boolean createTriggerTime)
+            boolean createTriggerTime,
+            List<int[]> replacements)
 	throws StandardException;
 	
 

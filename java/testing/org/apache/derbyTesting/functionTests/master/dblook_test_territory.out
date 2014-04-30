@@ -1874,7 +1874,7 @@ APP
 APP
 T
 <validityflag>
-insert into removed select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where x not in (select x from new org.apache.derby.catalog.TriggerNewTransitionRows() NEW  where x < 10)
+insert into "APP"."REMOVED" select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where x not in (select x from new org.apache.derby.catalog.TriggerNewTransitionRows() NEW  where x < 10)
 <systemid>
 APP
 null
@@ -1884,7 +1884,7 @@ null
 APP
 T
 <validityflag>
-select c from bar."tWithKeys"
+select c from "BAR"."tWithKeys"
 <systemid>
 APP
 null
@@ -1894,7 +1894,7 @@ null
 APP
 T
 <validityflag>
-update bar.t4 set j=8 where i=2
+update "BAR"."T4" set j=8 where i=2
 <systemid>
 APP
 null
@@ -2230,7 +2230,7 @@ X
 null
 <systemid>
 (1)
-insert into removed select * from old where x not in (select x from new where x < 10)
+insert into "APP"."REMOVED" select * from old where x not in (select x from new where x < 10)
 true
 true
 OLD
@@ -2249,7 +2249,7 @@ T3
 null
 <systemid>
 null
-update bar.t4 set j=8 where i=2
+update "BAR"."T4" set j=8 where i=2
 false
 false
 null
@@ -2287,7 +2287,7 @@ tWithKeys
 null
 <systemid>
 (1,2)
-select c from bar."tWithKeys"
+select c from "BAR"."tWithKeys"
 false
 false
 null
@@ -4238,7 +4238,7 @@ APP
 APP
 T
 <validityflag>
-insert into removed select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where x not in (select x from new org.apache.derby.catalog.TriggerNewTransitionRows() NEW  where x < 10)
+insert into "APP"."REMOVED" select * from new org.apache.derby.catalog.TriggerOldTransitionRows() OLD  where x not in (select x from new org.apache.derby.catalog.TriggerNewTransitionRows() NEW  where x < 10)
 <systemid>
 APP
 null
@@ -4248,7 +4248,7 @@ null
 APP
 T
 <validityflag>
-select c from bar."tWithKeys"
+select c from "BAR"."tWithKeys"
 <systemid>
 APP
 null
@@ -4258,7 +4258,7 @@ null
 APP
 T
 <validityflag>
-update bar.t4 set j=8 where i=2
+update "BAR"."T4" set j=8 where i=2
 <systemid>
 APP
 null
@@ -4594,7 +4594,7 @@ X
 null
 <systemid>
 (1)
-insert into removed select * from old where x not in (select x from new where x < 10)
+insert into "APP"."REMOVED" select * from old where x not in (select x from new where x < 10)
 true
 true
 OLD
@@ -4613,7 +4613,7 @@ T3
 null
 <systemid>
 null
-update bar.t4 set j=8 where i=2
+update "BAR"."T4" set j=8 where i=2
 false
 false
 null
@@ -4651,7 +4651,7 @@ tWithKeys
 null
 <systemid>
 (1,2)
-select c from bar."tWithKeys"
+select c from "BAR"."tWithKeys"
 false
 false
 null
@@ -6337,8 +6337,8 @@ SET SCHEMA "APP"
 -- ----------------------------------------------
 -- DDL Statements for triggers
 -- ----------------------------------------------
-CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2
-CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from bar.t1 where i = 2
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update "BAR"."T1" set i = 4 where i = 2
+CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from "BAR"."T1" where i = 2
 ############## End File Contents ################
 File dblook.log was empty.
 ************
@@ -6500,8 +6500,8 @@ SET SCHEMA "APP" #
 -- ----------------------------------------------
 -- DDL Statements for triggers
 -- ----------------------------------------------
-CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update bar.t1 set i = 4 where i = 2 #
-CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from bar.t1 where i = 2 #
+CREATE TRIGGER "APP"."TRIGONE" AFTER INSERT ON "BAR"."T1" FOR EACH ROW update "BAR"."T1" set i = 4 where i = 2 #
+CREATE TRIGGER "APP"."TRIGTWO" AFTER INSERT ON "BAR"."T1" REFERENCING NEW AS NEW FOR EACH ROW WHEN (new.i > 4) delete from "BAR"."T1" where i = 2 #
 ************
 Msg Test 5
 ************
@@ -6534,17 +6534,17 @@ CREATE TABLE "APP"."T1" ("X" INTEGER)
 -- ----------------------------------------------
 -- DDL Statements for triggers
 -- ----------------------------------------------
-CREATE TRIGGER "APP"."TR13" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR14" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR15" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR16" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR17" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR18" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR19" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR20" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR21" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR22" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR23" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
-CREATE TRIGGER "APP"."TR24" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from sys.systables natural join sys.sysschemas where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR13" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR14" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR15" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR16" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR17" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR18" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR19" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR20" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR21" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR22" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR23" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
+CREATE TRIGGER "APP"."TR24" AFTER UPDATE ON "APP"."T1" REFERENCING NEW_TABLE AS NEW FOR EACH STATEMENT select * from "SYS"."SYSTABLES" natural join "SYS"."SYSSCHEMAS" where exists(select * from new where x > 100)
 ############## End File Contents ################
 [ Done. ]

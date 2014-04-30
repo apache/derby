@@ -25,6 +25,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RowMultiSetImpl;
@@ -1569,15 +1570,22 @@ public abstract class QueryTreeNode implements Visitable
         }
     }
 
+    /**
+     * Get all child nodes of a specific type, and return them in the order
+     * in which they appear in the SQL text.
+     *
+     * @param <N> the type of node to look for
+     * @param type the type of node to look for
+     * @return all nodes of the specified type
+     * @throws StandardException if an error occurs
+     */
+    public <N extends QueryTreeNode>
+        SortedSet<N> getOffsetOrderedNodes(Class<N> type)
+                throws StandardException {
+        OffsetOrderVisitor<N> visitor = new OffsetOrderVisitor<N>(
+                type, getBeginOffset(), getEndOffset() + 1);
+        accept(visitor);
+        return visitor.getNodes();
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -2436,4 +2436,113 @@ public class TriggerTest extends BaseJDBCTestCase {
                 s.executeQuery("select * from d6543_2 order by x"),
                 new String[][] { {"1"}, {"2"}, {"2"}, {"2"}, {"2"}, {"3"} });
     }
+
+    /**
+     * DERBY-6370: Test that trigger actions are stored with qualified names
+     * in SYSTRIGGERS and SYSSTATEMENTS.
+     */
+    public void testQualifiedNamesInSystemTables() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create schema d6370");
+        s.execute("set schema d6370");
+        s.execute("create table t1(x int, y int, z int)");
+        s.execute("create table t2(x int, y int, z int)");
+        s.execute("create table t3(x int, y int, z int)");
+        s.execute("create table syn_table(x int, y int, z int)");
+        s.execute("create table view_table(x int, y int, z int)");
+
+        s.execute("create function f(x int) returns int language java "
+                + "parameter style java external name 'java.lang.Math.abs'");
+        s.execute("create procedure p() language java parameter style java "
+                + "external name '" + getClass().getName()
+                + ".dummyProc' no sql");
+        s.execute("create function tf() returns table (x int) "
+                + "language java parameter style derby_jdbc_result_set "
+                + "external name '" + getClass().getName()
+                + ".dummyTableFunction' no sql");
+        s.execute("create derby aggregate intmode for int external name '"
+                + ModeAggregate.class.getName() + "'");
+        s.execute("create sequence seq");
+        s.execute("create synonym syn for syn_table");
+        s.execute("create view v(x) as select x from view_table");
+        s.execute("create type tp external name 'java.util.List' language java");
+        s.execute("create table tp_t1(x tp)");
+        s.execute("create table tp_t2(x tp)");
+
+        // Create triggers referencing all of the objects above.
+        s.execute("create trigger tr01 no cascade before insert on t1 "
+                + "when (exists(select f(y) from v join t1 t on v.x = t.x)) "
+                + "call p()");
+        s.execute("create trigger tr02 after insert on t1 "
+                + "when (exists(select * from table(tf()) t)) "
+                + "insert into t2(z) select 1 from t1");
+        s.execute("create trigger tr03 after delete on t1 "
+                + "insert into t2(z) select intmode(x) from syn");
+        s.execute("create trigger tr04 after insert on tp_t1 "
+                + "referencing new as new for each row "
+                + "insert into tp_t2 values new.x, cast(null as tp)");
+        s.execute("create trigger tr05 after insert on t1 "
+                + "referencing new table as new "
+                + "when (next value for seq < 1000) "
+                + "insert into t2(y) select a.z from new a, t1 b, new c, t1 d");
+
+        // Table names in the SET clause of an UPDATE statement don't get
+        // qualified because of oddities in the way such statements are
+        // bound. Probably related to DERBY-6558.
+        s.execute("create trigger tr06 after insert on t1 "
+                + "update t2 set t2.x = t2.y");
+        // Same with target columns in INSERT statements.
+        s.execute("create trigger tr07 after insert on t1 "
+                + "insert into t2 (t2.x, t2.y) values (1, default)");
+
+        s.execute("create trigger tr08 after update on t1 "
+                + "delete from t2 where t2.x = t2.y");
+        s.execute("create trigger tr09 after delete on t1 "
+                + "merge into t2 using t3 on t2.x = t3.x "
+                + "when matched and t3.y = 5 then update set t2.x = t3.y "
+                + "when not matched then insert values (t3.x, t3.y, t3.z)");
+        s.execute("create trigger tr10 after insert on t1 "
+                + "referencing new as new for each row update t2 set x = "
+                + "(select count(*) from t1 where new.x = t2.x)");
+
+        // Now create two triggers that both reference the SIN function
+        // without specifying the schema. Create a SIN function in the
+        // current schema between the creation of the two triggers. The
+        // first trigger should reference SYSFUN.SIN, and the second one
+        // should reference D6370.SIN. See also DERBY-5901.
+        s.execute("create trigger tr11 after insert on t1 for each row "
+                + "values sin(0)");
+        s.execute("create function sin(x double) returns double language java "
+                + "parameter style java external name 'java.lang.Math.sin'");
+        s.execute("create trigger tr12 after insert on t1 for each row "
+                + "values sin(0)");
+
+        String[][] expectedRows = {
+            {"TR01", "exists(select \"D6370\".\"F\"(y) from \"D6370\".\"V\" join \"D6370\".\"T1\" t on \"V\".x = \"T\".x)", "VALUES exists(select \"D6370\".\"F\"(y) from \"D6370\".\"V\" join \"D6370\".\"T1\" t on \"V\".x = \"T\".x)", "call \"D6370\".\"P\"()", "call \"D6370\".\"P\"()"},
+            {"TR02", "exists(select * from table(\"D6370\".\"TF\"()) t)", "VALUES exists(select * from table(\"D6370\".\"TF\"()) t)", "insert into \"D6370\".\"T2\"(z) select 1 from \"D6370\".\"T1\"", "insert into \"D6370\".\"T2\"(z) select 1 from \"D6370\".\"T1\""},
+            {"TR03", null, null, "insert into \"D6370\".\"T2\"(z) select \"D6370\".\"INTMODE\"(x) from \"D6370\".\"SYN\"", "insert into \"D6370\".\"T2\"(z) select \"D6370\".\"INTMODE\"(x) from \"D6370\".\"SYN\""},
+            {"TR04", null, null, "insert into \"D6370\".\"TP_T2\" values new.x, cast(null as \"D6370\".\"TP\")", "insert into \"D6370\".\"TP_T2\" values CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject(1) AS \"D6370\".\"TP\") , cast(null as \"D6370\".\"TP\")"},
+            {"TR05", "next value for \"D6370\".\"SEQ\" < 1000", "VALUES next value for \"D6370\".\"SEQ\" < 1000", "insert into \"D6370\".\"T2\"(y) select \"A\".z from new a, \"D6370\".\"T1\" b, new c, \"D6370\".\"T1\" d", "insert into \"D6370\".\"T2\"(y) select \"A\".z from new org.apache.derby.catalog.TriggerNewTransitionRows()  a, \"D6370\".\"T1\" b, new org.apache.derby.catalog.TriggerNewTransitionRows()  c, \"D6370\".\"T1\" d"},
+            {"TR06", null, null, "update \"D6370\".\"T2\" set t2.x = \"T2\".y", "update \"D6370\".\"T2\" set t2.x = \"T2\".y"},
+            {"TR07", null, null, "insert into \"D6370\".\"T2\" (t2.x, t2.y) values (1, default)", "insert into \"D6370\".\"T2\" (t2.x, t2.y) values (1, default)"},
+            {"TR08", null, null, "delete from \"D6370\".\"T2\" where \"D6370\".\"T2\".x = \"D6370\".\"T2\".y", "delete from \"D6370\".\"T2\" where \"D6370\".\"T2\".x = \"D6370\".\"T2\".y"},
+            {"TR09", null, null, "merge into \"D6370\".\"T2\" using \"D6370\".\"T3\" on \"D6370\".\"T2\".x = \"D6370\".\"T3\".x when matched and \"D6370\".\"T3\".y = 5 then update set t2.x = \"D6370\".\"T3\".y when not matched then insert values (\"D6370\".\"T3\".x, \"D6370\".\"T3\".y, \"D6370\".\"T3\".z)", "merge into \"D6370\".\"T2\" using \"D6370\".\"T3\" on \"D6370\".\"T2\".x = \"D6370\".\"T3\".x when matched and \"D6370\".\"T3\".y = 5 then update set t2.x = \"D6370\".\"T3\".y when not matched then insert values (\"D6370\".\"T3\".x, \"D6370\".\"T3\".y, \"D6370\".\"T3\".z)"},
+            {"TR10", null, null, "update \"D6370\".\"T2\" set x = (select count(*) from \"D6370\".\"T1\" where new.x = \"D6370\".\"T2\".x)", "update \"D6370\".\"T2\" set x = (select count(*) from \"D6370\".\"T1\" where CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getNewRow().getObject(1) AS INTEGER)  = \"D6370\".\"T2\".x)"},
+            {"TR11", null, null, "values \"SYSFUN\".\"SIN\"(0)", "values \"SYSFUN\".\"SIN\"(0)"},
+            {"TR12", null, null, "values \"D6370\".\"SIN\"(0)", "values \"D6370\".\"SIN\"(0)"},
+        };
+        ResultSet rs = s.executeQuery(
+                "select triggername, whenclausetext, "
+                + "s1.text, triggerdefinition, s2.text "
+                + "from sys.systriggers join sys.sysschemas using (schemaid) "
+                + "left join sys.sysstatements s1 on whenstmtid = stmtid "
+                + "join sys.sysstatements s2 on actionstmtid = s2.stmtid "
+                + "where schemaname = 'D6370' order by triggername");
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Fire the triggers.
+        // disabled due to DERBY-6554
+        //s.execute("insert into t1 values (1,2,3)");
+        s.execute("insert into tp_t1 values cast(null as tp)");
+    }
 }

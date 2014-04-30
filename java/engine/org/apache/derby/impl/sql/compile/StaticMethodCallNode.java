@@ -246,6 +246,7 @@ class StaticMethodCallNode extends MethodCallNode
                 resolvedAggregate = new AggregateNode(
                      ((SQLToJavaValueNode) methodParms[ 0 ]).getSQLValueNode(),
                      new UserAggregateDefinition( ad ), 
+                     procedureName,
                      false,
                      ad.getJavaClassName(),
                      getContextManager()

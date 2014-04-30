@@ -70,6 +70,7 @@ class AggregateNode extends UnaryOperatorNode
      *
      * @param operand the value expression for the aggregate
      * @param uadClass the class of the user aggregate definition
+     * @param alias the name by which the aggregate was called
      * @param distinct boolean indicating whether this is distinct
 	 *					or not.
      * @param aggregateName the name of the aggregate from the user's
@@ -80,13 +81,12 @@ class AggregateNode extends UnaryOperatorNode
      AggregateNode(
             ValueNode operand,
             UserAggregateDefinition uadClass,
+            TableName alias,
             boolean distinct,
             String aggregateName,
             ContextManager cm) throws StandardException {
-        super(operand, cm);
-        this.aggregateName = aggregateName;
+        this(operand, alias, distinct, aggregateName, cm);
         setUserDefinedAggregate(uadClass);
-        this.distinct = distinct;
     }
 
     /**
@@ -293,6 +293,12 @@ class AggregateNode extends UnaryOperatorNode
         if ( userAggregateName != null )
         {
             userAggregateName.bind( dd );
+        }
+
+        // If this is a user-defined aggregate that hasn't been bound yet,
+        // bind it now.
+        if (userAggregateName != null && uad == null)
+        {
 
             AliasDescriptor ad = resolveAggregate
                 (

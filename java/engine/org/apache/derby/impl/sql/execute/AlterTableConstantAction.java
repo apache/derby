@@ -1916,7 +1916,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				0,
 				trd.getTableDescriptor(),
 				trd.getTriggerEventMask(),
-                true);
+                true,
+                null);
 
             if (isWhenClause) {
                 // The WHEN clause is not a full SQL statement, just a search

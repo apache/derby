@@ -410,7 +410,8 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					0,
 					td,
 					-1,
-                    false);
+                    false,
+                    null);
 
             if (isWhenClause) {
                 // The WHEN clause is not a full SQL statement, just a search

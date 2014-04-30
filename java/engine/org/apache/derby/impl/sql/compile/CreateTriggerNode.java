@@ -22,10 +22,11 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -68,8 +69,8 @@ class CreateTriggerNode extends DDLStatementNode
 	private	String				whenText;
 	private	StatementNode		actionNode;
 	private	String				actionText;
-    private final String        originalWhenText;
-    private final String        originalActionText;
+    private String              originalWhenText;
+    private String              originalActionText;
     private final int           whenOffset;
     private final int           actionOffset;
     private ProviderInfo[]      providerInfo;
@@ -220,6 +221,32 @@ class CreateTriggerNode extends DDLStatementNode
 	private boolean oldTableInReferencingClause;
 	private boolean newTableInReferencingClause;
 
+    /**
+     * <p>
+     * A list that describes how the original SQL text of the trigger action
+     * statement was modified when transition tables and transition variables
+     * were replaced by VTI calls. Each element in the list contains four
+     * integers describing positions where modifications have happened. The
+     * first two integers are begin and end positions of a transition table
+     * or transition variable in {@link #originalActionText the original SQL
+     * text}. The last two integers are begin and end positions of the
+     * corresponding replacement in {@link #actionText the transformed SQL
+     * text}.
+     * </p>
+     *
+     * <p>
+     * Begin positions are inclusive and end positions are exclusive.
+     * </p>
+     */
+    private final ArrayList<int[]>
+            actionTransformations = new ArrayList<int[]>();
+
+    /**
+     * Structure that has the same shape as {@code actionTransformations},
+     * except that it describes the transformations in the WHEN clause.
+     */
+    private final ArrayList<int[]>
+            whenClauseTransformations = new ArrayList<int[]>();
 
 	/**
      * Constructor for a CreateTriggerNode
@@ -374,6 +401,18 @@ class CreateTriggerNode extends DDLStatementNode
 		*/
 		boolean needInternalSQL = bindReferencesClause(dd);
 
+        // Get all the names of SQL objects referenced by the triggered
+        // SQL statement and the WHEN clause. Since some of the TableName
+        // nodes may be eliminated from the node tree during the bind phase,
+        // we collect the nodes before the nodes have been bound. The
+        // names will be used later when we normalize the trigger text
+        // that will be stored in the system tables.
+        SortedSet<TableName> actionNames =
+                actionNode.getOffsetOrderedNodes(TableName.class);
+        SortedSet<TableName> whenNames = (whenClause != null)
+                ? whenClause.getOffsetOrderedNodes(TableName.class)
+                : null;
+
         ProviderList prevAPL =
                 compilerContext.getCurrentAuxiliaryProviderList();
         ProviderList apl = new ProviderList();
@@ -418,6 +457,9 @@ class CreateTriggerNode extends DDLStatementNode
 			lcc.popTriggerTable(triggerTableDescriptor);
             compilerContext.setCurrentAuxiliaryProviderList(prevAPL);
 		}
+
+        // Qualify identifiers before storing them (DERBY-5901/DERBY-6370).
+        qualifyNames(actionNames, whenNames);
 
 		/* 
 		** Statement is dependent on the TableDescriptor 
@@ -604,8 +646,8 @@ class CreateTriggerNode extends DDLStatementNode
 					actionOffset,
 					triggerTableDescriptor,
 					triggerEventMask,
-					true
-					);			
+                    true,
+                    actionTransformations);
 
             // If there is a WHEN clause, we need to transform its text too.
             if (whenClause != null) {
@@ -614,7 +656,8 @@ class CreateTriggerNode extends DDLStatementNode
                             whenClause, oldTableName, newTableName,
                             originalWhenText, referencedColInts,
                             referencedColsInTriggerAction, whenOffset,
-                            triggerTableDescriptor, triggerEventMask, true);
+                            triggerTableDescriptor, triggerEventMask, true,
+                            whenClauseTransformations);
             }
 
 			//Now that we know what columns we need for REFERENCEd columns in
@@ -629,10 +672,12 @@ class CreateTriggerNode extends DDLStatementNode
 		{
 			//This is a table level trigger	        
             transformedActionText = transformStatementTriggerText(
-                    actionNode, originalActionText, actionOffset);
+                    actionNode, originalActionText, actionOffset,
+                    actionTransformations);
             if (whenClause != null) {
                 transformedWhenText = transformStatementTriggerText(
-                        whenClause, originalWhenText, whenOffset);
+                        whenClause, originalWhenText, whenOffset,
+                        whenClauseTransformations);
             }
 		}
 
@@ -660,6 +705,146 @@ class CreateTriggerNode extends DDLStatementNode
 
 		return regenNode;
 	}
+
+    /**
+     * Make sure all references to SQL schema objects (such as tables and
+     * functions) in the SQL fragments that will be stored in the SPS and
+     * in the trigger descriptor, are fully qualified with a schema name.
+     *
+     * @param actionNames all the TableName nodes found in the triggered
+     *                    SQL statement
+     * @param whenNames   all the Table Name nodes found in the WHEN clause
+     */
+    private void qualifyNames(SortedSet<TableName> actionNames,
+                              SortedSet<TableName> whenNames)
+            throws StandardException {
+
+        StringBuilder original = new StringBuilder();
+        StringBuilder transformed = new StringBuilder();
+
+        // Qualify the names in the action text.
+        qualifyNames(actionNode, actionNames, originalActionText, actionText,
+                     actionTransformations, original, transformed);
+        originalActionText = original.toString();
+        actionText = transformed.toString();
+
+        // Do the same for the WHEN clause, if there is one.
+        if (whenClause != null) {
+            original.setLength(0);
+            transformed.setLength(0);
+            qualifyNames(whenClause, whenNames, originalWhenText, whenText,
+                         whenClauseTransformations, original, transformed);
+            originalWhenText = original.toString();
+            whenText = transformed.toString();
+        }
+    }
+
+    /**
+     * Qualify all names SQL object names in original and transformed SQL
+     * text for an action or a WHEN clause.
+     *
+     * @param node the query tree node for the transformed version of the
+     *   SQL text, in a bound state
+     * @param tableNames all the TableName nodes in the transformed text,
+     *   in the order in which they appear in the SQL text
+     * @param originalText the original SQL text
+     * @param transformedText the transformed SQL text (with VTI calls for
+     *   transition tables or transition variables)
+     * @param replacements a data structure that describes how {@code
+     *   originalText} was transformed into {@code transformedText}
+     * @param newOriginal where to store the normalized version of the
+     *   original text
+     * @param newTransformed where to store the normalized version of the
+     *   transformed text
+     */
+    private void qualifyNames(
+            QueryTreeNode node,
+            SortedSet<TableName> tableNames,
+            String originalText,
+            String transformedText,
+            List<int[]> replacements,
+            StringBuilder newOriginal,
+            StringBuilder newTransformed) throws StandardException {
+
+        int originalPos = 0;
+        int transformedPos = 0;
+
+        for (TableName name : tableNames) {
+
+            String qualifiedName = name.getFullSQLName();
+
+            int beginOffset = name.getBeginOffset() - node.getBeginOffset();
+            int tokenLength = name.getEndOffset() + 1 - name.getBeginOffset();
+
+            // For the transformed text, use the positions from the node.
+            newTransformed.append(transformedText, transformedPos, beginOffset);
+            newTransformed.append(qualifiedName);
+            transformedPos = beginOffset + tokenLength;
+
+            // For the original text, we need to adjust the positions to
+            // compensate for the changes in the transformed text.
+            Integer origBeginOffset =
+                    getOriginalPosition(replacements, beginOffset);
+            if (origBeginOffset != null) {
+                newOriginal.append(originalText, originalPos, origBeginOffset);
+                newOriginal.append(qualifiedName);
+                originalPos = origBeginOffset + tokenLength;
+            }
+        }
+
+        newTransformed.append(
+                transformedText, transformedPos, transformedText.length());
+        newOriginal.append(originalText, originalPos, originalText.length());
+    }
+
+    /**
+     * Translate a position from the transformed trigger text
+     * ({@link #actionText} or {@link #whenText}) to the corresponding
+     * position in the original trigger text ({@link #originalActionText}
+     * or {@link #originalWhenText}).
+     *
+     * @param replacements a data structure that describes the relationship
+     *   between positions in the original and the transformed text
+     * @param transformedPosition the position to translate
+     * @return the position in the original text, or {@code null} if there
+     *   is no corresponding position in the original text (for example if
+     *   it points to a token that was added to the transformed text and
+     *   does not exist in the original text)
+     */
+    private static Integer getOriginalPosition(
+            List<int[]> replacements, int transformedPosition) {
+
+        // Find the last change before the position we want to translate.
+        for (int i = replacements.size() - 1; i >= 0; i--) {
+            int[] offsets = replacements.get(i);
+
+            // offset[0] is the begin offset of the replaced text
+            // offset[1] is the end offset of the replaced text
+            // offset[2] is the begin offset of the replacement text
+            // offset[3] is the end offset of the replacement text
+
+            // Skip those changes that come after the position we
+            // want to translate.
+            if (transformedPosition >= offsets[2]) {
+                if (transformedPosition < offsets[3]) {
+                    // The position points inside a changed portion of the
+                    // SQL text, so there's no corresponding position in the
+                    // original text. Return null.
+                    return null;
+                } else {
+                    // The position points after the end of the changed text,
+                    // which means it's in a portion that's common to the
+                    // original and the transformed text. Translate between
+                    // the two.
+                    return offsets[1] + (transformedPosition - offsets[3]);
+                }
+            }
+        }
+
+        // The position is before any of the transformations, so the position
+        // is the same in the original and the transformed text.
+        return transformedPosition;
+    }
 
 	/*
 	 * The arrary passed will have either -1 or a column position as it's 
@@ -701,13 +886,20 @@ class CreateTriggerNode extends DDLStatementNode
      *   triggered SQL statement
      * @param offset the offset of the WHEN clause or the triggered SQL
      *   statement within the CREATE TRIGGER statement
+     * @param replacements list that will be populated with int arrays that
+     *   describe how the original text was transformed. The int arrays
+     *   contain the begin (inclusive) and end (exclusive) positions of the
+     *   original text that got replaced and of the replacement text, so that
+     *   positions in the transformed text can be mapped to positions in the
+     *   original text.
      * @return internal syntax for accessing before or after image of
      *   the changed rows
      * @throws StandardException if an error happens while performing the
      *   transformation
      */
     private String transformStatementTriggerText(
-            Visitable node, String originalText, int offset)
+            Visitable node, String originalText, int offset,
+            List<int[]> replacements)
         throws StandardException
     {
         int start = 0;
@@ -716,31 +908,20 @@ class CreateTriggerNode extends DDLStatementNode
         // For a statement trigger, we find all FromBaseTable nodes. If
         // the from table is NEW or OLD (or user designated alternates
         // REFERENCING), we turn them into a trigger table VTI.
-        CollectNodesVisitor<FromBaseTable> visitor =
-                new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
-        node.accept(visitor);
-        List<FromBaseTable> tabs = visitor.getList();
-        Collections.sort(tabs, OFFSET_COMPARATOR);
-        for (FromBaseTable fromTable : tabs) {
+        for (FromBaseTable fromTable : getTransitionTables(node)) {
             String baseTableName = fromTable.getBaseTableName();
-            if (!isTransitionTable(fromTable)) {
-                // baseTableName is not the NEW or OLD table, so no need
-                // to do anything. Skip this table.
-                continue;
-            }
-
             int tokBeginOffset = fromTable.getTableNameField().getBeginOffset();
             int tokEndOffset = fromTable.getTableNameField().getEndOffset();
-            if (tokBeginOffset == -1) {
-                // Unknown offset. Skip this table.
-                continue;
-            }
+            int nextTokenStart = tokEndOffset - offset + 1;
 
             // Check if this transition table is allowed in this trigger type.
             checkInvalidTriggerReference(baseTableName);
 
-            // Replace the transition table name with a VTI.
+            // The text up to the transition table name should be kept.
             newText.append(originalText, start, tokBeginOffset - offset);
+
+            // Replace the transition table name with a VTI.
+            final int replacementOffset = newText.length();
             newText.append(baseTableName.equals(oldTableName)
                 ? "new org.apache.derby.catalog.TriggerOldTransitionRows() "
                 : "new org.apache.derby.catalog.TriggerNewTransitionRows() ");
@@ -752,12 +933,60 @@ class CreateTriggerNode extends DDLStatementNode
                 newText.append(baseTableName).append(' ');
             }
 
-            start = tokEndOffset - offset + 1;
+            // Record that we have made a change.
+            replacements.add(new int[] {
+                tokBeginOffset - offset,  // offset to original token
+                nextTokenStart,           // offset to next token
+                replacementOffset,        // offset to replacement
+                newText.length()          // offset to token after replacement
+            });
+
+            start = nextTokenStart;
         }
 
+        // Finally, add everything found after the last transition table
+        // unchanged.
         newText.append(originalText, start, originalText.length());
 
         return newText.toString();
+    }
+
+    /**
+     * Get all transition tables referenced by a given node, sorted in the
+     * order in which they appear in the SQL text.
+     *
+     * @param node the node in which to search for transition tables
+     * @return a sorted set of {@code FromBaseTable}s that represent
+     *   transition tables
+     * @throws StandardException if an error occurs
+     */
+    private SortedSet<FromBaseTable> getTransitionTables(Visitable node)
+            throws StandardException {
+
+        CollectNodesVisitor<FromBaseTable> visitor =
+                new CollectNodesVisitor<FromBaseTable>(FromBaseTable.class);
+        node.accept(visitor);
+
+        TreeSet<FromBaseTable> tables =
+                new TreeSet<FromBaseTable>(OFFSET_COMPARATOR);
+
+        for (FromBaseTable fbt : visitor.getList()) {
+            if (!isTransitionTable(fbt)) {
+                // The from table is not the NEW or OLD table, so no need
+                // to do anything. Skip this table.
+                continue;
+            }
+
+            int tokBeginOffset = fbt.getTableNameField().getBeginOffset();
+            if (tokBeginOffset == -1) {
+                // Unknown offset. Skip this table.
+                continue;
+            }
+
+            tables.add(fbt);
+        }
+
+        return tables;
     }
 
     /**

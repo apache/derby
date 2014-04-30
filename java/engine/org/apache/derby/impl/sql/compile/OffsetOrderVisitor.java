@@ -37,7 +37,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  *
  * @param <T> the type of nodes to collect
  */
-public class OffsetOrderVisitor<T extends QueryTreeNode> implements Visitor {
+class OffsetOrderVisitor<T extends QueryTreeNode> implements Visitor {
 
     /** Comparator that orders nodes by ascending begin offset. */
     private static final Comparator<QueryTreeNode>
@@ -61,7 +61,7 @@ public class OffsetOrderVisitor<T extends QueryTreeNode> implements Visitor {
      * @param low the lowest begin offset to accept (inclusive)
      * @param high the highest end offset to accept (exclusive)
      */
-    public OffsetOrderVisitor(Class<T> nodeClass, int low, int high) {
+    OffsetOrderVisitor(Class<T> nodeClass, int low, int high) {
         this.nodeClass = nodeClass;
         this.lowOffset = low;
         this.highOffset = high;
@@ -103,7 +103,7 @@ public class OffsetOrderVisitor<T extends QueryTreeNode> implements Visitor {
         return false;
     }
 
-    public SortedSet<T> getNodes() {
+    SortedSet<T> getNodes() {
         return nodes;
     }
 }

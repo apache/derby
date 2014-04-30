@@ -2872,6 +2872,8 @@ Statement( String statementSQLText, Object[] paramDefaults) throws StandardExcep
 {
 	statementNode = StatementPart(null) <EOF>
 	{
+        statementNode.setBeginOffset(0);
+        statementNode.setEndOffset(statementSQLText.length() - 1);
 		return statementNode;
 	}
 }
@@ -2892,6 +2894,8 @@ SearchCondition(String sqlFragment) throws StandardException :
 {
     valueNode = valueExpression() <EOF>
     {
+        valueNode.setBeginOffset(0);
+        valueNode.setEndOffset(sqlFragment.length() - 1);
         return valueNode;
     }
 }
@@ -11219,6 +11223,8 @@ triggerDefinition() throws StandardException :
 	{
 		actionEnd = getToken(0).endOffset;
 		actionBegin = tokenHolder[0].beginOffset;
+        actionNode.setBeginOffset(actionBegin);
+        actionNode.setEndOffset(actionEnd);
 
 		// No DML in action node for BEFORE triggers.
 		if (isBefore.booleanValue() && (actionNode instanceof DMLModStatementNode)) {
@@ -11249,6 +11255,8 @@ triggerDefinition() throws StandardException :
             // 10.11 or higher.
             checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "WHEN");
             whenOffset = whenOpen.endOffset + 1;
+            whenClause.setBeginOffset(whenOffset);
+            whenClause.setEndOffset(whenClose.beginOffset - 1);
             whenText = StringUtil.slice(statementSQLText,
                     whenOffset, whenClose.beginOffset - 1, false);
         }

@@ -153,7 +153,7 @@ import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
 import org.apache.derby.impl.services.locks.Timeout;
 import org.apache.derby.impl.sql.compile.ColumnReference;
-import org.apache.derby.impl.sql.compile.OffsetOrderVisitor;
+import org.apache.derby.impl.sql.compile.QueryTreeNode;
 import org.apache.derby.impl.sql.compile.TableName;
 import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 import org.apache.derby.impl.sql.execute.JarUtil;
@@ -4742,7 +4742,8 @@ public final class	DataDictionaryImpl
 			int actionOffset,
 			TableDescriptor triggerTableDescriptor,
 			int triggerEventMask,
-			boolean createTriggerTime
+            boolean createTriggerTime,
+            List<int[]> replacements
 			) throws StandardException
 	{
 		// If we are dealing with database created in 10.8 and prior,
@@ -4751,8 +4752,8 @@ public final class	DataDictionaryImpl
 		// all columns are getting read from the trigger table. We
 		// need to do this to maintain backward compatibility. 
 		boolean in10_9_orHigherVersion = checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
-		
-		StringBuffer newText = new StringBuffer();
+
+        StringBuilder newText = new StringBuilder();
 		int start = 0;
 
 		//Total Number of columns in the trigger table
@@ -4814,13 +4815,9 @@ public final class	DataDictionaryImpl
 
 		/* we need to sort on position in string, beetle 4324
 		 */
-        OffsetOrderVisitor<ColumnReference> visitor =
-                new OffsetOrderVisitor<ColumnReference>(ColumnReference.class,
-                        actionOffset,
-                        actionOffset + triggerDefinition.length());
-        actionStmt.accept(visitor);
-        SortedSet<ColumnReference> refs = visitor.getNodes();
-		
+        SortedSet<ColumnReference> refs = getTransitionVariables(
+                actionStmt, oldReferencingName, newReferencingName);
+
 		if (createTriggerTime) {
 			//The purpose of following array(triggerActionColsOnly) is to
 			//identify all the columns from the trigger action which are
@@ -4880,16 +4877,6 @@ public final class	DataDictionaryImpl
             for (ColumnReference ref : refs)
 			{
 				TableName tableName = ref.getQualifiedTableName();
-                if (!isTransitionVariable(
-                        tableName, oldReferencingName, newReferencingName))
-				{
-					continue;
-				}
-
-				if (tableName.getBeginOffset() == -1)
-				{
-					continue;
-				}
 
 				checkInvalidTriggerReference(tableName.getTableName(),
 						oldReferencingName,
@@ -4970,21 +4957,13 @@ public final class	DataDictionaryImpl
         for (ColumnReference ref : refs)
 		{
 			TableName tableName = ref.getQualifiedTableName();
-            if (!isTransitionVariable(
-                    tableName, oldReferencingName, newReferencingName))
-			{
-				continue;
-			}
-				
-			int tokBeginOffset = tableName.getBeginOffset();
-			if (tokBeginOffset == -1)
-			{
-				continue;
-			}
+            int tableBeginOffset = tableName.getBeginOffset() - actionOffset;
 
 			String colName = ref.getColumnName();
 
-			newText.append(triggerDefinition.substring(start, tokBeginOffset-actionOffset));
+            // Add whatever we've seen after the previous replacement.
+            newText.append(triggerDefinition, start, tableBeginOffset);
+
 			int colPositionInRuntimeResultSet = -1;
 			ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
             //DERBY-5121 We can come here if the column being used in trigger
@@ -5034,21 +5013,65 @@ public final class	DataDictionaryImpl
 			} else
 				colPositionInRuntimeResultSet=colPositionInTriggerTable;
 
+            // Add the replacement code that accesses a value in the
+            // transition variable.
+            final int replacementOffset = newText.length();
 			newText.append(genColumnReferenceSQL(triggerTableDescriptor, colName, 
 					tableName.getTableName(), 
 					tableName.getTableName().equals(oldReferencingName),
 					colPositionInRuntimeResultSet));
 
             start = ref.getEndOffset() + 1 - actionOffset;
+
+            if (replacements != null) {
+                // Record that we have made a change.
+                replacements.add(new int[] {
+                    tableBeginOffset,  // offset to replaced text
+                    start,             // offset to token after replaced text
+                    replacementOffset, // offset to replacement
+                    newText.length()   // offset to token after replacement
+                });
+            }
 		}
+
 		//By this point, we are finished transforming the trigger action if
 		//it has any references to old/new transition variables.
-		if (start < triggerDefinition.length())
-		{
-			newText.append(triggerDefinition.substring(start));
-		}
+        newText.append(triggerDefinition, start, triggerDefinition.length());
+
 		return newText.toString();
 	}
+
+    /**
+     * Get all columns that reference transition variables in triggers.
+     * The columns should be returned in the same order as in the SQL text.
+     *
+     * @param node the node in which to look for transition variables
+     * @param oldReferencingName the name of the old transition variable
+     * @param newReferencingName the name of the new transition variable
+     * @return all references to transition variables
+     */
+    private static SortedSet<ColumnReference> getTransitionVariables(
+        Visitable node, String oldReferencingName, String newReferencingName)
+        throws StandardException
+    {
+        // First get all column references.
+        SortedSet<ColumnReference> refs =
+            ((QueryTreeNode) node).getOffsetOrderedNodes(ColumnReference.class);
+
+        // Then remove all that are not referencing a transition variable.
+        Iterator<ColumnReference> it = refs.iterator();
+        while (it.hasNext()) {
+            TableName tableName = it.next().getQualifiedTableName();
+            if (!isTransitionVariable(
+                    tableName, oldReferencingName, newReferencingName)) {
+                it.remove();
+            }
+        }
+
+        // Return what's left. Should be all references to transition
+        // variables.
+        return refs;
+    }
 
     /**
      * Check if a table name is actually a transition variable.

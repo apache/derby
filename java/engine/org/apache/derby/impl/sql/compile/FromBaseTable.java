@@ -2335,6 +2335,8 @@ class FromBaseTable extends FromTable
 						   FromList fromListParam) 
 					throws StandardException
 	{
+        tableName.bind(dataDictionary);
+
         TableDescriptor tabDescr = bindTableDescriptor();
 
         if (tabDescr.getTableType() == TableDescriptor.VTI_TYPE) {

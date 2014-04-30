@@ -653,7 +653,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         rs.next();
         assertEquals("tt1       ", rs.getString(1));
         assertEquals(
-            "insert into trighistory (\"cOlUmN1\", \"cOlUmN2  \", " +
+            "insert into \"APP\".\"TRIGHISTORY\" (\"cOlUmN1\", \"cOlUmN2  \", " +
                 "\"cOlUmN3\"\"\"\"  \") " +
             "values (new.\"cOlUmN1\" + 5, \"NEW\".\"cOlUmN2  \" * "
                 + "new.\"cOlUmN3\"\"\"\"  \", 5)",
@@ -694,7 +694,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
 
         rs.next();
         assertEquals("tt1       ", rs.getString(1));
-        assertEquals("insert into trighistory (\"cOlUmN1\", \"cOlUmN2 "
+        assertEquals("insert into \"APP\".\"TRIGHISTORY\" (\"cOlUmN1\", \"cOlUmN2 "
                 + " \", \"cOlUmN3\"\"\"\"  \") values "
                 + "(new.\"cOlUmN1\" + new.\"cOlUmN1\", "
                 + "\"NEW\".\"cOlUmN2  \" * new.\"cOlUmN3\"\"\"\"  "

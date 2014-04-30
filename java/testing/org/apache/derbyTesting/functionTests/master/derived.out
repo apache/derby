@@ -31,9 +31,9 @@ ij> -- tests without a derived table
 -- negative tests
 -- # of columns does not match
 select aa from s ss (aa);
-ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'S'.
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'APP.S'.
 ij> select aa from s ss (aa, bb, cc, dd, ee, ff, gg);
-ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'S'.
+ERROR 42X32: The number of columns in the derived column list must match the number of columns in table 'APP.S'.
 ij> -- duplicate names in derived column list
 select aa from s ss (aa, ee, bb, cc, dd, aa);
 ERROR 42X33: The derived column list contains a duplicate column name 'AA'.

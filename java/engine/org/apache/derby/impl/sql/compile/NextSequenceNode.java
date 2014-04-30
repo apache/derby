@@ -87,6 +87,7 @@ class NextSequenceNode extends ValueNode {
         }
 
         // lookup sequence object in the data dictionary
+        sequenceName.bind(getDataDictionary());
         SchemaDescriptor sd = getSchemaDescriptor(sequenceName.getSchemaName());
         sequenceDescriptor = getDataDictionary().getSequenceDescriptor(sd, sequenceName.getTableName());
 
