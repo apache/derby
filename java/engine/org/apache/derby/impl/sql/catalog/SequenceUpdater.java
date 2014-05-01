@@ -20,6 +20,8 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import java.util.HashMap;
+
 import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
@@ -104,10 +106,14 @@ public abstract class SequenceUpdater implements Cacheable
     // DataDictionary where this generator is cached.
     protected DataDictionaryImpl _dd;
 
-    // This is the key used to lookup this generator in the cache.
+    //
+    // The following state needs to be reset whenever this Cachable is re-used.
+    //
+    
+    /** This is the key used to lookup this generator in the cache. */
     protected String _uuidString;
 
-    // This is the object which allocates ranges of sequence values
+    /** This is the object which allocates ranges of sequence values */
     protected SequenceGenerator _sequenceGenerator;
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -187,11 +193,32 @@ public abstract class SequenceUpdater implements Cacheable
         // Flush current value to disk. This prevents us from leaking values when DDL
         // is performed. The metadata caches are invalidated and cleared when DDL is performed.
         // We flush the current value to disk on database shutdown also.
+        // The call to updateCurrentValueOnDisk can fail if someone is holding a lock
+        // on the SYS.SYSSEQUENCES row. This can happen if the user disregards our
+        // advice and scans that catalog. This can also happen if the transaction which
+        // creates the sequences is open for a long time and some later sequence creation
+        // causes us to evict the old, uncommitted sequence generator from the cache.
         //
-        if ( _sequenceGenerator != null )
-        {
-            boolean gapClosed = updateCurrentValueOnDisk( null, peekAtCurrentValue() );
+        boolean gapClosed = false;
 
+        try {
+            if ( _sequenceGenerator == null ) { gapClosed = true; }
+            else
+            {
+                gapClosed = updateCurrentValueOnDisk( null, peekAtCurrentValue() );
+            }
+        }
+        catch (StandardException se)
+        {
+            // The too much contention exception is redundant because the problem is logged
+            // by the message below
+            if ( !SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE.equals( se.getMessageId() ) )
+            {
+                throw se;
+            }
+        }
+        finally
+        {
             // log an error message if we failed to flush the preallocated values.
             if ( !gapClosed )
             {
@@ -204,10 +231,10 @@ public abstract class SequenceUpdater implements Cacheable
 
                 Monitor.getStream().println( errorMessage );
             }
-        }
 
-        _uuidString = null;
-        _sequenceGenerator = null;
+            _uuidString = null;
+            _sequenceGenerator = null;
+        }
 	}
     
 	public boolean isDirty() { return false; }
@@ -421,9 +448,11 @@ public abstract class SequenceUpdater implements Cacheable
 
         if ( nestedTransaction != null )
         {
+            boolean retval = false;
+            
             try
             {
-                return updateCurrentValueOnDisk( nestedTransaction, oldValue, newValue, false );
+                retval = updateCurrentValueOnDisk( nestedTransaction, oldValue, newValue, false );
             }
             catch (StandardException se)
             {
@@ -437,6 +466,8 @@ public abstract class SequenceUpdater implements Cacheable
                 // transaction commits by default.
                 nestedTransaction.commit();
                 nestedTransaction.destroy();
+
+                return retval;
             }
         }
         

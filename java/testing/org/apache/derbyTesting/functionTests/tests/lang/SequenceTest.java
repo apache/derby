@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +46,8 @@ public class SequenceTest extends GeneratedColumnsHelper {
     private static final String ALPHA = "ALPHA";
     private static final String BETA = "BETA";
     private static final String[] LEGAL_USERS = {TEST_DBO, ALPHA, BETA};
+
+    private static  final   String  TOO_MANY_UNUSED_SEQUENCES = "X0Y93";
 
     public SequenceTest(String name) {
         super(name);
@@ -639,4 +642,113 @@ public class SequenceTest extends GeneratedColumnsHelper {
         expectExecutionError( conn, MISSING_OBJECT, peekAtSequence );
         expectCompilationError( conn, OBJECT_DOES_NOT_EXIST, "values next value for seq_6137" );
     }
+    
+    /**
+     * Verify that sequence numbers pick up where they left off after eviction from
+     * the sequence cache.
+     */
+    public void test_17_6554_cacheEviction() throws Exception
+    {
+        Connection control = openUserConnection( TEST_DBO );
+
+        // set the size of the sequence generator cache to 5 entries.
+        // bounce the database so that the value takes effect.
+        goodStatement( control, "call syscs_util.syscs_set_database_property( 'derby.language.sequenceGeneratorCacheSize', '5' )" );
+        getTestConfiguration().shutdownDatabase();
+
+        Connection conn1 = openUserConnection( ALPHA );
+        Connection conn2 = openUserConnection( ALPHA );
+
+        goodStatement( conn1, "create sequence s000" );
+        assertResults
+            (
+             conn1,
+             "values next value for s000",
+             new String[][]
+             {
+                 { "-2147483648" },
+             },
+             true
+             );
+        goodStatement( conn1, "create sequence s001" );
+        assertResults
+            (
+             conn1,
+             "values next value for s001",
+             new String[][]
+             {
+                 { "-2147483648" },
+             },
+             true
+             );
+        assertResults
+            (
+             conn1,
+             "values next value for s001",
+             new String[][]
+             {
+                 { "-2147483647" },
+             },
+             true
+             );
+
+        // now create enough sequences to evict the first two sequences from the cache
+        goodStatement( conn2, "create sequence s002" );
+        goodStatement( conn2, "create sequence s003" );
+        goodStatement( conn2, "create sequence s004" );
+        goodStatement( conn2, "create sequence s005" );
+        goodStatement( conn2, "create sequence s006" );
+        goodStatement( conn2, "create sequence s007" );
+        goodStatement( conn2, "create sequence s008" );
+        goodStatement( conn2, "create sequence s009" );
+        goodStatement( conn2, "create sequence s010" );
+
+        // now we pick up where we left off
+        assertResults
+            (
+             conn1,
+             "values next value for s000",
+             new String[][]
+             {
+                 { "-2147483647" },
+             },
+             true
+             );
+        assertResults
+            (
+             conn1,
+             "values next value for s001",
+             new String[][]
+             {
+                 { "-2147483646" },
+             },
+             true
+             );
+
+        // restore the original size of the sequence generator cache
+        control = openUserConnection( TEST_DBO );
+
+        goodStatement( control, "call syscs_util.syscs_set_database_property( 'derby.language.sequenceGeneratorCacheSize', '1000' )" );
+        getTestConfiguration().shutdownDatabase();
+    }
+    
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  SQL ROUTINES
+    //
+    //////////////////////////////////////////////////////////////////////
+
+    public  static  void    createSequence( String sequenceName )
+        throws Exception
+    {
+        Connection  conn = DriverManager.getConnection( "jdbc:default:connection" );
+
+        conn.prepareStatement( "create sequence " + sequenceName ).execute();
+
+        ResultSet   rs = conn.prepareStatement( "values next value for " + sequenceName ).executeQuery();
+        rs.next();
+        assertEquals( -2147483648L, rs.getLong( 1 ) );
+        rs.close();
+    }
+
 }

@@ -716,10 +716,10 @@ public interface Property {
 	 * The size of the sequence generator cache 
 	 * used by the data dictionary.  Database.  Static.
 	 * <p>
-	 * Externally visible but undocumented.
+	 * Externally visible and documented.
 	 */
 	String	LANG_SEQGEN_CACHE_SIZE = "derby.language.sequenceGeneratorCacheSize";
-	int		LANG_SEQGEN_CACHE_SIZE_DEFAULT =32;
+	int		LANG_SEQGEN_CACHE_SIZE_DEFAULT = 1000;
 
 	/**
 	 * Name of the implementation of SequencePreallocator which is used

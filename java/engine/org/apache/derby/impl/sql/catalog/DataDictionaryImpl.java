@@ -10253,10 +10253,13 @@ public final class	DataDictionaryImpl
 
             boolean baseRowExists = heapCC.fetch(
                     rowLocation, row.getRowArray(), columnToUpdate, wait);
-            if (SanityManager.DEBUG) {
-                // We're not prepared for a non-existing base row.
-                SanityManager.ASSERT(baseRowExists, "base row not found");
-            }
+
+            //
+            // We will fail to find the row if it is still locked by the transaction
+            // which created the sequence. In that case, we will leak values
+            // the next time the generator is referenced.
+            //
+            if ( !baseRowExists ) { return false; }
 
 			NumberDataValue oldValueOnDisk = (NumberDataValue) row.getColumn( columnNum );
 
