@@ -262,7 +262,12 @@ public final class DataStore {
             while (paths.hasNext()) {
                 candidate = paths.next();
                 if (candidate.startsWith(nPath)) {
-                    children.add(candidate.substring(nPath.length()));
+                    candidate = candidate.substring(nPath.length());
+                    // don't include grandchildren
+                    if ( candidate.indexOf( PathUtil.SEP_STR ) < 0 )
+                    {
+                        children.add(candidate);
+                    }
                 }
             }
         }

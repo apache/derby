@@ -454,8 +454,10 @@ grant codeBase "${derbyTesting.codejar}derbyoptionaltools.jar" {
   permission java.util.PropertyPermission "derby.system.home", "read";
 
   // all databases under derby.system.home 
-  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}lucene", "read,write,delete";
-  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}lucene${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete";
 
   permission java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read";
   permission java.util.PropertyPermission "user.dir", "read";
@@ -468,8 +470,10 @@ grant codeBase "${derbyTesting.codejar}derbyoptionaltools.jar" {
 grant codeBase "${derbyTesting.lucene.core}"
 {
   // permissions for file access, write access only to sandbox:
-  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}lucene", "read,write,delete";
-  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}lucene${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete";
   
   // Basic permissions needed for Lucene to work:
   permission java.util.PropertyPermission "user.dir", "read";

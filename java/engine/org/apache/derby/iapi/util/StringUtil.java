@@ -585,5 +585,19 @@ public class StringUtil
 		}
 		return result.toString();
 	}
+
+    /**
+     * Get the short database name from the canonical name.
+     */
+    public  static  String  shortDBName
+        (
+         String canonicalDBName,
+         char   separatorChar
+         )
+    {
+        int         lastSep = canonicalDBName.lastIndexOf( separatorChar );
+        return canonicalDBName.substring( lastSep + 1 );
+    }
+    
 }
 

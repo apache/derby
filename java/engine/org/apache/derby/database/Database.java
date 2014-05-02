@@ -47,6 +47,8 @@ import java.io.File;
  */
 public interface Database
 {
+    // where the Lucene plugin writes its indexes
+    public  static  final   String  LUCENE_DIR = "LUCENE";
 
 	/**
 	 * Tells whether the Database is configured as read-only, or the

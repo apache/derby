@@ -43,9 +43,10 @@ import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -62,12 +63,19 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.impl.sql.execute.JarUtil;
+import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.io.StorageFile;
+import org.apache.derby.io.StorageFactory;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Dictionary;
@@ -428,6 +436,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
     {
 		try {
 			af.backup(backupDir, wait);
+            if ( luceneLoaded() )
+            {
+                backupLucene( backupDir );
+            }
 		} catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
 		}
@@ -443,6 +455,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			af.backupAndEnableLogArchiveMode(backupDir, 
                                              deleteOnlineArchivedLogFiles,
                                              wait); 
+            if ( luceneLoaded() )
+            {
+                backupLucene( backupDir );
+            }
 		} catch (StandardException se) {
 			throw PublicAPI.wrapStandardException(se);
 		}
@@ -826,5 +842,103 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		return fr.getAsFile(externalName, generationId);
 	}
+
+    ////////////////////////////////////////////////////////////////////////
+    //
+    // SUPPORT FOR BACKING UP LUCENE DIRECTORY
+    //
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Return true if the Lucene plugin is loaded.
+     * </p>
+     */
+    private boolean luceneLoaded()
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         return getLuceneDir().exists();
+                     }
+                 }
+                 ).booleanValue();
+        }
+        catch (PrivilegedActionException pae) { throw StandardException.plainWrapException( pae ); }
+    }
+
+    /** Get the location of the Lucene indexes */
+    private StorageFile getLuceneDir()
+        throws StandardException
+    {
+        StorageFactory  dir = getStorageFactory();
+		
+		return dir.newStorageFile( Database.LUCENE_DIR );
+    }
+
+    /**
+     * <p>
+     * Get the database StorageFactory.
+     * </p>
+     */
+    private StorageFactory  getStorageFactory()
+        throws StandardException
+    {
+        DataFactory dataFactory = (DataFactory) Monitor.findServiceModule( this, DataFactory.MODULE );
+
+        return dataFactory.getStorageFactory();
+    }
+
+    /**
+     * <p>
+     * Backup Lucene indexes to the backup directory. This assumes
+     * that the rest of the database has been backup up and sanity
+     * checks have been run.
+     * </p>
+     */
+    private void    backupLucene( String backupDir )
+        throws StandardException
+    {
+        try {
+            File            backupRoot = new File( backupDir );
+            StorageFactory  storageFactory = getStorageFactory();
+            String      canonicalDbName = storageFactory.getCanonicalName();
+            String      dbname = StringUtil.shortDBName( canonicalDbName, storageFactory.getSeparator() );
+            File        backupDB = new File( backupRoot, dbname );
+        
+            final   File            targetDir = new File( backupDB, Database.LUCENE_DIR );
+            final   StorageFile sourceDir = getLuceneDir();
+
+            AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         if ( !FileUtil.copyDirectory( getStorageFactory(), sourceDir, targetDir, null, null, true ) )
+                         {
+                             throw StandardException.newException
+                                 (
+                                  SQLState.UNABLE_TO_COPY_FILE_FROM_BACKUP,
+                                  sourceDir.getPath(),
+                                  targetDir.getAbsolutePath()
+                                  );
+                         }
+                         
+                         return null;
+                     }
+                 }
+                 );
+        }
+        catch (IOException ioe) { throw StandardException.plainWrapException( ioe ); }
+        catch (PrivilegedActionException pae) { throw StandardException.plainWrapException( pae ); }
+    }
 
 }

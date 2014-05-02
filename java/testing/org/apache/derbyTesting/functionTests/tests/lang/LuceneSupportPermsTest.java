@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -98,6 +99,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 	private static  final   String      BAD_DIRECTORY                      = "42XBI";
 	private static  final   String      BAD_COLUMN_NAME                 = "42XBJ";
     private static  final   String      NONEXISTENT_TABLE_FUNCTION  ="42ZB4";
+    private static  final   String      INCOMPATIBLE_ENCRYPTION = "42XBL";
 
     private static  final   String      POLICY_FILE = "org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy";
 
@@ -968,6 +970,48 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
     }
 
+   /**
+     * <p>
+     * Test that encryption and the Lucene plugin are incompatible.
+     * </p>
+     */
+    public  void    test_010_encryption()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        String      password = getTestConfiguration().getPassword( TEST_DBO );
+        String      encryptDatabaseURL = "jdbc:derby:" + DB_NAME + ";user=" + TEST_DBO + ";password=" + password +
+                ";dataEncryption=true;bootPassword=tryToGuessThis";
+        String      decryptDatabaseURL = "jdbc:derby:" + DB_NAME + ";user=" + TEST_DBO + ";password=" + password +
+                ";decryptDatabase=true;bootPassword=tryToGuessThis";
+
+        goodStatement( dboConnection, LOAD_TOOL );
+        getTestConfiguration().shutdownDatabase();
+
+        // verify that you can't encrypt the database now
+        try {
+            DriverManager.getConnection( encryptDatabaseURL );
+            fail( "Should not have been able to get a connection!" );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( INCOMPATIBLE_ENCRYPTION, se );
+        }
+
+        // now unload the tool and encrypt the database
+        dboConnection = openUserConnection( TEST_DBO );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        getTestConfiguration().shutdownDatabase();
+        dboConnection = DriverManager.getConnection( encryptDatabaseURL );
+
+        // now you can't load the plugin
+        expectExecutionError( dboConnection, INCOMPATIBLE_ENCRYPTION, LOAD_TOOL );
+
+        // turn off encryption
+        getTestConfiguration().shutdownDatabase();
+        dboConnection = DriverManager.getConnection( decryptDatabaseURL );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

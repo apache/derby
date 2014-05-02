@@ -36,6 +36,7 @@ import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.SingleInstanceLockFactory;
 
+import org.apache.derby.database.Database;
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -62,6 +63,9 @@ class DerbyLuceneDir extends Directory
     // constructor args
     private final   StorageFactory  _storageFactory;
     private final   StorageFile     _directory;
+    private final   String              _schema;
+    private final   String              _table;
+    private final   String              _textcol;
 
     // files open for output which may need to be sync'd
     private HashMap<String,DerbyIndexOutput>    _outputFiles = new HashMap<String,DerbyIndexOutput>();
@@ -82,11 +86,12 @@ class DerbyLuceneDir extends Directory
      * Lookup a directory, creating its path as necessary.
      * </p>
      */
-    static  synchronized    DerbyLuceneDir  getDirectory( StorageFactory storageFactory, String directoryPath )
+    static  synchronized    DerbyLuceneDir  getDirectory
+        ( StorageFactory storageFactory, String schema, String table, String textcol )
         throws SQLException
     {
         try {
-            DerbyLuceneDir  candidate = new DerbyLuceneDir( storageFactory, directoryPath );
+            DerbyLuceneDir  candidate = new DerbyLuceneDir( storageFactory, schema, table, textcol );
             String              key = getKey( candidate );
             DerbyLuceneDir  result = _openDirectories.get( key );
 
@@ -96,8 +101,6 @@ class DerbyLuceneDir extends Directory
                 result.setLockFactory( new SingleInstanceLockFactory() );
                 _openDirectories.put( key, result );
             }
-
-            createPath( result._directory );
 
             return result;
         }
@@ -116,7 +119,10 @@ class DerbyLuceneDir extends Directory
     }
 
     /** Get the key associated with a directory */
-    private static  String  getKey( DerbyLuceneDir dir ) { return dir._directory.getPath(); }
+    private static  String  getKey( DerbyLuceneDir dir )
+    {
+        return dir._directory.getPath();
+    }
     
     /**
      * <p>
@@ -125,10 +131,14 @@ class DerbyLuceneDir extends Directory
      * Creates the directory if it does not already exist.
      * </p>
      */
-    private DerbyLuceneDir( StorageFactory storageFactory, String directoryPath )
+    private DerbyLuceneDir( StorageFactory storageFactory, String schema, String table, String textcol )
+        throws IOException, PrivilegedActionException, SQLException
     {
         _storageFactory = storageFactory;
-        _directory = _storageFactory.newStorageFile( directoryPath );
+        _schema = schema;
+        _table = table;
+        _textcol = textcol;
+        _directory = createPath( _storageFactory, _schema, _table, _textcol );
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -330,21 +340,46 @@ class DerbyLuceneDir extends Directory
 	/**
 	 * Create the path if necessary.
 	 */
-    private static void createPath( final StorageFile directory )
-        throws IOException, PrivilegedActionException
+    private static StorageFile createPath
+        ( final StorageFactory storageFactory, final String schema, final String table, final String textcol )
+        throws SQLException, IOException, PrivilegedActionException
     {
-        AccessController.doPrivileged
+        StorageFile    luceneDir = createPathLeg( storageFactory, null, Database.LUCENE_DIR );
+        StorageFile    schemaDir = createPathLeg( storageFactory, luceneDir, schema );
+        StorageFile    tableDir = createPathLeg( storageFactory, schemaDir, table );
+        StorageFile    indexDir = createPathLeg( storageFactory, tableDir, textcol );
+
+        return indexDir;
+    }
+
+	/**
+	 * Create the path if necessary.
+	 */
+    private static StorageFile createPathLeg
+        ( final StorageFactory storageFactory, final StorageFile parentDir, final String fileName )
+        throws SQLException, IOException, PrivilegedActionException
+    {
+        return AccessController.doPrivileged
             (
-             new PrivilegedExceptionAction<Object>()
+             new PrivilegedExceptionAction<StorageFile>()
              {
-                 public Object run() throws IOException
+                 public StorageFile run() throws IOException, SQLException
                  {
-                     directory.mkdirs();
-                     return null;
+                     String         normalizedName = LuceneSupport.derbyIdentifier( fileName );
+                     StorageFile    file = parentDir == null ?
+                         storageFactory.newStorageFile( normalizedName  ) :
+                         storageFactory.newStorageFile( parentDir, normalizedName );
+
+                     if ( !file.exists() ) { file.mkdir(); }
+                     if ( !file.exists() )
+                     {
+                         throw LuceneSupport.newSQLException( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, normalizedName );
+                     }
+                     else { return file; }
                  }
              }
              );
     }
-
+    
 }
 

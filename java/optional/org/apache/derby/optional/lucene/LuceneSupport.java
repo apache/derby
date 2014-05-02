@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.apache.derby.database.Database;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
@@ -98,8 +99,6 @@ public class LuceneSupport implements OptionalTool
     private static  final   String  DROP_INDEX = LUCENE_SCHEMA + "." + "dropIndex";
     private static  final   String  UPDATE_INDEX = LUCENE_SCHEMA + "." + "updateIndex";
     private static  final   String  SEPARATOR = "__";
-
-    static  final   String  LUCENE_DIR = "lucene";
 
     // names of columns in all query table functions
     private static  final   String  SCORE = "SCORE";
@@ -158,6 +157,15 @@ public class LuceneSupport implements OptionalTool
         
         Connection  conn = getDefaultConnection();
         mustBeDBO( conn );
+
+        //
+        // Lucene indexes are not allowed in encrypted databases. They leak
+        // encrypted data in plaintext.
+        //
+        if ( getDataFactory( conn ).databaseEncrypted() )
+        {
+            throw newSQLException( SQLState.LUCENE_ENCRYPTED_DB );
+        }
 
         if ( luceneSchemaExists( conn ) )
         {
@@ -220,6 +228,8 @@ public class LuceneSupport implements OptionalTool
 		executeDDL( conn, updateProcedure.toString() );
 
         if ( sqlAuthorizationEnabled ) { grantPermissions(); }
+
+        createLuceneDir( conn );
 	}
 
     /**
@@ -291,7 +301,7 @@ public class LuceneSupport implements OptionalTool
         //
         try {
             StorageFactory  storageFactory = getStorageFactory( conn );
-            StorageFile     luceneDir = storageFactory.newStorageFile( LUCENE_DIR );
+            StorageFile     luceneDir = storageFactory.newStorageFile( Database.LUCENE_DIR );
             if ( exists( luceneDir ) ) { deleteFile( luceneDir ); }
         }
         catch (IOException ioe) { throw wrap( ioe ); }
@@ -1349,7 +1359,7 @@ public class LuceneSupport implements OptionalTool
     }
 	
     /** Convert a raw string into a properly cased and escaped Derby identifier */
-    private static  String  derbyIdentifier( String rawString )
+    static  String  derbyIdentifier( String rawString )
         throws SQLException
     {
         try {
@@ -1711,6 +1721,32 @@ public class LuceneSupport implements OptionalTool
         return (Analyzer) method.invoke( null );
 	}
 
+	/**
+	 * Add a document to a Lucene index wrier.
+	 */
+    private static void createLuceneDir( final Connection conn )
+        throws SQLException
+    {
+        try {
+            AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run() throws SQLException
+                     {
+                         StorageFactory storageFactory = getStorageFactory( conn );
+                         StorageFile    luceneDir = storageFactory.newStorageFile( Database.LUCENE_DIR );
+
+                         luceneDir.mkdir();
+		
+                         return null;
+                     }
+                 }
+                 );
+        }
+        catch (PrivilegedActionException pae) { throw wrap( pae ); }
+    }
+
     /////////////////////////////////////////////////////////////////////
     //
     //  DERBY STORE
@@ -1726,38 +1762,26 @@ public class LuceneSupport implements OptionalTool
         throws SQLException
     {
         StorageFactory  storageFactory = getStorageFactory( conn );
-        String  relativePath = getRelativeIndexPath( schema, table, textcol );
-        DerbyLuceneDir  result = DerbyLuceneDir.getDirectory( storageFactory, relativePath );
+        DerbyLuceneDir  result = DerbyLuceneDir.getDirectory( storageFactory, schema, table, textcol );
 
         return result;
     }
-    
-    /**
-     * <p>
-     * Get the relative path of the index in the database.
-     * </p>
-     */
-    private static String getRelativeIndexPath( String schema, String table, String textcol )
-        throws SQLException
-    {
-        return
-            LUCENE_DIR + File.separator +
-            derbyIdentifier( schema ) + File.separator +
-            derbyIdentifier( table ) + File.separator +
-            derbyIdentifier( textcol ) + File.separator;
-    }
-
     
     /** Get the StorageFactory of the connected database */
     static  StorageFactory  getStorageFactory( Connection conn )
         throws SQLException
     {
+        return getDataFactory( conn ).getStorageFactory();
+    }
+
+    /** Get the DataFactory of the connected database */
+    static  DataFactory  getDataFactory( Connection conn )
+        throws SQLException
+    {
         try {
             Object monitor = Monitor.findService
                 ( Property.DATABASE_MODULE, ((EmbedConnection) conn).getDBName() ) ;
-            DataFactory dataFactory = (DataFactory) Monitor.findServiceModule( monitor, DataFactory.MODULE );
-
-            return dataFactory.getStorageFactory();
+            return (DataFactory) Monitor.findServiceModule( monitor, DataFactory.MODULE );
         }
         catch (StandardException se) { throw wrap( se ); }
     }

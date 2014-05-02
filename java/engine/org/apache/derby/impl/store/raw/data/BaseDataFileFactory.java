@@ -26,6 +26,7 @@ import org.apache.derby.iapi.reference.MessageId;
 
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
+import org.apache.derby.database.Database;
 import org.apache.derby.iapi.services.cache.CacheFactory;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -296,6 +297,16 @@ public class BaseDataFileFactory
             {
                 throw StandardException.newException(
                     SQLState.DATABASE_NOT_FOUND, ioe, dataDirectory);
+            }
+        }
+
+        // you can't encrypt a database if the Lucene plugin is loaded
+        if ( luceneLoaded() )
+        {
+            String  encryptionProp = startParams.getProperty( Attribute.DATA_ENCRYPTION );
+            if ( (encryptionProp != null) && "TRUE".equals( encryptionProp.toUpperCase() ) )
+            {
+                throw StandardException.newException( SQLState.LUCENE_ENCRYPTED_DB );
             }
         }
 
@@ -2637,7 +2648,7 @@ public class BaseDataFileFactory
             for (int i = 0; i < cfilelist.length; i++) 
             {
                 //delete only the seg* directories in the database home
-                if(cfilelist[i].startsWith("seg"))
+                if(cfilelist[i].startsWith("seg") || Database.LUCENE_DIR.equals( cfilelist[i] ))
                 {
                     csegdir = storageFactory.newStorageFile( cfilelist[i]);
                     if(!csegdir.deleteAll())
@@ -2655,7 +2666,7 @@ public class BaseDataFileFactory
         for (int i = 0; i < bfilelist.length; i++) 
         {
             //copy only the seg* directories and copy them from backup
-            if (bfilelist[i].startsWith("seg"))
+            if (bfilelist[i].startsWith("seg") || Database.LUCENE_DIR.equals( bfilelist[i] ))
             {
                 csegdir = storageFactory.newStorageFile( bfilelist[i]);
                 File bsegdir1 = new java.io.File(backupRoot, bfilelist[i]);
@@ -2701,6 +2712,28 @@ public class BaseDataFileFactory
 		// return what the baseDataFileFactory thinks
 		return readOnly;
 	}
+
+    /** Return true if the Lucene plugin is loaded */
+    public  boolean luceneLoaded()
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                     {
+                         StorageFactory storageFactory = getStorageFactory();
+                         StorageFile luceneDir = storageFactory.newStorageFile( Database.LUCENE_DIR );
+
+                         return luceneDir.exists();
+                     }
+                 }
+                 ).booleanValue();
+        }
+        catch (PrivilegedActionException pae) { throw StandardException.plainWrapException( pae ); }
+    }
 
     /**
      * @return The StorageFactory used by this dataFactory

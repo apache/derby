@@ -1188,6 +1188,7 @@ public interface SQLState {
     String LUCENE_BAD_INDEX                                               = "42XBI";
     String LUCENE_BAD_COLUMN_NAME                                   = "42XBJ";
     String LUCENE_BAD_VERSION                                           = "42XBK";
+    String LUCENE_ENCRYPTED_DB                                           = "42XBL";
     
 	// org.apache.derby.impl.sql.execute.rts
 	String RTS_ATTACHED_TO											   = "43X00.U";

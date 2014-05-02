@@ -51,6 +51,7 @@ import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
 
 import org.apache.derby.io.StorageFactory;
@@ -718,10 +719,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 			// get name of the current db, ie. database directory of current db.
 			StorageFile dbase           = storageFactory.newStorageFile(null); 
             String      canonicalDbName = storageFactory.getCanonicalName();
-            int         lastSep         = 
-                canonicalDbName.lastIndexOf(storageFactory.getSeparator());
-			String      dbname          = 
-                canonicalDbName.substring(lastSep + 1);
+            String      dbname = StringUtil.shortDBName( canonicalDbName, storageFactory.getSeparator() );
 
 			// append to end of history file
 			historyFile = 

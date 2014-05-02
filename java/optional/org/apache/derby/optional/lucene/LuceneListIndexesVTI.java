@@ -32,6 +32,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.apache.derby.database.Database;
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.StorageFile;
 
@@ -78,7 +79,7 @@ public class LuceneListIndexesVTI extends StringColumnVTI
         connection = LuceneSupport.getDefaultConnection();
         StorageFactory  dir = LuceneSupport.getStorageFactory( connection );
 		
-		StorageFile luceneDir = dir.newStorageFile( LuceneSupport.LUCENE_DIR );
+		StorageFile luceneDir = dir.newStorageFile( Database.LUCENE_DIR );
         ArrayList<StorageFile> allIndexes = new ArrayList<StorageFile>();
 
         StorageFile[]  schemas = listDirectories( dir, luceneDir );
