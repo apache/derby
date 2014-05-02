@@ -43,6 +43,10 @@
                     <location>${project.dir}/generated/java</location>
                 </source-folder>
                 <source-folder>
+                    <label>java/optional</label>
+                    <location>${project.dir}/java/optional</location>
+                </source-folder>
+                <source-folder>
                     <label>java/build</label>
                     <type>java</type>
                     <location>${project.dir}/java/build</location>
@@ -100,6 +104,12 @@
                     <label>generated/java</label>
                     <type>java</type>
                     <location>${project.dir}/generated/java</location>
+                    <encoding>UTF-8</encoding>
+                </source-folder>
+                <source-folder>
+                    <label>java/optional</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/optional</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
             </folders>
@@ -214,6 +224,10 @@
                         <label>generated/java</label>
                         <location>${project.dir}/generated/java</location>
                     </source-folder>
+                    <source-folder style="packages">
+                        <label>java/optional</label>
+                        <location>${project.dir}/java/optional</location>
+                    </source-folder>
                     <source-file>
                         <location>${ant.script}</location>
                     </source-file>
@@ -247,7 +261,8 @@
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
                 <package-root>${project.dir}/generated/java</package-root>
-                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix:${project.dir}/tools/java/xml-apis.jar</classpath>
+                <package-root>${project.dir}/java/optional</package-root>
+                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix:${project.dir}/tools/java/xml-apis.jar:${project.dir}/tools/java/lucene-analyzers-common-4.5.0.jar:${project.dir}/tools/java/lucene-core-4.5.0.jar:${project.dir}/tools/java/lucene-queryparser-4.5.0.jar</classpath>
                 <built-to>${project.dir}/jars/sane/derby.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyTesting.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyclient.jar</built-to>
