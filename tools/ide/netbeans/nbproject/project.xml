@@ -249,7 +249,7 @@
             </view>
             <subprojects/>
         </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/4">
             <compilation-unit>
                 <package-root>${project.dir}/java/build</package-root>
                 <package-root>${project.dir}/java/client</package-root>
@@ -270,7 +270,7 @@
                 <built-to>${project.dir}/jars/sane/derbyrun.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbytools.jar</built-to>
                 <javadoc-built-to>${project.dir}/javadoc</javadoc-built-to>
-                <source-level>1.5</source-level>
+                <source-level>1.6</source-level>
             </compilation-unit>
         </java-data>
         <preferences xmlns="http://www.netbeans.org/ns/auxiliary-configuration-preferences/1">
