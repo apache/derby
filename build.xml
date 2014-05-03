@@ -1093,6 +1093,8 @@
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.tools.src.dir}"
                includesfile="${javadoc.inclusions}"/>
+      <fileset dir="${derby.optional.src.dir}"
+               includesfile="${javadoc.inclusions}"/>
       <arg value="${xarg.doclint}"/>
     </javadoc>
 

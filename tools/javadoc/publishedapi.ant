@@ -77,4 +77,7 @@ org/apache/derby/mbeans/drda/*.java
 
 org/apache/derby/security/SystemPermission.java
 
+# package: org.apache.derby.optional.api
+
+org/apache/derby/optional/api/LuceneUtils.java
 
