@@ -34,6 +34,8 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IndexInput;
 import org.apache.lucene.store.IndexOutput;
 import org.apache.lucene.store.IOContext;
+import org.apache.lucene.store.Lock;
+import org.apache.lucene.store.LockFactory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
 
 import org.apache.derby.database.Database;
@@ -70,6 +72,9 @@ class DerbyLuceneDir extends Directory
     // files open for output which may need to be sync'd
     private HashMap<String,DerbyIndexOutput>    _outputFiles = new HashMap<String,DerbyIndexOutput>();
 
+    // Lucene lock factory
+    private LockFactory             _lockFactory;
+    
     private boolean _closed = false;
 
     // only supply one DerbyLuceneDir per database
@@ -172,6 +177,25 @@ class DerbyLuceneDir extends Directory
     //  Directory METHODS
     //
     /////////////////////////////////////////////////////////////////////
+
+    /** Set the lock factory used by this Directory. */
+    public  void    setLockFactory( LockFactory lockFactory ) { _lockFactory = lockFactory; }
+    
+    /** Get the lock factory used by this Directory. */
+    public  LockFactory getLockFactory() { return _lockFactory; }
+
+    /** Clear the lock */
+    public void clearLock( String name )
+        throws IOException
+    {
+        _lockFactory.clearLock( name );
+    }
+
+    /** Make a lock */
+    public Lock makeLock( String name )
+    {
+        return _lockFactory.makeLock( name );
+    }
 
     /**
      * <p>

@@ -74,7 +74,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     private static  final   String      LUCENE_VERSION_PROPERTY = "derby.tests.lucene.version";
-    private static  String              LUCENE_VERSION = "LUCENE_45";
+    private static  String              LUCENE_VERSION = "LUCENE_47";
 
     private static  final   String      DB_NAME = "lucenesupportpermsdb";
 
