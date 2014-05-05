@@ -34,6 +34,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -271,6 +272,36 @@ public class NullIfTest extends BaseJDBCTestCase {
                 }
             }
         }
+    }
+
+    /**
+     * Before DERBY-6423, boolean expressions (such as A OR B, or A AND B)
+     * were not accepted as arguments to NULLIF.
+     */
+    public void testBooleanExpressions() throws SQLException {
+        Statement s = createStatement();
+
+        // The following statements used to fail with syntax error.
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif(true or false, true or false)"),
+            null);
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif(true and false, true and false)"),
+            null);
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif(true and false, true or false)"),
+            "false");
+
+        // These, on the other hand, used to work. Verify that they still do.
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif((true or false), (true or false))"),
+            null);
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif((true and false), (true and false))"),
+            null);
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("values nullif((true and false), (true or false))"),
+            "false");
     }
 
     /**

@@ -228,6 +228,40 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Before DERBY-6423, boolean expressions (such as A OR B, or A AND B)
+     * were not accepted in THEN and ELSE clauses.
+     */
+    public void testBooleanExpressions() throws SQLException {
+        Statement s = createStatement();
+
+        // Test both with and without parentheses around the expressions.
+        // Those with parentheses used to work, and those without used to
+        // cause syntax errors. Now both should work.
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select case when a or b then b or c else a or c end,\n" +
+                "   case when a and b then b and c else a and c end,\n" +
+                "   case when (a or b) then (b or c) else (a or c) end,\n" +
+                "   case when (a and b) then (b and c) else (a and c) end\n" +
+                "from (values (true, true, true), (true, true, false),\n" +
+                "             (true, false, true), (true, false, false),\n" +
+                "             (false, true, true), (false, true, false),\n" +
+                "             (false, false, true), (false, false, false)\n" +
+                "      ) v(a, b, c)\n" +
+                "order by a desc, b desc, c desc"),
+            new String[][] {
+                { "true", "true", "true", "true" },
+                { "true", "false", "true", "false" },
+                { "true", "true", "true", "true" },
+                { "false", "false", "false", "false" },
+                { "true", "false", "true", "false" },
+                { "true", "false", "true", "false" },
+                { "true", "false", "true", "false" },
+                { "false", "false", "false", "false" },
+            });
+    }
+
+    /**
      * Runs the test fixtures in embedded.
      *
      * @return test suite
