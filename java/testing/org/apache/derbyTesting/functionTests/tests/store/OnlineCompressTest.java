@@ -523,6 +523,8 @@ public class OnlineCompressTest extends BaseTest
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(conn, "delete from " + table_name, true);
 
+        callWaitForPostCommit(conn);
+
         if (verbose)
             testProgress("deleted all rows, now calling compress.");
 
@@ -597,6 +599,8 @@ public class OnlineCompressTest extends BaseTest
         // delete all the rows.
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(conn, "delete from " + table_name, true);
+
+        callWaitForPostCommit(conn);
 
         if (verbose)
             testProgress("deleted all rows, now calling compress.");
@@ -768,6 +772,8 @@ public class OnlineCompressTest extends BaseTest
         // delete all rows and commit.
         executeQuery(conn, "delete from " + table_name, true);
 
+        callWaitForPostCommit(conn);
+
         // compress all space and commit.
         callCompress(conn, "APP", table_name, true, true, true, true);
 
@@ -826,6 +832,8 @@ public class OnlineCompressTest extends BaseTest
         // now commit the deletes, run all phases and make sure empty table
         // results.
         conn.commit();
+
+        callWaitForPostCommit(conn);
 
         // check the table.  Note that this will accumulate locks and
         // will commit the transaction.
@@ -1161,6 +1169,8 @@ public class OnlineCompressTest extends BaseTest
         executeQuery(
             conn, "delete from " + table_name + " where onehalf = 0", true);
 
+        callWaitForPostCommit(conn);
+
         if (verbose)
             testProgress("deleted every other row, now calling compress.");
 
@@ -1195,6 +1205,8 @@ public class OnlineCompressTest extends BaseTest
         executeQuery(
             conn, "delete from " + table_name + " where onethird = 0", true);
 
+        callWaitForPostCommit(conn);
+
         if (verbose)
             testProgress("deleted every third row, now calling compress.");
 
@@ -1228,6 +1240,8 @@ public class OnlineCompressTest extends BaseTest
         executeQuery(
             conn, "delete from " + table_name + " where keycol > " + 
             (num_rows / 2), true);
+
+        callWaitForPostCommit(conn);
 
         if (verbose)
             testProgress("deleted top half of the rows, now calling compress.");
@@ -1272,6 +1286,8 @@ public class OnlineCompressTest extends BaseTest
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(
             conn, "delete from " + table_name + " where keycol < 500 ", true);
+
+        callWaitForPostCommit(conn);
 
         if (verbose)
             testProgress("deleted keys < 500, now calling compress.");
@@ -1405,6 +1421,9 @@ public class OnlineCompressTest extends BaseTest
         // delete all the rows.
         ret_before = getSpaceInfo(conn, "APP", table_name, true);
         executeQuery(conn, "delete from " + table_name, true);
+
+        callWaitForPostCommit(conn);
+
         conn.commit();
 
         if (verbose)
@@ -1478,6 +1497,8 @@ public class OnlineCompressTest extends BaseTest
         executeQuery(
             conn, "delete from " + table_name + " where keycol < 1000", true);
 
+        callWaitForPostCommit(conn);
+
         conn.commit();
 
         if (verbose)
@@ -1504,6 +1525,15 @@ public class OnlineCompressTest extends BaseTest
         test7(conn, "test7", "TEST7");
     }
 
+    public static void callWaitForPostCommit(Connection conn) 
+            throws SQLException {
+        CallableStatement cstmt = 
+                conn.prepareCall(
+                    "call wait_for_post_commit()");
+        cstmt.execute();
+        cstmt.close();
+    }
+    
     public static void main(String[] argv) 
         throws Throwable
     {
@@ -1511,7 +1541,19 @@ public class OnlineCompressTest extends BaseTest
 
    		ij.getPropertyArg(argv); 
         Connection conn = ij.startJBMS();
+        
+        Statement stmt = conn.createStatement();
+        // Create a procedure to be called before checking on contents
+        // to ensure that the background worker thread has completed 
+        // all the post-commit work.
+        stmt.execute(
+            "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
+            "LANGUAGE JAVA EXTERNAL NAME " +
+            "'org.apache.derbyTesting.functionTests.util." +
+            "T_Access.waitForPostCommitToFinish' " +
+            "PARAMETER STYLE JAVA");
         conn.setAutoCommit(false);
+        stmt.close();
 
         try
         {
