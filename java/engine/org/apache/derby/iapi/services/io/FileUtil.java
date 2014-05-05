@@ -613,18 +613,12 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Class stringArrayClz;
     private static Class aclEntryBuilderClz;
     private static Class aclEntryTypeClz;
-    private static Class fileStoreClz;
     private static Class aclEntryPermissionClz;
 
     private static Method get;
     private static Method getFileAttributeView;
-    private static Method supportsFileAttributeView;
-    private static Method getFileStore;
     private static Method getOwner;
-    private static Method getAcl;
     private static Method setAcl;
-    private static Method principal;
-    private static Method getName;
     private static Method build;
     private static Method newBuilder;
     private static Method setPrincipal;
@@ -720,8 +714,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                         "java.nio.file.attribute.AclEntry$Builder");
                     aclEntryTypeClz = Class.forName(
                         "java.nio.file.attribute.AclEntryType");
-                    fileStoreClz = Class.forName(
-                        "java.nio.file.FileStore");
                     aclEntryPermissionClz = Class.forName(
                             "java.nio.file.attribute.AclEntryPermission");
                     get = pathsClz.getMethod(
@@ -730,22 +722,11 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                     getFileAttributeView = filesClz.getMethod(
                         "getFileAttributeView",
                         new Class[]{pathClz, Class.class, linkOptionArrayClz});
-                    supportsFileAttributeView = fileStoreClz.getMethod(
-                        "supportsFileAttributeView",
-                        new Class[]{Class.class});
-                    getFileStore = filesClz.getMethod("getFileStore",
-                                                      new Class[]{pathClz});
                     getOwner = filesClz.
                         getMethod("getOwner",
                                   new Class[]{pathClz, linkOptionArrayClz});
-                    getAcl = aclFileAttributeViewClz.
-                        getMethod("getAcl", new Class[]{});
                     setAcl = aclFileAttributeViewClz.
                         getMethod("setAcl", new Class[]{List.class});
-                    principal = aclEntryClz.
-                        getMethod("principal", new Class[]{});
-                    getName = userPrincipalClz.
-                        getMethod("getName", new Class[]{});
                     build = aclEntryBuilderClz.
                         getMethod("build", new Class[]{});
                     newBuilder = aclEntryClz.
@@ -885,22 +866,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             Object fileP = get.invoke(
                 null, new Object[]{file.getPath(), new String[]{}});
 
-            // ACLs supported on this platform, now check the current file
-            // system:
-            Object fileStore = getFileStore.invoke(
-                null,
-                new Object[]{fileP});
-
-            boolean supported =
-                ((Boolean)supportsFileAttributeView.invoke(
-                    fileStore,
-                    new Object[]{aclFileAttributeViewClz})).booleanValue();
-
-            if (!supported) {
-                return false;
-            }
-
-
             // AclFileAttributeView view =
             //     Files.getFileAttributeView(fileP,
             //         AclFileAttributeView.class);
@@ -911,6 +876,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                              Array.newInstance(linkOptionClz, 0)});
 
             if (view == null) {
+                // ACLs not supported on this file system.
                 return false;
             }
 
