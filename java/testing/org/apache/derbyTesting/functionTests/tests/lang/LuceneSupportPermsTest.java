@@ -498,7 +498,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         String  physicalDBName = config.getPhysicalDatabaseName( dbName );
         String  dbPath = config.getDatabasePath( physicalDBName );
         File    dbDirectory = new File( dbPath );
-        File    luceneDirectory = new File( dbDirectory, "lucene" );
+        File    luceneDirectory = new File( dbDirectory, "LUCENE" );
         File    ruthDirectory = new File( luceneDirectory, "RUTH" );
         File    poemsDirectory = new File( ruthDirectory, "POEMS" );
         File    poemTextIndexDirectory = new File( poemsDirectory, "POEMTEXT" );
