@@ -71,8 +71,6 @@ class CreateTriggerNode extends DDLStatementNode
 	private	String				actionText;
     private String              originalWhenText;
     private String              originalActionText;
-    private final int           whenOffset;
-    private final int           actionOffset;
     private ProviderInfo[]      providerInfo;
 
 	private SchemaDescriptor	triggerSchemaDescriptor;
@@ -262,10 +260,8 @@ class CreateTriggerNode extends DDLStatementNode
 	 * @param refClause				the referencing clause
 	 * @param whenClause			the WHEN clause tree
 	 * @param whenText				the text of the WHEN clause
-     * @param whenOffset            offset of start of WHEN clause
 	 * @param actionNode			the trigger action tree
 	 * @param actionText			the text of the trigger action
-	 * @param actionOffset			offset of start of action clause
      * @param cm                    context manager
 	 *
 	 * @exception StandardException		Thrown on error
@@ -282,10 +278,8 @@ class CreateTriggerNode extends DDLStatementNode
         List<TriggerReferencingStruct> refClause,
         ValueNode       whenClause,
         String          whenText,
-        int             whenOffset,
         StatementNode   actionNode,
         String          actionText,
-        int             actionOffset,
         ContextManager  cm
 	) throws StandardException
 	{
@@ -302,11 +296,9 @@ class CreateTriggerNode extends DDLStatementNode
         this.whenClause = whenClause;
         this.originalWhenText = whenText;
         this.whenText = (whenText == null) ? null : whenText.trim();
-        this.whenOffset = whenOffset;
         this.actionNode = actionNode;
         this.originalActionText = actionText;
         this.actionText = (actionText == null) ? null : actionText.trim();
-        this.actionOffset = actionOffset;
         this.implicitCreateSchema = true;
 	}
 
@@ -643,7 +635,7 @@ class CreateTriggerNode extends DDLStatementNode
 					originalActionText,
 					referencedColInts,
 					referencedColsInTriggerAction,
-					actionOffset,
+                    actionNode.getBeginOffset(),
 					triggerTableDescriptor,
 					triggerEventMask,
                     true,
@@ -655,7 +647,8 @@ class CreateTriggerNode extends DDLStatementNode
                     getDataDictionary().getTriggerActionString(
                             whenClause, oldTableName, newTableName,
                             originalWhenText, referencedColInts,
-                            referencedColsInTriggerAction, whenOffset,
+                            referencedColsInTriggerAction,
+                            whenClause.getBeginOffset(),
                             triggerTableDescriptor, triggerEventMask, true,
                             whenClauseTransformations);
             }
@@ -672,11 +665,10 @@ class CreateTriggerNode extends DDLStatementNode
 		{
 			//This is a table level trigger	        
             transformedActionText = transformStatementTriggerText(
-                    actionNode, originalActionText, actionOffset,
-                    actionTransformations);
+                    actionNode, originalActionText, actionTransformations);
             if (whenClause != null) {
                 transformedWhenText = transformStatementTriggerText(
-                        whenClause, originalWhenText, whenOffset,
+                        whenClause, originalWhenText,
                         whenClauseTransformations);
             }
 		}
@@ -884,8 +876,6 @@ class CreateTriggerNode extends DDLStatementNode
      *   SQL statement
      * @param originalText the original text of the WHEN clause or the
      *   triggered SQL statement
-     * @param offset the offset of the WHEN clause or the triggered SQL
-     *   statement within the CREATE TRIGGER statement
      * @param replacements list that will be populated with int arrays that
      *   describe how the original text was transformed. The int arrays
      *   contain the begin (inclusive) and end (exclusive) positions of the
@@ -898,10 +888,10 @@ class CreateTriggerNode extends DDLStatementNode
      *   transformation
      */
     private String transformStatementTriggerText(
-            Visitable node, String originalText, int offset,
-            List<int[]> replacements)
+            QueryTreeNode node, String originalText, List<int[]> replacements)
         throws StandardException
     {
+        final int offset = node.getBeginOffset();
         int start = 0;
         StringBuilder newText = new StringBuilder();
 

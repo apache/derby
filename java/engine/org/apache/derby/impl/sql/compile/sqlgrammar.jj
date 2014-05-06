@@ -11249,16 +11249,16 @@ triggerDefinition() throws StandardException :
                 statementSQLText, actionBegin, actionEnd, false);
 
         String whenText = null;
-        int whenOffset = 0;
         if (whenClause != null) {
             // The WHEN clause is only supported if the dictionary version is
             // 10.11 or higher.
             checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "WHEN");
-            whenOffset = whenOpen.endOffset + 1;
+            int whenOffset = whenOpen.endOffset + 1;
+            int whenEnd = whenClose.beginOffset - 1;
             whenClause.setBeginOffset(whenOffset);
-            whenClause.setEndOffset(whenClose.beginOffset - 1);
+            whenClause.setEndOffset(whenEnd);
             whenText = StringUtil.slice(statementSQLText,
-                    whenOffset, whenClose.beginOffset - 1, false);
+                                        whenOffset, whenEnd, false);
         }
 
         return new CreateTriggerNode(
@@ -11272,10 +11272,8 @@ triggerDefinition() throws StandardException :
                                 refClause,   // referencing clause
                                 whenClause,  // when clause node
                                 whenText,    // when clause text
-                                whenOffset,
 								actionNode,
                                 actionText,
-                                actionBegin,
 								getContextManager());
 	}
 }
