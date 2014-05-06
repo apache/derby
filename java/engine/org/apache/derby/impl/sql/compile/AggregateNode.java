@@ -292,7 +292,7 @@ class AggregateNode extends UnaryOperatorNode
 
         if ( userAggregateName != null )
         {
-            userAggregateName.bind( dd );
+            userAggregateName.bind();
         }
 
         // If this is a user-defined aggregate that hasn't been bound yet,

@@ -2335,7 +2335,7 @@ class FromBaseTable extends FromTable
 						   FromList fromListParam) 
 					throws StandardException
 	{
-        tableName.bind(dataDictionary);
+        tableName.bind();
 
         TableDescriptor tabDescr = bindTableDescriptor();
 
@@ -2793,7 +2793,7 @@ class FromBaseTable extends FromTable
         if(columnsTableName != null) {
             if(columnsTableName.getSchemaName() == null && correlationName == null)
             {
-                columnsTableName.bind(this.getDataDictionary());
+                columnsTableName.bind();
             }
         }
 		/*
@@ -2802,8 +2802,11 @@ class FromBaseTable extends FromTable
 		*/
         exposedTableName = getExposedTableName();
 
-        if(exposedTableName.getSchemaName() == null && correlationName == null)
-            exposedTableName.bind(this.getDataDictionary());
+        if (exposedTableName.getSchemaName() == null
+                && correlationName == null) {
+            exposedTableName.bind();
+        }
+
 		/*
 		** If the column did not specify a name, or the specified name
 		** matches the table we're looking at, see whether the column
@@ -4058,14 +4061,11 @@ class FromBaseTable extends FromTable
     TableName getTableName()
 			throws StandardException
 	{
-		TableName tn;
+        TableName tn = super.getTableName();
 
-		tn = super.getTableName();
-
-        if(tn != null) {
-            if(tn.getSchemaName() == null &&
-               correlationName == null)
-                   tn.bind(this.getDataDictionary());
+        if (tn != null && tn.getSchemaName() == null
+                && correlationName == null) {
+            tn.bind();
         }
 
 		return (tn != null ? tn : tableName);

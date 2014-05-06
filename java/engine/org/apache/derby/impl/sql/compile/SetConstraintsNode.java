@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -121,11 +120,9 @@ class SetConstraintsNode extends MiscellaneousStatementNode
     @Override
     public void bindStatement() throws StandardException
     {
-        final DataDictionary dd = getDataDictionary();
-
         if (constraints != null) {
             for (TableName c : constraints) {
-                c.bind(dd);
+                c.bind();
             }
         }
     }

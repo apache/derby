@@ -419,21 +419,6 @@ abstract class DDLStatementNode extends StatementNode
 	}
 
 	/**
-	  *	Bind the  object Name. This means filling in the schema name if it
-	  *	wasn't specified.
-	  *
-	  *	@param	dataDictionary	Data dictionary to bind against.
-	  *
-	  *	@exception StandardException		Thrown on error
-	  */
-	void	bindName( DataDictionary	dataDictionary )
-		                       throws StandardException
-	{
-        if (tableName != null)
-            tableName.bind( dataDictionary );
-	}
-
-	/**
 	  *	Make a from list for binding query fragments in a CREATE/ALTER TABLE
       *     statement.
       *

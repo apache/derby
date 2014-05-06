@@ -38,7 +38,6 @@ import org.apache.derby.iapi.sql.compile.IgnoreFilter;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -360,7 +359,7 @@ public final class MergeNode extends DMLModStatementNode
         forbidDerivedColumnLists();
         
         // synonyms not allowed
-        forbidSynonyms( dd );
+        forbidSynonyms();
 
         //
         // Don't add any privileges until we bind the matching clauses.
@@ -428,17 +427,19 @@ public final class MergeNode extends DMLModStatementNode
     }
 
     /** Neither the source nor the target table may be a synonym */
-    private void    forbidSynonyms( DataDictionary dd )    throws StandardException
+    private void forbidSynonyms() throws StandardException
     {
-        forbidSynonyms( dd, _targetTable.getTableNameField().cloneMe() );
+        forbidSynonyms(_targetTable.getTableNameField().cloneMe());
         if ( _sourceTable instanceof FromBaseTable )
         {
-            forbidSynonyms( dd, ((FromBaseTable)_sourceTable).getTableNameField().cloneMe() );
+            forbidSynonyms(
+                ((FromBaseTable) _sourceTable).getTableNameField().cloneMe());
         }
     }
-    private void    forbidSynonyms( DataDictionary dd, TableName tableName ) throws StandardException
+
+    private void forbidSynonyms(TableName tableName) throws StandardException
     {
-        tableName.bind( dd );
+        tableName.bind();
 
         TableName   synonym = resolveTableToSynonym( tableName );
         if ( synonym != null )
