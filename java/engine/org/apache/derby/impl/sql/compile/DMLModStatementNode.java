@@ -1017,23 +1017,28 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 			TableDescriptor refTd = cd.getTableDescriptor();
 
-            fkList.add(new FKInfo(
-									fkNames,							// foreign key names
-                                    cd.getSchemaDescriptor().getSchemaName(),
-									refTd.getName(),				// table being modified
-									statementType,						// INSERT|UPDATE|DELETE
-									type,								// FOREIGN_KEY|REFERENCED_KEY
-									pkuuid,								// referenced backing index uuid
-									pkIndexConglom.getConglomerateNumber(), // referened backing index conglom
-									uuids,								// fk backing index uuids
-									conglomNumbers,						// fk backing index congloms
-									isSelfReferencingFK,				// is self ref array of bool
-									remapReferencedColumns(cd, rowMap),	// column referened by key
-									dd.getRowLocationTemplate(getLanguageConnectionContext(), refTd),
-									                                // row location template  for table being modified 
-                                    raRules,// referential action rules
-                                    deferrable,
-                                    fkIds));
+            fkList.add(
+                new FKInfo(
+                    fkNames,                // foreign key names
+                    cd.getSchemaDescriptor().getSchemaName(),
+                    refTd.getName(),        // table being modified
+                    statementType,          // INSERT|UPDATE|DELETE
+                    type,                   // FOREIGN_KEY|REFERENCED_KEY
+                    pkuuid,                 // referenced backing index uuid
+                    pkIndexConglom.getConglomerateNumber(),
+                                            // referenced backing index conglom
+                    uuids,                  // fk backing index uuids
+                    conglomNumbers,         // fk backing index congloms
+                    isSelfReferencingFK,    // is self ref array of bool
+                    remapReferencedColumns(cd, rowMap),
+                                            // column referened by key
+                    dd.getRowLocationTemplate(getLanguageConnectionContext(),
+                                              refTd),
+                                            // row location template for table
+                                            // being modified
+                    raRules,                // referential action rules
+                    deferrable,             // deferrable flags
+                    fkIds));                // UUID of fks
 
 		}
 		
