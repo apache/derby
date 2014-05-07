@@ -650,7 +650,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
         CompilerContext compilerContext = getCompilerContext();
         
- 		// Donot need privileges to execute constraints
+        // Do not need privileges to execute constraints
 		compilerContext.pushCurrentPrivType( Authorizer.NULL_PRIV);
 		try {
 			getAllRelevantConstraints(dataDictionary, 	
