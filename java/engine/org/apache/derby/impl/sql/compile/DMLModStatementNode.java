@@ -879,7 +879,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 * one of these FKInfo structures and then package them up into
 	 * a single array.
 	 *
-	 * @param cdl				The constriant descriptor list
+	 * @param cdl				The constraint descriptor list
 	 * @param dd				The DataDictionary
 	 * @param td				The TableDescriptor
 	 * @param readColsBitSet 	columns read

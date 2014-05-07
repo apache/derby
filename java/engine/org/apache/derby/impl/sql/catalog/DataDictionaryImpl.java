@@ -6617,7 +6617,7 @@ public final class	DataDictionaryImpl
 
 			/*
 			** Now we need to bump the reference count of the
-			** contraint that this FK references
+			** constraint that this FK references
 			*/
 			ReferencedKeyConstraintDescriptor refDescriptor =
 							fkDescriptor.getReferencedConstraint();
