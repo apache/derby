@@ -21,11 +21,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -378,5 +380,91 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(rs, "6");
         
     }
-    
+
+    /**
+     * Verify that NOT elimination produces the correct results.
+     * DERBY-6563.
+     */
+    public void testNotElimination() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d6563(b1 boolean, b2 boolean, b3 boolean)");
+
+        // Fill the table with all possible combinations of true/false/null.
+        Boolean[] universe = { true, false, null };
+        PreparedStatement insert = prepareStatement(
+                "insert into d6563 values (?, ?, ?)");
+        for (Boolean v1 : universe) {
+            insert.setObject(1, v1);
+            for (Boolean v2 : universe) {
+                insert.setObject(2, v2);
+                for (Boolean v3 : universe) {
+                    insert.setObject(3, v3);
+                    insert.executeUpdate();
+                }
+            }
+        }
+
+        // Truth table for
+        // B1, B2, B3, WHEN B1 THEN B2 ELSE B3, NOT (WHEN B1 THEN B2 ELSE B3).
+        Object[][] expectedRows = {
+            { false, false, false, false, true  },
+            { false, false, true,  true,  false },
+            { false, false, null,  null,  null  },
+            { false, true,  false, false, true  },
+            { false, true,  true,  true,  false },
+            { false, true,  null,  null,  null  },
+            { false, null,  false, false, true  },
+            { false, null,  true,  true,  false },
+            { false, null,  null,  null,  null  },
+            { true,  false, false, false, true  },
+            { true,  false, true,  false, true  },
+            { true,  false, null,  false, true  },
+            { true,  true,  false, true,  false },
+            { true,  true,  true,  true,  false },
+            { true,  true,  null,  true,  false },
+            { true,  null,  false, null,  null  },
+            { true,  null,  true,  null,  null  },
+            { true,  null,  null,  null,  null  },
+            { null,  false, false, false, true  },
+            { null,  false, true,  true,  false },
+            { null,  false, null,  null,  null  },
+            { null,  true,  false, false, true  },
+            { null,  true,  true,  true,  false },
+            { null,  true,  null,  null,  null  },
+            { null,  null,  false, false, true  },
+            { null,  null,  true,  true,  false },
+            { null,  null,  null,  null,  null  },
+        };
+
+        // Verify the truth table. Since NOT elimination is not performed on
+        // expressions in the SELECT list, this passed even before the fix.
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select b1, b2, b3, case when b1 then b2 else b3 end, "
+                        + "not case when b1 then b2 else b3 end "
+                        + "from d6563 order by b1, b2, b3"),
+            expectedRows, false);
+
+        // Now take only those rows where the NOT CASE expression evaluated
+        // to TRUE, and strip off the expression columns at the end.
+        ArrayList<Object[]> rows = new ArrayList<Object[]>();
+        for (Object[] row : expectedRows) {
+            if (row[4] == Boolean.TRUE) {
+                rows.add(Arrays.copyOf(row, 3));
+            }
+        }
+
+        // Assert that those are the only rows returned if the NOT CASE
+        // expression is used as a predicate. This query used to return a
+        // different set of rows before the fix.
+        expectedRows = rows.toArray(new Object[rows.size()][]);
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d6563 where "
+                        + "not case when b1 then b2 else b3 end "
+                        + "order by b1, b2, b3"),
+                expectedRows, false);
+    }
+
 }

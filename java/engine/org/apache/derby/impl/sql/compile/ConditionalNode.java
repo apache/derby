@@ -660,19 +660,19 @@ class ConditionalNode extends ValueNode
 	ValueNode eliminateNots(boolean underNotNode) 
 					throws StandardException
 	{
-		ValueNode thenExpression;
-		ValueNode elseExpression;
+        // NOT CASE WHEN a THEN b ELSE c END is equivalent to
+        // CASE WHEN a THEN NOT b ELSE NOT c END, so just push the
+        // NOT node down to the THEN and ELSE expressions.
+        for (int i = 0; i < thenElseList.size(); i++) {
+            thenElseList.setElementAt(
+                    thenElseList.elementAt(i).eliminateNots(underNotNode),
+                    i);
+        }
 
-		if (! underNotNode)
-		{
-			return this;
-		}
-
-		/* Simply swap the then and else expressions */
-        thenExpression = thenElseList.elementAt(0);
-        elseExpression = thenElseList.elementAt(1);
-		thenElseList.setElementAt(elseExpression, 0);
-		thenElseList.setElementAt(thenExpression, 1);
+        // Eliminate NOTs in the WHEN expression too. The NOT node above us
+        // should not be pushed into the WHEN expression, though, as that
+        // would alter the meaning of the CASE expression.
+        testCondition = testCondition.eliminateNots(false);
 
 		return this;
 	}
