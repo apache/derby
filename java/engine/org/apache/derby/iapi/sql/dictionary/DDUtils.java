@@ -249,13 +249,14 @@ public	class	DDUtils
 		}	
 	}
 
-	/*
-	** Finds the existing delete connection for the table and the referential
-	** actions that will occur  and stores the information in the hash table.
-	** HashTable (key , value) = ( table name that this table is delete
-	** connected to, referential action that will occur if there is a delete on
-	** the table this table connected to[CASACDE, SETNULL , RESTRICT ...etc).)
-	**/
+    /**
+     * Finds the existing delete connection for the table and the referential
+     * actions that will occur and stores the information in the hash table.
+     * HashTable (key , value) = ( table name that this table is delete
+     * connected to, referential action that will occur if there is a delete on
+     * the table this table connected to [CASCADE, SET NULL, RESTRICT, NO
+     * ACTION] )
+     */
     @SuppressWarnings("UseOfObsoleteCollectionType")
 	private	static int  getCurrentDeleteConnections
 	(
@@ -346,19 +347,19 @@ public	class	DDUtils
 	}
 
 
-	/*
-	** Following function validates whether the new foreign key relation ship
-	** violates any restriction on the referential actions. Current refAction
-	** implementation does not allow cases where we can possible land up
-	** having multiple action for the same row in a table, this happens becase
-	** user can possibly define differential action through multiple paths.
-	** Following function throws error while creating foreign keys if the new
-	** releations ship leads to any such conditions.
-	** NOTE : SQL99 standard also does not cleary says what we are suppose to do
-	** in these non determenistic cases. 
-	** Our implementation just follows what is did in DB2 and throws error
-	** messaged similar to DB2 (sql0632N, sql0633N, sql0634N)
-	*/
+    /**
+     * The following function validates whether the new foreign key relationship
+     * violates any restriction on the referential actions. The current
+     * refAction implementation does not allow cases where we can possible land
+     * up having multiple action for the same row in a table. This could happen
+     * because the user can possibly define different actions through multiple
+     * foreign key paths.  The following function throws an error while creating
+     * foreign keys if the new releationship leads to any such conditions.
+     * NOTE: The SQL99 standard also does not clearly says what we are supposed
+     * to do in these cases.  Our implementation just follows what is done in
+     * DB2 and throws error messaged similar to DB2 (sql0632N, sql0633N,
+     * sql0634N).
+     */
     @SuppressWarnings("UseOfObsoleteCollectionType")
 	private	static void validateDeleteConnection
 	(
