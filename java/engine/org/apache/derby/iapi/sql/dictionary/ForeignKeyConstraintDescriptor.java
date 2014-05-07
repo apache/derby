@@ -23,8 +23,8 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A foreign key.
@@ -41,7 +41,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	   throws StandardException;
 	   <li>public boolean isSelfReferencingFK()
 	   throws StandardException;
-	   <ol>
+	   </ol>
 	*/
 
 	// Implementation
@@ -63,6 +63,8 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
 	 * @param referencedConstraintDescriptor	is referenced constraint descriptor
      * @param enforced          is the constraint enforced?
+     * @param raDeleteRule      The {@code ON DELETE} action rule
+     * @param raUpdateRule      The {@code ON UPDATE} action rule
 	 */
 	protected ForeignKeyConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -103,6 +105,8 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @param schemaDesc		The SchemaDescriptor for the constraint
 	 * @param referencedConstraintId	is referenced constraint id
      * @param enforced          {@code true} if this constraint is enforced
+     * @param raDeleteRule      The {@code ON DELETE} action rule 
+     * @param raUpdateRule      The {@code ON UPDATE} action rule 
 	 */
 	ForeignKeyConstraintDescriptor(
 		    DataDictionary dataDictionary,
@@ -131,7 +135,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 
 	/**
 	 * Get the constraint that this FK references.  Will
-	 * return either a primary key or a unique key constriant.
+	 * return either a primary key or a unique key constraint.
 	 *
 	 * @return	the constraint
 	 *
@@ -216,6 +220,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 * @return	An identifier telling what type of descriptor it is
 	 *		(UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK).
 	 */
+    @Override
 	public int	getConstraintType()
 	{
 		return DataDictionary.FOREIGNKEY_CONSTRAINT;
@@ -231,6 +236,7 @@ public class ForeignKeyConstraintDescriptor extends KeyConstraintDescriptor
 	 *
 	 * @return true/false
 	 */
+    @Override
 	public boolean needsToFire(int stmtType, int[] modifiedCols)
 	{
 		/*
