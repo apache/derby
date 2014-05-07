@@ -63,14 +63,15 @@ public	class	DDUtils
 
         ReferencedKeyConstraintDescriptor refCd;
 
-		/*
-		** There were no column names specified, just find
-		** the primary key on the table in question
-		*/
 		String[]	refColumnNames = otherConstraintInfo.getReferencedColumnNames();
+
 		if (refColumnNames == null ||
 			refColumnNames.length == 0)
 		{
+			/*
+			** There were no column names specified, just find
+			** the primary key on the table in question
+			*/
 			refCd = refTd.getPrimaryKey();
 			if (refCd == null)
 			{
@@ -102,14 +103,13 @@ public	class	DDUtils
 			}
 
 			return refCd;	
-		}
-
-		/*
-		** Check the referenced columns vs. each unique or primary key to
-		** see if they match the foreign key.
-		*/
+		} 
 		else
 		{
+			/*
+			** Check the referenced columns vs. each unique or primary key to
+			** see if they match the foreign key.
+			*/
 			ConstraintDescriptor cd;
 
 			ColumnDescriptorList colDl = getColumnDescriptors(dd, td, myColumnNames);
