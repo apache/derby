@@ -72,6 +72,7 @@ public class FKInfo implements Formatable
     int                 type;
     UUID                refUUID; // index index conglomerate uuid
     long                refConglomNumber;
+    boolean             refConstraintIsDeferrable;
     int                 stmtType;
     RowLocation         rowLocation;
 
@@ -99,8 +100,10 @@ public class FKInfo implements Formatable
 	 * @param tableName	the name of the table being modified
 	 * @param stmtType	the type of the statement: e.g. StatementType.INSERT
 	 * @param type either FKInfo.REFERENCED_KEY or FKInfo.FOREIGN_KEY
-	 * @param refUUID UUID of the referenced constraint
+     * @param refUUID UUID of the referenced constraint's supporting index
      * @param refConglomNumber conglomerate number of the referenced key
+     * @param refConstraintIsDeferrable {@code true} iff the referenced key
+     *                                  constraint is deferrable
 	 * @param fkUUIDs an array of fkUUIDs of backing indexes.  if
 	 *			FOREIGN_KEY, then just one element, the backing
      *          index of the referenced keys.  if REFERENCED_KEY,
@@ -117,6 +120,7 @@ public class FKInfo implements Formatable
 	 *			used to pass in a template row to tc.openScan()
      * @param raRules referential action rules
      * @param deferrable the corresponding constraint is deferrable
+     * @param fkIds the foreign key constraints' uuids.
 	 */
 	public FKInfo(
 					String[]			fkConstraintNames,
@@ -126,6 +130,7 @@ public class FKInfo implements Formatable
 					int					type,
 					UUID				refUUID,
 					long				refConglomNumber,
+                    boolean             refConstraintIsDeferrable,
 					UUID[]				fkUUIDs,
 					long[]				fkConglomNumbers,
 					boolean[]			fkIsSelfReferencing,
@@ -143,6 +148,7 @@ public class FKInfo implements Formatable
 		this.type = type;
 		this.refUUID = refUUID;
 		this.refConglomNumber = refConglomNumber;
+        this.refConstraintIsDeferrable = refConstraintIsDeferrable;
         this.fkUUIDs = ArrayUtil.copy(fkUUIDs);
         this.fkConglomNumbers = ArrayUtil.copy(fkConglomNumbers);
         this.fkIsSelfReferencing = ArrayUtil.copy(fkIsSelfReferencing);

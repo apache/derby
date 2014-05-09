@@ -56,7 +56,7 @@ public abstract class GenericRIChecker
     protected BackingStoreHashtable deferredRowsHashTable;
 
     private final Hashtable<Long,ScanController> scanControllers;
-    private final int numColumns;
+    protected final int numColumns;
     final IndexRow indexQualifierRow;
 
 	/**

@@ -33,7 +33,6 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
@@ -50,16 +49,17 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptorList;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.impl.sql.execute.TriggerInfo;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * A DMLStatement for a table modification: to wit, INSERT
@@ -1011,11 +1011,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				continue;
 			}
 
-			TableDescriptor	pktd = refcd.getTableDescriptor();
-			UUID pkuuid = refcd.getIndexId();
-			ConglomerateDescriptor pkIndexConglom = pktd.getConglomerateDescriptor(pkuuid);
+            final TableDescriptor   pktd = refcd.getTableDescriptor();
+            final UUID pkIndexId = refcd.getIndexId();
+            final ConglomerateDescriptor pkIndexConglom =
+                    pktd.getConglomerateDescriptor(pkIndexId);
 
-			TableDescriptor refTd = cd.getTableDescriptor();
+            final TableDescriptor refTd = cd.getTableDescriptor();
 
             fkList.add(
                 new FKInfo(
@@ -1024,14 +1025,16 @@ abstract class DMLModStatementNode extends DMLStatementNode
                     refTd.getName(),        // table being modified
                     statementType,          // INSERT|UPDATE|DELETE
                     type,                   // FOREIGN_KEY|REFERENCED_KEY
-                    pkuuid,                 // referenced backing index uuid
+                    pkIndexId,              // referenced backing index uuid
                     pkIndexConglom.getConglomerateNumber(),
                                             // referenced backing index conglom
+                    refcd.deferrable(),     // referenced constraint is
+                                            // deferrable?
                     uuids,                  // fk backing index uuids
                     conglomNumbers,         // fk backing index congloms
                     isSelfReferencingFK,    // is self ref array of bool
                     remapReferencedColumns(cd, rowMap),
-                                            // column referened by key
+                                            // columns referenced by key
                     dd.getRowLocationTemplate(getLanguageConnectionContext(),
                                               refTd),
                                             // row location template for table

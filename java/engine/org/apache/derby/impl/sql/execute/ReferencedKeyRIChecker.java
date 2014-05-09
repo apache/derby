@@ -24,14 +24,15 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.StatementUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -44,6 +45,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  */
 public class ReferencedKeyRIChecker extends GenericRIChecker
 {
+    private ScanController refKeyIndexScan = null;
+    private DataValueDescriptor[] refKey = new DataValueDescriptor[numColumns];
+
 	/**
      * @param lcc       the language connection context
 	 * @param tc		the xact controller
@@ -81,6 +85,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
+    @Override
     void doCheck(Activation a,
                  ExecRow row,
                  boolean restrictCheckOnly) throws StandardException
@@ -93,6 +98,20 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 		{
 			return;
 		}
+
+        if (fkInfo.refConstraintIsDeferrable) {
+            // We may have more than one row if the referenced constraint is
+            // deferred, if so, all is good: no foreign key constraints can be
+            // violated. DERBY-6559
+            if (lcc.isEffectivelyDeferred(
+                    lcc.getCurrentSQLSessionContext(a),
+                    fkInfo.refConglomNumber)) {
+                // It *is* deferred, go see if we have more than one row
+                if (isDuplicated(row)) {
+                    return;
+                }
+            }
+        }
 
 		/*
 		** Otherwise, should be no rows found.
@@ -150,6 +169,67 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 			scan.next();
 		}
 	}
+
+    private boolean isDuplicated(ExecRow row)
+            throws StandardException {
+        final DataValueDescriptor[] indexRowArray = row.getRowArray();
+
+        for (int i = 0; i < numColumns; i++)
+        {
+            refKey[i] = indexRowArray[fkInfo.colArray[i] - 1];
+        }
+
+        if (refKeyIndexScan == null) {
+            refKeyIndexScan = tc.openScan(
+                    fkInfo.refConglomNumber,
+                    false,                  // no hold over commit
+                    0,                      // read only
+                    TransactionController.MODE_RECORD,
+                                            // record locking
+                    TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
+                    (FormatableBitSet)null, // retrieve all fields
+                    refKey,                 // startKeyValue
+                    ScanController.GE,      // startSearchOp
+                    null,                   // qualified
+                    refKey,                 // stopKeyValue
+                    ScanController.GT);     // stopSearchOp
+        } else {
+            refKeyIndexScan.reopenScan(
+                      refKey,             // startKeyValue
+                      ScanController.GE,  // startSearchOp
+                      null,               // qualifier
+                      refKey,             // stopKeyValue
+                      ScanController.GT); // stopSearchOp
+        }
+
+        if (refKeyIndexScan.next()) {
+            if (refKeyIndexScan.next()) {
+                // two matching rows found, all ok
+                return true;
+            } // else exactly one row contains key
+        } else {
+            // No rows contain key
+        }
+
+        return false;
+    }
+
+    /**
+     * Clean up all scan controllers
+     *
+     * @exception StandardException on error
+     */
+    void close()
+        throws StandardException {
+
+        if (refKeyIndexScan != null) {
+            refKeyIndexScan.close();
+            refKeyIndexScan = null;
+        }
+
+        super.close();
+    }
+
 }
 
 

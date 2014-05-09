@@ -21,13 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import static org.apache.derbyTesting.junit.BaseJDBCTestCase.usingDerbyNetClient;
-import static org.apache.derbyTesting.junit.BaseJDBCTestCase.usingEmbedded;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import static org.apache.derbyTesting.junit.TestConfiguration.clientServerSuite;
@@ -67,6 +66,8 @@ import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
  * RESTRICT is a stricter condition than ON UPDATE NO ACTION. ON UPDATE
  * RESTRICT prohibits an update to a particular row if there are any
  * matching rows; ON UPDATE NO ACTION does not perform its constraint
+ * check until the entire set of rows to be updated has been processed.
+ * <p/>
  * NOTE 54 - Ditto for DELETE.
  * <p/>
  * Line numbers in the comments refer to svn revision 1580845 of Derby trunk.
@@ -521,7 +522,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
     public void testDeleteDirect() throws SQLException {
         Statement s = createStatement();
 
-        // Delete of child row is trivial, parent no affected.
+        // Delete of child row is trivial, parent not affected.
 
         // Parent
 
@@ -613,7 +614,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
      */
         public void testDeleteDeferred() throws SQLException {
         Statement s = createStatement();
-        // Delete of child row is trivial, parent no affected.
+        // Delete of child row is trivial, parent not affected.
 
         // Parent
 
@@ -710,11 +711,11 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
     }
 
     /**
-     * Insert using bulk import code path, i.e. IMPORT. Since IMPORT
+     * Insert using bulk insert code path, i.e. IMPORT. Since IMPORT
      * always performs a commit at the end, we strictly do no need to do
      * extra processing for deferrable constraints, but we do so
      * anyway to prepare for possible future lifting of this restriction to
-     * IMPORT. This behavior can no be observed externally, but we include
+     * IMPORT. This behavior can not be observed externally, but we include
      * the test here anyway as a baseline.
      *
      * @throws SQLException
@@ -798,6 +799,87 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
             dontThrow(s, "drop table t2");
             commit();
         }
+    }
+
+    /**
+     * The referenced constraint (in the referenced table) is a deferred unique
+     * or primary key constraint. This test concerns what happens if this is
+     * deferred, i.e. duplicate keys are allowed temporarily, and one or more
+     * of them is deleted.  The foreign key constraint itself could be deferred
+     * or not. If this is also deferred, we'd have no issue, cf. the
+     * explanation in DERBY-6559, as all checking happens later, typically at
+     * commit.  But it is is <em>not</em> deferred, we needed to adjust FK
+     * checking at delete/update time to <b>not</b> throw foreign key violation
+     * exception if a duplicate exists; otherwise we'd throw a foreign key
+     * violation where none exists. The remaining row(s) will fulfill the
+     * requirement. We will only check if the last such row is deleted or its
+     * key modified.
+     *
+     * @throws SQLException
+     */
+    public void testFKPlusUnique() throws SQLException {
+        Statement s = createStatement(
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+        try {
+            s.executeUpdate(
+                "create table ref_t(i int, j int, constraint ct " +
+                "    primary key(i) deferrable initially deferred)");
+            s.executeUpdate(
+                "create table t(i int unique not null, c char(1)," +
+                "    constraint c foreign key (i) references ref_t(i))");
+
+            s.executeUpdate("insert into ref_t values (1,2),(1,3),(1,4)");
+            s.executeUpdate("insert into t values (1, 'c')");
+
+            // Now, the child (referencing table) is referencing one of the the
+            // rows in the primary table whose value is 1, so the reference is
+            // ok.
+
+            // What happens when we delete one copy before commit?
+            // Even though we have ON DELETE restrict action, there is another
+            // row that would satisfy the constraint.
+            ResultSet rs = s.executeQuery("select * from ref_t");
+            rs.next();
+            rs.deleteRow();
+            rs.next();
+            rs.deleteRow();
+            // Now there should be only one left, so the referenced table is
+            // OK.
+            commit();
+
+            // Try again, but this time with normal delete, not using cursors
+            s.executeUpdate("insert into ref_t values (1,5),(1,6)");
+            s.executeUpdate("delete from ref_t where j > 4 ");
+            commit();
+
+            // Try again, but this time delete both duplicate rows. The second
+            // delete should fail.
+            s.executeUpdate("insert into ref_t values (1,3)");
+            rs = s.executeQuery("select * from ref_t");
+            rs.next();
+            rs.deleteRow();
+            rs.next();
+
+            try {
+                rs.deleteRow();
+                fail();
+            } catch (SQLException e) {
+                assertSQLState(LANG_FK_VIOLATION, e);
+            }
+
+            JDBC.assertFullResultSet(
+                    s.executeQuery("select * from ref_t"),
+                    new String[][]{{"1", "3"}});
+
+            commit();
+
+        } finally {
+            dontThrow(s, "drop table t");
+            dontThrow(s, "drop table ref_t");
+            commit();
+        }
+
     }
 
     private void dontThrow(Statement st, String stm) {
