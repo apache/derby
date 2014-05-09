@@ -485,6 +485,10 @@ class ConditionalNode extends ValueNode
 		*/
 		setType(thenElseList.getDominantTypeServices());
 
+        // The result is nullable if and only if at least one of the result
+        // expressions is nullable (DERBY-6567).
+        setNullability(thenElseList.isNullable());
+
 		/*
 		** Generate a CastNode if necessary and
 		** stick it over the original expression
