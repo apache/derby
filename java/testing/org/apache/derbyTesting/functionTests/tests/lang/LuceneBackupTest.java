@@ -77,7 +77,7 @@ public class LuceneBackupTest extends GeneratedColumnsHelper
 
     private static  final   String      READ_POEMS_INDEX =
         "select p.originalAuthor, i.score\n" +
-        "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
+        "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
         "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
         "order by i.score desc\n";
     private static  final   String[][]  DEFAULT_POEMS_RESULT =

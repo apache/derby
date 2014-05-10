@@ -178,7 +178,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
 
         String  readPoemsIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         String[][]  defaultPoemResults =

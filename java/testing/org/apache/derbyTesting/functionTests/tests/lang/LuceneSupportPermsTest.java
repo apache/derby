@@ -208,7 +208,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) luceneResults order by poemID";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
         // but ruth can
@@ -317,7 +317,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) luceneResults order by poemid";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
                 { "3", "3", "2", "0.22933942" },
@@ -461,7 +461,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select p.originalAuthor, i.score\n" +
-             "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
+             "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
              "order by i.score desc\n",
              new String[][]
@@ -510,7 +510,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectCompilationError
             (
              ruthConnection, NONEXISTENT_TABLE_FUNCTION,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0 ) ) t"
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, null ) ) t"
              );
 
         goodStatement( dboConnection, UNLOAD_TOOL );
@@ -547,7 +547,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         String  query =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
 
@@ -655,7 +655,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // vet index contents
         String  selectFromViewIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', null, 1000, 0 ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', null, 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         assertResults
@@ -760,7 +760,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select *\n" +
-             "from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) i\n" +
+             "from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
              "order by i.score desc\n",
              new String[][]
              {
@@ -844,7 +844,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0 ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, null ) ) t",
              new String[][]
              {
                  { "10", "9", "2.2791052" },
@@ -865,7 +865,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 3, 0 ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 3, null ) ) t",
              new String[][]
              {
                  { "10", "9", "2.2791052" },
@@ -908,7 +908,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.constantStringQueryParser', 100, 0 ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.constantStringQueryParser', 100, null ) ) t",
              new String[][]
              {
                  { "1", "0", "1.597837" },

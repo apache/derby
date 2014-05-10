@@ -329,7 +329,7 @@ public class LuceneSupport implements OptionalTool
          String queryText,
          String queryParserMaker,
          int    windowSize,
-         float scoreCeiling
+         Float scoreCeiling
          )
         throws ParseException, IOException, SQLException
     {

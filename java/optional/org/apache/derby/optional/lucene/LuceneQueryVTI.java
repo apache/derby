@@ -91,7 +91,7 @@ public class LuceneQueryVTI extends StringColumnVTI
     private String  _queryText;
     private String  _queryParserMaker;
     private int         _windowSize;
-    private float   _scoreCeiling;
+    private Float   _scoreCeiling;
 
     private String      _schema;
     private String      _table;
@@ -122,7 +122,7 @@ public class LuceneQueryVTI extends StringColumnVTI
          String queryText,
          String queryParserMaker,
          int    windowSize,
-         float scoreCeiling
+         Float scoreCeiling
          )
         throws SQLException
     {
@@ -452,7 +452,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 				
             Query luceneQuery = qp.parse( _queryText );
             TopScoreDocCollector tsdc = TopScoreDocCollector.create( _windowSize, true);
-            if ( _scoreCeiling != 0 ) {
+            if ( _scoreCeiling != null ) {
                 tsdc = TopScoreDocCollector.create( _windowSize, new ScoreDoc( 0, _scoreCeiling ), true );
             }
 

@@ -98,7 +98,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes', null, 1000, 0 ) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes', null, 1000, null ) ) luceneResults"
               ),
              expectedRows
              );
@@ -134,7 +134,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select title, author, publisher, documentID\n" +
-              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', null, 1000, 0 ) ) l\n" +
+              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', null, 1000, null ) ) l\n" +
               "where t.id = l.id\n" 
               ),
              expectedRows
@@ -159,7 +159,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
               )
              );
 	    
@@ -171,7 +171,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
               )
              );
 	    
@@ -188,7 +188,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, 0 ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
               ),
              expectedRows
              );

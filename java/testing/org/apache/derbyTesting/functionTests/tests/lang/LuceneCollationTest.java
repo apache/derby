@@ -150,7 +150,7 @@ public class LuceneCollationTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select * from table ( ruth.poems__poemText( 'star', null, 1000, 0 ) ) luceneResults order by poemID",
+             "select * from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) luceneResults order by poemID",
              new String[][]
              {
                  { "3", "3", "2", "0.22933942" },
