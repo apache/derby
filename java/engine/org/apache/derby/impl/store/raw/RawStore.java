@@ -435,25 +435,31 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	}
 
 	public Transaction startNestedReadOnlyUserTransaction(
+    Transaction parentTransaction,
     CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
         throws StandardException
     {
 		return(
-            xactFactory.startNestedReadOnlyUserTransaction(
-                this, compatibilitySpace, contextMgr, transName));
+            xactFactory.startNestedReadOnlyUserTransaction
+            (
+             this, (RawTransaction) parentTransaction, compatibilitySpace, contextMgr, transName)
+            );
 	}
 
 	public Transaction startNestedUpdateUserTransaction(
+    Transaction parentTransaction,
     ContextManager  contextMgr,
     String          transName,
     boolean         flush_log_on_xact_end)
         throws StandardException
     {
 		return(
-            xactFactory.startNestedUpdateUserTransaction(
-                this, contextMgr, transName, flush_log_on_xact_end));
+            xactFactory.startNestedUpdateUserTransaction
+            (
+             this, (RawTransaction) parentTransaction, contextMgr, transName, flush_log_on_xact_end)
+            );
 	}
 
 	public Transaction findUserTransaction(

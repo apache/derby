@@ -179,6 +179,9 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 	// id that is valid locally in this raw store.
 	private volatile TransactionId	myId;
 
+    // id of parent transaction if this is a nested user transaction
+    private volatile TransactionId parentTransactionId;
+
 	protected Logger		logger;		// the object we use to access the log.
 
 
@@ -272,8 +275,9 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 	** Constructor
 	*/
 
-	protected Xact(
+    protected Xact(
     XactFactory         xactFactory, 
+    Xact          parentTransaction, 
     LogFactory          logFactory, 
     DataFactory         dataFactory,
     DataValueFactory    dataValueFactory,
@@ -285,6 +289,10 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		super();
 
 		this.xactFactory            = xactFactory;
+        if ( parentTransaction != null )
+        {
+            parentTransactionId = parentTransaction.getId();
+        }
 		this.logFactory             = logFactory;
 		this.dataFactory            = dataFactory;
 		this.dataValueFactory       = dataValueFactory;
@@ -2834,6 +2842,19 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		logFactory.checkpointInRFR(cinstant, redoLWM, undoLWM, dataFactory);
 	}
 
+    public boolean isNestedOwner()
+    {
+        return (parentTransactionId != null );
+    }
+
+    public boolean nestsUnder( LockOwner other )
+    {
+        if ( parentTransactionId == null ) { return false; }
+        else if ( !(other instanceof Xact) ) { return false; }
+        {
+            return parentTransactionId.equals( ((Xact) other).getId() );
+        }
+    }
 }
 
 class LockCount {

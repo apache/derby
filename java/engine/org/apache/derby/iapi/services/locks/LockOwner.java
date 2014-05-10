@@ -51,4 +51,20 @@ public interface LockOwner {
      * {@code false} otherwise
      */
     boolean noWait();
+
+
+    /**
+     * <p>
+     * Return true if this is a nested owner, e.g., a nested user transaction.
+     * </p>
+     */
+    public boolean isNestedOwner();
+
+    /**
+     * <p>
+     * Return true if this owner nests under another owner.
+     * </p>
+     */
+    public boolean nestsUnder( LockOwner other );
+
 }

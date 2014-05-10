@@ -24,6 +24,7 @@ package org.apache.derby.impl.services.locks;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.Latch;
+import org.apache.derby.iapi.services.locks.LockOwner;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -598,6 +599,42 @@ final class LockControl implements Control {
         } while (++index < endIndex);
 		return null;
 	}
+
+    /**
+     * <p>
+     * Returns true if the childLock is blocked because its parent owns
+     * a conficting lock.
+     * This code was written to support the fix to DERBY-6554. The only known
+     * way that this condition arises is when a write attempt by a nested user
+     * transaction is blocked by a read lock held by the main transaction.
+     * This only happens while trying to write to SYS.SYSSEQUENCES while
+     * managing sequence generators.
+     * </p>
+     */
+    public boolean blockedByParent( Lock childLock )
+    {
+        if ( granted == null ) { return false; }
+        
+        LockOwner   childOwner = childLock.getCompatabilitySpace().getOwner();
+        Object          requestedQualifier = childLock.getQualifier();
+
+        for ( Lock grantedLock : granted )
+        {
+            LockOwner   ownerOfGrant = grantedLock.getCompatabilitySpace().getOwner();
+
+            if ( childOwner.nestsUnder( ownerOfGrant ) )
+            {
+                Object  grantedQualifier = grantedLock.getQualifier();
+
+                if ( !grantedLock.getLockable().requestCompatible( requestedQualifier, grantedQualifier ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
 //EXCLUDE-START-lockdiag- 
 	/**

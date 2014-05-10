@@ -660,6 +660,7 @@ public interface RawStoreFactory extends Corruptable {
         context is popped off the stack.
         </UL>
 
+        @param parentTransaction parent transaction
         @param compatibilitySpace compatibility space to use for locks.
         @param contextMgr is the context manager to use.  An exception will be
         thrown if context is not the current context.
@@ -674,6 +675,7 @@ public interface RawStoreFactory extends Corruptable {
     */
 
     public Transaction startNestedReadOnlyUserTransaction(
+    Transaction parentTransaction,
     CompatibilitySpace compatibilitySpace,
     ContextManager contextMgr,
     String         transName)
@@ -720,6 +722,7 @@ public interface RawStoreFactory extends Corruptable {
         context is popped off the stack.
         </UL>
 
+        @param parentTransaction parent transaction
         @param contextMgr is the context manager to use.  An exception will be
         thrown if context is not the current context.
         @param transName is the name of the transaction. This name will be 
@@ -737,6 +740,7 @@ public interface RawStoreFactory extends Corruptable {
     */
 
     public Transaction startNestedUpdateUserTransaction(
+    Transaction parentTransaction,
     ContextManager contextMgr,
     String         transName,
     boolean        flush_log_on_xact_end)

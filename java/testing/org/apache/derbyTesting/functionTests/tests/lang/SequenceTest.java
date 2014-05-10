@@ -644,6 +644,67 @@ public class SequenceTest extends GeneratedColumnsHelper {
     }
     
     /**
+     * Verify that a sequence can be used in the same transaction
+     * which created it.
+     */
+    public void test_17_6554() throws Exception
+    {
+        Connection alphaConn = openUserConnection( ALPHA );
+        Connection betaConn = openUserConnection( BETA );
+
+        alphaConn.setAutoCommit( false );
+        betaConn.setAutoCommit( false );
+
+        String  createSequence = "create sequence seq6554";
+        String  nextValueFor = "values next value for seq6554";
+        String[][]  nextValueForResults =
+            new String[][]
+            {
+                { "-2147483648" },
+            }; 
+
+        goodStatement( alphaConn, createSequence );
+        assertResults( alphaConn, nextValueFor, nextValueForResults, true );
+        alphaConn.rollback();
+
+        goodStatement( betaConn, createSequence );
+        assertResults( betaConn, nextValueFor, nextValueForResults, true );
+        betaConn.rollback();
+
+        // now try creating and using the sequence inside the nested
+        // transaction context of a database procedure
+
+        goodStatement
+            (
+             alphaConn,
+             "create procedure createSequence( sequenceName varchar( 128 ) )\n" +
+             "language java parameter style java modifies sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.SequenceTest.createSequence'\n"
+             );
+        goodStatement( alphaConn, "grant execute on procedure createSequence to public" );
+        alphaConn.commit();
+
+        String  runProcedure = "call alpha.createSequence( 'seq6554_2' )";
+        String  postProcedureQuery= "values next value for seq6554_2";
+        String[][]  postProcedureResults =
+            new String[][]
+            {
+                { "-2147483647" },
+            };
+
+        goodStatement( alphaConn, runProcedure );
+        assertResults( alphaConn, postProcedureQuery, postProcedureResults, true );
+        alphaConn.rollback();
+        
+        goodStatement( betaConn, runProcedure );
+        assertResults( betaConn, postProcedureQuery, postProcedureResults, true );
+        betaConn.rollback();
+
+        alphaConn.setAutoCommit( true );
+        betaConn.setAutoCommit( true );
+    }
+    
+    /**
      * Verify that sequence numbers pick up where they left off after eviction from
      * the sequence cache.
      */

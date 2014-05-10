@@ -549,10 +549,17 @@ public class HeapController
     protected boolean lockRowAtSlotNoWaitExclusive(RecordHandle rh)
         throws StandardException
     {
-        return(
-            open_conglom.getContainer().getLockingPolicy().
-                lockRecordForWrite(
-                    open_conglom.getRawTran(), rh, false, false));
+        try {
+            return(
+                   open_conglom.getContainer().getLockingPolicy().
+                   lockRecordForWrite
+                   ( open_conglom.getRawTran(), rh, false, false) );
+        }
+        catch (StandardException se)
+        {
+            if ( se.isSelfDeadlock() ) { return false; }
+            else { throw se; }
+        }
     }
     protected void removePage(Page page)
         throws StandardException

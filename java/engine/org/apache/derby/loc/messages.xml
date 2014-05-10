@@ -1127,6 +1127,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>40XL2</name>
+                <text>Self-deadlock.</text>
+            </msg>
+
+            <msg>
                 <name>40XT0</name>
                 <text>An internal error was identified by RawStore module.</text>
             </msg>

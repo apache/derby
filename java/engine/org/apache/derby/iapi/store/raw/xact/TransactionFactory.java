@@ -95,6 +95,8 @@ public interface TransactionFactory extends Corruptable {
         method will push a transaction context as described in
         RawStoreFactory.startNestedTransaction
 
+		@param rsf                      the RawStoreFactory
+		@param parentTransaction   the parent transaction
 		@param compatibilitySpace   compatibility space to use for locks.
         @param contextMgr           is the context manager to use.  It must be 
                                     the current context manager.
@@ -107,6 +109,7 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
+    RawTransaction parentTransaction,
     CompatibilitySpace compatibilitySpace,
     ContextManager  contextMgr,
     String          transName)
@@ -117,6 +120,8 @@ public interface TransactionFactory extends Corruptable {
         will push a transaction context as described in
         RawStoreFactory.startNestedTransaction
 
+		@param rsf                      the RawStoreFactory
+		@param parentTransaction   the parent transaction
         @param contextMgr               is the context manager to use.  It must
                                         be the current context manager.
         @param transName                is the transaction name. It will be 
@@ -134,6 +139,7 @@ public interface TransactionFactory extends Corruptable {
 	*/
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
+    RawTransaction parentTransaction,
     ContextManager  contextMgr,
     String          transName,
     boolean         flush_log_on_xact_end)

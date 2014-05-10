@@ -750,7 +750,10 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
                         nestedTC.rollbackToSavePoint(savepoint, false, null);
                     }
 
-                    if (nestedTC != null && se.isLockTimeout())
+                    if (
+                        (nestedTC != null) &&
+                        ( se.isLockTimeout() || se.isSelfDeadlock() )
+                        )
 					{
                         // Locks were set nowait, so a lock timeout here
                         // means that some lock request in the nested 

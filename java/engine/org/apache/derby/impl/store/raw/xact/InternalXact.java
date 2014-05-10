@@ -56,7 +56,7 @@ public class InternalXact extends Xact
     DataValueFactory    dataValueFactory) 
     {
 		super(
-            xactFactory, logFactory, dataFactory, dataValueFactory, 
+            xactFactory, null, logFactory, dataFactory, dataValueFactory, 
             false, null, false);
 
 		// always want to hold latches & containers open past the commit/abort

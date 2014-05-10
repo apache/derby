@@ -253,6 +253,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      * Common work done to create local or global transactions.
      *
      * @param rsf    the raw store factory creating this xact.
+     * @param parentTransaction parent transaction (if this is a nested user transaction)
      * @param cm     the current context manager to associate the xact with.
      * @param compatibilitySpace 
      *               if null, use the transaction being created, else if 
@@ -262,6 +263,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      **/
     private Xact startCommonTransaction(
     RawStoreFactory     rsf, 
+    Xact                    parentTransaction, 
     ContextManager      cm,
     boolean             readOnly,
     CompatibilitySpace  compatibilitySpace,
@@ -284,7 +286,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Xact xact = 
             new Xact(
-                this, logFactory, dataFactory, dataValueFactory, 
+                this, parentTransaction, logFactory, dataFactory, dataValueFactory, 
                 readOnly, compatibilitySpace, flush_log_on_xact_end);
 
         xact.setTransName(transName);
@@ -304,6 +306,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+                null, 
                 cm, 
                 false,              // user xact always read/write 
                 null, 
@@ -315,6 +318,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public RawTransaction startNestedReadOnlyUserTransaction(
     RawStoreFactory rsf,
+    RawTransaction parentTransaction,
     CompatibilitySpace compatibilitySpace,
     ContextManager  cm,
     String          transName)
@@ -323,6 +327,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+                (Xact) parentTransaction, 
                 cm, 
                 true, 
                 compatibilitySpace, 
@@ -335,6 +340,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 	public RawTransaction startNestedUpdateUserTransaction(
     RawStoreFactory rsf,
+    RawTransaction parentTransaction,
     ContextManager  cm,
     String          transName,
     boolean         flush_log_on_xact_end)
@@ -343,6 +349,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         return(
             startCommonTransaction(
                 rsf, 
+                (Xact) parentTransaction, 
                 cm, 
                 false, 
                 null, 
@@ -373,6 +380,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
         Xact xact =
             startCommonTransaction(
                 rsf, 
+                null, 
                 cm, 
                 false, 
                 null, 
@@ -426,7 +434,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		Xact xact = 
             new Xact(
-                this, logFactory, dataFactory, dataValueFactory, 
+                this, null, logFactory, dataFactory, dataValueFactory, 
                 false, null, false);
 
 		// hold latches etc. past commit in NTT

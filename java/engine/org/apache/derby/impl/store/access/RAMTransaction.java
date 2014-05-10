@@ -1431,9 +1431,8 @@ public class RAMTransaction
     long    conglomId)
         throws StandardException
     {
-        findExistingConglomerate(conglomId).purgeConglomerate(
-            this, 
-            rawtran);
+        findExistingConglomerate(conglomId).purgeConglomerate
+            ( this, rawtran );
 
 		return;
     }
@@ -2320,10 +2319,12 @@ public class RAMTransaction
         Transaction child_rawtran = 
             ((readOnly) ?
                 accessmanager.getRawStore().startNestedReadOnlyUserTransaction(
+                    rawtran, 
                     getLockSpace(), 
                     cm,
                     AccessFactoryGlobals.NESTED_READONLY_USER_TRANS) :
                 accessmanager.getRawStore().startNestedUpdateUserTransaction(
+                    rawtran, 
                     cm, 
                     AccessFactoryGlobals.NESTED_UPDATE_USER_TRANS,
                     flush_log_on_xact_end));

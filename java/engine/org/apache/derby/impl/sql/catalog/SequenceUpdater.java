@@ -449,6 +449,7 @@ public abstract class SequenceUpdater implements Cacheable
         if ( nestedTransaction != null )
         {
             boolean retval = false;
+            boolean escalateToParentTransaction = false;
             
             try
             {
@@ -456,7 +457,20 @@ public abstract class SequenceUpdater implements Cacheable
             }
             catch (StandardException se)
             {
-                if ( !se.isLockTimeout() ) { throw se; }
+                if ( !se.isLockTimeout() )
+                {
+                    if ( se.isSelfDeadlock() )
+                    {
+                        // We're blocked by a lock held by our parent transaction.
+                        // Escalate into the parent transaction now. See DERBY-6554.
+                        escalateToParentTransaction = true;
+                    }
+                    else
+                    {
+                        Monitor.logThrowable( se );
+                        throw se;
+                    }
+                }
             }
             finally
             {
@@ -466,6 +480,11 @@ public abstract class SequenceUpdater implements Cacheable
                 // transaction commits by default.
                 nestedTransaction.commit();
                 nestedTransaction.destroy();
+
+                if ( escalateToParentTransaction )
+                {
+                    retval = updateCurrentValueOnDisk( executionTransaction, oldValue, newValue, false );
+                }
 
                 return retval;
             }

@@ -319,6 +319,7 @@ final class ConcurrentLockSet implements LockTable {
 		LockControl control;
 		Lock lockItem;
         String  lockDebug = null;
+        boolean blockedByParent = false;
 
         Entry entry = getEntry(ref);
         try {
@@ -355,12 +356,23 @@ final class ConcurrentLockSet implements LockTable {
 				return lockItem;
 			}
 
-			if (AbstractPool.noLockWait(timeout, compatibilitySpace)) {
+            //
+            // This logic supports the use-case of DERBY-6554.
+            //
+            blockedByParent =
+                (timeout == 0) &&
+                compatibilitySpace.getOwner().isNestedOwner() &&
+                control.blockedByParent( lockItem );
 
+			if (
+                AbstractPool.noLockWait(timeout, compatibilitySpace) ||
+                blockedByParent
+                )
+            {
     			// remove all trace of lock
     			control.giveUpWait(lockItem, this);
 
-                if (SanityManager.DEBUG) 
+               if (SanityManager.DEBUG) 
                 {
                     if (SanityManager.DEBUG_ON("DeadlockTrace"))
                     {
@@ -391,11 +403,17 @@ final class ConcurrentLockSet implements LockTable {
                     }
                 }
 
-				return null;
+               return null;
 			}
 
         } finally {
             entry.unlock();
+            
+            if ( blockedByParent )
+            {
+                throw StandardException.newException
+                    ( SQLState.SELF_DEADLOCK );
+            }
         }
 
 		boolean deadlockWait = false;

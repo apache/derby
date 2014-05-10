@@ -658,6 +658,19 @@ public class StandardException extends Exception
     }
 
     /**
+     * Is this a self-deadlock exception caused by a nested transaction
+     * being blocked by its parent's locks.
+     * <p>
+     *
+     * @return true if this exception is a self-deadlock.
+     *
+     **/
+    public final boolean isSelfDeadlock() {
+
+        return(SQLState.SELF_DEADLOCK.equals(getSQLState()));
+    }
+
+    /**
      * Is this a lock timeout or lock deadlock exception.
      * <p>
      *

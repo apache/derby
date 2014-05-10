@@ -414,6 +414,17 @@ final class UpdateLoader implements LockOwner {
     public boolean noWait() {
         return false;
     }
+    
+    public boolean isNestedOwner()
+    {
+        return false;
+    }
+
+    public boolean nestsUnder( LockOwner other )
+    {
+        return false;
+    }
+    
 }
 
 
