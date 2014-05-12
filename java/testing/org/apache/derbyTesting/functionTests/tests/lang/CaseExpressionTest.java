@@ -508,4 +508,43 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
     }
 
+    /**
+     * Test how untyped NULLs are handled.
+     */
+    public void testUntypedNulls() throws SQLException {
+        Statement s = createStatement();
+
+        // When all branches specify NULL, then Derby currently returns NULL
+        // with type CHAR(1). It should have raised an error according to the
+        // SQL standard. See DERBY-2002.
+        String[] allNull = {
+            "values case when true then null end",
+            "values case when true then null else null end",
+            "values case when true then null when false then null else null end"
+        };
+        for (String sql : allNull) {
+            JDBC.assertSingleValueResultSet(s.executeQuery(sql), null);
+        }
+
+        // Check that expressions with untyped NULLs compile as long as
+        // there is at least one typed expression.
+        JDBC.assertFullResultSet(s.executeQuery(
+                "select case when a then 1 when b then null end, "
+                    + "case when a then null when b then 1 end, "
+                    + "case when a then null when b then null else 1 end "
+                    + "from (values (false, false), (false, true), "
+                    + " (true, false), (true, true)) v(a, b) order by a, b"),
+            new Object[][] {
+                { null, null, 1    },
+                { null, 1,    null },
+                { 1,    null, null },
+                { 1,    null, null },
+            },
+            false);
+
+        // When there is a typed NULL, its type has to be compatible with
+        // the types of the other expressions.
+        assertCompileError("42X89",
+            "values case when 1<>1 then 'abc' else cast(null as smallint) end");
+    }
 }

@@ -12571,82 +12571,69 @@ valueSpecification() throws StandardException :
 		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
 		// An impl assumption here is that Derby can promote CHAR to any comparable datatypes such as numeric
 		ContextManager cm = getContextManager();
+        ValueNodeList whenList = new ValueNodeList(cm);
         ValueNodeList thenElseList = new ValueNodeList(cm);
+
+        // Generate L = R for the WHEN clause.
+        whenList.addElement(new BinaryRelationalOperatorNode(
+                                    BinaryRelationalOperatorNode.K_EQUALS,
+                                    leftExpression,
+                                    rightExpression,
+                                    false,
+                                    cm));
 
 		//Use untyped null for then clause at this point. At the bind time, we will cast it to the datatype of L 
        thenElseList.addElement(new UntypedNullConstantNode(cm));
 		thenElseList.addElement(leftExpression);
 
-        return new ConditionalNode(
-                   new BinaryRelationalOperatorNode(
-                       BinaryRelationalOperatorNode.K_EQUALS,
-                       leftExpression,
-                       rightExpression,
-                       false,
-                       cm),
-                   thenElseList,
-                   true, // this node is for nullif
-                   cm);
+        return new ConditionalNode(whenList, thenElseList, cm);
 	}
 |
 	// CASE WHEN P1 THEN [T1 | NULL] (WHEN Pi THEN [Ti | NULL])* [ELSE E | NULL] END
-	<CASE> value = whenThenExpression()
+    <CASE> value = searchedCaseExpression()
 	{
 		return value;
 	}
 }
 
-/*
- * <A NAME="caseExpression">caseExpression</A>
- */
-ValueNode
-caseExpression() throws StandardException :
+ConditionalNode searchedCaseExpression() throws StandardException :
 {
-	ValueNode	   expr;
+    ContextManager cm = getContextManager();
+    ValueNodeList whenList = new ValueNodeList(cm);
+    ValueNodeList thenElseList = new ValueNodeList(cm);
+    ValueNode elseExpr = null;
 }
 {
-	<END>
-	{
-        ValueNode value = new CastNode(
-            new UntypedNullConstantNode(getContextManager()),
-            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),
-            getContextManager());
-		((CastNode) value).setForExternallyGeneratedCASTnode();
-		return value;
-	}
-|
-	<ELSE> expr = thenElseExpression() <END>
-	{
-		return expr;
-	}
-|
-	expr = whenThenExpression()
-	{
-		return expr;
-	}
+    ( whenThenExpression(whenList, thenElseList) ) +
+    ( <ELSE> elseExpr = thenElseExpression() ) ?
+    <END>
+    {
+        if (elseExpr == null) {
+            // ELSE NULL is implicit if there is no ELSE clause.
+            elseExpr = new UntypedNullConstantNode(cm);
+        }
+        thenElseList.addElement(elseExpr);
+
+        return new ConditionalNode(whenList, thenElseList, cm);
+    }
 }
 
 /*
  * <A NAME="whenThenExpression">whenThenExpression</A>
  */
-ValueNode
-whenThenExpression() throws StandardException :
+void
+whenThenExpression(ValueNodeList whenList, ValueNodeList thenElseList)
+throws StandardException :
 {
 	ValueNode	   expr;
 	ValueNode	   thenExpr;
-	ValueNode	   elseExpr;
 }
 {
 	<WHEN> expr = valueExpression()
 	<THEN> thenExpr = thenElseExpression()
-	elseExpr = caseExpression()
 	{
-		ContextManager cm = getContextManager();
-        ValueNodeList thenElseList = new ValueNodeList(cm);
-		thenElseList.addElement(thenExpr); // then
-		thenElseList.addElement(elseExpr); // else
-
-        return new ConditionalNode(expr, thenElseList, false, cm);
+        whenList.addElement(expr);
+        thenElseList.addElement(thenExpr);
 	}
 }
 
@@ -12662,12 +12649,7 @@ thenElseExpression() throws StandardException :
 	LOOKAHEAD ( {getToken(1).kind == NULL} )
 	<NULL>
 	{
-        ValueNode value = new CastNode(
-            new UntypedNullConstantNode(getContextManager()),
-            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),
-            getContextManager());
-		((CastNode) value).setForExternallyGeneratedCASTnode();
-		return value;
+        return new UntypedNullConstantNode(getContextManager());
 	}
 |
     expr = valueExpression()

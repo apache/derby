@@ -494,6 +494,18 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		}
 	}
 
+    /**
+     * Eliminate NotNodes in all the nodes in this list.
+     *
+     * @param underNotNode whether or not we are under a NotNode
+     * @see ValueNode#eliminateNots(boolean)
+     */
+    void eliminateNots(boolean underNotNode) throws StandardException {
+        for (int i = 0; i < size(); i++) {
+            setElementAt(elementAt(i).eliminateNots(underNotNode), i);
+        }
+    }
+
 	/**
 	 * Set the descriptor for every ParameterNode in the list.
 	 *
