@@ -742,7 +742,8 @@ create table t (d double precision, r real, f float, f1 float(1),
 
 select columnname, columndatatype 
 from sys.syscolumns c, sys.systables t
-where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='T';
+where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='T'
+order by columnname;
 
 -- invalid float values
 insert into t(r) values 'NaN';
