@@ -72,7 +72,6 @@ public class StoreScriptsTest extends ScriptTestCase {
         //      diffs between using datasource or drivermanager.
         //      also note, this would set maximumdisplaywidth, and the setting would
         //      remain for subsequent tests.
-        "SpaceTable", 
         "testsqldecimal", // note, original test had properties set:
         // derby.language.StatementCache=true
         // derby.storage.sortBufferMax=78
