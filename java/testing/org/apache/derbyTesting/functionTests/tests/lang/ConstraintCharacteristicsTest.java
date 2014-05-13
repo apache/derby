@@ -830,7 +830,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                 } finally {
                     idx++;
-                    dontThrow(s, "drop table t");
+                    dropTable("t");
                     commit();
                 }
             }
@@ -996,7 +996,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
                 } finally {
                     idx++;
-                    dontThrow(s, "drop table t");
+                    dropTable("t");
                     commit();
                 }
             }
@@ -1032,7 +1032,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         s,
                         "call calledNested(false)");
             } finally {
-                dontThrow(s, "drop table t");
+                dropTable("t");
             }
         }
 
@@ -1053,7 +1053,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             s,
                             "call calledNested(false)");
                 } finally {
-                    dontThrow(s, "drop table t");
+                    dropTable("t");
                     commit();
                 }
             }
@@ -1095,7 +1095,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         s,
                         "call calledNested(true)");
             } finally {
-                dontThrow(s, "drop table t");
+                dropTable("t");
                 commit();
             }
         }
@@ -1117,7 +1117,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             s,
                             "call calledNested(true)");
                 } finally {
-                    dontThrow(s, "drop table t");
+                    dropTable("t");
                     commit();
                 }
             }
@@ -1172,7 +1172,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                         s,
                         "call calledNestedFk()");
             } finally {
-                dontThrow(s, "drop table t");
+                dropTable("t");
                 dontThrow(s, "delete from referenced");
                 commit();
             }
@@ -1197,7 +1197,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                             s,
                             "call calledNestedFk()");
                 } finally {
-                    dontThrow(s, "drop table t");
+                    dropTable("t");
                     dontThrow(s, "delete from referenced");
                     commit();
                 }
@@ -1588,7 +1588,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 commit();
             }
         } finally {
-            dontThrow(s, "drop table t");
+            dropTable("t");
             commit();
         }
     }
@@ -1648,7 +1648,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 s.executeUpdate("alter table t drop constraint c");
             }
         } finally {
-            dontThrow(s, "drop table t");
+            dropTable("t");
             commit();
         }
     }
@@ -1863,7 +1863,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         } catch (SQLException e) {
             assertSQLState(LANG_DEFERRED_DUP_VIOLATION_T, e);
         } finally {
-            dontThrow(s, "drop table t");
+            dropTable("t");
             commit();
         }
     }
@@ -2023,8 +2023,8 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                               getConnection());
         } finally {
             // clean up
-            dontThrow(s, "drop table tab1");
-            dontThrow(s, "drop table trigtab");
+            dropTable("tab1");
+            dropTable("trigtab");
             commit();
         }
     }
@@ -2102,7 +2102,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                               getConnection());
 
         } finally {
-            dontThrow(s, "drop table t");
+            dropTable("t");
             commit();
         }
     }

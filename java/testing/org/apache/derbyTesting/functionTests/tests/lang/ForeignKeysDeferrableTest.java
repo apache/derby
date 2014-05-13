@@ -224,20 +224,20 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
         rollback();
         setAutoCommit(true);
         Statement s = createStatement();
-        dontThrow(s, "drop table t_d_r   ");
-        dontThrow(s, "drop table t_d_c   ");
-        dontThrow(s, "drop table t_d_na  ");
-        dontThrow(s, "drop table t_d_nu  ");
-        dontThrow(s, "drop table t_u_r   ");
-        dontThrow(s, "drop table t_u_na  ");
+        dropTable("t_d_r");
+        dropTable("t_d_c");
+        dropTable("t_d_na");
+        dropTable("t_d_nu");
+        dropTable("t_u_r");
+        dropTable("t_u_na");
 
-        dontThrow(s, "drop table ref_d_r");
-        dontThrow(s, "drop table ref_d_c");
-        dontThrow(s, "drop table ref_d_na");
-        dontThrow(s, "drop table ref_d_nu");
+        dropTable("ref_d_r");
+        dropTable("ref_d_c");
+        dropTable("ref_d_na");
+        dropTable("ref_d_nu");
 
-        dontThrow(s, "drop table ref_u_r");
-        dontThrow(s, "drop table ref_u_na");
+        dropTable("ref_u_r");
+        dropTable("ref_u_na");
 
         super.tearDown();
     }
@@ -796,7 +796,7 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
 
 
         } finally {
-            dontThrow(s, "drop table t2");
+            dropTable("t2");
             commit();
         }
     }
@@ -875,19 +875,9 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
             commit();
 
         } finally {
-            dontThrow(s, "drop table t");
-            dontThrow(s, "drop table ref_t");
+            dropTable("t");
+            dropTable("ref_t");
             commit();
-        }
-
-    }
-
-    private void dontThrow(Statement st, String stm) {
-        try {
-            st.executeUpdate(stm);
-        } catch (SQLException e) {
-            // ignore, best effort here
-            println("\"" + stm+ "\"failed: " + e);
         }
     }
 }
