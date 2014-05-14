@@ -22,20 +22,16 @@ package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Properties;
 
-import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -91,21 +87,18 @@ public class SpaceTableTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     protected void tearDown() throws Exception {
-        try {
         Statement stmt = createStatement();
         // cannot drop wait_for_post_commit or it will not exist in
         // all test methods. CleanDatabaseSetup should take care of it.
         // stmt.executeUpdate("drop procedure WAIT_FOR_POST_COMMIT");
-        stmt.executeUpdate("drop table IDELETEU");
-        stmt.executeUpdate("drop table platypus");
-        stmt.executeUpdate("drop table 'platypus2'");
+        dropTable("IDELETEU");
+        dropTable("PLATYPUS");
+        dropTable("\"platypus2\"");
         dropFooTables(stmt);
         // force pagesize back to default
         stmt.execute("call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
                 "'derby.storage.pageSize', NULL)");
-        } catch (SQLException sqe) {
-            assertSQLState("42Y55", sqe);
-        }
+        commit();
         super.tearDown();
     }
 
@@ -355,6 +348,8 @@ public class SpaceTableTest extends BaseJDBCTestCase {
             });
         
         commit();
+        dropFooTables(stmt);
+        commit();
     }
     
     private ResultSet doSpaceTableSelect(String tableName) throws SQLException
@@ -399,114 +394,25 @@ public class SpaceTableTest extends BaseJDBCTestCase {
     private void assertSpaceTableOK(String tableName, String[][] expRS, 
             boolean trytwice)
             throws SQLException, InterruptedException {
-
         ResultSet rs = doSpaceTableSelect(tableName);
-            String failString = "";
-            if (!trytwice)
-                JDBC.assertFullResultSet(rs, expRS);
-            else
-                failString = checkSpaceTable(rs, expRS, false);
-            // if we have a failString, we must have been
-            // through the checkSpaceTable and had a failure;
-            // go do it again, but this time we'll send it through the
-            // JDBC class' version.
-            if (failString.length() > 0)
+        try {
+            JDBC.assertFullResultSet(rs, expRS );
+        } catch (AssertionFailedError e) {
+            if (trytwice) {
                 assertSpaceTableOK(tableName, expRS, false);
-    }
-
-    // this method is needed because in a very few occassions we've seen
-    // instability in a few rows in this test. 
-    // In those cases, *if* we see unexpected results, we're going to assume it is
-    // a time-related issue and we sleep for a bit, then try 
-    public static String checkSpaceTable(
-            ResultSet rs,
-            Object [][] expectedRows,
-            boolean secondtime)
-                    throws SQLException
-    {
-        String failString="";
-        int rows;
-        ResultSetMetaData rsmd = rs.getMetaData();
-
-        // Assert that we have the right number of columns. If we expect an
-        // empty result set, the expected column count is unknown, so don't
-        // check.
-        if (expectedRows.length > 0) {
-            Assert.assertEquals("Unexpected column count:",
-                    expectedRows[0].length, rsmd.getColumnCount());
-        }
-
-        for (rows = 0; rs.next(); rows++)
-        {
-            /* If we have more actual rows than expected rows, don't
-             * try to assert the row.  Instead just keep iterating
-             * to see exactly how many rows the actual result set has.
-             */
-            if (rows < expectedRows.length)
-            {
-                failString = assertRowInResultSet(rs, rows + 1,
-                        expectedRows[rows]);
+            } else {
+                throw e;
             }
         }
-
-        rs.close();
-
-        // And finally, assert the row count.
-        Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
-        
-        return failString;
-    }
-    
-    private static String assertRowInResultSet(ResultSet rs, int rowNum,
-            Object [] expectedRow) throws SQLException
-    {
-        String assertString = "";
-        int cPos = 0;
-        ResultSetMetaData rsmd = rs.getMetaData();
-        for (int i = 0; i < expectedRow.length; i++)
-        {
-            cPos = i+1; 
-            Object obj;
-            // Trim the expected value, if non-null.
-            if (expectedRow[i] != null)
-                expectedRow[i] = ((String)expectedRow[i]).trim();
-
-            obj = rs.getString(cPos);
-
-            // Trim the rs string.
-            if (obj != null)
-                obj = ((String)obj).trim();
-
-            boolean ok = (rs.wasNull() && (expectedRow[i] == null))
-                    || (!rs.wasNull()
-                            && (expectedRow[i] != null)
-                            && (expectedRow[i].equals(obj)
-                                    || (obj instanceof byte[] // Assumes byte arrays
-                                            && Arrays.equals((byte[] )obj,
-                                                    (byte[] )expectedRow[i]))));
-            if (!ok)
-            {
-                Object expected = expectedRow[i];
-                Object found = obj;
-                if (!expected.equals(found))
-                {
-                    assertString = "Column value mismatch @ column '" +
-                            rsmd.getColumnName(cPos) + "', row " + rowNum +
-                            ":\n    Expected: >" + expected +
-                            "<\n    Found:    >" + found + "<";
-                }
-            }
-        }
-        return assertString;
     }
     
     public void dropFooTables(Statement stmt) throws SQLException {
-        stmt.executeUpdate("drop table foo_int");
-        stmt.executeUpdate("drop table foo_char");
-        stmt.executeUpdate("drop table foo_varchar");
-        stmt.executeUpdate("drop table foo_longvarchar");
-        stmt.executeUpdate("drop table foo_longvarbinary");
-        stmt.executeUpdate("drop table foo_bit");
-        stmt.executeUpdate("drop table foo_varbinary");
+        dropTable("FOO_INT");
+        dropTable("FOO_CHAR");
+        dropTable("FOO_VARCHAR");
+        dropTable("FOO_LONGVARCHAR");
+        dropTable("FOO_LONGVARBINARY");
+        dropTable("FOO_BIT");
+        dropTable("FOO_VARBINARY");
     }
 }
