@@ -4467,4 +4467,25 @@ public final class InbetweenTest extends BaseJDBCTestCase {
                                "on a=b where b not between 1 and 5"),
                 new String[][]{{"0", "0"}});
     }
+
+    /** Regression test case for DERBY-6577. */
+    public void testInBetweenQuantifiedComparison() throws SQLException {
+        Statement s = createStatement();
+        String[][] expectedRows = {
+            { "Y", "true" },
+            { "N", "false" },
+        };
+
+        // This query used to return wrong results.
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                "select c, true in ((c = all (values 'Y'))) "
+                + "from (values 'Y', 'N') v(c)"),
+            expectedRows);
+
+        // This query used to return wrong results.
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                "select c, true between false and (c = all (values 'Y')) "
+                + "from (values 'Y', 'N') v(c)"),
+            expectedRows);
+    }
 }

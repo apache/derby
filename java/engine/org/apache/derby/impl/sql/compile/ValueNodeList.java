@@ -546,14 +546,13 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 		throws StandardException
 	{
 		int size = size();
-		ValueNode	valueNode;
 
 		for (int index = 0; index < size; index++)
 		{
-            valueNode = elementAt(index);
-			valueNode.preprocess(numTables,
+            ValueNode vn = elementAt(index).preprocess(numTables,
 								 outerFromList, outerSubqueryList,
 								 outerPredicateList);
+            setElementAt(vn, index);
 		}
 	}
 

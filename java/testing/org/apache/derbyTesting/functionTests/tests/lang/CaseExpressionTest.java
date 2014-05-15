@@ -547,4 +547,13 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         assertCompileError("42X89",
             "values case when 1<>1 then 'abc' else cast(null as smallint) end");
     }
+
+    /** Regression test case for DERBY-6577. */
+    public void testQuantifiedComparison() throws SQLException {
+        // This query used to return wrong results.
+        JDBC.assertUnorderedResultSet(createStatement().executeQuery(
+                "select c, case when c = all (values 'Y') then true end "
+                + "from (values 'Y', 'N') v(c)"),
+            new String[][] { { "N", null }, { "Y", "true" }});
+    }
 }

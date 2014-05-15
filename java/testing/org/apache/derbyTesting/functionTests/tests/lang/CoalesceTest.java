@@ -1085,6 +1085,15 @@ public class CoalesceTest extends BaseJDBCTestCase
         vetThreeArgCoalesce("values coalesce(?, ?, cast(? as char(1)))");
     }
 
+    /** Regression test case for DERBY-6577. */
+    public void testQuantifiedComparison() throws SQLException {
+        // This query used to return wrong results.
+        JDBC.assertUnorderedResultSet(createStatement().executeQuery(
+                "select c, coalesce((c = all (values 'Y')), false) "
+                + "from (values 'Y', 'N') v(c)"),
+            new String[][] { { "N", "false" }, { "Y", "true" }});
+    }
+
     private void vetThreeArgCoalesce(String sql) throws SQLException {
         // First three values in each row are arguments to COALESCE. The
         // last value is the expected return value.
