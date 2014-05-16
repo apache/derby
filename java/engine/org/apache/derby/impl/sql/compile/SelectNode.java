@@ -1085,7 +1085,7 @@ class SelectNode extends ResultSetNode
 			if (whereSubquerys != null){
 				whereSubquerys.markWhereSubqueries();
 			}
-			whereClause.preprocess(numTables,
+            whereClause = whereClause.preprocess(numTables,
 								   fromList, whereSubquerys,
 								   wherePredicates);
 		}

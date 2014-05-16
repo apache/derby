@@ -1073,7 +1073,7 @@ class JoinNode extends TableOperatorNode
 				 * to joinClause.preprocess() because we know that no
 				 * flattening will take place. (Bug #1206)
 				 */
-				joinClause.preprocess(
+                joinClause = joinClause.preprocess(
                     numTables,
                     new FromList(
                         getOptimizerFactory().doJoinOrderOptimization(),

@@ -264,7 +264,7 @@ class SQLToJavaValueNode extends JavaValueNode
 							PredicateList outerPredicateList) 
 							throws StandardException
 	{
-		value.preprocess(numTables,
+        value = value.preprocess(numTables,
 						 outerFromList, outerSubqueryList,
 						 outerPredicateList);
 	}
