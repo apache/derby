@@ -75,13 +75,21 @@ public class ForeignKeyRIChecker extends GenericRIChecker
      * @param a     the activation
 	 * @param row	the row to check
      * @param restrictCheckOnly
+     *              {@code true} if the check is relevant only for RESTRICTED
+     *              referential action.
+     * @param postCheck
+     *              dummy (interface obligation only)
+     * @param deferredRowReq
+     *              dummy (interface obligation only)
 	 *
      * @exception StandardException on unexpected error, or
 	 *		on a foreign key violation
 	 */
     void doCheck(Activation a,
                  ExecRow row,
-                 boolean restrictCheckOnly) throws StandardException
+                 boolean restrictCheckOnly,
+                 boolean postCheck,
+                 int deferredRowReq) throws StandardException
 	{
 
 		if(restrictCheckOnly) //RESTRICT rule checks are not valid here.

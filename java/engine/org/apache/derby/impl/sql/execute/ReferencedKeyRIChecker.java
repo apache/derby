@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.Enumeration;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -30,9 +31,12 @@ import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.StatementUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.BackingStoreHashtable;
+import org.apache.derby.iapi.store.access.KeyHasher;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -46,7 +50,20 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 public class ReferencedKeyRIChecker extends GenericRIChecker
 {
     private ScanController refKeyIndexScan = null;
-    private DataValueDescriptor[] refKey = new DataValueDescriptor[numColumns];
+
+    /**
+     * Key mapping used when storing referenced (PK, unique) keys under
+     * deferred row processing and deferred key constraint (PK, unique).
+     */
+    private final DataValueDescriptor[] refKey =
+            new DataValueDescriptor[numColumns];
+
+    /**
+     * We save away keys with a counter in this hash table, so we know how many
+     * instances of a key (duplicates) have been deleted/modified, cf usage
+     * in {@link #postCheck()}. Initialized on demand.
+     */
+    private BackingStoreHashtable deletedKeys = null;
 
 	/**
      * @param lcc       the language connection context
@@ -81,14 +98,24 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
      * @param a     the activation
 	 * @param row	the row to check
      * @param restrictCheckOnly
-	 *
+     *              {@code true} if the check is relevant only for RESTRICTED
+     *              referential action.
+     * @param postCheck
+     *              For referenced keys: if {@code true}, rows are not yet
+     *              deleted, so do the check in the case of deferred PK later.
+     * @param deferredRowReq
+     *              For referenced keys: The required number of duplicates that
+     *              need to be present. Only used if {@code postCheck==false}.
+     *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
     @Override
     void doCheck(Activation a,
                  ExecRow row,
-                 boolean restrictCheckOnly) throws StandardException
+                 boolean restrictCheckOnly,
+                 boolean postCheck,
+                 int deferredRowReq) throws StandardException
 	{
 		/*
 		** If any of the columns are null, then the
@@ -106,9 +133,14 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             if (lcc.isEffectivelyDeferred(
                     lcc.getCurrentSQLSessionContext(a),
                     fkInfo.refConglomNumber)) {
-                // It *is* deferred, go see if we have more than one row
-                if (isDuplicated(row)) {
-                    return;
+                if (postCheck) {
+                    rememberKey(row);
+                } else {
+                    // It *is* a deferred constraint and it is *not* a deferred
+                    // rows code path, so go see if we have enough rows
+                    if (isDuplicated(row, deferredRowReq)) {
+                        return;
+                    }
                 }
             }
         }
@@ -170,15 +202,120 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 		}
 	}
 
-    private boolean isDuplicated(ExecRow row)
+
+    private void rememberKey(ExecRow rememberRow) throws StandardException {
+        if (deletedKeys == null) {
+            // key: all columns (these are index rows, or a row containing a
+            // row location)
+            identityMap = new int[numColumns];
+
+            for (int i = 0; i < numColumns; i++) {
+                identityMap[i] = i;
+            }
+
+            deletedKeys = new BackingStoreHashtable(
+                    tc,
+                    null,
+                    identityMap,
+                    true, // remove duplicates: no need for more copies:
+                    // one is enough to know what to look for on commit
+                    -1,
+                    HashScanResultSet.DEFAULT_MAX_CAPACITY,
+                    HashScanResultSet.DEFAULT_INITIAL_CAPACITY,
+                    HashScanResultSet.DEFAULT_MAX_CAPACITY,
+                    false,
+                    false);
+
+        }
+
+        DataValueDescriptor[] row = rememberRow.getRowArray();
+        for (int i = 0; i < numColumns; i++) {
+            refKey[i] = row[fkInfo.colArray[i] - 1];
+        }
+
+        Object hashKey = KeyHasher.buildHashKey(refKey, identityMap);
+
+        DataValueDescriptor[] savedRow =
+                (DataValueDescriptor[])deletedKeys.remove(hashKey);
+
+        if (savedRow == null) {
+            savedRow = new DataValueDescriptor[numColumns + 1];
+            System.arraycopy(refKey, 0, savedRow, 0, numColumns);
+            savedRow[numColumns] = new SQLLongint(1);
+        } else {
+            savedRow[numColumns] = new SQLLongint(
+                ((SQLLongint)savedRow[numColumns]).getLong() + 1);
+        }
+
+        deletedKeys.putRow(false, savedRow, null);
+    }
+
+    /**
+     * Check that we have at least one more row in the referenced
+     * table table containing a key than the number of seen deletes of that key.
+     * Only used when the referenced constraint id deferred.
+     *
+     * @throws StandardException Standard error policy
+     */
+    public void postCheck() throws StandardException
+    {
+        if (!fkInfo.refConstraintIsDeferrable) {
+            return;
+        }
+
+        if (deletedKeys != null) {
+            final Enumeration<?> e = deletedKeys.elements();
+
+            while (e.hasMoreElements()) {
+                final DataValueDescriptor[] row =
+                        (DataValueDescriptor[])e.nextElement();
+                final DataValueDescriptor[] key =
+                        new DataValueDescriptor[row.length - 1];
+                System.arraycopy(row, 0, key, 0, key.length);
+
+                // The number of times this key is to be deleted,
+                // we need at least one more if for Fk constraint to hold.
+                final long requiredCount = row[row.length - 1].getLong() + 1;
+
+                if (!isDuplicated(key, requiredCount)) {
+                    int[] oneBasedIdentityMap = new int[numColumns];
+
+                    for (int i = 0; i < numColumns; i++) {
+                        // Column numbers are numbere from 1 and
+                        // call to RowUtil.toString below expects that
+                        // convention.
+                        oneBasedIdentityMap[i] = i + 1;
+                    }
+
+                    StandardException se = StandardException.newException(
+                            SQLState.LANG_FK_VIOLATION,
+                            fkInfo.fkConstraintNames[0],
+                            fkInfo.tableName,
+                            StatementUtil.typeName(fkInfo.stmtType),
+                            RowUtil.toString(row, oneBasedIdentityMap));
+                    throw se;
+                }
+            }
+        }
+    }
+
+
+    private boolean isDuplicated(ExecRow row, int deferredRowReq)
             throws StandardException {
         final DataValueDescriptor[] indexRowArray = row.getRowArray();
 
         for (int i = 0; i < numColumns; i++)
         {
+            // map the columns into the PK form
             refKey[i] = indexRowArray[fkInfo.colArray[i] - 1];
         }
 
+        return isDuplicated(refKey, deferredRowReq);
+    }
+
+
+    private boolean isDuplicated(DataValueDescriptor[] key, long deferredRowReq)
+            throws StandardException {
         if (refKeyIndexScan == null) {
             refKeyIndexScan = tc.openScan(
                     fkInfo.refConglomNumber,
@@ -188,37 +325,40 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
                                             // record locking
                     TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
                     (FormatableBitSet)null, // retrieve all fields
-                    refKey,                 // startKeyValue
+                    key,                 // startKeyValue
                     ScanController.GE,      // startSearchOp
                     null,                   // qualified
-                    refKey,                 // stopKeyValue
+                    key,                 // stopKeyValue
                     ScanController.GT);     // stopSearchOp
         } else {
             refKeyIndexScan.reopenScan(
-                      refKey,             // startKeyValue
+                      key,             // startKeyValue
                       ScanController.GE,  // startSearchOp
                       null,               // qualifier
-                      refKey,             // stopKeyValue
+                      key,             // stopKeyValue
                       ScanController.GT); // stopSearchOp
         }
 
-        if (refKeyIndexScan.next()) {
-            if (refKeyIndexScan.next()) {
-                // two matching rows found, all ok
-                return true;
-            } // else exactly one row contains key
-        } else {
-            // No rows contain key
+
+        boolean foundRow = refKeyIndexScan.next();
+
+        while (--deferredRowReq > 0 && foundRow) {
+            foundRow =refKeyIndexScan.next();
         }
 
-        return false;
+        if (deferredRowReq == 0 && foundRow) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Clean up all scan controllers
+     * Clean up all scan controllers and other resources
      *
      * @exception StandardException on error
      */
+    @Override
     void close()
         throws StandardException {
 
@@ -226,6 +366,13 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             refKeyIndexScan.close();
             refKeyIndexScan = null;
         }
+
+        if (deletedKeys != null) {
+            deletedKeys.close();
+            deletedKeys = null;
+        }
+
+        identityMap = null;
 
         super.close();
     }

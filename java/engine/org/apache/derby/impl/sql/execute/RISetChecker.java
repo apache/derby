@@ -86,28 +86,64 @@ public class RISetChecker
 	 * that there is no row that matches the values in
 	 * the passed in row.
 	 *
-	 * @param row	the row to check
+     * @param a     The activation
+     * @param row   The row to check
+     * @param restrictCheckOnly
+     *              {@code true} if the check is relevant only for RESTRICTED
+     *              referential action.
+     * @param postCheck
+     *              For referenced keys: if {@code true}, rows are not yet
+     *              deleted, so do the check in the case of deferred PK later.
+     * @param deferredRowReq
+     *              For referenced keys: The required number of duplicates that
+     *              need to be present. Only used if {@code postCheck==false}.
 	 *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
 	 */
     public void doPKCheck(Activation a,
                           ExecRow row,
-                          boolean restrictCheckOnly) throws StandardException
+                          boolean restrictCheckOnly,
+                          boolean postCheck,
+                          int deferredRowReq) throws StandardException
 	{
 		if (checkers == null)
 			return;
 
-		for (int i = 0; i < checkers.length; i++)
-		{
-			if (checkers[i] instanceof ReferencedKeyRIChecker)
-			{
-                checkers[i].doCheck(a, row,restrictCheckOnly);
-			}
-		}
+        for (GenericRIChecker checker : checkers) {
+            if (checker instanceof ReferencedKeyRIChecker) {
+                checker.doCheck(a,
+                                row,
+                                restrictCheckOnly,
+                                postCheck,
+                                deferredRowReq);
+            }
+        }
 	}
 
-	/**
+    public void postCheck() throws StandardException
+    {
+        if (checkers == null) {
+            return;
+        }
+
+        for (int i = 0; i < checkers.length; i++) {
+            postCheck(i);
+        }
+    }
+
+    public void postCheck(int index) throws StandardException
+    {
+        if (checkers == null) {
+            return;
+        }
+
+        if (checkers[index] instanceof ReferencedKeyRIChecker) {
+            ((ReferencedKeyRIChecker)checkers[index]).postCheck();
+        }
+    }
+
+    /**
 	 * Check that everything in the row is ok, i.e.
 	 * that there are no foreign keys in the passed
 	 * in row that have invalid values.
@@ -127,7 +163,7 @@ public class RISetChecker
 		{
 			if (checkers[i] instanceof ForeignKeyRIChecker)
 			{
-                checkers[i].doCheck(a, row);
+                checkers[i].doCheck(a, row, false, false, 0);
 			}
 		}
 	}
@@ -137,7 +173,16 @@ public class RISetChecker
 	 *
      * @param a     the activation
 	 * @param index	index into fkInfo
-	 * @param row		the row to check
+     * @param row   the row to check
+     * @param restrictCheckOnly
+     *              {@code true} if the check is relevant only for RESTRICTED
+     *              referential action.
+     * @param postCheck
+     *              For referenced keys: if {@code true}, rows are not yet
+     *              deleted, so do the check in the case of deferred PK later
+     * @param deferredRowReq
+     *              For referenced keys: the required number of duplicates that
+     *              need to be present. Only used if {@code postCheck==false}.
 	 *
 	 * @exception StandardException on unexpected error, or
 	 *		on a primary/unique key violation
@@ -145,7 +190,9 @@ public class RISetChecker
     public void doRICheck(Activation a,
                           int index,
                           ExecRow row,
-                          boolean restrictCheckOnly) throws StandardException
+                          boolean restrictCheckOnly,
+                          boolean postCheck,
+                          int deferredRowReq) throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
@@ -161,7 +208,8 @@ public class RISetChecker
 			}
 		}
 
-        checkers[index].doCheck(a, row, restrictCheckOnly);
+        checkers[index].doCheck(
+            a, row, restrictCheckOnly, postCheck, deferredRowReq);
 	}
 
 	/**

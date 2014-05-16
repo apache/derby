@@ -148,10 +148,11 @@ class DeleteResultSet extends DMLWriteResultSet
 		*/
 		if (constants.deferred)
 		{
-			runFkChecker(true); //check for only RESTRICT referential action rule violations
+            runFkChecker(true, true); // check for only RESTRICT referential
+                                      // action rule violations
 			fireBeforeTriggers();
 			deleteDeferredRows();
-			runFkChecker(false); //check for all constraint violations
+            runFkChecker(false, false); //check for all constraint violations
 			// apply 
 			rc.finish();
 			fireAfterTriggers();
@@ -389,7 +390,11 @@ class DeleteResultSet extends DMLWriteResultSet
 			{
 				if (fkChecker != null)
 				{
-                    fkChecker.doPKCheck(activation, row, false);
+                    // Argument "2" below: If a PK referenced by an FK is
+                    // deferred, require at least two rows to be present in the
+                    // primary table since we are deleting one of them below,
+                    // and we need at least one to fulfill the constraint.
+                    fkChecker.doPKCheck(activation, row, false, false, 2);
 				}
 
 				baseRowLocation = 
@@ -537,7 +542,8 @@ class DeleteResultSet extends DMLWriteResultSet
 
 
 	// make sure foreign key constraints are not violated
-    void runFkChecker(boolean restrictCheckOnly) throws StandardException
+    void runFkChecker(boolean restrictCheckOnly, boolean postCheck)
+            throws StandardException
 	{
 
 		if (fkChecker != null)
@@ -554,11 +560,27 @@ class DeleteResultSet extends DMLWriteResultSet
 				rs.open();
 
                 ExecRow defRLRow;
+
                 while ((defRLRow = rs.getNextRow()) != null)
 				{
+                    // Argument "1" below: If a PK referenced by an FK is
+                    // deferred, require at least one to be present in the
+                    // primary table since we have deleted the row unless
+                    // postCheck == true, in which the call to postChecks does
+                    // the actual checking, and we need at least one to fulfill
+                    // the constraint.
                     fkChecker.doPKCheck(
-                        activation, defRLRow, restrictCheckOnly);
+                            activation,
+                            defRLRow,
+                            restrictCheckOnly,
+                            postCheck,
+                            1);
 				}
+
+                if (postCheck) {
+                    fkChecker.postCheck();
+                }
+
 			} finally
 			{
 				rs.close();

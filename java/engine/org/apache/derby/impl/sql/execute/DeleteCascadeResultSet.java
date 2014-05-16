@@ -126,12 +126,13 @@ class DeleteCascadeResultSet extends DeleteResultSet
 								SQLState.LANG_NO_ROW_FOUND));
 			}
 
-			runFkChecker(true); //check for only RESTRICT referential action rule violations
+            runFkChecker(true, true); // check for only RESTRICT referential
+                                      // action rule violations
 			Hashtable<String,String> mntHashTable = new Hashtable<String,String>(); //Hash Table to identify  mutiple node for same table cases. 
 			mergeRowHolders(mntHashTable);
 			fireBeforeTriggers(mntHashTable);
 			deleteDeferredRows();
-			runFkChecker(false); //check for all constraint violations
+            runFkChecker(false, false); // check for all constraint violations
 			rowChangerFinish();
 			fireAfterTriggers();
 		}finally
@@ -291,7 +292,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	
     @Override
-	void runFkChecker(boolean restrictCheckOnly) throws StandardException
+    void runFkChecker(boolean restrictCheckOnly, boolean postCheck)
+            throws StandardException
 	{
 
 		//run the Foreign key or primary key Checker on the dependent tables
@@ -299,17 +301,19 @@ class DeleteCascadeResultSet extends DeleteResultSet
 		{		
 			if(dependentResultSets[i] instanceof UpdateResultSet)
 			{
-				((UpdateResultSet) dependentResultSets[i]).runChecker(restrictCheckOnly);
+                ((UpdateResultSet) dependentResultSets[i]).runChecker(
+                    restrictCheckOnly, postCheck);
 			}
 			else{
-				((DeleteCascadeResultSet)dependentResultSets[i]).runFkChecker(restrictCheckOnly);
+                ((DeleteCascadeResultSet)dependentResultSets[i]).runFkChecker(
+                    restrictCheckOnly, postCheck);
 			}
 		}
 
 		//If there  is more than one node for the same table
 		//only one node does all foreign key checks.
 		if(mainNodeForTable)
-			super.runFkChecker(restrictCheckOnly);
+            super.runFkChecker(restrictCheckOnly, postCheck);
 	}
 
 

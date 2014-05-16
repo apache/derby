@@ -267,12 +267,13 @@ class UpdateResultSet extends DMLWriteResultSet
 		if (deferred)
 		{
 
-			runChecker(true); //check for only RESTRICT referential action rule violations
+            runChecker(true, true); // check for only RESTRICT referential
+                                    // action rule violations
 			fireBeforeTriggers();
 			updateDeferredRows();
 			/* Apply deferred inserts to unique indexes */
 			rowChanger.finish();
-			runChecker(false); //check for all  violations
+            runChecker(false, false); // check for all  violations
 			fireAfterTriggers();
 
 		}
@@ -926,7 +927,8 @@ class UpdateResultSet extends DMLWriteResultSet
 
 
 	
-	void runChecker(boolean restrictCheckOnly) throws StandardException
+    void runChecker(boolean restrictCheckOnly, boolean postCheck)
+            throws StandardException
 	{
 
 		/*
@@ -956,16 +958,33 @@ class UpdateResultSet extends DMLWriteResultSet
 					** For each delete row
 					*/	
 					deletedRows.open();
+
 					while ((deletedRow = deletedRows.getNextRow()) != null)
 					{
 						if (!foundRow(deletedRow, 
 										fkInfoArray[i].colArray, 
 										insertedRowHolder))
-						{
-                            riChecker.doRICheck(
-                                activation, i, deletedRow, restrictCheckOnly);
+                        {
+                            // Argument "1" below: If a PK referenced by an FK
+                            // is deferred, require at least one to be present
+                            // in the primary table since we have modified the
+                            // row's PK, unless postCheck == true, in which the
+                            // call to postChecks does the actual checking, and
+                            // we need at least one row intact to fulfill the
+                            // constraint.
+                           riChecker.doRICheck(
+                                    activation,
+                                    i,
+                                    deletedRow,
+                                    restrictCheckOnly,
+                                    postCheck,
+                                    1);
 						}
 					}	
+
+                    if (postCheck) {
+                        riChecker.postCheck(i);
+                    }
 				}
 				finally
 				{
@@ -1008,9 +1027,14 @@ class UpdateResultSet extends DMLWriteResultSet
 										deletedRowHolder))
 						{
                             riChecker.doRICheck(
-                                activation, i, insertedRow, restrictCheckOnly);
+                                activation,
+                                i,
+                                insertedRow,
+                                restrictCheckOnly,
+                                postCheck, // N/A, not referenced key
+                                0);        // N/A, not referenced key
 						}
-					}	
+                    }
 				}
 				finally
 				{

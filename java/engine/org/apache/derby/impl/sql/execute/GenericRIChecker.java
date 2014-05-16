@@ -57,6 +57,8 @@ public abstract class GenericRIChecker
 
     private final Hashtable<Long,ScanController> scanControllers;
     protected final int numColumns;
+    protected int[] identityMap;
+
     final IndexRow indexQualifierRow;
 
 	/**
@@ -91,21 +93,25 @@ public abstract class GenericRIChecker
 	/**
 	 * Check the validity of this row
 	 *
-     * @param a     the activation
-	 * @param row	the row to check
-     * @param restrictCheckOnly If {@code true}, only perform check if the
-     *              constraint action is RESTRICT.
+     * @param a     The activation
+     * @param row   The row to check
+     * @param restrictCheckOnly
+     *              {@code true} if the check is relevant only for RESTRICTED
+     *              referential action.
+     * @param postCheck
+     *              For referenced keys: if {@code true}, rows are not yet
+     *              deleted, so do the check in the case of deferred PK later
+     * @param deferredRowReq
+     *              For referenced keys: The required number of duplicates that
+     *              need to be present. Only used if {@code postCheck==false}.
 	 *
 	 * @exception StandardException on error
 	 */
     abstract void doCheck(Activation a,
                           ExecRow row,
-                          boolean restrictCheckOnly) throws StandardException;
-
-    public void doCheck(Activation a, ExecRow row) throws StandardException
-	{
-        doCheck(a, row, false); //Check all the referential Actions
-	}
+                          boolean restrictCheckOnly,
+                          boolean postCheck,
+                          int deferredRowReq) throws StandardException;
 
 	/**
 	 * Get a scan controller positioned using searchRow as
@@ -209,6 +215,9 @@ public abstract class GenericRIChecker
 	 * Are any of the fields null in the row passed
 	 * in.  The only fields that are checked are those
 	 * corresponding to the colArray in fkInfo.
+     *
+     * @param baseRow the row to check for null fields
+     * @return {@code true} if any are null
 	 */
 	boolean isAnyFieldNull(ExecRow baseRow)
 	{
