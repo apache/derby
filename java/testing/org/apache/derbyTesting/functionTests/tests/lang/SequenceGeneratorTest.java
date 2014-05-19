@@ -70,6 +70,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH  };
 
     private static  final   String      MISSING_ALLOCATOR = "X0Y85";
+    private static  final   String      DUPLICATE_SEQUENCE = "X0Y68";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -820,6 +821,38 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         PreparedStatement ps = chattyPrepare( conn, "values( next value for " + schema + "." + sequenceName + " )\n" );
 
         assertEquals( expectedValue, getScalarInteger( ps ) );
+    }
+    
+    /**
+     * <p>
+     * Verify that we don't get an internal error when creating a sequence-invoking trigger.
+     * See DERBY-6553.
+     * </p>
+     */
+    public void test_14_6553() throws Exception
+    {
+        Connection  dboConn = openUserConnection( TEST_DBO );
+
+        //
+        // The original DERBY-6553 test case.
+        //
+        goodStatement( dboConn, "create table t1_6553_1(x int, y int, z int)" );
+        goodStatement( dboConn, "create table t2_6553_1(x int, y int, z int)" );
+        goodStatement( dboConn, "create sequence seq_6553_1" );
+        goodStatement( dboConn, "values next value for seq_6553_1" );
+        goodStatement
+            ( dboConn, "create trigger tr1 after insert on t1_6553_1 insert into t2_6553_1(x) values (next value for seq_6553_1)" );
+
+        //
+        // The abbreviated test case.
+        //
+        dboConn.setAutoCommit( false );
+        goodStatement( dboConn, "create sequence seq_6553" );
+        dboConn.commit();
+        goodStatement( dboConn, "values next value for seq_6553" );
+        expectExecutionError( dboConn, DUPLICATE_SEQUENCE, "create sequence seq_6553" );
+        dboConn.rollback();
+        dboConn.setAutoCommit( true );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
