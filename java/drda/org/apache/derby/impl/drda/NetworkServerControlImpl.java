@@ -352,6 +352,14 @@ public final class NetworkServerControlImpl {
     public  String  getHost() { return hostArg; }
 
     /**
+     * Get the port where we listen for connections.
+     * @return the port number
+     */
+    public int getPort() {
+        return portNumber;
+    }
+
+    /**
      * Return true if the customer forcibly overrode our decision to install a
      * default SecurityManager.
      */

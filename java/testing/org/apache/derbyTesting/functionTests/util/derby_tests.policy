@@ -1,5 +1,5 @@
 //
-// *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.SimpleTest
+// *  Derby - Class org.apache.derbyTesting.functionTests.util.derby_tests.policy
 // *  
 // * Licensed to the Apache Software Foundation (ASF) under one
 // * or more contributor license agreements.  See the NOTICE file
@@ -95,8 +95,9 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)
+  // listen is needed for the server listening on the network port
   permission java.net.SocketPermission "127.0.0.1", "accept,connect";
-  permission java.net.SocketPermission "localhost", "accept,connect";
+  permission java.net.SocketPermission "localhost", "accept,connect,listen";
   permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   
@@ -171,6 +172,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
 
+
+  // Needed by NetworkServerTestSetup when probing ports
+  permission java.net.SocketPermission "localhost", "listen";
 };
 
 //
@@ -198,7 +202,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
 
   // combination of client and server side.
   permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
-  permission java.net.SocketPermission "localhost", "accept,connect,resolve";
+  permission java.net.SocketPermission "localhost", "accept,connect,resolve,listen";
   permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
   

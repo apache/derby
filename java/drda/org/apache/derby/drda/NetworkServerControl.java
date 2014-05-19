@@ -602,6 +602,15 @@ public class NetworkServerControl{
         System.setProperty( Property.DERBY_SECURITY_HOST, getHostNameForSocketPermission( server ) );
 
         //
+        // Forcibly set the following property so that it will be correctly
+        // substituted into the default policy file. This is the hostname for
+        // SocketPermissions. This is an internal property which customers
+        // may not override.
+        //
+        System.setProperty(Property.DERBY_SECURITY_PORT,
+                           String.valueOf(server.getPort()));
+
+        //
         // Forcibly set the following property. This is the parameter in
         // the Basic policy which points at the directory where the embedded and
         // network codesources. Do not let the customer
