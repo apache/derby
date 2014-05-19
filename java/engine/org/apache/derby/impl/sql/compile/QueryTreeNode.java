@@ -1471,15 +1471,16 @@ public abstract class QueryTreeNode implements Visitable
      */
     private void throwReliabilityException( String fragmentType, int fragmentBitMask ) throws StandardException
     {
+        final int reliability = getCompilerContext().getReliability();
         String sqlState;
 		/* Error string somewhat dependent on operation due to different
 		 * nodes being allowed for different operations.
 		 */
-		if (getCompilerContext().getReliability() == CompilerContext.DEFAULT_RESTRICTION)
+        if (reliability == CompilerContext.DEFAULT_RESTRICTION)
 		{
             sqlState = SQLState.LANG_INVALID_DEFAULT_DEFINITION;
 		}
-		else if (getCompilerContext().getReliability() == CompilerContext.GENERATION_CLAUSE_RESTRICTION)
+        else if (reliability == CompilerContext.GENERATION_CLAUSE_RESTRICTION)
 		{
             switch ( fragmentBitMask )
             {
@@ -1493,13 +1494,17 @@ public abstract class QueryTreeNode implements Visitable
             }
 		}
         else if (
-                 (getCompilerContext().getReliability() & fragmentBitMask & CompilerContext.SQL_IN_ROUTINES_ILLEGAL)
+                 (reliability & fragmentBitMask & CompilerContext.SQL_IN_ROUTINES_ILLEGAL)
                  != 0
                  )
         {
             sqlState = SQLState.LANG_ROUTINE_CANT_PERMIT_SQL;
         }
-		else
+        else if (reliability == CompilerContext.CHECK_CONSTRAINT)
+        {
+            sqlState = SQLState.LANG_UNRELIABLE_CHECK_CONSTRAINT;
+        }
+        else
 		{
             sqlState = SQLState.LANG_UNRELIABLE_QUERY_FRAGMENT;
 		}

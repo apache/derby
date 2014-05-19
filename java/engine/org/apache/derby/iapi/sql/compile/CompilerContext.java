@@ -132,6 +132,10 @@ public interface CompilerContext extends Context
 	public	static	final	int			CONDITIONAL_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
 	public	static	final	int			GROUP_BY_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
 
+    public static final int CASE_OPERAND_RESTRICTION =
+            CONDITIONAL_RESTRICTION | NON_DETERMINISTIC_ILLEGAL |
+            MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL;
+
     public  static  final   String  WHERE_SCOPE = "whereScope";
     
 	/////////////////////////////////////////////////////////////////////////////////////

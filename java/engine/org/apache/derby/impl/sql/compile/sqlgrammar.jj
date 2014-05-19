@@ -818,6 +818,7 @@ public class SQLParser
 		  case LESS_THAN_OR_EQUALS_OPERATOR:
 		  case GREATER_THAN_OR_EQUALS_OPERATOR:
 		  case IN:
+          case IS:
 		  case LIKE:
 		  case BETWEEN:
 		  	retval = true;
@@ -5444,33 +5445,12 @@ andExpression(ValueNode farLeftOperand) throws StandardException :
 ValueNode
 isSearchCondition() throws StandardException :
 {
-	ValueNode	result;
 	ValueNode	booleanPrimary;
-	Token		isToken = null;
-	Token		notToken = null;
-	Token		truthValue = null;
 }
 {
 	booleanPrimary = booleanPrimary()
-	[
-		isToken = <IS> [ notToken = <NOT> ] <NULL>
-	]
 	{
-		if ( isToken != null )
-		{
-            result = new IsNullNode(booleanPrimary,
-                                    false,
-                                    getContextManager());
-		
-            /* Put the NOT on top of the tree */
-				if (notToken != null)
-				{
-                result = new NotNode(result, getContextManager());
-            }
-        }
-		else { result = booleanPrimary; }
-
-		return result;
+        return booleanPrimary;
 	}
 }
 
@@ -5602,12 +5582,19 @@ remainingNegatablePredicate(ValueNode leftOperand) throws StandardException :
 	ValueNode	betweenLeft;
 	ValueNode	betweenRight;
 	ValueNode	escapeValue = null;
+    Token       notToken = null;
 }
 {
 	<IN> tree = inPredicateValue(leftOperand)
 	{
 		return tree;
 	}
+|
+    <IS> [ notToken = <NOT> ] <NULL>
+    {
+        return new IsNullNode(
+                leftOperand, (notToken != null), getContextManager());
+    }
 |
 	<LIKE> likePattern = additiveExpression(null, 0)
             [
@@ -12553,6 +12540,7 @@ valueSpecification() throws StandardException :
 	ValueNode	   value;
 	ValueNode	   leftExpression;
 	ValueNode	   rightExpression;
+    ValueNode      caseOperand;
 }
 {
 	value = literal()
@@ -12586,14 +12574,21 @@ valueSpecification() throws StandardException :
        thenElseList.addElement(new UntypedNullConstantNode(cm));
 		thenElseList.addElement(leftExpression);
 
-        return new ConditionalNode(whenList, thenElseList, cm);
+        return new ConditionalNode(null, whenList, thenElseList, cm);
 	}
 |
 	// CASE WHEN P1 THEN [T1 | NULL] (WHEN Pi THEN [Ti | NULL])* [ELSE E | NULL] END
+    LOOKAHEAD({ getToken(1).kind == CASE && getToken(2).kind == WHEN })
     <CASE> value = searchedCaseExpression()
 	{
 		return value;
 	}
+|
+    <CASE> caseOperand = valueExpression()
+           value = simpleCaseExpression(caseOperand)
+    {
+        return value;
+    }
 }
 
 ConditionalNode searchedCaseExpression() throws StandardException :
@@ -12614,7 +12609,7 @@ ConditionalNode searchedCaseExpression() throws StandardException :
         }
         thenElseList.addElement(elseExpr);
 
-        return new ConditionalNode(whenList, thenElseList, cm);
+        return new ConditionalNode(null, whenList, thenElseList, cm);
     }
 }
 
@@ -12656,6 +12651,85 @@ thenElseExpression() throws StandardException :
 	{
 		return expr;
 	}
+}
+
+ConditionalNode simpleCaseExpression(ValueNode caseOperand)
+throws StandardException :
+{
+    ContextManager cm = getContextManager();
+    ValueNodeList whenList = new ValueNodeList(cm);
+    ValueNodeList thenElseList = new ValueNodeList(cm);
+    ValueNode elseExpr = null;
+}
+{
+    ( simpleWhenClause(caseOperand, whenList, thenElseList) ) +
+    ( <ELSE> elseExpr = thenElseExpression() ) ?
+    <END>
+    {
+        if (elseExpr == null) {
+            // ELSE NULL is implicit if there is no ELSE clause.
+            elseExpr = new UntypedNullConstantNode(cm);
+        }
+        thenElseList.addElement(elseExpr);
+
+        return new ConditionalNode(caseOperand, whenList, thenElseList, cm);
+    }
+}
+
+void
+simpleWhenClause(ValueNode caseOperand,
+                 ValueNodeList whenList, ValueNodeList thenElseList)
+throws StandardException :
+{
+    ValueNode expr;
+    ValueNode thenExpr;
+}
+{
+    <WHEN> expr = whenOperandList(caseOperand)
+    <THEN> thenExpr = thenElseExpression()
+    {
+        whenList.addElement(expr);
+        thenElseList.addElement(thenExpr);
+    }
+}
+
+ValueNode whenOperandList(ValueNode caseOperand) throws StandardException :
+{
+    ValueNode first;
+    ValueNode rest = null;
+}
+{
+    first = whenOperand(caseOperand)
+    ( <COMMA> rest = whenOperandList(caseOperand) )?
+    {
+        if (rest == null) {
+            return first;
+        } else {
+            return new OrNode(first, rest, getContextManager());
+        }
+    }
+}
+
+ValueNode whenOperand(ValueNode caseOperand) throws StandardException :
+{
+    ContextManager cm = getContextManager();
+    ValueNode expr;
+}
+{
+    // Both remainingPredicate and valueExpression can start with NOT, so
+    // let's look ahead first.
+    LOOKAHEAD({ remainingPredicateFollows() })
+    expr = remainingPredicate(caseOperand)
+    {
+        return expr;
+    }
+|
+    expr = valueExpression()
+    {
+        return new BinaryRelationalOperatorNode(
+                BinaryRelationalOperatorNode.K_EQUALS,
+                caseOperand, expr, false, cm);
+    }
 }
 
 TableElementNode

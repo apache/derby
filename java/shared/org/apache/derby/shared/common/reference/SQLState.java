@@ -1003,7 +1003,7 @@ public interface SQLState {
 	String LANG_INVALID_COL_REF_GROUPED_SELECT_LIST                    = "42Y36";
 	String LANG_TYPE_DOESNT_EXIST3                                     = "42Y37";
 	String LANG_INVALID_BULK_INSERT_REPLACE                            = "42Y38";
-	String LANG_UNRELIABLE_QUERY_FRAGMENT                              = "42Y39";
+    String LANG_UNRELIABLE_CHECK_CONSTRAINT                            = "42Y39";
 	String LANG_DUPLICATE_COLUMN_IN_TRIGGER_UPDATE                     = "42Y40";
 	String LANG_TRIGGER_SPS_CANNOT_BE_EXECED                           = "42Y41";
 	String LANG_INVALID_DECIMAL_SCALE                                  = "42Y42";
@@ -1042,6 +1042,7 @@ public interface SQLState {
 	String LANG_BINARY_LOGICAL_NON_BOOLEAN                             = "42Y94";
 	String LANG_BINARY_OPERATOR_NOT_SUPPORTED                          = "42Y95";
 	String LANG_INVALID_ESCAPE										   = "42Y97";
+    String LANG_UNRELIABLE_QUERY_FRAGMENT                              = "42Y98";
 	String LANG_JAVA_METHOD_CALL_OR_FIELD_REF						   = "42Z00.U";
 	String LANG_UNTYPED												   = "42Z01.U";
 	// TEMPORARY COMPILATION RESTRICTIONS

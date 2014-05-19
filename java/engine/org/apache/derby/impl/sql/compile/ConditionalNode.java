@@ -46,6 +46,12 @@ import org.apache.derby.iapi.util.JBitSet;
 
 class ConditionalNode extends ValueNode
 {
+    /**
+     * The case operand if this is a simple case expression. Otherwise, it
+     * is {@code null}.
+     */
+    private ValueNode caseOperand;
+
     /** The list of test conditions in the WHEN clauses. */
     private ValueNodeList testConditions;
 
@@ -58,15 +64,19 @@ class ConditionalNode extends ValueNode
 	/**
      * Constructor for a ConditionalNode
 	 *
+     * @param caseOperand       The case operand if this is a simple case
+     *                          expression, or {@code null} otherwise
      * @param testConditions    The boolean test conditions
 	 * @param thenElseList		ValueNodeList with then and else expressions
      * @param cm                The context manager
 	 */
-    ConditionalNode(ValueNodeList testConditions,
+    ConditionalNode(ValueNode caseOperand,
+                    ValueNodeList testConditions,
                     ValueNodeList thenElseList,
                     ContextManager cm)
 	{
         super(cm);
+        this.caseOperand = caseOperand;
         this.testConditions = testConditions;
         this.thenElseList = thenElseList;
 	}
@@ -184,7 +194,9 @@ class ConditionalNode extends ValueNode
         CompilerContext cc = getCompilerContext();
         
         int previousReliability = orReliability( CompilerContext.CONDITIONAL_RESTRICTION );
-        
+
+        bindCaseOperand(cc, fromList, subqueryList, aggregates);
+
         testConditions.bindExpression(fromList,
 			subqueryList,
             aggregates);
@@ -277,6 +289,27 @@ class ConditionalNode extends ValueNode
         
 		return this;
 	}
+
+    /**
+     * Bind the case operand, if there is one, and check that it doesn't
+     * contain anything that's illegal in a case operand (such as calls to
+     * routines that are non-deterministic or modifies SQL).
+     */
+    private void bindCaseOperand(CompilerContext cc, FromList fromList,
+                                 SubqueryList subqueryList,
+                                List<AggregateNode> aggregates)
+            throws StandardException {
+
+        if (caseOperand != null) {
+            int previousReliability = orReliability(
+                    CompilerContext.CASE_OPERAND_RESTRICTION);
+
+            caseOperand = caseOperand.bindExpression(
+                    fromList, subqueryList, aggregates);
+
+            cc.setReliability(previousReliability);
+        }
+    }
 
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations

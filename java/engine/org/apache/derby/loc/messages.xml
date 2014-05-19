@@ -2843,6 +2843,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Y98</name>
+                <text>'{0}' may not appear in this context because it may return unreliable results.</text>
+                <arg>sqlObjectName</arg>
+            </msg>
+
+            <msg>
                 <name>42Z02</name>
                 <text>Multiple DISTINCT aggregates are not supported at this time.</text>
             </msg>
