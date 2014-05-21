@@ -23,12 +23,12 @@ package org.apache.derby.optional.lucene;
 
 import java.io.IOException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -57,11 +57,9 @@ public class LuceneListIndexesVTI extends StringColumnVTI
 
 	/**
 	 * Return a new LuceneListIndexesVTI.
-	 * 
-	 * @throws IOException
 	 */
 	public LuceneListIndexesVTI()
-        throws IOException, PrivilegedActionException, SQLException
+        throws SQLException
     {
 		super
             ( new String[]
@@ -219,13 +217,12 @@ public class LuceneListIndexesVTI extends StringColumnVTI
 
     /** List files */
     private static  StorageFile[]  listDirectories( final StorageFactory storageFactory, final StorageFile dir )
-        throws IOException, PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
-             new PrivilegedExceptionAction<StorageFile[]>()
+             new PrivilegedAction<StorageFile[]>()
              {
-                public StorageFile[] run() throws IOException
+                public StorageFile[] run()
                 {
                     ArrayList<StorageFile>  subdirectories = new ArrayList<StorageFile>();
                     String[]    fileNames = dir.list();
@@ -247,9 +244,10 @@ public class LuceneListIndexesVTI extends StringColumnVTI
 
     /** Read the index properties file */
     private static  Properties readIndexProperties( final StorageFile file )
-        throws IOException, PrivilegedActionException
+        throws IOException
     {
-        return AccessController.doPrivileged
+        try {
+            return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Properties>()
              {
@@ -259,6 +257,9 @@ public class LuceneListIndexesVTI extends StringColumnVTI
                 }
              }
              );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
     }
 
 }

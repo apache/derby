@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.apache.lucene.store.AlreadyClosedException;
@@ -74,21 +73,19 @@ public  class DerbyIndexInput   extends IndexInput
     {
         super( file.getPath() );
 
-        try {
-            setConstructorFields( file );
-        }
-        catch (PrivilegedActionException pae) { wrapWithIOException( pae ); }
+        setConstructorFields( file );
     }
 
     /** Set the constructor fields */
     private void    setConstructorFields( final StorageFile file )
-        throws IOException, PrivilegedActionException
+        throws IOException
     {
-        AccessController.doPrivileged
+        try {
+            AccessController.doPrivileged
             (
-             new PrivilegedExceptionAction<Object>()
+             new PrivilegedExceptionAction<Void>()
              {
-                public Object run() throws IOException
+                public Void run() throws IOException
                 {
                     _file = file;
                     _sraf = _file.getRandomAccessFile( "r" );
@@ -97,6 +94,9 @@ public  class DerbyIndexInput   extends IndexInput
                 }
              }
              );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
     }
 
     /////////////////////////////////////////////////////////////////////

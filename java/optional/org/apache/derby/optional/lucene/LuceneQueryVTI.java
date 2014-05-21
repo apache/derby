@@ -29,7 +29,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -38,15 +37,11 @@ import java.util.Properties;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.optional.api.LuceneUtils;
-import org.apache.derby.vti.RestrictedVTI;
-import org.apache.derby.vti.Restriction;
-import org.apache.derby.vti.Restriction.ColumnQualifier;
 import org.apache.derby.vti.StringColumnVTI;
 import org.apache.derby.vti.VTIContext;
 import org.apache.derby.vti.VTITemplate;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
@@ -58,7 +53,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
@@ -461,10 +455,6 @@ public class LuceneQueryVTI extends StringColumnVTI
         catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
         catch (ParseException pe) { throw LuceneSupport.wrap( pe ); }
         catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
-        catch (ClassNotFoundException cnfe) { throw LuceneSupport.wrap( cnfe ); }
-        catch (IllegalAccessException iae) { throw LuceneSupport.wrap( iae ); }
-        catch (InvocationTargetException ite) { throw LuceneSupport.wrap( ite ); }
-        catch (NoSuchMethodException nsme) { throw LuceneSupport.wrap( nsme ); }
     }
 
     /**
@@ -536,8 +526,7 @@ public class LuceneQueryVTI extends StringColumnVTI
          final String fieldName,
          final Analyzer analyzer
          )
-        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
-               NoSuchMethodException, PrivilegedActionException
+        throws PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
@@ -565,23 +554,28 @@ public class LuceneQueryVTI extends StringColumnVTI
 	private static IndexReader getIndexReader( final DerbyLuceneDir dir )
         throws IOException, PrivilegedActionException
     {
-        return AccessController.doPrivileged
+        try {
+            return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<IndexReader>()
              {
-                 public IndexReader run() throws SQLException, IOException
+                 public IndexReader run() throws IOException
                  {
                      return DirectoryReader.open( dir );
                  }
              }
              );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
 	}
 	
     /** Read the index properties file */
     private static  Properties readIndexProperties( final StorageFile file )
-        throws IOException, PrivilegedActionException
+        throws IOException
     {
-        return AccessController.doPrivileged
+        try {
+            return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Properties>()
              {
@@ -591,6 +585,9 @@ public class LuceneQueryVTI extends StringColumnVTI
                 }
              }
              );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
     }
 
 	/**
@@ -598,8 +595,7 @@ public class LuceneQueryVTI extends StringColumnVTI
      * The method has no arguments.
 	 */
 	private static Analyzer getAnalyzer( final String analyzerMaker )
-        throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
-               NoSuchMethodException, PrivilegedActionException
+        throws PrivilegedActionException
     {
         return AccessController.doPrivileged
             (
@@ -616,9 +612,10 @@ public class LuceneQueryVTI extends StringColumnVTI
 	
     /** Read the index properties file */
     private void    searchAndScore( final Query luceneQuery, final TopScoreDocCollector tsdc )
-        throws IOException, PrivilegedActionException
+        throws IOException
     {
-        AccessController.doPrivileged
+        try {
+            AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Object>()
              {
@@ -632,6 +629,9 @@ public class LuceneQueryVTI extends StringColumnVTI
                 }
              }
              );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
     }
 
 }
