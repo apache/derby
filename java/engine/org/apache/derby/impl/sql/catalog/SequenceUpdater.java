@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.BulkInsertCounter;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -176,10 +177,18 @@ public abstract class SequenceUpdater implements Cacheable
      * and identities. See DERBY-5426.
      * </p>
      */
-    protected   StandardException   tooMuchContentionException()
+    private   StandardException   tooMuchContentionException()
     {
-        return StandardException.newException
-            ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
+        // If the sequence lives in the SYS schema, then it is used to back an identity column.
+        if ( SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME.equals( _sequenceGenerator.getSchemaName() ) )
+        {
+            return StandardException.newException( SQLState.LOCK_TIMEOUT );
+        }
+        else
+        {
+            return StandardException.newException
+                ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

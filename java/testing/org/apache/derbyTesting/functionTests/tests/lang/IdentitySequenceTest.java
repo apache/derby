@@ -338,6 +338,44 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test that too much contention on an identity column raises a LOCK_TIMEOUT.
+     * </p>
+     */
+    public  void    test_003_identityTimeout()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.locks.waitTimeout', '1' )" );
+        goodStatement( conn, "create table t_timeout( a int generated always as identity, b int )" );
+        conn.setAutoCommit( false );
+
+        try {
+            PreparedStatement   ps = chattyPrepare( conn, "select count(*) from sys.syssequences with rs\n" );
+            getScalarInteger( ps );
+            expectExecutionError( conn, LOCK_TIMEOUT, "insert into t_timeout( b ) values ( 1 )" );
+        }
+        finally
+        {
+            conn.setAutoCommit( true );
+            goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.locks.waitTimeout', '60' )" );
+        }
+    }
+    /** Get a scalar integer result from a query */
+    private int getScalarInteger( PreparedStatement ps ) throws Exception
+    {
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int retval = rs.getInt( 1 );
+
+        rs.close();
+        ps.close();
+
+        return retval;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
