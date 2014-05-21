@@ -103,6 +103,8 @@ help;
                                -- each column to integerValue
   ASYNC name 'SQL-J text';     -- run the command in another thread
   WAIT FOR name;               -- wait for result of ASYNC'd command
+  NOHOLDFORCONNECTION;         -- sets holdability for a connection to NO HOLD
+                               -- (i.e. ResultSet.CLOSE_CURSORS_AT_COMMIT)
   GET [SCROLL INSENSITIVE] [WITH  { HOLD | NOHOLD }] CURSOR name AS 'SQL-J query';
                                -- gets a cursor (JDBC result set) on the query
                                -- the default is a forward-only cursor with holdability
