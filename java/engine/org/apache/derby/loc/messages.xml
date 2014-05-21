@@ -2866,6 +2866,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Z09</name>
+                <text>The case operand cannot be an untyped parameter.</text>
+            </msg>
+
+            <msg>
                 <name>42Z15</name>
                 <text>Invalid type specified for column '{0}'. The type of a column may not be changed.  </text>
                 <arg>columnName</arg>

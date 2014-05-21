@@ -307,6 +307,21 @@ class ConditionalNode extends ValueNode
             caseOperand = caseOperand.bindExpression(
                     fromList, subqueryList, aggregates);
 
+            // For now, let's also forbid untyped parameters as case
+            // operands. The problem is that the current type inference
+            // doesn't handle conflicting types. Take for example
+            //    CASE ? WHEN 1 THEN TRUE WHEN 'abc' THEN FALSE END
+            // The type of the parameter would first get set to INTEGER
+            // when binding the first WHEN clause. Later, when binding the
+            // second WHEN clause, the type would be changed to CHAR(3),
+            // without noticing that it already had a type, and that the
+            // previous type was incompatible with the new one. Until the
+            // type inference has improved, forbid such expressions.
+            if (caseOperand.requiresTypeFromContext()) {
+                throw StandardException.newException(
+                        SQLState.LANG_CASE_OPERAND_UNTYPED);
+            }
+
             cc.setReliability(previousReliability);
         }
     }

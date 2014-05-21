@@ -725,5 +725,74 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                 "values case cast(1 as bigint)"
                 + " when cast(1 as smallint) then 'yes' end"),
             "yes");
+
+        // A sequence cannot be accessed anywhere in a CASE expression.
+        s.execute("create sequence d1576_s start with 1");
+        assertCompileError(
+                "42XAH",
+                "values case next value for d1576_s when 1 then 1 else 0 end");
+        assertCompileError(
+                "42XAH",
+                "values case 1 when next value for d1576_s then 1 else 0 end");
+        assertCompileError(
+                "42XAH",
+                "values case 1 when 1 then next value for d1576_s else 0 end");
+
+        // Instead, access the sequence value in a nested query.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery(
+                    "select case x when 1 then 1 else 0 end from "
+                    + "(values next value for d1576_s) v(x)"),
+                "1");
+
+        s.execute("drop sequence d1576_s restrict");
+
+        // Window functions are allowed.
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select case row_number() over () when 1 then 'one' "
+                    + "when 2 then 'two' end from (values 1, 1, 1) v(x)"),
+                new String[][] { {"one"}, {"two"}, {null} });
+
+        // Parameters in the case operand have to be typed for now, since the
+        // current type inference doesn't handle multiple types very well.
+        PreparedStatement ps = prepareStatement(
+                "values case cast(? as integer) "
+                + "when 1 then 'one' when 2 then 'two' end");
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "one");
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "two");
+        ps.setInt(1, 3);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        // This one fails to compile because an integer cannot be checked
+        // with LIKE.
+        assertCompileError("42884",
+                "values case cast(? as integer) "
+                + "when 1 then 1 when like 'abc' then 2 end");
+
+        // Should have been able to infer the type in this case, but
+        // expect failure for now.
+        assertCompileError("42Z09",
+                           "values case ? when 1 then 2 when 3 then 4 end");
+
+        // Should have detected that the types in the WHEN clauses are
+        // incompatible (the first requires the operand to be a number, the
+        // second requires it to be a string). Instead, for now, it fails
+        // because untyped parameters have been forbidden in the case operand.
+        // Used to fail with "Invalid character string format for type int"
+        // during execution before it was forbidden.
+        assertCompileError("42Z09",
+            "values case ? when 1 then true when like 'abc' then false end");
+
+        // Should have detected that the types in the WHEN clauses are
+        // incompatible (the first requires the operand to be a string, the
+        // second requires it to be a number). Instead, for now, it fails
+        // because untyped parameters have been forbidden in the case operand.
+        // Used to fail with an assert failure at compile time before it was
+        // forbidden.
+        assertCompileError("42Z09",
+            "values case ? when like 'abc' then true when 1 then false end");
     }
 }
