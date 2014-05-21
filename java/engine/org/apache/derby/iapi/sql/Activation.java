@@ -41,6 +41,7 @@ import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 
 
@@ -629,4 +630,17 @@ public interface Activation extends Dependent
 	 */
 	public Activation getParentActivation();
 
+	/**
+	 * Called by generated code to get the next number in an ANSI/ISO sequence
+     * and advance the sequence. Raises an exception if the sequence was declared
+     * NO CYCLE and its range is exhausted.
+	 *
+     * @param sequenceUUIDstring The string value of the sequence's UUID
+     * @param typeFormatID The format id of the data type to be returned. E.g., StoredFormatIds.SQL_INTEGER_ID.
+     *
+	 * @return The next number in the sequence
+	 */
+	public NumberDataValue getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, int typeFormatID )
+        throws StandardException;
 }

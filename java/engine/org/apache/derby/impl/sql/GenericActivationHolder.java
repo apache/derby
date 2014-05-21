@@ -52,6 +52,7 @@ import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.impl.sql.execute.BaseActivation;
 
@@ -824,4 +825,12 @@ final public class GenericActivationHolder implements Activation
 	public int getMaxDynamicResults() {
 		return ac.getMaxDynamicResults();
 	}
+
+	public NumberDataValue getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, int typeFormatID )
+        throws StandardException
+    {
+        return ac.getCurrentValueAndAdvance( sequenceUUIDstring, typeFormatID );
+    }
+
 }

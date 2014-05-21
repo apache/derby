@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.BulkInsertCounter;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -327,6 +328,35 @@ public abstract class SequenceUpdater implements Cacheable
 
     /**
      * <p>
+     * Reset the sequence generator to a new start value. This is used by the special
+     * bulk-insert optimization in InsertResultSet.
+     * </p>
+     */
+    public synchronized void reset( Long newValue )
+        throws StandardException
+    {
+        // first try to reset on disk
+        updateCurrentValueOnDisk( null, newValue );
+
+        // now reset the sequence generator
+        _sequenceGenerator = _sequenceGenerator.clone( newValue );
+    }
+    
+    /**
+     * <p>
+     * Get the SequenceUpdater used for the bulk-insert optimization in InsertResultSet.
+     * </p>
+     *
+     * @param restart   True if the counter should be re-initialized to its start position.
+     */
+    public synchronized BulkInsertUpdater   getBulkInsertUpdater( boolean restart )
+        throws StandardException
+    {
+        return new BulkInsertUpdater( this, restart );
+    }
+    
+    /**
+     * <p>
      * Get the next sequence number managed by this generator and advance the number. Could raise an
      * exception if the legal range is exhausted and wrap-around is not allowed.
      * Only one thread at a time is allowed through here. We do not want a race between the
@@ -608,6 +638,42 @@ public abstract class SequenceUpdater implements Cacheable
         protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
         {
             return _dd.updateCurrentSequenceValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
+        }
+    }
+
+    /**
+     * <p>
+     * Implementation of SequenceUpdater for use with the bulk-insert optimization
+     * used by InsertResultSet. This BulkInsertUpdater doesn't really write to disk. It is assumed
+     * that the BulkInsertUpdater will only be used by the bulk-insert code, where the
+     * user has exclusive write-access on the table whose identity column is backed by
+     * the original SequenceUpdater. At the end of bulk-insert, the current value of the
+     * BulkInsertUpdater is written to disk by other code.
+     * </p>
+     */
+    public static final class BulkInsertUpdater extends SequenceUpdater implements BulkInsertCounter
+    {
+        public BulkInsertUpdater() { super(); }
+        public BulkInsertUpdater( SequenceUpdater originalUpdater, boolean restart )
+        {
+            _sequenceGenerator = originalUpdater._sequenceGenerator.clone( restart );
+        }
+    
+        //
+        // SequenceUpdater BEHAVIOR
+        //
+
+        protected SequenceGenerator createSequenceGenerator( TransactionController readOnlyTC )
+            throws StandardException
+        {
+            return _sequenceGenerator;
+        }
+
+        protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait )
+            throws StandardException
+        {
+            // always succeeds
+            return true;
         }
     }
 

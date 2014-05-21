@@ -60,6 +60,7 @@ import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
@@ -1235,11 +1236,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// now add the column to the tables column descriptor list.
 		td.getColumnDescriptorList().add(columnDescriptor);
 
-		if (columnDescriptor.isAutoincrement())
+        if (SanityManager.DEBUG)
 		{
-            updateNewAutoincrementColumn(columnInfo[ix].name,
-										 columnInfo[ix].autoincStart,
-										 columnInfo[ix].autoincInc);
+            // support for adding identity columns was removed before Derby
+            // was open-sourced
+			SanityManager.ASSERT( !columnDescriptor.isAutoincrement(), "unexpected attempt to add an identity column" );
 		}
 
 		// Update the new column to its default, if it has a non-null default
@@ -2200,11 +2201,37 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             //
             if ( dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null ) )
             {
+                Long    currentValue = null;
+                
+                // don't clobber the current value of the sequence generator if we
+                // are just changing the increment. see DERBY-6579.
+                if ( columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT )
+                {
+                    currentValue = dd.peekAtIdentity( td.getSchemaName(), td.getName() );
+                }
+
                 DropTableConstantAction.dropIdentitySequence( dd, td, activation );
 
+                // recreate the sequence
+                String      sequenceName = TableDescriptor.makeSequenceName( td.getUUID() );
                 CreateSequenceConstantAction   csca = CreateTableConstantAction.makeCSCA
-                    ( columnInfo[ix], TableDescriptor.makeSequenceName( td.getUUID() ) );
+                    ( columnInfo[ix], sequenceName );
                 csca.executeConstantAction( activation );
+
+                // reset the current value of the sequence generator as necessary
+                if ( columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT )
+                {
+                    SequenceDescriptor  sequence = dd.getSequenceDescriptor
+                        ( dd.getSystemSchemaDescriptor(), sequenceName );
+                    RowLocation[] rowLocation = new RowLocation[ 1 ];
+                    SequenceDescriptor[] sequenceDescriptor = new SequenceDescriptor[ 1 ];
+            
+                    dd.computeSequenceRowLocation
+                        ( tc, sequence.getUUID().toString(), rowLocation, sequenceDescriptor );
+                    dd.updateCurrentSequenceValue
+                        ( tc, rowLocation[ 0 ], true, null, currentValue );
+                }
+                
             }
         }
 	}
@@ -3471,72 +3498,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		compressHeapGSC = null;
 	}
 
-	/**
-	 * Update values in a new autoincrement column being added to a table.
-	 * This is similar to updateNewColumnToDefault whereby we issue an
-	 * update statement using a nested connection. The UPDATE statement 
-	 * uses a static method in ConnectionInfo (which is not documented) 
-	 * which returns the next value to be inserted into the autoincrement
-	 * column.
-	 *
-	 * @param columnName autoincrement column name that is being added.
-	 * @param initial    initial value of the autoincrement column.
-	 * @param increment  increment value of the autoincrement column.
-	 *
-	 * @see #updateNewColumnToDefault
-	 */
-    private void updateNewAutoincrementColumn(String columnName, long initial,
-											 long increment)
-		throws StandardException
-	{
-		// Don't throw an error in bind when we try to update the 
-		// autoincrement column.
-		lcc.setAutoincrementUpdate(true);
-
-		lcc.autoincrementCreateCounter(td.getSchemaName(),
-									   td.getName(),
-                                       columnName, Long.valueOf(initial),
-									   increment, 0);
-		// the sql query is.
-		// UPDATE table 
-		//  set ai_column = ConnectionInfo.nextAutoincrementValue(
-		//							schemaName, tableName, 
-		//							columnName)
-        String updateStmt = "UPDATE " +
-            IdUtil.mkQualifiedName(td.getSchemaName(), td.getName()) +
-            " SET " + IdUtil.normalToDelimited(columnName) + "=" +
-			"org.apache.derby.iapi.db.ConnectionInfo::" + 
-			"nextAutoincrementValue(" + 
-            StringUtil.quoteStringLiteral(td.getSchemaName()) + "," +
-            StringUtil.quoteStringLiteral(td.getName()) + "," +
-            StringUtil.quoteStringLiteral(columnName) + ")";
-
-
-
-		try
-		{
-			AlterTableConstantAction.executeUpdate(lcc, updateStmt);
-		}
-		catch (StandardException se)
-		{
-			if (se.getMessageId().equals(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE))
-			{
-				// If overflow, override with more meaningful message.
-				throw StandardException.newException(SQLState.LANG_AI_OVERFLOW,
-													 se,
-													 td.getName(),
-													 columnName);
-			}
-			throw se;
-		}
-		finally
-		{
-			// and now update the autoincrement value.
-			lcc.autoincrementFlushCache(td.getUUID());
-			lcc.setAutoincrementUpdate(false);		
-		}
-
-	} 
 	/**
 	 * Make sure that the columns are non null
 	 * If any column is nullable, check that the data is null.

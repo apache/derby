@@ -951,8 +951,6 @@ public interface LanguageConnectionContext extends Context {
 	 * to an existing table.
 	 * 
 	 * @param flag 	the value for autoincrementUpdate (TRUE or FALSE)
-	 * @see org.apache.derby.impl.sql.execute.AlterTableConstantAction#updateNewAutoincrementColumn
-	 *
 	 */
 	public void setAutoincrementUpdate(boolean flag);
 

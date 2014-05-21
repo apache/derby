@@ -225,6 +225,60 @@ public class SequenceGenerator
         //
         _remainingPreallocatedValues = 1L;
     }
+
+    /**
+     * <p>
+     * Clone this sequence generator. This method supports the special bulk-insert optimization in
+     * InsertResultSet.
+     * </p>
+     *
+     * @param restart   True if the clone should be reset to start at the beginning instead of at the current value.
+     */
+    public synchronized SequenceGenerator clone( boolean restart )
+    {
+        Long    startValue;
+
+        if ( restart ) { startValue = new Long( _RESTART_VALUE ); }
+        else if ( _isExhausted ) { startValue = null; }
+        else { startValue = new Long( _currentValue ); }
+
+        return new SequenceGenerator
+            (
+             startValue,
+             _CAN_CYCLE,
+             _INCREMENT,
+             _MAX_VALUE,
+             _MIN_VALUE,
+             _RESTART_VALUE,
+             _SCHEMA_NAME,
+             _SEQUENCE_NAME,
+             _PREALLOCATOR
+             );
+    }
+    
+    /**
+     * <p>
+     * Clone this sequence generator. This method supports the special bulk-insert optimization in
+     * InsertResultSet.
+     * </p>
+     *
+     * @param newStartValue New value to start with.
+     */
+    public synchronized SequenceGenerator clone( Long newStartValue )
+    {
+        return new SequenceGenerator
+            (
+             newStartValue,
+             _CAN_CYCLE,
+             _INCREMENT,
+             _MAX_VALUE,
+             _MIN_VALUE,
+             _RESTART_VALUE,
+             _SCHEMA_NAME,
+             _SEQUENCE_NAME,
+             _PREALLOCATOR
+             );
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //

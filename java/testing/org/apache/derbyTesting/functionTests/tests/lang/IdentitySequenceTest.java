@@ -116,27 +116,26 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
-             "create table t1_01\n" +
+             "create table T1_01_IST\n" +
              "(\n" +
              "    a int generated always as identity ( start with 10, increment by 20 ),\n" +
              "    b int\n" +
              ")\n"
              );
-        String  sequenceName = getIdentitySequenceName( conn, "t1_01" );
+        String  sequenceName = getIdentitySequenceName( conn, "T1_01_IST" );
 
         // sequence should be in SYS, its name should be based on the table id,
         // and its start/stop/max/min/cycle values should be correct.
-        String  sequenceStats =
-            "select\n" +
-            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
-            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
-            "from sys.syssequences s, sys.sysschemas c\n" +
-            "where s.schemaID = c.schemaID\n";
 
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][]
              {
                  { "SYS", sequenceName, "10", "10", "-2147483648", "2147483647", "20", "N" },
@@ -147,7 +146,7 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "values syscs_util.syscs_peek_at_identity( 'APP', 'T1_01' )",
+             "values syscs_util.syscs_peek_at_identity( 'APP', 'T1_01_IST' )",
              new String[][]
              {
                  { "10" },
@@ -160,22 +159,32 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
             ( conn, BAD_NEXT_VALUE, "values ( next value for sys.\"" + sequenceName + "\" )" );
 
         // alter the identity column and observe that the sequence generator changes
-        goodStatement( conn, "alter table t1_01 alter column a set increment by 15" );
+        goodStatement( conn, "alter table T1_01_IST alter column a set increment by 15" );
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][]
              {
                  { "SYS", sequenceName, "10", "10", "-2147483648", "2147483647", "15", "N" },
              },
              false
              );
-        goodStatement( conn, "alter table t1_01 alter column a restart with 500" );
+        goodStatement( conn, "alter table T1_01_IST alter column a restart with 500" );
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][]
              {
                  { "SYS", sequenceName, "500", "500", "-2147483648", "2147483647", "15", "N" },
@@ -184,36 +193,46 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              );
         
         // system sequence should disappear when the table is dropped
-        goodStatement( conn, "drop table t1_01" );
+        goodStatement( conn, "drop table T1_01_IST" );
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][] {},
              false
              );
 
         // can't add an identity column to a table
-        goodStatement( conn, "create table t2_01( b int )" );
+        goodStatement( conn, "create table T2_01_IST( b int )" );
         expectCompilationError
             ( conn, CANT_ADD_IDENTITY,
-              "alter table t2_01 add column a int generated always as identity ( start with 10, increment by 20 )" );
+              "alter table T2_01_IST add column a int generated always as identity ( start with 10, increment by 20 )" );
 
         // dropping an identity column should drop the sequence generator too
         goodStatement
             (
              conn,
-             "create table t1_03\n" +
+             "create table T3_03_IST\n" +
              "(\n" +
              "    a int generated always as identity ( start with 10, increment by 20 ),\n" +
              "    b int\n" +
              ")\n"
              );
-        sequenceName = getIdentitySequenceName( conn, "t1_03" );
+        sequenceName = getIdentitySequenceName( conn, "T3_03_IST" );
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][]
              {
                  { "SYS", sequenceName, "10", "10", "-2147483648", "2147483647", "20", "N" },
@@ -223,38 +242,112 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "values syscs_util.syscs_peek_at_identity( 'APP', 'T1_03' )",
+             "values syscs_util.syscs_peek_at_identity( 'APP', 'T3_03_IST' )",
              new String[][]
              {
                  { "10" },
              },
              false
              );
-        goodStatement( conn, "alter table t1_03 drop column a" );
+        goodStatement( conn, "alter table T3_03_IST drop column a" );
         assertResults
             (
              conn,
-             sequenceStats,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
              new String[][] {},
              false
              );
         expectExecutionError
             ( conn, TABLE_DOESNT_HAVE_IDENTITY,
-             "values syscs_util.syscs_peek_at_identity( 'APP', 'T1_03' )"
+             "values syscs_util.syscs_peek_at_identity( 'APP', 'T3_03_IST' )"
               );
     }
     
+    /**
+     * <p>
+     * Test ALTER TABLE behavior.
+     * </p>
+     */
+    public  void    test_002_alterTable()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Test that changing the increment value for an identity
+        // column does not affect its current value. See DERBY-6579.
+        //
+        goodStatement( conn, "create table t1_002( a int, b int generated always as identity )" );
+        goodStatement( conn, "insert into t1_002( a ) values ( 100 ), ( 200 )" );
+        goodStatement( conn, "alter table t1_002 alter b set increment by 10" );
+        goodStatement( conn, "insert into t1_002( a ) values ( 300 ), ( 400 )" );
+        assertResults
+            (
+             conn,
+             "select * from t1_002 order by a",
+             new String[][]
+             {
+                 { "100", "1" },
+                 { "200", "2" },
+                 { "300", "3" },
+                 { "400", "13" },
+             },
+             false
+             );
+
+        goodStatement( conn, "drop table t1_002" );
+        goodStatement( conn, "create table t1_002( a int, b int generated always as identity )" );
+        goodStatement( conn, "insert into t1_002( a ) values ( 100 ), ( 200 )" );
+        goodStatement( conn, "delete from t1_002 where a = 200" );
+        goodStatement( conn, "alter table t1_002 alter b set increment by 10" );
+        goodStatement( conn, "insert into t1_002( a ) values ( 300 ), ( 400 )" );
+        assertResults
+            (
+             conn,
+             "select * from t1_002 order by a",
+             new String[][]
+             {
+                 { "100", "1" },
+                 { "300", "3" },
+                 { "400", "13" },
+             },
+             false
+             );
+
+        // now restart the identity column at a later number
+        goodStatement( conn, "alter table t1_002 alter b restart with 1000" );
+        goodStatement( conn, "insert into t1_002( a ) values ( 500 ), ( 600 )" );
+        assertResults
+            (
+             conn,
+             "select * from t1_002 order by a",
+             new String[][]
+             {
+                 { "100", "1" },
+                 { "300", "3" },
+                 { "400", "13" },
+                 { "500", "1000" },
+                 { "600", "1010" },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private String  getIdentitySequenceName( Connection conn, String tableName )
+    public  static String  getIdentitySequenceName( Connection conn, String tableName )
         throws Exception
     {
-        PreparedStatement   ps = chattyPrepare
-            ( conn, "select tableID from sys.systables where tablename = ?" );
+        PreparedStatement   ps = conn.prepareStatement( "select tableID from sys.systables where tablename = ?" );
         ps.setString( 1, tableName.toUpperCase() );
         ResultSet   rs = ps.executeQuery();
         rs.next();

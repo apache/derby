@@ -1841,6 +1841,42 @@ public interface DataDictionary
 		throws StandardException;
 	
 	/**
+	 * Computes the RowLocation in SYSSEQUENCES for a particular sequence. Also
+     * constructs the sequence descriptor.
+	 * 
+	 * @param tc			Transaction Controller to use.
+	 * @param sequenceIDstring UUID of the sequence as a string
+	 * @param rowLocation OUTPUT param for returing the row location
+	 * @param sequenceDescriptor OUTPUT param for return the sequence descriptor
+     *
+	 * @exception StandardException thrown on failure.
+	 */ 
+	public void computeSequenceRowLocation
+        ( TransactionController tc, String sequenceIDstring, RowLocation[] rowLocation, SequenceDescriptor[] sequenceDescriptor )
+		throws StandardException;
+    
+	/**
+	 * Set the current value of an ANSI/ISO sequence. This method does not perform
+     * any sanity checking but assumes that the caller knows what they are doing. If the
+     * old value on disk is not what we expect it to be, then we are in a race with another
+     * session. They won and we don't update the value on disk. However, if the old value
+     * is null, that is a signal to us that we should update the value on disk anyway.
+	 * 
+	 * @param tc			Transaction Controller to use.
+	 * @param rowLocation Row in SYSSEQUENCES to update.
+     * @param wait True if we should wait for locks
+     * @param oldValue What we expect to find in the CURRENTVALUE column.
+     * @param newValue What to stuff into the CURRENTVALUE column.
+	 * 
+	 * @return Returns true if the value was successfully updated, false if we lost a race with another session.
+     *
+	 * @exception StandardException thrown on failure.
+	 */
+    public  boolean updateCurrentSequenceValue
+        ( TransactionController tc, RowLocation rowLocation, boolean wait, Long oldValue, Long newValue )
+        throws StandardException;
+    
+	/**
 	 * Get the next number from an ANSI/ISO sequence generator
      * which was created with the CREATE SEQUENCE statement. May
      * raise an exception if the sequence was defined as NO CYCLE and
@@ -2386,4 +2422,26 @@ public interface DataDictionary
      */
     public DependableFinder getColumnDependableFinder(
             int formatId, byte[] columnBitMap);
+
+    /**
+     * Get the identity generator used to support the bulk-insert optimization
+     * in InsertResultSet.
+     *
+     * @param sequenceUUIDString UUID of the sequence which backs the identity column.
+     * @param restart   True if the counter should be re-initialized to its start position.
+     */
+    public  BulkInsertCounter   getBulkInsertCounter
+        ( String sequenceUUIDString, boolean restart )
+        throws StandardException;
+
+    /**
+     * Flush the updated values of the BulkInsertCounter to disk and to the original, cached
+     * SequenceUpdater. This is used for the bulk-insert optimization in InsertResultSet.
+     *
+     * @param sequenceUUIDString UUID of the sequence which backs the identity column.
+     * @param bic   the BulkInsertCounter which generates identities for bulk insert
+     */
+    public  void   flushBulkInsertCounter
+        ( String sequenceUUIDString, BulkInsertCounter bic )
+        throws StandardException;
 }

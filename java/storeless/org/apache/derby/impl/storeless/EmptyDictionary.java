@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.BulkInsertCounter;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -752,6 +753,21 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+	public void computeSequenceRowLocation
+        ( TransactionController tc, String sequenceIDstring, RowLocation[] rowLocation, SequenceDescriptor[] sequenceDescriptor )
+		throws StandardException
+    {
+		// Auto-generated method stub
+    }
+
+    public  boolean updateCurrentSequenceValue
+        ( TransactionController tc, RowLocation rowLocation, boolean wait, Long oldValue, Long newValue )
+        throws StandardException
+    {
+		// Auto-generated method stub
+        return true;
+    }
+               
     public void getCurrentValueAndAdvance
         ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException
@@ -975,4 +991,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
             int formatId, byte[] columnBitMap) {
         return null;
     }
+
+    public  BulkInsertCounter   getBulkInsertCounter
+        ( String sequenceUUIDString, boolean restart )
+    { return null; }
+    
+    public  void   flushBulkInsertCounter
+        ( String sequenceUUIDString, BulkInsertCounter bic )
+        throws StandardException
+    {}
 }

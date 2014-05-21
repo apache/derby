@@ -754,7 +754,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
      *
 	 * @return The next number in the sequence
 	 */
-	protected NumberDataValue getCurrentValueAndAdvance
+	public NumberDataValue getCurrentValueAndAdvance
         ( String sequenceUUIDstring, int typeFormatID )
 	       throws StandardException
 	{

@@ -223,11 +223,32 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs = s.executeQuery("select * from ai_short order by i");
 		String[][]expectedRows=new String[][]{{"0","0"},{"1","2"},{"2","4"},{"33","6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'AIS'");
-		expectedRows=new String[][]{{"AIS","8","0","2"}};
-		JDBC.assertFullResultSet(rs,expectedRows);
-
+        vetSequenceState( "ai_short", 8, 0, 2 );
 	}
+    private void    vetSequenceState( String tableName, long currentValue, long startValue, long stepValue )
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        String  sequenceName = IdentitySequenceTest.getIdentitySequenceName( conn, tableName );
+        ResultSet   rs = conn.prepareStatement
+            (
+             "select s.startValue, s.increment\n" +
+             "from sys.syssequences s\n" +
+             "where sequenceName = '" + sequenceName + "'"
+             ).executeQuery();
+        String[][]  expectedRows = new String[][]
+        {
+            { Long.toString( startValue ), Long.toString( stepValue ) }
+        };
+        JDBC.assertFullResultSet( rs,expectedRows );
+
+        rs = conn.prepareStatement
+            (
+             "values syscs_util.syscs_peek_at_identity( 'APP', '" + tableName.toUpperCase() + "' )"
+             ).executeQuery();
+        expectedRows = new String[][] { { Long.toString( currentValue ) } };
+        JDBC.assertFullResultSet( rs,expectedRows );
+    }
 	public void testonegeneratedcolumn() throws Exception
 	{
 		//-- table with one generated column spec should succeed
@@ -380,18 +401,14 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("select * from tab1 order by s1");
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1'");
-		expectedRows=new String[][]{{"TAB1","4","1","1"}};
-		JDBC.assertFullResultSet(rs,expectedRows);
+        vetSequenceState( "TAB1", 4, 1, 1 );
 		s.executeUpdate("create table tab2 (lvl int, s1  bigint generated always as identity)");
 		s.executeUpdate("create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3");
 		s.executeUpdate("insert into tab3 values null");
 		rs=s.executeQuery("select * from tab2 order by lvl");
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB2'");
-		expectedRows=new String[][]{{"TAB2","4","1","1"}};
-		JDBC.assertFullResultSet(rs,expectedRows);
+        vetSequenceState( "TAB2", 4, 1, 1 );
 	}
 	public void testadditionalSysCol() throws Exception
 	{
@@ -492,13 +509,24 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("set isolation serializable");
 		rs=s.executeQuery("select columnname, autoincrementvalue from sys.syscolumns where columnname = 'YYYY'");
-		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1   ","S   ","SYSCOLUMNS  ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]
+            {
+                {"APP     ","UserTran","TABLE   ","1   ","S   ","SYSCOLUMNS  ","GRANT","ACTIVE"}
+            };
 		rs=s.executeQuery("select * from lock_table order by tabname, type desc, mode, cnt");
-		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]
+            {
+                {"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"}
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into lockt1 (x) values (3)");
 		rs=s.executeQuery("select * from lock_table order by tabname, type desc, mode, cnt");
-		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","IX","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","2  ","X","SYSCOLUMNS  ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]
+            {
+                {"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},
+                {"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},
+                {"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 		commit();
 		
@@ -604,10 +632,10 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		ResultSet rs;
 		Statement pst=createStatement();
 		Statement s=createStatement();
-		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
-		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1)");		
+		assertStatementError("2200H", pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
+		assertStatementError("2200H", pst,"insert into ai_over1 (x) values (1)");		
 		s.executeUpdate("insert into ai_over2 (x) values (1),(2),(3),(4),(5),(6),(7),(8)");
-		assertStatementError("22003", pst,"insert into ai_over2 (x) values (9),(10)");
+		assertStatementError("2200H", pst,"insert into ai_over2 (x) values (9),(10)");
 		String[][]expectedRows=new String[][]{{"1","-32760"},{"2","-32761"},{"3","-32762"},{"4","-32763"},{"5","-32764"},{"6","-32765"},{"7","-32766"},{"8","-32767"}};
 		rs=s.executeQuery("select * from ai_over2 order by x");
 		JDBC.assertFullResultSet(rs,expectedRows);		
@@ -616,12 +644,17 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("select * from ai_over3 order by x");
 		expectedRows=new String[][]{{"1","2147483646"},{"2","2147483647"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		assertStatementError("22003", pst,"insert into ai_over3 (x) select x from ai_over3");			
+		assertStatementError("2200H", pst,"insert into ai_over3 (x) select x from ai_over3");			
 		//bigint overflow check		
-		s.executeUpdate("insert into ai_over4 (x) values (1),(2)");
-		assertStatementError("22003", pst,"insert into ai_over4 (x) values (3)");
+		s.executeUpdate("insert into ai_over4 (x) values (1),(2),(3)");
+		assertStatementError("2200H", pst,"insert into ai_over4 (x) values (4)");
 		rs=s.executeQuery("select * from ai_over4 order by x");
-		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"}};
+		expectedRows=new String[][]
+            {
+                {"1","9223372036854775805"},
+                {"2","9223372036854775806"},
+                {"3","9223372036854775807"},
+            };
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -965,9 +998,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
                 {"2","9999"}
             };
 		JDBC.assertFullResultSet(rs,expectedRows);
-		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'REC11'");
-		expectedRows=new String[][]{{"REC11","4","2","2"}};
-		JDBC.assertFullResultSet(rs,expectedRows);
+        vetSequenceState( "RESTARTT1", 4, 2, 2 );
 		assertStatementError("42837",s,"alter table restartt1 alter column c12 RESTART WITH 2");
 		assertStatementError("42X49",s,"alter table restartt1 alter column rec11 RESTART WITH 2.20");
 		s.execute("alter table restartt1 alter column rec11 RESTART WITH 2");
@@ -999,10 +1030,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"LOCKC11","1","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("23505",s,"insert into t1lock(c12) values(3)");
-		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'LOCKC11'");
-		//Utilities.showResultSet(rs);
-		expectedRows=new String[][]{{"LOCKC11","2","1","1"}};
-		JDBC.assertFullResultSet(rs,expectedRows);
+        vetSequenceState( "T1LOCK", 2, 1, 1 );
 
 		rs=s.executeQuery("select * from t1lock");
 		expectedRows=new String[][]{{"1","1"}};
@@ -1036,9 +1064,9 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("SELECT col.columndefault,col.autoincrementvalue, col.autoincrementstart,col.autoincrementinc FROM sys.syscolumns col INNER JOIN sys.systables tab ON col.referenceId = tab.tableid WHERE tab.tableName = 'DERBY_1645' AND ColumnName = 'TESTTABLEID'");
 		expectedRows=new String[][]{{"GENERATED_BY_DEFAULT","1","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (1, 'test1')");
-		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (2, 'test2')");
-		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (3, 'test3')");
+		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (-1, 'test1')");
+		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (-2, 'test2')");
+		s.execute("INSERT INTO derby_1645 (TESTTableId, TESTStringValue) VALUES (-3, 'test3')");
 		s.execute("ALTER TABLE derby_1645 ALTER TESTTableId SET INCREMENT BY 50");
 		rs=s.executeQuery("SELECT col.columndefault,col.autoincrementvalue, col.autoincrementstart,col.autoincrementinc FROM sys.syscolumns col INNER JOIN sys.systables tab ON col.referenceId = tab.tableid WHERE tab.tableName = 'DERBY_1645' AND ColumnName = 'TESTTABLEID'");
 		expectedRows=new String[][]{{"GENERATED_BY_DEFAULT","53","1","50"}};

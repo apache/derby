@@ -783,6 +783,7 @@ public class GenericConstantActionFactory
 	 *  @param autoincRowLocation array of row locations into syscolumns for
 	                              autoincrement columns
 	 *  @param underMerge   True if this is an INSERT action of a MERGE statement.
+	 *  @param identitySequenceUUIDString   For 10.11 and higher, the handle on the sequence for the identity column
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -811,7 +812,8 @@ public class GenericConstantActionFactory
 								Object[]			ddlList,
 								boolean				singleRowSource,
 								RowLocation[]		autoincRowLocation,
-								boolean		underMerge
+								boolean		underMerge,
+								String		identitySequenceUUIDString
 							)
 			throws StandardException
 	{
@@ -833,7 +835,8 @@ public class GenericConstantActionFactory
 										indexedCols,
 										singleRowSource,
 										autoincRowLocation,
-										underMerge
+										underMerge,
+										identitySequenceUUIDString
 										);
 	}
 

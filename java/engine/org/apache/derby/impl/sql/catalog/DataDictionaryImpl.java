@@ -84,6 +84,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.BulkInsertCounter;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
@@ -10178,7 +10179,7 @@ public final class	DataDictionaryImpl
      *
 	 * @exception StandardException thrown on failure.
 	 */ 
-	void computeSequenceRowLocation
+	public void computeSequenceRowLocation
         ( TransactionController tc, String sequenceIDstring, RowLocation[] rowLocation, SequenceDescriptor[] sequenceDescriptor )
 		throws StandardException								  
 	{
@@ -10222,7 +10223,7 @@ public final class	DataDictionaryImpl
      *
 	 * @exception StandardException thrown on failure.
 	 */
-    boolean updateCurrentSequenceValue
+    public  boolean updateCurrentSequenceValue
         ( TransactionController tc, RowLocation rowLocation, boolean wait, Long oldValue, Long newValue )
         throws StandardException
     {
@@ -10362,6 +10363,45 @@ public final class	DataDictionaryImpl
             }
         }
     }
+    
+    public  BulkInsertCounter   getBulkInsertCounter
+        ( String sequenceUUIDString, boolean restart )
+        throws StandardException
+    {
+        SequenceUpdater sequenceUpdater = null;
+
+        try {
+            sequenceUpdater = (SequenceUpdater) sequenceGeneratorCache.find( sequenceUUIDString );
+            return sequenceUpdater.getBulkInsertUpdater( restart );
+        }
+        finally
+        {
+            if ( sequenceUpdater != null )
+            {
+                sequenceGeneratorCache.release( sequenceUpdater );
+            }
+        }
+    }
+
+    public  void   flushBulkInsertCounter
+        ( String sequenceUUIDString, BulkInsertCounter bic )
+        throws StandardException
+    {
+        SequenceUpdater sequenceUpdater = null;
+
+        try {
+            sequenceUpdater = (SequenceUpdater) sequenceGeneratorCache.find( sequenceUUIDString );
+            sequenceUpdater.reset( bic.peekAtCurrentValue() );
+        }
+        finally
+        {
+            if ( sequenceUpdater != null )
+            {
+                sequenceGeneratorCache.release( sequenceUpdater );
+            }
+        }
+    }
+    
     
     public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
                                               TableDescriptor td)

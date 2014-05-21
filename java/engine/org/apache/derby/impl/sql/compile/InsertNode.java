@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
@@ -89,6 +90,9 @@ public final class InsertNode extends DMLModStatementNode
     private     boolean           hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	protected   RowLocation[] 		autoincRowLocation;
+
+    private     String              identitySequenceUUIDString;
+    
 	/**
      * Constructor for an InsertNode.
 	 *
@@ -550,6 +554,21 @@ public final class InsertNode extends DMLModStatementNode
                                                   null,
                                                   resultSet);
 		}
+
+        // if this is 10.11 or higher and the table has an identity column,
+        // get the uuid of the sequence generator backing the identity column
+        if (
+            targetTableDescriptor.tableHasAutoincrement() &&
+            dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )
+            )
+        {
+            SequenceDescriptor  seq = dd.getSequenceDescriptor
+                (
+                 dd.getSystemSchemaDescriptor(),
+                 TableDescriptor.makeSequenceName( targetTableDescriptor.getUUID() )
+                 );
+            identitySequenceUUIDString = seq.getUUID().toString();
+        }
         
         getCompilerContext().removePrivilegeFilter( ignorePermissions );
 		getCompilerContext().popCurrentPrivType();
@@ -811,7 +830,8 @@ public final class InsertNode extends DMLModStatementNode
 				  null,
 				  resultSet.isOneRowResultSet(), 
 				  autoincRowLocation,
-				  inMatchingClause()
+				  inMatchingClause(),
+				  identitySequenceUUIDString
 				  );
 		}
 		else
