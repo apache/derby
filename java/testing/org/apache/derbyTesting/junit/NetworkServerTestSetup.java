@@ -600,6 +600,22 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         boolean expectServerUp)
         throws InterruptedException
     {
+        //DERBY-6337(derbynet.ServerPropertiesTest.ttestSetPortPriority prints 
+        // exception java.lang.Exception: 
+        // DRDA_InvalidReplyTooShort.S:Invalidreply from network 
+        // server:Insufficent data. but test passes)
+        //Sometimes, when server is coming down and a ping is sent to it, ping
+        // may get DRDA_InvalidReplyTooShort.S:Invalidreply rather than server
+        // is down depending on the timing of the server shutdown. If we do run
+        // into DRDA_InvalidReplyTooShort.S:Invalidreply, we will now send 
+        // another ping after a little wait, and this time around we should 
+        // get expected server down exception.
+        //Following boolean will be set to true if we get reply too short
+        // during the ping and it will try to ping again. But if we get
+        // the reply too short on that ping attempt as well, we will just
+        // print the exception on the console and conclude that server is
+        // down.
+        boolean alreadyGotReplyTooShort=false;
         // If we expect the server to be or come up, then
         // it makes sense to sleep (if ping unsuccessful), then ping 
         // and repeat this for the duration of wait-time, but stop
@@ -624,8 +640,13 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             } catch (Throwable e) {
                 if ( !vetPing( e ) )
                 {
+                    if ( !alreadyGotReplyTooShort && 
+                            (e.getMessage().startsWith( "DRDA_InvalidReplyTooShort.S:" ) ) ){
+                        alreadyGotReplyTooShort = true;
+                        Thread.sleep(SLEEP_TIME);
+                        continue;
+                    }
                     e.printStackTrace( System.out );
-
                     // at this point, we don't have the usual "server not up
                     // yet" error. get out. at this point, you may have to
                     // manually kill the server.
