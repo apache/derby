@@ -794,5 +794,54 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         // forbidden.
         assertCompileError("42Z09",
             "values case ? when like 'abc' then true when 1 then false end");
+
+        // The EXISTS predicate can only be used in the WHEN operand if
+        // the CASE operand is a BOOLEAN.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("values case true when exists" +
+                               "(select * from sysibm.sysdummy1) then 1 end"),
+                "1");
+        assertCompileError("42818",
+                "values case 1 when exists" +
+                "(select * from sysibm.sysdummy1) then 1 end");
+
+        // Scalar subqueries are allowed in the operands.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery(
+                        "values case (select ibmreqd from sysibm.sysdummy1) "
+                        + "when 'N' then 'no' when 'Y' then 'yes' end"),
+                "yes");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("values case 'Y' when "
+                                + "(select ibmreqd from sysibm.sysdummy1) "
+                                + "then 'yes' end"),
+                "yes");
+
+        // Subquery returns two columns - fail.
+        assertCompileError(
+                "42X39",
+                "values case (select ibmreqd, 1 from sysibm.sysdummy1)"
+                + " when 'Y' then true end");
+        assertCompileError(
+                "42X39",
+                "values case 'Y' when "
+                + "(select ibmreqd, 1 from sysibm.sysdummy1) then true end");
+
+        // Subquery returns multiple rows - fail.
+        assertStatementError("21000", s,
+            "values case (select 1 from sys.systables) when 1 then true end");
+        assertStatementError("21000", s,
+            "values case 1 when (select 1 from sys.systables) then true end");
+
+        // Subquery returns zero rows, which is converted to NULL for scalar
+        // subqueries.
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case (select ibmreqd from sysibm.sysdummy1 where false)"
+                + " when is null then 'yes' end"),
+            "yes");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case true when true then "
+                + "(select ibmreqd from sysibm.sysdummy1 where false) end"),
+            null);
     }
 }
