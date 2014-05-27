@@ -498,20 +498,20 @@ public class BasicSetup extends UpgradeChange {
         	//During the path back to original release, all the spses get
         	// marked invalid and hence they will be regenerated during 
         	// the next time they get fired. This regeneration will cause
-        	// the dependency between trigger action sps and trigger table
+        	// the dependency between trigger action sps and trigger table 
         	// be dropped except in 10.8.2.2 and higher releases where
         	// DERBY-5120 has already been fixed.
             assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
 
         	preapreFortDERBY5120();
-            s.execute("update ATDC_TAB1 set c12=11");
+            s.execute("update ATDC_TAB1 set c11=11");
             s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
             //DERBY-5120 has been fixed in 10.8.2.2 and higher and hence we 
             // will not see the buggy behavior on those codelines
             if (oldLessThan(10,8,2,2)) 
-                s.execute("update ATDC_TAB1 set c12=11");
+                s.execute("update ATDC_TAB1 set c11=11");
             else
-                assertStatementError("42802", s, " update ATDC_TAB1 set c12=11");            
+                assertStatementError("42802", s, " update ATDC_TAB1 set c11=11");            
         	break;
 
         case PH_POST_HARD_UPGRADE:
