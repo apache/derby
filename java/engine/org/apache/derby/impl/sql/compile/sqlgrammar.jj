@@ -12577,6 +12577,7 @@ valueSpecification() throws StandardException :
         return new ConditionalNode(null, whenList, thenElseList, cm);
 	}
 |
+    // Searched CASE expression.
 	// CASE WHEN P1 THEN [T1 | NULL] (WHEN Pi THEN [Ti | NULL])* [ELSE E | NULL] END
     LOOKAHEAD({ getToken(1).kind == CASE && getToken(2).kind == WHEN })
     <CASE> value = searchedCaseExpression()
@@ -12584,8 +12585,13 @@ valueSpecification() throws StandardException :
 		return value;
 	}
 |
+    // Simple CASE expression.
+    // It will be rewritten to a searched CASE expression internally, for
+    // example: CASE x (WHEN Wi THEN Ti)+ -> CASE (WHEN x=Wi THEN Ti)+
+    // Wrap the case operand in a CachedValueNode to prevent it from being
+    // evaluated multiple times in the rewritten expression.
     <CASE> caseOperand = valueExpression()
-           value = simpleCaseExpression(caseOperand)
+           value = simpleCaseExpression(new CachedValueNode(caseOperand))
     {
         return value;
     }
@@ -12653,7 +12659,7 @@ thenElseExpression() throws StandardException :
 	}
 }
 
-ConditionalNode simpleCaseExpression(ValueNode caseOperand)
+ConditionalNode simpleCaseExpression(CachedValueNode caseOperand)
 throws StandardException :
 {
     ContextManager cm = getContextManager();

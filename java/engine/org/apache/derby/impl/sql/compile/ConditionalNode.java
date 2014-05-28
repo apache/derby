@@ -50,7 +50,7 @@ class ConditionalNode extends ValueNode
      * The case operand if this is a simple case expression. Otherwise, it
      * is {@code null}.
      */
-    private ValueNode caseOperand;
+    private CachedValueNode caseOperand;
 
     /** The list of test conditions in the WHEN clauses. */
     private ValueNodeList testConditions;
@@ -70,7 +70,7 @@ class ConditionalNode extends ValueNode
 	 * @param thenElseList		ValueNodeList with then and else expressions
      * @param cm                The context manager
 	 */
-    ConditionalNode(ValueNode caseOperand,
+    ConditionalNode(CachedValueNode caseOperand,
                     ValueNodeList testConditions,
                     ValueNodeList thenElseList,
                     ContextManager cm)
@@ -304,7 +304,7 @@ class ConditionalNode extends ValueNode
             int previousReliability = orReliability(
                     CompilerContext.CASE_OPERAND_RESTRICTION);
 
-            caseOperand = caseOperand.bindExpression(
+            caseOperand = (CachedValueNode) caseOperand.bindExpression(
                     fromList, subqueryList, aggregates);
 
             // For now, let's also forbid untyped parameters as case
@@ -511,6 +511,13 @@ class ConditionalNode extends ValueNode
 
         for (int i = 0; i < testConditions.size(); i++) {
             mb.completeConditional();
+        }
+
+        // If we have a cached case operand, clear the field that holds
+        // the cached value after the case expression has been evaluated,
+        // so that the value can be garbage collected early.
+        if (caseOperand != null) {
+            caseOperand.generateClearField(mb);
         }
 	}
 

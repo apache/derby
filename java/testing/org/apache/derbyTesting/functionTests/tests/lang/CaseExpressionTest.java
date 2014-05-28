@@ -29,10 +29,13 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -843,5 +846,118 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                 "values case true when true then "
                 + "(select ibmreqd from sysibm.sysdummy1 where false) end"),
             null);
+
+        // Simple case expressions should work in join conditions.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select x from (values 1, 2, 3) v1(x) "
+                                + "join (values 13, 14) v2(y) "
+                                + "on case y-x when 10 then true end"),
+                "3");
+    }
+
+    /**
+     * Verify that the case operand expression is evaluated only once per
+     * evaluation of the CASE expression.
+     */
+    public void testSingleEvaluationOfCaseOperand() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute("create function count_me(x int) returns int "
+                + "language java parameter style java external name '"
+                + getClass().getName() + ".countMe' no sql deterministic");
+
+        callCount.set(0);
+
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery(
+                "select case count_me(x) when 1 then 'one' when 2 then 'two' "
+                + "when 3 then 'three' end from (values 1, 2, 3) v(x)"),
+            new String[][] { {"one"}, {"two"}, {"three"} });
+
+        // The CASE expression is evaluated once per row. There are three
+        // rows. Expect that the COUNT_ME function was only invoked once
+        // per row.
+        assertEquals(3, callCount.get());
+    }
+
+    /** Count how many times countMe() has been called. */
+    private static final AtomicInteger callCount = new AtomicInteger();
+
+    /**
+     * Stored function that keeps track of how many times it has been called.
+     * @param i an integer
+     * @return the integer {@code i}
+     */
+    public static int countMe(int i) {
+        callCount.incrementAndGet();
+        return i;
+    }
+
+    /**
+     * Test that large objects can be used as case operands.
+     */
+    public void testLobAsCaseOperand() throws SQLException {
+        Statement s = createStatement();
+
+        // BLOB and CLOB are allowed in the case operand.
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case cast(null as blob) when is null then 'yes' end"),
+            "yes");
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "values case cast(null as clob) when is null then 'yes' end"),
+            "yes");
+
+        // Comparisons between BLOB and BLOB, or between CLOB and CLOB, are
+        // not allowed, so expect a compile-time error for these queries.
+        assertCompileError("42818",
+                "values case cast(null as blob) "
+                + "when cast(null as blob) then true end");
+        assertCompileError("42818",
+                "values case cast(null as clob) "
+                + "when cast(null as clob) then true end");
+
+        // Now create a table with some actual LOBs in them.
+        s.execute("create table lobs_for_simple_case("
+                + "id int generated always as identity, b blob, c clob)");
+
+        PreparedStatement insert = prepareStatement(
+                "insert into lobs_for_simple_case(b, c) values (?, ?)");
+
+        // A small one.
+        insert.setBytes(1, new byte[] {1, 2, 3});
+        insert.setString(2, "small");
+        insert.executeUpdate();
+
+        // And a big one (larger than 32K means it will be streamed
+        // from store, instead of being returned as a materialized value).
+        insert.setBinaryStream(1, new LoopingAlphabetStream(40000));
+        insert.setCharacterStream(2, new LoopingAlphabetReader(40000));
+        insert.executeUpdate();
+
+        // And a NULL.
+        insert.setNull(1, Types.BLOB);
+        insert.setNull(2, Types.CLOB);
+        insert.executeUpdate();
+
+        // IS [NOT] NULL can be used on both BLOB and CLOB. LIKE can be
+        // used on CLOB. Those are the only predicates supported on BLOB
+        // and CLOB in simple case expressions currently. Test that they
+        // all work.
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery(
+                "select id, case b when is null then 'yes'"
+                + " when is not null then 'no' end, "
+                + "case c when is null then 'yes' when like 'abc' then 'abc'"
+                + " when like 'abc%' then 'abc...' when is not null then 'no'"
+                + " end "
+                + "from lobs_for_simple_case"),
+            new String[][] {
+                { "1", "no", "no" },
+                { "2", "no", "abc..." },
+                { "3", "yes", "yes" },
+            });
+
+        s.execute("drop table lobs_for_simple_case");
     }
 }
