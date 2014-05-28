@@ -1196,6 +1196,7 @@ TOKEN [IGNORE_CASE] :
 |	<GET: "get">
 |	<GETCURRENTROWNUMBER: "getcurrentrownumber">
 |	<HOLD: "hold">
+|   <HOLDFORCONNECTION: "holdforconnection">
 |	<HELP: "help">
 |	<IN: "in">
 |	<INDEXES: "indexes">
@@ -1584,6 +1585,7 @@ throws SQLException
 |	r=GetCursorStatement()	
 |	r=GetCurrentRowNumber()	
 |	r=HelpStatement()	
+|   r=HoldForConnectionStatement()    
 |	r=LastStatement()	
 |	r=LocalizedDisplay()
 |	r=MaximumDisplayWidthStatement()	
@@ -2812,6 +2814,27 @@ throws SQLException
 		theConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		return null;
 	}
+}
+
+/**
+ * By default, holdability is set to true for Connection objects. This syntax HOLDFORCONNECTION lets you set it to the default.
+ * Syntax:
+ *   HOLDFORCONNECTION ;
+ */
+ijResult
+HoldForConnectionStatement()
+throws SQLException
+:
+{
+    Token on=null;
+}
+{
+    <HOLDFORCONNECTION> 
+    {
+        haveConnection();
+        theConnection.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        return null;
+    }
 }
 
 /**

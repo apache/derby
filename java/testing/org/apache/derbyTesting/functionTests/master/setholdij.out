@@ -1,0 +1,131 @@
+ij> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+-- create a table
+create table sethold(c1 int, c2 int);
+0 rows inserted/updated/deleted
+ij> -- insert data into tables
+insert into sethold values(1,1);
+1 row inserted/updated/deleted
+ij> insert into sethold values(2,2);
+1 row inserted/updated/deleted
+ij> -- set autocommit off
+autocommit off;
+ij> -- first test - make sure that cursors created with default holdability
+-- have open resultsets after commit
+get cursor jdk1 as 'SELECT * FROM sethold';
+ij> get scroll insensitive cursor jdk2 as 'SELECT * FROM sethold';
+ij> -- do fetches from these cursors
+next jdk1;
+C1         |C2         
+-----------------------
+1          |1          
+ij> next jdk2;
+C1         |C2         
+-----------------------
+1          |1          
+ij> --commit and see if the cursors are still open
+commit;
+ij> next jdk1;
+C1         |C2         
+-----------------------
+2          |2          
+ij> next jdk2;
+C1         |C2         
+-----------------------
+2          |2          
+ij> -- second test - make sure that cursors created with holdability false
+-- do not have open resultsets after commit
+
+-- set NoHold, then declare 2 different kind of cursors and fetch from them
+NoHoldForConnection;
+ij> get cursor jdk3 as 'SELECT * FROM sethold';
+ij> get scroll insensitive cursor jdk4 as 'SELECT * FROM sethold';
+ij> -- do fetches from these cursors
+next jdk3;
+C1         |C2         
+-----------------------
+1          |1          
+ij> next jdk4;
+C1         |C2         
+-----------------------
+1          |1          
+ij> --commit and see if the cursors are still open
+commit;
+ij> next jdk3;
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
+ij> next jdk4;
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
+ij> -- third test - make sure that cursors created with holdability true
+-- have open resultsets after commit
+-- set Hold, then declare 2 different kind of cursors and fetch from them
+HoldForConnection;
+ij> get cursor jdk5 as 'SELECT * FROM sethold';
+ij> get scroll insensitive cursor jdk6 as 'SELECT * FROM sethold';
+ij> -- do fetches from these cursors
+next jdk5;
+C1         |C2         
+-----------------------
+1          |1          
+ij> next jdk6;
+C1         |C2         
+-----------------------
+1          |1          
+ij> --commit
+commit;
+ij> next jdk5;
+C1         |C2         
+-----------------------
+2          |2          
+ij> next jdk6;
+C1         |C2         
+-----------------------
+2          |2          
+ij> -- fourth test - make sure that we get the same behavior as before after
+-- setting the holdability to No Hold again.
+
+-- set NoHold, then declare 2 different kind of cursors and fetch from them
+NoHoldForConnection;
+ij> get cursor jdk7 as 'SELECT * FROM sethold';
+ij> get scroll insensitive cursor jdk8 as 'SELECT * FROM sethold';
+ij> -- do fetches from these cursors
+next jdk7;
+C1         |C2         
+-----------------------
+1          |1          
+ij> next jdk8;
+C1         |C2         
+-----------------------
+1          |1          
+ij> --commit and see if the cursors are still open
+commit;
+ij> next jdk7;
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
+ij> next jdk8;
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is off.
+ij> -- clean up.
+close jdk1;
+ij> close jdk2;
+ij> close jdk3;
+ij> close jdk4;
+ij> close jdk5;
+ij> close jdk6;
+ij> close jdk7;
+ij> close jdk8;
+ij> drop table sethold;
+0 rows inserted/updated/deleted
+ij> commit;
+ij> 
