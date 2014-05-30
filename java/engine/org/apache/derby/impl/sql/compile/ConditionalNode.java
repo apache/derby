@@ -378,7 +378,7 @@ class ConditionalNode extends ValueNode
     }
 
     /**
-     * A visitor that replaces all occurrences of the {@link caseOperand} node
+     * A visitor that replaces all occurrences of the {@link #caseOperand} node
      * in a tree with dummy parameter nodes. It also fills a supplied list
      * with the parameter nodes that have been inserted into the tree.
      */
