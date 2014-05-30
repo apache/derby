@@ -3307,6 +3307,7 @@ you should not have to do this.
         <antcall target="movepdf"><param name="userguide" value="devguide"/></antcall>
         <antcall target="movepdf"><param name="userguide" value="getstart"/></antcall>
         <antcall target="movepdf"><param name="userguide" value="ref"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="security"/></antcall>
         <antcall target="movepdf"><param name="userguide" value="tools"/></antcall>
         <antcall target="movepdf"><param name="userguide" value="tuning"/></antcall>
 
