@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -757,8 +758,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                     + "when 2 then 'two' end from (values 1, 1, 1) v(x)"),
                 new String[][] { {"one"}, {"two"}, {null} });
 
-        // Parameters in the case operand have to be typed for now, since the
-        // current type inference doesn't handle multiple types very well.
+        // Test that you can have a typed parameter in the case operand.
         PreparedStatement ps = prepareStatement(
                 "values case cast(? as integer) "
                 + "when 1 then 'one' when 2 then 'two' end");
@@ -775,28 +775,167 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                 "values case cast(? as integer) "
                 + "when 1 then 1 when like 'abc' then 2 end");
 
-        // Should have been able to infer the type in this case, but
-        // expect failure for now.
-        assertCompileError("42Z09",
-                           "values case ? when 1 then 2 when 3 then 4 end");
+        // Untyped parameter in the case operand. Should be able to infer
+        // the type from the WHEN clauses.
+        ps = prepareStatement("values case ? when 1 then 2 when 3 then 4 end");
+        ParameterMetaData pmd = ps.getParameterMetaData();
+        assertEquals(Types.INTEGER, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
 
-        // Should have detected that the types in the WHEN clauses are
-        // incompatible (the first requires the operand to be a number, the
-        // second requires it to be a string). Instead, for now, it fails
-        // because untyped parameters have been forbidden in the case operand.
-        // Used to fail with "Invalid character string format for type int"
-        // during execution before it was forbidden.
-        assertCompileError("42Z09",
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "2");
+
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        ps.setInt(1, 3);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "4");
+
+        ps = prepareStatement(
+                "values case ? when cast(1.1 as double) then true "
+                + "when cast(1.2 as double) then false end");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.DOUBLE, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setDouble(1, 1.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+        ps.setDouble(1, 1.2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "false");
+        ps.setDouble(1, 1.3);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        // Mixed types are accepted, as long as they are compatible.
+        ps = prepareStatement(
+                "values case ? when 1 then 'one' when 2.1 then 'two' end");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.DECIMAL, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "one");
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        ps.setDouble(1, 1.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setDouble(1, 2.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "two");
+
+        ps = prepareStatement(
+                "values case ? when 1 then 'one' when 2.1 then 'two'"
+                + " when cast(3 as bigint) then 'three' end");
+        assertEquals(Types.DECIMAL, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "one");
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setInt(1, 3);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "three");
+
+        ps.setDouble(1, 1.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setDouble(1, 2.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "two");
+        ps.setDouble(1, 3.1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        ps = prepareStatement(
+                "values case ? when 'abcdef' then 1 "
+                + "when cast('abcd' as varchar(4)) then 2 end");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.VARCHAR, pmd.getParameterType(1));
+        assertEquals(6, pmd.getPrecision(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setString(1, "abcdef");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        ps.setString(1, "abcd");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "2");
+        ps.setString(1, "ab");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        ps.setString(1, "abcdefghi");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        // The types in the WHEN clauses are incompatible, so the type of
+        // the case operand cannot be inferred.
+        assertCompileError("42818",
             "values case ? when 1 then true when like 'abc' then false end");
 
-        // Should have detected that the types in the WHEN clauses are
-        // incompatible (the first requires the operand to be a string, the
-        // second requires it to be a number). Instead, for now, it fails
-        // because untyped parameters have been forbidden in the case operand.
-        // Used to fail with an assert failure at compile time before it was
-        // forbidden.
-        assertCompileError("42Z09",
+        assertCompileError("42818",
             "values case ? when like 'abc' then true when 1 then false end");
+
+        // BLOB and CLOB are not comparable with anything.
+        assertCompileError("42818",
+                "values case ? when cast(x'abcd' as blob) then true end");
+        assertCompileError("42818",
+                "values case ? when cast('abcd' as clob) then true end");
+
+        // Cannot infer type if both sides of the comparison are untyped.
+        assertCompileError("42X35", "values case ? when ? then true end");
+        assertCompileError("42X35", "values case ? when ? then true "
+                                    + "when 1 then false end");
+
+        // Should be able to infer type when the untyped parameter is prefixed
+        // with plus or minus.
+        ps = prepareStatement(
+                "values (case +? when 1 then 1 when 2.1 then 2 end, "
+                        + "case -? when 1 then 1 when 2.1 then 2 end)");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.DECIMAL, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+        assertEquals(Types.DECIMAL, pmd.getParameterType(2));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(2));
+
+        ps.setInt(1, 1);
+        ps.setInt(2, -1);
+        JDBC.assertFullResultSet(ps.executeQuery(),
+                                 new String[][] {{ "1", "1" }});
+
+        ps.setInt(1, 2);
+        ps.setInt(2, -2);
+        JDBC.assertFullResultSet(ps.executeQuery(),
+                                 new String[][] {{ null, null }});
+
+        ps.setDouble(1, 1.1);
+        ps.setDouble(2, -1.1);
+        JDBC.assertFullResultSet(ps.executeQuery(),
+                                 new String[][] {{ null, null }});
+
+        ps.setDouble(1, 2.1);
+        ps.setDouble(2, -2.1);
+        JDBC.assertFullResultSet(ps.executeQuery(),
+                                 new String[][] {{ "2", "2" }});
+
+        // If the untyped parameter is part of an arithmetic expression, its
+        // type is inferred from that expression and not from the WHEN clause.
+        ps = prepareStatement(
+                "values case 2*? when 2 then true when 3.0 then false end");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.INTEGER, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+        ps.setDouble(1, 1.5);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        ps = prepareStatement(
+                "values case 2.0*? when 2 then true when 3.0 then false end");
+        pmd = ps.getParameterMetaData();
+        assertEquals(Types.DECIMAL, pmd.getParameterType(1));
+        assertEquals(ParameterMetaData.parameterNullable, pmd.isNullable(1));
+
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+        ps.setDouble(1, 1.5);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "false");
+        ps.setInt(1, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
 
         // The EXISTS predicate can only be used in the WHEN operand if
         // the CASE operand is a BOOLEAN.

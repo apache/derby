@@ -32,6 +32,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -195,11 +196,40 @@ class ConditionalNode extends ValueNode
         
         int previousReliability = orReliability( CompilerContext.CONDITIONAL_RESTRICTION );
 
-        bindCaseOperand(cc, fromList, subqueryList, aggregates);
+        ValueNodeList caseOperandParameters =
+                bindCaseOperand(cc, fromList, subqueryList, aggregates);
 
         testConditions.bindExpression(fromList,
 			subqueryList,
             aggregates);
+
+        // If we have a simple case expression in which the case operand
+        // requires type from context (typically because it's an untyped
+        // parameter), find out which type best describes it.
+        if (caseOperandParameters != null) {
+
+            // Go through all the dummy parameter nodes that bindCaseOperand()
+            // inserted into the synthetic test conditions. Each of them will
+            // have been given the type of the corresponding when operand
+            // when testConditions was bound.
+            for (ValueNode vn : caseOperandParameters) {
+                // Check that this parameter is comparable to all the other
+                // parameters in the list. This indirectly checks whether
+                // all when operands have compatible types.
+                caseOperandParameters.comparable(vn);
+
+                // Replace the dummy parameter node with the actual case
+                // operand.
+                testConditions.accept(new ReplaceNodeVisitor(vn, caseOperand));
+            }
+
+            // Finally, after we have determined that all the when operands
+            // are compatible, and we have reinserted the case operand into
+            // the tree, set the type of the case operand to the dominant
+            // type of all the when operands.
+            caseOperand.setType(
+                    caseOperandParameters.getDominantTypeServices());
+        }
 
         // Following call to "findType()"  and "recastNullNodes" will
         // indirectly bind the expressions in the thenElseList, so no need
@@ -291,38 +321,99 @@ class ConditionalNode extends ValueNode
 	}
 
     /**
+     * <p>
      * Bind the case operand, if there is one, and check that it doesn't
      * contain anything that's illegal in a case operand (such as calls to
-     * routines that are non-deterministic or modifies SQL).
+     * routines that are non-deterministic or modify SQL).
+     * </p>
+     *
+     * <p>
+     * Also, if the type of the case operand needs to be inferred, insert
+     * dummy parameter nodes into {@link #testConditions} instead of the
+     * case operand, so that the type can be inferred individually for each
+     * test condition. Later, {@link #bindExpression} will find a common
+     * type for all of them, use that type for the case operand, and reinsert
+     * the case operand into the test conditions.
+     * </p>
+     *
+     * @return a list of dummy parameter nodes that have been inserted into
+     * the tree instead of the case operand, if such a replacement has
+     * happened; otherwise, {@code null} is returned
      */
-    private void bindCaseOperand(CompilerContext cc, FromList fromList,
-                                 SubqueryList subqueryList,
-                                List<AggregateNode> aggregates)
+    private ValueNodeList bindCaseOperand(
+                    CompilerContext cc, FromList fromList,
+                    SubqueryList subqueryList, List<AggregateNode> aggregates)
             throws StandardException {
+
+        ValueNodeList replacements = null;
 
         if (caseOperand != null) {
             int previousReliability = orReliability(
                     CompilerContext.CASE_OPERAND_RESTRICTION);
 
+            // If the case operand requires type from context (typically,
+            // because it is an untyped parameter), we need to find a type
+            // that is comparable with all the when operands.
+            //
+            // To find the types of the when operands, temporarily replace
+            // all occurrences of the case operand with dummy parameter nodes.
+            // Later, after binding testConditions, those dummy nodes will
+            // have their types set to the types of the when operands. At that
+            // time, we will be able to find a common type, set the type of the
+            // case operand to that type, and reinsert the case operand into
+            // the tree.
+            if (caseOperand.requiresTypeFromContext()) {
+                replacements = new ValueNodeList(getContextManager());
+                testConditions.accept(
+                        new ReplaceCaseOperandVisitor(replacements));
+            }
+
             caseOperand = (CachedValueNode) caseOperand.bindExpression(
                     fromList, subqueryList, aggregates);
 
-            // For now, let's also forbid untyped parameters as case
-            // operands. The problem is that the current type inference
-            // doesn't handle conflicting types. Take for example
-            //    CASE ? WHEN 1 THEN TRUE WHEN 'abc' THEN FALSE END
-            // The type of the parameter would first get set to INTEGER
-            // when binding the first WHEN clause. Later, when binding the
-            // second WHEN clause, the type would be changed to CHAR(3),
-            // without noticing that it already had a type, and that the
-            // previous type was incompatible with the new one. Until the
-            // type inference has improved, forbid such expressions.
-            if (caseOperand.requiresTypeFromContext()) {
-                throw StandardException.newException(
-                        SQLState.LANG_CASE_OPERAND_UNTYPED);
-            }
-
             cc.setReliability(previousReliability);
+        }
+
+        return replacements;
+    }
+
+    /**
+     * A visitor that replaces all occurrences of the {@link caseOperand} node
+     * in a tree with dummy parameter nodes. It also fills a supplied list
+     * with the parameter nodes that have been inserted into the tree.
+     */
+    private class ReplaceCaseOperandVisitor implements Visitor {
+        private final ValueNodeList replacements;
+
+        private ReplaceCaseOperandVisitor(ValueNodeList replacements) {
+            this.replacements = replacements;
+        }
+
+        @Override
+        public Visitable visit(Visitable node) throws StandardException {
+            if (node == caseOperand) {
+                ParameterNode pn = new ParameterNode(
+                        0, null, getContextManager());
+                replacements.addElement(pn);
+                return pn;
+            } else {
+                return node;
+            }
+        }
+
+        @Override
+        public boolean visitChildrenFirst(Visitable node) {
+            return false;
+        }
+
+        @Override
+        public boolean stopTraversal() {
+            return false;
+        }
+
+        @Override
+        public boolean skipChildren(Visitable node) throws StandardException {
+            return false;
         }
     }
 

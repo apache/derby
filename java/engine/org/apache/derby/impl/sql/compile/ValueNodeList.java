@@ -166,8 +166,14 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 			ValueNode			valueNode;
 
             valueNode = elementAt(index);
-			if (valueNode.requiresTypeFromContext())
+
+            // Skip nodes that take their type from the context, if they
+            // haven't already been bound to a type.
+            if (valueNode.requiresTypeFromContext()
+                    && valueNode.getTypeServices() == null) {
 				continue;
+            }
+
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
 			if (valueNodeDTS.getTypeId().isStringTypeId())
