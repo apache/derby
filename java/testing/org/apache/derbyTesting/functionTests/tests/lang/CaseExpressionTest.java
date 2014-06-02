@@ -496,6 +496,15 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         ps.setInt(1, 1);
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
 
+        ps = prepareStatement(
+                "values case when true then ? else cast(? as integer) end");
+        ParameterMetaData params = ps.getParameterMetaData();
+        assertEquals(Types.INTEGER, params.getParameterType(1));
+        assertEquals(Types.INTEGER, params.getParameterType(2));
+        ps.setInt(1, 1);
+        ps.setInt(2, 2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+
         // Parameters in the WHEN clause can be untyped. They will
         // implicitly get the BOOLEAN type.
         ps = prepareStatement("values case when ? then 1 else 0 end");
@@ -518,16 +527,29 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
     public void testUntypedNulls() throws SQLException {
         Statement s = createStatement();
 
-        // When all branches specify NULL, then Derby currently returns NULL
-        // with type CHAR(1). It should have raised an error according to the
-        // SQL standard. See DERBY-2002.
-        String[] allNull = {
+        // Before DERBY-2002, Derby accepted a CASE expression to have an
+        // untyped NULL in all the result branches. Verify that an error
+        // is raised.
+        String[] allUntyped = {
+            // The SQL standard says at least one result should not be an
+            // untyped NULL, so expect these to fail.
             "values case when true then null end",
             "values case when true then null else null end",
-            "values case when true then null when false then null else null end"
+            "values case when true then null "
+                + "when false then null else null end",
+
+            // We're not able to tell the type if we have a mix of untyped
+            // NULLs and untyped parameters.
+            "values case when true then ? end", // implicit ELSE NULL
+            "values case when true then null else ? end",
+            "values case when true then ? when false then ? else null end",
+
+            // These ones failed even before DERBY-2002.
+            "values case when true then ? else ? end",
+            "values case when true then ? when false then ? else ? end",
         };
-        for (String sql : allNull) {
-            JDBC.assertSingleValueResultSet(s.executeQuery(sql), null);
+        for (String sql : allUntyped) {
+            assertCompileError("42X87", sql);
         }
 
         // Check that expressions with untyped NULLs compile as long as

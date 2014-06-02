@@ -2124,8 +2124,7 @@ Guide.
 
             <msg>
                 <name>42X87</name>
-                <text>At least one result expression (THEN or ELSE) of the '{0}' expression must not be a '?'. </text>
-                <arg>expression</arg>
+                <text>At least one result expression (THEN or ELSE) of the CASE expression must have a known type.</text>
             </msg>
 
             <msg>

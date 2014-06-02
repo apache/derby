@@ -921,7 +921,7 @@ public interface SQLState {
 	String LANG_CANT_DROP_BACKING_INDEX                                = "42X84";
 	String LANG_CONSTRAINT_SCHEMA_MISMATCH                             = "42X85";
     String LANG_DROP_OR_ALTER_NON_EXISTING_CONSTRAINT                  = "42X86";
-	String LANG_ALL_RESULT_EXPRESSIONS_PARAMS                          = "42X87";
+    String LANG_ALL_RESULT_EXPRESSIONS_UNTYPED                         = "42X87";
 	String LANG_CONDITIONAL_NON_BOOLEAN                                = "42X88";
 	String LANG_NOT_TYPE_COMPATIBLE                                    = "42X89";
 	String LANG_TOO_MANY_PRIMARY_KEY_CONSTRAINTS                       = "42X90";
