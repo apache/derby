@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Properties;
-import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -35,7 +34,6 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.ConglomerateController;
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;

@@ -298,7 +298,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
                     int[] oneBasedIdentityMap = new int[numColumns];
 
                     for (int i = 0; i < numColumns; i++) {
-                        // Column numbers are numbere from 1 and
+                        // Column numbers are numbered from 1 and
                         // call to RowUtil.toString below expects that
                         // convention.
                         oneBasedIdentityMap[i] = i + 1;
