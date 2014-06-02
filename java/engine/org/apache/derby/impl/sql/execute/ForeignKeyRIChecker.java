@@ -77,8 +77,6 @@ public class ForeignKeyRIChecker extends GenericRIChecker
      * @param restrictCheckOnly
      *              {@code true} if the check is relevant only for RESTRICTED
      *              referential action.
-     * @param postCheck
-     *              dummy (interface obligation only)
      * @param deferredRowReq
      *              dummy (interface obligation only)
 	 *
@@ -88,7 +86,6 @@ public class ForeignKeyRIChecker extends GenericRIChecker
     void doCheck(Activation a,
                  ExecRow row,
                  boolean restrictCheckOnly,
-                 boolean postCheck,
                  int deferredRowReq) throws StandardException
 	{
 

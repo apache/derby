@@ -21,20 +21,20 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Enumeration;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 
 /**
  * Delete the rows from the specified  base table and executes delete/update
@@ -52,7 +52,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
     ResultSet[] dependentResultSets;
 	private int noDependents =0;
-	private String resultSetId;
+    private final String resultSetId;
 	private boolean mainNodeForTable = true;
 	private boolean affectedRows = false;
 	private int tempRowHolderId; //this result sets temporary row holder id 
@@ -126,13 +126,15 @@ class DeleteCascadeResultSet extends DeleteResultSet
 								SQLState.LANG_NO_ROW_FOUND));
 			}
 
-            runFkChecker(true, true); // check for only RESTRICT referential
+            runFkChecker(true); // check for only RESTRICT referential
                                       // action rule violations
-			Hashtable<String,String> mntHashTable = new Hashtable<String,String>(); //Hash Table to identify  mutiple node for same table cases. 
+            HashMap<String,String> mntHashTable =
+                new HashMap<String,String>(); // Hash table to identify multiple
+                                              // node for same table cases.
 			mergeRowHolders(mntHashTable);
 			fireBeforeTriggers(mntHashTable);
-			deleteDeferredRows();
-            runFkChecker(false, false); // check for all constraint violations
+            deleteDeferredRows();
+            runFkChecker(false); // check for all constraint violations
 			rowChangerFinish();
 			fireAfterTriggers();
 		}finally
@@ -208,8 +210,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 		return rowsFound;
 	}
 
-    @SuppressWarnings("UseOfObsoleteCollectionType")
-	void fireBeforeTriggers(Hashtable<String,String> msht) throws StandardException
+    void fireBeforeTriggers(HashMap<String, String> msht)
+            throws StandardException
 	{
 		if(!mainNodeForTable) 
 		{
@@ -292,7 +294,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	
     @Override
-    void runFkChecker(boolean restrictCheckOnly, boolean postCheck)
+    void runFkChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
 
@@ -302,18 +304,18 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			if(dependentResultSets[i] instanceof UpdateResultSet)
 			{
                 ((UpdateResultSet) dependentResultSets[i]).runChecker(
-                    restrictCheckOnly, postCheck);
+                    restrictCheckOnly);
 			}
 			else{
                 ((DeleteCascadeResultSet)dependentResultSets[i]).runFkChecker(
-                    restrictCheckOnly, postCheck);
+                    restrictCheckOnly);
 			}
 		}
 
 		//If there  is more than one node for the same table
 		//only one node does all foreign key checks.
 		if(mainNodeForTable)
-            super.runFkChecker(restrictCheckOnly, postCheck);
+            super.runFkChecker(restrictCheckOnly);
 	}
 
 
@@ -357,8 +359,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	//if there is more than one node for the same table, copy the rows
 	// into one node , so that we don't fire trigger more than once.
-    @SuppressWarnings("UseOfObsoleteCollectionType")
-	private void mergeRowHolders(Hashtable<String,String> msht) throws StandardException
+    private void mergeRowHolders(HashMap<String, String> msht)
+            throws StandardException
 	{
 		if(msht.containsKey(resultSetId) || rowCount ==0)
 		{

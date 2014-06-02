@@ -98,9 +98,6 @@ public abstract class GenericRIChecker
      * @param restrictCheckOnly
      *              {@code true} if the check is relevant only for RESTRICTED
      *              referential action.
-     * @param postCheck
-     *              For referenced keys: if {@code true}, rows are not yet
-     *              deleted, so do the check in the case of deferred PK later
      * @param deferredRowReq
      *              For referenced keys: The required number of duplicates that
      *              need to be present. Only used if {@code postCheck==false}.
@@ -110,7 +107,6 @@ public abstract class GenericRIChecker
     abstract void doCheck(Activation a,
                           ExecRow row,
                           boolean restrictCheckOnly,
-                          boolean postCheck,
                           int deferredRowReq) throws StandardException;
 
 	/**

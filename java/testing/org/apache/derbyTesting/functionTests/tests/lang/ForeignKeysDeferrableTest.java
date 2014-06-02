@@ -834,207 +834,359 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
         ResultSet rs = null;
 
         try {
-            s.executeUpdate(
-                "create table ref_t(i int, j int, constraint ct " +
-                "    primary key(i) deferrable initially deferred)");
-            s.executeUpdate(
-                "create table t(i int unique not null, c char(1)," +
-                "    constraint c foreign key (i) references ref_t(i))");
+            // RESTRICT and NO ACTION will throw in different
+            // code paths, but in practice, in Derby presently, the
+            // behavior is the same since we do not support SQL in before
+            // triggers, so test both with the same fixtures.
+            // CASCADE is tested separately later.
+            final String[] refActions = {
+                "ON DELETE NO ACTION ON UPDATE NO ACTION",
+                "ON DELETE RESTRICT ON UPDATE RESTRICT" };
 
-            s.executeUpdate("insert into ref_t values (1,2),(1,3),(1,4)");
-            s.executeUpdate("insert into t values (1, 'c')");
+            /*   N O   A C T I O N,   R E S T R I C T   (d i r e c t) */
 
-            // Now, the child (referencing table) is referencing one of the the
-            // rows in the primary table whose value is 1, so the reference is
-            // ok.
+            for (String refAct: refActions) {
+                s.executeUpdate(
+                    "create table ref_t(i int, j int, constraint ct " +
+                    "    primary key(i) deferrable initially deferred)");
+                s.executeUpdate(
+                    "create table t(i int unique not null, c char(1)," +
+                    "    constraint c foreign key (i) references ref_t(i) " +
+                    refAct + ")");
 
-            // What happens when we delete one copy before commit?
-            // Even though we have ON DELETE restrict action, there is another
-            // row that would satisfy the constraint.
-            rs = s.executeQuery("select * from ref_t");
-            rs.next();
-            rs.deleteRow();
-            rs.next();
-            rs.deleteRow();
-            // Now there should be only one left, so the referenced table is
-            // OK.
-            commit();
+                s.executeUpdate("insert into ref_t values (1,2),(1,3),(1,4)");
+                s.executeUpdate("insert into t values (1, 'c')");
 
-            // Try again, but this time with normal delete, not using cursors
-            s.executeUpdate("insert into ref_t values (1,5),(1,6)");
-            s.executeUpdate("delete from ref_t where j > 4 ");
-            commit();
+                // Now, the child (referencing table) is referencing one of the
+                // the rows in the primary table whose value is 1, so the
+                // reference is ok.
 
-            // Try again, but this time delete both duplicate rows. The second
-            // delete should fail.
-            s.executeUpdate("insert into ref_t values (1,3)");
-            rs = s.executeQuery("select * from ref_t");
-            rs.next();
-            rs.deleteRow();
-            rs.next();
-
-            try {
+                // What happens when we delete one copy before commit?  Even
+                // though we have ON DELETE restrict action, there is another
+                // row that would satisfy the constraint.
+                rs = s.executeQuery("select * from ref_t");
+                rs.next();
                 rs.deleteRow();
-                fail();
-            } catch (SQLException e) {
-                assertSQLState(LANG_FK_VIOLATION, e);
-            }
+                rs.next();
+                rs.deleteRow();
+                // Now there should be only one left, so the referenced table
+                // is OK.
+                commit();
 
-            s.executeUpdate("insert into ref_t values (1,4), (1,5)");
+                // Try again, but this time with normal delete, not using
+                // cursors
+                s.executeUpdate("insert into ref_t values (1,5),(1,6)");
+                s.executeUpdate("delete from ref_t where j > 4 ");
+                commit();
 
-            // direct delete code path
-            assertStatementError(LANG_FK_VIOLATION, s, "delete from ref_t");
+                // Try again, but this time delete both duplicate rows. The
+                // second delete should fail.
+                s.executeUpdate("insert into ref_t values (1,3)");
+                rs = s.executeQuery("select * from ref_t");
+                rs.next();
+                rs.deleteRow();
+                rs.next();
 
-            // deferred delete code path: not ok
-            assertStatementError(LANG_FK_VIOLATION, s,
-                    "delete from ref_t where i = 1 and " +
-                    "    i in (select i from ref_t)");
+                try {
+                    rs.deleteRow();
+                    fail();
+                } catch (SQLException e) {
+                    assertSQLState(LANG_FK_VIOLATION, e);
+                }
 
-            // deferred code path: OK
-            s.executeUpdate("delete from ref_t where i = 1 and " +
-                    "    i in (select i from ref_t) and j >= 4");
+                s.executeUpdate("insert into ref_t values (1,4), (1,5)");
 
-            s.executeUpdate("insert into ref_t values (1,4), (1,5)");
-            s.executeUpdate("delete from ref_t where j >= 4");
-            JDBC.assertFullResultSet(
+                // direct delete code path
+                assertStatementError(LANG_FK_VIOLATION, s, "delete from ref_t");
+
+                // deferred delete code path: not ok
+                assertStatementError(LANG_FK_VIOLATION, s,
+                                     "delete from ref_t where i = 1 and " +
+                                     "    i in (select i from ref_t)");
+
+                // deferred code path: OK
+                s.executeUpdate("delete from ref_t where i = 1 and " +
+                                "    i in (select i from ref_t) and j >= 4");
+
+                s.executeUpdate("insert into ref_t values (1,4), (1,5)");
+                s.executeUpdate("delete from ref_t where j >= 4");
+                JDBC.assertFullResultSet(
                     s.executeQuery("select * from ref_t"),
                     new String[][]{{"1", "3"}});
 
-            commit();
+                commit();
 
-            //
-            // Try similar with update rather than delete. In this
-            // case there is only ever a deferred code path, so separate
-            // teste cases as for delete (above) are not relevant.
-            //
-            s.executeUpdate("insert into ref_t values (1,4)");
-            s.executeUpdate("update ref_t set i = 2 where j = 4");
-            s.executeUpdate("insert into ref_t values (1,4)");
-            assertStatementError(LANG_FK_VIOLATION,
-                                 s,
-                                 "update ref_t set i = 2");
+                //
+                // Try similar with update rather than delete. In this
+                // case there is only ever a deferred code path, so separate
+                // teste cases as for delete (above) are not relevant.
+                //
+                s.executeUpdate("insert into ref_t values (1,4)");
+                s.executeUpdate("update ref_t set i = 2 where j = 4");
+                s.executeUpdate("insert into ref_t values (1,4)");
+                assertStatementError(LANG_FK_VIOLATION,
+                                     s,
+                                     "update ref_t set i = 2");
 
-            rs = s.executeQuery("select * from ref_t");
-            rs.next();
-            rs.updateInt(1, 3);
-            rs.updateRow();
-            rs.close();
-            commit();
+                rs = s.executeQuery("select * from ref_t");
+                rs.next();
+                rs.updateInt(1, 3);
+                rs.updateRow();
+                rs.close();
+                commit();
 
-            dropTable("t");
-            dropTable("ref_t");
-            commit();
+                dropTable("t");
+                dropTable("ref_t");
+                commit();
+            }
 
-            // Delete (deferred processing code path) with more complex FKs and
-            // more dups with different keys, so we can execise the postCheck
-            // mechanism in ReferencedKeyRIChecker including row/key mappings
-            s.executeUpdate(
-                "create table ref_t(c char(1), i int, j int, k int," +
-                "    constraint c primary key (k, i) initially deferred)");
-            s.executeUpdate(
-                "create table t(l bigint, i int, j int, k int," +
-                "    constraint c2 foreign key(i,k) references ref_t(k, i))");
+            /*   N O   A C T I O N,   R E S T R I C T   (d e f e r r e d) */
 
-            // key (1, 100) has 3 dups, key (3,100) has two dups
-            s.executeUpdate("insert into ref_t values " +
-                            "('a', 100, -1, 1)," +
-                            "('a', 100, -2, 1)," +
-                            "('a', 100, -3, 1)," +
-                            "('a', 100, -1, 2)," +
-                            "('a', 100, -2, 3)," +
-                            "('a', 100, -3, 3)");
+            for (String refAct : refActions) {
+                // Delete (deferred processing code path) with more complex FKs
+                // and more dups with different keys, so we can execise the
+                // postCheck mechanism in ReferencedKeyRIChecker including
+                // row/key mappings
 
-            s.executeUpdate("insert into t values " +
-                            "(-11, 1, -4, 100)," +
-                            "(-12, 2, -5, 100)," +
-                            "(-13, 3, -6, 100)");
+                s.executeUpdate(
+                    "create table ref_t(c char(1), i int, j int, k int," +
+                    "    constraint c primary key (k, i) initially deferred)");
+                s.executeUpdate(
+                    "create table t(l bigint, i int, j int, k int," +
+                    "    constraint c2 foreign key(i,k) " +
+                    "    references ref_t(k, i)" + refAct + ")");
 
-            // This should throw using the postCheck mechanism.
-            try {
+                // key (1, 100) has 3 dups, key (3,100) has two dups
+                s.executeUpdate("insert into ref_t values " +
+                                "('a', 100, -1, 1)," +
+                                "('a', 100, -2, 1)," +
+                                "('a', 100, -3, 1)," +
+                                "('a', 100, -1, 2)," +
+                                "('a', 100, -2, 3)," +
+                                "('a', 100, -3, 3)");
+
+                s.executeUpdate("insert into t values " +
+                                "(-11, 1, -4, 100)," +
+                                "(-12, 2, -5, 100)," +
+                                "(-13, 3, -6, 100)");
+
+                // This should throw using the postCheck mechanism.
+                try {
+                    s.executeUpdate(
+                        "delete from ref_t where j < -1 and " +
+                        "    k in (select k from ref_t)");
+                    fail();
+                } catch (SQLException e) {
+                    assertSQLState(LANG_FK_VIOLATION, e);
+                    String expected =
+                        "DELETE on table 'REF_T' caused a violation" +
+                        " of foreign key constraint 'C2' for key (3,100).  " +
+                        "The statement has been rolled back.";
+                    assertEquals(expected, e.getMessage());
+                }
+
+                // These should be ok (using the postCheck mechanism), since
+                // they both leave one row in ref_t to satisfy the constraint.
                 s.executeUpdate(
                     "delete from ref_t where j < -1 and " +
-                    "    k in (select k from ref_t)");
-                fail();
-            } catch (SQLException e) {
-                assertSQLState(LANG_FK_VIOLATION, e);
-                String expected =
-                    "DELETE on table 'REF_T' caused a violation" +
-                    " of foreign key constraint 'C2' for key (3,100).  " +
-                    "The statement has been rolled back.";
-                assertEquals(expected, e.getMessage());
+                    "    k in (select k from ref_t where k < 3)");
+                s.executeUpdate(
+                    "delete from ref_t where j < -2 and " +
+                    "    k in (select k from ref_t where k >= 3)");
+
+                commit();
+
+                //
+                // Do the same exercise but now with update instead of delete
+                //
+                dropTable("t");
+                dropTable("ref_t");
+                commit();
+
+                s.executeUpdate(
+                    "create table ref_t(c char(1), i int, j int, k int," +
+                    "    constraint c primary key (k, i) initially deferred)");
+                s.executeUpdate(
+                    "create table t(l bigint, i int, j int, k int," +
+                    "    constraint c2 foreign key(i,k) " +
+                    "    references ref_t(k, i)" + refAct + ")");
+
+                // key (1, 100) has 3 dups, key (3,100) has two dups
+                s.executeUpdate("insert into ref_t values " +
+                                "('a', 100, -1, 1)," +
+                                "('a', 100, -2, 1)," +
+                                "('a', 100, -3, 1)," +
+                                "('a', 100, -1, 2)," +
+                                "('a', 100, -2, 3)," +
+                                "('a', 100, -3, 3)");
+
+                s.executeUpdate("insert into t values " +
+                                "(-11, 1, -4, 100)," +
+                                "(-12, 2, -5, 100)," +
+                                "(-13, 3, -6, 100)");
+
+                // This should throw using the postCheck mechanism.
+                try {
+                    s.executeUpdate(
+                        "update ref_t set k=k*100 where j < -1 and " +
+                        "    k in (select k from ref_t)");
+                    fail();
+                } catch (SQLException e) {
+                    assertSQLState(LANG_FK_VIOLATION, e);
+                    String expected =
+                        "UPDATE on table 'REF_T' caused a violation" +
+                        " of foreign key constraint 'C2' for key (3,100).  " +
+                        "The statement has been rolled back.";
+                    assertEquals(expected, e.getMessage());
+                }
+
+                // These should be ok (using the postCheck mechanism), since
+                // they both leave one row in ref_t to satisfy the constraint.
+                s.executeUpdate(
+                    "update ref_t set k=k*100 where j < -1 and " +
+                    "    k in (select k from ref_t where k < 3)");
+                s.executeUpdate(
+                    "update ref_t set k=k*100 where j < -2 and " +
+                    "    k in (select k from ref_t where k >= 3)");
+
+                dropTable("t");
+                dropTable("ref_t");
+                commit();
             }
 
-            // These should be ok (using the postCheck mechanism), since they
-            // both leave one row in ref_t to satisfy the constraint.
+            /*  C A S C A D E  */
+
+            // CASCADE delete with deferred row code path (not deferred
+            // constraint) should still
+            // not fail. Test since we messed with code path.
+            s.executeUpdate(
+                "create table ref_t(c char(1), i int, j int, k int," +
+                "    constraint c primary key (k, i))");
+            s.executeUpdate(
+                "create table t(l bigint, i int, j int, k int," +
+                "    constraint c2 foreign key(i,k) references ref_t(k, i) " +
+                "    on delete cascade)");
+
+            s.executeUpdate("insert into ref_t values " +
+                            "('a', 100, -3, 3)");
+            s.executeUpdate("insert into t values " +
+                            "(-11, 3, -4, 100)");
             s.executeUpdate(
                 "delete from ref_t where j < -1 and " +
-                "    k in (select k from ref_t where k < 3)");
-            s.executeUpdate(
-                "delete from ref_t where j < -2 and " +
-                "    k in (select k from ref_t where k >= 3)");
+                "    k in (select k from ref_t)");
 
-            commit();
+            JDBC.assertEmpty(s.executeQuery("select * from ref_t"));
+            JDBC.assertEmpty(s.executeQuery("select * from t"));
 
-            //
-            // Do the same exercise but now with update instead of delete
-            //
             dropTable("t");
             dropTable("ref_t");
             commit();
 
+            // Deferred PK constraint, this time with delete with CASCADE,
+            // should not fail
             s.executeUpdate(
                 "create table ref_t(c char(1), i int, j int, k int," +
                 "    constraint c primary key (k, i) initially deferred)");
-            s.executeUpdate(
+
+            // Not yet implemented
+            assertStatementError("X0Y47", s,
                 "create table t(l bigint, i int, j int, k int," +
-                "    constraint c2 foreign key(i,k) references ref_t(k, i))");
+                "    constraint c2 foreign key(i,k) references ref_t(k, i) " +
+                "    on delete cascade)");
 
-            // key (1, 100) has 3 dups, key (3,100) has two dups
-            s.executeUpdate("insert into ref_t values " +
-                            "('a', 100, -1, 1)," +
-                            "('a', 100, -2, 1)," +
-                            "('a', 100, -3, 1)," +
-                            "('a', 100, -1, 2)," +
-                            "('a', 100, -2, 3)," +
-                            "('a', 100, -3, 3)");
-
-            s.executeUpdate("insert into t values " +
-                            "(-11, 1, -4, 100)," +
-                            "(-12, 2, -5, 100)," +
-                            "(-13, 3, -6, 100)");
-
-            // This should throw using the postCheck mechanism.
-            try {
-                s.executeUpdate(
-                    "update ref_t set k=k*100 where j < -1 and " +
-                    "    k in (select k from ref_t)");
-                fail();
-            } catch (SQLException e) {
-                assertSQLState(LANG_FK_VIOLATION, e);
-                String expected =
-                    "UPDATE on table 'REF_T' caused a violation" +
-                    " of foreign key constraint 'C2' for key (3,100).  " +
-                    "The statement has been rolled back.";
-                assertEquals(expected, e.getMessage());
-            }
-
-            // These should be ok (using the postCheck mechanism), since they
-            // both leave one row in ref_t to satisfy the constraint.
-            s.executeUpdate(
-                "update ref_t set k=k*100 where j < -1 and " +
-                "    k in (select k from ref_t where k < 3)");
-            s.executeUpdate(
-                "update ref_t set k=k*100 where j < -2 and " +
-                "    k in (select k from ref_t where k >= 3)");
+            dropTable("t");
+            dropTable("ref_t");
 
             commit();
 
+            /*  S E T   N U L L  */
+
+            // SET NULL  delete with deferred row code path should still
+            // not fail. Test since we messed with code path.
+            s.executeUpdate(
+                "create table ref_t(c char(1), i int, j int, k int," +
+                "    constraint c primary key (k, i))");
+            s.executeUpdate(
+                "create table t(l bigint, i int, j int, k int," +
+                "    constraint c2 foreign key(i,k) references ref_t(k, i) " +
+                "    on delete set null)");
+
+            s.executeUpdate("insert into ref_t values " +
+                            "('a', 100, -3, 3)");
+            s.executeUpdate("insert into t values " +
+                            "(-11, 3, -4, 100)");
+            s.executeUpdate("delete from ref_t");
+
+            JDBC.assertEmpty(s.executeQuery("select * from ref_t"));
+            JDBC.assertFullResultSet(s.executeQuery("select * from t"),
+                    new String[][]{{"-11", null, "-4", null}});
+
+            dropTable("t");
+            dropTable("ref_t");
+            commit();
+
+            // Deferred constraint PK, delete with SET NULL should not
+            // fail
+            s.executeUpdate(
+                "create table ref_t(c char(1), i int, j int, k int," +
+                "    constraint c primary key (k, i) initially deferred)");
+
+            // Not yet implemented
+            assertStatementError("X0Y47", s,
+               "create table t(l bigint, i int, j int, k int," +
+                "    constraint c2 foreign key(i,k) references ref_t(k, i) " +
+                "    on delete set null)");
+
+            commit();
         } finally {
             if (rs != null) {
                 rs.close();
             }
             dropTable("t");
             dropTable("ref_t");
+            commit();
+        }
+    }
+
+    public void testSelfReferential() throws SQLException {
+        Statement s = createStatement();
+        try {
+
+            s.executeUpdate(
+                "create table t(name varchar(10) primary key " +
+                "                   deferrable initially deferred," +
+                "               boss varchar(10) references t(name) " +
+                "                   on delete restrict, i int)");
+
+            s.executeUpdate("insert into t values ('daisy', null, 1)");
+            s.executeUpdate("insert into t values ('daisy', null, 2)");
+            s.executeUpdate("insert into t values ('donald', 'daisy', 3)");
+
+            s.executeUpdate("delete from t where name like 'daisy%' and i = 1");
+            JDBC.assertFullResultSet(s.executeQuery("select * from t"),
+                    new String[][]{
+                        {"daisy", null, "2"},
+                        {"donald", "daisy", "3"}});
+            commit();
+
+            s.executeUpdate(
+                    "create table employees(name char(40), " +
+                    "    constraint ec primary key(name) initially deferred, " +
+                    "    address char(40))");
+
+            // Not yet implemented.
+            assertStatementError("X0Y47", s,
+                "create table teammember(" +
+                "name char(40) primary key " +
+                        "references employees(name) on delete cascade, " +
+                "boss char(40) " +
+                        "references teammember(name) on delete cascade)");
+
+
+        } finally {
+            dropTable("t");
+            dropTable("employees");
+            dropTable("teammember");
             commit();
         }
     }

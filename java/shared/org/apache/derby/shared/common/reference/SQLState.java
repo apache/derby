@@ -1399,6 +1399,7 @@ public interface SQLState {
 	String LANG_INVALID_FK_NO_REF_KEY                                  = "X0Y44.S";
 	String LANG_ADD_FK_CONSTRAINT_VIOLATION                            = "X0Y45.S";
 	String LANG_INVALID_FK_NO_REF_TAB                                  = "X0Y46.S";
+    String LANG_INVALID_FK_REF_KEY                                     = "X0Y47.S";
 	String LANG_SCHEMA_NOT_EMPTY                                       = "X0Y54.S";
 	String LANG_INDEX_ROW_COUNT_MISMATCH                               = "X0Y55.S";
 	String LANG_INVALID_OPERATION_ON_SYSTEM_TABLE                      = "X0Y56.S";

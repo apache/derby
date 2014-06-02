@@ -282,6 +282,7 @@ public class FKInfo implements Formatable
 		out.writeInt(stmtType);
 		out.writeObject(refUUID);
 		out.writeLong(refConglomNumber);
+        out.writeBoolean(refConstraintIsDeferrable);
 
 		ArrayUtil.writeArray(out, fkConstraintNames);
 		ArrayUtil.writeArray(out, fkUUIDs);
@@ -320,6 +321,7 @@ public class FKInfo implements Formatable
 			stmtType = in.readInt();
 			refUUID = (UUID)in.readObject();
 			refConglomNumber = in.readLong();
+            refConstraintIsDeferrable = in.readBoolean();
 
 			fkConstraintNames = new String[ArrayUtil.readArrayLength(in)];
 			ArrayUtil.readArrayItems(in, fkConstraintNames);
@@ -362,8 +364,10 @@ public class FKInfo implements Formatable
 			str.append("\ntype:\t\t\t\t");
 			str.append((type == FOREIGN_KEY) ? "FOREIGN_KEY" : "REFERENCED_KEY");
 
-			str.append("\nReferenced Key UUID:\t\t"+refUUID);
+            str.append("\nReferenced Key Index UUID:\t\t"+refUUID);
 			str.append("\nReferenced Key ConglomNum:\t"+refConglomNumber);
+            str.append("\nReferenced Key Constraint is deferrable:\t" +
+                       refConstraintIsDeferrable);
 
 			str.append("\nForeign Key Names:\t\t(");
 			for (int i = 0; i < fkUUIDs.length; i++)
@@ -424,6 +428,8 @@ public class FKInfo implements Formatable
                 str.append(colArray[i]);
             }
             str.append(")\n");
+
+
 
             return str.toString();
 		}

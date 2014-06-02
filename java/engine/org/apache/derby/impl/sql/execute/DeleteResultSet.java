@@ -22,14 +22,12 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Properties;
-
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
@@ -37,9 +35,11 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.ConglomerateController;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Delete the rows from the specified
@@ -129,6 +129,7 @@ class DeleteResultSet extends DMLWriteResultSet
 	/**
 		@exception StandardException Standard Derby error policy
 	*/
+    @Override
 	public void open() throws StandardException
 	{
 
@@ -148,11 +149,11 @@ class DeleteResultSet extends DMLWriteResultSet
 		*/
 		if (constants.deferred)
 		{
-            runFkChecker(true, true); // check for only RESTRICT referential
+            runFkChecker(true); // check for only RESTRICT referential
                                       // action rule violations
 			fireBeforeTriggers();
-			deleteDeferredRows();
-            runFkChecker(false, false); //check for all constraint violations
+            deleteDeferredRows();
+            runFkChecker(false); //check for all constraint violations
 			// apply 
 			rc.finish();
 			fireAfterTriggers();
@@ -394,7 +395,7 @@ class DeleteResultSet extends DMLWriteResultSet
                     // deferred, require at least two rows to be present in the
                     // primary table since we are deleting one of them below,
                     // and we need at least one to fulfill the constraint.
-                    fkChecker.doPKCheck(activation, row, false, false, 2);
+                    fkChecker.doPKCheck(activation, row, false, 2);
 				}
 
 				baseRowLocation = 
@@ -541,8 +542,10 @@ class DeleteResultSet extends DMLWriteResultSet
 	}
 
 
-	// make sure foreign key constraints are not violated
-    void runFkChecker(boolean restrictCheckOnly, boolean postCheck)
+    /**
+     * Make sure foreign key constraints are not violated
+     */
+    void runFkChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
 
@@ -573,11 +576,10 @@ class DeleteResultSet extends DMLWriteResultSet
                             activation,
                             defRLRow,
                             restrictCheckOnly,
-                            postCheck,
                             1);
 				}
 
-                if (postCheck) {
+                if (restrictCheckOnly) {
                     fkChecker.postCheck();
                 }
 
@@ -607,6 +609,7 @@ class DeleteResultSet extends DMLWriteResultSet
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void	cleanUp() throws StandardException
 	{ 
 		numOpens = 0;
@@ -648,7 +651,7 @@ class DeleteResultSet extends DMLWriteResultSet
     @Override
     public void close() throws StandardException
     {
-        close( constants.underMerge() );
+        super.close( constants.underMerge() );
     }
                                
     @Override

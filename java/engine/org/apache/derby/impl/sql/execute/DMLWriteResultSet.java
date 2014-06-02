@@ -64,7 +64,6 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
      */
     protected DataValueDescriptor[] cachedDestinations;
 
-
 	/**
 	 * Constructor
 	 *
@@ -125,7 +124,10 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 	/**
      * Returns the description of the inserted rows.
      * REVISIT: Do we want this to return NULL instead?
+     *
+     * @return the description of the inserted rows
 	 */
+    @Override
 	public ResultDescription getResultDescription()
 	{
 	    return resultDescription;
@@ -136,6 +138,9 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 	 * 
 	 * @param source		SourceResultSet
 	 * Also look at Track#2432/change 12433
+     * @return             The next row in the result set
+     * @throws StandardException
+     *                     Standard error policy
 	 */
 	protected ExecRow getNextRowCore(NoPutResultSet source)
 		throws StandardException
@@ -200,6 +205,10 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
 	 * deferred non-sparse row. Share the underlying columns. If there
 	 * is no column bit map, make them the same row.
 	 *
+     * @param deferredBaseRow  the deferred non-sparse row
+     * @param baseRowReadList  the columns to include (1-based bit map)
+     * @param lcc              the language connection context
+     * @return                 the deferred sparse row
 	 * @exception StandardException		Thrown on error
 	 */
 	protected ExecRow makeDeferredSparseRow(
@@ -306,6 +315,11 @@ abstract public class DMLWriteResultSet extends NoRowsResultSetImpl
      * This applies logic usually found in a NormalizeResultSet, which is missing for
      * the MERGE statement.
      * </p>
+     * @param sourceResultSet        the result set for which this action is
+     *                               to be performed
+     * @param row                    the row to be normalized
+     * @return                       the normalized row
+     * @throws StandardException     Standard error policy
      */
     protected   ExecRow normalizeRow( NoPutResultSet sourceResultSet, ExecRow row )
         throws StandardException

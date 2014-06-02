@@ -129,6 +129,19 @@ public	class	DDUtils
 					 columnNamesMatch(refColumnNames, 
 										cd.getColumnDescriptors()))
 				{
+                    if (cd.deferrable()) {
+                        final int onDelete = otherConstraintInfo.
+                                getReferentialActionDeleteRule();
+
+                        if (onDelete == StatementType.RA_CASCADE ||
+                            onDelete == StatementType.RA_SETNULL) {
+                            // DERBY-532: Not yet implemented
+                            throw StandardException.newException(
+                                    SQLState.LANG_INVALID_FK_REF_KEY,
+                                    myConstraintName,
+                                    refTd.getQualifiedName());
+                        }
+                    }
 					return (ReferencedKeyConstraintDescriptor)cd;
 				}
 			}

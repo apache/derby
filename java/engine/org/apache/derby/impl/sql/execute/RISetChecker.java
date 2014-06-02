@@ -91,9 +91,6 @@ public class RISetChecker
      * @param restrictCheckOnly
      *              {@code true} if the check is relevant only for RESTRICTED
      *              referential action.
-     * @param postCheck
-     *              For referenced keys: if {@code true}, rows are not yet
-     *              deleted, so do the check in the case of deferred PK later.
      * @param deferredRowReq
      *              For referenced keys: The required number of duplicates that
      *              need to be present. Only used if {@code postCheck==false}.
@@ -104,7 +101,6 @@ public class RISetChecker
     public void doPKCheck(Activation a,
                           ExecRow row,
                           boolean restrictCheckOnly,
-                          boolean postCheck,
                           int deferredRowReq) throws StandardException
 	{
 		if (checkers == null)
@@ -115,7 +111,6 @@ public class RISetChecker
                 checker.doCheck(a,
                                 row,
                                 restrictCheckOnly,
-                                postCheck,
                                 deferredRowReq);
             }
         }
@@ -163,7 +158,7 @@ public class RISetChecker
 		{
 			if (checkers[i] instanceof ForeignKeyRIChecker)
 			{
-                checkers[i].doCheck(a, row, false, false, 0);
+                checkers[i].doCheck(a, row, false, 0);
 			}
 		}
 	}
@@ -177,9 +172,6 @@ public class RISetChecker
      * @param restrictCheckOnly
      *              {@code true} if the check is relevant only for RESTRICTED
      *              referential action.
-     * @param postCheck
-     *              For referenced keys: if {@code true}, rows are not yet
-     *              deleted, so do the check in the case of deferred PK later
      * @param deferredRowReq
      *              For referenced keys: the required number of duplicates that
      *              need to be present. Only used if {@code postCheck==false}.
@@ -191,7 +183,6 @@ public class RISetChecker
                           int index,
                           ExecRow row,
                           boolean restrictCheckOnly,
-                          boolean postCheck,
                           int deferredRowReq) throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -209,7 +200,7 @@ public class RISetChecker
 		}
 
         checkers[index].doCheck(
-            a, row, restrictCheckOnly, postCheck, deferredRowReq);
+            a, row, restrictCheckOnly, deferredRowReq);
 	}
 
 	/**

@@ -100,9 +100,6 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
      * @param restrictCheckOnly
      *              {@code true} if the check is relevant only for RESTRICTED
      *              referential action.
-     * @param postCheck
-     *              For referenced keys: if {@code true}, rows are not yet
-     *              deleted, so do the check in the case of deferred PK later.
      * @param deferredRowReq
      *              For referenced keys: The required number of duplicates that
      *              need to be present. Only used if {@code postCheck==false}.
@@ -114,7 +111,6 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
     void doCheck(Activation a,
                  ExecRow row,
                  boolean restrictCheckOnly,
-                 boolean postCheck,
                  int deferredRowReq) throws StandardException
 	{
 		/*
@@ -133,8 +129,9 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             if (lcc.isEffectivelyDeferred(
                     lcc.getCurrentSQLSessionContext(a),
                     fkInfo.refConglomNumber)) {
-                if (postCheck) {
+                if (restrictCheckOnly) {
                     rememberKey(row);
+                    return;
                 } else {
                     // It *is* a deferred constraint and it is *not* a deferred
                     // rows code path, so go see if we have enough rows
@@ -203,6 +200,12 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 	}
 
 
+    /**
+     * Remember the deletion of this key, it may cause a RESTRICT
+     * foreign key violation, cf. logic in @{link #postCheck}.
+     * @param rememberRow
+     * @throws StandardException
+     */
     private void rememberKey(ExecRow rememberRow) throws StandardException {
         if (deletedKeys == null) {
             // key: all columns (these are index rows, or a row containing a
@@ -252,14 +255,28 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 
     /**
      * Check that we have at least one more row in the referenced
-     * table table containing a key than the number of seen deletes of that key.
-     * Only used when the referenced constraint id deferred.
+     * table table containing a key than the number of projected deletes of that
+     * key. Only used when the referenced constraint id deferred and with
+     * RESTRICT mode
      *
      * @throws StandardException Standard error policy
      */
     public void postCheck() throws StandardException
     {
         if (!fkInfo.refConstraintIsDeferrable) {
+            return;
+        }
+
+        int indexOfFirstRestrict = -1;
+
+        for (int i = 0; i < fkInfo.fkConglomNumbers.length; i++) {
+            if (fkInfo.raRules[i] == StatementType.RA_RESTRICT) {
+                indexOfFirstRestrict = i;
+                break;
+            }
+        }
+
+        if (indexOfFirstRestrict == -1) {
             return;
         }
 
@@ -289,7 +306,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
 
                     StandardException se = StandardException.newException(
                             SQLState.LANG_FK_VIOLATION,
-                            fkInfo.fkConstraintNames[0],
+                            fkInfo.fkConstraintNames[indexOfFirstRestrict],
                             fkInfo.tableName,
                             StatementUtil.typeName(fkInfo.stmtType),
                             RowUtil.toString(row, oneBasedIdentityMap));

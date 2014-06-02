@@ -3655,6 +3655,13 @@ Guide.
             </msg>
 
             <msg>
+                <name>X0Y47.S</name>
+                <text>Constraint '{0}' is invalid: the unique or primary key constraint on table '{1}' is deferrable and the referential action is CASCADE or SET NULL.</text>
+                <arg>constraintName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
                 <name>X0Y54.S</name>
                 <text>Schema '{0}' cannot be dropped because it is not empty.</text>
                 <arg>schemaNamet</arg>

@@ -42,6 +42,7 @@ import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
+import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -113,6 +114,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	 * @param source update rows come from source
 	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
+     * @param activation The activation
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
@@ -133,7 +135,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
 	 * @param activation Activation
-	 * @param constantActionItem  id of the update constant action saved objec
+     * @param constantActionItem  id of the update constant action saved object
 	 * @param rsdItem  id of the Result Description saved object
 	 * @exception StandardException thrown on error
      */
@@ -162,6 +164,9 @@ class UpdateResultSet extends DMLWriteResultSet
 	 * @param source update rows come from source
 	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
+     * @param activation
+     * @param passedInConstantAction
+     * @param passedInRsd
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
@@ -208,21 +213,20 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		if (fkInfoArray != null)
 		{
-			for (int i = 0; i < fkInfoArray.length; i++)
-			{
-				if (fkInfoArray[i].type == FKInfo.REFERENCED_KEY)
-				{
-					updatingReferencedKey = true;
-					if (SanityManager.DEBUG)
-					{
-						SanityManager.ASSERT(constants.deferred, "updating referenced key but update not deferred, wuzzup?");
-					}
-				}
-				else
-				{	
-					updatingForeignKey = true;
-				}
-			}
+            for (FKInfo fkInfo : fkInfoArray) {
+                if (fkInfo.type == FKInfo.REFERENCED_KEY) {
+                    updatingReferencedKey = true;
+                    if (SanityManager.DEBUG)
+                    {
+                        SanityManager.ASSERT(
+                            constants.deferred,
+                            "updating referenced key but update not " +
+                                "deferred, wuzzup?");
+                    }
+                } else {
+                    updatingForeignKey = true;
+                }
+            }
 		}
 
 		/* Get the # of columns in the ResultSet */
@@ -253,6 +257,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	/**
 		@exception StandardException Standard Derby error policy
 	*/
+    @Override
 	public void open() throws StandardException
 	{
 
@@ -267,13 +272,13 @@ class UpdateResultSet extends DMLWriteResultSet
 		if (deferred)
 		{
 
-            runChecker(true, true); // check for only RESTRICT referential
+            runChecker(true); // check for only RESTRICT referential
                                     // action rule violations
 			fireBeforeTriggers();
-			updateDeferredRows();
+            updateDeferredRows();
 			/* Apply deferred inserts to unique indexes */
 			rowChanger.finish();
-            runChecker(false, false); // check for all  violations
+            runChecker(false); // check for all  violations
 			fireAfterTriggers();
 
 		}
@@ -289,6 +294,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	/**
 		@exception StandardException Standard Derby error policy
 	*/
+    @Override
 	void setup() throws StandardException
 	{
 		super.setup();
@@ -647,11 +653,13 @@ class UpdateResultSet extends DMLWriteResultSet
 	protected ExecRow getNextRowCore( NoPutResultSet source )
 		throws StandardException
 	{
-		ExecRow row = super.getNextRowCore( source );
+        ExecRow nextRow = super.getNextRowCore( source );
 
-        if ( (row != null) && constants.underMerge() ) { row = processMergeRow( source, row ); }
+        if ( (nextRow != null) && constants.underMerge() ) {
+            nextRow = processMergeRow( source, nextRow );
+        }
 
-        return row;
+        return nextRow;
 	}
 
     /**
@@ -754,13 +762,13 @@ class UpdateResultSet extends DMLWriteResultSet
 
 			if (tableScan.past2FutureTbl == null)
 			{
-				double rowCount = tableScan.getEstimatedRowCount();
+                double rowCnt = tableScan.getEstimatedRowCount();
 				int initCapacity = 32 * 1024;
-				if (rowCount > 0.0)
+                if (rowCnt > 0.0)
 				{
-					rowCount = rowCount / 0.75 + 1.0;	// load factor
-					if (rowCount < initCapacity)
-						initCapacity = (int) rowCount;
+                    rowCnt = rowCnt / 0.75 + 1.0;   // load factor
+                    if (rowCnt < initCapacity)
+                        initCapacity = (int) rowCnt;
 				}
 				if (maxCapacity < initCapacity)
 					initCapacity = maxCapacity;
@@ -838,7 +846,8 @@ class UpdateResultSet extends DMLWriteResultSet
 			deferredBaseCC = 
                 tc.openCompiledConglomerate(
                     false,
-                    tc.OPENMODE_FORUPDATE|tc.OPENMODE_SECONDARY_LOCKED,
+                    (TransactionController.OPENMODE_SECONDARY_LOCKED |
+                     TransactionController.OPENMODE_FORUPDATE),
                     lockMode,
                     TransactionController.ISOLATION_SERIALIZABLE,
                     constants.heapSCOCI,
@@ -927,7 +936,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 
 	
-    void runChecker(boolean restrictCheckOnly, boolean postCheck)
+    void runChecker(boolean restrictCheckOnly)
             throws StandardException
 	{
 
@@ -977,12 +986,11 @@ class UpdateResultSet extends DMLWriteResultSet
                                     i,
                                     deletedRow,
                                     restrictCheckOnly,
-                                    postCheck,
                                     1);
 						}
 					}	
 
-                    if (postCheck) {
+                    if (restrictCheckOnly) {
                         riChecker.postCheck(i);
                     }
 				}
@@ -1031,7 +1039,6 @@ class UpdateResultSet extends DMLWriteResultSet
                                 i,
                                 insertedRow,
                                 restrictCheckOnly,
-                                postCheck, // N/A, not referenced key
                                 0);        // N/A, not referenced key
 						}
                     }
@@ -1103,6 +1110,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
+    @Override
 	public void	cleanUp() throws StandardException
 	{ 
 		numOpens = 0;
@@ -1151,7 +1159,7 @@ class UpdateResultSet extends DMLWriteResultSet
     @Override
     public void close() throws StandardException
     {
-        close( constants.underMerge() );
+        super.close( constants.underMerge() );
     }
                                
 	void rowChangerFinish() throws StandardException
