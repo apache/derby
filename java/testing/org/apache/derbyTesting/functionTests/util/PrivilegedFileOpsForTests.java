@@ -89,9 +89,35 @@ public class PrivilegedFileOpsForTests {
                         return file.getAbsolutePath();
                     }});
     }
-      
-    
-    
+
+    /**
+     * Create a temporary file.
+     *
+     * @param prefix file name prefix, at least three characters
+     * @param suffix file name suffix, defaults to ".tmp" if {@code null}
+     * @param directory where to create the file, or {@code null} for the
+     *   default temporary file directory
+     * @return the file that was created
+     * @throws IOException if the file cannot be created
+     * @see File#createTempFile(String, String, File)
+     */
+    public static File createTempFile(final String prefix,
+                                      final String suffix,
+                                      final File directory)
+            throws IOException
+    {
+        try {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<File>() {
+                    @Override
+                    public File run() throws IOException {
+                        return File.createTempFile(prefix, suffix, directory);
+                    }
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
+    }
 
     /**
      * Returns a input stream for the specified file.
@@ -188,6 +214,20 @@ public class PrivilegedFileOpsForTests {
         return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
             public Boolean run() {
                 return file.setReadable(readable, ownerOnly);
+            }
+        });
+    }
+
+    /**
+     * Make a file or directory read-only.
+     * @param file the file to make read-only
+     * @return {@code true} if successful, {@code false} otherwise
+     */
+    public static boolean setReadOnly(final File file) {
+        return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+            @Override
+            public Boolean run() {
+                return file.setReadOnly();
             }
         });
     }
