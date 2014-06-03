@@ -364,7 +364,7 @@ public class FilteredIssueLister {
         }
         RemoteIssue[] issues = null;
         if (filterId == GENERATE_JQL) {
-            issues = execJiraJQLQuery(out, auth, targetVersion);
+            issues = execJiraJQLQuery( out, auth, targetVersion, excludeFixVersions );
         } else {
             issues = execJiraFilterQuery(out, auth, filterId);
         }
@@ -579,9 +579,15 @@ public class FilteredIssueLister {
      * @return A list of matching issues.
      * @throws IOException if something goes wrong
      */
-    private RemoteIssue[] execJiraJQLQuery(BufferedWriter out, String auth,
-                                           DerbyVersion targetVersion)
-            throws IOException {
+    private RemoteIssue[] execJiraJQLQuery
+        (
+         BufferedWriter out,
+         String auth,
+         DerbyVersion targetVersion,
+         DerbyVersion[] excludeFixVersions
+         )
+        throws IOException
+    {
         // Here we have two scenarions:
         // a) A single target version number - the release has already been
         //    made, or there is only one release candidate.
@@ -613,6 +619,17 @@ public class FilteredIssueLister {
         sb.deleteCharAt(sb.length() -1).deleteCharAt(sb.length() -1);
         sb.append(')');
         jql += sb.toString();
+
+        StringBuilder   notIn = new StringBuilder();
+        notIn.append( " and fixversion not in ( " );
+        for ( int i = 0; i < excludeFixVersions.length; i++ )
+        {
+            if ( i > 0 ) { notIn.append( ", " ); }
+            DerbyVersion    exclusion = excludeFixVersions[ i ];
+            notIn.append( exclusion.getQuotedVersion() );
+        }
+        notIn.append( " )" );
+        jql += notIn.toString();
 
         // Execute the query.
         out.write("// JQL query: " + jql);
