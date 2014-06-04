@@ -540,6 +540,7 @@ public interface SQLState {
 	String FILE_WRITE_PAGE_EXCEPTION                            = "XSDG1.D";
 	String FILE_BAD_CHECKSUM                                    = "XSDG2.D";
 	String FILE_CONTAINER_EXCEPTION                             = "XSDG3.D";
+    String UNABLE_TO_ARRAYCOPY                                  = "XSDG4.D";
 	String FILE_DATABASE_NOT_IN_CREATE                          = "XSDG5.D";
 	String DATA_DIRECTORY_NOT_FOUND_IN_BACKUP                   = "XSDG6.D";
 	String UNABLE_TO_REMOVE_DATA_DIRECTORY                      = "XSDG7.D";
