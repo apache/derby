@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+
 <!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -58,6 +59,10 @@
     <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/serializedDataSources">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/serializedDataSources"
         includes="*.ser"/>
+    </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/Derby6587">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/Derby6587"
+        includes="*.csv"/>
     </copy>
   </target>
 
