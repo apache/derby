@@ -222,6 +222,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSDG1","Page {0} could not be written to disk, please check if the disk is full, or if a file system limit, such as a quota or a maximum file size, has been reached.","45000"},
         		{"XSDG2","Invalid checksum on Page {0}, expected={1}, on-disk version={2}, page dump follows: {3}","45000"},
         		{"XSDG3","Meta-data for {0} could not be accessed to {1} {2}","45000"},
+                {"XSDG4","Unrecoverable internal error encountered while attempting to read low level metadata about the table or index. Please provide your support organization with the following exception information: Failed: arraycopy of embryonic page byte[{0}] to container information byte[{1}]. Values of variables and constants: MAX_BORROWED_SPACE: {2}, BORROWED_SPACE_OFFSET({3}) + BORROWED_SPACE_LENG({4}) = {5}; arraycopylength: {6}; embryonic page {7}.","45000"},
         		{"XSDG5","Database is not in create mode when createFinished is called.","45000"},
         		{"XSDG6","Data segment directory not found in {0} backup during restore. Please make sure that backup copy is the right one and it is not corrupted.","45000"},
         		{"XSDG7","Directory {0} could not be removed during restore. Please make sure that permissions are correct.","45000"},
