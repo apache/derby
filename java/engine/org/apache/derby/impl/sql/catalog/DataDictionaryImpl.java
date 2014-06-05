@@ -1181,7 +1181,10 @@ public final class	DataDictionaryImpl
 					*/
 					if (ddlUsers == 0 && readersInDDLMode == 0)
 					{
-						clearCaches();
+						// Until we implement ALTER SEQUENCE, there should be no need
+                        // to clear the sequence cache. Always clearing the sequence cache
+                        // here gives rise to heisenbug DERBY-6595.
+						clearCaches( false );
 						setCacheMode(DataDictionary.COMPILE_ONLY_MODE);
 					}
 
