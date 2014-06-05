@@ -340,20 +340,25 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
                     0,                      // read only
                     TransactionController.MODE_RECORD,
                                             // record locking
-                    TransactionController.ISOLATION_READ_COMMITTED_NOHOLDLOCK,
+
+                    // Use repeatable read here, since we rely on the row being
+                    // present till we commit if we accept this row as being
+                    // the one the upholds the constraint when we delete ours.
+                    TransactionController.ISOLATION_REPEATABLE_READ,
+
                     (FormatableBitSet)null, // retrieve all fields
-                    key,                 // startKeyValue
+                    key,                    // startKeyValue
                     ScanController.GE,      // startSearchOp
                     null,                   // qualified
-                    key,                 // stopKeyValue
+                    key,                    // stopKeyValue
                     ScanController.GT);     // stopSearchOp
         } else {
             refKeyIndexScan.reopenScan(
-                      key,             // startKeyValue
-                      ScanController.GE,  // startSearchOp
-                      null,               // qualifier
-                      key,             // stopKeyValue
-                      ScanController.GT); // stopSearchOp
+                      key,                  // startKeyValue
+                      ScanController.GE,    // startSearchOp
+                      null,                 // qualifier
+                      key,                  // stopKeyValue
+                      ScanController.GT);   // stopSearchOp
         }
 
 
