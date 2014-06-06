@@ -928,16 +928,14 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, UNLOAD_TOOL );
         unloadTestTable( ruthConnection );
     }
-    private void    loadTestTable( Connection conn ) throws Exception
+    static  void    loadTestTable( Connection conn ) throws Exception
     {
-        goodStatement
+        conn.prepareStatement
             (
-             conn,
              "create table textTable( keyCol int primary key, textCol clob )"
-             );
-        goodStatement
+             ).execute();
+        conn.prepareStatement
             (
-             conn,
              "insert into textTable values\n" +
              "( 1, 'one' ),\n" +
              "( 2, 'one two' ),\n" +
@@ -959,15 +957,14 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "( 108, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events' ),\n" +
              "( 109, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want' ),\n" +
              "( 110, 'bricks and mortar, tea, tears, turtle, soup, when in the course of human events you want better cell coverage' )\n"
-             );
+             ).execute();
     }
-    private void    unloadTestTable( Connection conn ) throws Exception
+    static  void    unloadTestTable( Connection conn ) throws Exception
     {
-        goodStatement
+        conn.prepareStatement
             (
-             conn,
              "drop table textTable"
-             );
+             ).execute();
     }
 
    /**

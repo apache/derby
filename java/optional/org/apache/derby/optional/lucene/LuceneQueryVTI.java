@@ -34,6 +34,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Properties;
 
+import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.optional.api.LuceneUtils;
@@ -526,17 +527,21 @@ public class LuceneQueryVTI extends StringColumnVTI
          final String fieldName,
          final Analyzer analyzer
          )
-        throws PrivilegedActionException
+        throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<QueryParser>()
              {
                  public QueryParser run()
-                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                     throws ClassNotFoundException, IllegalAccessException,
+                     InvocationTargetException, NoSuchMethodException,
+                     SQLException
                  {
                      int    lastDotIdx = queryParserMaker.lastIndexOf( "." );
-                     Class<? extends Object>  klass = Class.forName( queryParserMaker.substring( 0, lastDotIdx ) );
+                     String className = queryParserMaker.substring( 0, lastDotIdx );
+                     ClassInspector  ci = LuceneSupport.getClassFactory().getClassInspector();
+                     Class<? extends Object>  klass = ci.getClass( className );
                      String methodName = queryParserMaker.substring( lastDotIdx + 1, queryParserMaker.length() );
                      Method method = klass.getDeclaredMethod( methodName, Version.class, String.class, Analyzer.class );
                      
@@ -595,14 +600,16 @@ public class LuceneQueryVTI extends StringColumnVTI
      * The method has no arguments.
 	 */
 	private static Analyzer getAnalyzer( final String analyzerMaker )
-        throws PrivilegedActionException
+        throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Analyzer>()
              {
                  public Analyzer run()
-                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                     throws ClassNotFoundException, IllegalAccessException,
+                     InvocationTargetException, NoSuchMethodException,
+                     SQLException
                  {
                      return LuceneSupport.getAnalyzerNoPrivs( analyzerMaker );
                  }

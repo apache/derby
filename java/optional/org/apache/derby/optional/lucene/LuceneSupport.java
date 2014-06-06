@@ -52,6 +52,8 @@ import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.util.IdUtil;
@@ -1678,14 +1680,16 @@ public class LuceneSupport implements OptionalTool
      * The method has no arguments.
 	 */
 	private static Analyzer getAnalyzer( final String analyzerMaker )
-        throws PrivilegedActionException
+        throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
              new PrivilegedExceptionAction<Analyzer>()
              {
                  public Analyzer run()
-                     throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
+                     throws ClassNotFoundException, IllegalAccessException,
+                     InvocationTargetException, NoSuchMethodException,
+                     SQLException
                  {
                      return getAnalyzerNoPrivs( analyzerMaker );
                  }
@@ -1699,10 +1703,12 @@ public class LuceneSupport implements OptionalTool
 	 */
 	static Analyzer getAnalyzerNoPrivs( String analyzerMaker )
         throws ClassNotFoundException, IllegalAccessException, InvocationTargetException,
-               NoSuchMethodException
+               NoSuchMethodException, SQLException
     {
         int    lastDotIdx = analyzerMaker.lastIndexOf( "." );
-        Class<? extends Object>  klass = Class.forName( analyzerMaker.substring( 0, lastDotIdx ) );
+        String  className = analyzerMaker.substring( 0, lastDotIdx );
+        ClassInspector  ci = getClassFactory().getClassInspector();
+        Class<? extends Object>  klass = ci.getClass( className );
         String methodName = analyzerMaker.substring( lastDotIdx + 1, analyzerMaker.length() );
         Method method = klass.getDeclaredMethod( methodName );
                      
@@ -1776,5 +1782,13 @@ public class LuceneSupport implements OptionalTool
         catch (StandardException se) { throw wrap( se ); }
     }
 
+	/**
+		Get the ClassFactory to use with this database.
+	*/
+	static  ClassFactory getClassFactory()
+        throws SQLException
+    {
+		return ConnectionUtil.getCurrentLCC().getLanguageConnectionFactory().getClassFactory();
+	}
 	
 }

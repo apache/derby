@@ -458,6 +458,8 @@ grant codeBase "${derbyTesting.codejar}derbyoptionaltools.jar" {
   permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete";
   permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete";
   permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE${/}-", "read,write,delete";
 
   permission java.io.FilePermission "${derbyTesting.lucene.core.jar.file}", "read";
   permission java.util.PropertyPermission "user.dir", "read";
@@ -474,6 +476,8 @@ grant codeBase "${derbyTesting.lucene.core}"
   permission java.io.FilePermission "${derby.system.home}${/}lucenesupportpermsdb${/}LUCENE${/}-", "read,write,delete";
   permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE", "read,write,delete";
   permission java.io.FilePermission "${derby.system.home}${/}lucenebackupdb${/}LUCENE${/}-", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE", "read,write,delete";
+  permission java.io.FilePermission "${derby.system.home}${/}lucenejarloadingdb${/}LUCENE${/}-", "read,write,delete";
   
   // Basic permissions needed for Lucene to work:
   permission java.util.PropertyPermission "user.dir", "read";

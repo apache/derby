@@ -178,6 +178,7 @@ final class JarLoader extends SecureClassLoader {
                 && !className.startsWith("org.apache.derby.jdbc.")
                 && !className.startsWith("org.apache.derby.vti.")
                 && !className.startsWith("org.apache.derby.agg.")
+                && !className.startsWith("org.apache.derby.optional.")
                 && !className.startsWith("org.apache.derby.impl.tools.optional.")
             )
         {
