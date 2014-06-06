@@ -33,6 +33,7 @@ import java.sql.SQLWarning;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -196,4 +197,38 @@ public class LuceneJarLoadingTest extends GeneratedColumnsHelper
         LuceneSupportPermsTest.unloadTestTable( ruthConnection );
     }
 
+    /**
+     * <p>
+     * Test that you can declare a function on methods in the Lucene api package.
+     * </p>
+     */
+    public  void    test_002_apiPackage()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+
+        goodStatement( dboConnection, "create type LuceneVersion external name 'org.apache.lucene.util.Version' language java" );
+        goodStatement
+            (
+             dboConnection,
+             "create function getLuceneVersion() returns LuceneVersion\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derby.optional.api.LuceneUtils.currentVersion'\n"
+             );
+
+        assertResults
+            (
+             dboConnection,
+             "values getLuceneVersion()",
+             new String[][]
+             {
+                 { LuceneUtils.currentVersion().toString() }
+             },
+             false
+             );
+
+        goodStatement( dboConnection, "drop function getLuceneVersion" );
+        goodStatement( dboConnection, "drop type LuceneVersion restrict" );
+    }
+    
 }

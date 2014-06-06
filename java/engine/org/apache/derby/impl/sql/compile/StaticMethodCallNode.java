@@ -370,6 +370,7 @@ class StaticMethodCallNode extends MethodCallNode
                 javaClassName.startsWith( "org.apache.derby." ) &&
                 !javaClassName.startsWith( "org.apache.derby.impl.tools.optional." ) &&
                 !javaClassName.startsWith( "org.apache.derby.optional.lucene." ) &&
+                !javaClassName.startsWith( "org.apache.derby.optional.api." ) &&
                 !javaClassName.startsWith( "org.apache.derby.vti." )
                 )
             {
