@@ -596,6 +596,7 @@ public class AllocPage extends StoredPage
 	*/
 	public static void ReadContainerInfo(byte[] containerInfo,
 										 byte[] epage)
+	throws StandardException
 	{
 		int N = (int)epage[BORROWED_SPACE_OFFSET];
 
@@ -612,8 +613,30 @@ public class AllocPage extends StoredPage
 		}
 
 		if (N != 0)
-			System.arraycopy(epage, BORROWED_SPACE_OFFSET+BORROWED_SPACE_LEN,
-							 containerInfo, 0, N);
+		{
+		    try {
+		        System.arraycopy(
+		                epage, BORROWED_SPACE_OFFSET+BORROWED_SPACE_LEN,
+						containerInfo, 0, N);
+		    }  catch (ArrayIndexOutOfBoundsException ioobe) {
+                throw StandardException.newException (
+                    SQLState.DATA_UNEXPECTED_EXCEPTION, 
+                        StandardException.newException (
+                            SQLState.UNABLE_TO_ARRAYCOPY,
+                            ioobe,
+                            new Integer(epage.length),
+                            new Integer(containerInfo.length),
+                            new Integer(MAX_BORROWED_SPACE),
+                            new Integer(BORROWED_SPACE_OFFSET),
+                            new Integer(BORROWED_SPACE_LEN),
+                            new Integer(BORROWED_SPACE_OFFSET + BORROWED_SPACE_LEN),
+                            new Integer(N),
+                            org.apache.derby.iapi.util.StringUtil.hexDump(
+                                    epage)
+                        )
+                );
+		    }
+		} 
 	}
 
 
