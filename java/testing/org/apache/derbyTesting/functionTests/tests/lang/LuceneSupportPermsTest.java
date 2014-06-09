@@ -1009,6 +1009,84 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         dboConnection = DriverManager.getConnection( decryptDatabaseURL );
     }
     
+   /**
+     * <p>
+     * Test that nulls are allowed in keys. See DERBY-6602.
+     * </p>
+     */
+    public  void    test_6602()
+        throws Exception
+    {
+        CD[]    columnDescriptors = new CD[]
+        {
+            new CD( "bigintCol", "bigint" ),
+            new CD( "blobCol", "blob" ),
+            new CD( "booleanCol", "boolean" ),
+            new CD( "charCol", "char( 10 )" ),
+            new CD( "clobCol", "clob" ),
+            new CD( "dataCol", "date" ),
+            new CD( "decimalCol", "decimal" ),
+            new CD( "doubleCol", "double" ),
+            new CD( "floatCol", "float" ),
+            new CD( "intCol", "int" ),
+            new CD( "longvarcharCol", "long varchar" ),
+            new CD( "longvarcharforbitdataCol", "long varchar for bit data" ),
+            new CD( "numericCol", "numeric" ),
+            new CD( "realCol", "real" ),
+            new CD( "smallintCol", "smallint" ),
+            new CD( "timeCol", "time" ),
+            new CD( "varcharCol", "varchar( 10 )" ),
+            new CD( "varcharforbitdataCol", "varchar( 10 ) for bit data" ),
+        };
+
+        StringBuilder   buffer = new StringBuilder();
+        buffer.append( "create table t_6602\n(\ttextcol clob" );
+        for ( CD cd : columnDescriptors )
+        {
+            buffer.append( ",\n\t" + cd.name + " " + cd.type );
+        }
+        buffer.append( "\n)" );
+        
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        
+        goodStatement( dboConnection, LOAD_TOOL );
+        goodStatement( dboConnection, buffer.toString() );
+        goodStatement( dboConnection, "insert into t_6602( textcol ) values ( 'abc'), ( 'def')" );
+
+        for ( CD cd : columnDescriptors )
+        {
+            vet6602( dboConnection, cd );
+        }
+
+        goodStatement( dboConnection, "drop table t_6602" );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+    }
+    private void    vet6602( Connection conn, CD cd )   throws Exception
+    {
+        PreparedStatement   ps = chattyPrepare
+            (
+             conn,
+             "call lucenesupport.createindex\n" +
+             "( 'TEST_DBO', 't_6602', 'textcol', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', ? )\n"
+             );
+        ps.setString( 1, cd.name );
+        ps.execute();
+
+        assertResults
+            (
+             conn,
+             "select * from table( t_6602__textcol( 'abc or def', null, 3, null ) ) tc order by documentid",
+             new String[][]
+             {
+                 { null, "0", "0.35355338" },
+                 { null, "1", "0.35355338" },
+             },
+             false
+             );
+
+        goodStatement( conn, "call lucenesupport.dropIndex( 'TEST_DBO', 't_6602', 'textcol' )" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -1354,6 +1432,20 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         {
             return super.parse( "one" );
         }
+    }
+
+    public  static  class   CD
+    {
+        public  final   String  name;
+        public  final   String  type;
+
+        public  CD( String Name, String Type )
+        {
+            name = Name;
+            type = Type;
+        }
+
+        public  String  toString() { return "[ " + name + ", " + type + " ]"; }
     }
 
 }

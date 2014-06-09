@@ -801,6 +801,9 @@ public class LuceneSupport implements OptionalTool
             throw newSQLException( SQLState.LUCENE_UNSUPPORTED_TYPE, keyDescriptor.typeName );
         }
 
+        // Lucene fields do not allow null values
+        if ( rs.wasNull() ) { field = null; }
+
         if ( field != null ) { doc.add( field ); }
     }
 	

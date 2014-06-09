@@ -102,6 +102,9 @@ public class LuceneQueryVTI extends StringColumnVTI
     private int _maxKeyID;
     private int _docIDColumnID;
     private int _scoreColumnID;
+
+    // true if last column read was null
+    private boolean _wasNull;
 	
     /////////////////////////////////////////////////////////////////////
     //
@@ -144,6 +147,8 @@ public class LuceneQueryVTI extends StringColumnVTI
 	 */
 	public String getRawColumn( int columnid ) throws SQLException
     {
+        _wasNull = false;
+        
 		try {
             ScoreDoc    scoreDoc = getScoreDoc();
             int     docID = scoreDoc.doc;
@@ -153,6 +158,22 @@ public class LuceneQueryVTI extends StringColumnVTI
 		}
         catch (IOException e)   { throw LuceneSupport.wrap( e ); }
 	}
+
+    /** Handle boolean columns */
+    public  boolean getBoolean( int columnid ) throws SQLException
+    {
+        String  stringValue = getRawColumn( columnid );
+
+        if ( stringValue == null )
+        {
+            _wasNull = true;
+            return false;
+        }
+        else
+        {
+            return Boolean.valueOf( stringValue );
+        }
+    }
 
     /** Handle float columns */
     public  float   getFloat( int columnid )    throws SQLException
@@ -274,6 +295,8 @@ public class LuceneQueryVTI extends StringColumnVTI
     /** Handle integer columns */
     public  int getInt( int columnid )  throws SQLException
     {
+        _wasNull = false;
+        
 		try {
             ScoreDoc    scoreDoc = getScoreDoc();
             int     docID = scoreDoc.doc;
@@ -293,9 +316,14 @@ public class LuceneQueryVTI extends StringColumnVTI
     {
         IndexableField  field = _searcher.doc( getScoreDoc().doc ).getField( getColumnName( columnid ) );
 
-        if ( field == null ) { return null; }
+        if ( field == null )
+        {
+            _wasNull = true;
+            return null;
+        }
         else
         {
+            _wasNull = false;
             Number  number = field.numericValue();
 
             return number;
@@ -321,6 +349,7 @@ public class LuceneQueryVTI extends StringColumnVTI
                     if ( ref != null )  { return ref.bytes; }
                 }
 
+                _wasNull = true;
                 return null;
             }
 			else { throw invalidColumnPosition( columnid ); }
@@ -346,6 +375,7 @@ public class LuceneQueryVTI extends StringColumnVTI
 	public boolean next()
         throws SQLException
     {
+        _wasNull = false;
         if ( _schema == null ) { initScan(); }
         
 		_hitIndex++;
@@ -365,7 +395,12 @@ public class LuceneQueryVTI extends StringColumnVTI
 
         closeReader();
 	}
-	
+
+    public  boolean wasNull() throws SQLException
+    {
+        return _wasNull;
+    }
+    
 	/**
 	 * Be sure to close the Lucene IndexReader
 	 */
