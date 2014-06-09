@@ -89,7 +89,7 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>Deferrable constraints</b> - Constraint enforcement can now be deferred to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
+<b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
 
 
 <li>
@@ -131,6 +131,12 @@ This is a feature release. The following new features were added:
 </th><th>Description</th>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6606">DERBY-6606</a></td><td>ErrorCodeTest AssertionFailedError: Unexpected row count, expected: 174, actual: 175</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6599">DERBY-6599</a></td><td>Incorrect quoting of 42ZB4 message</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6591">DERBY-6591</a></td><td>Minor tweaks needed on new ij commands</td>
 </tr>
 <tr>
@@ -156,9 +162,6 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6566">DERBY-6566</a></td><td>Simplify handling of untyped nulls in CASE and NULLIF expressions</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6564">DERBY-6564</a></td><td>Document the experimental, optional LuceneSupport tool.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6563">DERBY-6563</a></td><td>NOT elimination for CASE expressions is broken</td>
@@ -218,9 +221,6 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6527">DERBY-6527</a></td><td>Fix errors in foreign keys documentation</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6526">DERBY-6526</a></td><td>Document the MERGE statement</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6523">DERBY-6523</a></td><td>Convert lang/triggerBeforeTrig.sql to JUnit TriggerBeforeTrigTest</td>
 </tr>
 <tr>
@@ -261,6 +261,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6505">DERBY-6505</a></td><td>Clean up dead code in FileUtil</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6504">DERBY-6504</a></td><td>change AllocPage.ReadContainerInfo to catch ArrayIndexOutOfBoundsException and turn it into Derby error.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6503">DERBY-6503</a></td><td>Starting network server on a network drive fails with JDK 7 on Windows</td>
@@ -363,9 +366,6 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6410">DERBY-6410</a></td><td>ClassCastException when launching derby from windows subst drive</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6390">DERBY-6390</a></td><td>Document the WHEN clause in the CREATE TRIGGER statement</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6386">DERBY-6386</a></td><td>Errors in jdbc4.LobStreamTest if derbyclient.jar is first in the classpath</td>
@@ -489,6 +489,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6230">DERBY-6230</a></td><td>Use the JVM's cache of Number instances in ReuseFactory</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6217">DERBY-6217</a></td><td>Put all of the security documentation in a single, separate user guide</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6213">DERBY-6213</a></td><td>Deprecate support for Java 5 and CDC</td>
@@ -673,6 +676,9 @@ This is a feature release. The following new features were added:
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-534">DERBY-534</a></td><td>Support use of the WHEN clause in CREATE TRIGGER statements</td>
 </tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-532">DERBY-532</a></td><td>Support deferrable constraints</td>
+</tr>
 </table>
 </div>
 <h2>
@@ -724,13 +730,12 @@ of the class EmbeddedConnectionPoolDataSource40 has changed in Derby 10.8 and la
 </li>
 <li>
 <a href="#Note for DERBY-6096"><span>Note for DERBY-6096: 
-Estimate memory usage for BLOB and CLOB objects held in memory to avoid OutOfMemoryError with CLOB or BLOB hash join.
-
+Estimates have changed for the memory needed when hash-joining LOB-bearing tables.
 </span></a>
 </li>
 <li>
 <a href="#Note for DERBY-2041"><span>Note for DERBY-2041: 
-Dropping of objects used in triggers will now fail.
+Dropping objects mentioned by triggers now fails.
 </span></a>
 </li>
 <li>
@@ -965,7 +970,7 @@ The previous behavior violated the SQL Standard.
 <h4>Application Changes Required</h4>
 
 <p>
-Applications which need to add change an identity column into a non-identity
+Applications which need to change an identity column into a non-identity
 column with a default should be re-coded to do something like this:
 </p>
 
@@ -1524,16 +1529,6 @@ DataSources listed above.
 <a name="Note for DERBY-6128"></a>Note for DERBY-6128</h3>
 <div>
 
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
 
 <h4>Summary of Change</h4>
 
@@ -1544,18 +1539,6 @@ of the class EmbeddedConnectionPoolDataSource40 has changed in Derby 10.8 and la
 
 </p>
 
-
-<!-- DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM
-  OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
@@ -1569,43 +1552,15 @@ this version of Derby.
 </p>
 
 
-<!-- 
-  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
-
-  For instance:
-
-  Applications which open two InputStreams on the ResultSet column now
-  fail.
--->
-
-
 <h4>Incompatibilities with Previous Release</h4>
 
-Derby releases newer that 10.8 can't read serialized data source
-objects of the class EmbeddedConnectionPoolDataSource40 produced by a
-Derby 10.7 or older.
-
-<!-- 
-  DESCRIBE WHY THE CHANGE WAS MADE.
-
-  For instance:
-
-  The previous behavior violated the JDBC standard. The new behavior
-  is correct.
--->
+Derby releases newer than 10.8 can't read serialized data source
+objects of the class EmbeddedConnectionPoolDataSource40 if those
+objects were produced by Derby version 10.7 or older.
 
 <h4>Rationale for Change</h4>
 
 Accidental change.
-
-<!-- 
-  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
-  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
-
-  For instance:
-
-  Users must recode applications which open multiple streams on the same column.
--->
 
 <h4>Application Changes Required</h4>
 
@@ -1617,94 +1572,51 @@ N/A.
 <a name="Note for DERBY-6096"></a>Note for DERBY-6096</h3>
 <div>
 
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
 
 <h4>Summary of Change</h4>
 
 <p>
-Estimate memory usage for BLOB and CLOB objects held in memory to avoid OutOfMemoryError with CLOB or BLOB hash join.
-
+Estimates have changed for the memory needed when hash-joining LOB-bearing tables.
 </p>
-
-
-<!-- 
-  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-In previous releases BLOB and CLOBs held in memory were estimated to take zero bytes. This would mean that hash joins with many objects of type BLOB or CLOB could use a large amount of memory which might lead to either better performance or an OutOfMemory error.  After the change for DERBY-6096, hash joins may spill to disk earlier and thus be less performant.
- 
+In previous releases, BLOBs and CLOBs held in memory were estimated to
+take zero bytes. This would mean that hash joins with many objects of
+type BLOB or CLOB could use a large amount of memory. That might improve
+performance. However, it could cause OutOfMemory errors.  After the
+change for DERBY-6096, hash joins may spill to disk earlier and thus
+run slower. 
 </p>
 
-
-<!-- 
-  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
-
-  For instance:
-
-  Applications which open two InputStreams on the ResultSet column now
-  fail.
--->
 
 
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-      BLOBs and CLOBs did not have a maximum memory limit for hash joins. Now they have the default limit of 1048576 (1MB)  or the setting of derby.language.maxMemoryPerTable  
+      BLOBs and CLOBs did not have a maximum memory limit for hash
+joins. Now they have the default limit of 1048576 (1MB). This limit
+can be overridden by setting the derby.language.maxMemoryPerTable property.
 </p>
 
-
-<!-- 
-  DESCRIBE WHY THE CHANGE WAS MADE.
-
-  For instance:
-
-  The previous behavior violated the JDBC standard. The new behavior
-  is correct.
--->
 
 
 <h4>Rationale for Change</h4>
 
 <p>
-      Not setting a limit on BLOB/CLOB hash joins could cause an OutOfMemory and crash if the hash join ran out of memory.
+Hash joins of LOB-bearing tables were raising OutOfMemory errors and
+crashing the engine.
 </p>
 
-
-<!-- 
-  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
-  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
-
-  For instance:
-
-  Users must recode applications which open multiple streams on the same column.
--->
 
 
 <h4>Application Changes Required</h4>
 
 <p>
-      To allow BLOB/CLOB (and all)  hash joins to use more memory override the default the Derby propery  derby.language.maxMemoryPerTable  to be the number of bytes you would like to allow for each  hash join.
+      To allow BLOB/CLOB (and all) hash joins to use more memory, set
+the Derby property  derby.language.maxMemoryPerTable to be the number of bytes you would like to allow for each hash join.
 </p>
 
 
@@ -1715,41 +1627,21 @@ In previous releases BLOB and CLOBs held in memory were estimated to take zero b
 <a name="Note for DERBY-2041"></a>Note for DERBY-2041</h3>
 <div>
 
-<!-- 
-  SUMMARIZE THE ISSUE. This is a one line, one sentence summary of the
-  issue. It serves as the title for the issue in the Issues section of
-  the full Release Notes.
-
-  For instance:
-
-  Applications may no longer open two InputStreams on the same ResultSet column.
--->
-
 
 <h4>Summary of Change</h4>
 
 <p>
-Dropping of objects used in triggers will now fail.
+Dropping objects mentioned by triggers now fails.
 </p>
 
-
-<!-- 
-  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
-
-  For instance:
-
-  In the previous release, applications were able to open two
-  InputStreams on the same column. Depending on how these streams
-  interacted, the value siphoned out of the column was erratic. Now
-  Derby raises a SQLException when the application attempts to create
-  the second InputStream.
--->
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-When <tt>DROP TABLE</tt>, <tt>DROP VIEW</tt>, <tt>DROP PROCEDURE</tt>, <tt>DROP FUNCTION</tt> or <tt>DROP SYNONYM</tt> is invoked on an object that is used by a trigger in a triggered SQL statement, the <tt>DROP</tt> operation fails and the object is not dropped. In previous releases, those operations would have succeeded, and an exception would have been thrown the next time the dependent trigger fired.
+When <tt>DROP TABLE/VIEW/PROCEDURE/FUNCTION/SYNONYM</tt> is invoked on
+an object which is used by a trigger in a triggered SQL statement, the
+<tt>DROP</tt> operation now fails and the object is not dropped. In previous releases, those operations would have succeeded, and an exception would have been thrown the next time the dependent trigger fired.
 </p>
 
 
@@ -1764,17 +1656,9 @@ ERROR X0Y25: Operation 'DROP TABLE' cannot be performed on object 'T' because TR
 
 
 <p>
-The new exception is only thrown if the trigger was created with the new version. If the dependent trigger was created with an older version, the <tt>DROP</tt> operation will succeed, and an exception will be thrown the next time the trigger fires.
+The new exception is thrown only if the trigger was created with
+version 10.11 or higher. If the dependent trigger was created with an older version, the <tt>DROP</tt> operation will succeed, and an exception will be thrown the next time the trigger fires.
 </p>
-
-<!-- 
-  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
-
-  For instance:
-
-  Applications which open two InputStreams on the ResultSet column now
-  fail.
--->
 
 <!--h4>Incompatibilities with Previous Release</h4>
 <p>
@@ -1795,12 +1679,15 @@ The new exception is only thrown if the trigger was created with the new version
 <h4>Rationale for Change</h4>
 
 <p>
-The previous behavior silently allowed dropping of objects that would make other objects invalid and cause subsequent errors. The new behavior helps preventing such problems.
+The previous behavior dropped objects and made other objects invalid. That caused subsequent errors. The new behavior helps prevent such problems.
 </p>
 
 
 <p>
-Also, the new behavior makes <tt>DROP TABLE</tt>, <tt>DROP VIEW</tt>, <tt>DROP PROCEDURE</tt>, <tt>DROP FUNCTION</tt> and <tt>DROP SYNONYM</tt> consistent with <tt>DROP TYPE</tt>, <tt>DROP SEQUENCE</tt>, <tt>DROP DERBY AGGREGATE</tt>, <tt>ALTER TABLE ... DROP COLUMN</tt> and <tt>REVOKE</tt>, which already fail when there is a dependent trigger.
+Also, the new behavior makes
+<tt>DROP TABLE/VIEW/PROCEDURE/FUNCTION/SYNONYM</tt> consistent with
+<tt>DROP TYPE/SEQUENCE/DERBY AGGREGATE</tt>, <tt>ALTER TABLE ... DROP
+COLUMN</tt> and <tt>REVOKE</tt>. Those statements already failed when there was a dependent trigger.
 </p>
 
 <!-- 

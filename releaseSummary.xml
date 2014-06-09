@@ -110,7 +110,7 @@ This is a feature release. The following new features were added:
 
 <li><b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual.</li>
 
-<li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
+<li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
 
 <li><b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual.</li>
 
