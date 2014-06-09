@@ -125,6 +125,8 @@ public class LuceneQueryVTI extends StringColumnVTI
         throws SQLException
     {
         super( null );
+
+        LuceneSupport.checkNotNull( "QUERY", queryText );
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;

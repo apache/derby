@@ -367,6 +367,8 @@ public class LuceneSupport implements OptionalTool
 
         Connection              conn = getDefaultConnection();
 
+        vetIdentifiers( schema, table, textcol );
+
         // only the dbo or the schema owner can perform this function
         mustBeOwner( conn, schema );
 
@@ -409,6 +411,8 @@ public class LuceneSupport implements OptionalTool
         
         Connection              conn = getDefaultConnection();
         DatabaseMetaData    dbmd = conn.getMetaData();
+
+        vetIdentifiers( schema, table, textcol );
 
         // First make sure that the text column exists and is a String type
         vetTextColumn( dbmd, schema, table, textcol );
@@ -570,6 +574,20 @@ public class LuceneSupport implements OptionalTool
         }
 	}
 
+    /** Verify that the schema, table, and column names aren't null */
+	private static void vetIdentifiers
+        (
+         String schema,
+         String table,
+         String textcol
+         )
+        throws SQLException
+    {
+        checkNotNull( "SCHEMANAME", schema );
+        checkNotNull( "TABLENAME", table );
+        checkNotNull( "TEXTCOLUMN", textcol );
+    }
+    
     /////////////////////////////////////////////////////////////////////
     //
     //  DROP INDEX
@@ -590,6 +608,8 @@ public class LuceneSupport implements OptionalTool
     {
         forbidReadOnlyConnections();
         
+        vetIdentifiers( schema, table, textcol );
+
         getDefaultConnection().prepareStatement
             (
              "drop function " + makeTableFunctionName( schema, table, textcol )
@@ -1356,6 +1376,16 @@ public class LuceneSupport implements OptionalTool
         catch (StandardException se)  { throw sqlException( se ); }
     }
 
+    /** Raise an error if an argument is being given a null value */
+    static  void    checkNotNull( String argumentName, String argumentValue )
+        throws SQLException
+    {
+        if ( argumentValue == null )
+        {
+            throw newSQLException( SQLState.ARGUMENT_MAY_NOT_BE_NULL, argumentName );
+        }
+    }
+
     /**
      * Return the primary key columns for a table, sorted by key position.
      */
@@ -1474,6 +1504,8 @@ public class LuceneSupport implements OptionalTool
         int counter = 0;
         for ( String key : keyColumns )
         {
+            checkNotNull( "KEYCOLUMNS", key );
+            
             if ( counter > 0 ) { buffer.append( ", " ); }
             counter++;
             buffer.append( derbyIdentifier( key ) );

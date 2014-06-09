@@ -100,6 +100,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 	private static  final   String      BAD_COLUMN_NAME                 = "42XBJ";
     private static  final   String      NONEXISTENT_TABLE_FUNCTION  ="42ZB4";
     private static  final   String      INCOMPATIBLE_ENCRYPTION = "42XBL";
+    private static  final   String      ILLEGAL_NULL_ARG = "42XBM";
+    private static  final   String      NULL_PRIMITIVE_ARG = "39004";
 
     private static  final   String      POLICY_FILE = "org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy";
 
@@ -1085,6 +1087,86 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
 
         goodStatement( conn, "call lucenesupport.dropIndex( 'TEST_DBO', 't_6602', 'textcol' )" );
+    }
+    
+   /**
+     * <p>
+     * Test that nulls are not allowed as the values of certain arguments. See DERBY-6596.
+     * </p>
+     */
+    public  void    test_6596_null_args()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        
+        goodStatement( dboConnection, LOAD_TOOL );
+        goodStatement( dboConnection, "create table t_6596( x int primary key, c clob )" );
+        goodStatement( dboConnection, "insert into t_6596 values ( 1, 'abc' ), ( 2, 'def' )" );
+
+        // create index errors
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.createindex( null, 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.createindex( 'TEST_DBO', null, 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', null, 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', null )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', 'x', null )" );
+
+        goodStatement( dboConnection, "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        assertResults
+            (
+             dboConnection,
+             "select * from table( t_6596__c( 'abc or def', null, 3, null ) ) tc order by documentid",
+             new String[][]
+             {
+                 { "1", "0", "0.35355338" },
+                 { "2", "1", "0.35355338" },
+             },
+             false
+             );
+        goodStatement( dboConnection, "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        
+        // update index errors
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.updateindex( null, 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.updateindex( 'TEST_DBO', null, 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', null, 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+
+        // query errors
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "select * from table( t_6596__c( null, null, 3, null ) ) tc order by documentid" );
+        expectExecutionError
+            ( dboConnection, NULL_PRIMITIVE_ARG,
+              "select * from table( t_6596__c( 'abc or def', null, null, null ) ) tc order by documentid" );
+
+        // drop index errors
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.dropindex( null, 't_6596', 'c' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.dropindex( 'TEST_DBO', null, 'c' )" );
+        expectExecutionError
+            ( dboConnection, ILLEGAL_NULL_ARG,
+              "call lucenesupport.dropindex( 'TEST_DBO', 't_6596', null )" );
+
+        goodStatement( dboConnection, "call lucenesupport.dropindex( 'TEST_DBO', 't_6596', 'c' )" );
+        goodStatement( dboConnection, "drop table t_6596" );
+        goodStatement( dboConnection, UNLOAD_TOOL );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

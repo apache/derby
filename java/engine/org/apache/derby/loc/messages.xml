@@ -2417,6 +2417,12 @@ Guide.
                 <text>Lucene indexes cannot be created in an encrypted database and, conversely, a database containing a Lucene index cannot be encrypted.</text>
             </msg>
 
+	        <msg>
+                <name>42XBM</name>
+                <text>Argument '{0}' may not be null.</text>
+                <arg>argumentName</arg>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
