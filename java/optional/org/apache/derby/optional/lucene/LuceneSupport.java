@@ -495,6 +495,8 @@ public class LuceneSupport implements OptionalTool
         tableFunction.append( "( query varchar( 32672 ), queryParserMaker varchar( 32672 ), windowSize int, scoreCeiling real )\n" );
         tableFunction.append( "returns table\n(" );
 
+        writeIndexProperties( propertiesFile, indexProperties );
+        
         PreparedStatement   ps = null;
         ResultSet rs = null;
         IndexWriter iw = null;
@@ -550,8 +552,6 @@ public class LuceneSupport implements OptionalTool
                     doc.add(new TextField( LuceneQueryVTI.TEXT_FIELD_NAME, textcolValue, Store.NO));
                 }
                 addDocument( iw, doc );
-
-                writeIndexProperties( propertiesFile, indexProperties );
             }
         }
         finally
