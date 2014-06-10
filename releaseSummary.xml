@@ -108,9 +108,9 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual.</li>
+<li><b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual. See also features F312, F313, and F314 of the SQL Standard.</li>
 
-<li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
+<li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual. See also features F721 and F492 of the SQL Standard.</li>
 
 <li><b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual.</li>
 
@@ -118,7 +118,7 @@ This is a feature release. The following new features were added:
 
 <li><b>Experimental Lucene support</b> - Derby text columns can now be indexed and queried via Apache Lucene. See the section on the optional luceneSupport tool in the Derby Tools and Utilities Guide.</li>
 
-<li><b>Simple case expression</b> - The "simple" and "extended" syntax for CASE expressions has been added. See the section on the CASE expression in the Derby Reference Manual.</li>
+<li><b>Simple case expression</b> - The "simple" and "extended" syntax for CASE expressions has been added. See the section on the CASE expression in the Derby Reference Manual. See also features F261-01, F262, and F263 of the SQL Standard.</li>
 
 <li><b>Better concurrency for identity columns</b> - The concurrency of identity columns has been boosted. See the detailed release note for DERBY-6542 below.</li>
 
