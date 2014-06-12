@@ -335,7 +335,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // Tests need to be able to exec a java program. DERBY-6295: Also give them
   // read permission so that detailed error message is shown.
   permission java.io.FilePermission "${java.home}${/}-", "execute, read";
- 
+
+  // needed to create a temp file in order to open a database in a jar file
+  permission java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete";
+
   // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";
