@@ -183,7 +183,8 @@ public class StatementPoolingTest
         final String simpleName = names[names.length -1];
         if (JDBC.vmSupportsJDBC4() && !expectedName.endsWith("40")) {
 
-            if ( isJava8() && expectedName.contains( "Statement" ) )
+            if (JDBC.vmSupportsJDBC42()
+                    && expectedName.contains("Statement"))
             {
                 expectedName += "42";
             }
