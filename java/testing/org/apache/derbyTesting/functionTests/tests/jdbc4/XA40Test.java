@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.*;
@@ -195,7 +196,7 @@ public class XA40Test extends BaseJDBCTestCase {
      */
     public void test_registerOutParameter_jdbc4_2() throws Exception
     {
-        if ( isJava8() )
+        if (JDBC.vmSupportsJDBC42())
         {
             Class<?>   klass = Class.forName( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" );
             Method  method = klass.getMethod( "registerObjectTest", new Class<?>[] { Connection.class } );

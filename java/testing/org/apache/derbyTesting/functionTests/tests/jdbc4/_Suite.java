@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
@@ -80,7 +81,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Driver40UnbootedTest.suite());
         suite.addTest(LoginTimeoutTest.suite());
 
-        if ( isJava8() )
+        if (JDBC.vmSupportsJDBC42())
         {
             suite.addTest( getSuite( "org.apache.derbyTesting.functionTests.tests.jdbc4.PreparedStatementTest42" ) );
         }

@@ -212,7 +212,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     {
         assertBatchUpdateCounts( squashLongs( expectedBatchResult ), bue.getUpdateCounts() );
         
-        if ( isJava8() )
+        if (JDBC.vmSupportsJDBC42())
         {
             BatchUpdateExceptionWrapper wrapper = new BatchUpdateExceptionWrapper( bue );
 
