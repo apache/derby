@@ -101,6 +101,46 @@ public class DBInJarTest extends BaseJDBCTestCase {
             assertSQLState("08006", se);
         }
     }
+
+    /**
+     * Test for fix of DERBY-4381, by testing the connection to a jar 
+     * with a param in the name. DERBY-4381 describes the problem when
+     * the param is in the path, but the cause is the same
+     */
+    public void testConnectParamDBInJar() throws SQLException
+    {
+        //      Create database to be jarred up.
+        
+        Connection beforejarconn = DriverManager.getConnection("jdbc:derby:testparjardb;create=true");
+        Statement bjstmt = beforejarconn.createStatement();  
+        bjstmt.executeUpdate("CREATE TABLE PARTAB (I INT)");
+        bjstmt.executeUpdate("INSERT INTO PARTAB VALUES(1)");
+        shutdownDB("jdbc:derby:testparjardb;shutdown=true");
+        Statement stmt = createStatement();
+        
+        stmt.executeUpdate(
+                "CALL CREATEARCHIVE('test)jardb.jar', " +
+                "'testparjardb','testparjardb')");
+        Connection jarconn = DriverManager.getConnection(
+                "jdbc:derby:jar:(test)jardb.jar)testparjardb");
+        Statement s = jarconn.createStatement();
+        
+        // try to read from a table.
+        ResultSet rs = s.executeQuery("SELECT * from PARTAB");
+        JDBC.assertSingleValueResultSet(rs, "1");
+        
+       shutdownDB("jdbc:derby:jar:(test)jardb.jar)testparjardb;shutdown=true");
+              
+       // cleanup databases
+      File jarredpardb = new File(System.getProperty("derby.system.home") 
+              + "/test)jardb.jar");
+      assertTrue("failed deleting " +
+              jarredpardb.getPath(),jarredpardb.delete());
+      removeDirectory(new File(System.getProperty("derby.system.home") 
+              + "/testparjardb" ));
+    }
+    
+    
     
     /**
      * Test various queries that use a hash table that may be spilled to disk

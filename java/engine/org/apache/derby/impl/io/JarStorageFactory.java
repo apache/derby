@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.io.StorageFile;
 
 /**
@@ -92,7 +93,7 @@ public class JarStorageFactory extends BaseStorageFactory
         {
             leftParen = dataDirectory.indexOf( '(', offset);
             if( leftParen >= 0)
-                rightParen = dataDirectory.indexOf( ')', leftParen + 1);
+                rightParen = dataDirectory.lastIndexOf( ')' );
         }
         File jarFile = null;
         if( rightParen > 0)
