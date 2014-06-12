@@ -89,9 +89,34 @@ public class PrivilegedFileOpsForTests {
                         return file.getAbsolutePath();
                     }});
     }
-      
-    
-    
+
+    /**
+     * Create a temporary file.
+     *
+     * @param prefix file name prefix, at least three characters
+     * @param suffix file name suffix, defaults to ".tmp" if {@code null}
+     * @param directory where to create the file, or {@code null} for the
+     *   default temporary file directory
+     * @return the file that was created
+     * @throws IOException if the file cannot be created
+     * @see File#createTempFile(String, String, File)
+     */
+    public static File createTempFile(final String prefix,
+                                      final String suffix,
+                                      final File directory)
+            throws IOException
+    {
+        try {
+            return (File) AccessController.doPrivileged(
+                new PrivilegedExceptionAction() {
+                    public Object run() throws IOException {
+                        return File.createTempFile(prefix, suffix, directory);
+                    }
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        }
+    }
 
     /**
      * Returns a input stream for the specified file.
@@ -159,6 +184,19 @@ public class PrivilegedFileOpsForTests {
                             return Boolean.valueOf(file.delete());
                         }
                     })).booleanValue();
+    }
+
+    /**
+     * Make a file or directory read-only.
+     * @param file the file to make read-only
+     * @return {@code true} if successful, {@code false} otherwise
+     */
+    public static boolean setReadOnly(final File file) {
+        return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                return Boolean.valueOf(file.setReadOnly());
+            }
+        })).booleanValue();
     }
 
     /**

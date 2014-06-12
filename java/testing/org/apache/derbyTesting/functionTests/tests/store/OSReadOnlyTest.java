@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
@@ -106,6 +107,15 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
      * on OS level, the database reacts as if it's in 'ReadOnly' mode
      */
     public void testOSReadOnly() throws Exception {
+        if (!supportsSetReadOnly()) {
+            // If we can modify files after File.setReadOnly() has been
+            // called on them, the test database will not actually be
+            // read-only, and the test will fail. Skip the test in that
+            // case.
+            alarm("Read-only files can be modified. Skipping OSReadOnlyTest.");
+            return;
+        }
+
         // start with some simple checks
         setAutoCommit(false);
         Statement stmt = createStatement();
@@ -172,7 +182,39 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         // testharness will try to remove the original db; put it back
         moveDatabaseOnOS("readOnly2", phDbName);
     }
-    
+
+    /**
+     * Check if {@code File.setReadOnly()} has any effect in this environment.
+     * For example, if the test runs as a privileged user, it may be able
+     * to modify a file even if it has been made read-only. If so, it doesn't
+     * make any sense to run this test.
+     *
+     * @return {@code true} if {@code File.setReadOnly()} prevents file
+     *   modifications; otherwise, {@code false}
+     * @throws IOException if an unexpected error happens
+     */
+    private boolean supportsSetReadOnly() throws IOException {
+        File tmp = PrivilegedFileOpsForTests.createTempFile(
+                "tmp", null, currentDirectory());
+        PrivilegedFileOpsForTests.setReadOnly(tmp);
+        FileOutputStream fs = null;
+        try {
+            fs = PrivilegedFileOpsForTests.getFileOutputStream(tmp);
+            // Was able to open the file in read-write mode, so it's not
+            // properly read-only.
+            return false;
+        } catch (FileNotFoundException fnf) {
+            // Failed to open the file in read-write mode, so it seems like
+            // it's read-only.
+            return true;
+        } finally {
+            if (fs != null) {
+                fs.close();
+            }
+            PrivilegedFileOpsForTests.delete(tmp);
+        }
+    }
+
     /*
      * figure out the physical database name, we want to manipulate
      * the actual files on the OS.
