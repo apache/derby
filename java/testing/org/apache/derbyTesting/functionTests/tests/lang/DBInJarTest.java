@@ -104,14 +104,15 @@ public class DBInJarTest extends BaseJDBCTestCase {
 
     /**
      * Test for fix of DERBY-4381, by testing the connection to a jar 
-     * with a param in the name. DERBY-4381 describes the problem when
-     * the param is in the path, but the cause is the same
+     * with a closing parenthesis / round bracket in the name. 
+     * DERBY-4381 describes the problem when this round bracket
+     * is in the path, but the cause is the same.
      */
-    public void testConnectParamDBInJar() throws SQLException
+    public void testConnectParenDBInJar() throws SQLException
     {
         //      Create database to be jarred up.
-        
-        Connection beforejarconn = DriverManager.getConnection("jdbc:derby:testparjardb;create=true");
+        Connection beforejarconn = DriverManager.getConnection(
+                "jdbc:derby:testparjardb;create=true");
         Statement bjstmt = beforejarconn.createStatement();  
         bjstmt.executeUpdate("CREATE TABLE PARTAB (I INT)");
         bjstmt.executeUpdate("INSERT INTO PARTAB VALUES(1)");
@@ -129,15 +130,15 @@ public class DBInJarTest extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery("SELECT * from PARTAB");
         JDBC.assertSingleValueResultSet(rs, "1");
         
-       shutdownDB("jdbc:derby:jar:(test)jardb.jar)testparjardb;shutdown=true");
-              
-       // cleanup databases
-      File jarredpardb = new File(System.getProperty("derby.system.home") 
-              + "/test)jardb.jar");
-      assertTrue("failed deleting " +
-              jarredpardb.getPath(),jarredpardb.delete());
-      removeDirectory(new File(System.getProperty("derby.system.home") 
-              + "/testparjardb" ));
+        shutdownDB("jdbc:derby:jar:(test)jardb.jar)testparjardb;shutdown=true");
+        
+        // cleanup databases
+        File jarredpardb = new File(System.getProperty("derby.system.home") 
+                + "/test)jardb.jar");
+        assertTrue("failed deleting " +
+                jarredpardb.getPath(),jarredpardb.delete());
+        removeDirectory(new File(System.getProperty("derby.system.home") 
+                + "/testparjardb" ));
     }
     
     

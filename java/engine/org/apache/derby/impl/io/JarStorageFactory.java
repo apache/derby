@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipFile;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.io.StorageFile;
 
 /**
