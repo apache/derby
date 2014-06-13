@@ -30,25 +30,25 @@ public class jdk19 extends jvm {
     public String getName(){return "jdk19";}
     public jdk19(boolean noasyncgc, boolean verbosegc, boolean noclassgc,
         long ss, long oss, long ms, long mx, String classpath, String prof,
-        boolean verify, boolean noverify, boolean nojit, Vector<String> D) {
+        boolean verify, boolean noverify, boolean nojit, Vector D) {
         super(noasyncgc,verbosegc,noclassgc,ss,oss,ms,mx,classpath,prof,
             verify,noverify,nojit,D);
     }
 
-    public jdk19(String classpath, Vector<String> D) {
+    public jdk19(String classpath, Vector D) {
         super(classpath,D);
     }
 
-    public jdk19(long ms, long mx, String classpath, Vector<String> D) {
+    public jdk19(long ms, long mx, String classpath, Vector D) {
         super(ms,mx,classpath,D);
     }
 
     public jdk19() { }
 
 
-    public Vector<String> getCommandLine() {
+    public Vector getCommandLine() {
         StringBuffer sb = new StringBuffer();
-        Vector<String> v = super.getCommandLine();
+        Vector v = super.getCommandLine();
         appendOtherFlags(sb);
         String s = sb.toString();
         StringTokenizer st = new StringTokenizer(s);
