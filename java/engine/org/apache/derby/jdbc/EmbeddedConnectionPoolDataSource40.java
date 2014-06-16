@@ -23,7 +23,7 @@ package org.apache.derby.jdbc;
 /** 
    <P>
    This is a vacuous, deprecated class. At one time, it had real behavior and helped us support
-   separate datasources for Java 5 and Java 6.
+   separate data sources for Java 5 and Java 6.
    Now that we no longer support Java 5, all functionality has migrated into the superclass, EmbeddedConnectionPoolDataSource.
    This class is preserved for backward compatibility reasons.
    </P>

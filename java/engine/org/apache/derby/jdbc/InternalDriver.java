@@ -795,17 +795,17 @@ public class InternalDriver implements ModuleControl, Driver {
      * EmbeddedDataSource.
      */
     protected PooledConnection getNewPooledConnection(
-            EmbeddedBaseDataSource eds, String user, String password,
+            BasicEmbeddedDataSource40 eds, String user, String password,
             boolean requestPassword) throws SQLException {
         return new EmbedPooledConnection(eds, user, password, requestPassword);
     }
 
     /**
      * Create and return an EmbedXAConnection from the received instance of
-     * EmbeddedBaseDataSource.
+     * BasicEmbeddedDataSource40.
      */
     protected XAConnection getNewXAConnection(
-            EmbeddedBaseDataSource eds, ResourceAdapter ra,
+            BasicEmbeddedDataSource40 eds, ResourceAdapter ra,
             String user, String password, boolean requestPassword)
             throws SQLException {
         return new EmbedXAConnection(eds, ra, user, password, requestPassword);

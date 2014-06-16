@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import javax.sql.PooledConnection;
 
 /**
- * This datasource is suitable for an application using embedded Derby,
+ * This data source is suitable for an application using embedded Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
  * BasicEmbeddedConnectionPoolDataSource40 is similar to
@@ -51,17 +51,12 @@ public class BasicEmbeddedConnectionPoolDataSource40
      * Implementation of ConnectionPoolDataSource interface methods
      */
 
-    /**
-     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection()
-     */
+    @Override
     public final PooledConnection getPooledConnection() throws SQLException {
         return createPooledConnection (getUser(), getPassword(), false);
     }
 
-    /**
-     * @see javax.sql.ConnectionPoolDataSource#getPooledConnection(
-     *      String, String)
-     */
+    @Override
     public final PooledConnection getPooledConnection(
             String username,
             String password) throws SQLException {

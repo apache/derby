@@ -47,15 +47,15 @@ public final class JDBCClient {
             "org.apache.derby.jdbc.EmbeddedDriver", 
 
             JDBC.vmSupportsJNDI() ?
-            "org.apache.derby.jdbc.EmbeddedDataSource40":
+            "org.apache.derby.jdbc.EmbeddedDataSource":
             "org.apache.derby.jdbc.BasicEmbeddedDataSource40",
 
             JDBC.vmSupportsJNDI() ?
-            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40":
+            "org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource":
             "org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40",
 
             JDBC.vmSupportsJNDI() ?
-            "org.apache.derby.jdbc.EmbeddedXADataSource40":
+            "org.apache.derby.jdbc.EmbeddedXADataSource":
             "org.apache.derby.jdbc.BasicEmbeddedXADataSource40",
 
             "jdbc:derby:");

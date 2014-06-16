@@ -22,11 +22,8 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 import javax.sql.PooledConnection;
 
-import org.apache.derby.impl.jdbc.Util;
 
 /**
    <P>
@@ -84,6 +81,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 
 		@exception SQLException if a database-access error occurs.
 	*/
+    @Override
 	public final PooledConnection getPooledConnection() throws SQLException { 
 		return createPooledConnection (getUser(), getPassword(), false);
 	}
@@ -98,6 +96,7 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 
 		@exception SQLException if a database-access error occurs.
 	*/
+    @Override
 	public final PooledConnection getPooledConnection(String username, 
 												String password)
 		 throws SQLException
@@ -105,10 +104,10 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 		return createPooledConnection (username, password, true);
 	}
         
-    /**
-     * Create and return an EmbedPooledConnection from this instance
-     * of EmbeddedConnectionPoolDataSource.
-     */
+    //
+    // Create and return an EmbedPooledConnection from this instance
+    // of EmbeddedConnectionPoolDataSource.
+    //
     private PooledConnection createPooledConnection (String user,
         String password, boolean requestPassword) throws SQLException
     {

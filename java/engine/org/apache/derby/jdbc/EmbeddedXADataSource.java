@@ -23,18 +23,12 @@ package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
 import javax.sql.XAConnection;
-import org.apache.derby.iapi.db.Database;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
-import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 /**
 
    <P>
-    This datasource is suitable for an application using embedded Derby,
+    This data source is suitable for an application using embedded Derby,
     running on full Java SE 6 or higher, corresponding to JDBC 4.0 and higher.
     EmbeddedXADataSource is an XADataSource implementation.
     <P/>
@@ -70,7 +64,8 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 	<P>See EmbeddedDataSource for DataSource properties.</P>
 
  */
-public class EmbeddedXADataSource extends EmbeddedDataSource implements EmbeddedXADataSourceInterface
+public class EmbeddedXADataSource extends EmbeddedDataSource
+                                  implements EmbeddedXADataSourceInterface
 {
 
 	private static final long serialVersionUID = -5715798975598379738L;
@@ -98,6 +93,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements Embedded
 	 * @return  a Connection to the database
 	 * @exception SQLException if a database-access error occurs.
 	 */
+    @Override
 	public final XAConnection getXAConnection() throws SQLException
 	{
 		if (ra == null || !ra.isActive())
@@ -115,6 +111,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements Embedded
 	 * @return  a Connection to the database
 	 * @exception SQLException if a database-access error occurs.
 	 */
+    @Override
 	public final XAConnection getXAConnection(String user, String password)
 		 throws SQLException 
 	{
@@ -128,20 +125,17 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements Embedded
 	 * private method
 	 */
 
-   protected void update() {
+    @Override
+    protected void update() {
 		ra = null;
 		super.update();
 	}
 
         
-    /**
-     * Instantiate and return an EmbedXAConnection from this instance
-     * of EmbeddedXADataSource.
-     *
-     * @param user 
-     * @param password 
-     * @return XAConnection
-     */
+    //
+    // Instantiate and return an EmbedXAConnection from this instance
+    // of EmbeddedXADataSource.
+    //
     private XAConnection createXAConnection (ResourceAdapter ra,
         String user, String password, boolean requestPassword)
         throws SQLException
@@ -182,6 +176,7 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements Embedded
      * @return The ResourceAdapter instance for
      *         the underlying database
      */
+    @Override
     public ResourceAdapter getResourceAdapter()
     {
         return ra;

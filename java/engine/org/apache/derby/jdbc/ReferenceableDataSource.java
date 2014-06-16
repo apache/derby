@@ -20,7 +20,7 @@
  */
 package org.apache.derby.jdbc;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 import javax.naming.RefAddr;
 import javax.naming.Reference;
@@ -47,14 +47,11 @@ import javax.naming.spi.ObjectFactory;
  * factory as part of their JDBC product.
  *
  * @see org.apache.derby.jdbc.EmbeddedDataSource
- * @see org.apache.derby.jdbc.EmbeddedDataSource40
  * @see org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource
- * @see org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40
  * @see org.apache.derby.jdbc.EmbeddedXADataSource
- * @see org.apache.derby.jdbc.EmbeddedXADataSource40
  */
 
-public class ReferenceableDataSource extends EmbeddedBaseDataSource
+public class ReferenceableDataSource extends BasicEmbeddedDataSource40
                                      implements ObjectFactory {
 
     private static final long serialVersionUID = 1872877359127597176L;
@@ -87,6 +84,7 @@ public class ReferenceableDataSource extends EmbeddedBaseDataSource
      *      object is made.
      * @throws Exception if recreating the object fails
      */
+    @Override
     public Object getObjectInstance(Object refObj,
                                     javax.naming.Name name,
                                     javax.naming.Context nameContext,
@@ -112,29 +110,27 @@ public class ReferenceableDataSource extends EmbeddedBaseDataSource
         return ds;
     }
 
-    /** Reflect lookup for Java bean method taking a single String arg */
-    private static final Class[] STRING_ARG = { "".getClass() };
-    /** Reflect lookup for Java bean method taking a single int arg */
-    private static final Class[] INT_ARG = { Integer.TYPE };
-    /** Reflect lookup for Java bean method taking a single boolean arg */
-    private static final Class[] BOOLEAN_ARG = { Boolean.TYPE };
-    /** Reflect lookup for Java bean method taking a single short arg */
-    private static final Class[] SHORT_ARG = { Short.TYPE };
+    // Reflect lookup for Java bean method taking a single String arg
+    private static final Class<?>[] STRING_ARG = { "".getClass() };
+    // Reflect lookup for Java bean method taking a single int arg
+    private static final Class<?>[] INT_ARG = { Integer.TYPE };
+    // Reflect lookup for Java bean method taking a single boolean arg
+    private static final Class<?>[] BOOLEAN_ARG = { Boolean.TYPE };
+    // Reflect lookup for Java bean method taking a single short arg
+    private static final Class<?>[] SHORT_ARG = { Short.TYPE };
 
-    /**
-     * Set the Java bean properties for an object from its Reference. The
-     * Reference contains a set of StringRefAddr values with the key being the
-     * bean name and the value a String representation of the bean's value. This
-     * code looks for setXXX() method where the set method corresponds to the
-     * standard bean naming scheme and has a single parameter of type String,
-     * int, boolean or short.
-     */
+    // Set the Java bean properties for an object from its Reference. The
+    // Reference contains a set of StringRefAddr values with the key being the
+    // bean name and the value a String representation of the bean's value. This
+    // code looks for setXXX() method where the set method corresponds to the
+    // standard bean naming scheme and has a single parameter of type String,
+    // int, boolean or short.
     private static void setBeanProperties(Object ds, Reference ref)
             throws Exception {
 
-        for (Enumeration e = ref.getAll(); e.hasMoreElements();) {
+        for (Enumeration<RefAddr> e = ref.getAll(); e.hasMoreElements();) {
 
-            RefAddr attribute = (RefAddr) e.nextElement();
+            RefAddr attribute = e.nextElement();
 
             String propertyName = attribute.getType();
 

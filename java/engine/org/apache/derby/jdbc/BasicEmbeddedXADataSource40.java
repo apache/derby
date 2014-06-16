@@ -56,9 +56,7 @@ public class BasicEmbeddedXADataSource40
      * Implementation of XADataSource interface methods
      */
 
-    /**
-     * @see javax.sql.XADataSource#getXAConnection()
-     */
+    @Override
     public final XAConnection getXAConnection() throws SQLException     {
 
         if (ra == null || !ra.isActive()) {
@@ -68,9 +66,7 @@ public class BasicEmbeddedXADataSource40
         return createXAConnection (ra, getUser(), getPassword(), false);
     }
 
-    /**
-     * @see javax.sql.XADataSource#getXAConnection(String, String)
-     */
+    @Override
     public final XAConnection getXAConnection(String user, String password)
          throws SQLException {
 
@@ -82,21 +78,15 @@ public class BasicEmbeddedXADataSource40
     }
 
     // implementation methods
+    @Override
     protected void update() {
         ra = null;
         super.update();
     }
 
 
-    /**
-     * Instantiate and return an EmbedXAConnection from this instance
-     * of EmbeddedXADataSource.
-     *
-     * @param user
-     * @param password
-     * @return XAConnection
-     * @throws SQLException if a connection can't be created
-     */
+    // Instantiate and return an EmbedXAConnection from this instance
+    // of EmbeddedXADataSource.
     private XAConnection createXAConnection(
             ResourceAdapter ra,
             String user,
@@ -112,6 +102,7 @@ public class BasicEmbeddedXADataSource40
     /**
      * @return The ResourceAdapter instance for the underlying database
      */
+    @Override
     public ResourceAdapter getResourceAdapter() {
         return ra;
     }

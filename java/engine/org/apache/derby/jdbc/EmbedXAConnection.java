@@ -45,7 +45,7 @@ class EmbedXAConnection extends EmbedPooledConnection implements XAConnection {
 
         private EmbedXAResource xaRes;
 
-   EmbedXAConnection(EmbeddedBaseDataSource ds,
+   EmbedXAConnection(BasicEmbeddedDataSource40 ds,
                       ResourceAdapter ra,
                       String u,
                       String p,

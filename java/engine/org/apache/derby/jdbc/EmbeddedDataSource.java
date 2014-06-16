@@ -21,14 +21,9 @@
 
 package org.apache.derby.jdbc;
 
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.Referenceable;
@@ -239,6 +234,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource
      * @return the created reference object for this data source
      * @exception NamingException cannot find named object
      */
+    @Override
     public final Reference getReference() throws NamingException
 	{
         // These fields will be set by the JNDI server when it decides to
@@ -253,25 +249,20 @@ public class EmbeddedDataSource extends ReferenceableDataSource
         return ref;
 	}
 
-    /**
-     * Add Java Bean properties to the reference using
-     * StringRefAddr for each property. List of bean properties
-     * is defined from the public getXXX() methods on this object
-     * that take no arguments and return short, int, boolean or String.
-     * The StringRefAddr has a key of the Java bean property name,
-     * converted from the method name. E.g. traceDirectory for
-     * traceDirectory.
-     *
-     */
+    //
+    // Add Java Bean properties to the reference using
+    // StringRefAddr for each property. List of bean properties
+    // is defined from the public getXXX() methods on this object
+    // that take no arguments and return short, int, boolean or String.
+    // The StringRefAddr has a key of the Java bean property name,
+    // converted from the method name. E.g. traceDirectory for
+    // traceDirectory.
     private static void addBeanProperties(Object ths, Reference ref)
     {
         // Look for all the getXXX methods in the class that take no arguments.
         Method[] methods = ths.getClass().getMethods();
 
-        for (int i = 0; i < methods.length; i++) {
-
-            Method m = methods[i];
-
+        for (Method m : methods) {
             // only look for simple getter methods.
             if (m.getParameterTypes().length != 0)
                 continue;
@@ -285,7 +276,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource
             if ((methodName.length() < 5) || !methodName.startsWith("get"))
                 continue;
 
-            Class returnType = m.getReturnType();
+            Class<?> returnType = m.getReturnType();
 
             if (Integer.TYPE.equals(returnType)
                     || Short.TYPE.equals(returnType)
@@ -297,10 +288,10 @@ public class EmbeddedDataSource extends ReferenceableDataSource
 
                 String propertyName = methodName.substring(3, 4).toLowerCase(
                         java.util.Locale.ENGLISH).concat(
-                        methodName.substring(4));
+                                methodName.substring(4));
 
                 try {
-                    Object ov = m.invoke(ths, null);
+                    Object ov = m.invoke(ths, (Object[])null);
                     // Need to check if property value is null, otherwise
                     // "null" string gets stored.
                     if (ov != null) {
@@ -312,144 +303,6 @@ public class EmbeddedDataSource extends ReferenceableDataSource
 
             }
         }
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-        super.setLoginTimeout(seconds);
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return super.getLoginTimeout();
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter logWriter)
-            throws SQLException {
-        super.setLogWriter(logWriter);
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return super.getLogWriter();
-    }
-
-    @Override
-    public final void setPassword(String password) {
-        super.setPassword(password);
-    }
-
-    @Override
-    public final String getPassword() {
-        return super.getPassword();
-    }
-
-    @Override
-    public void setDatabaseName(String databaseName) {
-        super.setDatabaseName(databaseName);
-    }
-
-    @Override
-    public String getDatabaseName() {
-        return super.getDatabaseName();
-    }
-
-    @Override
-    public void setDataSourceName(String dataSourceName) {
-        super.setDataSourceName(dataSourceName);
-    }
-
-    @Override
-    public String getDataSourceName() {
-        return super.getDataSourceName();
-    }
-
-    @Override
-    public void setDescription(String description) {
-        super.setDescription(description);
-    }
-
-    @Override
-    public String getDescription() {
-        return super.getDescription();
-    }
-
-    @Override
-    public void setUser(String user) {
-        super.setUser(user);
-    }
-
-    @Override
-    public String getUser() {
-        return super.getUser();
-    }
-
-    @Override
-    public final void setCreateDatabase(String create) {
-        super.setCreateDatabase(create);
-    }
-
-    @Override
-    public final String getCreateDatabase() {
-        return super.getCreateDatabase();
-    }
-
-    @Override
-    public final void setShutdownDatabase(String shutdown) {
-        super.setShutdownDatabase(shutdown);
-    }
-
-    @Override
-    public final String getShutdownDatabase() {
-        return super.getShutdownDatabase();
-    }
-
-    @Override
-    public final void setConnectionAttributes(String prop) {
-        super.setConnectionAttributes(prop);
-    }
-
-    @Override
-    public final String getConnectionAttributes() {
-        return super.getConnectionAttributes();
-    }
-
-
-    @Override
-    public Connection getConnection() throws SQLException {
-        return super.getConnection();
-    }
-
-    @Override
-    public Connection getConnection(String user, String password)
-            throws SQLException {
-        return super.getConnection(user, password);
-    }
-
-    @Override
-    public final Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return super.getParentLogger();
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return super.isWrapperFor(iface);
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return super.unwrap(iface);
-    }
-
-    @Override
-    public final void setAttributesAsPassword(boolean attributesAsPassword) {
-        super.setAttributesAsPassword(attributesAsPassword);
-    }
-
-    @Override
-    public final boolean getAttributesAsPassword() {
-        return super.getAttributesAsPassword();
     }
 
     @Override
