@@ -30,7 +30,7 @@ import org.apache.derby.client.ClientXAConnection;
 import java.util.Properties;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 
 /**
  *
@@ -48,7 +48,7 @@ public interface ClientJDBCObjectFactory {
      * implements {@code javax.sql.PooledConnection}.
      */
     ClientPooledConnection newClientPooledConnection(
-            ClientBaseDataSourceRoot ds,
+            BasicClientDataSource40 ds,
             LogWriter logWriter,
             String user,
             String password) throws SQLException;
@@ -58,7 +58,7 @@ public interface ClientJDBCObjectFactory {
      * ClientXAConnection (or ClientXAConnection40) class which
      * implements {@code javax.sql.XAConnection}.
      */
-    ClientXAConnection newClientXAConnection(ClientBaseDataSourceRoot ds,
+    ClientXAConnection newClientXAConnection(BasicClientDataSource40 ds,
             LogWriter logWriter,String user,String password)
             throws SQLException;
     
@@ -226,7 +226,7 @@ public interface ClientJDBCObjectFactory {
             LogWriter logWriter,
             String user,
             String password,
-            ClientBaseDataSourceRoot dataSource,
+            BasicClientDataSource40 dataSource,
             int rmId,
             boolean isXAConn) throws SqlException;
     
@@ -254,7 +254,7 @@ public interface ClientJDBCObjectFactory {
     ClientConnection newNetConnection(
             LogWriter logWriter,
             String user,String password,
-            ClientBaseDataSourceRoot dataSource,int rmId,
+            BasicClientDataSource40 dataSource,int rmId,
             boolean isXAConn,ClientPooledConnection cpc) throws SqlException;
     
     /**

@@ -120,7 +120,7 @@ public class BasicClientConnectionPoolDataSource40
     /**
      * Internally used method.
      *
-     * @see ClientBaseDataSourceRoot#maxStatementsToPool
+     * @see BasicClientDataSource40#maxStatementsToPool
      */
     public int maxStatementsToPool() {
         return this.maxStatements;

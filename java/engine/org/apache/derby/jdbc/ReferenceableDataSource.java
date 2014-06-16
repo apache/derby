@@ -90,7 +90,7 @@ public class ReferenceableDataSource extends EmbeddedBaseDataSource
     public Object getObjectInstance(Object refObj,
                                     javax.naming.Name name,
                                     javax.naming.Context nameContext,
-                                    java.util.Hashtable environment)
+                                    java.util.Hashtable<?,?> environment)
             throws java.lang.Exception {
 
         Object ds = null;

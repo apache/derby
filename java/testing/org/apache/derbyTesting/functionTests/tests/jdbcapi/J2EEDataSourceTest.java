@@ -54,6 +54,7 @@ import javax.transaction.xa.Xid;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 
 import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
@@ -2338,7 +2339,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 PrivilegedFileOpsForTests.getAbsolutePath(traceFile));
         J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
         J2EEDataSource.setBeanProperty( ds, "traceLevel",
-                new Integer(ClientDataSourceInterface.TRACE_ALL));
+                new Integer(BasicClientDataSource40.TRACE_ALL));
 
         // Obtain connection.
         PooledConnection physicalCon = null;

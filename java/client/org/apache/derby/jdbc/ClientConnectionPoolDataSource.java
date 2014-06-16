@@ -104,7 +104,7 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
     /**
      * Internally used method.
      *
-     * @see ClientBaseDataSource#maxStatementsToPool
+     * @see BasicClientDataSource40#maxStatementsToPool
      */
     public int maxStatementsToPool() {
         return this.maxStatements;

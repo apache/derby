@@ -21,8 +21,16 @@
 
 package org.apache.derby.jdbc;
 
+import java.util.Enumeration;
+import java.util.Properties;
+import javax.naming.NamingException;
+import javax.naming.Reference;
+import javax.naming.Referenceable;
+import javax.naming.StringRefAddr;
+import org.apache.derby.client.ClientDataSourceFactory;
+
 /**
- * This datasource is suitable for a client/server use of Derby,
+ * This data source is suitable for a client/server use of Derby,
  * running on full Java SE 6 and higher, corresponding to JDBC 4.0 and higher.
  * <p/>
  * ClientDataSource is a simple data source implementation
@@ -75,7 +83,7 @@ package org.apache.derby.jdbc;
  * the last line, the DataSource.getConnection() method
  * is called to produce a database connection.
  * <p/>
- * This simple data source subclass of ClientBaseDataSource maintains
+ * This simple data source subclass of BasicClientDataSource40 maintains
  * it's own private <code>password</code> property.
  * <p/>
  * The specified password, along with the user, is validated by DERBY.
@@ -89,7 +97,8 @@ package org.apache.derby.jdbc;
  * breaches.
  * <p/>
  */
-public class ClientDataSource extends ClientBaseDataSource {
+public class ClientDataSource extends BasicClientDataSource40 
+                              implements Referenceable {
 
     private final static long serialVersionUID = 1894299584216955553L;
     public static final String className__ = "org.apache.derby.jdbc.ClientDataSource";
@@ -138,6 +147,62 @@ public class ClientDataSource extends ClientBaseDataSource {
         super();
     }
 
+    //------------------------ Referenceable interface methods -----------------------------
 
+    @Override
+    public Reference getReference() throws NamingException {
+
+        // This method creates a new Reference object to represent this data
+        // source.  The class name of the data source object is saved in the
+        // Reference, so that an object factory will know that it should
+        // create an instance of that class when a lookup operation is
+        // performed. The class name of the object factory,
+        // org.apache.derby.client.ClientBaseDataSourceFactory, is also stored
+        // in the reference.  This is not required by JNDI, but is recommend
+        // in practice.  JNDI will always use the object factory class
+        // specified in the reference when reconstructing an object, if a
+        // class name has been specified.
+        //
+        // See the JNDI SPI documentation for further details on this topic,
+        // and for a complete description of the Reference and StringRefAddr
+        // classes.
+        //
+        // This BasicClientDataSource40 class provides several standard JDBC
+        // properties.  The names and values of the data source properties are
+        // also stored in the reference using the StringRefAddr class.  This
+        // is all the information needed to reconstruct a ClientDataSource
+        // object.
+
+        Reference ref = new Reference(this.getClass().getName(),
+                ClientDataSourceFactory.class.getName(), null);
+
+        addBeanProperties(ref);
+        return ref;
+    }
+
+    /**
+     * Add Java Bean properties to the reference using
+     * StringRefAddr for each property. List of bean properties
+     * is defined from the public getXXX() methods on this object
+     * that take no arguments and return short, int, boolean or String.
+     * The StringRefAddr has a key of the Java bean property name,
+     * converted from the method name. E.g. traceDirectory for
+     * traceDirectory.
+     *
+     * @param ref The referenced object
+      */
+    private void addBeanProperties(Reference ref) {
+
+        Properties p = getProperties(this);
+        Enumeration<?> e = p.propertyNames();
+
+        while (e.hasMoreElements()) {
+            String propName = (String)e.nextElement();
+            Object value = p.getProperty(propName);
+            if (value != null) {
+                ref.add(new StringRefAddr(propName, value.toString()));
+            }
+        }
+    }
 }
 

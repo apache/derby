@@ -43,7 +43,8 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import org.apache.derby.client.net.NetXAResource;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -186,10 +187,10 @@ public abstract class ClientConnection
     public int xaHostVersion_ = 0;
 
     private int loginTimeout_;
-    public ClientBaseDataSourceRoot dataSource_;
+    public BasicClientDataSource40 dataSource_;
     public String serverNameIP_;
     public int portNumber_;
-    private int clientSSLMode_ = ClientBaseDataSourceRoot.SSL_OFF;
+    private int clientSSLMode_ = BasicClientDataSource40.SSL_OFF;
 
     Hashtable<String, String> clientCursorNameCache_ =
             new Hashtable<String, String>();
@@ -206,7 +207,7 @@ public abstract class ClientConnection
             LogWriter logWriter,
             String user,
             String password,
-            ClientBaseDataSourceRoot dataSource)
+            BasicClientDataSource40 dataSource)
             throws SqlException {
 
         this.user_ = user;
@@ -218,7 +219,7 @@ public abstract class ClientConnection
             String user,
             String password,
             boolean isXAConn,
-            ClientBaseDataSourceRoot dataSource)
+            BasicClientDataSource40 dataSource)
             throws SqlException {
 
         this.user_ = user;
@@ -229,7 +230,7 @@ public abstract class ClientConnection
     // For jdbc 2 connections
     private void initConnection(
             LogWriter logWriter,
-            ClientBaseDataSourceRoot dataSource)
+            BasicClientDataSource40 dataSource)
             throws SqlException {
 
         if (logWriter != null) {
@@ -269,7 +270,7 @@ public abstract class ClientConnection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            ClientBaseDataSourceRoot.getSSLModeFromString(dataSource.getSsl());
+            BasicClientDataSource40.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -282,7 +283,7 @@ public abstract class ClientConnection
     protected ClientConnection(
             LogWriter logWriter,
             boolean isXAConn,
-            ClientBaseDataSourceRoot dataSource)
+            BasicClientDataSource40 dataSource)
             throws SqlException {
 
         if (logWriter != null) {
@@ -291,7 +292,7 @@ public abstract class ClientConnection
 
         isXAConnection_ = isXAConn;
 
-        user_ = ClientBaseDataSourceRoot.propertyDefault_user;
+        user_ = ClientDataSourceInterface.propertyDefault_user;
 
         // Extract common properties.
         databaseName_ = dataSource.getDatabaseName();
@@ -304,7 +305,7 @@ public abstract class ClientConnection
         portNumber_ = dataSource.getPortNumber();
 
         clientSSLMode_ = 
-            ClientBaseDataSourceRoot.getSSLModeFromString(dataSource.getSsl());
+            BasicClientDataSource40.getSSLModeFromString(dataSource.getSsl());
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,
@@ -348,14 +349,14 @@ public abstract class ClientConnection
         databaseName_ = databaseName;
 
         // Extract common properties.
-        user_ = ClientBaseDataSourceRoot.getUser(properties);
+        user_ = BasicClientDataSource40.getUser(properties);
         retrieveMessageText_ =
-            ClientBaseDataSourceRoot.getRetrieveMessageText(properties);
+            BasicClientDataSource40.getRetrieveMessageText(properties);
 
         loginTimeout_ = driverManagerLoginTimeout;
         serverNameIP_ = serverName;
         portNumber_ = portNumber;
-        clientSSLMode_ = ClientBaseDataSourceRoot.getClientSSLMode(properties);
+        clientSSLMode_ = BasicClientDataSource40.getClientSSLMode(properties);
 
         agent_ = newAgent_(logWriter,
                 loginTimeout_,

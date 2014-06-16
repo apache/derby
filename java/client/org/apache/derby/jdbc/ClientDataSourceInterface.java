@@ -134,20 +134,4 @@ public interface ClientDataSourceInterface extends DataSource {
     public boolean getTraceFileAppend();
 
 
-    // ---------------------------- traceLevel -------------------------------
-    //
-
-    public final static int TRACE_NONE = 0x0;
-    public final static int TRACE_CONNECTION_CALLS = 0x1;
-    public final static int TRACE_STATEMENT_CALLS = 0x2;
-    public final static int TRACE_RESULT_SET_CALLS = 0x4;
-    public final static int TRACE_DRIVER_CONFIGURATION = 0x10;
-    public final static int TRACE_CONNECTS = 0x20;
-    public final static int TRACE_PROTOCOL_FLOWS = 0x40;
-    public final static int TRACE_RESULT_SET_META_DATA = 0x80;
-    public final static int TRACE_PARAMETER_META_DATA = 0x100;
-    public final static int TRACE_DIAGNOSTICS = 0x200;
-    public final static int TRACE_XA_CALLS = 0x800;
-    public final static int TRACE_ALL = 0xFFFFFFFF;
-    public final static int propertyDefault_traceLevel = TRACE_ALL;
 }

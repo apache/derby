@@ -115,7 +115,7 @@ public abstract class EmbeddedBaseDataSource
      *
      * @param databaseName the name of the database
      */
-    public final synchronized void setDatabaseName(String databaseName) {
+    public synchronized void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
 
         if( databaseName!= null && (databaseName.indexOf(";") >= 0)){
@@ -138,7 +138,7 @@ public abstract class EmbeddedBaseDataSource
     /**
      * @return database name with ant attributes stripped off.
      */
-    protected String getShortDatabaseName() {
+    private String getShortDatabaseName() {
         return shortDatabaseName;
     }
 
@@ -148,14 +148,14 @@ public abstract class EmbeddedBaseDataSource
      *
      *  @param dsn the name of the data source
      */
-    public final void setDataSourceName(String dsn) {
+    public void setDataSourceName(String dsn) {
         dataSourceName = dsn;
     }
 
     /**
      * @return data source name as set in {@link #setDataSourceName}.
      */
-    public final String getDataSourceName() {
+    public String getDataSourceName() {
         return dataSourceName;
     }
 
@@ -165,14 +165,14 @@ public abstract class EmbeddedBaseDataSource
      *
      * @param desc the description of the data source
      */
-    public final void setDescription(String desc) {
+    public void setDescription(String desc) {
         description = desc;
     }
 
     /**
      * @return the description as set in {@link #setDescription}.
      */
-    public final String getDescription() {
+    public String getDescription() {
         return description;
     }
 
@@ -182,14 +182,14 @@ public abstract class EmbeddedBaseDataSource
      * This is user name for any data source {@code getConnection()} call
      * that takes no arguments.
     */
-    public final void setUser(String user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
     /**
      * @return the user name as set by {@link #setUser}.
      */
-    public final String getUser() {
+    public String getUser() {
         return user;
     }
 
@@ -199,14 +199,14 @@ public abstract class EmbeddedBaseDataSource
      * This is user's password for any data source {@code getConnection()} call
      * that takes no arguments.
      */
-    public final void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
     /**
      * @return the password as set in {@link #setPassword}.
      */
-    public final String getPassword() {
+    public String getPassword() {
         return password;
     }
 
@@ -341,7 +341,7 @@ public abstract class EmbeddedBaseDataSource
      * source will try to create a new database of databaseName, or
      * boot the database if one by that name already exists.
      */
-    public final void setCreateDatabase(String create) {
+    public void setCreateDatabase(String create) {
         if (create != null &&
             create.toLowerCase(java.util.Locale.ENGLISH).equals("create")) {
             createDatabase = create;
@@ -354,7 +354,7 @@ public abstract class EmbeddedBaseDataSource
      * @return The string {@code "create"} if create is set, or {@code
      * null} if not
      */
-    public final String getCreateDatabase() {
+    public String getCreateDatabase() {
         return createDatabase;
     }
 
@@ -406,7 +406,7 @@ public abstract class EmbeddedBaseDataSource
      *
      * See the Derby documentation for complete list.
      */
-    public final void setConnectionAttributes(String prop) {
+    public void setConnectionAttributes(String prop) {
          connectionAttributes = prop;
          update();
     }
@@ -416,7 +416,7 @@ public abstract class EmbeddedBaseDataSource
      * @return the Derby specific connection URL attributes, see
      * {@link #setConnectionAttributes}.
      */
-    public final String getConnectionAttributes() {
+    public String getConnectionAttributes() {
         return connectionAttributes;
     }
 
@@ -427,7 +427,7 @@ public abstract class EmbeddedBaseDataSource
      * @param shutdown if set to the string {@code "shutdown"}, this
      * data source will shutdown the database if it is running.
      */
-    public final void setShutdownDatabase(String shutdown) {
+    public void setShutdownDatabase(String shutdown) {
         if (shutdown != null && shutdown.equalsIgnoreCase("shutdown")) {
             shutdownDatabase = shutdown;
         } else {
@@ -439,7 +439,7 @@ public abstract class EmbeddedBaseDataSource
      * @return the string {@code "shutdown"} if shutdown is set, or
      * null if not, cf.  {@link #setShutdownDatabase}.
      */
-    public final String getShutdownDatabase() {
+    public String getShutdownDatabase() {
         return shutdownDatabase;
     }
 
@@ -456,7 +456,7 @@ public abstract class EmbeddedBaseDataSource
      * @param attributesAsPassword Use {@code true} to encode password
      * argument as a set of connection attributes in a connection request.
      */
-    public final void setAttributesAsPassword(boolean attributesAsPassword) {
+    public void setAttributesAsPassword(boolean attributesAsPassword) {
         this.attributesAsPassword = attributesAsPassword;
         update();
     }
@@ -465,7 +465,7 @@ public abstract class EmbeddedBaseDataSource
      * Return the value of the {@code attributesAsPassword} property, cf.
      * {@link #setAttributesAsPassword}.
      */
-    public final boolean getAttributesAsPassword() {
+    public boolean getAttributesAsPassword() {
         return attributesAsPassword;
     }
 
@@ -631,16 +631,16 @@ public abstract class EmbeddedBaseDataSource
     // JDBC 4.0 java.sql.Wrapper interface methods
 
     /**
-     * Returns false unless {@code interfaces} is implemented.
+     * Returns false unless {@code interFace} is implemented.
      *
-     * @param iface a class defining an interface
+     * @param interFace a class defining an interface
      * @return {@code true} if this implements the interface or directly or
      *     indirectly wraps an object that does
      * @throws SQLException if an error occurs while determining
      *     whether this is a wrapper for an object with the given interface
      */
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return iface.isInstance(this);
+    public boolean isWrapperFor(Class<?> interFace) throws SQLException {
+        return interFace.isInstance(this);
     }
 
     /**

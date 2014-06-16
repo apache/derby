@@ -21,9 +21,14 @@
 
 package org.apache.derby.jdbc;
 
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.Referenceable;
@@ -31,7 +36,7 @@ import javax.naming.StringRefAddr;
 
 /**
    <P>
-    This datasource is suitable for an application using embedded Derby,
+    This data source is suitable for an application using embedded Derby,
     running on full Java SE 6 and higher, corresponding to 4.0 and higher.
     </P>
 
@@ -307,5 +312,152 @@ public class EmbeddedDataSource extends ReferenceableDataSource
 
             }
         }
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        super.setLoginTimeout(seconds);
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return super.getLoginTimeout();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter logWriter)
+            throws SQLException {
+        super.setLogWriter(logWriter);
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return super.getLogWriter();
+    }
+
+    @Override
+    public final void setPassword(String password) {
+        super.setPassword(password);
+    }
+
+    @Override
+    public final String getPassword() {
+        return super.getPassword();
+    }
+
+    @Override
+    public void setDatabaseName(String databaseName) {
+        super.setDatabaseName(databaseName);
+    }
+
+    @Override
+    public String getDatabaseName() {
+        return super.getDatabaseName();
+    }
+
+    @Override
+    public void setDataSourceName(String dataSourceName) {
+        super.setDataSourceName(dataSourceName);
+    }
+
+    @Override
+    public String getDataSourceName() {
+        return super.getDataSourceName();
+    }
+
+    @Override
+    public void setDescription(String description) {
+        super.setDescription(description);
+    }
+
+    @Override
+    public String getDescription() {
+        return super.getDescription();
+    }
+
+    @Override
+    public void setUser(String user) {
+        super.setUser(user);
+    }
+
+    @Override
+    public String getUser() {
+        return super.getUser();
+    }
+
+    @Override
+    public final void setCreateDatabase(String create) {
+        super.setCreateDatabase(create);
+    }
+
+    @Override
+    public final String getCreateDatabase() {
+        return super.getCreateDatabase();
+    }
+
+    @Override
+    public final void setShutdownDatabase(String shutdown) {
+        super.setShutdownDatabase(shutdown);
+    }
+
+    @Override
+    public final String getShutdownDatabase() {
+        return super.getShutdownDatabase();
+    }
+
+    @Override
+    public final void setConnectionAttributes(String prop) {
+        super.setConnectionAttributes(prop);
+    }
+
+    @Override
+    public final String getConnectionAttributes() {
+        return super.getConnectionAttributes();
+    }
+
+
+    @Override
+    public Connection getConnection() throws SQLException {
+        return super.getConnection();
+    }
+
+    @Override
+    public Connection getConnection(String user, String password)
+            throws SQLException {
+        return super.getConnection(user, password);
+    }
+
+    @Override
+    public final Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return super.getParentLogger();
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return super.isWrapperFor(iface);
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return super.unwrap(iface);
+    }
+
+    @Override
+    public final void setAttributesAsPassword(boolean attributesAsPassword) {
+        super.setAttributesAsPassword(attributesAsPassword);
+    }
+
+    @Override
+    public final boolean getAttributesAsPassword() {
+        return super.getAttributesAsPassword();
+    }
+
+    @Override
+    public Object getObjectInstance(Object refObj,
+                                    javax.naming.Name name,
+                                    javax.naming.Context nameContext,
+                                    java.util.Hashtable<?,?> environment)
+            throws java.lang.Exception {
+        return super.getObjectInstance(refObj, name, nameContext, environment);
     }
 }

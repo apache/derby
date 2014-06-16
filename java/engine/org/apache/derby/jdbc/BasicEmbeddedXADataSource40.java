@@ -27,7 +27,7 @@ import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 /**
  *
- * This datasource is suitable for an application using embedded Derby,
+ * This data source is suitable for an application using embedded Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
  * BasicEmbeddedXADataSource40 is similar to

@@ -48,7 +48,6 @@ import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.Agent;
@@ -58,6 +57,7 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SectionManager;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 
 import org.apache.derby.shared.common.reference.SQLState;
@@ -204,9 +204,9 @@ public class NetConnection extends ClientConnection {
             throw netAgent_.exceptionOpeningSocket_;
         }
         checkDatabaseName();
-        String password = ClientBaseDataSourceRoot.getPassword(properties);
+        String password = BasicClientDataSource40.getPassword(properties);
         securityMechanism_ =
-                ClientBaseDataSourceRoot.getSecurityMechanism(properties);
+                BasicClientDataSource40.getSecurityMechanism(properties);
         flowConnect(password, securityMechanism_);
         if(!isConnectionNull())
             completeConnect();
@@ -218,7 +218,7 @@ public class NetConnection extends ClientConnection {
     NetConnection(LogWriter logWriter,
                          String user,
                          String password,
-                         ClientBaseDataSourceRoot dataSource,
+                         BasicClientDataSource40 dataSource,
                          int rmId,
                          boolean isXAConn) throws SqlException {
         super(logWriter, user, password, isXAConn, dataSource);
@@ -251,7 +251,7 @@ public class NetConnection extends ClientConnection {
     NetConnection(LogWriter logWriter,
                          String user,
                          String password,
-                         ClientBaseDataSourceRoot dataSource,
+                         BasicClientDataSource40 dataSource,
                          int rmId,
                          boolean isXAConn,
                          ClientPooledConnection cpc) throws SqlException {
@@ -263,7 +263,7 @@ public class NetConnection extends ClientConnection {
     }
 
     private void initialize(String password,
-                            ClientBaseDataSourceRoot dataSource,
+                            BasicClientDataSource40 dataSource,
                             boolean isXAConn) throws SqlException {
         securityMechanism_ = dataSource.getSecurityMechanism(password);
 
@@ -1380,7 +1380,7 @@ public class NetConnection extends ClientConnection {
         // Define which userName takes precedence - If we have a dataSource
         // available here, it is posible that the userName has been
         // overriden by some defined as part of the connection attributes
-        // (see ClientBaseDataSourceRoot.updateDataSourceValues().
+        // (see BasicClientDataSource40.updateDataSourceValues().
         // We need to use the right userName as strong password
         // substitution depends on the userName when the substitute
         // password is generated; if we were not using the right userName

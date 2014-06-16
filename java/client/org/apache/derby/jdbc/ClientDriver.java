@@ -127,7 +127,7 @@ public class ClientDriver implements Driver {
             String server = tokenizeServerName(urlTokenizer, url);    // "/server"
             int port = tokenizeOptionalPortNumber(urlTokenizer, url); // "[:port]/"
             if (port == 0) {
-                port = ClientBaseDataSourceRoot.propertyDefault_portNumber;
+                port = BasicClientDataSource40.propertyDefault_portNumber;
             }
 
             // database is the database name and attributes.  This will be
@@ -140,7 +140,7 @@ public class ClientDriver implements Driver {
             int traceLevel;
             try {
                 traceLevel =
-                    ClientBaseDataSourceRoot.getTraceLevel(augmentedProperties);
+                    BasicClientDataSource40.getTraceLevel(augmentedProperties);
             } catch (NumberFormatException e) {
                 // A null log writer is passed, because jdbc 1 sqlexceptions are automatically traced
                 throw new SqlException(null, 
@@ -152,13 +152,13 @@ public class ClientDriver implements Driver {
             // This log writer may be narrowed to the connection-level
             // This log writer will be passed to the agent constructor.
             LogWriter dncLogWriter =
-                ClientBaseDataSourceRoot.computeDncLogWriterForNewConnection(
+                BasicClientDataSource40.computeDncLogWriterForNewConnection(
                     DriverManager.getLogWriter(),
-                    ClientBaseDataSourceRoot.getTraceDirectory(
+                    BasicClientDataSource40.getTraceDirectory(
                         augmentedProperties),
-                    ClientBaseDataSourceRoot.getTraceFile(
+                    BasicClientDataSource40.getTraceFile(
                         augmentedProperties),
-                    ClientBaseDataSourceRoot.getTraceFileAppend(
+                    BasicClientDataSource40.getTraceFileAppend(
                         augmentedProperties),
                     traceLevel,
                     "_driver",
@@ -254,7 +254,7 @@ public class ClientDriver implements Driver {
                 Attribute.USERNAME_ATTR,
                 properties.getProperty(
                     Attribute.USERNAME_ATTR,
-                    ClientBaseDataSourceRoot.propertyDefault_user));
+                    BasicClientDataSource40.propertyDefault_user));
 
         driverPropertyInfo[1] =
                 new DriverPropertyInfo(Attribute.PASSWORD_ATTR,
@@ -420,7 +420,7 @@ public class ClientDriver implements Driver {
             attributeString = url.substring(attributeIndex);
         }
 
-        return ClientBaseDataSourceRoot.tokenizeAttributes(
+        return BasicClientDataSource40.tokenizeAttributes(
             attributeString, properties);
     }
     

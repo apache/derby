@@ -39,7 +39,7 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -107,7 +107,7 @@ public class ClientPooledConnection implements PooledConnection {
      * @throws SQLException if creating the pooled connection fails due problems
      *      in the database, or problems communicating with the database
      */
-    public ClientPooledConnection(ClientBaseDataSourceRoot ds,
+    public ClientPooledConnection(BasicClientDataSource40 ds,
                                   LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
@@ -156,7 +156,7 @@ public class ClientPooledConnection implements PooledConnection {
      * @throws SQLException if creating the pooled connection fails due problems
      *      in the database, or problems communicating with the database
      */
-    public ClientPooledConnection(ClientBaseDataSourceRoot ds,
+    public ClientPooledConnection(BasicClientDataSource40 ds,
                                   LogWriter logWriter,
                                   String user,
                                   String password,

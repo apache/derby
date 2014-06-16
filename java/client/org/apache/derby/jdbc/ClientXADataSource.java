@@ -57,10 +57,12 @@ public class ClientXADataSource
     public ClientXADataSource() {
     }
 
+    @Override
     public XAConnection getXAConnection() throws SQLException {
         return getXAConnectionMinion();
     }
 
+    @Override
     public XAConnection getXAConnection(String user, String password) throws SQLException {
         return getXAConnectionMinion(user, password);
     }    

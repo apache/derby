@@ -68,6 +68,8 @@ public class DataSourceSerializationTest
     private static final String VERSION_10_3_2_1 = "10_3_2_1";
     /** Constant for Derby version 10.10.1.0. */
     private static final String VERSION_10_10_1_0 = "10_10_1_0";
+    /** Constant for Derby version 10.11.1.0. */
+    private static final String VERSION_10_11_1_0 = "10_11_1_0";
     private final String _40Suffix = "40";
 
     public DataSourceSerializationTest(String name) {
@@ -402,6 +404,28 @@ public class DataSourceSerializationTest
                 filePrefix +
                     "BasicClientConnectionPoolDataSource40-10_10_1_0.ser",
                 filePrefix + "BasicClientXADataSource40-10_10_1_0.ser",
+
+                // 10.11 resources
+                filePrefix + "EmbeddedDataSource-10_11_1_0.ser",
+                filePrefix + "EmbeddedDataSource40-10_11_1_0.ser",
+                filePrefix + "EmbeddedConnectionPoolDataSource-10_11_1_0.ser",
+                filePrefix + "EmbeddedConnectionPoolDataSource40-10_11_1_0.ser",
+                filePrefix + "EmbeddedXADataSource-10_11_1_0.ser",
+                filePrefix + "EmbeddedXADataSource40-10_11_1_0.ser",
+                filePrefix + "ClientDataSource-10_11_1_0.ser",
+                filePrefix + "ClientDataSource40-10_11_1_0.ser",
+                filePrefix + "ClientConnectionPoolDataSource-10_11_1_0.ser",
+                filePrefix + "ClientConnectionPoolDataSource40-10_11_1_0.ser",
+                filePrefix + "ClientXADataSource-10_11_1_0.ser",
+                filePrefix + "ClientXADataSource40-10_11_1_0.ser",
+                filePrefix + "BasicEmbeddedDataSource40-10_11_1_0.ser",
+                filePrefix +
+                    "BasicEmbeddedConnectionPoolDataSource40-10_11_1_0.ser",
+                filePrefix + "BasicEmbeddedXADataSource40-10_11_1_0.ser",
+                filePrefix + "BasicClientDataSource40-10_11_1_0.ser",
+                filePrefix +
+                    "BasicClientConnectionPoolDataSource40-10_11_1_0.ser",
+                filePrefix + "BasicClientXADataSource40-10_11_1_0.ser",
             });
     }
 }

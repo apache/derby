@@ -30,7 +30,7 @@ import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.client.net.NetXAResource;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class ClientXAConnection extends ClientPooledConnection implements XAConnection {
@@ -46,7 +46,7 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
     // This connection is used to access the indoubt table
     private NetXAConnection controlCon_ = null;
 
-    public ClientXAConnection(ClientBaseDataSourceRoot ds,
+    public ClientXAConnection(BasicClientDataSource40 ds,
                               LogWriter logWtr,
                               String userId,
                               String password) throws SQLException {

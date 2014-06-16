@@ -45,7 +45,6 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.ClientConnection;
 import org.apache.derby.client.am.ClientDatabaseMetaData;
@@ -53,6 +52,7 @@ import org.apache.derby.client.am.MaterialStatement;
 import org.apache.derby.client.am.ClientResultSet;
 import org.apache.derby.client.am.StatementCacheInteractor;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
@@ -77,7 +77,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      * org.apache.derby.client.ClientPooledConnection}
      */
     public ClientPooledConnection newClientPooledConnection(
-            ClientBaseDataSourceRoot ds,
+            BasicClientDataSource40 ds,
             LogWriter logWriter,
             String user,
             String password) throws SQLException {
@@ -87,7 +87,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     /**
      * @return an instance of {@link org.apache.derby.client.ClientXAConnection}
      */
-    public ClientXAConnection newClientXAConnection(ClientBaseDataSourceRoot ds,
+    public ClientXAConnection newClientXAConnection(BasicClientDataSource40 ds,
         LogWriter logWriter,String user, String password) throws SQLException
     {
         return new ClientXAConnection(ds, logWriter, user, password);
@@ -288,7 +288,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      */
     public ClientConnection newNetConnection(
             LogWriter logWriter, String user, String password,
-            ClientBaseDataSourceRoot dataSource,
+            BasicClientDataSource40 dataSource,
             int rmId,
             boolean isXAConn) throws SqlException {
 
@@ -320,7 +320,7 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
     public ClientConnection newNetConnection(
             LogWriter logWriter,String user,
             String password,
-            ClientBaseDataSourceRoot dataSource,
+            BasicClientDataSource40 dataSource,
             int rmId,boolean isXAConn,
             ClientPooledConnection cpc) throws SqlException {
 

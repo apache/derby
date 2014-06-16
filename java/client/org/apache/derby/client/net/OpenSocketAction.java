@@ -33,7 +33,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import org.apache.derby.jdbc.ClientBaseDataSourceRoot;
+import org.apache.derby.jdbc.BasicClientDataSource40;
 
 class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
     private String server_;
@@ -60,14 +60,14 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
-        case ClientBaseDataSourceRoot.SSL_BASIC:
+        case BasicClientDataSource40.SSL_BASIC:
             sf = NaiveTrustManager.getSocketFactory();
             break;
-        case ClientBaseDataSourceRoot.
+        case BasicClientDataSource40.
                 SSL_PEER_AUTHENTICATION:
             sf = (SocketFactory)SSLSocketFactory.getDefault();
             break;
-        case ClientBaseDataSourceRoot.SSL_OFF:
+        case BasicClientDataSource40.SSL_OFF:
             sf = SocketFactory.getDefault();
             break;
         default: 

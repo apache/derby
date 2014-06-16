@@ -1074,9 +1074,10 @@
       <param name="more_inclusions" value="${extraApi}"/>
     </antcall>
 
-    <javadoc sourcepath="${out.javadoc.dir}/sourcedir"
-             bootclasspath="${bootClasspath}"
+    <javadoc bootclasspath="${bootClasspath}"
              classpath="${bootClasspath};${osgi};${servlet24};${out.dir};${jars.javadoc}"
+             sourcepath="${derby.engine.src.dir}:${derby.client.src.dir}:${derby.drda.src.dir}:${derby.shared.src.dir}:${derby.optional.src.dir}:${derby.tools.src.dir}"
+         excludepackagenames="org.apache.derby.*"
              breakiterator="true"
              destdir="${public.api.dir}"
     	     Overview="${basedir}/published_api_overview.html"
@@ -1085,6 +1086,8 @@
              Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
       <Doctitle> Apache Derby ${major}.${minor} API Documentation</Doctitle>   
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+      <link href="http://docs.oracle.com/javaee/7/api/"/>
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
@@ -1095,10 +1098,10 @@
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.optional.src.dir}"
                includesfile="${javadoc.inclusions}"/>
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
       <arg value="${xarg.doclint}"/>
     </javadoc>
 
-    <delete dir="${out.javadoc.dir}/sourcedir"/>
     <delete dir="${javadoc.temp.dir}"/>
    
     <!-- Copy the logo needed by the Doctitle attribute above -->

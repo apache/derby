@@ -26,7 +26,7 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
 /**
- * This datasource is suitable for client/server use of Derby,
+ * This data source is suitable for client/server use of Derby,
  * running on Java 8 Compact Profile 2 or higher.
  * <p/>
  * Similar to ClientXADataSource except it does not support JNDI,
