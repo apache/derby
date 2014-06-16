@@ -112,7 +112,7 @@ This is a feature release. The following new features were added:
 
 <li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual. See also features F721 and F492 of the SQL Standard.</li>
 
-<li><b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual.</li>
+<li><b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual. See also feature T211-05 of the SQL Standard.</li>
 
 <li><b>Rolling log file</b> - The Derby diagnostic log can now be split across a sequence of files. See the section on the derby.stream.error.style property in the Derby Reference Manual.</li>
 
