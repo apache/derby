@@ -774,31 +774,6 @@ abstract class BaseMonitor
 
 	/**
 	*/
-	private Object newInstance(String className) {
-
-		try {
-
-			Class factoryClass = Class.forName(className);
-			return factoryClass.newInstance();
-		}
-		catch (ClassNotFoundException e) {
-			report(className + " " + e.toString());
-		}
-		catch (InstantiationException e) {
-			report(className + " " + e.toString());
-		}
- 		catch (IllegalAccessException e) {
-			report(className + " " + e.toString());
-		}
-		catch (LinkageError le) {
-			report(className + " " + le.toString());
-			reportException(le);
-		}
-
-		return null;
-	}
-	/**
-	*/
 	private Object newInstance(Class classObject) {
 
 		try {
