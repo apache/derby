@@ -1062,6 +1062,11 @@
 
     bootClasspath    Sensitive to JDBC level.
     extraApi         Extra files to include in the public api.
+
+    If behind a firewall, the links to Java SE and J2EE javadocs may
+    fail.  You can manually download the package-list files into the
+    folders ./packageListLoc-se-8 and ./packageListLoc-j2ee-7 instead
+    to get a correct build.
   -->
   <target name="publishedapi-workhorse" depends="initjars,set-doclint">
  
@@ -1086,7 +1091,11 @@
              Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
       <Doctitle> Apache Derby ${major}.${minor} API Documentation</Doctitle>   
+      <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/"
+                         packagelistLoc="packageListLoc-se-8" />
       <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+      <link offline="true" href="http://docs.oracle.com/javaee/7/api/"
+                     packagelistLoc="packageListLoc-j2ee-7" />
       <link href="http://docs.oracle.com/javaee/7/api/"/>
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
@@ -1098,7 +1107,6 @@
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.optional.src.dir}"
                includesfile="${javadoc.inclusions}"/>
-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
       <arg value="${xarg.doclint}"/>
     </javadoc>
 
