@@ -137,7 +137,7 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
     /**
      * Get the class bound to a UDT column.
      */
-    public Class getUDTClass( int column ) throws SQLException
+    Class getUDTClass( int column ) throws SQLException
     {
         String columnName = getColumnName( column );
         

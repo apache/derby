@@ -181,7 +181,7 @@ abstract class MethodCallNode extends JavaValueNode
 	  *
 	  *	@return	the Classes of our parameters
 	  */
-    public  Class<?>[]  getMethodParameterClasses()
+    Class<?>[]  getMethodParameterClasses()
 	{ 
 		ClassInspector ci = getClassFactory().getClassInspector();
 
