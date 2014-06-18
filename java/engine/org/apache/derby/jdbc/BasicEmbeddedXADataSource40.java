@@ -85,7 +85,7 @@ public class BasicEmbeddedXADataSource40
     /**
      * {@inheritDoc}
      * <p/>
-     * Also clears {@link ra}.
+     * Also clears {@link #ra}.
      */
     @Override
     protected void update() {
