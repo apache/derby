@@ -104,10 +104,17 @@ public class EmbeddedConnectionPoolDataSource extends EmbeddedDataSource
 		return createPooledConnection (username, password, true);
 	}
         
-    //
-    // Create and return an EmbedPooledConnection from this instance
-    // of EmbeddedConnectionPoolDataSource.
-    //
+    /**
+     * Create and return an EmbedPooledConnection from this instance
+     * of EmbeddedConnectionPoolDataSource.
+     *
+     * @param user The user name
+     * @param password The password
+     * @param requestPassword @{@code false} if original call is from a
+     *        no-argument constructor, otherwise {@code true}
+     * @return A pooled connection
+     * @throws SQLException An error occurred
+     */
     private PooledConnection createPooledConnection (String user,
         String password, boolean requestPassword) throws SQLException
     {

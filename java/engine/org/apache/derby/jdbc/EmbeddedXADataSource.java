@@ -70,7 +70,10 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
 
 	private static final long serialVersionUID = -5715798975598379738L;
 
-	// link to the database
+    /**
+     * A cached link to the database, set up with the first connection is
+     * made.
+     */
 	transient private ResourceAdapter ra;
   
 	/**
@@ -121,10 +124,11 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
         return createXAConnection (ra, user, password, true);
 	}
 	
-	/*
-	 * private method
-	 */
-
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also clear the cached value of {@link #ra}.
+     */
     @Override
     protected void update() {
 		ra = null;
@@ -132,9 +136,17 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
 	}
 
         
-    //
-    // Instantiate and return an EmbedXAConnection from this instance
-    // of EmbeddedXADataSource.
+    /**
+     * Instantiate and return an EmbedXAConnection from this instance
+     * of EmbeddedXADataSource.
+     * @param ra The resource adapter to the database
+     * @param user The user name
+     * @param password The password
+     * @param requestPassword @{@code false} if original call is from a
+     *        no-argument constructor, otherwise {@code true}
+     * @return An XA connection to the database
+     * @throws java.sql.SQLException
+     */
     //
     private XAConnection createXAConnection (ResourceAdapter ra,
         String user, String password, boolean requestPassword)
@@ -172,9 +184,8 @@ public class EmbeddedXADataSource extends EmbeddedDataSource
 
 
     /**
-     *
-     * @return The ResourceAdapter instance for
-     *         the underlying database
+     * @return The cached {@code ResourceAdapter} instance for the underlying
+     * database
      */
     @Override
     public ResourceAdapter getResourceAdapter()

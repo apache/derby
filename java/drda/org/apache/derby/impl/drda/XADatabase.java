@@ -58,9 +58,10 @@ class XADatabase extends Database {
     /**
      * Make a new connection using the database name and set 
      * the connection in the database
-     **/
-    synchronized void makeConnection(Properties p) throws
- SQLException
+     * @throws java.sql.SQLException
+     */
+    @Override
+    synchronized void makeConnection(Properties p) throws SQLException
     {
         if (xaDataSource == null) {
             try {

@@ -58,6 +58,36 @@ import org.apache.derby.shared.common.reference.SQLState;
  * BasicClientDataSource40 is similar to ClientDataSource except it
  * can not be used with JNDI, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
+ * <p/>
+ *  * The standard attributes provided are, cf. e.g. table
+ * 9.1 in the JDBC 4.2 specification.
+ * <ul>
+ *   <li>databaseName</li>
+ *   <li>dataSourceName</li>
+ *   <li>description</li>
+ *   <li>password</li>
+ *   <li>user</li>
+ * </ul>
+ * These standard attributes are not supported:
+ * <ul>
+ *   <li>networkProtocol</li>
+ *   <li>roleName</li>
+ * </ul>
+ * The Derby client driver also supports these attributes:
+ * <ul>
+ *   <li>loginTimeout</li> @see javax.sql.CommonDataSource set/get
+ *   <li>logWriter</li> @see javax.sql.CommonDataSource set/get
+ *   <li>createDatabase</li>
+ *   <li>connectionAttributes</li>
+ *   <li>shutdownDatabase</li>
+ *   <li>attributesAsPassword</li>
+ *   <li>retrieveMessageText</li>
+ *   <li>securityMechanism</li>
+ *   <li>traceDirectory</li>
+ *   <li>traceFile</li>
+ *   <li>traceFileAppend</li>
+ *   <li>traceLevel<li>
+ * </ul>
  */
 @SuppressWarnings("ResultOfObjectAllocationIgnored")
 public class BasicClientDataSource40 
@@ -230,7 +260,7 @@ public class BasicClientDataSource40
     // other data source properties should probably also be supported as
     // connection properties.
 
-        // ---------------------------- loginTimeout ------------------------------
+    // ---------------------------- loginTimeout ------------------------------
     //
     // was serialized in 1.0 release
     /**
@@ -270,36 +300,50 @@ public class BasicClientDataSource40
 
     // ---------------------------- databaseName ------------------------------
     //
-    // Stores the relational database name, RDBNAME.
-    // The length of the database name may be limited to 18 bytes
-    // and therefore may throw an SQLException.
-    //
-    //
+    
+    /**
+     * Stores the relational database name, RDBNAME.
+     * The length of the database name may be limited to 18 bytes
+     * and therefore may throw an SQLException.
+     * @serial
+     */
     private String databaseName;
 
     // databaseName is not permitted in a properties object
 
 
     // ---------------------------- description ------------------------------
-    // A description of this data source.
+    
+    /**
+     * A description of this data source.
+     * @serial
+     */
     private String description;
 
     // ---------------------------- dataSourceName ----------------------------
     //
-    // A data source name;
-    // used to name an underlying XADataSource,
-    // or ConnectionPoolDataSource when pooling of connections is done.
-    //
+    
+    /**
+     * A data source name;
+     * used to name an underlying XADataSource,
+     * or ConnectionPoolDataSource when pooling of connections is done.
+     * @serial
+     */
     private String dataSourceName;
 
     // ---------------------------- portNumber --------------------------------
-    //
+
+    /**
+     * @serial
+     */
     private int portNumber = propertyDefault_portNumber;
 
     // ---------------------------- serverName --------------------------------
-    //
-    // Derby-410 fix.
-    private String serverName = propertyDefault_serverName;
+    
+    /**
+     * @serial 
+     */
+    private String serverName = propertyDefault_serverName; // Derby-410 fix.
 
     // serverName is not permitted in a properties object
 
@@ -372,17 +416,22 @@ public class BasicClientDataSource40
 
     // ---------------------------- user -----------------------------------
     //
-    // This property can be overwritten by specifing the
-    // username parameter on the DataSource.getConnection() method
-    // call.  If user is specified, then password must also be
-    // specified, either in the data source object or provided on
-    // the DataSource.getConnection() call.
-    //
-    // Each data source implementation subclass will maintain it's own
-    // <code>password</code> property.  This password property may or may not
-    // be declared transient, and therefore may be serialized to a file in
-    // clear-text, care must taken by the user to prevent security breaches.
-    // Derby-406 fix
+    
+    /**
+     * This property can be overwritten by specifing the
+     * username parameter on the DataSource.getConnection() method
+     * call.  If user is specified, then password must also be
+     * specified, either in the data source object or provided on
+     * the DataSource.getConnection() call.
+     *
+     * Each data source implementation subclass will maintain it's own
+     * <code>password</code> property.  This password property may or may not
+     * be declared transient, and therefore may be serialized to a file in
+     * clear-text, care must taken by the user to prevent security breaches.
+     * Derby-406 fix
+     * 
+     * @serial
+     */
     private String user = propertyDefault_user;
 
     public static String getUser(Properties properties) {
@@ -424,23 +473,28 @@ public class BasicClientDataSource40
     // or on the Client DataSource object
     private final static short SECMEC_HAS_NOT_EXPLICITLY_SET = 0;
 
-    // Security Mechanism can be specified explicitly either when obtaining a
-    // connection via a DriverManager or via Datasource.
-    // Via DriverManager, securityMechanism can be set on the connection
-    // request using the 'securityMechanism' attribute.
-    // Via DataSource, securityMechanism can be set by calling
-    // setSecurityMechanism() on the ClientDataSource
-    // If the security mechanism is not explicitly set as mentioned above, in
-    // that case the Client will try to upgrade the security mechanism to a
-    // more secure one, if possible.
-    // @see #getUpgradedSecurityMechanism
-    // Therefore, need to keep track if the securityMechanism has been
-    // explicitly set
+    /**
+     * Security Mechanism can be specified explicitly either when obtaining a
+     * connection via a DriverManager or via Datasource.
+     * Via DriverManager, securityMechanism can be set on the connection
+     * request using the 'securityMechanism' attribute.
+     * Via DataSource, securityMechanism can be set by calling
+     * setSecurityMechanism() on the ClientDataSource
+     * If the security mechanism is not explicitly set as mentioned above, in
+     * that case the Client will try to upgrade the security mechanism to a
+     * more secure one, if possible.
+     * See {@link #getUpgradedSecurityMechanism}.
+     * Therefore, need to keep track if the securityMechanism has been
+     * explicitly set.
+     *
+     * @serial
+     */
     private short securityMechanism = SECMEC_HAS_NOT_EXPLICITLY_SET;
 
 
 
     // We use the NET layer constants to avoid a mapping for the NET driver.
+    
     /**
      * Return security mechanism if it is set, else upgrade the security
      * mechanism if possible and return the upgraded security mechanism
@@ -526,7 +580,10 @@ public class BasicClientDataSource40
     }
 
     // ---------------------------- getServerMessageTextOnGetMessage ---------
-    //
+
+    /**
+     * @serial
+     */
     private boolean retrieveMessageText = propertyDefault_retrieveMessageText;
 
     public static boolean getRetrieveMessageText(Properties properties) {
@@ -537,7 +594,10 @@ public class BasicClientDataSource40
     }
 
     // ---------------------------- traceFile ---------------------------------
-    //
+
+    /**
+     * @serial
+     */
     private String traceFile;
 
     static String getTraceFile(Properties properties) {
@@ -547,7 +607,10 @@ public class BasicClientDataSource40
     // ---------------------------- traceDirectory ----------------------------
     // For the suffix of the trace file when traceDirectory is enabled.
     private transient int traceFileSuffixIndex_ = 0;
-    //
+
+    /**
+     * @serial
+     */
     private String traceDirectory;
 
     /**
@@ -598,7 +661,10 @@ public class BasicClientDataSource40
     }
 
     // ---------------------------- traceFileAppend ---------------------------
-    //
+
+    /**
+     * @serial
+     */
     private boolean traceFileAppend = propertyDefault_traceFileAppend;
 
     static boolean getTraceFileAppend(Properties properties) {
@@ -619,6 +685,9 @@ public class BasicClientDataSource40
         return properties.getProperty("password");
     }
 
+    /**
+     * @serial
+     */
     private String password;
 
     synchronized public void setPassword(String password) {
@@ -868,7 +937,7 @@ public class BasicClientDataSource40
      * Properties to be seen by Bean - access thru reflection.
      */
 
-    // -- Stardard JDBC DataSource Properties
+    // -- Standard JDBC DataSource Properties
 
     public synchronized void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
@@ -973,6 +1042,9 @@ public class BasicClientDataSource40
 
     // ----------------------- ssl
 
+    /**
+     * @serial
+     */
     private int sslMode;
 
     /**
@@ -1011,11 +1083,13 @@ public class BasicClientDataSource40
     // ----------------------- set/getCreate/ShutdownDatabase -----------------
     /**
      * Set to true if the database should be created.
+     * @serial
      */
     private boolean createDatabase;
 
     /**
      * Set to true if the database should be shutdown.
+     * @serial
      */
     private boolean shutdownDatabase;
 
@@ -1072,6 +1146,9 @@ public class BasicClientDataSource40
         return shutdownstr;
     }
 
+    /**
+     * @serial
+     */
     private String connectionAttributes = null;
 
     /**
@@ -1104,7 +1181,9 @@ public class BasicClientDataSource40
     }
 
 
-
+    /**
+     * @serial
+     */
     private int traceLevel = propertyDefault_traceLevel;
 
     /**

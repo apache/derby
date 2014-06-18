@@ -24,33 +24,6 @@ package org.apache.derby.jdbc;
 /**
  * Methods that extend the API of
  * {@code javax.sql.DataSource} common for all Derby embedded data sources.
- * <p>
- * EmbeddedDataSourceInterface provides support for JDBC standard DataSource
- * attributes
- * <p>
- * The standard attributes provided by implementations are, cf. e.g. table
- * 9.1 in the JDBC 4.1 specification.
- * <ul>
- *   <li>databaseName</li>
- *   <li>dataSourceName</li>
- *   <li>description</li>
- *   <li>password</li>
- *   <li>user</li>
- * </ul>
- * The embedded Derby driver also supports these attributes:
- * <ul>
- *   <li>loginTimeout</li> @see javax.sql.CommonDataSource set/get
- *   <li>logWriter</li> @see javax.sql.CommonDataSource set/get
- *   <li>createDatabase</li>
- *   <li>connectionAttributes</li>
- *   <li>shutdownDatabase</li>
- *   <li>attributesAsPassword</li>
- * </ul>
- * <br>
- * See the specific Derby DataSource implementation for details on their
- * meaning.
- * <br>
- * See the JDBC specifications for more details.
  */
 public interface EmbeddedDataSourceInterface extends javax.sql.DataSource {
     public void setDatabaseName(String databaseName);

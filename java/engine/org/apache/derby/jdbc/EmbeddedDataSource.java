@@ -249,14 +249,18 @@ public class EmbeddedDataSource extends ReferenceableDataSource
         return ref;
 	}
 
-    //
-    // Add Java Bean properties to the reference using
-    // StringRefAddr for each property. List of bean properties
-    // is defined from the public getXXX() methods on this object
-    // that take no arguments and return short, int, boolean or String.
-    // The StringRefAddr has a key of the Java bean property name,
-    // converted from the method name. E.g. traceDirectory for
-    // traceDirectory.
+    /**
+    * Add Java Bean properties to the reference using
+    * StringRefAddr for each property. List of bean properties
+    * is defined from the public getXXX() methods on this object
+    * that take no arguments and return short, int, boolean or String.
+    * The {@link StringRefAddr} has a key of the Java bean property name,
+    * converted from the method name. E.g. traceDirectory for
+    * traceDirectory.
+    *
+     * @param ths {@code this} object
+     * @param ref The reference to add properties to
+    */
     private static void addBeanProperties(Object ths, Reference ref)
     {
         // Look for all the getXXX methods in the class that take no arguments.

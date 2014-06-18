@@ -45,9 +45,14 @@ public class BasicEmbeddedXADataSource40
 
     private static final long serialVersionUID = -5715798975598379739L;
 
-    // link to the database
+    /**
+     * link to the database
+     */
     private transient ResourceAdapter ra;
 
+    /**
+     * Constructs a basic embedded XA data source. See the class Javadoc.
+     */
     public BasicEmbeddedXADataSource40() {
         super();
     }
@@ -77,7 +82,11 @@ public class BasicEmbeddedXADataSource40
         return createXAConnection (ra, user, password, true);
     }
 
-    // implementation methods
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Also clears {@link ra}.
+     */
     @Override
     protected void update() {
         ra = null;
@@ -85,8 +94,16 @@ public class BasicEmbeddedXADataSource40
     }
 
 
-    // Instantiate and return an EmbedXAConnection from this instance
-    // of EmbeddedXADataSource.
+    /**
+     * Instantiate and return an EmbedXAConnection from this instance
+     * of EmbeddedXADataSource. Minion method.
+     * @param ra The resource adapter for this database
+     * @param user The user name
+     * @param password The password
+     * @param requestPassword @{@code false} if original call is from a
+     *        no-argument constructor, otherwise {@code true}
+     * @return An XA connection to the database
+     */
     private XAConnection createXAConnection(
             ResourceAdapter ra,
             String user,

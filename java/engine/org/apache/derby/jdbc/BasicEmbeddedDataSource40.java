@@ -48,6 +48,37 @@ import org.apache.derby.impl.jdbc.Util;
  * BasicEmbeddedDataSource40 is similar to EmbeddedDataSource, but does
  * not support JNDI naming, i.e. it does not implement
  * {@code javax.naming.Referenceable}.
+ * <p/>
+ * The standard attributes provided are, cf. e.g. table
+ * 9.1 in the JDBC 4.2 specification.
+ * <ul>
+ *   <li>databaseName</li>
+ *   <li>dataSourceName</li>
+ *   <li>description</li>
+ *   <li>password</li>
+ *   <li>user</li>
+ * </ul>
+ * These standard attributes are not supported:
+ * <ul>
+ *   <li>networkProtocol</li>
+ *   <li>portNumber</li>
+ *   <li>roleName</li>
+ *   <li>serverName</li>
+ * </ul>
+ * The embedded Derby driver also supports these attributes:
+ * <ul>
+ *   <li>loginTimeout</li> @see javax.sql.CommonDataSource set/get
+ *   <li>logWriter</li> @see javax.sql.CommonDataSource set/get
+ *   <li>createDatabase</li>
+ *   <li>connectionAttributes</li>
+ *   <li>shutdownDatabase</li>
+ *   <li>attributesAsPassword</li>
+ * </ul>
+ * <br>
+ * See the specific Derby DataSource implementation for details on their
+ * meaning.
+ * <p/>
+ * See also the JDBC specifications for more details.
  *
  * @see EmbeddedDataSource
  */
@@ -58,47 +89,95 @@ public class BasicEmbeddedDataSource40
 
     private static final long serialVersionUID = -4945135214995641182L;
 
-    protected String description;
-    protected String dataSourceName;
-    protected String databaseName;
     /**
-     * Derby specific connection attributes.
+     * Set by {@link #setDescription(java.lang.String)}.
+     * @serial
+     */
+    protected String description;
+
+    /**
+     * Set by {@link #setDataSourceName(java.lang.String)}.
+     * @serial
+     */
+    protected String dataSourceName;
+
+    /**
+     * Set by {@link #setDatabaseName(java.lang.String)}.
+     * @serial
+     */
+    protected String databaseName;
+
+    /**
+     * Derby specific connection attributes. Set by
+     * {@link #setConnectionAttributes(java.lang.String)}.
      * @serial
      */
     protected String connectionAttributes;
 
     /**
      * Set to "create" if the database should be created.
+     * See {@link #setCreateDatabase(java.lang.String)}.
      * @serial
      */
     protected String createDatabase;
 
     /**
-     * Set to "shutdown" if the database should be shutdown.
+     * Set to "shutdown" if the database should be shutdown. See {@link
+     * #setShutdownDatabase(java.lang.String)}.
      * @serial
      */
     protected String shutdownDatabase;
 
     /**
      * Set password to be a set of connection attributes.
+     * @serial
      */
     protected boolean attributesAsPassword;
 
-    // shortDatabaseName has attributes of databaseName stripped off
+    /**
+     * {@code shortDatabaseName} has attributes of {@code databaseName}
+     * stripped off. See {@link #databaseName}.
+     * @serial
+     */
     private String shortDatabaseName;
 
+    /**
+     * Set by {@link #setPassword(java.lang.String)}.
+     * @serial
+     */
     private String password;
+
+    /**
+     * Set by {@link #setUser(java.lang.String)}.
+     * @serial
+     */
     private String user;
+
+    /**
+     * Set by {@link #setLoginTimeout(int)}.
+     * @serial
+     */
     protected int loginTimeout;
 
-    // instance variables that will not be serialized
+    /**
+     * Instance variable that will not be serialized.
+     */
     transient private PrintWriter printer;
+
+    /**
+     * Instance variable that will not be serialized.
+     */
     transient protected String jdbcurl;
 
-    // Unlike a DataSource, LocalDriver is shared by all
-    // Derby databases in the same jvm.
+    /**
+     * Unlike a DataSource, the internal driver is shared by all
+     * Derby databases in the same JVM.
+     */
     transient protected InternalDriver driver;
 
+    /**
+     * Constructs a basic embedded data source. See the class Javadoc.
+     */
     public BasicEmbeddedDataSource40() {
         update();
     }
@@ -137,9 +216,9 @@ public class BasicEmbeddedDataSource40
         return databaseName;
     }
 
-    //
-    // Return database name with ant attributes stripped off.
-    //
+    /**
+     * Return database name with ant attributes stripped off.
+    */
     private String getShortDatabaseName() {
         return shortDatabaseName;
     }
@@ -303,6 +382,10 @@ public class BasicEmbeddedDataSource40
         printer = out;
     }
 
+
+    /**
+     * Update {@link #jdbcurl} from attributes set.
+     */
     protected void update() {
         StringBuilder sb = new StringBuilder(64);
 
@@ -375,6 +458,13 @@ public class BasicEmbeddedDataSource40
         return createDatabase;
     }
 
+    /**
+     * Return a handle to the internal driver, possibly instantiating it first
+     * if it hasn't been booted or if it has been shut down.
+     *
+     * @return The internal driver handle
+     * @throws SQLException
+     */
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     InternalDriver findDriver() throws SQLException {
         String url = jdbcurl;
@@ -494,15 +584,15 @@ public class BasicEmbeddedDataSource40
         return attributesAsPassword;
     }
 
-    // Most of our customers would be using JNDI to get the data
-    // sources. Since we don't have a jndi in the test setup to test this, we
-    // are adding this method to fake it. This is getting used in XAJNDITest
-    // so we can compare the two data sources.
+     // Most of our customers would be using JNDI to get the data
+     // sources. Since we don't have a JNDI in the test setup to test this, we
+     // are adding this method to fake it. This is getting used in XAJNDITest
+     // so we can compare the two data sources.
     @Override
-    public boolean equals(Object p0) {
+    public boolean equals(Object other) {
 
-        if (p0 instanceof EmbeddedDataSource) {
-            EmbeddedDataSource ds = (EmbeddedDataSource)p0;
+        if (other instanceof EmbeddedDataSource) {
+            EmbeddedDataSource ds = (EmbeddedDataSource)other;
 
             boolean match = true;
 
@@ -564,6 +654,9 @@ public class BasicEmbeddedDataSource40
         return false;
     }
 
+    // We don't really need this in the tests
+    // (see equals), but unsafe not to
+    // define hashCode if we define equals.
     @Override
     public int hashCode() {
         int hash = 5;
@@ -627,8 +720,16 @@ public class BasicEmbeddedDataSource40
         return this.getConnection(username, password, true);
     }
 
-    // requestPassword Use {@code true} if the password came from the
-    // getConnection() call.
+    /**
+     * Get a user connection: minion method.
+     *
+     * @param username the user name
+     * @param password the password
+     * @param requestPassword {@code true} if the password came from the
+     *        getConnection() call with user and password arguments..
+     * @return user connection
+     * @throws SQLException
+     */
     final Connection getConnection(String username,
                                    String password,
                                    boolean requestPassword)
@@ -717,6 +818,19 @@ public class BasicEmbeddedDataSource40
         }
     }
 
+    /**
+     * Return a resource adapter. Use {@code ra} if non-null and active, else
+     * get the one for the data base.
+     *
+     * @param ds The data source
+     * @param ra The cached value if any
+     * @param user The user name
+     * @param password The password in clear text
+     * @param requestPassword If {@code true}, use the supplied user and
+     *                        password to boot the database if required
+     * @return the resource adapter
+     * @throws SQLException An error occurred
+     */
     protected static ResourceAdapter setupResourceAdapter(
         EmbeddedXADataSourceInterface ds,
         ResourceAdapter ra,
