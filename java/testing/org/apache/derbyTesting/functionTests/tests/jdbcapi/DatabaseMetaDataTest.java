@@ -21,11 +21,9 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.lang.reflect.Method;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
-//import java.lang.reflect.Constructor;
-//import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -41,28 +39,21 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
-//import java.util.HashMap;
-//import java.util.Iterator;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-//import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.functionTests.tests.upgradeTests.Version;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-//import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-//import org.apache.derby.shared.common.reference.JDBC40Translation;
-import org.apache.derbyTesting.functionTests.tests.upgradeTests.Version;
-import org.apache.derbyTesting.functionTests.util.Barrier;
 
 /**
  * Test the DatabaseMetaData api.
@@ -186,7 +177,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         super(name);
     }
     
-    /** Set the schema name to be used by the test. */
+    /**
+     * Set the schema name to be used by the test.
+     * @throws java.lang.Exception
+     */
+    @Override
     protected void setUp()
             throws Exception {
         // Currently there are no tests that depend on data created outside
@@ -199,6 +194,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 schema.length() > 2);
     }
 
+    @Override
     protected void tearDown() throws Exception
     {
         if (modifiedDatabase)
@@ -207,8 +203,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             conn.setAutoCommit(false);
 
             DatabaseMetaData dmd = getDMD();
-            for (int i = 0; i < IDS.length; i++)
-                JDBC.dropSchema(dmd, getStoredIdentifier(IDS[i]));
+            for (String IDS1 : IDS) {
+                JDBC.dropSchema(dmd, getStoredIdentifier(IDS1));
+            }
   
             commit();
         }
@@ -217,6 +214,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Default suite for running this test.
+     * @return the suite
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
@@ -292,6 +290,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Return the identifiers used to create schemas,
      * tables etc. in the order the database stores them.
+     * @return identifiers
      */
     private String[] getSortedIdentifiers()
     {
@@ -307,7 +306,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         return dbIDS;
     }
     
-    private final DatabaseMetaData getDMD() throws SQLException
+    private DatabaseMetaData getDMD() throws SQLException
     {
         return getConnection().getMetaData();
     }
@@ -317,6 +316,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * there's a lock on the system tables (DERBY-2584). This test must run on
      * a fresh database (that is, <code>getIndexInfo</code> must not have been
      * prepared and stored in <code>SYS.SYSSTATEMENTS</code>).
+     *
+     * @throws java.sql.SQLException
      */
     public void initialCompilationTest() throws SQLException {
         Connection c = getConnection();
@@ -341,6 +342,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * there's a lock conflict that causes the first attempt to store it to
      * stop midway (DERBY-4160). This test needs a fresh database so that the
      * meta-data calls are not already compiled.
+     * @throws java.lang.Exception
      */
     public void concurrentCompilationTest() throws Exception {
         // Create a barrier that can be used to synchronize the two threads
@@ -407,6 +409,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * derby.language.stalePlanCheckInterval should be set to 5 (the lowest
      * possible value) so that we don't have to wait long for the query plan
      * to be invalidated.
+     * @throws java.sql.SQLException
      */
     public void recompileTimeoutTest() throws SQLException {
         DatabaseMetaData dmd = getDMD();
@@ -711,6 +714,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Methods that describe the version of the
      * driver and database.
+     *
+     * @throws java.sql.SQLException
      */
     public void testVersionInfo() throws SQLException
     {
@@ -787,6 +792,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * getURL() method. Note that this method
      * is the only JDBC 3 DatabaseMetaData method
      * that is dropped in JSR169.
+     *
+     * @throws java.sql.SQLException
      */
     public void testGetURL() throws SQLException
     {
@@ -842,6 +849,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Derby stores unquoted identifiers as upper
      * case and quoted ones as mixed case.
      * They are always compared case sensitive.
+     *
+     * @throws java.sql.SQLException
      */
     public void testIdentifierStorage() throws SQLException
     {
@@ -858,6 +867,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * methods that return information about handling NULL.
+     *
+     * @throws java.sql.SQLException
      */
     public void testNullInfo() throws SQLException
     {
@@ -873,6 +884,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Method getSQLKeywords, returns list of SQL keywords
      * that are not defined by SQL92.
+     *
+     * @throws java.sql.SQLException
      */
     public void testSQLKeywords() throws SQLException
     {
@@ -886,6 +899,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Methods that return information specific to
      * the current connection.
+     *
+     * @throws java.sql.SQLException
      */
     public void testConnectionSpecific() throws SQLException
     {
@@ -917,6 +932,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Test UDT-related metadata methods.
      * 
+     * @throws java.lang.Exception
      */
     public void testUDTs() throws Exception
     {
@@ -993,7 +1009,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         dropObjectsForUDTTests();
     }
-    /** Create objects needed to test the UDT-related metadata calls */
+
+    /**
+     * Create objects needed to test the UDT-related metadata calls
+     *
+     * @throws java.sql.SQLException
+     */
     private void createObjectsForUDTTests() throws SQLException
     {
         getConnection().setAutoCommit(false);
@@ -1005,7 +1026,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         commit();
         getConnection().setAutoCommit(true);
     }
-    /** Drop the objects needed for testing the UDT-related metadata methods */
+
+    /**
+     * Drop the objects needed for testing the UDT-related metadata methods
+     *
+     * @throws java.sql.SQLException
+     */
     private void dropObjectsForUDTTests() throws SQLException
     {
         getConnection().setAutoCommit(false);
@@ -1025,6 +1051,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * correct shape, and with correct names, datatypes and 
      * nullability for the columns in the ResultSet. 
      * 
+     * @throws java.sql.SQLException
      */
     public void testUnimplementedSQLObjectAttributes() throws SQLException
     {
@@ -1100,7 +1127,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     *  Implement ODBC equivalent for getVersionColumns - SYSIBM.SQLCOLUMNS
+     * Implement ODBC equivalent for getVersionColumns - SYSIBM.SQLCOLUMNS
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     *
+     * @return version
+     * @throws java.sql.SQLException
      */
     public ResultSet getVersionColumnsODBC(
             String catalog, String schema, String table)
@@ -1120,6 +1154,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getVersionColumns - calls 
      * dmd.getVersionColumns for the JDBC call, and getVersionColumnsODBC for
      * the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return version
      * @throws SQLException 
      */
     private ResultSet[] getVersionColumns(
@@ -1195,8 +1233,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         modifiedDatabase = true;
 
         Statement s = createStatement();
-        for (int i = 0; i < IDS.length; i++)
-           s.executeUpdate("CREATE SCHEMA " + IDS[i]);
+        for (String IDS1 : IDS) {
+            s.executeUpdate("CREATE SCHEMA " + IDS1);
+        }
         s.close();
         
         commit();
@@ -1212,6 +1251,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * can be used regardless of the database state.
      * The builtin schemas are automatically checked
      * and must not be part of the passed in list.
+     * @param rs
+     * @param userExpected
+     *
+     * @throws java.sql.SQLException
      */
     public static void checkSchemas(ResultSet rs,
             String[] userExpected) throws SQLException
@@ -1259,6 +1302,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Check the shape of the ResultSet from any
      * getSchemas call.
+     *
+     * @param rs result set
+     * @throws java.sql.SQLException
      */
     private static void checkSchemasShape(ResultSet rs) throws SQLException
     {
@@ -1276,6 +1322,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Execute dmd.getTables() but perform additional checking
      * of the ODBC variant.
+     * @param dmd
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param tableTypes
+     * @return result set from query
+     * @throws java.sql.SQLException
      * @throws IOException 
      */
     private ResultSet getDMDTables(DatabaseMetaData dmd,
@@ -1392,15 +1445,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             //boolean ourTable;
             assertEquals("TABLE_CAT", "", rs.getString("TABLE_CAT"));
             
-            String schema = rs.getString("TABLE_SCHEM");
+            String schema_ = rs.getString("TABLE_SCHEM");
             
             // See if the table is in one of the schemas we created.
             // If not we perform what checking we can.
-            boolean ourSchema = Arrays.binarySearch(dbIDS, schema) >= 0;
+            boolean ourSchema = Arrays.binarySearch(dbIDS, schema_) >= 0;
             
             if (ourSchema) {        
                 assertEquals("TABLE_SCHEM",
-                    dbIDS[rowPosition/dbIDS.length], schema);
+                    dbIDS[rowPosition/dbIDS.length], schema_);
                 assertEquals("TABLE_NAME",
                     dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_NAME"));
             }
@@ -1424,13 +1477,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
        
          Random rand = new Random();
         
-         // Test using schema pattern with a pattern unique to
-         // a single schema.
-         for (int i = 0; i < dbIDS.length; i++)
-         {
-            String schema = dbIDS[i];
+        for (String schema_ : dbIDS) {
             int pc = rand.nextInt(6);
-            String schemaPattern = schema.substring(0, pc + 2) + "%";
+            String schemaPattern = schema_.substring(0, pc + 2) + "%";
             
             rs = getDMDTables(dmd, null, schemaPattern, null, userTableOnly);
             checkTablesShape(rs);
@@ -1438,7 +1487,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             while (rs.next())
             {
                 assertEquals("TABLE_SCHEM",
-                        schema, rs.getString("TABLE_SCHEM"));
+                        schema_, rs.getString("TABLE_SCHEM"));
                 assertEquals("TABLE_NAME",
                         dbIDS[rowPosition%dbIDS.length], rs.getString("TABLE_NAME"));
                 assertEquals("TABLE_TYPE", "TABLE", rs.getString("TABLE_TYPE"));
@@ -1447,13 +1496,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             rs.close();
             assertEquals("getTables count schema pattern",
                     dbIDS.length, rowPosition);
-         }
+        }
          
-         // Test using table pattern with a pattern unique to
-         // a single table per schema.
-         for (int i = 0; i < dbIDS.length; i++)
-         {
-            String table = dbIDS[i];
+        for (String table : dbIDS) {
             int pc = rand.nextInt(6);
             String tablePattern = table.substring(0, pc + 2) + "%";
             
@@ -1472,13 +1517,18 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             rs.close();
             assertEquals("getTables count schema pattern",
                     dbIDS.length, rowPosition);
-         }        
+        }
     }
       
   
     /**
      * Execute and check the ODBC variant of getTables which
      * uses a procedure to provide the same information to ODBC clients.
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param tableTypes
+     * @throws java.sql.SQLException
      * @throws IOException 
      */
     private void checkGetTablesODBC(String catalog, String schema,
@@ -1487,13 +1537,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         String tableTypesAsString = null;
         if (tableTypes != null) {
             int count = tableTypes.length;
-            StringBuffer sb = new StringBuffer();
-           for (int i = 0; i < count; i++) {
-               if (i > 0)
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < count; i++) {
+                if (i > 0)
                     sb.append(",");
-            sb.append(tableTypes[i]);
-           }
-           tableTypesAsString = sb.toString();
+                sb.append(tableTypes[i]);
+            }
+            tableTypesAsString = sb.toString();
         }
 
         CallableStatement cs = prepareCall(
@@ -1538,6 +1589,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @param skipXML true if tables with the XML column should not
      * be created.
+     * @return total number of tables created
      * @throws SQLException
      */
     private int createTablesForTest(boolean skipXML) throws Exception
@@ -1565,14 +1617,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         int columnCounter = 0;
         
-        for (int sid = 0; sid < IDS.length; sid++) {
-            for (int tid = 0; tid < IDS.length; tid++)
-            {
-                StringBuffer sb = new StringBuffer();
+        for (String IDS1 : IDS) {
+            for (String IDS2 : IDS) {
+                StringBuilder sb = new StringBuilder();
                 sb.append("CREATE TABLE ");
-                sb.append(IDS[sid]);
+                sb.append(IDS1);
                 sb.append('.');
-                sb.append(IDS[tid]);
+                sb.append(IDS2);
                 sb.append(" (");
                 
                 // Five columns per table
@@ -1591,7 +1642,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     if (c < 5)
                         sb.append(", ");
                 }
-                
                 sb.append(")");
                 s.execute(sb.toString());
             }
@@ -1609,6 +1659,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Contents are compared to the ResultSetMetaData
      * for a SELECT * from the table. All columns in
      * all tables are checked.
+     *
+     * @throws java.lang.Exception
      */
     public void testGetColumnsReadOnly() throws Exception
     {
@@ -1652,11 +1704,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
                 while (rs[j].next())
                 {
-                    String schema = rs[j].getString("TABLE_SCHEM");
+                    String schema_ = rs[j].getString("TABLE_SCHEM");
                     String table = rs[j].getString("TABLE_NAME");
                     String column = rs[j].getString("COLUMN_NAME");
 
-                    assertMatchesPattern(schemaPattern, schema);
+                    assertMatchesPattern(schemaPattern, schema_);
                     assertMatchesPattern(tableNamePattern, table);
                     assertMatchesPattern(columnNamePattern, column);
 
@@ -1682,11 +1734,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             for (int j=0  ; j<2 ; j++) {
                 while (rs[j].next())
                 {
-                    String schema = rs[j].getString("TABLE_SCHEM");
+                    String schema_ = rs[j].getString("TABLE_SCHEM");
                     String table = rs[j].getString("TABLE_NAME");
                     String column = rs[j].getString("COLUMN_NAME");
 
-                    if (!doesMatch(schemaPattern, 0, schema, 0))
+                    if (!doesMatch(schemaPattern, 0, schema_, 0))
                         continue;               
                     if (!doesMatch(tableNamePattern, 0, table, 0))
                         continue;
@@ -1824,7 +1876,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             base = dbIDS[rand.nextInt(dbIDS.length)];
         }
         
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < base.length();)
         {
             int x = rand.nextInt(10);
@@ -1888,11 +1940,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         while (rs.next())
         {
-            String schema = rs.getString("TABLE_SCHEM");
+            String schema_ = rs.getString("TABLE_SCHEM");
             String table = rs.getString("TABLE_NAME");
             
             ResultSet rst = s.executeQuery(
-                "SELECT * FROM " + JDBC.escape(schema, table));
+                "SELECT * FROM " + JDBC.escape(schema_, table));
             ResultSetMetaData rsmdt = rst.getMetaData();
 
                      
@@ -1909,7 +1961,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 assertEquals("TABLE_CAT",
                         "", rs.getString("TABLE_CAT"));
                 assertEquals("TABLE_SCHEM",
-                        schema, rs.getString("TABLE_SCHEM"));
+                        schema_, rs.getString("TABLE_SCHEM"));
                 assertEquals("TABLE_NAME",
                         table, rs.getString("TABLE_NAME"));
                 
@@ -2119,7 +2171,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     *  Implement ODBC equivalent for getColumns - SYSIBM.SQLCOLUMNS
+     * Implement ODBC equivalent for getColumns - SYSIBM.SQLCOLUMNS
+     *
+     * @param catalog
+     * @param schemaPattern
+     * @param tableNamePattern
+     * @param columnNamePattern
+     *
+     * @return result set of query
+     * @throws java.sql.SQLException
      */
     private ResultSet getColumnsODBC(
             String catalog, String schemaPattern, String tableNamePattern,
@@ -2140,6 +2200,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getColumns - calls dmd.getColumns for
      * the JDBC call, and getColumnsODBC for the ODBC procedure
+     * @param catalog
+     * @param schemaPattern
+     * @param tableNamePattern
+     * @param columnNamePattern
+     * @return Array of the two result sets of columns
      * @throws SQLException 
      */
     private ResultSet[] getColumns(
@@ -2158,6 +2223,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Test getTableTypes()
+     *
+     * @throws java.sql.SQLException
      */
     public void testTableTypes() throws SQLException
     {
@@ -2183,6 +2250,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Test getTypeInfo
+     *
+     * @throws java.lang.Exception
      */
     public void testGetTypeInfo() throws Exception
     {
@@ -2635,6 +2704,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * even though it doesn't support catalogs because the
      * SQL query returns a constant (empty string) for
      * a table's catalog.
+     * @param rs
+     * @throws java.sql.SQLException
      */
     private void checkTablesShape(ResultSet rs) throws SQLException
     {
@@ -2659,6 +2730,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Check the shape of the ResultSet from any getCatlogs call.
+     * @param rs
+     * @throws java.sql.SQLException
      */
     private void checkCatalogsShape(ResultSet rs) throws SQLException
     {
@@ -2676,6 +2749,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Check the shape of the ResultSet from any
      * getVersionColumns call.
+     * @param rs
+     * @throws java.sql.SQLException
      */
     private static void checkVersionColumnsShape(ResultSet[] rs) throws SQLException
     {
@@ -2754,6 +2829,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * the list does not contain duplicates, all the functions
      * listed can be executed and that if a function is not
      * in the list but is specified it cannot be executed.
+     *
+     * @param specList
+     * @param metaDataList
+     *
+     * @throws java.sql.SQLException
      */
     private void escapedFunctions(String[][] specList, String metaDataList)
     throws SQLException
@@ -2812,6 +2892,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC escaped function. We don't care about the actual
      * return value, that should be tested elsewhere in
      * the specific test of a function.
+     *
+     * @param specDetails
+     *
+     * @throws java.sql.SQLException
      */
     private void executeEscaped(String[] specDetails)
         throws SQLException
@@ -2841,6 +2925,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * suitable for use in any SQL statement where a SQL type is
      * expected. For variable sized types the string will
      * have random valid length information. E.g. CHAR(37).
+     * @param conn current connection
+     * @return list of types
+     * @throws java.sql.SQLException
      */
     public static List<String> getSQLTypes(Connection conn) throws SQLException
     {
@@ -2866,7 +2953,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
-            if (createParams.indexOf("length") != -1)
+            if (createParams.contains("length"))
             {
                 int maxLength = rs.getInt("PRECISION");
                 
@@ -2878,7 +2965,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     list.add(typeName + "(" + length + ")");
                     
                 } else {
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     sb.append(typeName.substring(0, paren+1));
                     sb.append(length);
                     sb.append(typeName.substring(paren+1));
@@ -2888,10 +2975,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
-            if (createParams.indexOf("scale") != -1)
+            if (createParams.contains("scale"))
             {
                 int maxPrecision = rs.getInt("PRECISION");
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 int precision = rand.nextInt(maxPrecision) + 1;
                 sb.append(typeName);
                 sb.append("(");
@@ -2907,7 +2994,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 continue;
             }
             
-            if (createParams.indexOf("precision") != -1)
+            if (createParams.contains("precision"))
             {
                 list.add(typeName);
                 continue;
@@ -2925,6 +3012,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC type identifier from java.sql.Types.
      * Will assert if the type is not known
      * (in future, currently just return Types.NULL).
+     *
+     * @param type
+     * @return JDBC type identifier (java.sql.Types.*)
      */
     public static int getJDBCType(String type)
     {
@@ -3016,6 +3106,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * precision/length for this specific value
      * if the type is variable, e.g. CHAR(5) will
      * return 5, but LONG VARCHAR will return 0.
+     *
+     * @param jdbcType
+     * @param type
+     *
+     * @return precision or length
      */
     public static int getPrecision(int jdbcType, String type)
     {
@@ -3030,7 +3125,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int lp = type.indexOf('(');
             int rp = type.indexOf(')');
             int precision =
-                Integer.valueOf(type.substring(lp+1, rp)).intValue();
+                Integer.parseInt(type.substring(lp+1, rp));
             return precision;
 
         default:
@@ -3045,6 +3140,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * to those of the equivalent JDBC calls; this fixture assumes that the
      * the JDBC calls return correct results (testing of the JDBC results occurs
      * elsewhere, see fixtures testGetXXportedKeys()
+     *
+     * @throws java.sql.SQLException
+     * @throws java.io.IOException
      */
     public void testGetXXportedKeysODBC() throws SQLException, IOException
     {
@@ -3126,7 +3224,18 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Execute a call to the ODBC system procedure "SQLFOREIGNKEYS"
      * and verify the results by comparing them with the results of
      * an equivalent JDBC call (if one exists).
+     *
+     * @param pCatalog
+     * @param pSchema
+     * @param pTable
+     * @param fCatalog
+     * @param fSchema
+     * @param fTable
+     *
+     * @throws java.sql.SQLException
+     * @throws java.io.IOException
      */
+
     private void checkODBCKeys(String pCatalog, String pSchema,
         String pTable, String fCatalog, String fSchema, String fTable)
         throws SQLException, IOException
@@ -3230,6 +3339,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Check the shape of the ResultSet from a call to the ODBC function
      * SQLForeignKeys.
+     *
+     * @param rs
+     * @throws java.sql.SQLException
      */
     private void checkODBCKeysShape(ResultSet rs) throws SQLException
     {
@@ -3471,7 +3583,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // test DERBY-2610 for fun; can't pass in null table name      
         try {
-            rs = getBestRowIdentifier(null,schema,null,
+            getBestRowIdentifier(null,schema,null,
             		DatabaseMetaData.bestRowTemporary,true);
         } catch (SQLException sqle) {
             assertSQLState( "XJ103", sqle);
@@ -3523,6 +3635,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Helper method for testing getBestRowIdentifier - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param scope
+     * @param nullable
+     * @return the result set of the query
+     *
      * @throws SQLException 
      */
     private ResultSet getBestRowIdentifierODBC(String catalog, String schema, 
@@ -3544,7 +3664,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getBestRowIdentifier - calls 
      * dmd.getBestRowIdentifier for the JDBC call, and getBestRowIdentifierODBC
+     *
      * for the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param scope
+     * @param nullable
+     * @return array of two result sets corresponding to JDBC and ODBC
+     *
      * @throws SQLException 
      */
     private ResultSet[] getBestRowIdentifier(String catalog, String schema, String table,
@@ -3594,19 +3722,17 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * helper method for test testGetBestRowIdentifier
      * @param rss - ResultSet array from getBestRowIdentifier;
      *     rss[0] will have the JDBC result, rss[1] the ODBC result
-     * @param expRS - bidimensional String array with expected result row(s)
+     * @param expRS - bi-dimensional String array with expected result row(s)
      * @throws SQLException 
      */
     public void verifyBRIResults(ResultSet[] rss, String[][] expRS) throws SQLException {      
         JDBC.assertFullResultSet(rss[0], expRS, true);
-        // JDBC does not use BUFFER_LENGTH column (6th), with ODBC
-        // in our queries the value is mostly 4
-        for (int  i = 0 ; i < expRS.length; i++) {
-            expRS[i][5] = "4";
+        for (String[] expRS1 : expRS) {
+            expRS1[5] = "4";
         }
         JDBC.assertFullResultSet(rss[1], expRS, true);
-        for (int  i = 0 ; i < expRS.length; i++) {
-            expRS[i][5] = null;
+        for (String[] expRS1 : expRS) {
+            expRS1[5] = null;
         }
     }
     
@@ -3648,6 +3774,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getColumnPrivileges - calls the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param columnNamePattern
+     * @return the result set of the query
      * @throws SQLException 
      */
     private ResultSet getColumnPrivilegesODBC(String catalog, String schema, 
@@ -3668,6 +3799,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getColumnPrivileges - calls dmd.getIndexInfo for the 
      * JDBC call, and getColumnPrivilegesODBC for the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param columnNamePattern
+     * @return array of two result sets corresponding to JDBC and ODBC
+     *
      * @throws SQLException 
      */
     private ResultSet[] getColumnPrivileges(String catalog, String schema, String table,
@@ -3718,6 +3856,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Helper method for testing getTablePrivileges - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param tableNamePattern
+     * @return the result set of the query
+     *
      * @throws SQLException 
      */
     private ResultSet getTablePrivilegesODBC(String catalog, String schema, 
@@ -3736,6 +3880,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getTablePrivileges - calls dmd.getIndexInfo for the 
      * JDBC call, and getTablePrivilegesODBC for the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param tableNamePattern
+     * @return array of two result sets corresponding to JDBC and ODBC
+     *
      * @throws SQLException 
      */
     private ResultSet[] getTablePrivileges(
@@ -3835,20 +3985,30 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.execute("create unique index iii on iit(i asc, j desc)");
         DatabaseMetaData dmd = getDMD();
         ResultSet rs = dmd.getIndexInfo("",schema,"IIT",false,false);
-        rs.next();
-        if (rs != null)
+        boolean more = rs.next();
+
+        if (more) {
             assertEquals("A",rs.getString(10));
-        rs.next();    
-        if (rs != null)
+        }
+
+        more = rs.next();
+
+        if (more) {
             assertEquals("D",rs.getString(10));
+        }
 
         rs = getIndexInfoODBC("",schema,"IIT",false,false);
-        rs.next();
-        if (rs != null)
+        more = rs.next();
+
+        if (more) {
             assertEquals("A",rs.getString(10));
-        rs.next();    
-        if (rs != null)
+        }
+
+        more = rs.next();
+
+        if (more) {
             assertEquals("D",rs.getString(10));
+        }
 
         st.execute("drop index iii");
         st.execute("drop table iit");
@@ -3858,6 +4018,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getIndexInfo - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param approximate
+     * @param unique
+     * @return the result set of the query
+     *
      * @throws SQLException 
      */
     private ResultSet getIndexInfoODBC(String catalog, String schema, 
@@ -3882,6 +4050,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getIndexInfo - calls dmd.getIndexInfo for the 
      * JDBC call, and getIndexInfoODBC for the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @param unique
+     * @param approximate
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
      * @throws SQLException 
      */
     private ResultSet[] getIndexInfo(String catalog, String schema, String table,
@@ -3919,9 +4094,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Helper method - unravles a ResultSet array created e.g. 
+     * Helper method - unravels a ResultSet array created e.g.
      * with this.getIndexInfo, i.e. Resultset[0] has the JDBC resultset
      * and ResultSet[1] the ODBC resultset
+     *
+     * @param rs
+     * @param expRS
+     * @param trim
+     *
      * @throws SQLException 
      */
     private void assertFullResultSet(
@@ -3929,6 +4109,24 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     {
         JDBC.assertFullResultSet(rs[0], expRS, trim);
         JDBC.assertFullResultSet(rs[1], expRS, trim);
+    }
+
+    /**
+     * Helper method - unravels a ResultSet array created e.g.
+     * with this.getIndexInfo, i.e. Resultset[0] has the JDBC resultset
+     * and ResultSet[1] the ODBC resultset
+     *
+     * @param rs
+     * @param expRS
+     * @param trim
+     *
+     * @throws SQLException
+     */
+    private void assertFullUnorderedResultSet(
+        ResultSet rs[], String[][] expRS, boolean trim) throws SQLException
+    {
+        JDBC.assertUnorderedResultSet(rs[0], expRS, trim);
+        JDBC.assertUnorderedResultSet(rs[1], expRS, trim);
     }
 
     /**
@@ -4049,6 +4247,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getPrimaryKeys - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return result set of the query
      * @throws SQLException 
      */
     private ResultSet getPrimaryKeysODBC(
@@ -4066,6 +4269,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getPrimaryKeys - calls dmd.getPrimaryKeys for
      * the JDBC call, and getPrimaryKeysODBC for the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
      * @throws SQLException 
      */
     private ResultSet[] getPrimaryKeys(
@@ -4114,7 +4322,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // try with valid search criteria
         // although, % may not actually be appropriate?
         ResultSet rs[] = getImportedKeys("", "%", "REFTAB");
-        assertFullResultSet(rs, expRS1, true);
+        assertFullUnorderedResultSet(rs, expRS1, true);
         rs = getImportedKeys("", "%", "REFTAB2");
         assertFullResultSet(rs, expRS2, true);
         
@@ -4304,6 +4512,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Helper method for testing getImportedKeys - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return result set of the query
+     *
      * @throws SQLException 
      */
     private ResultSet getImportedKeysODBC(
@@ -4321,6 +4535,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getImportedKeys - calls dmd.getImportedKeys for
      * the JDBC call, and getImportedKeysODBC for the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
      * @throws SQLException 
      */
     private ResultSet[] getImportedKeys(
@@ -4363,6 +4582,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getExportedKeys - calls the ODBC procedure
+     *
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return the result set of the query
+     *
      * @throws SQLException 
      */
     private ResultSet getExportedKeysODBC(
@@ -4380,6 +4605,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getExportedKeys - calls dmd.getExportedKeys for
      * the JDBC call, and getExportedKeysODBC for the ODBC procedure
+     * @param catalog
+     * @param schema
+     * @param table
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
      * @throws SQLException 
      */
     private ResultSet[] getExportedKeys(
@@ -4397,6 +4627,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getCrossReference - calls the ODBC procedure
+     * @param parentcatalog
+     * @param parentschema
+     * @param parenttable
+     * @param foreigncatalog
+     * @param foreignschema
+     * @param foreigntable
+     * @return the result set of the query
      * @throws SQLException 
      */
     private ResultSet getCrossReferenceODBC(
@@ -4420,6 +4657,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getCrossReference - calls dmd.getCrossReference for
      * the JDBC call, and getCrossReferenceODBC for the ODBC procedure
+     *
+     * @param parentcatalog
+     * @param parentschema
+     * @param parenttable
+     * @param foreigncatalog
+     * @param foreignschema
+     * @param foreigntable
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
+     *
      * @throws SQLException 
      */
     private ResultSet[] getCrossReference(
@@ -4553,7 +4800,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Further testing of these methods is done in lang/LangProcedureTest
      *
      * 
-     * @throws SQLexception
+     * @throws Exception
      */
     // Possible TODO: 
     //   rewrite data portion of this test to compare results from 
@@ -4696,7 +4943,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
             // JDBC variant has always null in column #15 (SQL_DATA_TYPE) and
             // column #16 (SQL_DATETIME_SUB)
-            Object[] jdbcRow = (Object[]) row.clone();
+            Object[] jdbcRow = row.clone();
             jdbcRow[14] = jdbcRow[15] = null;
 
             // ODBC variant lacks column #20 (SPECIFIC_NAME)...
@@ -4731,6 +4978,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Append one two-dimensional array to another.
+     * @param target
+     * @param suffix
+     * @return appended array
      */
     private Object[][] appendArray(Object[][] target, Object[][] suffix)
     {
@@ -4749,6 +4999,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getProcedures - calls the ODBC procedure
+     * @param catalog
+     * @param schemaPattern
+     * @param procedureNamePattern
+     * @return the result set of the query
      * @throws SQLException 
      */
     private ResultSet getProceduresODBC(
@@ -4767,6 +5021,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Helper method for testing getProcedures - calls dmd.getProcedures for
      * the JDBC call, and getProceduresODBC for the ODBC procedure
+     *
+     * @param catalog
+     * @param schemaPattern
+     * @param procedureNamePattern
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
+     *
      * @throws SQLException 
      */
     private ResultSet[] getProcedures(
@@ -4817,6 +5078,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Helper method for testing getProcedureColumns - calls the ODBC procedure
+     * @param catalog
+     * @param schemaPattern
+     * @param procedureNamePattern
+     * @param columnNamePattern
+     * @return the result set of the query
      * @throws SQLException 
      */
     private ResultSet getProcedureColumnsODBC(String catalog, 
@@ -4838,6 +5104,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getProcedureColumns - calls 
      * dmd.getProcedureColumns for the JDBC call, and 
      * getProcedureColumnssODBC for the ODBC procedure
+     * @param catalog
+     * @param schemaPattern
+     * @param procedureNamePattern
+     * @param columnNamePattern
+     * @return an array of two result sets corresponding to JDBC and ODBC
+     *         respectively
      * @throws SQLException 
      */
     private ResultSet[] getProcedureColumns(String catalog, 
@@ -4918,6 +5190,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Test DatabaseMetaData.getFunctionColumns()
+     *
+     * @throws java.lang.Exception
      */
     public void testGetFunctionColumns() throws Exception
     {
@@ -4954,9 +5228,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // vm whose DatabaseMetaData doesn't include this method, even though
         // our actual drivers do.
         Method gfcMethod = dmd.getClass().getMethod
-            ( "getFunctionColumns", new Class[] { String.class, String.class, String.class, String.class, } );
+            ( "getFunctionColumns", new Class<?>[] {
+                String.class, String.class, String.class, String.class, } );
         
-        ResultSet rs = (ResultSet) gfcMethod.invoke( dmd, new String[] { null, "%", "F_GFC_%", "%" } );
+        ResultSet rs = (ResultSet) gfcMethod.invoke(
+                dmd, (Object[])new String[] { null, "%", "F_GFC_%", "%" } );
 
         JDBC.GeneratedId genid = new JDBC.GeneratedId();
 
@@ -4997,6 +5273,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Convert an {@code int} to a {@code java.lang.Integer}.
+     * @param i
+     * @return an Integer
      */
     private static Integer i(int i) {
         return new Integer(i);
@@ -5004,6 +5282,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Test methods added by JDBC 4.1
+     *
+     * @throws java.lang.Exception
      */
     public void test_jdbc4_1() throws Exception
     {
@@ -5091,6 +5371,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Test methods added by JDBC 4.2
+     *
+     * @throws java.lang.Exception
      */
     public void test_jdbc4_2() throws Exception
     {
@@ -5160,6 +5442,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * getColumns() used to fail with a truncation error if an auto-increment
      * column had a start value or an increment that was very large (that is,
      * when its CHAR representation exceeded 12 characters). DERBY-5274.
+     *
+     * @throws java.sql.SQLException
      */
     public void testGetColumns_DERBY5274() throws SQLException {
         // Disable auto-commit to allow easy cleanup.
@@ -5190,9 +5474,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // Verify that the returned meta-data looks right.
         assertTrue("No columns found", rs.next());
-        for (int i = 0; i < expected.length; i++) {
-            String label = expected[i][0];
-            String expectedVal = expected[i][1];
+        for (String[] expected1 : expected) {
+            String label = expected1[0];
+            String expectedVal = expected1[1];
             assertEquals(label, expectedVal, rs.getString(label));
         }
 
@@ -5205,23 +5489,46 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     *  dummy method to test getProcedureColumns
+     * Dummy method to test getProcedureColumns
+     *
+     * @param a
+     * @param b
+     * @param k
+     * @param c
+     * @param e
+     * @param d
+     * @param f
+     * @param g
+     * @param j
+     * @param i
+     * @param l
+     * @param h
+     * @param T
+     * @return the {@code j} byte array
      */
-    public static byte[] getpc(String a, BigDecimal b, short c, byte d, short e, int f, long g, float h, double i, byte[] j, Date k, Time l, Timestamp T)
+    public static byte[] getpc(
+        String a, BigDecimal b, short c, byte d, short e,
+        int f, long g, float h, double i, byte[] j, Date k, Time l, Timestamp T)
     {
         return j;
     }
 
     /**
-     *  overload getpc to further test getProcedureColumns
+     * Overload getpc to further test getProcedureColumns
+     *
+     * @param a
+     * @param b
      */
     public static void getpc(int a, long[] b)
     {
     }
 
     /**
-     *  overload getpc to further test getProcedureColumns
-     *  private method shouldn't be returned with alias, ok with procedure
+     * Overload getpc to further test getProcedureColumns
+     * private method shouldn't be returned with alias, ok with procedure
+     *
+     * @param a
+     * @param b
      */
     private static void getpc(int a, long b)
     {
@@ -5231,6 +5538,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * instance method for getProcedureColumns testing
      * with method alias, this should not be returned by getProcedureColumns
      * but DB2 returns this with a java procedure
+     * @param a
+     * @param b
      */ 
     public void getpc(String a, String b) {
     }
@@ -5243,8 +5552,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
 
     /**
-     * check a method with no paramters and a return value works
+     * Check a method with no parameters and a return value works
      * for getProcedureColumns
+     *
+     * @return the int 4
      */
     public static int getpc4b() {
         return 4;
@@ -5253,6 +5564,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Reading of DatabaseMetaData obtained earlier, after a connection
      * is closed.
+     *
+     * @throws java.sql.SQLException
      */
     public void testDMDconnClosed() throws SQLException {
         ResultSet rs_ = getConnection().getMetaData().
@@ -5271,7 +5584,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * <p>
      * Get the version of the data in the database.
      * </p>
+     * @param conn the current connection
+     * @return data base version
+     * @throws java.lang.Exception
      */
+    @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch", "UseSpecificCatch"})
     private Version getDataVersion( Connection conn )
         throws Exception
     {
