@@ -1049,11 +1049,36 @@
     <mkdir dir="${public.api.dir}"/>
  
     <antcall target="publishedapi-workhorse">
-      <param name="bootClasspath" value="${java16compile.classpath}"/>
       <param name="extraApi" value="publishedapi_jdbc.ant"/>
     </antcall>
 
   </target>
+
+<!-- ==================================================================== -->
+<!--                     Download Java SE and J2EE's "package-list"s      -->
+<!-- ==================================================================== -->
+
+   <!-- You can override this property in local.properties to fetch from an alternative location -->
+   <property name="javasedoc.url" value="http://docs.oracle.com/javase/8/docs/api"/>
+   <property name="j2eedoc.url" value="http://docs.oracle.com/javaee/7/api"/>
+   <property name="javasedoc.local" value="packageListLoc-se-8"/>
+   <property name="j2eedoc.local" value="packageListLoc-j2ee-7"/>
+
+   <target name="packagelist_check">
+     <condition property="javadoc_local.exists">
+       <and>
+       <available file="${javasedoc.local}/package-list" property="javasedoc.exists"/>
+       <available file="${j2eedoc.local}/package-list" property="j2eedoc.exists"/>
+       </and>
+     </condition>
+   </target>
+
+   <target name="install_packagelists" depends="packagelist_check" unless="javadoc_local.exists" description="downloads Java SE and J2EE package lists to local cache">
+       <mkdir dir="${javasedoc.local}"/>
+       <mkdir dir="${j2eedoc.local}"/>
+       <get src="${javasedoc.url}/package-list" dest="${javasedoc.local}/" verbose="true" ignoreerrors="false"/>
+       <get src="${j2eedoc.url}/package-list" dest="${j2eedoc.local}/" verbose="true" ignoreerrors="false"/>
+   </target>
 
   <!--
     This target used to be called twice, once to build the JDBC3 public api
@@ -1068,7 +1093,7 @@
     folders ./packageListLoc-se-8 and ./packageListLoc-j2ee-7 instead
     to get a correct build.
   -->
-  <target name="publishedapi-workhorse" depends="initjars,set-doclint">
+  <target name="publishedapi-workhorse" depends="initjars,set-doclint,install_packagelists">
  
     <!--  Only include the files we want customers to see.  -->
     <mkdir dir="${javadoc.temp.dir}"/>
@@ -1092,12 +1117,10 @@
              Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
       <Doctitle> Apache Derby ${major}.${minor} API Documentation</Doctitle>   
-      <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/"
-                         packagelistLoc="packageListLoc-se-8" />
-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
-      <link offline="true" href="http://docs.oracle.com/javaee/7/api/"
-                     packagelistLoc="packageListLoc-j2ee-7" />
-      <link href="http://docs.oracle.com/javaee/7/api/"/>
+      <link offline="true" href="${javasedoc.url}"
+                         packagelistLoc="${javasedoc.local}" />
+      <link offline="true" href="${j2eedoc.url}"
+                     packagelistLoc="${j2eedoc.local}" />
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
