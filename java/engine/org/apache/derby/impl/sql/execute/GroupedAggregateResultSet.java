@@ -121,7 +121,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	private boolean resultsComplete;
 	private List<ExecRow> finishedResults;
 	private ExecIndexRow[]			resultRows;
-    private List<List<Set<String>>> distinctValues;
+    private List<List<Set<DataValueDescriptor>>> distinctValues;
 
 	private boolean rollup;
 	private boolean usingAggregateObserver = false;
@@ -239,8 +239,8 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 				resultRows = new ExecIndexRow[1];
 			if (aggInfoList.hasDistinct())
             {
-                distinctValues =
-                        new ArrayList<List<Set<String>>>(resultRows.length);
+                distinctValues = new ArrayList<List<Set<DataValueDescriptor>>>(
+                        resultRows.length);
             }
 			for (int r = 0; r < resultRows.length; r++)
 			{
@@ -249,8 +249,8 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 				initializeVectorAggregation(resultRows[r]);
 				if (aggInfoList.hasDistinct())
                 {
-                    distinctValues.add(
-                            new ArrayList<Set<String>>(aggregates.length));
+                    distinctValues.add(new ArrayList<Set<DataValueDescriptor>>(
+                            aggregates.length));
                     initializeDistinctMaps(r, true);
                 }
 			}
@@ -762,12 +762,24 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
             AggregatorInfo aInfo = aggInfoList.elementAt(i);
 			if (aInfo.isDistinct())
 			{
+                if (SanityManager.DEBUG) {
+                    // Distinct aggregates currently always use the sorter.
+                    // Assert that it is so.
+                    SanityManager.ASSERT(!isInSortedOrder);
+                    SanityManager.ASSERT(scanController != null);
+
+                    // If we ever start reading directly from the source
+                    // result set, we should call source.needsToClone() to
+                    // check if we need to clone the value before adding it
+                    // to the set of distinct values. Don't clone it for now.
+                }
+
 				DataValueDescriptor newValue = currAggregate.getInputColumnValue(newRow);
 				// A NULL value is always distinct, so we only
 				// have to check for duplicate values for
 				// non-NULL values.
-                String str = newValue.getString();
-                if (str != null && !distinctValues.get(level).get(i).add(str))
+                if (!newValue.isNull()
+                        && !distinctValues.get(level).get(i).add(newValue))
 				{
                     // The value was already in the set, and we only look
                     // for distinct values. Skip this value.
@@ -792,44 +804,18 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
                 // Otherwise, insert null so that the list is of the right
                 // size and the indexes match those in aggregates[].
                 distinctValues.get(r).add(aInfo.isDistinct() ?
-                        new HashSet<String>() : null);
+                        new HashSet<DataValueDescriptor>() : null);
             }
 
 			if (aInfo.isDistinct())
 			{
-                Set<String> set = distinctValues.get(r).get(a);
+                Set<DataValueDescriptor> set = distinctValues.get(r).get(a);
                 set.clear();
 				DataValueDescriptor newValue =
 					aggregates[a].getInputColumnValue(resultRows[r]);
-                set.add(newValue.getString());
+                set.add(newValue);
 			}
 		}
 	}
 
-        private void dumpAllRows(int cR)
-            throws StandardException
-        {
-            System.out.println("dumpAllRows("+cR+"/"+resultRows.length+"):");
-            for (int r = 0; r < resultRows.length; r++)
-                System.out.println(dumpRow(resultRows[r]));
-        }
-	private String dumpRow(ExecRow r)
-		throws StandardException
-	{
-            if (r == null)
-                return "<NULL ROW>";
-        StringBuilder buf = new StringBuilder();
-	    int nCols = r.nColumns();
-	    for (int d = 0; d < nCols; d++)
-	    {
-		if (d > 0) buf.append(",");
-                DataValueDescriptor o = r.getColumn(d+1);
-                buf.append(o.getString());
-                if (o instanceof ExecAggregator)
-                    buf.append("[").
-                        append(((ExecAggregator)o).getResult().getString()).
-                        append("]");
-	    }
-	    return buf.toString();
-	}
 }

@@ -76,6 +76,7 @@ public class CollationTest extends BaseJDBCTestCase {
     private final static String[] ENGLISH_CASE_INSENSITIVE = {
         "testUsingClauseAndNaturalJoin",
         "testNullColumnInInsert",
+        "testDerby6227",
     };
 
     /** Test cases to run with Norwegian case-sensitive collation. */
@@ -2263,5 +2264,30 @@ public void testMissingCollatorSupport() throws SQLException {
                 "select * from d6030 where x like y escape '\u00df'");
         assertStatementError(INVALID_ESCAPE, s,
                 "select * from d6030 where x like y escape 'aa'");
+    }
+
+    /**
+     * Regression test case for DERBY-6227. Distinct grouped aggregates used
+     * to eliminate duplicates by comparing the string representation of the
+     * values using {@code String.equals()}. That does not give the right
+     * results if the database collation defines equality in a different way
+     * than {@code String.equals()}, for example when running with case
+     * insensitive collation ({@code collation=TERRITORY_BASED:PRIMARY}).
+     */
+    public void testDerby6227() throws SQLException {
+        String sql = "select i, count(distinct s) "
+                + "from (values (1, 'a'), (1, 'a'), (2, 'b'), (2, 'B'), "
+                + "(3, 'a'), (3, 'A'), (3, 'b'), (3, 'B'), (3, 'c')) v(i, s) "
+                + "group by i order by i";
+
+        // These are the expected results of the query when running with
+        // case-insensitive collation. Before the fix, the query would return
+        // (1, 1), (2, 2), (3, 5).
+        String[][] expectedRows = {
+            { "1", "1" }, { "2", "1" }, { "3", "3" }
+        };
+
+        Statement s = createStatement();
+        JDBC.assertFullResultSet(s.executeQuery(sql), expectedRows);
     }
 }
