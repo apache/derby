@@ -21,14 +21,8 @@
 
 package org.apache.derby.client.am;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
@@ -675,42 +669,6 @@ public class LogWriter {
         Version.writeDriverConfiguration(printWriter_);
     }
 
-    public static PrintWriter getPrintWriter(
-            final String fileName,
-            final boolean fileAppend) throws SqlException {
-
-        PrintWriter printWriter = null;
-        //Using an anonymous class to deal with the PrintWriter because the  
-        //method java.security.AccessController.doPrivileged requires an 
-        //instance of a class(which implements 
-        //java.security.PrivilegedExceptionAction). Since getPrintWriter method
-        //is static, we can't simply pass "this" to doPrivileged method and 
-        //have LogWriter implement PrivilegedExceptionAction.
-        //To get around the static nature of method getPrintWriter, have an
-        //anonymous class implement PrivilegedExceptionAction. That class will 
-        //do the work related to PrintWriter in it's run method and return 
-        //PrintWriter object.
-        try {
-            printWriter = AccessController.doPrivileged(
-                new PrivilegedExceptionAction<PrintWriter>(){
-                    public PrintWriter run() throws IOException {
-                        String fileCanonicalPath =
-                            new File(fileName).getCanonicalPath();
-                        return new PrintWriter(
-                                new BufferedOutputStream(
-                                        new FileOutputStream(
-                                                fileCanonicalPath, fileAppend), 4096), true);
-                        }
-                    });
-        } catch (PrivilegedActionException pae) {
-            throw new SqlException(null, 
-                new ClientMessageId(SQLState.UNABLE_TO_OPEN_FILE),
-                new Object[] { fileName, pae.getMessage() },
-                pae);
-        }
-        return printWriter;
-    }
-    
     /**
      * Obtain a set of Properties for the client data source.
      */
