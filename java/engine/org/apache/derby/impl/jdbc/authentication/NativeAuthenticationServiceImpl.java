@@ -447,14 +447,6 @@ public final class NativeAuthenticationServiceImpl
         // If we get here, then we successfully connected to the credentials database. Hooray.
         return true;
     }
-    /** Call a setter method on a DataSource via reflection */
-    private void callDataSourceSetter( DataSource ds, String methodName, String value )
-        throws StandardException
-    {
-        try {
-            ds.getClass().getMethod( methodName, new Class[] { String.class } ).invoke( ds, new Object[] { value } );
-        } catch (Exception e)  { throw wrap( e ); }   
-    }
     private StandardException wrap( Throwable t )   { return StandardException.plainWrapException( t ); }
     
     ///////////////////////////////////////////////////////////////////////////////////
