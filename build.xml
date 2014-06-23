@@ -2125,7 +2125,6 @@
      <antcall target="appendnotice"><param name="sourcefile" value="nisttestgrant.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="jdbcstubs.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="felix.txt"/></antcall>
-     <antcall target="appendnotice"><param name="sourcefile" value="xalan.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="lucene.txt"/></antcall>
      
       <antcall target="checkinfile">

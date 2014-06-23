@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
-import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
@@ -44,7 +43,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
-import java.lang.reflect.Method;
 
 import java.util.List;
 
@@ -830,7 +828,7 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR,
+                SQLState.LANG_XML_QUERY_ERROR, xe,
                 "XMLEXISTS", xe.getMessage());
         }
     }
@@ -903,7 +901,7 @@ public class XML
          * fail but Derby will continue to run as normal. 
          */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR,
+                SQLState.LANG_XML_QUERY_ERROR, xe,
                 "XMLQUERY", xe.getMessage());
         }
     }
@@ -983,7 +981,7 @@ public class XML
         {
             xmlReqCheck = "";
 
-            /* If the w3c Document class exists, then we
+            /* If the DocumentBuilderFactory class exists, then we
              * assume a JAXP implementation is present in
              * the classpath.  If this assumption is incorrect
              * then we at least know that the JAXP *interface*
@@ -997,21 +995,16 @@ public class XML
              * provided as part the JVM if it is jdk 1.4 or
              * greater.
              */
-            Object docImpl = checkJAXPRequirement();
-            if (docImpl == null)
+            if (!checkJAXPRequirement()) {
                 xmlReqCheck = "JAXP";
+            }
 
-            /* If the XPath class exists, then we assume that our XML
-             * query processor (in this case, Xalan), is present in the
-             * classpath.  Note: if JAXP API classes aren't present
-             * then the following check will return false even if the
-             * Xalan classes *are* present; this is because the Xalan
-             * XPath class relies on JAXP, as well.  Thus there's no
-             * point in checking for Xalan unless we've already confirmed
-             * that we have the JAXP interfaces.
+            /* If the XPathFactory class exists, then we assume that
+             * our XML query processor is present in the classpath.
              */
-            else if (!checkXPathRequirement(docImpl))
-                xmlReqCheck = "XPath 3.0";
+            else if (!checkXPathRequirement()) {
+                xmlReqCheck = "XPath";
+            }
         }
 
         if (xmlReqCheck.length() != 0)
@@ -1019,63 +1012,36 @@ public class XML
             throw StandardException.newException(
                 SQLState.LANG_MISSING_XML_CLASSES, xmlReqCheck);
         }
-
-        return;
     }
 
     /**
      * Check if we have a JAXP implementation installed.
      *
-     * @return a {@code DOMImplementation} object retrieved from the
-     * JAXP implementation, if one is installed, or {@code null} if an
-     * implementation couldn't be found
+     * @return {@code true} if JAXP is installed, or {@code false} otherwise
      */
-    private static Object checkJAXPRequirement() {
+    private static boolean checkJAXPRequirement() {
         try {
-            Class<?> factoryClass =
-                    Class.forName("javax.xml.parsers.DocumentBuilderFactory");
-            Method newFactory = factoryClass.getMethod(
-                    "newInstance", new Class[0]);
-            Method newBuilder = factoryClass.getMethod(
-                    "newDocumentBuilder", new Class[0]);
-
-            Class<?> builderClass =
-                    Class.forName("javax.xml.parsers.DocumentBuilder");
-            Method getImpl = builderClass.getMethod(
-                    "getDOMImplementation", new Class[0]);
-
-            Object factory = newFactory.invoke(null, new Object[0]);
-            Object builder = newBuilder.invoke(factory, new Object[0]);
-            Object impl = getImpl.invoke(builder, new Object[0]);
-
-            return impl;
-
+            Class.forName("javax.xml.parsers.DocumentBuilderFactory");
+            return true;
         } catch (Throwable t) {
-            // Oops... Couldn't get a DOMImplementation object for
+            // Oops... Couldn't load the DocumentBuilderFactory class for
             // some reason. Assume we don't have JAXP.
-            return null;
+            return false;
         }
     }
 
     /**
-     * Check if the supplied {@code DOMImplementation} object has
-     * support for DOM Level 3 XPath.
+     * Check if XPath is supported on this platform.
      *
-     * @param domImpl the {@code DOMImplementation} instance to check
-     * @return {@code true} if the required XPath level is supported,
-     * {@code false} otherwise
+     * @return {@code true} if XPath is supported, or {@code false} otherwise
      */
-    private static boolean checkXPathRequirement(Object domImpl) {
+    private static boolean checkXPathRequirement() {
         try {
-            Class<?> domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
-            Method getFeature = domImplClass.getMethod(
-                    "getFeature", new Class[] {String.class, String.class});
-            Object impl =
-                    getFeature.invoke(domImpl, new Object[] {"+XPath", "3.0"});
-            return impl != null;
+            Class.forName("javax.xml.xpath.XPathFactory");
+            return true;
         } catch (Throwable t) {
             // Oops... Something went wrong when checking for XPath
-            // 3.0 support. Assume we don't have it.
+            // support. Assume we don't have it.
             return false;
         }
     }

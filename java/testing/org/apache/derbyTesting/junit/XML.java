@@ -35,37 +35,6 @@ import junit.framework.Assert;
  * <p>
  * XML utility methods for the JUnit tests.
  * </p>
- *
- * <p>
- * Note that The XML tests require a more advanced version of Xalan
- * than the default version bundled with JDK 1.4. The XML tests silently
- * exit if the required environment is not found.
- * </p>
- *
- * <p>
- * To run the XML tests under JDK 1.4, you must do the following:
- * </p>
- *
- * <ul>
- * <li>Download the latest version of Xalan (2.7.0 as of this writing).</li>
- * <li>Copy all of the downloaded jars into the jre/lib/endorsed directory
- * of your JDK 1.4 installation. Those jar files are:
- * serializer.jar, xalan.jar, xercesImpl.jar, and xsltc.jar.</li>
- * </ul>
- *
- * <p>
- *That's it! Now the XML tests should run for you under JDK 1.4.
- * </p>
- *
- * <p>
- * To run the XML tests under a higher version of the JDK, you must do the
- * following:
- * </p>
- *
- * <ul>
- * <li>Download the latest version of Xalan as described above.</li>
- * <li>Wire the downloaded jar files into your CLASSPATH.</li>
- * </ul>
  */
 public class XML {
 
@@ -85,10 +54,9 @@ public class XML {
             HAVE_JAXP && checkJAXPImplementation();
 
     /**
-     * Determine if we have support for DOM level 3 XPath, which is required
-     * for successful use of the XML operators.
+     * Determine if we have support evaluating XPath queries.
      */
-    private static final boolean HAVE_XPATH_LEVEL_3
+    private static final boolean HAVE_XPATH
             = HAVE_JAXP_IMPL && checkXPathSupport();
 
     /**
@@ -102,7 +70,7 @@ public class XML {
      * Return true if the classpath contains JAXP and
      * an implementation of the JAXP interfaces, for example the
      * Xalan classes (this method doesn't care about
-     * support for DOM level 3 XPath).
+     * support for XPath queries).
      */
     public static boolean classpathHasJAXP()
     {
@@ -111,13 +79,11 @@ public class XML {
 
     /**
      * Return true if the classpath meets all of the requirements
-     * for use of the SQL/XML operators.  This means that all
-     * required classes exist in the classpath AND there is support
-     * for DOM level 3 XPath.
+     * for use of the SQL/XML operators.
      */
     public static boolean classpathMeetsXMLReqs()
     {
-        return HAVE_XPATH_LEVEL_3;
+        return HAVE_XPATH;
     }
 
     /**
@@ -247,7 +213,7 @@ public class XML {
      * <p>
      * Determine whether or not the classpath with which we're
      * running contains a JAXP implementation that supports
-     * DOM level 3 XPath.
+     * evaluating XPath queries.
      * </p>
      *
      * <p>
@@ -257,54 +223,22 @@ public class XML {
      */
     private static boolean checkXPathSupport()
     {
-        boolean supportsXPath;
-
-        // Invoke the following using reflection to see if we have support
-        // for DOM level 3 XPath:
-        //
-        //     DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        //             .getDOMImplementation().getFeature("+XPath", "3.0");
-        //
         try {
             Class<?> factoryClass =
-                    Class.forName("javax.xml.parsers.DocumentBuilderFactory");
+                    Class.forName("javax.xml.xpath.XPathFactory");
 
             Method newFactory =
-                    factoryClass.getMethod("newInstance", new Class[0]);
+                    factoryClass.getMethod("newInstance");
 
-            Object factory = newFactory.invoke(null, new Object[0]);
+            Object factory = newFactory.invoke(null);
 
-            Method newBuilder = factoryClass.getMethod(
-                    "newDocumentBuilder", new Class[0]);
-
-            Object builder = newBuilder.invoke(factory, new Object[0]);
-
-            Class<?> builderClass =
-                    Class.forName("javax.xml.parsers.DocumentBuilder");
-
-            Method getImpl = builderClass.getMethod(
-                    "getDOMImplementation", new Class[0]);
-
-            Object impl = getImpl.invoke(builder, new Object[0]);
-
-            Class<?> domImplClass =
-                    Class.forName("org.w3c.dom.DOMImplementation");
-
-            Method getFeature = domImplClass.getMethod(
-                    "getFeature", new Class[] {String.class, String.class});
-
-            Object ret =
-                    getFeature.invoke(impl, new Object[] {"+XPath", "3.0"});
-
-            supportsXPath = (ret != null);
+            return factory != null;
 
         } catch (Throwable t) {
             // If something went wrong, assume we don't have the
             // necessary classes.
-            supportsXPath = false;
+            return false;
         }
-
-        return supportsXPath;
     }
 
     private static boolean checkJAXPImplementation() {

@@ -28,28 +28,29 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import java.io.IOException;
 import java.io.StringReader;
-
-import java.math.BigDecimal;
 
 // -- JDBC 3.0 JAXP API classes.
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
-
-import org.w3c.dom.xpath.XPathEvaluator;
-import org.w3c.dom.xpath.XPathExpression;
-import org.w3c.dom.xpath.XPathResult;
 
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import javax.xml.XMLConstants;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,6 +62,12 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * This class contains "utility" methods that work with XML-specific
@@ -115,9 +122,11 @@ public class SqlXmlUtil
     // XML serialization rules.
     private Transformer serializer;
 
-    // Classes used to compile and execute an XPath expression
-    // against Xalan.
+    /** The compiled XPath query. */
     private XPathExpression query;
+
+    /** The return type of the XPath query. {@code null} if it is unknown. */
+    private QName returnType;
 
     // Used to recompile the XPath expression when this formatable
     // object is reconstructed.  e.g.:  SPS 
@@ -247,15 +256,15 @@ public class SqlXmlUtil
 
             /* The following XPath constructor compiles the expression
              * as part of the construction process.  We pass a null
-             * namespace resolver object so that the implementation will
-             * provide one for us, which means prefixes will not be resolved
+             * namespace context object so that prefixes will not be resolved
              * in the query (Xalan will just throw an error if a prefix
              * is used).  In the future we may want to revisit this
              * to make it easier for users to query based on namespaces.
              */
-            XPathEvaluator eval = (XPathEvaluator)
-                dBuilder.getDOMImplementation().getFeature("+XPath", "3.0");
-            query = eval.createExpression(queryExpr, null);
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            xpath.setNamespaceContext(NullNamespaceContext.SINGLETON);
+
+            query = xpath.compile(queryExpr);
 
             this.queryExpr = queryExpr;
             this.opName = opName;
@@ -571,72 +580,43 @@ public class SqlXmlUtil
                 (returnResults ? "XMLQUERY" : "XMLEXISTS"));
         } 
 
-        Document docNode = null;
-        docNode = dBuilder.parse(
+        Document docNode = dBuilder.parse(
             new InputSource(
                 new StringReader(xmlContext.getString())));
 
-        // Evaluate the expresion using Xalan.
-        XPathResult result = (XPathResult)
-                query.evaluate(docNode, XPathResult.ANY_TYPE, null);
+        Object result = evaluate(docNode);
 
         if (!returnResults)
         {
+            // This is for XMLEXISTS.
+            //
             // We don't want to return the actual results, we just
             // want to know if there was at least one item in the
             // result sequence.
-            switch (result.getResultType()) {
-                case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
-                case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-                    if (result.iterateNext() == null) {
-                        // We have an empty sequence, so return null.
-                        return null;
-                    } else {
-                        // We have a non-empty sequence, so return a non-null
-                        // list to indicate that we found at least one item.
-                        return Collections.EMPTY_LIST;
-                    }
-                default:
-                    // We have a single atomic value, which means the result is
-                    // non-empty. So return a non-null list.
-                    return Collections.EMPTY_LIST;
+            if (result instanceof NodeList
+                    && ((NodeList) result).getLength() == 0) {
+                // We have an empty sequence, so return null to indicate
+                // there were no results from the query.
+                return null;
+            } else {
+                // We have either a non-empty sequence or a scalar, so
+                // return a non-null value to indicate that we found at
+                // least one item.
+                return Collections.emptyList();
             }
         }
 
         // Else process the results.
         List itemRefs;
-        switch (result.getResultType()) {
-            case XPathResult.NUMBER_TYPE:
-                // Single atomic number. Get its string value.
-                String val = numberToString(result.getNumberValue());
-                itemRefs = Collections.singletonList(val);
-                break;
-            case XPathResult.STRING_TYPE:
-                // Single atomic string value.
-                itemRefs = Collections.singletonList(result.getStringValue());
-                break;
-            case XPathResult.BOOLEAN_TYPE:
-                // Single atomic boolean. Get its string value.
-                itemRefs = Collections.singletonList(
-                        String.valueOf(result.getBooleanValue()));
-                break;
-            case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
-            case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-                // We have a sequence. Get all nodes.
-                ArrayList<Node> nodes = new ArrayList<Node>();
-                Node node;
-                while ((node = result.iterateNext()) != null) {
-                    nodes.add(node);
-                }
-                itemRefs = nodes;
-                break;
-            default:
-                if (SanityManager.DEBUG) {
-                    SanityManager.THROWASSERT(
-                            "Don't know how to handle XPath result type " +
-                            result.getResultType());
-                }
-                itemRefs = null;
+        if (result instanceof NodeList) {
+            NodeList list = (NodeList) result;
+            ArrayList<Node> nodes = new ArrayList<Node>();
+            for (int i = 0; i < list.getLength(); i++) {
+                nodes.add(list.item(i));
+            }
+            itemRefs = nodes;
+        } else {
+            itemRefs = Collections.singletonList(result);
         }
 
         /* Indicate what kind of XML result value we have.  If
@@ -656,6 +636,32 @@ public class SqlXmlUtil
     /* ****
      * Helper classes and methods.
      * */
+
+    /**
+     * Evaluate the XPath query on the specified document.
+     */
+    private Object evaluate(Document doc) throws XPathExpressionException {
+
+        // If we know the return type, just evaluate the expression with
+        // that type.
+        if (returnType != null) {
+            return query.evaluate(doc, returnType);
+        }
+
+        // Otherwise, first try to evaluate the expression as if it returned
+        // a set of nodes. If that fails, evaluate it as if it returned a
+        // string. Remember which type was successful so that we can use that
+        // type directly the next time we evaluate the expression.
+        try {
+            Object result = query.evaluate(doc, XPathConstants.NODESET);
+            returnType = XPathConstants.NODESET;
+            return result;
+        } catch (XPathExpressionException xpee) {
+            Object result = query.evaluate(doc, XPathConstants.STRING);
+            returnType = XPathConstants.STRING;
+            return result;
+        }
+    }
 
     /**
      * Create an instance of Xalan serializer for the sake of
@@ -704,35 +710,6 @@ public class SqlXmlUtil
         // Load the serializer with the correct properties.
         serializer = TransformerFactory.newInstance().newTransformer();
         serializer.setOutputProperties(props);
-        return;
-    }
-
-    /**
-     * Convert a number returned by an XPath query to a string, following the
-     * rules for the <a href="http://www.w3.org/TR/xpath/#function-string">
-     * XPath string function</a>.
-     *
-     * @param d {@code double} representation of the number
-     * @return {@code String} representation of the number
-     */
-    private static String numberToString(double d) {
-        if (Double.isNaN(d) || Double.isInfinite(d)) {
-            // BigDecimal doesn't know how to handle NaN or +/- infinity, so
-            // use Double to handle those cases.
-            return Double.toString(d);
-        } else if (d == 0.0d) {
-            // If the result is zero, return plain "0". This special case is
-            // needed because BigDecimal.stripTrailingZeros() does not remove
-            // trailing zeros from zero, and will end up producing "0.0", see
-            // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6480539
-            return "0";
-        } else {
-            // Otherwise, use BigDecimal to format the number the way we want.
-            // We could have used Double to format it, but then the resulting
-            // string would have been in scientific format (like 1.0e-3), and
-            // we want it to be in plain format (like 0.001).
-            return BigDecimal.valueOf(d).stripTrailingZeros().toPlainString();
-        }
     }
 
     /*
@@ -758,6 +735,30 @@ public class SqlXmlUtil
             throws SAXException
         {
             throw new SAXException (exception);
+        }
+    }
+
+    /**
+     * A NamespaceContext that reports all namespaces as unbound.
+     */
+    private static class NullNamespaceContext implements NamespaceContext {
+
+        private final static NullNamespaceContext
+                SINGLETON = new NullNamespaceContext();
+
+        @Override
+        public String getNamespaceURI(String prefix) {
+            return XMLConstants.NULL_NS_URI;
+        }
+
+        @Override
+        public String getPrefix(String namespaceURI) {
+            return null;
+        }
+
+        @Override
+        public Iterator getPrefixes(String namespaceURI) {
+            return Collections.emptyList().iterator();
         }
     }
 }

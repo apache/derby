@@ -35,31 +35,6 @@
 <!-- Targets -->
 
   <target name="compile_types">
-    <!--
-        Compile SqlXmlUtil separately because it uses some XML
-        interfaces that are not part of the Java SE specification, and
-        requires xml-apis.jar on the compile classpath.
-    -->
-    <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${xmlApis};${java16compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
-      <compilerarg value="-Xlint:unchecked"/>
-    </javac>
-
     <javac
       source="1.6"
       target="1.6"
@@ -77,7 +52,6 @@
         <pathelement path="${java16compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/types/*.java"/>
-      <exclude name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
