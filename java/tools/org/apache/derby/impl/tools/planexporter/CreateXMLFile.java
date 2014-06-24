@@ -21,14 +21,8 @@
 
 package org.apache.derby.impl.tools.planexporter;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 
 /**
  * This class is to create the final xml file, that will be used
@@ -46,15 +40,12 @@ public class CreateXMLFile {
     /**
      * @param stmt statement executed
      * @param time time which the statement was executed
-     * @param data large xml data string array
-     * @param file_name name of the file to be written
+     * @param out where to write the XML file
      * @param xsl_sheet_name name of the style sheet
-     * @throws PrivilegedActionException
      * @throws IOException
-     * @throws PrivilegedActionException
      */
     public void writeTheXMLFile(String stmt, String time,
-            TreeNode[] data, final String file_name, String xsl_sheet_name)
+                                Writer out, String xsl_sheet_name)
     throws IOException {
 
         String defaultXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -67,20 +58,6 @@ public class CreateXMLFile {
         String parentTagEnd = "</plan>\n";
         String childTagStart = "<details>\n";
         String childTagEnd = "</details>\n";
-
-        FileOutputStream fos;
-        try {
-            fos = AccessController.doPrivileged(
-                    new PrivilegedExceptionAction<FileOutputStream>() {
-                        public FileOutputStream run() throws IOException {
-                            return new FileOutputStream(file_name);
-                        }
-                    });
-        } catch (PrivilegedActionException pae) {
-            throw (IOException) pae.getCause();
-        }
-
-        Writer out = new BufferedWriter(new OutputStreamWriter(fos, "UTF-8"));
 
         out.write(defaultXML);
 
@@ -106,6 +83,5 @@ public class CreateXMLFile {
         out.write(childTagEnd);
 
         out.write(parentTagEnd);
-        out.close();
     }
 }

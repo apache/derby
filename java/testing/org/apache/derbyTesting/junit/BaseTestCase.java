@@ -257,7 +257,7 @@ public abstract class BaseTestCase
      *
      * @param out the new stream
      */
-    protected void setSystemOut(final PrintStream out) {
+    protected static void setSystemOut(final PrintStream out) {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 System.setOut(out);
@@ -271,7 +271,7 @@ public abstract class BaseTestCase
      *
      * @param err the new stream
      */
-    protected void setSystemErr(final PrintStream err) {
+    protected static void setSystemErr(final PrintStream err) {
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
             public Void run() {
                 System.setErr(err);
