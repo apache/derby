@@ -90,7 +90,7 @@ import java.io.FileNotFoundException;
 **/
 
 
-public class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Object>
+class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Object>
 {
 
     /**************************************************************************
