@@ -278,7 +278,7 @@ public class SqlXmlUtil
              * continue to run as normal. 
              */
             throw StandardException.newException(
-                SQLState.LANG_XML_QUERY_ERROR, opName, te.getMessage());
+                SQLState.LANG_XML_QUERY_ERROR, te, opName, te.getMessage());
 
         }
     }
@@ -640,7 +640,12 @@ public class SqlXmlUtil
             Object result = query.evaluate(doc, XPathConstants.NODESET);
             returnType = XPathConstants.NODESET;
             return result;
-        } catch (XPathExpressionException xpee) {
+        } catch (Exception xpee) {
+            // Retry with the string type if an XPathExpressionException is
+            // thrown. The catch block is broader and retries on all kinds of
+            // exceptions. The reason is that IBM fails with a runtime
+            // exception that shadows the XPathExpressionException, if a
+            // security manager is installed. See DERBY-6637 for details.
             Object result = query.evaluate(doc, XPathConstants.STRING);
             returnType = XPathConstants.STRING;
             return result;
