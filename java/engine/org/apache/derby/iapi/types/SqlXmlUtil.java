@@ -128,12 +128,6 @@ public class SqlXmlUtil
     /** The return type of the XPath query. {@code null} if it is unknown. */
     private QName returnType;
 
-    // Used to recompile the XPath expression when this formatable
-    // object is reconstructed.  e.g.:  SPS 
-    private String queryExpr;
-    private String opName;
-    private boolean recompileQuery;
-
     /**
      * Constructor: Initializes objects required for parsing
      * and serializing XML values.  Since most XML operations
@@ -265,10 +259,6 @@ public class SqlXmlUtil
             xpath.setNamespaceContext(NullNamespaceContext.SINGLETON);
 
             query = xpath.compile(queryExpr);
-
-            this.queryExpr = queryExpr;
-            this.opName = opName;
-            this.recompileQuery = false;
 
         } catch (Throwable te) {
 
@@ -552,12 +542,6 @@ public class SqlXmlUtil
     protected List evalXQExpression(XMLDataValue xmlContext,
         boolean returnResults, int [] resultXType) throws Exception
     {
-        // if this object is in an SPS, we need to recompile the query
-        if (recompileQuery)
-        {
-        	compileXQExpr(queryExpr, opName);
-        }
-
         // Make sure we have a compiled query.
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
