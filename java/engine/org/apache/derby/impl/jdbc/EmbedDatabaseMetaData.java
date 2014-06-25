@@ -2185,7 +2185,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				return ps.executeQuery();
 			}
 	
-			// get the unique constraint with the fewest columns.
+            // Get the unique constraint with the fewest columns.
+            // If there is a tie, i.e. there is more than one unique constraint
+            // with the same number of columns involved, we chose the one
+            // that's ordered first, cf. the query text in metadata.properties
+            // (DERBY-6623)..
 			ps = getPreparedQuery("getBestRowIdentifierUniqueConstraint");
 			ps.setString(1,catalogPattern);
 			ps.setString(2,schemaPattern);

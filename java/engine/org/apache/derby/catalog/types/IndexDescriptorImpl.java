@@ -259,7 +259,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 
 	public String toString()
 	{
-		StringBuffer	sb = new StringBuffer(60);
+        StringBuilder   sb = new StringBuilder(60);
 
         if (isUnique || isUniqueDeferrable)
 			sb.append("UNIQUE ");

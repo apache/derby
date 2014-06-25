@@ -3479,11 +3479,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         		DatabaseMetaData.bestRowTemporary, true);
         verifyBRIResults(rs, expRSI);
 
-        // result: column j
+        // result: column i (j is equally good but its index descriptor
+        // sorts after i: DERBY-6623)
         rs = getBestRowIdentifier(null,schema,"BRIT3",
         		DatabaseMetaData.bestRowTemporary,true);
-        verifyBRIResults(rs, expRSJ);
-        
+        verifyBRIResults(rs, expRSI);
         // result: column i
         rs = getBestRowIdentifier(null,schema,"BRIT4",
         		DatabaseMetaData.bestRowTemporary,true);
