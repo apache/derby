@@ -1481,6 +1481,27 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
+        // If the query returns an atomic value (not a sequence), the XMLEXISTS
+        // operator should return TRUE.
+
+        expRS = new String[][] {
+            { "true" },
+            { "true" },
+            { "true" },
+            { "true" },
+            { "true" },
+        };
+
+        JDBC.assertFullResultSet(
+            st.executeQuery(
+                "select xmlexists('1+1' passing by ref x) from xqExists3"),
+            expRS);
+
+        JDBC.assertFullResultSet(
+            st.executeQuery(
+                "select xmlexists('1=2' passing by ref x) from xqExists3"),
+            expRS);
+
         // Cleanup.
 
         st.executeUpdate("drop table xqExists1");
@@ -2674,6 +2695,9 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             { "0 div 0", "NaN" },
             { "3.14 div 0", "Infinity" },
             { "-3.14 div 0", "-Infinity" },
+            // Not strictly numeric, but let's test boolean too
+            { "1=1", "true" },
+            { "1=2", "false" },
         };
 
         Statement s = createStatement();
