@@ -36,7 +36,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
  * Lucene IndexOutput.
  * </p>
  */
-public  class DerbyIndexOutput   extends IndexOutput
+class DerbyIndexOutput   extends IndexOutput
 {
     /////////////////////////////////////////////////////////////////////
     //

@@ -44,7 +44,7 @@ import org.apache.derby.vti.StringColumnVTI;
  * See org.apache.derby.optional.lucene.LuceneSupport.listIndexes.
  * 
  */
-public class LuceneListIndexesVTI extends StringColumnVTI
+class LuceneListIndexesVTI extends StringColumnVTI
 {
     private Connection  connection;
 	private StorageFile[] indexes;

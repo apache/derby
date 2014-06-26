@@ -65,7 +65,7 @@ import org.apache.lucene.util.Version;
  * LuceneSupport.luceneQuery.
  * 
  */
-public class LuceneQueryVTI extends StringColumnVTI
+class LuceneQueryVTI extends StringColumnVTI
 {
     /////////////////////////////////////////////////////////////////////
     //
