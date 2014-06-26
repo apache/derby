@@ -21,14 +21,13 @@
 
 package org.apache.derby.tools;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
@@ -79,12 +78,12 @@ public class SignatureChecker
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private ParsedArgs _parsedArgs;
+    private final ParsedArgs _parsedArgs;
 
-    private ArrayList<SQLRoutine>   _procedures = new ArrayList<SQLRoutine>();
-    private ArrayList<SQLRoutine>   _functions = new ArrayList<SQLRoutine>();
+    private final ArrayList<SQLRoutine>   _procedures = new ArrayList<SQLRoutine>();
+    private final ArrayList<SQLRoutine>   _functions = new ArrayList<SQLRoutine>();
 
-    private boolean     _debugging = false;
+    private final boolean     _debugging = false;
     
 	private static          LocalizedResource _messageFormatter;
     
@@ -142,7 +141,6 @@ public class SignatureChecker
             if ( conn == null )
             {
                 println(  formatMessage( "SC_NO_CONN" )  );
-                return;
             }
             else
             {
@@ -151,13 +149,15 @@ public class SignatureChecker
                 conn.close();
             }
             
-        } catch (Throwable t) { printThrowable( t ); }
+        } catch (SQLException t) { printThrowable( t ); }
     }
 
     /**
      * <p>
      * Match the signatures of routines in the database attached to this connection.
      * </p>
+     * @param conn This connection
+     * @throws java.sql.SQLException
      */
     private void matchSignatures( Connection conn )
         throws SQLException
@@ -170,6 +170,8 @@ public class SignatureChecker
      * <p>
      * Match the signatures of procedures in this database.
      * </p>
+     * @param conn The connection to use to access the database
+     * @throws java.sql.SQLException
      */
     private void matchProcedures( Connection conn )
         throws SQLException
@@ -190,7 +192,7 @@ public class SignatureChecker
         for ( int i = 0; i < count; i++ )
         {
             SQLRoutine  procedure = getProcedure( i );
-            StringBuffer buffer = new StringBuffer();
+            StringBuilder buffer = new StringBuilder();
             int             argCount = procedure.getArgCount();
 
             buffer.append( "call " );
@@ -203,7 +205,7 @@ public class SignatureChecker
             }
             buffer.append( " )" );
 
-            checkSignature( conn, procedure, buffer.toString(), makeReadableSignature( procedure ) );
+            checkSignature( conn, buffer.toString(), makeReadableSignature( procedure ) );
         }
     }
 
@@ -211,6 +213,8 @@ public class SignatureChecker
      * <p>
      * Match the signatures of functions in this database.
      * </p>
+     * @param conn The connection to use to access the database
+     * @throws java.sql.SQLException
      */
     private void matchFunctions( Connection conn )
         throws SQLException
@@ -231,7 +235,7 @@ public class SignatureChecker
         for ( int i = 0; i < count; i++ )
         {
             SQLRoutine  function = getFunction( i );
-            StringBuffer query = new StringBuffer();
+            StringBuilder query = new StringBuilder();
             int             argCount = function.getArgCount();
 
             if ( function.isTableFunction() ) { query.append( "select * from table( " ); }
@@ -247,7 +251,7 @@ public class SignatureChecker
             query.append( " ) )" );
             if ( function.isTableFunction() ) { query.append( " s" ); }
 
-            checkSignature( conn, function, query.toString(), makeReadableSignature( function ) );
+            checkSignature( conn, query.toString(), makeReadableSignature( function ) );
         }
     }
 
@@ -256,10 +260,12 @@ public class SignatureChecker
      * Make a human readable signature for a routine. This can be
      * used in error messages.
      * </p>
+     * @param routine the routine for which we want a signature
+     * @return human readable string
      */
     private String  makeReadableSignature( SQLRoutine routine )
     {
-        StringBuffer signature = new StringBuffer();
+        StringBuilder signature = new StringBuilder();
         int             argCount = routine.getArgCount();
         
         signature.append( routine.getQualifiedName() );
@@ -267,7 +273,9 @@ public class SignatureChecker
         for ( int k = 0; k < argCount; k++ )
         {
             if ( k > 0 ) { signature.append( ", " ); }
-            signature.append( " " + routine.getArgType( k ) + " " );
+            signature.append( " " );
+            signature.append( routine.getArgType( k ) );
+            signature.append( " " );
         }
         signature.append( " )" );
 
@@ -278,6 +286,8 @@ public class SignatureChecker
      * <p>
      * Find all of the user-declared procedures.
      * </p>
+     * @param dbmd the database metadata of the database
+     * @throws java.sql.SQLException
      */
     private void    findProcedures( DatabaseMetaData dbmd )
         throws SQLException
@@ -298,8 +308,11 @@ public class SignatureChecker
     
     /**
      * <p>
-     * Count up the arguments to the user-coded procedures.
+     * Count up the arguments to the user-coded procedures in
+     * {@link #_procedures} and update that data structure accordingly
      * </p>
+     * @param dbmd the database metadata of the database
+     * @throws java.sql.SQLException
      */
     private void    countProcedureArgs( DatabaseMetaData dbmd )
         throws SQLException
@@ -323,17 +336,16 @@ public class SignatureChecker
      * <p>
      * Find all of the user-declared functions. We use reflection to get our
      * hands on getFunctions() because that method does not appear in
-     * the JSR169 api for DatabaseMetaData.
+     * the JSR169 api for DatabaseMetaData. Update {@link #_functions}.
      * </p>
+     * @param dbmd the database metadata of the database
+     * @throws java.sql.SQLException
      */
     private void    findFunctions( DatabaseMetaData dbmd )
         throws SQLException
     {
         try {
-            Method      getFunctionsMethod = dbmd.getClass().getMethod
-                ( "getFunctions", new Class[] { String.class, String.class, String.class } );
-            ResultSet   rs = (ResultSet) getFunctionsMethod.invoke
-                ( dbmd, new Object[] { null, null, WILDCARD } );
+            ResultSet   rs = dbmd.getFunctions(null, null, WILDCARD);
 
             while( rs.next() )
             {
@@ -343,16 +355,15 @@ public class SignatureChecker
 
                 if ( isSystemSchema( schema ) ) { continue; }
 
-                boolean isTableFunction;
-                if ( functionType == DatabaseMetaData.functionReturnsTable ) { isTableFunction = true; }
-                else { isTableFunction = false; }
+                boolean isTableFunction =
+                    functionType == DatabaseMetaData.functionReturnsTable;
 
                 putFunction( schema, name, isTableFunction );
             }
             rs.close();
 
             
-        } catch (Exception e) { throw new SQLException( e.getMessage() ); }
+        } catch (SQLException e) { throw new SQLException( e.getMessage() ); }
     }
 
     /**
@@ -360,49 +371,48 @@ public class SignatureChecker
      * Count up the arguments to the user-coded procedures. We use
      * reflection to look up the getFunctionColumns() method because that
      * method does not appear in the JSR169 api for DatabaseMetaData.
+     * Update {@link #_functions}.
      * </p>
+     * @param dbmd the database metadata of the database
+     * @throws java.sql.SQLException
      */
     private void    countFunctionArgs( DatabaseMetaData dbmd )
         throws SQLException
     {
-        try {
-            Method      getFunctionColumnsMethod = dbmd.getClass().getMethod
-                ( "getFunctionColumns", new Class[] { String.class, String.class, String.class, String.class } );
+        int     count = _functions.size();
+        for ( int i = 0; i < count; i++ )
+        {
+            SQLRoutine  function = getFunction( i );
+            ResultSet   rs = dbmd.getFunctionColumns(
+                null, function.getSchema(), function.getName(), WILDCARD);
 
-            int     count = _functions.size();
-            for ( int i = 0; i < count; i++ )
+            while( rs.next() )
             {
-                SQLRoutine  function = getFunction( i );
+                short   columnType = rs.getShort( 5 );
 
-                ResultSet   rs = (ResultSet) getFunctionColumnsMethod.invoke
-                    ( dbmd, new Object[] { null, function.getSchema(), function.getName(), WILDCARD } );
+                //
+                // Skip the return value if this is a table function.
+                // Skip all columns in the returned result set if this is a
+                // table function.
+                //
+                if ( columnType == DatabaseMetaData.functionReturn ) { continue; }
+                if ( columnType == DatabaseMetaData.functionColumnResult ) { continue; }
 
-                while( rs.next() )
-                {
-                    short   columnType = rs.getShort( 5 );
-
-                    //
-                    // Skip the return value if this is a table function.
-                    // Skip all columns in the returned result set if this is a
-                    // table function.
-                    //
-                    if ( columnType == DatabaseMetaData.functionReturn ) { continue; }
-                    if ( columnType == DatabaseMetaData.functionColumnResult ) { continue; }
-                    
-                    function.addArg( rs.getString( 7 ) );
-                }
-                rs.close();
+                function.addArg( rs.getString( 7 ) );
             }
-        } catch (Exception e) { throw new SQLException( e.getMessage() ); }
-        
+            rs.close();
+        }
     }
     
     /**
      * <p>
      * Prepared a routine invocation in order to check whether it matches a Java method.
      * </p>
+     * @param conn The connection to the database
+     * @param query The SQL to prepare
+     * @param readableSignature the signature: printed if prepare fails
      */
-    private void    checkSignature( Connection conn, SQLRoutine routine, String query, String readableSignature )
+    private void    checkSignature( Connection conn, String query, String readableSignature )
     {
         try {
             PreparedStatement   ps = prepareStatement( conn, query );
@@ -427,6 +437,9 @@ public class SignatureChecker
      * We use reflection to get the J2SE connection so that references to
      * DriverManager will not generate linkage errors on old J2ME platforms
      * which may resolve references eagerly.
+     *
+     * @return a connection to the database
+     * @throws java.sql.SQLException
      */
     private Connection  getJ2SEConnection()
         throws SQLException
@@ -434,17 +447,15 @@ public class SignatureChecker
         try {
             Class.forName( "org.apache.derby.jdbc.EmbeddedDriver" );
             Class.forName( "org.apache.derby.jdbc.ClientDriver" );
-        } catch (Throwable t) {}
+            Class.forName( "java.sql.DriverManager" );
+        } catch (ClassNotFoundException t) {}
 
         try {
-            Class<?>   driverManagerClass = Class.forName( "java.sql.DriverManager" );
-            Method  getConnectionMethod = driverManagerClass.getDeclaredMethod
-                ( "getConnection", String.class );
 
-            return (Connection) getConnectionMethod.invoke
-                ( null, new Object[] { _parsedArgs.getJ2seConnectionUrl() } );
+            return DriverManager.getConnection(
+                _parsedArgs.getJ2seConnectionUrl()  );
             
-        } catch (Throwable t)
+        } catch (SQLException t)
         {
             printThrowable( t );
             return null;
@@ -464,6 +475,7 @@ public class SignatureChecker
         println(  formatMessage( "SC_USAGE" )  );
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private static void printThrowable( Throwable t )
     {
         t.printStackTrace();
@@ -476,6 +488,8 @@ public class SignatureChecker
 
     /**
      * Return true if the schema is a system schema.
+     * @param schema the schema to check
+     * @return {@code true} if the schema is a system schema
      */
     private boolean isSystemSchema( String schema )
     {
@@ -490,7 +504,9 @@ public class SignatureChecker
     }
     
     /**
-     * Store a procedure descriptor.
+     * Store a procedure descriptor. Updates {@link #_procedures}.
+     * @param schema schema of the procedure
+     * @param name of a procedure
      */
     private void putProcedure( String schema, String name )
     {
@@ -498,7 +514,9 @@ public class SignatureChecker
     }
         
     /**
-     * Get a procedure descriptor.
+     * Get a procedure descriptor from {@link #_procedures}.
+     * @param idx The index of the procedure in {@link #_procedures}.
+     * @return a procedure descriptor
      */
     private SQLRoutine getProcedure( int idx )
     {
@@ -506,7 +524,11 @@ public class SignatureChecker
     }
 
     /**
-     * Store a function descriptor.
+     * Store a function descriptor. Updates {@link #_functions}.
+     *
+     * @param schema The schema of the function
+     * @param name The name of the function
+     * @param isTableFunction {@code true} iff the function is a table function
      */
     private void putFunction( String schema, String name, boolean isTableFunction )
     {
@@ -514,7 +536,10 @@ public class SignatureChecker
     }
         
     /**
-     * Get a functon descriptor.
+     * Get a function descriptor from {@link #_functions}
+     * .
+     * @param idx The index of the procedure in {@link #_functions}.
+     * @return a function descriptor
      */
     private SQLRoutine getFunction( int idx )
     {
@@ -523,6 +548,10 @@ public class SignatureChecker
 
     /**
      * Format a localizable message.
+     *
+     * @param key The message key by which we located the localized text
+     * @param args Any arguments to the localized text to be filled in
+     * @return A localized message
      */
     private static String formatMessage(String key, Object... args)
     {
@@ -531,6 +560,8 @@ public class SignatureChecker
     
     /**
      * Get the message resource.
+     *
+     * @return localized resource
      */
     private static  LocalizedResource   getMessageFormatter()
     {
@@ -576,10 +607,10 @@ public class SignatureChecker
 
     class SQLRoutine
     {
-        private String _schema;
-        private String _name;
-        private boolean _isTableFunction;
-        private ArrayList<String>   _argList = new ArrayList<String>();
+        private final String _schema;
+        private final String _name;
+        private final boolean _isTableFunction;
+        private final ArrayList<String>   _argList = new ArrayList<String>();
 
         public SQLRoutine( String schema, String name, boolean isTableFunction )
         {
@@ -596,15 +627,21 @@ public class SignatureChecker
         public String getArgType( int idx ) { return _argList.get( idx ); }
         public boolean isTableFunction() { return _isTableFunction; }
 
+        @Override
         public  String  toString()
         {
-            StringBuffer    buffer = new StringBuffer();
+            StringBuilder    buffer = new StringBuilder();
 
             buffer.append( "SQLRoutine( " );
-            buffer.append( _schema + ", " );
-            buffer.append( _name + ", " );
-            buffer.append(  "isTableFunction = " + _isTableFunction + ", " );
-            buffer.append( " argCount = " + getArgCount() );
+            buffer.append( _schema );
+            buffer.append( ", " );
+            buffer.append( _name );
+            buffer.append( ", " );
+            buffer.append(  "isTableFunction = " );
+            buffer.append( _isTableFunction );
+            buffer.append( ", " );
+            buffer.append( " argCount = " );
+            buffer.append( getArgCount() );
             buffer.append( " )" );
 
             return buffer.toString();
