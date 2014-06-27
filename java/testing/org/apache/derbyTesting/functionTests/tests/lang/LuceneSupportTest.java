@@ -20,13 +20,38 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.util.Version;
+
+import org.apache.derby.optional.api.LuceneIndexDescriptor;
+import org.apache.derby.optional.api.LuceneUtils;
 
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -98,7 +123,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes', null, 1000, null ) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes', 1000, null ) ) luceneResults"
               ),
              expectedRows
              );
@@ -111,7 +136,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes', null, 1000, .75 ) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes', 1000, .75 ) ) luceneResults"
               ),
              expectedRows
              );
@@ -120,7 +145,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
             (
              s.executeQuery
              (
-              "select * from table ( lucenetest.titles__title( 'grapes',  null, 1000, 0.5) ) luceneResults"
+              "select * from table ( lucenetest.titles__title( 'grapes',  1000, 0.5) ) luceneResults"
               )
              );
 
@@ -134,7 +159,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select title, author, publisher, documentID\n" +
-              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', null, 1000, null ) ) l\n" +
+              "from lucenetest.titles t, table ( lucenetest.titles__title( 'grapes', 1000, null ) ) l\n" +
               "where t.id = l.id\n" 
               ),
              expectedRows
@@ -159,7 +184,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, null ) ) luceneResults\n"
               )
              );
 	    
@@ -171,7 +196,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, null ) ) luceneResults\n"
               )
              );
 	    
@@ -188,7 +213,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
              s.executeQuery
              (
               "select *\n" +
-              "from table ( lucenetest.titles__title( 'mice', null, 1000, null ) ) luceneResults\n"
+              "from table ( lucenetest.titles__title( 'mice', 1000, null ) ) luceneResults\n"
               ),
              expectedRows
              );
@@ -265,6 +290,216 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 		assertCallError( ILLEGAL_CHARACTER, "call LuceneSupport.dropIndex('','','../')");
 		
 	}
+
+    //////////////////////////////////////////////////////////////
+    //
+    //  BEGIN TEST FOR MULTIPLE FIELDS
+    //
+    //////////////////////////////////////////////////////////////
+	
+    public void testMultipleFields() throws SQLException
+    {
+        println( "Running multi-field test." );
+        
+        Statement s = createStatement();
+
+        s.execute("create table multifield(id int primary key, c clob)");
+        s.execute("insert into multifield values "
+                + "(1, '<document><secret/>No one must know!</document>'), "
+                + "(2, '<document>No secret here!</document>')");
+
+        s.execute("call lucenesupport.createindex('lucenetest', 'multifield', "
+                  + "'c', '" + getClass().getName() + ".makeMultiFieldIndexDescriptor')");
+
+        PreparedStatement ps = prepareStatement(
+                "select id from table(multifield__c(?, 100, null)) t");
+
+        String[][] bothRows = { {"1"}, {"2"} };
+
+        ps.setString(1, "text:secret");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "2");
+        ps.setString(1, "tags:secret");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        ps.setString(1, "secret");
+        JDBC.assertUnorderedResultSet(ps.executeQuery(), bothRows);
+    }
+
+    /** Create the custom index descriptor for the multi-field test */
+    public  static  LuceneIndexDescriptor   makeMultiFieldIndexDescriptor()
+    {
+        return new MultiFieldIndexDescriptor();
+    }
+    /**
+     * Create a simple query parser for multiple fields, which uses
+     * StandardAnalyzer instead of the XMLAnalyzer that was used to create
+     * the index.
+     */
+    public static QueryParser createXMLQueryParser(
+            Version version, String[] fields, Analyzer analyzer) {
+        return new MultiFieldQueryParser(
+                version, fields, new StandardAnalyzer(version));
+    }
+
+    /**
+     * Custom analyzer for XML files. It indexes the tags and the text
+     * separately.
+     */
+    public static class XMLAnalyzer extends Analyzer {
+
+        public XMLAnalyzer() {
+            // We want different tokenizers for different fields. Set reuse
+            // policy to per-field to achieve that.
+            super(PER_FIELD_REUSE_STRATEGY);
+        }
+
+        @Override
+        protected TokenStreamComponents createComponents(
+                String fieldName, Reader reader) {
+
+            if (fieldName.equals("text")) {
+                return new TokenStreamComponents(new XMLTextTokenizer(reader));
+            }
+
+            if (fieldName.equals("tags")) {
+                return new TokenStreamComponents(new XMLTagsTokenizer(reader));
+            }
+
+            fail("unknown field name: " + fieldName);
+            return null;
+        }
+    }
+
+    /** Common logic for XMLTextTokenizer and XMLTagsTokenizer. */
+    private abstract static class AbstractTokenizer extends Tokenizer {
+        Iterator<String> tokens;
+        final CharTermAttribute charTermAttr =
+                addAttribute(CharTermAttribute.class);
+        final PositionIncrementAttribute posIncrAttr
+                = addAttribute(PositionIncrementAttribute.class);
+
+        AbstractTokenizer(Reader reader) {
+            super(reader);
+        }
+
+        @Override
+        public boolean incrementToken() throws IOException {
+            if (tokens == null) {
+                tokens = getTokens().iterator();
+            }
+
+            if (tokens.hasNext()) {
+                charTermAttr.setEmpty();
+                charTermAttr.append(tokens.next());
+                posIncrAttr.setPositionIncrement(1);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void reset() throws IOException {
+            tokens = null;
+            super.reset();
+        }
+
+        abstract Iterable<String> getTokens();
+    }
+
+    private static class XMLTextTokenizer extends AbstractTokenizer {
+
+        XMLTextTokenizer(Reader in) {
+            super(in);
+        }
+
+        @Override
+        Iterable<String> getTokens() {
+            StringBuilder text = new StringBuilder();
+            getAllText(parseXMLDocument(input), text);
+            return Arrays.asList(text.toString().split("[ \r\n\t]"));
+        }
+
+    }
+
+    private static class XMLTagsTokenizer extends AbstractTokenizer {
+
+        XMLTagsTokenizer(Reader in) {
+            super(in);
+        }
+
+        @Override
+        Iterable<String> getTokens() {
+            return getAllXMLTags(parseXMLDocument(input));
+        }
+
+    }
+
+    /** Parse an XML document from a Reader. */
+    private static Document parseXMLDocument(Reader reader) {
+        Document doc = null;
+
+        try {
+            doc = DocumentBuilderFactory.newInstance()
+                    .newDocumentBuilder().parse(new InputSource(reader));
+            reader.close();
+        } catch (Exception e) {
+            fail("Failed to parse XML document", e);
+        }
+
+        return doc;
+    }
+
+    /** Get a list of all the XML tags in a node. */
+    private static List<String> getAllXMLTags(Node node) {
+        ArrayList<String> list = new ArrayList<String>();
+        NodeList nl = node.getChildNodes();
+        for (int i = 0; i < nl.getLength(); i++) {
+            Node n = nl.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE) {
+                list.add(n.getNodeName());
+                list.addAll(getAllXMLTags(n));
+            }
+        }
+        return list;
+    }
+
+    /** Strip out all tags from an XML node, so that only the text is left. */
+    private static void getAllText(Node node, StringBuilder sb) {
+        if (node.getNodeType() == Node.TEXT_NODE) {
+            sb.append(node.getNodeValue());
+        } else {
+            NodeList nl = node.getChildNodes();
+            for (int i = 0; i < nl.getLength(); i++) {
+                getAllText(nl.item(i), sb);
+            }
+        }
+    }
+
+    public static class MultiFieldIndexDescriptor implements LuceneIndexDescriptor
+    {
+        public  String[]    getFieldNames() { return new String[] { "tags", "text" }; }
+    
+        public Analyzer getAnalyzer()   { return new XMLAnalyzer(); }
+
+        public  QueryParser getQueryParser()
+        {
+            Version version = LuceneUtils.currentVersion();
+            
+            return new MultiFieldQueryParser
+                (
+                 version,
+                 getFieldNames(),
+                 new StandardAnalyzer( version )
+                 );
+        }
+
+    }
+
+    //////////////////////////////////////////////////////////////
+    //
+    //  END TEST FOR MULTIPLE FIELDS
+    //
+    //////////////////////////////////////////////////////////////
 	
 	protected void setUp() throws SQLException {
 		CallableStatement cSt;			    

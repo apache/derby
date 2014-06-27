@@ -37,6 +37,7 @@ import java.util.Properties;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.optional.api.LuceneIndexDescriptor;
 import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derby.vti.StringColumnVTI;
 import org.apache.derby.vti.VTIContext;
@@ -73,8 +74,6 @@ class LuceneQueryVTI extends StringColumnVTI
     //
     /////////////////////////////////////////////////////////////////////
 
-    public  static  final   String  TEXT_FIELD_NAME = "luceneTextField";
-
     /////////////////////////////////////////////////////////////////////
     //
     //  STATE
@@ -84,7 +83,6 @@ class LuceneQueryVTI extends StringColumnVTI
     // constructor args
     private Connection  _connection;
     private String  _queryText;
-    private String  _queryParserMaker;
     private int         _windowSize;
     private Float   _scoreCeiling;
 
@@ -118,7 +116,6 @@ class LuceneQueryVTI extends StringColumnVTI
 	LuceneQueryVTI
         (
          String queryText,
-         String queryParserMaker,
          int    windowSize,
          Float scoreCeiling
          )
@@ -130,7 +127,6 @@ class LuceneQueryVTI extends StringColumnVTI
         
         _connection = LuceneSupport.getDefaultConnection();
         _queryText = queryText;
-        _queryParserMaker = queryParserMaker;
         _windowSize = windowSize;
         _scoreCeiling = scoreCeiling;
 	}
@@ -464,24 +460,16 @@ class LuceneQueryVTI extends StringColumnVTI
             DerbyLuceneDir  derbyLuceneDir = LuceneSupport.getDerbyLuceneDir( _connection, _schema, _table, _column );
             StorageFile propertiesFile = LuceneSupport.getIndexPropertiesFile( derbyLuceneDir );
             Properties  indexProperties = readIndexProperties( propertiesFile );
-            String          analyzerMaker = indexProperties.getProperty( LuceneSupport.ANALYZER_MAKER );
-            Analyzer    analyzer = getAnalyzer( analyzerMaker );
+            String          indexDescriptorMaker = indexProperties.getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
+            LuceneIndexDescriptor   indexDescriptor = getIndexDescriptor( indexDescriptorMaker );
+            Analyzer    analyzer = indexDescriptor.getAnalyzer( );
+            QueryParser qp = indexDescriptor.getQueryParser();
 
             vetLuceneVersion( indexProperties.getProperty( LuceneSupport.LUCENE_VERSION ) );
 
             _indexReader = getIndexReader( derbyLuceneDir );
             _searcher = new IndexSearcher( _indexReader );
 
-            QueryParser qp = getQueryParser
-                (
-                 _queryParserMaker == null ?
-                 LuceneUtils.class.getName() + ".defaultQueryParser" : _queryParserMaker,
-                 
-                 LuceneUtils.currentVersion(),
-                 TEXT_FIELD_NAME,
-                 analyzer
-                 );
-				
             Query luceneQuery = qp.parse( _queryText );
             TopScoreDocCollector tsdc = TopScoreDocCollector.create( _windowSize, true);
             if ( _scoreCeiling != null ) {
@@ -550,45 +538,6 @@ class LuceneQueryVTI extends StringColumnVTI
     }
     
 	/**
-	 * Invoke a static method (possibly supplied by the user) to instantiate a QueryParser.
-     *
-     * @param queryParserMaker  Full name of public, static method whicn instantiates a QueryParser given the following arguments.
-     * @param version   Lucene version.
-     * @param fieldName Name of field holding the indexed text.
-     * @param analyzer  Analyzer used to index the text.
-	 */
-	private static QueryParser getQueryParser
-        (
-         final String queryParserMaker,
-         final Version version,
-         final String fieldName,
-         final Analyzer analyzer
-         )
-        throws PrivilegedActionException, SQLException
-    {
-        return AccessController.doPrivileged
-            (
-             new PrivilegedExceptionAction<QueryParser>()
-             {
-                 public QueryParser run()
-                     throws ClassNotFoundException, IllegalAccessException,
-                     InvocationTargetException, NoSuchMethodException,
-                     SQLException
-                 {
-                     int    lastDotIdx = queryParserMaker.lastIndexOf( "." );
-                     String className = queryParserMaker.substring( 0, lastDotIdx );
-                     ClassInspector  ci = LuceneSupport.getClassFactory().getClassInspector();
-                     Class<? extends Object>  klass = ci.getClass( className );
-                     String methodName = queryParserMaker.substring( lastDotIdx + 1, queryParserMaker.length() );
-                     Method method = klass.getDeclaredMethod( methodName, Version.class, String.class, Analyzer.class );
-                     
-                     return (QueryParser) method.invoke( null, version, fieldName, analyzer );
-                 }
-             }
-             );
-	}
-	
-	/**
 	 * Returns a Lucene IndexReader, which reads from the indicated Lucene index.
 	 * 
 	 * @param indexHome The directory holding the Lucene index.
@@ -633,22 +582,22 @@ class LuceneQueryVTI extends StringColumnVTI
     }
 
 	/**
-	 * Invoke a static method (possibly supplied by the user) to instantiate an Analyzer.
+	 * Invoke a static method (possibly supplied by the user) to instantiate an index descriptor.
      * The method has no arguments.
 	 */
-	private static Analyzer getAnalyzer( final String analyzerMaker )
+	private static LuceneIndexDescriptor getIndexDescriptor( final String indexDescriptorMaker )
         throws PrivilegedActionException, SQLException
     {
         return AccessController.doPrivileged
             (
-             new PrivilegedExceptionAction<Analyzer>()
+             new PrivilegedExceptionAction<LuceneIndexDescriptor>()
              {
-                 public Analyzer run()
+                 public LuceneIndexDescriptor run()
                      throws ClassNotFoundException, IllegalAccessException,
                      InvocationTargetException, NoSuchMethodException,
                      SQLException
                  {
-                     return LuceneSupport.getAnalyzerNoPrivs( analyzerMaker );
+                     return LuceneSupport.getIndexDescriptorNoPrivs( indexDescriptorMaker );
                  }
              }
              );

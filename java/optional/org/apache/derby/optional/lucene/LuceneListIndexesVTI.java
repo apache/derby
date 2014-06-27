@@ -70,7 +70,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
                     "LASTUPDATED",
                     "LUCENEVERSION",
                     "ANALYZER",
-                    "ANALYZERMAKER",
+                    "INDEXDESCRIPTORMAKER",
                 }
               );
 		
@@ -144,7 +144,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
         case 3: return column;
         case 5: return getProperty( LuceneSupport.LUCENE_VERSION );
         case 6: return getProperty( LuceneSupport.ANALYZER );
-        case 7: return getProperty( LuceneSupport.ANALYZER_MAKER );
+        case 7: return getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
         default:
             throw LuceneSupport.newSQLException
                 (

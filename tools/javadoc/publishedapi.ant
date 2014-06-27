@@ -79,5 +79,6 @@ org/apache/derby/security/SystemPermission.java
 
 # package: org.apache.derby.optional.api
 
+org/apache/derby/optional/api/LuceneIndexDescriptor.java
 org/apache/derby/optional/api/LuceneUtils.java
 

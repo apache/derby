@@ -45,6 +45,7 @@ import org.apache.lucene.analysis.Analyzer;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
+import org.apache.derby.optional.api.LuceneIndexDescriptor;
 import org.apache.derby.optional.api.LuceneUtils;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
@@ -72,15 +73,17 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     private static  final   String      READ_WRITE_USER = "READWRITEUSER";
     private static  final   String[]    LEGAL_USERS = { RUTH, READ_ONLY_USER, READ_WRITE_USER };
 
-    private static  final   String      ENGLISH_ANALYZER =
+    public  static  final   String      ENGLISH_ANALYZER =
         "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getEnglishAnalyzer";
+    public  static  final   String      STANDARD_ANALYZER =
+        "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getStandardAnalyzer";
 
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
     private static  final   String      INDEX_POEMS =
         "call LuceneSupport.createIndex( 'ruth', 'poems', 'poemText', '" + ENGLISH_ANALYZER + "' )";
     private static  final   String      UPDATE_POEMS_INDEX =
-        "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )";
+        "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', '" + STANDARD_ANALYZER + "' )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'poems', 'poemText' )";
 
     private static  final   String      ILLEGAL_FOR_READONLY = "25502";
@@ -178,7 +181,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
 
         String  readPoemsIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         String[][]  defaultPoemResults =
@@ -205,7 +208,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
              );
 
         String  listIndexes =
-            "select schemaName, tableName, columnName, analyzerMaker from table( LuceneSupport.listIndexes() ) l";
+            "select schemaName, tableName, columnName, indexDescriptorMaker from table( LuceneSupport.listIndexes() ) l";
         String[][]  defaultIndexList =
             new String[][]
             {
@@ -260,7 +263,7 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         String[][]  standardIndexList =
             new String[][]
             {
-                { "RUTH", "POEMS", "POEMTEXT", "org.apache.derby.optional.api.LuceneUtils.standardAnalyzer" },
+                { "RUTH", "POEMS", "POEMTEXT", STANDARD_ANALYZER },
             };
 
         assertResults
@@ -304,11 +307,18 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** Return the Analyzer for an English Locale */
-    public  static  Analyzer    getEnglishAnalyzer()
+    /** Return an index descriptor with an Analyzer for an English Locale */
+    public  static  LuceneIndexDescriptor    getEnglishAnalyzer()
         throws Exception
     {
-        return LuceneUtils.getAnalyzerForLocale( Locale.US );
+        return new EnglishIndexDescriptor();
+    }
+    
+    /** Return an index descriptor with a StandardAnalyzer */
+    public  static  LuceneIndexDescriptor    getStandardAnalyzer()
+        throws Exception
+    {
+        return new StandardIndexDescriptor();
     }
     
 
@@ -383,6 +393,32 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
         ps.executeUpdate();
 
         ps.close();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  static  class   EnglishIndexDescriptor extends LuceneUtils.DefaultIndexDescriptor
+    {
+        public  EnglishIndexDescriptor() { super(); }
+        
+        public  Analyzer    getAnalyzer()   throws SQLException
+        {
+            return LuceneUtils.getAnalyzerForLocale( Locale.US );
+        }
+    }
+
+    public  static  class   StandardIndexDescriptor extends LuceneUtils.DefaultIndexDescriptor
+    {
+        public  StandardIndexDescriptor() { super(); }
+        
+        public  Analyzer    getAnalyzer()   throws SQLException
+        {
+            return LuceneUtils.standardAnalyzer();
+        }
     }
 
 

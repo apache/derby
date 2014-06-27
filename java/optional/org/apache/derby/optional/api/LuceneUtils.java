@@ -29,9 +29,12 @@ import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
 
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
@@ -47,6 +50,8 @@ public abstract class LuceneUtils
     //  CONSTANTS
     //
     /////////////////////////////////////////////////////////////////
+
+    public  static  final   String  TEXT_FIELD_NAME = "luceneTextField";
 
     /////////////////////////////////////////////////////////////////
     //
@@ -126,7 +131,7 @@ public abstract class LuceneUtils
      * </p>
      */
     public  static  Analyzer    defaultAnalyzer()
-        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, SQLException
+        throws SQLException
     {
         return getAnalyzerForLocale( ConnectionUtil.getCurrentLCC().getDatabase().getLocale() );
     }
@@ -137,19 +142,25 @@ public abstract class LuceneUtils
      * </p>
      */
     public  static  Analyzer    getAnalyzerForLocale( Locale locale )
-        throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException
+        throws SQLException
     {
         String          language = locale.getLanguage();
 
-        Class<? extends Analyzer>   analyzerClass = _analyzerClasses.get( language );
+        try {
+            Class<? extends Analyzer>   analyzerClass = _analyzerClasses.get( language );
         
-        if ( analyzerClass == null )    { return standardAnalyzer(); }
-        else
-        {
-            Constructor<? extends Analyzer> constructor = analyzerClass.getConstructor( Version.class );
+            if ( analyzerClass == null )    { return standardAnalyzer(); }
+            else
+            {
+                Constructor<? extends Analyzer> constructor = analyzerClass.getConstructor( Version.class );
 
-            return constructor.newInstance( currentVersion() );
+                return constructor.newInstance( currentVersion() );
+            }
         }
+        catch (IllegalAccessException iae) { throw wrap( iae ); }
+        catch (InstantiationException ie)   { throw wrap( ie ); }
+        catch (InvocationTargetException ite)   { throw wrap( ite ); }
+        catch (NoSuchMethodException nsme)  { throw wrap( nsme ); }
     }
 
     /**
@@ -170,11 +181,22 @@ public abstract class LuceneUtils
     public  static  QueryParser defaultQueryParser
         (
          Version version,
-         String fieldName,
+         String[] fieldNames,
          Analyzer analyzer
          )
     {
-        return new QueryParser( version, fieldName, analyzer );
+        return new MultiFieldQueryParser( version, fieldNames, analyzer );
+    }
+    
+    /**
+     * <p>
+     * Get the default index descriptor. This has a single field named TEXT,
+     * a defaultAnalyzer() and a defaultQueryParser().
+     * </p>
+     */
+    public  static  LuceneIndexDescriptor   defaultIndexDescriptor()
+    {
+        return new DefaultIndexDescriptor();
     }
     
     /////////////////////////////////////////////////////////////////
@@ -204,4 +226,49 @@ public abstract class LuceneUtils
         return languageCode;
     }
 
+    /** Wrap an external exception */
+    private  static  SQLException    wrap( Throwable t )
+    {
+        return sqlException( StandardException.plainWrapException( t ) );
+    }
+    
+    /** Turn a StandardException into a SQLException */
+    private  static  SQLException    sqlException( StandardException se )
+    {
+        return PublicAPI.wrapStandardException( se );
+    }
+
+    /////////////////////////////////////////////////////////////////
+    //
+    //  NESTED CLASSES
+    //
+    /////////////////////////////////////////////////////////////////
+
+    /** The default LuceneIndexDescriptor */
+    public  static  class   DefaultIndexDescriptor  implements LuceneIndexDescriptor
+    {
+        public  DefaultIndexDescriptor()    {}
+
+        /** Return the default array of field names { TEXT_FIELD_NAME }. */
+        public  String[]    getFieldNames() { return new String[] { TEXT_FIELD_NAME }; }
+
+        /** Return LuceneUtils.defaultAnalyzer() */
+        public Analyzer getAnalyzer()   throws SQLException
+        { return LuceneUtils.defaultAnalyzer(); }
+
+        /**
+         * Return LuceneUtils.defaultQueryParser(  LuceneUtils.currentVersion(), getFieldNames(), getAnalyzer() ).
+         */
+        public  QueryParser getQueryParser()
+            throws SQLException
+        {
+            return LuceneUtils.defaultQueryParser
+                (
+                 LuceneUtils.currentVersion(),
+                 getFieldNames(),
+                 getAnalyzer()
+                 );
+        }
+    }
+    
 }

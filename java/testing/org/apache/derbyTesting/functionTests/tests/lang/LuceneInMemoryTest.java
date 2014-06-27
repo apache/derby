@@ -47,13 +47,10 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static  final   String      ENGLISH_ANALYZER =
-        "org.apache.derbyTesting.functionTests.tests.lang.LuceneCoarseAuthorizationTest.getEnglishAnalyzer";
-
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
     private static  final   String      INDEX_POEMS =
-        "call LuceneSupport.createIndex( 'app', 'poems', 'poemText', '" + ENGLISH_ANALYZER + "' )";
+        "call LuceneSupport.createIndex( 'app', 'poems', 'poemText', '" + LuceneCoarseAuthorizationTest.ENGLISH_ANALYZER + "' )";
     private static  final   String      DROP_POEMS_INDEX = "call LuceneSupport.dropIndex( 'app', 'poems', 'poemText' )";
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +133,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
 
         String  readPoemsIndex =
             "select p.originalAuthor, i.score\n" +
-            "from poems p, table ( poems__poemText( 'star', null, 1000, null ) ) i\n" +
+            "from poems p, table ( poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         String[][]  defaultPoemResults =
@@ -156,11 +153,11 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
              );
 
         String  listIndexes =
-            "select schemaName, tableName, columnName, analyzerMaker from table( LuceneSupport.listIndexes() ) l";
+            "select schemaName, tableName, columnName, indexDescriptorMaker from table( LuceneSupport.listIndexes() ) l";
         String[][]  defaultIndexList =
             new String[][]
             {
-                { "APP", "POEMS", "POEMTEXT", ENGLISH_ANALYZER },
+                { "APP", "POEMS", "POEMTEXT", LuceneCoarseAuthorizationTest.ENGLISH_ANALYZER },
             };
 
         assertResults

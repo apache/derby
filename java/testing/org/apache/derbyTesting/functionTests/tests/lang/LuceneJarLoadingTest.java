@@ -72,7 +72,7 @@ public class LuceneJarLoadingTest extends GeneratedColumnsHelper
 
     private static  final   String      LOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', true )";
     private static  final   String      UNLOAD_TOOL = "call syscs_util.syscs_register_tool( 'luceneSupport', false )";
-    private static  final   String      MY_ANALYZER = "MyAnalyzer.makeMyAnalyzer";
+    private static  final   String      MY_ANALYZER = "MyAnalyzer.makeMyIndexDescriptor";
     private static  final   String      INDEX_TEXT_TABLE =
         "call LuceneSupport.createIndex( 'ruth', 'textTable', 'textCol', '" + MY_ANALYZER + "' )";
     private static  final   String      DROP_TEXT_INDEX = "call LuceneSupport.dropIndex( 'ruth', 'textTable', 'textCol' )";
@@ -83,7 +83,6 @@ public class LuceneJarLoadingTest extends GeneratedColumnsHelper
         "  ruth.textTable__textCol\n" +
         "  (\n" +
         "    'one two three four five six seven eight nine ten',\n" +
-        "    'MyQueryParser.makeMyQueryParser',\n" +
         "    100, null\n" +
         "  )\n" +
         ") t\n";

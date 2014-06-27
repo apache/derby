@@ -44,12 +44,16 @@ import java.util.Locale;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.apache.derby.optional.api.LuceneIndexDescriptor;
+import org.apache.derby.optional.api.LuceneUtils;
 
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -118,6 +122,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private static  final   String      LANGUAGE = "en";
     private static  final   String      COUNTRY = "US";
 
+    private static  final   String      DEFAULT_INDEX_DESCRIPTOR = "org.apache.derby.optional.api.LuceneUtils.defaultIndexDescriptor";
+    private static  final   String      CONSTANT_QUERY_PARSER = "org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.constantStringIndexDescriptor";
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -210,7 +217,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             ( ruthConnection, NONEXISTENT_INDEX, "call LuceneSupport.updateIndex( 'ruth', 'poems', 'originalAuthor', null )" );
 
         // alice can't view an index created by ruth
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) luceneResults order by poemID";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, null ) ) luceneResults order by poemID";
         expectExecutionError( aliceConnection, LACK_EXECUTE_PRIV, viewPoemsIndex );
 
         // but ruth can
@@ -319,7 +326,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         // but alice still needs select privilege on the base table columns
-        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) luceneResults order by poemid";
+        String  viewPoemsIndex = "select * from table ( ruth.poems__poemText( 'star', 1000, null ) ) luceneResults order by poemid";
         String[][]  viewPoemsIndexResults = new String[][]
             {
                 { "3", "3", "2", "0.22933942" },
@@ -463,7 +470,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select p.originalAuthor, i.score\n" +
-             "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
+             "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
              "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
              "order by i.score desc\n",
              new String[][]
@@ -512,7 +519,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         expectCompilationError
             (
              ruthConnection, NONEXISTENT_TABLE_FUNCTION,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, null ) ) t"
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, null ) ) t"
              );
 
         goodStatement( dboConnection, UNLOAD_TOOL );
@@ -549,7 +556,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         String  query =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
 
@@ -569,7 +576,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // now switch the Analyzer and re-run the query
         goodStatement
             ( ruthConnection,
-              "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call LuceneSupport.updateIndex( 'ruth', 'poems', 'poemText', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
 
         assertResults
             (
@@ -590,7 +597,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select schemaName, tableName, columnName, luceneVersion, analyzer, analyzerMaker\n" +
+             "select schemaName, tableName, columnName, luceneVersion, analyzer, indexDescriptorMaker\n" +
              "from table( LuceneSupport.listIndexes() ) l\n" +
              "order by schemaName, tableName, columnName\n",
              new String[][]
@@ -598,12 +605,12 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
                  {
                      "RUTH", "POEMS", "ORIGINALAUTHOR", LUCENE_VERSION,
                      "org.apache.lucene.analysis.en.EnglishAnalyzer",
-                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                     DEFAULT_INDEX_DESCRIPTOR
                  },
                  {
                      "RUTH", "POEMS", "POEMTEXT", LUCENE_VERSION,
                      "org.apache.lucene.analysis.standard.StandardAnalyzer",
-                     "org.apache.derby.optional.api.LuceneUtils.standardAnalyzer",
+                     LuceneCoarseAuthorizationTest.STANDARD_ANALYZER
                  },
              },
              false
@@ -657,7 +664,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // vet index contents
         String  selectFromViewIndex =
             "select p.originalAuthor, i.score\n" +
-            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', null, 1000, null ) ) i\n" +
+            "from ruth.poems p, table ( ruth.poemView__poemText( 'star', 1000, null ) ) i\n" +
             "where p.poemID = i.poemID and p.versionStamp = i.versionStamp\n" +
             "order by i.score desc\n";
         assertResults
@@ -675,7 +682,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
 
         // vet index list
         String  selectIndexes =
-            "select schemaName, tableName, columnName, analyzerMaker\n" +
+            "select schemaName, tableName, columnName, indexDescriptorMaker\n" +
             "from table( LuceneSupport.listIndexes() ) l\n" +
             "order by schemaName, tableName, columnName\n";
         assertResults
@@ -686,11 +693,11 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              {
                  {
                      "RUTH", "POEMS", "POEMTEXT",
-                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                     DEFAULT_INDEX_DESCRIPTOR
                  },
                  {
                      "RUTH", "POEMVIEW", "POEMTEXT",
-                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                     DEFAULT_INDEX_DESCRIPTOR
                  },
              },
              false
@@ -700,7 +707,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement
             (
              ruthConnection,
-             "call LuceneSupport.updateIndex( 'ruth', 'poemView', 'poemText', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )"
+             "call LuceneSupport.updateIndex( 'ruth', 'poemView', 'poemText', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )"
              );
         assertResults
             (
@@ -721,11 +728,11 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              {
                  {
                      "RUTH", "POEMS", "POEMTEXT",
-                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                     DEFAULT_INDEX_DESCRIPTOR
                  },
                  {
                      "RUTH", "POEMVIEW", "POEMTEXT",
-                     "org.apache.derby.optional.api.LuceneUtils.standardAnalyzer",
+                     LuceneCoarseAuthorizationTest.STANDARD_ANALYZER
                  },
              },
              false
@@ -745,7 +752,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              {
                  {
                      "RUTH", "POEMS", "POEMTEXT",
-                     "org.apache.derby.optional.api.LuceneUtils.defaultAnalyzer",
+                     DEFAULT_INDEX_DESCRIPTOR
                  },
              },
              false
@@ -762,7 +769,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              ruthConnection,
              "select *\n" +
-             "from table ( ruth.poems__poemText( 'star', null, 1000, null ) ) i\n" +
+             "from table ( ruth.poems__poemText( 'star', 1000, null ) ) i\n" +
              "order by i.score desc\n",
              new String[][]
              {
@@ -846,7 +853,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, null ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, null ) ) t",
              new String[][]
              {
                  { "10", "9", "2.2791052" },
@@ -867,7 +874,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 3, null ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 3, null ) ) t",
              new String[][]
              {
                  { "10", "9", "2.2791052" },
@@ -881,7 +888,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 4, 1.0 ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 4, 1.0 ) ) t",
              new String[][]
              {
                  { "7", "6", "0.97469425" },
@@ -896,7 +903,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', null, 100, 0.2 ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, 0.2 ) ) t",
              new String[][]
              {
                  { "3", "2", "0.17799875" },
@@ -907,10 +914,16 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
         
         // try a different query parser
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'textTable', 'textCol' )" );
+        goodStatement
+            (
+             ruthConnection,
+             "call LuceneSupport.createIndex( 'ruth', 'textTable', 'textCol', '" + CONSTANT_QUERY_PARSER + "' )"
+             );
         assertResults
             (
              ruthConnection,
-             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.constantStringQueryParser', 100, null ) ) t",
+             "select * from table( ruth.textTable__textCol( 'one two three four five six seven eight nine ten', 100, null ) ) t",
              new String[][]
              {
                  { "1", "0", "1.597837" },
@@ -1069,7 +1082,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             (
              conn,
              "call lucenesupport.createindex\n" +
-             "( 'TEST_DBO', 't_6602', 'textcol', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', ? )\n"
+             "( 'TEST_DBO', 't_6602', 'textcol', '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "', ? )"
              );
         ps.setString( 1, cd.name );
         ps.execute();
@@ -1077,7 +1090,7 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select * from table( t_6602__textcol( 'abc or def', null, 3, null ) ) tc order by documentid",
+             "select * from table( t_6602__textcol( 'abc or def', 3, null ) ) tc order by documentid",
              new String[][]
              {
                  { null, "0", "0.35355338" },
@@ -1106,25 +1119,25 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         // create index errors
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.createindex( null, 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.createindex( null, 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.createindex( 'TEST_DBO', null, 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.createindex( 'TEST_DBO', null, 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', null, 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', null,  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', null )" );
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "', null )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer', 'x', null )" );
+              "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "', 'x', null )" );
 
-        goodStatement( dboConnection, "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        goodStatement( dboConnection, "call lucenesupport.createindex( 'TEST_DBO', 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         assertResults
             (
              dboConnection,
-             "select * from table( t_6596__c( 'abc or def', null, 3, null ) ) tc order by documentid",
+             "select * from table( t_6596__c( 'abc or def', 3, null ) ) tc order by documentid",
              new String[][]
              {
                  { "1", "0", "0.35355338" },
@@ -1132,26 +1145,26 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              },
              false
              );
-        goodStatement( dboConnection, "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+        goodStatement( dboConnection, "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         
         // update index errors
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.updateindex( null, 't_6596', 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.updateindex( null, 't_6596', 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.updateindex( 'TEST_DBO', null, 'c', 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.updateindex( 'TEST_DBO', null, 'c',  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', null, 'org.apache.derby.optional.api.LuceneUtils.standardAnalyzer' )" );
+              "call lucenesupport.updateindex( 'TEST_DBO', 't_6596', null,  '" + LuceneCoarseAuthorizationTest.STANDARD_ANALYZER + "' )" );
 
         // query errors
         expectExecutionError
             ( dboConnection, ILLEGAL_NULL_ARG,
-              "select * from table( t_6596__c( null, null, 3, null ) ) tc order by documentid" );
+              "select * from table( t_6596__c( null, 3, null ) ) tc order by documentid" );
         expectExecutionError
             ( dboConnection, NULL_PRIMITIVE_ARG,
-              "select * from table( t_6596__c( 'abc or def', null, null, null ) ) tc order by documentid" );
+              "select * from table( t_6596__c( 'abc or def', null, null ) ) tc order by documentid" );
 
         // drop index errors
         expectExecutionError
@@ -1416,14 +1429,9 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     }
 
     /** Alternative QueryParser maker, which forces the text to be a constant string */
-    public  static  QueryParser constantStringQueryParser
-        (
-         Version version,
-         String fieldName,
-         Analyzer analyzer
-         )
+    public  static  LuceneIndexDescriptor constantStringIndexDescriptor()
     {
-        return new ConstantQueryParser( version, fieldName, analyzer );
+        return new ConstantIndexDescriptor();
     }
     
     /**
@@ -1498,16 +1506,16 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public  static  class   ConstantQueryParser extends QueryParser
+    public  static  class   ConstantQueryParser extends MultiFieldQueryParser
     {
         public  ConstantQueryParser
             (
              Version version,
-             String fieldName,
+             String[] fieldNames,
              Analyzer analyzer
              )
         {
-            super( version, fieldName, analyzer );
+            super( version, fieldNames, analyzer );
         }
 
         public Query parse( String query )  throws ParseException
@@ -1528,6 +1536,22 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
 
         public  String  toString() { return "[ " + name + ", " + type + " ]"; }
+    }
+
+    public  static  class   ConstantIndexDescriptor extends LuceneUtils.DefaultIndexDescriptor
+    {
+        public  ConstantIndexDescriptor() { super(); }
+        
+        public  QueryParser getQueryParser()
+            throws SQLException
+        {
+            return new ConstantQueryParser
+                (
+                 LuceneUtils.currentVersion(),
+                 getFieldNames(),
+                 getAnalyzer()
+                 );
+        }
     }
 
 }
