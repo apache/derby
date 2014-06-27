@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import java.util.List;
 import java.util.Stack;
 import java.util.Hashtable;
-import java.util.Properties;
 
 import java.io.InputStream;
 import java.io.FileInputStream;
@@ -51,7 +50,7 @@ import java.sql.PreparedStatement;
 	single and dual connection ij runs.
 
  */
-public class utilMain implements java.security.PrivilegedAction<Object> {
+public class utilMain {
 
 	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
@@ -213,7 +212,8 @@ public class utilMain implements java.security.PrivilegedAction<Object> {
 		if (firstRun) {
 
 			// figure out which version this is
-			InputStream versionStream = (InputStream) java.security.AccessController.doPrivileged(this);
+            InputStream versionStream = util.getResourceAsStream(
+                    ProductGenusNames.TOOLS_INFO);
 
 			// figure out which version this is
 			ProductVersionHolder ijVersion = 
@@ -827,9 +827,5 @@ public class utilMain implements java.security.PrivilegedAction<Object> {
 	{
         checkScrollableCursor(rs, "GETCURRENTROWNUMBER");
 		return rs.getRow();
-	}
-
-	public final Object run() {
-		return  getClass().getResourceAsStream(ProductGenusNames.TOOLS_INFO);
 	}
 }

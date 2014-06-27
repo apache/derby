@@ -160,7 +160,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	  @param resourceName the name of the resource
 	  @return a buffered stream for the resource if it exists and null otherwise.
 	  */
-	static public InputStream getResourceAsStream(String resourceName) 
+    static InputStream getResourceAsStream(String resourceName)
 	{
 		final Class c = util.class;
 		final String resource = qualifyResourceName(resourceName,true);
