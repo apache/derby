@@ -407,7 +407,7 @@ public final class SecurityManagerSetup extends TestSetup {
         }
         isJars = true;
 		
-		URL derby = getURL("org.apache.derby.jdbc.EmbeddedDataSource");
+		URL derby = getURL("org.apache.derby.jdbc.BasicEmbeddedDataSource40");
         if (derby != null)
 		    classPathSet.setProperty("derbyTesting.codejar", stripJar(derby));
 
