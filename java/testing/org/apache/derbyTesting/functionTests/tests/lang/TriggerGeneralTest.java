@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import org.apache.derby.iapi.db.Factory;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
@@ -871,7 +872,15 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
             {"TABLE", "IX", "T1"}
         };
 
-        JDBC.assertFullResultSet(rs, expRS, true);
+        try {
+            JDBC.assertFullResultSet(rs, expRS, true);
+        } catch (AssertionFailedError e) {
+            // DERBY-6628: get more information
+            dumpRs(st.executeQuery(
+                    "select * from syscs_diag.lock_table " + 
+                    "    order by tablename, type"));
+            throw e;
+        }
 
         rollback();
 
