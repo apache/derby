@@ -2423,6 +2423,18 @@ Guide.
                 <arg>argumentName</arg>
             </msg>
 
+	        <msg>
+                <name>42XBN</name>
+                <text>A field and a key have the same name: '{0}'</text>
+                <arg>fieldName</arg>
+            </msg>
+
+	        <msg>
+                <name>42XBO</name>
+                <text>Duplicate or null field name: '{0}'</text>
+                <arg>fieldName</arg>
+            </msg>
+
             <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>

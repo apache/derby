@@ -43,6 +43,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Properties;
 
 import org.apache.derby.database.Database;
@@ -490,6 +491,9 @@ public class LuceneSupport implements OptionalTool
         String[]  fieldNames = indexDescriptor.getFieldNames();
         Analyzer    analyzer = indexDescriptor.getAnalyzer();
 
+        // make sure the field names don't overlap with the key names
+        sortAndVetFieldNames( fieldNames, primaryKeys );
+
         Properties  indexProperties = new Properties();
         indexProperties.setProperty( LUCENE_VERSION, luceneVersion.toString() );
         indexProperties.setProperty( UPDATE_TIMESTAMP, Long.toString( System.currentTimeMillis() ) );
@@ -591,6 +595,41 @@ public class LuceneSupport implements OptionalTool
         checkNotNull( "SCHEMANAME", schema );
         checkNotNull( "TABLENAME", table );
         checkNotNull( "TEXTCOLUMN", textcol );
+    }
+
+    /**
+     * Raise an exception if a field has the same name as a key or if two
+     * fields have the same name.
+     */
+    private static  void    sortAndVetFieldNames( String[] fieldNames, VTITemplate.ColumnDescriptor[] keys )
+        throws SQLException
+    {
+        for ( String fieldName : fieldNames )
+        {
+            if ( fieldName == null )
+            {
+                throw newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
+            }
+        }
+        Arrays.sort( fieldNames );
+        
+        HashSet<String>   keyNames = new HashSet<String>();
+        for ( VTITemplate.ColumnDescriptor cd : keys ) { keyNames.add( cd.columnName ); }
+
+        String  previousFieldName = null;
+        for ( String fieldName : fieldNames )
+        {
+            if ( fieldName.equals( previousFieldName ) )
+            {
+                throw newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
+            }
+            previousFieldName = fieldName;
+
+            if ( keyNames.contains( fieldName ) )
+            {
+                throw newSQLException( SQLState.LUCENE_FIELD_KEY_CONFLICT, fieldName );
+            }
+        }
     }
     
     /////////////////////////////////////////////////////////////////////

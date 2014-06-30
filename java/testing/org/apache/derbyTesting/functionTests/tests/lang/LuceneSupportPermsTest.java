@@ -105,6 +105,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     private static  final   String      NONEXISTENT_TABLE_FUNCTION  ="42ZB4";
     private static  final   String      INCOMPATIBLE_ENCRYPTION = "42XBL";
     private static  final   String      ILLEGAL_NULL_ARG = "42XBM";
+    private static  final   String      BAD_FIELD_NAME = "42XBN";
+    private static  final   String      DUPLICATE_FIELD_NAME = "42XBO";
     private static  final   String      NULL_PRIMITIVE_ARG = "39004";
 
     private static  final   String      POLICY_FILE = "org/apache/derbyTesting/functionTests/tests/lang/luceneSupport.policy";
@@ -130,6 +132,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     // STATE
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    static  String[]    _fieldNames;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1026,6 +1030,54 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
     
    /**
      * <p>
+     * Test restrictions on field names.
+     * </p>
+     */
+    public  void    test_011_fieldNames()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        loadTestTable( ruthConnection );
+        goodStatement( dboConnection, LOAD_TOOL );
+
+        String  indexTestTable =
+            "call LuceneSupport.createIndex\n" +
+            "(\n" +
+            "    'ruth', 'textTable', 'textCol',\n" +
+            "    'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.makeFieldNameIndexDescriptor'\n" +
+            ")\n";
+        
+        goodStatement
+            (
+             ruthConnection,
+             "create procedure setFieldNames( fieldName varchar( 32672 )... )\n" +
+             "language java parameter style derby no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.LuceneSupportPermsTest.setFieldNames'\n"
+             );
+
+        // Field and key name conflict.
+        goodStatement( ruthConnection, "call setFieldNames( 'KEYCOL' )" );
+        expectExecutionError( ruthConnection, BAD_FIELD_NAME, indexTestTable );
+
+        // Duplicate field names.
+        goodStatement( ruthConnection, "call setFieldNames( 'FOO', 'FOO' )" );
+        expectExecutionError( ruthConnection, DUPLICATE_FIELD_NAME, indexTestTable );
+
+        // Null field name.
+        goodStatement( ruthConnection, "call setFieldNames( 'FOO', null )" );
+        expectExecutionError( ruthConnection, DUPLICATE_FIELD_NAME, indexTestTable );
+        goodStatement( ruthConnection, "call setFieldNames( null, 'FOO' )" );
+        expectExecutionError( ruthConnection, DUPLICATE_FIELD_NAME, indexTestTable );
+
+        goodStatement( ruthConnection, "drop procedure setFieldNames" );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        unloadTestTable( ruthConnection );
+    }
+
+   /**
+     * <p>
      * Test that nulls are allowed in keys. See DERBY-6602.
      * </p>
      */
@@ -1500,6 +1552,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              );
     }
 
+    public  static  void    setFieldNames( String... fieldNames ) { _fieldNames = fieldNames; }
+
+    public  static  LuceneIndexDescriptor   makeFieldNameIndexDescriptor() { return new FieldNameIndexDescriptor(); }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // NESTED CLASSES
@@ -1554,4 +1610,10 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         }
     }
 
+    public  static  class   FieldNameIndexDescriptor extends LuceneUtils.DefaultIndexDescriptor
+    {
+        public  FieldNameIndexDescriptor() { super(); }
+        public  String[]    getFieldNames() { return LuceneSupportPermsTest._fieldNames; }
+    }
+    
 }

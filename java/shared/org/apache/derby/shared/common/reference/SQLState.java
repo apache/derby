@@ -1193,6 +1193,8 @@ public interface SQLState {
     String LUCENE_BAD_VERSION                                           = "42XBK";
     String LUCENE_ENCRYPTED_DB                                           = "42XBL";
     String ARGUMENT_MAY_NOT_BE_NULL                                = "42XBM";
+    String LUCENE_FIELD_KEY_CONFLICT                                = "42XBN";
+    String LUCENE_DUPLICATE_FIELD_NAME                                = "42XBO";
     
 	// org.apache.derby.impl.sql.execute.rts
 	String RTS_ATTACHED_TO											   = "43X00.U";
