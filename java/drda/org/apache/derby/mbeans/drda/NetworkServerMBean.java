@@ -82,26 +82,31 @@ public interface NetworkServerMBean {
     
     /**
      * <p>
-     * Reports whether or not the Derby Network Server will send keepalive 
+     * Reports whether or not the Derby Network Server will send keep-alive 
      * probes and attempt to clean up connections for disconnected clients (the 
-     * value of the <code>derby.drda.keepAlive</code> property).</p>
+     * value of the {@code derby.drda.keepAlive} property).</p>
      * <p>
-     * If <code>true</code>, a keepalive probe is sent to the client if a "long 
+     * If {@code true}, a keep-alive probe is sent to the client if a "long 
      * time" (by default, more than two hours) passes with no other data being 
      * sent or received. This will detect and clean up connections for clients 
      * on powered-off machines or clients that have disconnected unexpectedly.
      * </p>
      * <p>
-     * If false, Derby will not attempt to clean up connections from
-     * disconnected clients, and will not send keepalive probes.</p>
+     * If {@code false}, Derby will not attempt to clean up connections from
+     * disconnected clients, and will not send keep-alive probes.</p>
      * <p>
      * Requires <code>SystemPermission("server", "monitor")</code> if a security
      * manager is installed.</p>
-     * 
-     * @see <a href="http://db.apache.org/derby/docs/dev/adminguide/radmindrdakeepalive.html"><code>derby.drda.keepAlive</code> documentation</a>
-     * @return whether or not the Derby Network Server will send keepalive 
+     * <p>
+     * See also the documentation for the property {@code derby.drda.keepAlive}
+     * in the <em>Derby Server and Administration Guide</em>, section
+     * <em>Managing the Derby Network Server</em>, subsection <em>Setting
+     * Network Server Properties</em>, subsubsection <em>derby.drda.keepAlive
+     * property</em>.
+     * </p>
+     * @return {@code true} if Derby Network Server will send keep-alive 
      *         probes and attempt to clean up connections for disconnected 
-     *         clients (<code>derby.drda.keepAlive</code>)
+     *         clients ({@code derby.drda.keepAlive})
      */
     public boolean getDrdaKeepAlive();
     
