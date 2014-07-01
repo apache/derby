@@ -31,6 +31,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 
 import junit.framework.Assert;
+import junit.framework.AssertionFailedError;
 
 /**
  * JDBC utility methods for the JUnit tests.
@@ -761,22 +762,32 @@ public class JDBC {
 	    int expectedRows) throws SQLException
 	{
 		ResultSetMetaData rsmd = rs.getMetaData();
+        List<List<String>> seen = new ArrayList<List<String>>();
+        List<String> seenRow = new ArrayList<String>();
 		
 		int rows = 0;
 		while (rs.next()) {
 			for (int col = 1; col <= rsmd.getColumnCount(); col++)
 			{
 				String s = rs.getString(col);
+                seenRow.add(s);
 				Assert.assertEquals(s == null, rs.wasNull());
                 if (rs.wasNull())
-                    assertResultColumnNullable(rsmd, col);
+                    assertResultColumnNullable(rs, seen, seenRow, col);
 			}
 			rows++;
+            seen.add(new ArrayList<String>(seenRow));
+            seenRow.clear();
 		}
 		rs.close();
 
-		if (expectedRows >= 0)
-			Assert.assertEquals("Unexpected row count:", expectedRows, rows);
+        if (expectedRows >= 0) {
+            try {
+                Assert.assertEquals("Unexpected row count:", expectedRows, rows);
+            } catch (AssertionFailedError e) {
+                throw addRsToReport(e, rsmd, seen, seenRow, rs);
+            }
+        }
         
         return rows;
 	}
@@ -787,14 +798,26 @@ public class JDBC {
      * ResultSet sees a NULL value. If the value is NULL then
      * the column's definition in ResultSetMetaData must allow NULLs
      * (or not disallow NULLS).
-     * @param rsmd Metadata of the ResultSet
+     * @param rs the resultSet
+     * @param seen The set of entirely read rows so far
+     * @param seenRow The set of read columns in the current row so far
      * @param col Position of column just fetched that was NULL.
      * @throws SQLException Error accessing meta data
      */
-    private static void assertResultColumnNullable(ResultSetMetaData rsmd, int col)
+    private static void assertResultColumnNullable(
+            ResultSet rs,
+            List<List<String>> seen,
+            List<String> seenRow,
+            int col)
     throws SQLException
     {
-        Assert.assertFalse(rsmd.isNullable(col) == ResultSetMetaData.columnNoNulls); 
+        final ResultSetMetaData rsmd = rs.getMetaData();
+
+        try {
+            Assert.assertFalse(rsmd.isNullable(col) == ResultSetMetaData.columnNoNulls);
+        } catch (AssertionFailedError e) {
+            throw addRsToReport(e, rsmd, seen, seenRow, rs);
+        }
     }
 	
     /**
@@ -1064,12 +1087,19 @@ public class JDBC {
         int rows;
         ResultSetMetaData rsmd = rs.getMetaData();
 
+        List<List<String>> seen = new ArrayList<List<String>>();
+        List<String> seenRow = new ArrayList<String>();
+
         // Assert that we have the right number of columns. If we expect an
         // empty result set, the expected column count is unknown, so don't
         // check.
         if (expectedRows.length > 0) {
-            Assert.assertEquals("Unexpected column count:",
-                expectedRows[0].length, rsmd.getColumnCount());
+            try {
+                Assert.assertEquals("Unexpected column count:",
+                        expectedRows[0].length, rsmd.getColumnCount());
+            } catch (AssertionFailedError e) {
+                throw addRsToReport(e, rsmd, seen, seenRow, rs);
+            }
         }
 
         for (rows = 0; rs.next(); rows++)
@@ -1087,10 +1117,14 @@ public class JDBC {
                     wstr = w.getSQLState();
                 }
 
-                Assert.assertEquals(
-                    "Warning assertion error on row " + (rows+1),
-                    warnings[rows],
-                    wstr);
+                try {
+                    Assert.assertEquals(
+                            "Warning assertion error on row " + (rows+1),
+                            warnings[rows],
+                            wstr);
+                } catch (AssertionFailedError e) {
+                    throw addRsToReport(e, rsmd, seen, seenRow, rs);
+                }
             }
 
             /* If we have more actual rows than expected rows, don't
@@ -1099,15 +1133,23 @@ public class JDBC {
              */
             if (rows < expectedRows.length)
             {
-                assertRowInResultSet(rs, rows + 1,
+                // dumps itself in any assertion seem
+                assertRowInResultSet(rs, seen, seenRow, rows + 1,
                     expectedRows[rows], allAsTrimmedStrings);
             }
+
+            seen.add(new ArrayList<String>(seenRow));
+            seenRow.clear();
         }
 
         if ( closeResultSet ) { rs.close(); }
 
         // And finally, assert the row count.
-        Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+        try {
+            Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+        } catch (AssertionFailedError e) {
+            throw addRsToReport(e, rsmd, seen, seenRow, rs);
+        }
     }
 
 
@@ -1146,6 +1188,9 @@ public class JDBC {
         throws SQLException
     {
         int rows;
+        final List<List<String>> seen = new ArrayList<List<String>>();
+        final List<String> seenRow = new ArrayList<String>();
+        final ResultSetMetaData rsmd = rs.getMetaData();
 
         // Assert that we have the right number of columns. If we expect an
         // empty result set, the expected column count is unknown, so don't
@@ -1163,15 +1208,21 @@ public class JDBC {
              */
             if (rows < expectedRows.length)
             {
-                assertRowInResultSet(rs, rows + 1,
+                assertRowInResultSet(rs, seen, seenRow, rows + 1,
                     expectedRows[rows], true, colsToCheck);
             }
+            seen.add(new ArrayList<String>(seenRow));
+            seenRow.clear();
         }
 
         rs.close();
 
         // And finally, assert the row count.
-        Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+        try {
+            Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+        } catch (AssertionFailedError e) {
+            throw addRsToReport(e, rsmd, seen, seenRow, rs);
+        }
     }
 
     /**
@@ -1193,6 +1244,9 @@ public class JDBC {
      * not work if one of the acceptable values is <code>null</code>.)
      *
      * @param rs Result set whose current row we'll check.
+     * @param seen The set of entirely read rows so far (IN semantics)
+     * @param seenRow The set of read columns in the current row so far
+     *                (OUT semantics)
      * @param rowNum Row number (w.r.t expected rows) that we're
      *  checking.
      * @param expectedRow Array of objects representing the expected
@@ -1208,12 +1262,18 @@ public class JDBC {
      *  CHAR(8) column, asTrimmedStrings should be FALSE and the
      *  expected row should contain the expected padding, such as
      *  "FRED    ".
+     * @throws java.sql.SQLException
      */
-    private static void assertRowInResultSet(ResultSet rs, int rowNum,
-        Object [] expectedRow, boolean asTrimmedStrings) throws SQLException
+    private static void assertRowInResultSet(
+            ResultSet rs,
+            List<List<String>> seen,
+            List<String> seenRow,
+            int rowNum,
+            Object [] expectedRow,
+            boolean asTrimmedStrings) throws SQLException
     {
         assertRowInResultSet(
-            rs, rowNum, expectedRow, asTrimmedStrings, (BitSet)null);
+            rs, seen, seenRow, rowNum, expectedRow, asTrimmedStrings, (BitSet)null);
     }
 
     /**
@@ -1233,9 +1293,14 @@ public class JDBC {
      *   result set is compared to the i-th column in expectedRow,
      *   where 0 <= i < expectedRow.length.
      */
-    private static void assertRowInResultSet(ResultSet rs,
-        int rowNum, Object [] expectedRow, boolean asTrimmedStrings,
-        BitSet colsToCheck) throws SQLException
+    private static void assertRowInResultSet(
+            ResultSet rs,
+            List<List<String>> seen,
+            List<String> seenRow,
+            int rowNum,
+            Object [] expectedRow,
+            boolean asTrimmedStrings,
+            BitSet colsToCheck) throws SQLException
     {
         int cPos = 0;
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -1269,7 +1334,6 @@ public class JDBC {
                         obj = (rs.getShort(cPos) == 0) ? "false" : "true";
                     else
                         obj = rs.getString(cPos);
-                        
                 }
                 else
                 {
@@ -1282,8 +1346,11 @@ public class JDBC {
                     obj = ((String)obj).trim();
 
             }
-            else
+            else {
                 obj = rs.getObject(cPos);
+            }
+
+            seenRow.add(obj == null ? "null" : obj.toString());
 
             boolean ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
@@ -1300,15 +1367,20 @@ public class JDBC {
                     expected = bytesToString((byte[] )expectedRow[i]);
                     found = bytesToString((byte[] )obj);
                 }
-                Assert.fail("Column value mismatch @ column '" +
-                    rsmd.getColumnName(cPos) + "', row " + rowNum +
-                    ":\n    Expected: >" + expected +
-                    "<\n    Found:    >" + found + "<");
+
+                try {
+                    Assert.fail("Column value mismatch @ column '" +
+                            rsmd.getColumnName(cPos) + "', row " + rowNum +
+                            ":\n    Expected: >" + expected +
+                            "<\n    Found:    >" + found + "<");
+                } catch (AssertionFailedError e) {
+                    throw addRsToReport(e, rsmd, seen, seenRow, rs);
+                }
             }
             
-            if (rs.wasNull())
-                assertResultColumnNullable(rsmd, cPos);
-
+            if (rs.wasNull()) {
+                assertResultColumnNullable(rs, seen, seenRow, cPos);
+            }
         }
     }
     
@@ -1436,8 +1508,15 @@ public class JDBC {
         }
 
         ResultSetMetaData rsmd = rs.getMetaData();
-        Assert.assertEquals("Unexpected column count",
-                            expectedRows[0].length, rsmd.getColumnCount());
+        List<List<String>> seen = new ArrayList<List<String>>();
+        List<String> seenRow = new ArrayList<String>();
+
+        try {
+            Assert.assertEquals("Unexpected column count",
+                    expectedRows[0].length, rsmd.getColumnCount());
+        } catch (AssertionFailedError e) {
+            throw addRsToReport(e, rsmd, seen, seenRow, rs);
+        }
 
         List<List<String>> expected =
                 new ArrayList<List<String>>(expectedRows.length);
@@ -1461,34 +1540,42 @@ public class JDBC {
             List<String> row = new ArrayList<String>(expectedRows[0].length);
             for (int i = 1; i <= expectedRows[0].length; i++) {
                 String s = rs.getString(i);
+                seenRow.add(s);
 
                 row.add(asTrimmedStrings ?
                         (s == null ? null : s.trim()) :
                         s);
 
-                if (rs.wasNull())
-                    assertResultColumnNullable(rsmd, i);
+                if (rs.wasNull()) {
+                    assertResultColumnNullable(rs, seen, seenRow, i);
+                }
             }
             actual.add(row);
+            seen.add(new ArrayList<String>(seenRow));
+            seenRow.clear();
         }
         rs.close();
 
-        if (rowCountsMustMatch) {
-            String message = "Unexpected row count, expected: " +
-                    expectedRows.length + ", actual: " + actual.size() + "\n" +
-                    "\t expected rows: \n\t\t" + expected + 
-                    "\n\t actual result: \n\t\t" + actual + "\n";
-            Assert.assertEquals(message,
-                                expectedRows.length, actual.size());
-        }
-        if ( !actual.containsAll(expected) )
-        {
-            expected.removeAll( actual );
-            BaseTestCase.println
-                ( "These expected rows don't appear in the actual result: " + expected );
-            String message = "Missing rows in ResultSet; \n\t expected rows: \n\t\t" 
-                + expected + "\n\t actual result: \n\t\t" + actual;
-            Assert.fail( message );
+        try {
+            if (rowCountsMustMatch) {
+                String message = "Unexpected row count, expected: " +
+                        expectedRows.length + ", actual: " + actual.size() + "\n" +
+                        "\t expected rows: \n\t\t" + expected +
+                        "\n\t actual result: \n\t\t" + actual + "\n";
+                Assert.assertEquals(message,
+                        expectedRows.length, actual.size());
+            }
+            if ( !actual.containsAll(expected) )
+            {
+                expected.removeAll( actual );
+                BaseTestCase.println
+                        ( "These expected rows don't appear in the actual result: " + expected );
+                String message = "Missing rows in ResultSet; \n\t expected rows: \n\t\t"
+                        + expected + "\n\t actual result: \n\t\t" + actual;
+                Assert.fail( message );
+            }
+        } catch (AssertionFailedError e) {
+            throw addRsToReport(e, rsmd, seen, seenRow, rs);
         }
     }
 
@@ -1700,6 +1787,93 @@ public class JDBC {
 
         RuntimeStatisticsParser rtsp = new RuntimeStatisticsParser(rts);
         rtsp.assertSequence(sequence);
+    }
+
+    private static AssertionFailedError addRsToReport(
+            AssertionFailedError afe,
+            ResultSetMetaData rsmd,
+            List<List<String>> seen,
+            List<String> seenRow,
+            ResultSet rs) throws SQLException {
+
+        if (rs == null) {
+            return new AssertionFailedError(afe.getMessage() + "\n<NULL>");
+        }
+
+        final int c = rsmd.getColumnCount();
+        StringBuilder heading = new StringBuilder("    ");
+        StringBuilder underline = new StringBuilder("    ");
+
+        // Display column headings
+        for (int i=1; i<= c; i++) {
+            if (i > 1) {
+                heading.append(",");
+                underline.append(" ");
+            }
+
+            int len = heading.length();
+            heading.append(rsmd.getColumnLabel(i));
+            len = heading.length() - len;
+
+            for (int j = len; j > 0; j--) {
+                underline.append("-");
+            }
+        }
+
+        heading.append("\n");
+        underline.append("\n");
+
+        StringBuilder rowImg = new StringBuilder();
+        rowImg.append(afe.getMessage()).
+               append("\n\n").
+               append(heading.toString()).
+               append(underline.toString());
+
+        if (!rs.isClosed()) {
+            final int s = seenRow.size();
+
+            // Get any rest of columns of current row
+            for (int i=0; i < c - s; i++) {
+                String column = null;
+
+                try {
+                    column = rs.getString(s + i + 1);
+                } catch (SQLException e) {
+                    // We may not yet have called next?
+                    if (e.getSQLState().equals("24000")) {
+                        if (rs.next()) {
+                            column = rs.getString(s + i + 1);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                seenRow.add(column);
+            }
+
+            if (seenRow.size() > 0) {
+                seen.add(new ArrayList<String>(seenRow));
+                seenRow.clear();
+            }
+
+            // Get any remaining rows
+            while (rs.next()) {
+                for (int i = 0; i < c; i++) {
+                    seenRow.add(rs.getString(i + 1));
+                }
+                seen.add(new ArrayList<String>(seenRow));
+                seenRow.clear();
+            }
+        }
+
+        // Display data
+        for (List<String> row : seen) {
+            rowImg.append("   ").
+                   append(row.toString()).
+                   append("\n");
+        }
+
+        return new AssertionFailedError(rowImg.toString());
     }
 
 }
