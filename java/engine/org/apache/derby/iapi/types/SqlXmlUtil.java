@@ -33,6 +33,7 @@ import java.util.List;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 // -- JDBC 3.0 JAXP API classes.
 
@@ -298,7 +299,7 @@ public class SqlXmlUtil
     protected String serializeToString(String xmlAsText)
         throws Exception
     {
-        ArrayList<Document> aList = new ArrayList<Document>();
+        Document doc;
 
         /* The call to dBuilder.parse() is a call to an external
          * (w.r.t. to Derby) JAXP parser.  If the received XML
@@ -311,14 +312,14 @@ public class SqlXmlUtil
         try {
 
             final InputSource is = new InputSource(new StringReader(xmlAsText));
-            aList.add(java.security.AccessController.doPrivileged(
+            doc = java.security.AccessController.doPrivileged(
                 new java.security.PrivilegedExceptionAction<Document>()
                 {
                     public Document run() throws IOException, SAXException
                     {
                         return dBuilder.parse(is);
                     }
-                }));
+                });
 
         } catch (java.security.PrivilegedActionException pae) {
 
@@ -342,7 +343,7 @@ public class SqlXmlUtil
          * don't have a top-level attribute node in the list,
          * so we don't have to worry.  Hence the "null" here.
          */
-        return serializeToString(aList, null);
+        return serializeToString(Collections.singletonList(doc), null);
     }
 
     /**
@@ -360,7 +361,10 @@ public class SqlXmlUtil
      * for the rest of the serialization work, we just make calls on the
      * DOMSerializer class provided by Xalan.
      *
-     * @param items List of items to serialize
+     * @param items List of items to serialize. It should either be
+     *  a list of a single string value (in case it's the result of
+     *  an XMLQUERY operation that returns an atomic value), or a list
+     *  of zero or more Node objects.
      * @param xmlVal XMLDataValue into which the serialized string
      *  returned by this method is ultimately going to be stored.
      *  This is used for keeping track of XML values that represent
@@ -372,12 +376,19 @@ public class SqlXmlUtil
     protected String serializeToString(List items,
         XMLDataValue xmlVal) throws TransformerException
     {
-        if ((items == null) || items.isEmpty()) {
-        // nothing to do; return empty sequence.
+        // If we have an empty sequence, return an empty value immediately.
+        if (items.isEmpty()) {
             return "";
         }
 
-        java.io.StringWriter sWriter = new java.io.StringWriter();
+        // If it contains a single string, just return that string.
+        if (items.size() == 1 && items.get(0) instanceof String) {
+            return (String) items.get(0);
+        }
+
+        // Otherwise, it's a non-empty list of Node objects.
+
+        StringWriter sWriter = new StringWriter();
 
         // Serializer should have been set by now.
         if (SanityManager.DEBUG)
@@ -386,45 +397,10 @@ public class SqlXmlUtil
                 "Tried to serialize with uninitialized XML serializer.");
         }
 
-        /* Step 1: Empty sequence.  If we have an empty sequence then we
-         * won't ever enter the for loop and the call to sWriter.toString()
-         * at the end of this method will return an empty string, as
-         * required.  Otherwise, for a non-empty sequence our "items"
-         * list already corresponds to "S1".
-         */
-
         // Iterate through the list and serialize each item.
-        boolean lastItemWasString = false;
         for (Object obj : items)
         {
-            // if it's a string, then this corresponds to some atomic
-            // value, so just echo the string as it is.
-            if (obj instanceof String)
-            {
-                /* Step 2: Atomic values.  If "obj" is a string then it
-                 * corresponds to some atomic value whose "lexical
-                 * representation" is obj.  So we just take that.
-                 */
-
-                if (lastItemWasString)
-                {
-                    /* Step 3: Adjacent strings.  If we have multiple adjacent
-                     * strings then concatenate them with a single space
-                     * between them.
-                     */
-                    sWriter.write(" ");
-                }
-
-                /* Step 4: Create a Text node from the adjacent strings.
-                 * Since we're just going to serialize the Text node back
-                 * into a string, we short-cut this step by skipping the
-                 * creation of the Text node and just writing the string
-                 * out directly to our serialized stream.
-                 */
-                sWriter.write((String)obj);
-                lastItemWasString = true;
-            }
-            else if (obj instanceof Attr)
+            if (obj instanceof Attr)
             {
                 /* Step 7a: Attribute nodes.  If there is an Attribute node
                  * node in the sequence then we have to throw a serialization
@@ -453,11 +429,9 @@ public class SqlXmlUtil
                  * explicit call to serialize the sequence, we'll throw the
                  * appropriate error (see XML.XMLSerialize()).
                  */
-                if (xmlVal != null)
-                    xmlVal.markAsHavingTopLevelAttr();
+                xmlVal.markAsHavingTopLevelAttr();
                 serializer.transform(
                         new DOMSource((Node) obj), new StreamResult(sWriter));
-                lastItemWasString = false;
             }
             else
             { // We have a Node, so try to serialize it.
@@ -493,8 +467,6 @@ public class SqlXmlUtil
                     serializer.transform(
                             new DOMSource(n), new StreamResult(sWriter));
                 }
-
-                lastItemWasString = false;
             }
         }
 
