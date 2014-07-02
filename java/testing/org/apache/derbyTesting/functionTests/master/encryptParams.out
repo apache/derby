@@ -112,12 +112,20 @@ connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=Thurs
 ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
 ERROR XBM01: Startup failed due to an exception. See next exception for details. 
 ERROR XBCXI: The feedback mode 'CNN' is not supported. Supported feedback modes are CBC, CFB, OFB and ECB.
-ij> -- create a new database with a bad provider
+ij> -- create a new database with a provider class that doesn't exist
 -- should not work
 connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionProvider=com.foo.bar';
 ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
 ERROR XBM0G: Failed to start encryption engine. Please make sure you are running Java 2 and have downloaded an encryption provider such as jce and put it in your class path. 
 ERROR XBCXF: The class 'com.foo.bar' representing the encryption provider cannot be found.
+ERROR XJ001: Java exception: 'com.foo.bar: java.lang.ClassNotFoundException'.
+ij> -- create a new database with a provider class that doesn't implement the
+-- java.security.Provider interface
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionProvider=java.lang.Object';
+ERROR XJ041: Failed to create database 'wombatBad', see the next exception for details.
+ERROR XBM01: Startup failed due to an exception. See next exception for details. 
+ERROR XBCXF: The class 'java.lang.Object' does not implement the java.security.Provider interface.
 ij> -- create a new database with a bad encryption algorithm format
 -- should not work
 connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DES';

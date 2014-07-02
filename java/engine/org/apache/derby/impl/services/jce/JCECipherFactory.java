@@ -24,13 +24,7 @@ package org.apache.derby.impl.services.jce;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.shared.common.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
@@ -38,15 +32,15 @@ import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Properties;
 import java.util.Enumeration;
-import java.security.Key;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.MessageDigest;
-import java.security.spec.KeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,13 +48,11 @@ import java.io.DataInputStream;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 /**
@@ -68,7 +60,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
 
 	@see CipherFactory
  */
-public final class JCECipherFactory implements CipherFactory, java.security.PrivilegedExceptionAction<Object>
+public final class JCECipherFactory implements CipherFactory
 {
     private final static String MESSAGE_DIGEST = "MD5";
 
@@ -110,9 +102,6 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	    This does not include the MD5 checksum bytes
 	 */
 	private final static int VERIFYKEY_DATALEN = 4096;
-	private StorageFile activeFile;
-	private int action;
-	private String activePerms;
 
 
     /*
@@ -547,9 +536,24 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 				// provider package should be set by property
 				if (Security.getProvider(cryptoProviderShort) == null)
 				{
-					action = 1;
+                    Class cryptoClass = Class.forName(cryptoProvider);
+                    if (!Provider.class.isAssignableFrom(cryptoClass)) {
+                        throw StandardException.newException(
+                                SQLState.ENCRYPTION_NOT_A_PROVIDER,
+                                cryptoProvider);
+                    }
+
+                    final Provider provider =
+                            (Provider) cryptoClass.newInstance();
+
 					// add provider through privileged block.
-					java.security.AccessController.doPrivileged(this);
+                    AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                        @Override
+                        public Void run() {
+                            Security.addProvider(provider);
+                            return null;
+                        }
+                    });
 				}
 			}
 
@@ -604,10 +608,21 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 
 			return;
 		}
-		catch (java.security.PrivilegedActionException  pae)
+        catch (ClassNotFoundException cnfe)
+        {
+            t = StandardException.newException(
+                    SQLState.ENCRYPTION_NO_PROVIDER_CLASS,
+                    cnfe,
+                    cryptoProvider);
+        }
+        catch (InstantiationException ie)
 		{
-			t = pae.getException();
+            t = ie;
 		}
+        catch (IllegalAccessException iae)
+        {
+            t = iae;
+        }
 		catch (NoSuchAlgorithmException nsae)
 		{
 			t = nsae;
@@ -848,39 +863,6 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
     }
 
 	/**
-	 	perform actions with privileges enabled.
-	 */
-	public final Object run() throws StandardException, InstantiationException, IllegalAccessException {
-
-		try {
-
-			switch(action)
-			{
-				case 1:
-					Security.addProvider(
-					(Provider)(Class.forName(cryptoProvider).newInstance()));
-					break;
-				case 2:
-					// SECURITY PERMISSION - MP1 and/or OP4
-					// depends on the value of activePerms
-					return activeFile.getRandomAccessFile(activePerms);
-                case 3:
-                    return activeFile.getInputStream();
-
-			}
-
-		} catch (ClassNotFoundException cnfe) {
-			throw StandardException.newException(SQLState.ENCRYPTION_NO_PROVIDER_CLASS,cryptoProvider);
-		}
-		catch(FileNotFoundException fnfe) {
-			throw StandardException.newException(SQLState.ENCRYPTION_UNABLE_KEY_VERIFICATION,cryptoProvider);
-		}
-		return null;
-	}
-
-
-
-	/**
 	    The database can be encrypted with an encryption key given in connection url.
 	    For security reasons, this key is not made persistent in the database.
 
@@ -1028,16 +1010,23 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	 	@return	StorageRandomAccessFile returns file with fileName for writing
 		@exception IOException Any exception during accessing the file for read/write
 	 */
-	private StorageRandomAccessFile privAccessFile(StorageFactory storageFactory,String fileName,String filePerms)
+    private StorageRandomAccessFile privAccessFile(
+            StorageFactory storageFactory,
+            String fileName,
+            final String filePerms)
 		throws java.io.IOException
 	{
-		StorageFile verifyKeyFile = storageFactory.newStorageFile("",fileName);
-		activeFile  = verifyKeyFile;
-		this.action = 2;
-		activePerms = filePerms;
+        final StorageFile verifyKeyFile =
+                storageFactory.newStorageFile("", fileName);
 	    try
         {
-			return (StorageRandomAccessFile)java.security.AccessController.doPrivileged(this);
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<StorageRandomAccessFile>() {
+                @Override
+                public StorageRandomAccessFile run() throws IOException {
+                    return verifyKeyFile.getRandomAccessFile(filePerms);
+                }
+            });
 		}
 		catch( java.security.PrivilegedActionException pae)
 		{
@@ -1055,16 +1044,24 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	private InputStream privAccessGetInputStream(StorageFactory storageFactory,String fileName)
 	throws StandardException
 	{
-	    StorageFile verifyKeyFile = storageFactory.newStorageFile("",fileName);
-	    activeFile  = verifyKeyFile;
-	    this.action = 3;
+        final StorageFile verifyKeyFile
+                = storageFactory.newStorageFile("", fileName);
 	    try
 	    {
-	        return (InputStream)java.security.AccessController.doPrivileged(this);
+            return AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<InputStream>() {
+                @Override
+                public InputStream run() throws FileNotFoundException {
+                    return verifyKeyFile.getInputStream();
+                }
+            });
 	    }
 	    catch( java.security.PrivilegedActionException pae)
 	    {
-	        throw (StandardException)pae.getException();
+            throw StandardException.newException(
+                    SQLState.ENCRYPTION_UNABLE_KEY_VERIFICATION,
+                    pae.getCause(),
+                    cryptoProvider);
 	    }
 	}
 

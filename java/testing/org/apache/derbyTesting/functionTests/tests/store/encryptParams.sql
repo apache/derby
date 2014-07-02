@@ -98,9 +98,14 @@ connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=Thurs
 -- should not work
 connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionAlgorithm=DES/CNN/NoPadding';
 
--- create a new database with a bad provider
+-- create a new database with a provider class that doesn't exist
 -- should not work
 connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionProvider=com.foo.bar';
+
+-- create a new database with a provider class that doesn't implement the
+-- java.security.Provider interface
+-- should not work
+connect 'jdbc:derby:wombatBad;create=true;dataEncryption=true;bootPassword=ThursdaySaturday;encryptionProvider=java.lang.Object';
 
 -- create a new database with a bad encryption algorithm format
 -- should not work

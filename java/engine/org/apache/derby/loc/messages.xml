@@ -4002,6 +4002,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>XBCXF.S.1</name>
+                <text>The class '{0}' does not implement the java.security.Provider interface.</text>
+                <arg>className</arg>
+            </msg>
+
+            <msg>
                 <name>XBCXG.S</name>
                 <text>The encryption provider '{0}' does not exist.</text>
                 <arg>providerName</arg>
