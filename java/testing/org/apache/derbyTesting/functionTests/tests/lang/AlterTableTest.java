@@ -1228,10 +1228,22 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 new String[][]{ {v, s, inc} });
     }
 
-    public void testAlterColumn() throws Exception {
-        Statement st = createStatement();
-        createTestObjects(st);
-        // tests for ALTER TABLE ALTER COLUMN [NOT] NULL
+    /**
+     * Test cases for altering the nullability of a column. Derby supports
+     * two different syntaxes: A legacy syntax for backwards compatibility
+     * ({@code ALTER TABLE t ALTER COLUMN c [NOT] NULL}), and SQL standard
+     * syntax ({@code ALTER TABLE t ALTER COLUMN c SET NOT NULL}, and
+     * {@code ALTER TABLE t ALTER COLUMN c DROP NOT NULL}).
+     *
+     * @param st a statement to use for executing SQL statements
+     * @param standardSyntax if true, test the standard SQL syntax;
+     *   otherwise, test the legacy syntax
+     * @throws SQLException if a database error occurs
+     */
+    private void testAlterColumnNullability(
+            Statement st, boolean standardSyntax) throws SQLException {
+        final String setNotNull = standardSyntax ? "SET NOT NULL" : "NOT NULL";
+        final String dropNotNull = standardSyntax ? "DROP NOT NULL" : "NULL";
 
         st.executeUpdate(
                 "create table atmcn_1 (a integer, b integer not null)");
@@ -1253,7 +1265,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
-        st.executeUpdate("alter table atmcn_1 alter column a not null");
+        st.executeUpdate("alter table atmcn_1 alter column a " + setNotNull);
 
         // should fail because a cannot be null
 
@@ -1274,7 +1286,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
-        st.executeUpdate("alter table atmcn_1 alter column b null");
+        st.executeUpdate("alter table atmcn_1 alter column b " + dropNotNull);
         st.executeUpdate("insert into atmcn_1 (a) values (1)");
 
         rs = st.executeQuery("select * from atmcn_1");
@@ -1294,7 +1306,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // NULL should fail
 
         assertStatementError("X0Y80", st,
-                "alter table atmcn_1 alter column b not null");
+                "alter table atmcn_1 alter column b " + setNotNull);
 
         // show that a column which is part of the PRIMARY KEY 
         // cannot be modified NULL
@@ -1304,7 +1316,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "key, b integer not null)");
 
         assertStatementError("42Z20", st,
-                " alter table atmcn_2 alter column a null");
+                " alter table atmcn_2 alter column a " + dropNotNull);
 
         st.executeUpdate(
                 " create table atmcn_3 (a integer not null, b " +
@@ -1315,7 +1327,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "primary key(a, b)");
 
         assertStatementError("42Z20", st,
-                " alter table atmcn_3 alter column b null");
+                " alter table atmcn_3 alter column b " + dropNotNull);
 
         // verify that the keyword "column" in the ALTER TABLE ... 
         // ALTER COLUMN ... statement is optional:
@@ -1323,7 +1335,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "create table atmcn_4 (a integer not null, b integer)");
 
-        st.executeUpdate("alter table atmcn_4 alter a null");
+        st.executeUpdate("alter table atmcn_4 alter a " + dropNotNull);
 
         //set column, part of unique constraint, to null
 
@@ -1331,7 +1343,49 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "create table atmcn_5 (a integer not null, b integer " +
                 "not null unique)");
 
-        st.executeUpdate("alter table atmcn_5 alter column b null");
+        st.executeUpdate("alter table atmcn_5 alter column b " + dropNotNull);
+
+        // SET NOT NULL on an already not nullable column, or DROP NOT NULL
+        // on an already nullable column, should be a no-op.
+
+        st.execute("create table atmcn_6 (a integer not null, b integer)");
+
+        for (int i = 0; i < 2; i++) {
+            st.execute("alter table atmcn_6 alter column a " + setNotNull);
+            st.execute("alter table atmcn_6 alter column b " + dropNotNull);
+
+            rs = st.executeQuery("select * from atmcn_6");
+            JDBC.assertNullability(rs, new boolean[] { false, true });
+            JDBC.assertEmpty(rs);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            st.execute("alter table atmcn_6 alter column a " + dropNotNull);
+            st.execute("alter table atmcn_6 alter column b " + setNotNull);
+
+            rs = st.executeQuery("select * from atmcn_6");
+            JDBC.assertNullability(rs, new boolean[] { true, false });
+            JDBC.assertEmpty(rs);
+        }
+
+        // The syntax is SET NOT NULL and DROP NOT NULL. Verify that it
+        // fails with a syntax error if SET NULL or DROP NULL is used.
+        assertCompileError("42X01", "alter table t alter column c set null");
+        assertCompileError("42X01", "alter table t alter column c drop null");
+
+        rollback();
+    }
+
+    public void testAlterColumn() throws Exception {
+        setAutoCommit(false);
+        Statement st = createStatement();
+        createTestObjects(st);
+
+        // tests for ALTER TABLE ALTER COLUMN [NOT] NULL, and the
+        // equivalents ALTER TABLE ALTER COLUMN SET NOT NULL and
+        // ALTER TABLE ALTER COLUMN DROP NOT NULL
+        testAlterColumnNullability(st, true);
+        testAlterColumnNullability(st, false);
 
         // tests for ALTER TABLE ALTER COLUMN DEFAULT
 
@@ -1343,11 +1397,11 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into atmod_1 values (default, 'minus one')");
         st.executeUpdate("insert into atmod_1 (b) values ('b')");
 
-        rs = st.executeQuery("select * from atmod_1");
+        ResultSet rs = st.executeQuery("select * from atmod_1");
 
         JDBC.assertColumnNames(rs, new String[]{"A", "B"});
 
-        expRS = new String[][]{
+        String[][] expRS = {
                     {"1", "one"},
                     {"-1", "minus one"},
                     {"-1", "b"}
@@ -1700,7 +1754,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             pSt.setObject(i, rs.getObject(i));
         }
         rs = pSt.executeQuery();
-        expColNames = new String[]{"A", "BB_GUN", "C"};
+        String[] expColNames = {"A", "BB_GUN", "C"};
 
         JDBC.assertColumnNames(rs, expColNames);
 

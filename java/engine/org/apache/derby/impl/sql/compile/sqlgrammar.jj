@@ -13635,6 +13635,8 @@ addColumnDefinition(TableElementList tableElementList) throws StandardException 
  *		RESTART WITH increment_restart_value
  *		[SET | WITH] DEFAULT default_value
  *      DROP DEFAULT
+ *      SET NOT NULL
+ *      DROP NOT NULL
  *      [NOT] NULL
  */
 TableElementNode
@@ -13695,6 +13697,7 @@ columnAlterClause(String columnName) throws StandardException :
 										   autoIncrementInfo);
 	}
 |
+    LOOKAHEAD ({getToken(1).kind == DROP && getToken(2).kind == _DEFAULT})
 	<DROP> <_DEFAULT>
     {
 
@@ -13705,8 +13708,11 @@ columnAlterClause(String columnName) throws StandardException :
 										   autoIncrementInfo);
 	}
 |
-	LOOKAHEAD ({getToken(1).kind == NULL })
-	<NULL>
+    // The SQL standard syntax is DROP NOT NULL. Also accept Derby legacy
+    // syntax, which is simply NULL.
+    LOOKAHEAD ({getToken(1).kind == NULL ||
+                 (getToken(1).kind == DROP && getToken(2).kind == NOT)})
+    ( <NULL> | <DROP> <NOT> <NULL> )
 	{
 		// for a MODIFY column NULL clause form a modify_column node
 		// with all null values. In a column definition a [NOT] NULL
@@ -13722,8 +13728,11 @@ columnAlterClause(String columnName) throws StandardException :
                                  getContextManager());
 	}
 |
-	LOOKAHEAD({getToken(1).kind == NOT})
-	<NOT> <NULL>
+    // The SQL standard syntax is SET NOT NULL. Also accept Derby legacy
+    // syntax NOT NULL.
+    LOOKAHEAD({getToken(1).kind == NOT ||
+                (getToken(1).kind == SET && getToken(2).kind == NOT)})
+    ( <NOT> <NULL> | <SET> <NOT> <NULL> )
 	{
 		// for a MODIFY column NOT NULL clause form a modify_column node
 		// with all null values. In a column definition a [NOT] NULL
