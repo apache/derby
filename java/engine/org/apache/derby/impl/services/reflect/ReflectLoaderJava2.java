@@ -22,7 +22,6 @@
 package org.apache.derby.impl.services.reflect;
 
 import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.sql.compile.CodeGeneration;
 
 final class ReflectLoaderJava2 extends ClassLoader {
 
@@ -56,7 +55,7 @@ final class ReflectLoaderJava2 extends ClassLoader {
 	/**
 		Load a generated class from the passed in class data.
 	*/
-	public LoadedGeneratedClass loadGeneratedClass(String name, ByteArray classData) {
+    LoadedGeneratedClass loadGeneratedClass(String name, ByteArray classData) {
 
 		Class jvmClass = defineClass(name, classData.getArray(), classData.getOffset(), classData.getLength());
 
