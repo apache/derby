@@ -185,7 +185,9 @@ public class utilMain {
 				JDBCDisplayUtil.ShowException(out, i); // will continue past driver failure
 			} catch (IllegalAccessException ia) {
 				JDBCDisplayUtil.ShowException(out, ia); // will continue past driver failure
-			}
+            } catch (ijException ie) {
+                JDBCDisplayUtil.ShowException(out, ie); // will continue past driver failure
+            }
 		}
 	}
 

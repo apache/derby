@@ -558,8 +558,14 @@ public abstract class SequenceUpdater implements Cacheable
             {
                 return new SequenceRange( Integer.parseInt( className ) );
             }
-            
-            return (SequencePreallocator) Class.forName( className ).newInstance();
+
+            Class<?> klass = Class.forName(className);
+            if (!SequencePreallocator.class.isAssignableFrom(klass)) {
+                throw StandardException.newException(
+                    SQLState.LANG_NOT_A_SEQUENCE_PREALLOCATOR, propertyName);
+            }
+
+            return (SequencePreallocator) klass.newInstance();
         }
         catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
         catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }

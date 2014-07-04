@@ -53,7 +53,7 @@ IJ ERROR: Unable to establish connection
 ij> -- moved from errorcode.sql
 -- specify an invalid driver
 driver 'java.lang.Integer';
-IJ ERROR: Could not locate class java.lang.Integer
+IJ ERROR: The class 'java.lang.Integer' does not implement the interface 'java.sql.Driver'.
 ij> -- now a valid driver
 driver 'org.apache.derby.jdbc.EmbeddedDriver';
 ij> -- specify an invalid database

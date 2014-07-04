@@ -33,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -44,6 +45,7 @@ import java.sql.Types;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.Locale;
+import javax.sql.DataSource;
 
 /**
 	Methods used to control setup for apps as
@@ -53,7 +55,6 @@ import java.util.Locale;
  */
 public final class util implements java.security.PrivilegedAction<String> {
 	
-	private static final Class[] DS_GET_CONN_TYPES = {"".getClass(), "".getClass()};
 	private util() {}
 
 	//-----------------------------------------------------------------
@@ -345,24 +346,23 @@ public final class util implements java.security.PrivilegedAction<String> {
     public static Connection getDataSourceConnection(String dsName,String user,String password,
     												String dbName,boolean firstTime) throws SQLException{
 		// Get a new proxied connection through DataSource
-		Object ds = null; // really javax.sql.DataSource
+        DataSource ds;
 		try {
 			
 		    Class<?> dc = Class.forName(dsName);
-		    ds = dc.newInstance();
-		    
+            if (DataSource.class.isAssignableFrom(dc)) {
+                ds = (DataSource) dc.newInstance();
+            } else {
+                throw new ijException(LocalizedResource.getMessage(
+                    "TL_notInstanceOf", dsName, DataSource.class.getName()));
+            }
+
 		    // set datasource properties
 		    setupDataSource(ds,dbName,firstTime);	   
 
-		    // Java method call "by hand" {  con = ds.getConnection(); }
-		    // or con = ds.getConnection(user, password)
-		    	
-			java.lang.reflect.Method m = 
-				user == null ? dc.getMethod("getConnection", null) :
-					 dc.getMethod("getConnection", DS_GET_CONN_TYPES);
-				
-			return (java.sql.Connection) m.invoke(ds,
-					 user == null ? null : new String[] {user, password});
+            return user == null
+                    ? ds.getConnection()
+                    : ds.getConnection(user, password);
 		} catch (InvocationTargetException ite)
 		{
 			if (ite.getTargetException() instanceof SQLException)
@@ -754,8 +754,16 @@ AppUI.out.println("SIZE="+l);
 			create an instance.
 		@exception IllegalAccessException if driver class constructor not visible.
 	 */
-	public static void loadDriver(String driverClass) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        Class.forName(driverClass).newInstance();
+    static void loadDriver(String driverClass)
+            throws ClassNotFoundException, InstantiationException,
+                   IllegalAccessException {
+        Class<?> klass = Class.forName(driverClass);
+        if (Driver.class.isAssignableFrom(klass)) {
+            klass.newInstance();
+        } else {
+            throw new ijException(LocalizedResource.getMessage(
+                    "TL_notInstanceOf", driverClass, Driver.class.getName()));
+        }
 	}
 
 	/**

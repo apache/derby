@@ -3834,6 +3834,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>X0Y85.S.1</name>
+                <text>The Derby property '{0}' identifies a class which does not implement the org.apache.derby.catalog.SequencePreallocator interface.</text>
+                <arg>propertyName</arg>
+            </msg>
+
+            <msg>
                 <name>X0Y86.S</name>
                 <text>Derby could not obtain the locks needed to release the unused, preallocated values for the sequence '{0}'.'{1}'. As a result, unexpected gaps may appear in this sequence.</text>
                 <arg>schemaName</arg>

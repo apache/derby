@@ -27,6 +27,7 @@ import java.io.StringReader;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -131,6 +132,7 @@ public final class dblook {
 		if (!loadDriver()) {
 		// Failed when loading the driver.  We already logged
 		// the exception, so just return.
+            Logs.cleanup();    // Make sure the error log is flushed to disk.
 			return;
 		}
 
@@ -321,7 +323,15 @@ public final class dblook {
 	    }
 
 		try {
-			Class.forName(derbyDriver).newInstance();
+            Class<?> klass = Class.forName(derbyDriver);
+            if (Driver.class.isAssignableFrom(klass)) {
+                klass.newInstance();
+            } else {
+                Logs.debug(
+                        "TL_notInstanceOf",
+                        new String[] { derbyDriver, Driver.class.getName() });
+                return false;
+            }
 	    }
 		catch (Exception e)
 		{
