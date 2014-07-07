@@ -124,6 +124,8 @@ This is a feature release. The following new features were added:
 
 <li><b>New ij HoldForConnection command</b> - A new ij command has been added to change the default cursor holdability to "keep cursors open after commit." See the section on the HoldForConnection command in the Derby Tools and Utilities Guide.</li>
 
+<li><b>Standard syntax for altering column nullability</b> - Standard syntax has been added for altering the nullability of columns. See the section on ALTER TABLE in the Derby Reference Manual. See also feature F383 of the SQL Standard.</li>
+
 </ul>
 
 </newFeatures>

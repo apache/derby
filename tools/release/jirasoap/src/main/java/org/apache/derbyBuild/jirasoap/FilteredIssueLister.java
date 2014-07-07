@@ -609,7 +609,7 @@ public class FilteredIssueLister {
         Iterator rcIter = rcs.iterator();
 
         // Build JQL query.
-        String jql = "project = DERBY AND resolution = fixed AND fixversion ";
+        String jql = "project = DERBY AND resolution = fixed AND component not in ( Test ) AND fixversion ";
         StringBuffer sb = new StringBuffer("in (");
         while (rcIter.hasNext()) {
             DerbyVersion rc = (DerbyVersion)rcIter.next();

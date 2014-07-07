@@ -85,15 +85,15 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual.</li>
+<b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual. See also features F312, F313, and F314 of the SQL Standard.</li>
 
 
 <li>
-<b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual.</li>
+<b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual. See also features F721 and F492 of the SQL Standard.</li>
 
 
 <li>
-<b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual.</li>
+<b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual. See also feature T211-05 of the SQL Standard.</li>
 
 
 <li>
@@ -105,7 +105,7 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>Simple case expression</b> - The "simple" and "extended" syntax for CASE expressions has been added. See the section on the CASE expression in the Derby Reference Manual.</li>
+<b>Simple case expression</b> - The "simple" and "extended" syntax for CASE expressions has been added. See the section on the CASE expression in the Derby Reference Manual. See also features F261-01, F262, and F263 of the SQL Standard.</li>
 
 
 <li>
@@ -114,6 +114,10 @@ This is a feature release. The following new features were added:
 
 <li>
 <b>New ij HoldForConnection command</b> - A new ij command has been added to change the default cursor holdability to "keep cursors open after commit." See the section on the HoldForConnection command in the Derby Tools and Utilities Guide.</li>
+
+
+<li>
+<b>Standard syntax for altering column nullability</b> - Standard syntax has been added for altering the nullability of columns. See the section on ALTER TABLE in the Derby Reference Manual. See also feature F383 of the SQL Standard.</li>
 
 
 </ul>
@@ -131,13 +135,64 @@ This is a feature release. The following new features were added:
 </th><th>Description</th>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6606">DERBY-6606</a></td><td>ErrorCodeTest AssertionFailedError: Unexpected row count, expected: 174, actual: 175</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6644">DERBY-6644</a></td><td>Support standard syntax for altering column nullability</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6643">DERBY-6643</a></td><td>ALTER TABLE columnAlteration syntax needs fixing</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6638">DERBY-6638</a></td><td>Remove unnecessary use of reflection in SignatureChecker</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6633">DERBY-6633</a></td><td>Remove DOM level 3 XPath requirement from description of XML operators</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6629">DERBY-6629</a></td><td>Restrict privileged operation in CreateXMLFile</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6624">DERBY-6624</a></td><td>Use javax.xml.xpath interfaces for XPath support</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6615">DERBY-6615</a></td><td>Remove unused newInstance() method in BaseMonitor</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6611">DERBY-6611</a></td><td>Broken link in API docs to derby.drda.keepAlive documentation</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6609">DERBY-6609</a></td><td>Documentation for SQL features should reflect current standard</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6605">DERBY-6605</a></td><td>"Derby support for SQL-92 features" topic in Reference Manual needs updating</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6602">DERBY-6602</a></td><td>LuceneQueryVTI handles NULL key values inconsistently</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6601">DERBY-6601</a></td><td>Clean up Java EE compliance section of Reference Manual</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6599">DERBY-6599</a></td><td>Incorrect quoting of 42ZB4 message</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6598">DERBY-6598</a></td><td>Document permissions recommendations for JAR procedures</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6597">DERBY-6597</a></td><td>LUCENESUPPORT.LISTINDEXES() fails with FileNotFoundException</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6596">DERBY-6596</a></td><td>LUCENESUPPORT routines should check for NULL arguments</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6595">DERBY-6595</a></td><td>CheckToursDBTest failed while updating sequence value on disk</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6594">DERBY-6594</a></td><td>Typos in "Listing indexes" topic of the tools guide</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6591">DERBY-6591</a></td><td>Minor tweaks needed on new ij commands</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6587">DERBY-6587</a></td><td>Foreign Key constraint not matched when using UUID in a composite foreign key when using SYSCS_UTIL.SYSCS_IMPORT_TABLE</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6585">DERBY-6585</a></td><td>add HoldForConnection ij command to match NoHoldForConnection</td>
@@ -155,7 +210,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6576">DERBY-6576</a></td><td>A immediate Fk constraint blows up iff its referenced PK is deferred and we modify a duplicate key column</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6575">DERBY-6575</a></td><td>LangScript.floattypes gets REAL instead of expected DOUBLE</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6571">DERBY-6571</a></td><td>Document deferrable constraints</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6567">DERBY-6567</a></td><td>Incorrect nullability for CASE expression with parameter</td>
@@ -164,10 +219,10 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6566">DERBY-6566</a></td><td>Simplify handling of untyped nulls in CASE and NULLIF expressions</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6563">DERBY-6563</a></td><td>NOT elimination for CASE expressions is broken</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6564">DERBY-6564</a></td><td>Document the experimental, optional LuceneSupport tool.</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6562">DERBY-6562</a></td><td>Failed to delete directory in LuceneSupportPermsTest.test_005_deleteDirectory()</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6563">DERBY-6563</a></td><td>NOT elimination for CASE expressions is broken</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6561">DERBY-6561</a></td><td>Organization topics of some manuals need updating</td>
@@ -185,10 +240,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6553">DERBY-6553</a></td><td>Sequence generator makes CREATE TRIGGER fail with internal error</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6547">DERBY-6547</a></td><td>testDERBY5120NumRowsInSydependsForTrigger fails when the starting version of the upgrade trajectory is 10.10.2.0</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6546">DERBY-6546</a></td><td>Database can't be dropped on Windows using the decoration of LuceneSupportPermsTest</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6552">DERBY-6552</a></td><td>The public api includes methods inherited from superclasses which aren't in the public api and so have no javadoc comments</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6545">DERBY-6545</a></td><td>Should not be able to add a default to an identity column</td>
@@ -212,52 +264,22 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6534">DERBY-6534</a></td><td>Remove StorageFile.getURL() and its implementations</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6532">DERBY-6532</a></td><td>sysinfo does not show derbyTesting package info if junit.jar not in classpath</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6529">DERBY-6529</a></td><td>nightly regression test failure in newly added junit test TriggerGeneralTest</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6527">DERBY-6527</a></td><td>Fix errors in foreign keys documentation</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6523">DERBY-6523</a></td><td>Convert lang/triggerBeforeTrig.sql to JUnit TriggerBeforeTrigTest</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6526">DERBY-6526</a></td><td>Document the MERGE statement</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6521">DERBY-6521</a></td><td>Improve error handling when restricting file permissions</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6520">DERBY-6520</a></td><td>Convert lang/triggerGeneral.sql to JUnit TriggerGeneralTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6519">DERBY-6519</a></td><td>Convert lang/joinDeadlock.sql to JUnit JoinDeadlockTest</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6518">DERBY-6518</a></td><td>JVMInfo should not use parseFloat() to parse java.specification.version</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6517">DERBY-6517</a></td><td>Convert lang/consistencyChecker.sql to JUnit ConsistencyCheckerTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6516">DERBY-6516</a></td><td>Convert lang/nestedCommit.sql to JUnit NestedCommitTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6515">DERBY-6515</a></td><td>ij doesn't list its command NoHoldForConnection in the help menu</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6514">DERBY-6514</a></td><td>Convert lang/aggbuiltin.sql to JUnit AggBuiltinTest</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6511">DERBY-6511</a></td><td>java.lang.NoSuchMethodError chaining a function and procedure</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6509">DERBY-6509</a></td><td>Convert lang/currentSchema.sql to JUnit CurrentSchemaTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6508">DERBY-6508</a></td><td>Convert lang/LOBDB2compatibility.sql to JUnit LOBDB2compatibilityTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6507">DERBY-6507</a></td><td>Convert lang/fk_nonSPS.sql to JUnit ForeignKeysNonSpsTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6505">DERBY-6505</a></td><td>Clean up dead code in FileUtil</td>
@@ -269,25 +291,13 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6503">DERBY-6503</a></td><td>Starting network server on a network drive fails with JDK 7 on Windows</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6502">DERBY-6502</a></td><td>Failure in OnlineCompressTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6501">DERBY-6501</a></td><td>change 10.10 version of CastingTest.java to build/run under jsr169</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6496">DERBY-6496</a></td><td>Optional tool registration may fail because the CompilerContext is not always available at execution time.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6495">DERBY-6495</a></td><td>Error in SelectivityTest.testBasic</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6493">DERBY-6493</a></td><td>Improve reporting of exceptions wrapped in InvocationTargetException</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6488">DERBY-6488</a></td><td>Get rid of the EmbedSQLException class</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6485">DERBY-6485</a></td><td>Failure in SimpleApp test</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6484">DERBY-6484</a></td><td>Include SQLState in client exception messages</td>
@@ -326,16 +336,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6447">DERBY-6447</a></td><td>Use StrictMath for more functions in SYSFUN</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6446">DERBY-6446</a></td><td>Test ordering problem in GrantRevokeDDLTest</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6441">DERBY-6441</a></td><td>Non-deterministic query results in GrantRevokeDDLTest</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6440">DERBY-6440</a></td><td>Connections opened by ForeignTableVTI never get released</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6437">DERBY-6437</a></td><td>ConstraintCharachteristicsTest testLockingWithRollback or testLockingWithCommit failing on trunk with AssertionFailedError - isolation levels ...</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6434">DERBY-6434</a></td><td>Incorrect privileges may be required for INSERT and DELETE statements.</td>
@@ -368,10 +369,10 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6410">DERBY-6410</a></td><td>ClassCastException when launching derby from windows subst drive</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6386">DERBY-6386</a></td><td>Errors in jdbc4.LobStreamTest if derbyclient.jar is first in the classpath</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6390">DERBY-6390</a></td><td>Document the WHEN clause in the CREATE TRIGGER statement</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6380">DERBY-6380</a></td><td>Rolling log files do not get copied in failed directory when a junit test fails</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6386">DERBY-6386</a></td><td>Errors in jdbc4.LobStreamTest if derbyclient.jar is first in the classpath</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6378">DERBY-6378</a></td><td>OFFSET/FETCH NEXT ignored when query is enclosed in parentheses</td>
@@ -386,13 +387,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6359">DERBY-6359</a></td><td>Document rolling derby.log file feature</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6352">DERBY-6352</a></td><td>Access denied ("java.lang.RuntimePermission" "modifyThread") highly intermittent, but e.g. in store.RecoveryAfterBackup test</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6350">DERBY-6350</a></td><td>Provide a rolling file implementation of derby.log</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6337">DERBY-6337</a></td><td>derbynet.ServerPropertiesTest.ttestSetPortPriority prints exception  java.lang.Exception: DRDA_InvalidReplyTooShort.S:Invalid reply f rom network server: Insufficient data. but test passes</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6330">DERBY-6330</a></td><td>Simplify StringBuffer use, as they are mutable</td>
@@ -410,28 +405,16 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6315">DERBY-6315</a></td><td>Improve test coverage of org.apache.derby.impl.io.InputStreamFile</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6307">DERBY-6307</a></td><td>Improve the code coverage of org.apache.derby.iapi.services.info.JVMInfo</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6304">DERBY-6304</a></td><td>Remove unused methods in Predicate</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6299">DERBY-6299</a></td><td>Improve the code coverage of  Org.apache.derby.iapi.services.sanity  package</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6296">DERBY-6296</a></td><td>Simplify PropertyUtil using Properties.stringPropertyNames()</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6295">DERBY-6295</a></td><td>Allow tests to show detailed error when spawning new process fails</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6292">DERBY-6292</a></td><td>Use Arrays.copyOf() in FormatableArrayHolder.getArray()</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6291">DERBY-6291</a></td><td>Improve code coverage of  org.apache.derby.iapi.jdbc.BrokeredCallableStatement</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6288">DERBY-6288</a></td><td>Skip 10.0.2.1 in upgrade tests when running with JaCoCo</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6287">DERBY-6287</a></td><td>Don't use reflection to call Java 6 methods in FileUtil</td>
@@ -450,9 +433,6 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6262">DERBY-6262</a></td><td>Simplify message-generating methods using varargs</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6261">DERBY-6261</a></td><td>test getCurConnJdbc20.sql is no longer useful and can be removed</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6259">DERBY-6259</a></td><td>Collapse the level 2 optimizer into its parent module.</td>
@@ -489,6 +469,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6230">DERBY-6230</a></td><td>Use the JVM's cache of Number instances in ReuseFactory</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6227">DERBY-6227</a></td><td>Distinct aggregates don't work well with territory-based collation</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6217">DERBY-6217</a></td><td>Put all of the security documentation in a single, separate user guide</td>
@@ -539,9 +522,6 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6182">DERBY-6182</a></td><td>Cleanup suspect coding practices in org.apache.derby.iapi.error package</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6179">DERBY-6179</a></td><td>Insert some guarding code into the first replication test to check port availability</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6177">DERBY-6177</a></td><td>Cleanup suspect coding practices in org.apache.derby.catalog.types</td>
 </tr>
 <tr>
@@ -554,16 +534,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6163">DERBY-6163</a></td><td>Reduce visibility of methods in subclasses of PageBasicOperation</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6162">DERBY-6162</a></td><td>Simplify privileged actions in NetworkServerControlApiTest</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6161">DERBY-6161</a></td><td>Simplify code that handles LOB files</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6158">DERBY-6158</a></td><td>mailjdbc test in networkserver configuration does not perform compress correctly if server is started in a different directory</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6154">DERBY-6154</a></td><td>add non-order by cases to the BlobClob4BlobTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6138">DERBY-6138</a></td><td>org.apache.derbyTesting.functionTests.tests.store.ClassLoaderBootTest fails with  sealing violation: package org.apache.derby.iapi.services.sanity is sealed depending on classpath order</td>
@@ -576,9 +547,6 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6125">DERBY-6125</a></td><td>Code clean up in client driver.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-6107">DERBY-6107</a></td><td>Investigate why setting a login timeout causes NativeAuthenticationServiceTest to fail when run in a suite</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6096">DERBY-6096</a></td><td>OutOfMemoryError with Clob or Blob hash join: DataTypeDescriptor.estimatedMemoryUsage()  has no case for BLOB or CLOB so would underestimate memory usage for those types at zero</td>
@@ -602,16 +570,10 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5196">DERBY-5196</a></td><td>Correct the layout of log.ctrl as described on the Derby web site</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-5133">DERBY-5133</a></td><td>nightly test failure in derbyall/storeall/storemore/SpaceTable</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5111">DERBY-5111</a></td><td>NullPointerException on unique constraint violation with unique index</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4805">DERBY-4805</a></td><td>Increase the length of the RDBNAM field in the DRDA implementation</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4785">DERBY-4785</a></td><td>Remove JCC tests and references to JCC in test code</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4750">DERBY-4750</a></td><td>add documentation to declare global temporary tables to explain expected behavior when used with XA transactions.</td>
@@ -623,10 +585,7 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4403">DERBY-4403</a></td><td>Assert failure (sane) or NullPointerException (insane) when attempting to GROUP BY expression containing scalar subquery</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4378">DERBY-4378</a></td><td>Create test cases for MultiProbeTableScanResultSet with duplicates in the probe list</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-3955">DERBY-3955</a></td><td>test lang/selectivity.sql can be revived</td>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4381">DERBY-4381</a></td><td>Connection to Derby database using jar subprotocol doesn't work if the path has round bracket in it</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-3573">DERBY-3573</a></td><td>Argument checking for ResultSet.setFetchSize(int) is incorrect</td>
@@ -635,22 +594,10 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-3155">DERBY-3155</a></td><td>Support for SQL:2003 MERGE statement</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2999">DERBY-2999</a></td><td>convert lang/lockTable.sql to Junit</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2446">DERBY-2446</a></td><td>Remove notion of the old test harness from TestConfiguration</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2438">DERBY-2438</a></td><td>Remove JDBC20Translation and JDBC30Translation classes</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2423">DERBY-2423</a></td><td>Embedded and client differ on ResultSetMetaData.isCurrency() value for DECIMAL and  NUMERIC columns</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2162">DERBY-2162</a></td><td>Shutting down a database loaded from a jar file via the classpath and URLClassLoader  leaves an open file reference to the jar file containing the database.</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-2091">DERBY-2091</a></td><td>Increase coverage for StatementEventsTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2041">DERBY-2041</a></td><td>Trigger should register a dependency on tables and columns used in its body</td>
