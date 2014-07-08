@@ -136,8 +136,8 @@ final public class SystemPermission extends BasicPermission {
      *
      * @param name the name of the permission
      * @param actions the actions of the permission
-     * @param NullPointerException if actions is null
-     * @param IllegalArgumentException if name is not a legal SystemPermission
+     * @throws NullPointerException if actions is null
+     * @throws IllegalArgumentException if name is not a legal SystemPermission
      */
     private void validateNameAndActions(String name, String actions) {
         // superclass BasicPermission has checked that name isn't null
