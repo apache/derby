@@ -30,12 +30,19 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import java.util.Set;
 import java.util.HashSet;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 import java.security.AccessControlException;
 import java.security.Permission;
+import java.util.Locale;
 import javax.security.auth.Subject;
 
 import org.apache.derby.authentication.SystemPrincipal;
@@ -142,6 +149,16 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         { false, false, false, false, false, false, false, true }
     };    
 
+    /** The valid names of a SystemPermission. */
+    private static final String[] VALID_SYSPERM_NAMES = {
+        "server", "engine", "jmx"
+    };
+
+    /** The valid actions of a SystemPermission. */
+    private static final String[] VALID_SYSPERM_ACTIONS = {
+        "shutdown", "control", "monitor"
+    };
+
     /**
      * Create a test with the given name.
      *
@@ -153,8 +170,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
     /**
      * Return a suite with all tests in this class (default suite)
-     *
-     * @throws Exception
      */
     public static Test suite() {
         // this suite cannot be constructed with automatic test extraction
@@ -186,6 +201,12 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                      POLICY_FILE_NAME));
         }
 
+        // We need to manipulate private and final fields in order to test
+        // deserialization of invalid objects. Disable the security manager
+        // for this test case to allow that.
+        suite.addTest(SecurityManagerSetup.noSecurityManager(
+                new SystemPrivilegesPermissionTest("testSerialization")));
+
         return suite;
     }
 
@@ -208,6 +229,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
+
+        // DERBY-3476: The SystemPrincipal class should be final.
+        assertTrue(Modifier.isFinal(SystemPrincipal.class.getModifiers()));
     }
     
     /**
@@ -237,7 +261,39 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
-        
+
+        // actions cannot be null
+        try {
+            new SystemPermission("server", null);
+            fail("expected NullPointerException");
+        } catch (NullPointerException ex) {
+            // expected exception
+        }
+
+        // Illegal and duplicate actions are ignored.
+        assertEquals("", new SystemPermission("server", "").getActions());
+        assertEquals("", new SystemPermission("server", ",,").getActions());
+        assertEquals("",
+                     new SystemPermission("server", "illegal_action")
+                             .getActions());
+        assertEquals("control",
+                     new SystemPermission("server", "control,").getActions());
+        assertEquals("control",
+                     new SystemPermission("server", "control,illegal_action")
+                             .getActions());
+        assertEquals("control",
+                     new SystemPermission("server", "control,control")
+                             .getActions());
+        assertEquals("control,monitor",
+                     new SystemPermission("server", "control, monitor, control")
+                             .getActions());
+        assertEquals("control",
+                     new SystemPermission("server", "CoNtRoL")
+                             .getActions());
+        assertEquals("control",
+                     new SystemPermission("server", "CoNtRoL,control")
+                             .getActions());
+
         String[] validNames = {
             SystemPermission.ENGINE,
             SystemPermission.JMX,
@@ -327,6 +383,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 }
             }
         }
+
+        // DERBY-3476: The SystemPermission class should be final.
+        assertTrue(Modifier.isFinal(SystemPermission.class.getModifiers()));
     }
     
     /**
@@ -508,6 +567,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         checkImplies(absDirPathPerms, inclPerms, allFalse);
         checkImplies(inclPerms, absDirPathAliasPerms, allTrue);
         checkImplies(absDirPathAliasPerms, inclPerms, allFalse);
+
+        // DERBY-3476: The DatabasePermission class should be final.
+        assertTrue(Modifier.isFinal(DatabasePermission.class.getModifiers()));
     }
 
     /**
@@ -549,6 +611,169 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                                      DatabasePermission.CREATE);
         execute(anyUser,
                 new CreateDatabaseAction(dbPerm), true);
+    }
+
+    /**
+     * Test serialization of permissions. In particular, test that
+     * deserialization of invalid objects fails.
+     */
+    public void testSerialization() throws IOException {
+
+        // Test all valid name/action combinations. All should succeed to
+        // serialize and deserialize.
+        for (String name : VALID_SYSPERM_NAMES) {
+            for (String action : VALID_SYSPERM_ACTIONS) {
+                // Actions are case-insensitive, so test both lower-case
+                // and upper-case.
+                SystemPermission pl =
+                    new SystemPermission(name, action.toLowerCase(Locale.US));
+                SystemPermission pu =
+                    new SystemPermission(name, action.toUpperCase(Locale.US));
+                assertEquals(pl, serializeDeserialize(pl, null));
+                assertEquals(pu, serializeDeserialize(pu, null));
+            }
+        }
+
+        // A permission can specify multiple actions ...
+        SystemPermission sp = new SystemPermission(
+                "server", "control,monitor,shutdown");
+        assertEquals(sp, serializeDeserialize(sp, null));
+
+        // ... but only a single name, so this should fail.
+        // (Did not fail before DERBY-3476.)
+        serializeDeserialize(
+                createSyspermNoCheck("server,jmx", "control"),
+                IllegalArgumentException.class);
+
+        // Invalid and duplicate actions should be ignored.
+        sp = serializeDeserialize(createSyspermNoCheck(
+                    VALID_SYSPERM_NAMES[0],
+                    "control,invalid,control,,shutdown"),
+                null);
+        // The next assert failed before DERBY-3476.
+        assertEquals("control,shutdown", sp.getActions());
+
+        // Empty action is allowed.
+        sp = new SystemPermission(VALID_SYSPERM_NAMES[0], "");
+        assertEquals(sp, serializeDeserialize(sp, null));
+
+        // Name is case-sensitive, so this should fail.
+        // (Did not fail before DERBY-3476.)
+        serializeDeserialize(createSyspermNoCheck(
+                VALID_SYSPERM_NAMES[0].toUpperCase(Locale.US),
+                VALID_SYSPERM_ACTIONS[0]),
+            IllegalArgumentException.class);
+
+        // Empty name is not allowed.
+        serializeDeserialize(createSyspermNoCheck(
+                "",
+                VALID_SYSPERM_ACTIONS[0]),
+                IllegalArgumentException.class);
+
+        // Null name is not allowed.
+        serializeDeserialize(createSyspermNoCheck(
+                null,
+                VALID_SYSPERM_ACTIONS[0]),
+            NullPointerException.class);
+
+        // Null action is not allowed.
+        // (Did not fail before DERBY-3476.)
+        serializeDeserialize(createSyspermNoCheck(
+                VALID_SYSPERM_NAMES[0],
+                null),
+            NullPointerException.class);
+    }
+
+    /**
+     * Create a new SystemPermission object without checking that the name
+     * and actions are valid.
+     *
+     * @param name the name of the permission
+     * @param actions the actions of the permission
+     * @return a SystemPermission instance
+     */
+    private static SystemPermission
+                        createSyspermNoCheck(String name, String actions) {
+        // First create a valid permission object, so that the checks in
+        // the constructor are happy.
+        SystemPermission sysperm = new SystemPermission("server", "control");
+
+        // Then use reflection to override the values of the fields with
+        // potentially invalid values.
+        setField(Permission.class, "name", sysperm, name);
+        setField(SystemPermission.class, "actions", sysperm, actions);
+
+        return sysperm;
+    }
+
+    /**
+     * Forcefully set the value of a field, ignoring access checks such as
+     * final and private.
+     *
+     * @param klass the class in which the field lives
+     * @param name the name of the field
+     * @param object the object to change
+     * @param value the new value of the field
+     */
+    private static void setField(
+            Class<?> klass, String name, Object object, Object value) {
+        try {
+            Field f = klass.getDeclaredField(name);
+            f.setAccessible(true);
+            f.set(object, value);
+        } catch (NoSuchFieldException ex) {
+            fail("Cannot find field " + name, ex);
+        } catch (IllegalAccessException ex) {
+            fail("Cannot access field " + name, ex);
+        }
+    }
+
+    /**
+     * Serialize an object, then deserialize it from where it's stored, and
+     * finally return the deserialized object.
+     *
+     * @param <T> the type of the object being serialized
+     * @param object the object to serialize
+     * @param expectedException the type of exception being expected during
+     *   deserialization, or {@code null} if deserialization is expected to
+     *   be successful
+     * @return the deserialized object, or {@code null} if deserialization
+     *   failed as expected
+     * @throws IOException if an I/O error occurred
+     */
+    // We actually do check the type before we cast the result to T, but the
+    // compiler doesn't understand it because we're using a JUnit assert.
+    // Ignore the warning.
+    @SuppressWarnings("unchecked")
+    private static <T> T serializeDeserialize(
+                T object,
+                Class<? extends Exception> expectedException)
+            throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(object);
+        oos.close();
+
+        ObjectInputStream ois = new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray()));
+        try {
+            Object deserialized = ois.readObject();
+            assertNull("should have failed", expectedException);
+            assertEquals(object.getClass(), deserialized.getClass());
+            // This generates a compile-time warning because the compiler
+            // doesn't understand that the deserialized object has to be of
+            // the correct type when the above assert succeeds. Because of
+            // this, "unchecked" warnings are suppressed in this method.
+            return (T) deserialized;
+        } catch (Exception e) {
+            if (expectedException == null ||
+                    !expectedException.isAssignableFrom(e.getClass())) {
+                fail("unexpected exception", e);
+            }
+            return null;
+        } finally {
+            ois.close();
+        }
     }
 
     /**

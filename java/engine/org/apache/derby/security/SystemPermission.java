@@ -21,6 +21,8 @@
 
 package org.apache.derby.security;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.security.BasicPermission;
 import java.security.Permission;
 import java.util.ArrayList;
@@ -113,19 +115,31 @@ final public class SystemPermission extends BasicPermission {
     /**
      * Actions for this permission.
      */
-    private final String actions;
+    private String actions;
     
     /**
      * Creates a new SystemPermission with the specified name.
      *
      * @param name the name of the SystemPermission
-     * @throws NullPointerException if name is null
+     * @throws NullPointerException if name or actions is null
      * @throws IllegalArgumentException if name is empty or not a legal SystemPermission
      * @see BasicPermission#BasicPermission(String)
      */
     public SystemPermission(String name, String actions) {
         super(name);
-            
+        validateNameAndActions(name, actions);
+    }
+
+    /**
+     * Check if name and actions are valid, and normalize the actions
+     * string.
+     *
+     * @param name the name of the permission
+     * @param actions the actions of the permission
+     * @param NullPointerException if actions is null
+     * @param IllegalArgumentException if name is not a legal SystemPermission
+     */
+    private void validateNameAndActions(String name, String actions) {
         // superclass BasicPermission has checked that name isn't null
         // (NullPointerException) or empty (IllegalArgumentException)
 
@@ -223,6 +237,17 @@ final public class SystemPermission extends BasicPermission {
         
         return mask;
     }
-    
-    
+
+    /**
+     * Called upon deserialization for restoring the state of this
+     * SystemPermission from a stream.
+     */
+    private void readObject(ObjectInputStream s)
+         throws IOException, ClassNotFoundException {
+        // Read the fields from the stream.
+        s.defaultReadObject();
+
+        // Make sure the name and actions fields contain legal values.
+        validateNameAndActions(getName(), getActions());
+    }
 }
