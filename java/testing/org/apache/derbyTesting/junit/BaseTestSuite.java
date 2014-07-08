@@ -30,11 +30,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Derby replacement for TestSuite. This version, when provided with a
- * {@code Class} argument in a constructor or method, constructs a
- * {@code TestSuite} with a lexicographically sorted set of fixtures (i.e. test
- * cases) to avoid random fixture ordering (after Java 6). Its usage is similar
- * to the original JUnit TestSuite class.
+ * Derby replacement for {@code junit.framework.TestSuite}. This version, when
+ * provided with a {@code Class} argument in a constructor or method,
+ * constructs a {@code TestSuite} with a lexicographically sorted set of
+ * fixtures (i.e. test cases) to avoid random fixture ordering (after Java
+ * 6). Its usage is similar to the original JUnit {@code TestSuite} class.
  */
 public class BaseTestSuite extends TestSuite {
 
