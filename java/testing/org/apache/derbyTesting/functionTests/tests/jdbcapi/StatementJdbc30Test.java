@@ -24,11 +24,9 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -57,7 +55,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
      * this class
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementJdbc30Test");
+        BaseTestSuite suite = new BaseTestSuite("StatementJdbc30Test");
 
         suite.addTest(baseSuite("StatementJdbc30Test:embedded"));
         suite
@@ -68,7 +66,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         suite.addTestSuite(StatementJdbc30Test.class);
 

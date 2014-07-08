@@ -34,19 +34,15 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Pattern;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import org.apache.derbyTesting.functionTests.tests.compatibility.helpers.DummyBlob;
 import org.apache.derbyTesting.functionTests.tests.compatibility.helpers.DummyClob;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DerbyVersion;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * A set of client driver compatibility tests.
@@ -1350,7 +1346,7 @@ public class JDBCDriverTest
      * whose names start with the string "test" in the named classes.
      */
     public static Test suite() {
-        TestSuite testSuite = new TestSuite("JDBCDriverTest suite");
+        BaseTestSuite testSuite = new BaseTestSuite("JDBCDriverTest suite");
         testSuite.addTestSuite(JDBCDriverTest.class);
         return TestConfiguration.defaultExistingServerDecorator(
                 new BaseJDBCTestSetup(testSuite) {

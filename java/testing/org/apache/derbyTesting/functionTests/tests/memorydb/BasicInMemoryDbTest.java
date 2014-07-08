@@ -30,14 +30,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
@@ -384,7 +382,8 @@ public class BasicInMemoryDbTest
 
     public static Test suite() {
         // Run only in embedded-mode for now.
-        return new SupportFilesSetup(new TestSuite(BasicInMemoryDbTest.class));
+        return new SupportFilesSetup(
+            new BaseTestSuite(BasicInMemoryDbTest.class));
     }
 
     /**

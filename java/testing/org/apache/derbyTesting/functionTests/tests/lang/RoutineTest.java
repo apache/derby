@@ -30,11 +30,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -55,7 +53,8 @@ public class RoutineTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite(RoutineTest.class, "RoutineTest");
+        BaseTestSuite suite =
+            new BaseTestSuite(RoutineTest.class, "RoutineTest");
         
         return new CleanDatabaseTestSetup(suite);
     }

@@ -22,8 +22,8 @@
 package org.apache.derbyTesting.functionTests.tests.management;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 
 
@@ -50,7 +50,7 @@ public class _Suite extends BaseTestCase {
      */
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("management");
+        BaseTestSuite suite = new BaseTestSuite("management");
 
         if (JDBC.vmSupportsJMX()) {
             suite.addTest(JMXTest.suite());

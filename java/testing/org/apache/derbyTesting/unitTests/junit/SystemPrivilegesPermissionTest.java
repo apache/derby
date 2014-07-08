@@ -21,15 +21,6 @@
 
 package org.apache.derbyTesting.unitTests.junit;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-
-import java.util.Set;
-import java.util.HashSet;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,20 +28,23 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-
-import java.security.PrivilegedAction;
-import java.security.AccessController;
 import java.security.AccessControlException;
+import java.security.AccessController;
 import java.security.Permission;
+import java.security.PrivilegedAction;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import javax.security.auth.Subject;
-
+import junit.framework.Test;
 import org.apache.derby.authentication.SystemPrincipal;
-import org.apache.derby.security.SystemPermission;
-import org.apache.derby.security.DatabasePermission;
-
-import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.security.DatabasePermission;
+import org.apache.derby.security.SystemPermission;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
  * This class tests the basic permission classes for system privileges.
@@ -175,7 +169,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         // this suite cannot be constructed with automatic test extraction
         // (by passing a class argument); instead, the tests need to be added
         // manually since some of them require their own policy file
-        TestSuite suite = new TestSuite("SystemPrivilegesPermissionTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("SystemPrivilegesPermissionTest");
 
         // add API tests for the basic security framework classes
         suite.addTest(

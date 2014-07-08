@@ -21,9 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Run a lang '.java' test from the old harness in the Junit infrastructure.
@@ -106,7 +106,9 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
+        BaseTestSuite suite =
+            new BaseTestSuite("jdbcapi: old harness java tests");
+
         suite.addTest(baseSuite("embedded", LANG_TESTS_BOTH));
         suite.addTest(baseSuite("embedded", LANG_TESTS_EMEBDDED));
         
@@ -116,7 +118,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     }
    
     private static Test baseSuite(String which, String[] set) {
-        TestSuite suite = new TestSuite("lang: " + which);
+        BaseTestSuite suite = new BaseTestSuite("lang: " + which);
         for (int i = 0; i < set.length; i++)
         {
             suite.addTest(decorate(new LangHarnessJavaTest(set[i])));

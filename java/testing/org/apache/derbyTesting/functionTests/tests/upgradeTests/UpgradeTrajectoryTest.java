@@ -22,23 +22,18 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 import javax.sql.DataSource;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCClientSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -246,7 +241,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Upgrade trajectory test");
+        BaseTestSuite suite = new BaseTestSuite("Upgrade trajectory test");
 
         addTrajectories( suite );
         
@@ -260,7 +255,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * Add all of the trajectories we intend to test.
      * </p>
      */
-    private static void addTrajectories( TestSuite suite )
+    private static void addTrajectories( BaseTestSuite suite )
     {
         Version.Trajectory[] trajectories = makeTrajectories();
         int                  count = trajectories.length;
@@ -359,7 +354,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * Add only the test case which hard-upgrades along all edges of the Trajectory.
      * </p>
      */
-    private static void addHardUpgradeOnlyTrajectory( TestSuite suite, Version.Trajectory trajectory )
+    private static void addHardUpgradeOnlyTrajectory(
+        BaseTestSuite suite, Version.Trajectory trajectory )
     {
         // a valid trajectory must have a start point and a different end point
         int       versionCount = trajectory.getVersionCount();
@@ -379,7 +375,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * hard and softupgrade.
      * </p>
      */
-    private static void addTrajectory( TestSuite suite, Version.Trajectory trajectory )
+    private static void addTrajectory(
+        BaseTestSuite suite, Version.Trajectory trajectory )
     {
         // a valid trajectory must have a start point and a different end point
         int       versionCount = trajectory.getVersionCount();
@@ -393,7 +390,11 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         addTrajectory( suite, trajectory, hardUpgradeRequests, 1 );
     }
 
-    private static void addTrajectory( TestSuite suite, Version.Trajectory trajectory, boolean[] hardUpgradeRequests, int idx )
+    private static void addTrajectory(
+        BaseTestSuite suite,
+        Version.Trajectory trajectory,
+        boolean[] hardUpgradeRequests,
+        int idx )
     {
         if ( idx >= trajectory.getVersionCount() )
         {
@@ -427,7 +428,10 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      * Add a single trajectory to the suite, with upgrade instructions.
      * </p>
      */
-    private static void addTrajectory( TestSuite suite, Version.Trajectory trajectory, boolean[] hardUpgradeRequests )
+    private static void addTrajectory(
+        BaseTestSuite suite,
+        Version.Trajectory trajectory,
+        boolean[] hardUpgradeRequests )
     {
         UpgradeTrajectoryTest utt = new UpgradeTrajectoryTest( trajectory, hardUpgradeRequests );
         TestSetup setup = TestConfiguration.additionalDatabaseDecorator( utt, UPGRADED_DATABASE );

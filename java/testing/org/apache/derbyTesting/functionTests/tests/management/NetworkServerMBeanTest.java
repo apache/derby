@@ -24,7 +24,6 @@ package org.apache.derbyTesting.functionTests.tests.management;
 import java.util.Hashtable;
 import javax.management.ObjectName;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**

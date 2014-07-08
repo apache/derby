@@ -23,17 +23,15 @@ package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -84,7 +82,7 @@ public class CryptoCrashRecoveryTest
             suite = TestConfiguration.embeddedSuite(
                     CryptoCrashRecoveryTest.class);
         } else {
-            suite = new TestSuite(
+            suite = new BaseTestSuite(
                     "CryptoCrashRecovery disabled due to non-debug build");
             println("CryptoCrashRecoveryTest disabled due to non-debug build");
         }

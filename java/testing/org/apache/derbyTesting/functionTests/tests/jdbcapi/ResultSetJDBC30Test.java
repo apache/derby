@@ -19,11 +19,13 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 

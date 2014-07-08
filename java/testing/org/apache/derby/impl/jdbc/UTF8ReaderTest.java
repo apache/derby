@@ -29,14 +29,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
@@ -193,7 +191,7 @@ public class UTF8ReaderTest
      * @return A test suite.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(UTF8ReaderTest.class);
+        BaseTestSuite suite = new BaseTestSuite(UTF8ReaderTest.class);
         return new CleanDatabaseTestSetup(suite) {
             public void decorateSQL(Statement stmt)
                     throws SQLException {

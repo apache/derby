@@ -25,19 +25,16 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import java.util.Arrays;
-import java.util.Properties;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -183,7 +180,7 @@ public class ClobMemTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite =  new TestSuite();
+        BaseTestSuite suite =  new BaseTestSuite();
         // Just add Derby-6096 embedded as it takes time to run
         suite.addTest(new ClobMemTest("xtestderby6096ClobHashJoin"));
         suite.addTest(TestConfiguration.defaultSuite(ClobMemTest.class));

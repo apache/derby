@@ -26,12 +26,10 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -76,8 +74,11 @@ public class OfflineBackupTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         
-        if (JDBC.vmSupportsJSR169())
-            return new TestSuite("Empty OfflineBackupTest (uses DriverManager)");
+        if (JDBC.vmSupportsJSR169()) {
+            return new BaseTestSuite(
+                "Empty OfflineBackupTest (uses DriverManager)");
+        }
+
         return TestConfiguration.embeddedSuite(OfflineBackupTest.class);        
     }
 

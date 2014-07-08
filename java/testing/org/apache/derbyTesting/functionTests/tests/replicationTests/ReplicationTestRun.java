@@ -22,8 +22,8 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class ReplicationTestRun extends BaseJDBCTestCase
 {
@@ -39,8 +39,8 @@ public class ReplicationTestRun extends BaseJDBCTestCase
     {
         System.out.println("*** ReplicationTestRun.suite()");
         
-        TestSuite suite = new TestSuite("ReplicationTestRun");
-        System.out.println("*** Done new TestSuite()");
+        BaseTestSuite suite = new BaseTestSuite("ReplicationTestRun");
+        System.out.println("*** Done new BaseTestSuite()");
         
         String masterHostName = System.getProperty("test.serverHost", "localhost");
         int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));

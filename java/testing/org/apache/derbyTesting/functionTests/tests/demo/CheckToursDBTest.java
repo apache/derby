@@ -19,22 +19,21 @@
  */
 package org.apache.derbyTesting.functionTests.tests.demo;
 
-import java.sql.PreparedStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-
+import org.apache.derbyTesting.junit.TestConfiguration;
 import toursdb.insertMaps;
 
 /**
@@ -50,7 +49,7 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     }
 
    public static Test basesuite(String name) {
-        TestSuite suite = new TestSuite(CheckToursDBTest.class, name);
+        BaseTestSuite suite = new BaseTestSuite(CheckToursDBTest.class, name);
         Test test = new SupportFilesSetup(suite, new String[] {
                 "functionTests/tests/demo/cupisle.gif",
                 "functionTests/tests/demo/smallisle.gif",
@@ -62,9 +61,11 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
         if ( JDBC.vmSupportsJSR169())
             // Test executes PreparedStatement.setBigDecimal, which
             // is not supported with JSR169
-            return new TestSuite("empty CheckToursDBTest - *.setBigDecimal not supported with JSR169");
+                        return new BaseTestSuite(
+                "empty CheckToursDBTest - *.setBigDecimal " +
+                "not supported with JSR169");
         
-        TestSuite suite = new TestSuite("CheckToursDBTest");
+        BaseTestSuite suite = new BaseTestSuite("CheckToursDBTest");
         suite.addTest(basesuite("CheckToursDBTest:embedded"));
         suite.addTest(TestConfiguration
                 .clientServerDecorator(basesuite("CheckToursDBTest:client")));

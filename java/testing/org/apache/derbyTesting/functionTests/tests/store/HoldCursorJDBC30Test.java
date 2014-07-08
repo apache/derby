@@ -23,15 +23,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 public final class HoldCursorJDBC30Test extends BaseJDBCTestCase {
 
@@ -104,7 +102,7 @@ public final class HoldCursorJDBC30Test extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("HoldCursorJDBC30Test");
+        BaseTestSuite suite = new BaseTestSuite("HoldCursorJDBC30Test");
         suite.addTest(decorateTest(TestConfiguration.embeddedSuite(HoldCursorJDBC30Test.class)));
         suite.addTest(decorateTest(TestConfiguration.clientServerSuite(HoldCursorJDBC30Test.class)));
         

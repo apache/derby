@@ -1,19 +1,16 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Statement;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
@@ -53,7 +50,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
     public static Test suite() {
         Properties systemProperties = new Properties();
         systemProperties.setProperty("derby.optimizer.noTimeout","true");
-        TestSuite suite = new TestSuite("predicatePushdown Test");
+        BaseTestSuite suite = new BaseTestSuite("predicatePushdown Test");
         suite.addTest(new SystemPropertyTestSetup(new CleanDatabaseTestSetup(TestConfiguration
                 .embeddedSuite(PredicatePushdownTest.class)),systemProperties));
         return suite;

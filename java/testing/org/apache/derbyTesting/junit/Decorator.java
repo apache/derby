@@ -22,9 +22,7 @@ package org.apache.derbyTesting.junit;
 
 import java.util.Properties;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Utility class that provides static methods to decorate tests.
@@ -78,7 +76,7 @@ public class Decorator {
     public static Test encryptedDatabaseBpw(Test test, String bootPassword)
     {
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("no encryption support");
+            return new BaseTestSuite("no encryption support");
 
         Properties attributes = new Properties();
         attributes.setProperty("dataEncryption", "true");

@@ -20,25 +20,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
 
 /**
  * Test class to test <code>UpdateableReader</code> for <code>Clob</code> in
@@ -288,10 +285,11 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite ts = new TestSuite ("ClobUpdatableReaderTest");
+        BaseTestSuite ts = new BaseTestSuite("ClobUpdatableReaderTest");
         ts.addTest(TestConfiguration.defaultSuite(
                     ClobUpdatableReaderTest.class));
-        TestSuite encSuite = new TestSuite ("ClobUpdatableReaderTest:encrypted");
+        BaseTestSuite encSuite =
+            new BaseTestSuite("ClobUpdatableReaderTest:encrypted");
         encSuite.addTestSuite (ClobUpdatableReaderTest.class);
         ts.addTest(Decorator.encryptedDatabase (encSuite));
         return ts;

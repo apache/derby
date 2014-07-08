@@ -38,21 +38,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.LoginTimeoutTestSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 /**
  * Test database class loading, executing routines from the
@@ -76,7 +73,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public static Test suite() throws Exception
     {
-        final TestSuite suite = new TestSuite("DatabaseClassLoadingTest");
+        final BaseTestSuite suite =
+            new BaseTestSuite("DatabaseClassLoadingTest");
         
         // Need DriverManager to execute the add contact procedure
         // as it uses server side jdbc.
@@ -198,7 +196,8 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      * have the database in its context class loader.
      */
     private static Test loginTimeoutSuite() throws Exception {
-        TestSuite suite = new TestSuite("Class loading with login timeout");
+        BaseTestSuite suite =
+            new BaseTestSuite("Class loading with login timeout");
 
         // First run a test when the database is not in the classpath.
         // Expect the connection attempt to fail.

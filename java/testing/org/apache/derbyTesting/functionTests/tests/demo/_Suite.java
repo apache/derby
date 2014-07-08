@@ -21,9 +21,9 @@
 */
 package org.apache.derbyTesting.functionTests.tests.demo;
 
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
-import junit.framework.Test; 
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -42,7 +42,7 @@ public class _Suite extends BaseTestCase  {
     
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("demo");
+        BaseTestSuite suite = new BaseTestSuite("demo");
         suite.addTest(CheckToursDBTest.suite());
         
         return suite;

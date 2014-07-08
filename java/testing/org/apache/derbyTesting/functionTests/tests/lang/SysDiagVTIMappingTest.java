@@ -19,26 +19,24 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Properties;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
@@ -63,7 +61,8 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Diagnostic VTI Table Mappings");
+        BaseTestSuite suite =
+            new BaseTestSuite("Diagnostic VTI Table Mappings");
 
         Test    defaultSetup = TestConfiguration.defaultSuite( SysDiagVTIMappingTest.class );
 

@@ -22,12 +22,9 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -49,7 +46,7 @@ public class IjConnNameTest extends ScriptTestCase {
     }    
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("IjConnNameTest");
+        BaseTestSuite suite = new BaseTestSuite("IjConnNameTest");
         
         // Test does not run on J2ME
         if (JDBC.vmSupportsJSR169())

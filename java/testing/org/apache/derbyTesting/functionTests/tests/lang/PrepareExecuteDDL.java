@@ -21,14 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.sql.*;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test the dependency system for active statements when 
@@ -86,7 +89,7 @@ public class PrepareExecuteDDL extends BaseJDBCTestCase {
      * as well.
 	 */
     public static Test suite() {
-        TestSuite suite = new TestSuite("PrepareExecuteDDL");
+        BaseTestSuite suite = new BaseTestSuite("PrepareExecuteDDL");
         for (int i = 0; i < DDL.length; i++)
         	suite.addTest(new PrepareExecuteDDL("testPrepareExcute", DDL[i]));
         return TestConfiguration.sqlAuthorizationDecorator(suite);

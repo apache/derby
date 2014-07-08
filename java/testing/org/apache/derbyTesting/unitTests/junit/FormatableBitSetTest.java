@@ -21,20 +21,16 @@
 
 package org.apache.derbyTesting.unitTests.junit;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-import junit.framework.*;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.shared.common.sanity.AssertFailure;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
+import junit.framework.Test;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 
 /**
@@ -106,7 +102,7 @@ public class FormatableBitSetTest extends BaseTestCase {
      * @throws Exception
      */
     public static Test suite() {
-        TestSuite ts = new TestSuite(FormatableBitSetTest.class,
+        BaseTestSuite ts = new BaseTestSuite(FormatableBitSetTest.class,
                              "FormatableBitSetTest suite");
 
         if (bitCount != null) {

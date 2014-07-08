@@ -22,8 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -57,7 +57,7 @@ public class ReplicationRun_Local extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local Suite");
+        BaseTestSuite suite = new BaseTestSuite("ReplicationRun_Local Suite");
         
         suite.addTestSuite( ReplicationRun_Local.class );
         
@@ -69,7 +69,8 @@ public class ReplicationRun_Local extends ReplicationRun
     {
         String      user = "KIWI";
         String      password = "KIWI_password";
-        TestSuite suite = new TestSuite("ReplicationRun_Local Suite Local Authentication Suite");
+        BaseTestSuite suite = new BaseTestSuite(
+            "ReplicationRun_Local Suite Local Authentication Suite");
 
         suite.addTest( new ReplicationRun_Local( "testReplication_Local_TestStraightReplication", user, password ) );
         suite.addTest( new ReplicationRun_Local( "testReplication_Local_LogFilesSynched", user, password ) );

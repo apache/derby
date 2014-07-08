@@ -23,17 +23,25 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.*;
-import java.sql.*;
 
 
 /**
@@ -275,10 +283,12 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("UpdatableResultSetTest");
+        BaseTestSuite suite = new BaseTestSuite("UpdatableResultSetTest");
         
-        TestSuite embeddedSuite = baseSuite("UpdatableResultSetTest:embedded");
-        TestSuite clientSuite = baseSuite("UpdatableResultSetTest:client");
+        BaseTestSuite embeddedSuite =
+            baseSuite("UpdatableResultSetTest:embedded");
+        BaseTestSuite clientSuite =
+            baseSuite("UpdatableResultSetTest:client");
         
         if (JDBC.vmSupportsJDBC3()) {
             embeddedSuite.addTest(
@@ -294,8 +304,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         return suite;
     }
     
-    private static TestSuite baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+    private static BaseTestSuite baseSuite(String name) {
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(UpdatableResultSetTest.class);
         return suite;
     }

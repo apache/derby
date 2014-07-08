@@ -23,16 +23,13 @@ package org.apache.derbyTesting.functionTests.tests.memory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -92,6 +89,7 @@ public class XAMemTest
             return TestConfiguration.defaultSuite(XAMemTest.class);
         }
 
-        return new TestSuite("XAMemTest skipped - XADataSource not available");
+        return new BaseTestSuite(
+            "XAMemTest skipped - XADataSource not available");
     }
 }

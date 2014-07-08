@@ -21,9 +21,12 @@ limitations under the License.
 package org.apache.derbyTesting.perf.basic.jdbc;
 
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 
 /**
@@ -43,7 +46,7 @@ public class HeapScan extends JDBCPerfTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("HeapScanTests");
+        BaseTestSuite suite = new BaseTestSuite("HeapScanTests");
         suite.addTest(baseSuite("HeapScan:CHAR", false));
         suite.addTest(baseSuite("HeapScan:BINARY", true));
         return suite;
@@ -61,7 +64,7 @@ public class HeapScan extends JDBCPerfTestCase {
     private static Test baseSuite(String name, boolean binaryData) {
         int iterations = 700, repeats = 4;
 
-        TestSuite heapScan = new TestSuite(name);
+        BaseTestSuite heapScan = new BaseTestSuite(name);
         heapScan.addTest(new HeapScan("Scan100", binaryData,
                                       iterations, repeats));
         heapScan.addTest(new HeapScan("Scan100GetData", binaryData,

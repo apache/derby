@@ -21,17 +21,11 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.Blob;
 import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.framework.Assert;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -62,7 +56,8 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         if (JDBC.vmSupportsJSR169()) {
-            return new TestSuite("empty: client not supported on JSR169; procs use DriverMgr");
+            return new BaseTestSuite(
+                "empty: client not supported on JSR169; procs use DriverMgr");
         }
         else {
             return TestConfiguration.defaultSuite(

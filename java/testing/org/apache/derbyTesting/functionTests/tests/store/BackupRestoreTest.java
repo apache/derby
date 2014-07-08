@@ -27,9 +27,9 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -113,7 +113,7 @@ public class BackupRestoreTest
      * @return A test suite.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(BackupRestoreTest.class);
+        BaseTestSuite suite = new BaseTestSuite(BackupRestoreTest.class);
         return new SupportFilesSetup(
                 TestConfiguration.singleUseDatabaseDecorator(suite));
     }

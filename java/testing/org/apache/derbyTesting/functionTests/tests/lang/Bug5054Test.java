@@ -25,15 +25,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * Where current of cursorname and case sensitivity
@@ -61,7 +58,7 @@ public class Bug5054Test extends BaseJDBCTestCase {
      *         run.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("Bug5054Test");
+        BaseTestSuite suite = new BaseTestSuite("Bug5054Test");
         Test test = new CleanDatabaseTestSetup(TestConfiguration
                 .embeddedSuite(Bug5054Test.class)) {
             protected void decorateSQL(Statement stmt) throws SQLException {

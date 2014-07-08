@@ -31,13 +31,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.tests.upgradeTests.helpers.DisposableIndexStatistics;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -98,7 +95,7 @@ public class Changes10_9 extends UpgradeChange
      * @return the test suite created.
      */
     public static Test suite(int phase) {
-        TestSuite suite = new TestSuite("Upgrade test for 10.9");
+        BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.9");
 
         suite.addTestSuite(Changes10_9.class);
         

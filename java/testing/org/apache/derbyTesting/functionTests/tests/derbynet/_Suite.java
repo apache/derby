@@ -21,12 +21,11 @@
 */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -44,7 +43,7 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() throws Exception {
 
-        TestSuite suite = new TestSuite("derbynet");
+        BaseTestSuite suite = new BaseTestSuite("derbynet");
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());

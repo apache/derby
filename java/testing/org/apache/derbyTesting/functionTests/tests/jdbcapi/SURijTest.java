@@ -21,9 +21,8 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -54,7 +53,7 @@ public final class SURijTest extends ScriptTestCase {
 	 */
 	public static Test suite() {
 
-		TestSuite suite = new TestSuite("SURijTest");
+        BaseTestSuite suite = new BaseTestSuite("SURijTest");
 		suite.addTest(TestConfiguration
 				.clientServerDecorator(new CleanDatabaseTestSetup(
 						new SURijTest(TESTS[0]))));

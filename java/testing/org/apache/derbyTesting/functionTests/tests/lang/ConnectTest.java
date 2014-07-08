@@ -26,12 +26,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.TestRoutines;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -49,10 +47,10 @@ public class ConnectTest extends BaseJDBCTestCase{
         if ( JDBC.vmSupportsJSR169())
             // Test uses DriverManager which
             // is not supported with JSR169
-            return 
-            new TestSuite("empty ConnectTest:DriverManager not supported");
+                        return 
+            new BaseTestSuite("empty ConnectTest:DriverManager not supported");
         else  {
-                TestSuite suite = new TestSuite("ConnectTest suite");  
+                BaseTestSuite suite = new BaseTestSuite("ConnectTest suite");
                 suite.addTest(TestConfiguration.defaultSuite(ConnectTest.class));
                 // Derby2026 test uses explicit client connection so not relevant to embedded
                 suite.addTest(TestConfiguration.

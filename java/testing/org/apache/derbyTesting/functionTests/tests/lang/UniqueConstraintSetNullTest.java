@@ -25,11 +25,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -51,7 +49,9 @@ public class UniqueConstraintSetNullTest extends BaseJDBCTestCase {
      *         implemented tests to run.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("UniqueConstraintSetNullTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("UniqueConstraintSetNullTest");
+
         suite.addTest(TestConfiguration.embeddedSuite(
                 UniqueConstraintSetNullTest.class));
         return suite;

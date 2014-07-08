@@ -19,10 +19,9 @@
  */
 package org.apache.derbyTesting.functionTests.suites;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Run all of the XML JUnit tests as a single suite.
@@ -44,7 +43,7 @@ public final class XMLSuite extends BaseTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("XML Suite");
+        BaseTestSuite suite = new BaseTestSuite("XML Suite");
         
         // Add all JUnit tests for XML.
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest.suite());

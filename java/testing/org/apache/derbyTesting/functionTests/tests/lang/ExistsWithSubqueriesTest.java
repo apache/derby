@@ -21,17 +21,16 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import junit.framework.*;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This test contains a variety of cases of EXISTS predicates with subqueries.
@@ -74,7 +73,7 @@ public class ExistsWithSubqueriesTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-       TestSuite suite = new TestSuite("EXISTS with SET operations");
+       BaseTestSuite suite = new BaseTestSuite("EXISTS with SET operations");
 
         /* This is a language/optimization test so behavior will be the
          * same for embedded and client/server.  Therefore we only need

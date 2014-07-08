@@ -22,7 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Run an autoload test with the system property
@@ -36,7 +36,7 @@ abstract class JDBCDriversPropertyTest extends TestCase {
     
     final static Test getSuite(String jdbcDrivers) throws Exception {
         
-        TestSuite suite = new TestSuite("jdbc.drivers="+jdbcDrivers);
+        BaseTestSuite suite = new BaseTestSuite("jdbc.drivers="+jdbcDrivers);
         
         System.setProperty("jdbc.drivers", jdbcDrivers);
         

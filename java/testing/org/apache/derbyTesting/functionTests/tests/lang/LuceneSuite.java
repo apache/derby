@@ -21,13 +21,10 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-
 import java.util.Properties;
-
-import junit.framework.Test; 
-import junit.framework.TestSuite;
-
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -45,7 +42,7 @@ public class LuceneSuite extends BaseTestCase
 
 	public static Test suite()
     {
-		TestSuite suite = new TestSuite("LuceneSuite");
+        BaseTestSuite suite = new BaseTestSuite("LuceneSuite");
         Properties  properties = TestConfiguration.getSystemProperties();
         
         //

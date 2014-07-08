@@ -24,8 +24,8 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.InputStream;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Tests basic operations on a small read-only Clob from the store module.
@@ -66,8 +66,8 @@ public class SmallStoreStreamClobTest
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(SmallStoreStreamClobTest.class,
-                                        "SmallStoreStreamClobTest suite");
+        BaseTestSuite suite = new BaseTestSuite(
+            SmallStoreStreamClobTest.class, "SmallStoreStreamClobTest suite");
         return suite;
     }
 } // End class SmallStoreStreamClobTest

@@ -20,24 +20,27 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.vti.VTITemplate;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derby.client.am.ClientStatement;
 import org.apache.derby.impl.jdbc.EmbedResultSet;
 import org.apache.derby.impl.sql.execute.RowUtil;
-
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.*;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.*;
-import org.apache.derby.client.am.ClientStatement;
 
 /**
  * Tests for new methods added for Statement in JDBC4.
@@ -598,12 +601,12 @@ public class StatementTest
      * Create test suite for StatementTest.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementTest suite");
+        BaseTestSuite suite = new BaseTestSuite("StatementTest suite");
         // Decorate test suite with a TestSetup class.
         suite.addTest(new StatementTestSetup(
-                        new TestSuite(StatementTest.class)));
+                        new BaseTestSuite(StatementTest.class)));
         suite.addTest(TestConfiguration.clientServerDecorator(
-            new StatementTestSetup(new TestSuite(StatementTest.class))));
+            new StatementTestSetup(new BaseTestSuite(StatementTest.class))));
         return suite;
     }
 

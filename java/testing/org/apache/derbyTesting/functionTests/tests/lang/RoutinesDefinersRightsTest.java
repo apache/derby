@@ -21,19 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
 import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test that routines declared with EXTERNAL SECURITY DEFINER/INVOKER behaves
@@ -79,7 +79,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("RoutinesDefinersRightsTest");
+        BaseTestSuite suite = new BaseTestSuite("RoutinesDefinersRightsTest");
 
         if (!JDBC.vmSupportsJSR169()) {
             // JSR169 cannot run with tests with stored procedures
@@ -108,7 +108,7 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
          * sqlAuthorization.
          */
         Test clean = new CleanDatabaseTestSetup(
-            new TestSuite(RoutinesDefinersRightsTest.class)) {
+            new BaseTestSuite(RoutinesDefinersRightsTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {
 

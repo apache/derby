@@ -26,8 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
@@ -56,7 +56,8 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("OrderByAndOffsetFetchInSubqueries");
+        BaseTestSuite suite =
+            new BaseTestSuite("OrderByAndOffsetFetchInSubqueries");
 
         suite.addTest(makeSuite());
         suite.addTest(
@@ -73,7 +74,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
-            new TestSuite(OrderByAndOffsetFetchInSubqueries.class)) {
+            new BaseTestSuite(OrderByAndOffsetFetchInSubqueries.class)) {
                 @Override
                 protected void decorateSQL(Statement s)
                         throws SQLException {

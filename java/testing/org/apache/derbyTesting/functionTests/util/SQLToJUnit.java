@@ -16,7 +16,13 @@
 */
 package org.apache.derbyTesting.functionTests.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -1287,7 +1293,8 @@ public class SQLToJUnit
             "    }\n\n" +
             "    public static Test suite()\n" +
             "    {\n" +
-            "        TestSuite suite = new TestSuite(\"IJToJUnitTest Test\");\n" +
+            "        BaseTestSuite suite = " +
+            "new BaseTestSuite(\"IJToJUnitTest Test\");\n" +
             "        suite.addTest(TestConfiguration.defaultSuite(IJToJUnitTest.class));\n" +
             "        return suite;\n" +
             "    }\n\n" +

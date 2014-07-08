@@ -22,38 +22,38 @@ package org.apache.derbyTesting.functionTests.tests.engine;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.HashSet;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
-import org.apache.derbyTesting.junit.*;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests related to use of restrictive file permissions (DERBY-5363).
@@ -85,7 +85,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
             println("warning: testing of strict permissions in " +
                     "RestrictiveFilePermissionsTest can not take place, " +
                     "need Java 7");
-            return new TestSuite();
+            return new BaseTestSuite();
         }
 
         File f = new File("system/testPermissions");
@@ -111,7 +111,8 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         // setting of the property derby.storage.useDefaultFilePermissions.
         // The extra setup file is for testJarFiles.
 
-        TestSuite totalSuite = new TestSuite("RestrictiveFilePermissionsTest");
+        BaseTestSuite totalSuite =
+            new BaseTestSuite("RestrictiveFilePermissionsTest");
 
         Properties p = new Properties();
         p.put("derby.storage.useDefaultFilePermissions", "false");
@@ -121,7 +122,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
             new SystemPropertyTestSetup(
                 TestConfiguration.singleUseDatabaseDecorator(
                     new SupportFilesSetup(
-                        new TestSuite(
+                        new BaseTestSuite(
                             RestrictiveFilePermissionsTest.class,
                             "haveWeGotAllCreatedFilesSuite"),
                         new String[] {"functionTests/tests/lang/dcl_id.jar"}),

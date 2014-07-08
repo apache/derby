@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivilegedActionException;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 
 /**
@@ -53,7 +51,7 @@ public class Schema extends JDBCPerfTestCase {
      * @return the tests to run
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("Order Entry- Schema");
+        BaseTestSuite suite = new BaseTestSuite("Order Entry- Schema");
 
         // Create Schema
         addBaseSchema(suite);
@@ -61,7 +59,7 @@ public class Schema extends JDBCPerfTestCase {
         return suite;
     }
     
-    public static void addBaseSchema(TestSuite suite) {
+    public static void addBaseSchema(BaseTestSuite suite) {
         // Create Schema
         suite.addTest(new Schema("schema.sql"));
         suite.addTest(new Schema("dataroutines.sql"));
@@ -73,7 +71,7 @@ public class Schema extends JDBCPerfTestCase {
      * 
      * @param suite
      */
-    static void addConstraints(TestSuite suite) {
+    static void addConstraints(BaseTestSuite suite) {
         suite.addTest(new Schema("primarykey.sql"));
         suite.addTest(new Schema("foreignkey.sql"));
         suite.addTest(new Schema("index.sql"));

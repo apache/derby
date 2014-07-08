@@ -21,6 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.DataTruncation;
@@ -33,22 +38,15 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-
-import java.math.BigDecimal;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This Junit test class tests the JDBC PreparedStatement.  This test
@@ -81,14 +79,15 @@ public class PrepareStatementTest extends BaseJDBCTestCase
     {
         if ( JDBC.vmSupportsJSR169())
             // see DERBY-2233 for details
-            return new TestSuite("empty PrepareStatementTest - client not supported on JSR169");
+                        return new BaseTestSuite(
+                "empty PrepareStatementTest - client not supported on JSR169");
         else
         {
-            TestSuite suite = new TestSuite("PrepareStatementTest");
+            BaseTestSuite suite = new BaseTestSuite("PrepareStatementTest");
             suite.addTest(TestConfiguration.defaultSuite(PrepareStatementTest.class));
             suite.addTest(TestConfiguration.clientServerDecorator(
                 TestConfiguration.connectionCPDecorator(new CleanDatabaseTestSetup(
-                    new TestSuite(PrepareStatementTest.class)))));
+                    new BaseTestSuite(PrepareStatementTest.class)))));
             return suite;
         }
     }

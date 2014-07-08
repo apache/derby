@@ -19,26 +19,24 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.shared.common.reference.SQLState;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
-import java.io.IOException;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.SqlException;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This is used for testing the SqlException class.  This test can be added
@@ -314,7 +312,8 @@ public class SqlExceptionTest extends BaseJDBCTestCase
     public static Test suite() {
     	if ( JDBC.vmSupportsJSR169())
     		// see DERBY-2157 for details
-    		return new TestSuite("empty SqlExceptionTest - client not supported on JSR169");
+                        return new BaseTestSuite(
+                "empty SqlExceptionTest - client not supported on JSR169");
     	else
         {
             Test test = TestConfiguration.defaultSuite(SqlExceptionTest.class);

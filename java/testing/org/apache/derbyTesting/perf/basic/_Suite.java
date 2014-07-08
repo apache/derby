@@ -22,10 +22,14 @@ Derby - Class org.apache.derbyTesting.perf.basic._Suite
 package org.apache.derbyTesting.perf.basic;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.perf.basic.jdbc.*;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.perf.basic.jdbc.CountTest;
+import org.apache.derbyTesting.perf.basic.jdbc.CoveredIdxScan;
+import org.apache.derbyTesting.perf.basic.jdbc.HeapScan;
+import org.apache.derbyTesting.perf.basic.jdbc.SelectDistinctTest;
+import org.apache.derbyTesting.perf.basic.jdbc.SortTest;
+import org.apache.derbyTesting.perf.basic.jdbc.ValuesTest;
 
 /**
  * Basic Performance Suite
@@ -34,7 +38,7 @@ public class _Suite extends BaseTestCase{
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("BasicPerf");
+        BaseTestSuite suite = new BaseTestSuite("BasicPerf");
         
         suite.addTest(ValuesTest.suite());
         suite.addTest(CountTest.suite());

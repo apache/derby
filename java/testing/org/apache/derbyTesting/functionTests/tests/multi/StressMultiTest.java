@@ -31,13 +31,11 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
-
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
@@ -119,7 +117,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         sysprops.put("derby.storage.keepTransactionLog", "true");
         sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
-        Test embedded = new TestSuite(StressMultiTest.class);
+        Test embedded = new BaseTestSuite(StressMultiTest.class);
         embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
         embedded = new DatabasePropertyTestSetup(embedded,dbprops);
         // make this a singleUseDatabase so the datbase and 
@@ -131,21 +129,25 @@ public class StressMultiTest extends BaseJDBCTestCase {
         // with -Dderby.storage.keepTransactionLog=true if
         // you need to save the transaction log for client.
         Test client = TestConfiguration.clientServerDecorator(
-        		new TestSuite(StressMultiTest.class));
+                new BaseTestSuite(StressMultiTest.class));
         client = newCleanDatabase(new DatabasePropertyTestSetup(client,dbprops));
-        Test encrypted = new TestSuite(StressMultiTest.class);
+        Test encrypted = new BaseTestSuite(StressMultiTest.class);
         // SystemPropertyTestSetup for static properties 
         // does not work for encrypted databases because the
         // database has to be rebooted and we don't have access
         // to the boot password (local to Decorator.encryptedDatabase()
         // Run with -Dderby.storage.keepTransactionLog=true if you 
         // need to save the transaction log for encrypted.
-        TestSuite unencrypted = new TestSuite("StressMultiTest:unencrypted");
+        BaseTestSuite unencrypted =
+            new BaseTestSuite("StressMultiTest:unencrypted");
+
         unencrypted.addTest((embedded));
         unencrypted.addTest((client));
 
-        TestSuite suite = new TestSuite("StressMultiTest, " + THREADS +
-                " Threads " + MINUTES + " Minutes");
+        BaseTestSuite suite =
+            new BaseTestSuite("StressMultiTest, " + THREADS +
+                               " Threads " + MINUTES + " Minutes");
+
         suite.addTest(newCleanDatabase(unencrypted));
         //Encrypted uses a different database so it needs its own newCleanDatabase
         suite.addTest(Decorator.encryptedDatabase(new DatabasePropertyTestSetup(newCleanDatabase(encrypted),dbprops)));
@@ -188,7 +190,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
         sysprops.put("derby.storage.keepTransactionLog", "true");
         sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
-        Test embedded = new TestSuite(StressMultiTest.class);
+        Test embedded = new BaseTestSuite(StressMultiTest.class);
         embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
         embedded = new DatabasePropertyTestSetup(embedded,dbprops);
         embedded = TestConfiguration.singleUseDatabaseDecorator(newCleanDatabase(embedded));

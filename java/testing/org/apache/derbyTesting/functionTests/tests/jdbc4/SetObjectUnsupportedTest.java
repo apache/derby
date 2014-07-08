@@ -19,15 +19,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -169,12 +167,18 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * Create a suite with all tests.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("SetObjectUnsupportedTest suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("SetObjectUnsupportedTest suite");
+
         suite.addTest(baseSuite(false, "SetObjectUnsupportedTest:prepared"));
         suite.addTest(baseSuite(true, "SetObjectUnsupportedTest:callable"));
-        TestSuite client = new TestSuite("SetObjectUnsupportedTest:client");
+
+        BaseTestSuite client =
+            new BaseTestSuite("SetObjectUnsupportedTest:client");
+
         client.addTest(baseSuite(false, "SetObjectUnsupportedTest:prepared"));
         client.addTest(baseSuite(true, "SetObjectUnsupportedTest:callable"));
+
         suite.addTest(TestConfiguration.clientServerDecorator(client));
         return suite;
     }
@@ -189,7 +193,7 @@ public class SetObjectUnsupportedTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     static Test baseSuite(boolean callable, String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         for (TypeInfo typeInfo : TYPES) {
             suite.addTest(new SetObjectUnsupportedTest
                           ("testUnsupportedSetObject", typeInfo, callable));

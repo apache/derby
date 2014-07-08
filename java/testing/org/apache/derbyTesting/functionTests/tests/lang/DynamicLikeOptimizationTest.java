@@ -28,8 +28,8 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
@@ -60,10 +60,13 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite tests = new TestSuite("DynamicLikeOptimizationTest");
+        BaseTestSuite tests =
+            new BaseTestSuite("DynamicLikeOptimizationTest");
+
         tests.addTestSuite(DynamicLikeOptimizationTest.class);
         tests.addTest(TestConfiguration.clientServerDecorator(
-                          new TestSuite(DynamicLikeOptimizationTest.class)));
+            new BaseTestSuite(DynamicLikeOptimizationTest.class)));
+
         return new CleanDatabaseTestSetup(tests) {
             protected void decorateSQL(Statement stmt) throws SQLException {
                 stmt.executeUpdate("create table t1(c11 int)");

@@ -21,17 +21,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
-import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
 import javax.sql.XADataSource;
-import junit.framework.*;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -77,7 +75,7 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
         }
 
         // Else return empty suite.
-        return new TestSuite("JDBC 4 from JDBC 3 Data Sources");
+        return new BaseTestSuite("JDBC 4 from JDBC 3 Data Sources");
     }
 
     /**

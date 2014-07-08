@@ -22,15 +22,13 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import java.nio.charset.Charset;
 import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.TimeZoneTestSetup;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * LocalizedDisplayScriptTest runs the ij script LocalizedDisplay.sql
@@ -64,7 +62,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      */
     public static Test suite() {
         
-        TestSuite suite = new TestSuite("LocalizedDisplay");
+        BaseTestSuite suite = new BaseTestSuite("LocalizedDisplay");
 
         // This test will fail with JSR169, because lack of support for 
         // rs.getBigDecimal() will prevent the localization of numeric and
@@ -82,7 +80,9 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
             return suite;
         }
 
-        TestSuite localizedEmbeddedTests = new TestSuite("LocalizedDisplay:embedded");
+        BaseTestSuite localizedEmbeddedTests =
+            new BaseTestSuite("LocalizedDisplay:embedded");
+
         localizedEmbeddedTests.addTest(getSuite());
         Test embeddedrun = TestConfiguration.singleUseDatabaseDecorator(localizedEmbeddedTests);
         // add the client test
@@ -94,7 +94,9 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         // resulting in localized display by default, and thus a diff with the
         // master.
         // Set up the script's run with the network client
-        TestSuite localizedTests = new TestSuite("LocalizedDisplay:client");
+        BaseTestSuite localizedTests =
+            new BaseTestSuite("LocalizedDisplay:client");
+
         localizedTests.addTest(getSuite());
         Test client = TestConfiguration.clientServerDecorator(
             TestConfiguration.singleUseDatabaseDecorator(localizedTests));
@@ -119,7 +121,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite() {
-        TestSuite suite = new TestSuite("localized Display");
+        BaseTestSuite suite = new BaseTestSuite("localized Display");
         Properties uiProps = new Properties();
         uiProps.put("derby.ui.locale","es_AR");
         uiProps.put("derby.ui.codeset", ENCODING);

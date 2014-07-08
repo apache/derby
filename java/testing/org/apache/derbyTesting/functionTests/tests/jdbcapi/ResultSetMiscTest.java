@@ -27,12 +27,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -740,7 +738,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ResultSetTest2");
+        BaseTestSuite suite = new BaseTestSuite("ResultSetTest2");
 
         suite.addTest(baseSuite("ResultSetTest2:embedded"));
 
@@ -750,7 +748,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(ResultSetMiscTest.class);
 
         // Some test cases expect lock timeouts, so reduce the timeout to

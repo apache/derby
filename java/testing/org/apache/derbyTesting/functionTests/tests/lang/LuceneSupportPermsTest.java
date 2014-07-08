@@ -27,42 +27,31 @@ import java.math.BigDecimal;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.util.Version;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.optional.api.LuceneIndexDescriptor;
 import org.apache.derby.optional.api.LuceneUtils;
-
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 
 /**
  * <p>
@@ -165,7 +154,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         String      luceneVersion = getSystemProperty( LUCENE_VERSION_PROPERTY );
         if ( luceneVersion != null ) { LUCENE_VERSION = luceneVersion; }
         
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(LuceneSupportPermsTest.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            LuceneSupportPermsTest.class);
 
         Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication

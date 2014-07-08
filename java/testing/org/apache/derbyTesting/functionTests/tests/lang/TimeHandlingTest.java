@@ -29,11 +29,9 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Calendar;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -71,7 +69,7 @@ public class TimeHandlingTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite(TimeHandlingTest.class);
+        BaseTestSuite suite = new BaseTestSuite(TimeHandlingTest.class);
         
         suite.addTest(TestConfiguration.clientServerSuite(TimeHandlingTest.class));
         

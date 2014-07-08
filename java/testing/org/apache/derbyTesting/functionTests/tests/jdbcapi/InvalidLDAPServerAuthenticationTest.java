@@ -26,13 +26,10 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -55,13 +52,16 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("InvalidLDAPServerAuthenticationTest - cannot" +
+            return new BaseTestSuite(
+                "InvalidLDAPServerAuthenticationTest - cannot" +
                 " run with JSR169 - missing functionality for " +
                 "org.apache.derby.iapi.jdbc.AuthenticationService");
         
         // security manager would choke attempting to resolve to the invalid
         // LDAPServer, so run without
-        TestSuite suite = new TestSuite("InvalidLDAPServerAuthenticationTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("InvalidLDAPServerAuthenticationTest");
+
         suite.addTest(SecurityManagerSetup.noSecurityManager(baseSuite(
                 "testInvalidLDAPServerConnectionError")));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -71,7 +71,7 @@ public class InvalidLDAPServerAuthenticationTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         Test test = new InvalidLDAPServerAuthenticationTest("testInvalidLDAPServerConnectionError");
         suite.addTest(test);
 

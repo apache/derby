@@ -25,13 +25,11 @@ package org.apache.derbyTesting.functionTests.tests.engine;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -58,7 +56,7 @@ public class ReadMeFilesTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-    	TestSuite suite = new TestSuite("ReadMeFilesTest");
+        BaseTestSuite suite = new BaseTestSuite("ReadMeFilesTest");
 
         //DERBY-5232 (Put a stern README file in log and seg0 directories 
         // to warn users of corrpution they will cause if they touch files 

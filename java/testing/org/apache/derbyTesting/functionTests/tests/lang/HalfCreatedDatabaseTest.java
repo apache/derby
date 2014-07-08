@@ -22,18 +22,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -77,7 +73,7 @@ public class HalfCreatedDatabaseTest extends BaseJDBCTestCase
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("HalfCreatedDatabaseTest");
+        BaseTestSuite suite = new BaseTestSuite("HalfCreatedDatabaseTest");
 
         suite.addTest( decorateTest() );
         
@@ -86,7 +82,7 @@ public class HalfCreatedDatabaseTest extends BaseJDBCTestCase
     
     private static Test decorateTest()
     {
-        Test test = new TestSuite( HalfCreatedDatabaseTest.class );
+        Test test = new BaseTestSuite( HalfCreatedDatabaseTest.class );
 
         test = TestConfiguration.singleUseDatabaseDecorator( test, DB_NAME );
 

@@ -35,16 +35,14 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-
-import junit.framework.*;
-
+import junit.framework.Test;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.tests.lang.Price;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for new methods added for PreparedStatement in JDBC 4.2.
@@ -181,7 +179,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("PreparedStatementTest42");
+        BaseTestSuite suite = new BaseTestSuite("PreparedStatementTest42");
 
         suite.addTest( TestConfiguration.defaultSuite( PreparedStatementTest42.class ) );
 

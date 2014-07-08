@@ -22,21 +22,18 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.net.InetAddress;
-import java.sql.Driver;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import javax.sql.DataSource;
 import java.util.Enumeration;
-
+import javax.sql.DataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -90,7 +87,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     public static Test suite() {
         if (!JDBC.vmSupportsJDBC3())
-            return new TestSuite("empty: no java.sql.DriverManager");
+            return new BaseTestSuite("empty: no java.sql.DriverManager");
 
 
         boolean embeddedAutoLoad = false;
@@ -132,7 +129,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         
         if (jdbc4Autoload || embeddedAutoLoad || clientAutoLoad)
         {
-            TestSuite suite = new TestSuite("AutoloadTest");
+            BaseTestSuite suite = new BaseTestSuite("AutoloadTest");
             
             if (jdbc4Autoload && !embeddedAutoLoad)
             {
@@ -164,7 +161,8 @@ public class AutoloadTest extends BaseJDBCTestCase
 
         // Run a single test that ensures that the driver is
         // not loaded implicitly by some other means.
-        TestSuite suite = new TestSuite("AutoloadTest: no autoloading expected");
+        BaseTestSuite suite =
+            new BaseTestSuite("AutoloadTest: no autoloading expected");
         
         suite.addTest(SecurityManagerSetup.noSecurityManager(new AutoloadTest("testEmbeddedNotStarted")));
         suite.addTest(new AutoloadTest("noloadTestNodriverLoaded"));
@@ -179,7 +177,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     private static Test baseAutoLoadSuite(String which)
     {
-        TestSuite suite = new TestSuite("AutoloadTest: " + which);
+        BaseTestSuite suite = new BaseTestSuite("AutoloadTest: " + which);
         
         suite.addTest(new AutoloadTest("testRegisteredDriver"));
         if ("embedded".equals(which))
@@ -227,7 +225,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * </ul>
      */
     static Test fullAutoloadSuite() {
-        TestSuite suite = new TestSuite("AutoloadTest:All");
+        BaseTestSuite suite = new BaseTestSuite("AutoloadTest:All");
         suite.addTest(new AutoloadTest(AutoloadTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversEmbeddedTest.class));
         suite.addTest(new AutoloadTest(JDBCDriversClientTest.class));

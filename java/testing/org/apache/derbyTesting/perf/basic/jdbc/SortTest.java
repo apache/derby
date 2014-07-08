@@ -21,9 +21,12 @@ limitations under the License.
 package org.apache.derbyTesting.perf.basic.jdbc;
 
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 
 /**
@@ -43,7 +46,7 @@ public class SortTest extends JDBCPerfTestCase {
     {
         int iterations = 350, repeats = 4;
 
-        TestSuite suite = new TestSuite("SortTests");
+        BaseTestSuite suite = new BaseTestSuite("SortTests");
         suite.addTest(new SortTest("SortDesc100",iterations,repeats));
         suite.addTest(new SortTest("SortDesc100GetData",iterations,repeats));
         return new BaseLoad100TestSetup(suite,rowcount,tableName);

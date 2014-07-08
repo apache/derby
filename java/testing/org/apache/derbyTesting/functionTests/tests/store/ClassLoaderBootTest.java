@@ -24,17 +24,17 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandlerFactory;
-import java.sql.*;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import junit.extensions.TestSetup;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -83,7 +83,7 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite(ClassLoaderBootTest.class);
+        BaseTestSuite suite = new BaseTestSuite(ClassLoaderBootTest.class);
         Test test = suite;
         TestSetup setup = 
             new CleanDatabaseTestSetup(test) {

@@ -21,11 +21,10 @@
 */
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test; 
-import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -49,7 +48,7 @@ public class _Suite extends BaseTestCase  {
 
 	public static Test suite() {
 
-		TestSuite suite = new TestSuite("i18n");
+        BaseTestSuite suite = new BaseTestSuite("i18n");
 
         // Also, none of these tests will run with JSR169.
         if (JDBC.vmSupportsJSR169())

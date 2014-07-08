@@ -21,9 +21,8 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class _Suite extends BaseJDBCTestCase {
 
@@ -39,7 +38,7 @@ public class _Suite extends BaseJDBCTestCase {
      * The full suite may take a very long time.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("largedata suite");
+        BaseTestSuite suite = new BaseTestSuite("largedata suite");
 
         suite.addTest(Derby6317Test.suite());
         // DERBY-5624, currently this runs out of file descriptors on unix

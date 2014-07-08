@@ -25,11 +25,9 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.Derby;
 
@@ -42,12 +40,12 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         if (Derby.hasTools()) {
-            TestSuite suite = new TestSuite("IJRunScriptTest");
+            BaseTestSuite suite = new BaseTestSuite("IJRunScriptTest");
             suite.addTestSuite(IJRunScriptTest.class);
             return new CleanDatabaseTestSetup(suite);
         }
         
-        return new TestSuite("empty: no tools support");
+        return new BaseTestSuite("empty: no tools support");
     }
     
     public IJRunScriptTest(String name)

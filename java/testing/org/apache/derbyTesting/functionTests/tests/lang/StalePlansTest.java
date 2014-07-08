@@ -25,9 +25,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -54,7 +54,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
         // reduce the number of times we need to execute each statement.
         props.setProperty("derby.language.stalePlanCheckInterval", "10");
         Test suite = new DatabasePropertyTestSetup(
-            new TestSuite(StalePlansTest.class), props, true);
+            new BaseTestSuite(StalePlansTest.class), props, true);
         return new CleanDatabaseTestSetup(suite);
     }
 

@@ -30,17 +30,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -87,7 +83,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("AuthenticationTest");
+        BaseTestSuite suite = new BaseTestSuite("AuthenticationTest");
         suite.addTest(baseSuite("AuthenticationTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("AuthenticationTest:client")));
@@ -95,7 +91,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
     
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite("AuthenticationTest");
+        BaseTestSuite suite = new BaseTestSuite("AuthenticationTest");
         
         Test test = new AuthenticationTest(
             "testConnectShutdownAuthentication");
@@ -154,13 +150,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         return TestConfiguration.singleUseDatabaseDecorator(suite);
     }
     
-    protected static void setBaseProps(TestSuite suite, Test test) 
+    protected static void setBaseProps(BaseTestSuite suite, Test test)
     {
         setBaseProps(suite, test, null);
     }
 
     private static void setBaseProps(
-            TestSuite suite, Test test, Properties extraDbProps)
+            BaseTestSuite suite, Test test, Properties extraDbProps)
     {
         // Use DatabasePropertyTestSetup.builtinAuthentication decorator
         // to set the user properties required by this test (and shutdown 

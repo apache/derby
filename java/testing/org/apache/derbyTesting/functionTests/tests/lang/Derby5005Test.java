@@ -24,11 +24,10 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class Derby5005Test extends BaseJDBCTestCase {
 
@@ -43,7 +42,7 @@ public class Derby5005Test extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Derby5005Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby5005Test");
 
         suite.addTest(makeSuite());
         // suite.addTest(
@@ -60,7 +59,7 @@ public class Derby5005Test extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
-            new TestSuite(Derby5005Test.class)) {
+            new BaseTestSuite(Derby5005Test.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {
                     getConnection().setAutoCommit(false);

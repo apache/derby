@@ -20,18 +20,16 @@
 package org.apache.derbyTesting.system.oe.test;
 
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.system.oe.direct.SimpleNonStandardOperations;
 import org.apache.derbyTesting.system.oe.run.Checks;
 import org.apache.derbyTesting.system.oe.run.Populate;
 import org.apache.derbyTesting.system.oe.run.Schema;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Test the basic functionality of the Order Entry test
@@ -48,7 +46,7 @@ public class OETest extends BaseJDBCTestCase {
     
       
     public static Test suite() {
-        TestSuite suite = new TestSuite("Order Entry");
+        BaseTestSuite suite = new BaseTestSuite("Order Entry");
         
         suite.addTest(Schema.suite());
         // Test load part

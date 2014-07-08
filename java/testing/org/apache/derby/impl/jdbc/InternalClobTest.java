@@ -22,31 +22,26 @@
  */
 package org.apache.derby.impl.jdbc;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import junit.framework.Test;
+import junit.framework.TestCase;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.Resetable;
 import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
-
-import java.sql.SQLException;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * A set of tests for the {@link org.apache.derby.impl.jdbc.InternalClob}
@@ -91,7 +86,8 @@ public abstract class InternalClobTest
 
     protected static Test addModifyingTests(Class<? extends TestCase> theClass)
             throws Exception {
-        TestSuite suite = new TestSuite("Modifying InternalClob test suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("Modifying InternalClob test suite");
         Method[] methods = theClass.getMethods();
         List<String> testMethods = new ArrayList<String>();
         for (int i=0; i < methods.length; i++) {

@@ -24,13 +24,9 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class TestPreStartedMasterServer extends ClientRunner
@@ -51,7 +47,7 @@ public class TestPreStartedMasterServer extends ClientRunner
         // String masterHostName = System.getProperty("test.serverHost", "localhost");
         // int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         
-        TestSuite suite = new TestSuite("TestPreStartedMasterServer");
+        BaseTestSuite suite = new BaseTestSuite("TestPreStartedMasterServer");
                 
         suite.addTest(TestPreStartedMasterServer.suite(masterServerHost, masterServerPort));
         System.out.println("*** Done suite.addTest(TestPreStartedMasterServer.suite())");

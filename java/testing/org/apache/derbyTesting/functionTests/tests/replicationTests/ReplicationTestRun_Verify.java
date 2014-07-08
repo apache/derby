@@ -26,13 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.tests.derbynet.PrepareStatementTest;
-import org.apache.derbyTesting.functionTests.tests.lang.AnsiTrimTest;
-import org.apache.derbyTesting.functionTests.tests.lang.CreateTableFromQueryTest;
-import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBCClient;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ReplicationTestRun_Verify extends BaseJDBCTestCase
@@ -48,8 +43,8 @@ public class ReplicationTestRun_Verify extends BaseJDBCTestCase
     {
         System.out.println("*** ReplicationTestRun_Verify.suite()");
         
-        TestSuite suite = new TestSuite("ReplicationTestRun_Verify");
-        System.out.println("*** Done new TestSuite()");
+        BaseTestSuite suite = new BaseTestSuite("ReplicationTestRun_Verify");
+        System.out.println("*** Done new BaseTestSuite()");
         
         String masterHostName = System.getProperty("test.serverHost", "localhost");
         int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));

@@ -28,15 +28,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
@@ -50,7 +48,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
     public static Test suite() {
 
         if (!Derby.hasTools())
-            return new TestSuite("empty: no tools support");
+            return new BaseTestSuite("empty: no tools support");
         
         // check to see if we have derbynet.jar or derbyclient.jar
         // before starting the security manager...
@@ -59,7 +57,9 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         if (!Derby.hasClient())
             isClient=false;
 
-        Test suite = new TestSuite(SysinfoCPCheckTest.class, "Sysinfo ClassPath Checker");        
+        Test suite = new BaseTestSuite(
+            SysinfoCPCheckTest.class, "Sysinfo ClassPath Checker");
+
         return new LocaleTestSetup(suite, Locale.ENGLISH);
     }
 

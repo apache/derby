@@ -22,19 +22,23 @@
 
 package org.apache.derbyTesting.functionTests.tests.memory;
 
-import org.apache.derbyTesting.junit.*;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
-import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
-import java.io.Reader;
-import java.io.IOException;
+import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test for small and larg clobs with multibyte characters.
@@ -137,7 +141,7 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("MultiByteClobTest");
+        BaseTestSuite suite = new BaseTestSuite("MultiByteClobTest");
         suite.addTest(baseSuite("MultiByteClobTest:embedded"));
         suite.addTest(TestConfiguration
             .clientServerDecorator(baseSuite("MultiByteClobTest:client")));
@@ -153,7 +157,7 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
      * @param name name for the suite.
      */
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(MultiByteClobTest.class);
         return new CleanDatabaseTestSetup(DatabasePropertyTestSetup
                 .setLockTimeouts(suite, 2, 4)) {

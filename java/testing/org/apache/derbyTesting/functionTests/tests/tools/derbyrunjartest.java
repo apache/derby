@@ -25,10 +25,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
@@ -44,7 +43,7 @@ public class derbyrunjartest extends BaseTestCase {
     public static Test suite() {
         Class cl = derbyrunjartest.class;
 
-        TestSuite suite = new TestSuite(cl);
+        BaseTestSuite suite = new BaseTestSuite(cl);
 
         // The server command can only be used on platforms that support
         // the network server.

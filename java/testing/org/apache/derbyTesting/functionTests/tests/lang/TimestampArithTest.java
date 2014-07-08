@@ -26,12 +26,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
@@ -386,8 +384,9 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-		return new BaseJDBCTestSetup(new TestSuite(TimestampArithTest.class,
-				"TimestampArithTest")) {
+        return new BaseJDBCTestSetup(
+            new BaseTestSuite(
+                TimestampArithTest.class, "TimestampArithTest")) {
 
 			protected void setUp() throws Exception {
 				super.setUp();

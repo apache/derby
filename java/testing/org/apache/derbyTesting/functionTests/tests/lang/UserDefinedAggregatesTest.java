@@ -21,25 +21,16 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.util.HashMap;
-
+import java.sql.Connection;
+import java.sql.ResultSet;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.Decorator;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
-
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -110,7 +101,7 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite( "UserDefinedAggregatesTest" );
+        BaseTestSuite suite = new BaseTestSuite("UserDefinedAggregatesTest");
 
         suite.addTest( TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class) );
         suite.addTest( collatedSuite( "en" ) );
@@ -127,7 +118,9 @@ public class UserDefinedAggregatesTest  extends GeneratedColumnsHelper
      */
     private static Test collatedSuite(String locale)
     {
-        TestSuite suite = new TestSuite( "UserDefinedAggregatesTest:territory=" + locale );
+        BaseTestSuite suite =
+            new BaseTestSuite("UserDefinedAggregatesTest:territory=" + locale);
+
         suite.addTest( TestConfiguration.defaultSuite(UserDefinedAggregatesTest.class) );
 
         return Decorator.territoryCollatedDatabase( suite, locale );

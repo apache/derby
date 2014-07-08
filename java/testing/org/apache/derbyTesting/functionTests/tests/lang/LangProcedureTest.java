@@ -33,10 +33,10 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.Locale;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.ProcedureTest;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -64,7 +64,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         if (JDBC.vmSupportsJSR169()) {
-            return new TestSuite(
+            return new BaseTestSuite(
                 "Empty LangProcedureTest. " +
                 "JSR169 does not support jdbc:default:connection");
         } else {

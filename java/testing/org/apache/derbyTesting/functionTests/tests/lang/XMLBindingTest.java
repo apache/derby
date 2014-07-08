@@ -25,17 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * This test checks to make sure that the XML data type and
@@ -69,7 +67,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("XML Binding Suite");
+        BaseTestSuite suite = new BaseTestSuite("XML Binding Suite");
         if (XML.classpathMeetsXMLReqs())
         {
             /* "false" in the next line means that we will *not* clean the

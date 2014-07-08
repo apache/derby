@@ -29,13 +29,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -75,36 +72,53 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("cannt run with JSR169 - missing functionality" +
+            return new BaseTestSuite(
+                "cannot run with JSR169 - missing functionality" +
                 " for org.apache.derby.iapi.jdbc.AuthenticationService");
+
         ldapUser=getSystemProperty("derbyTesting.ldapUser");
+
         if (ldapUser == null || ldapUser.length() < 1)
-            return new TestSuite("LDAPAuthenticationTest requires property " +
+            return new BaseTestSuite(
+                "LDAPAuthenticationTest requires property " +
                 "derbyTesting.ldapUser set to a valid user set up on the " +
                 "ldapServer, eg: -DderbyTesting.ldapUser=CharliesPwd. In addition," +
                 "test requires a user 'kathy', pwd 'kathyS' to be set up");
+
         ldapPassword=getSystemProperty("derbyTesting.ldapPassword");
+
         if (ldapPassword == null || ldapPassword.length() < 1)
-            return new TestSuite("LDAPAuthenticationTest requires property " +
+            return new BaseTestSuite(
+                "LDAPAuthenticationTest requires property " +
                 "derbyTesting.ldapPassword set the password of a valid user set" +
                 " up on the ldapServer, eg: -DderbyTesting.ldapPassword=Charlie");
+
         ldapServer=getSystemProperty("derbyTesting.ldapServer");
+
         if (ldapServer == null || ldapServer.length() < 1)
-            return new TestSuite("LDAPAuthenticationTest requires property " +
+            return new BaseTestSuite(
+                "LDAPAuthenticationTest requires property " +
                 "derbyTesting.ldapServer set, eg: " +
                 "-DderbyTesting.ldapServer=myldapserver.myorg.org");
+
         ldapPort=getSystemProperty("derbyTesting.ldapPort");
+
         if (ldapPort == null || ldapPort.length() < 1)
-            return new TestSuite("LDAPAuthenticationTest requires property " +
+            return new BaseTestSuite(
+                "LDAPAuthenticationTest requires property " +
                 "derbyTesting.ldapPort set, eg: -DderbyTesting.ldapPort=333");
+
         dnString=getSystemProperty("derbyTesting.dnString");
+
         if (dnString == null || dnString.length() < 1)
-            return new TestSuite("LDAPAuthenticationTest requires property " +
+            return new BaseTestSuite(
+                "LDAPAuthenticationTest requires property " +
                 "derbyTesting.dnString for setting o=, eg: " +
                 "-DderbyTesting.dnString=myJNDIstring");
+
         ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
 
-        TestSuite suite = new TestSuite("LDAPAuthenticationTest");
+        BaseTestSuite suite = new BaseTestSuite("LDAPAuthenticationTest");
         suite.addTest(baseSuite("LDAPAuthenticationTest:embedded",
             "testLDAPConnection"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -116,7 +130,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name, String fixture) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         Test test = new LDAPAuthenticationTest(fixture);
         setBaseProps(suite, test);
 
@@ -125,7 +139,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         return TestConfiguration.singleUseDatabaseDecorator(suite);
     }
 
-    protected static void setBaseProps(TestSuite suite, Test test) 
+    protected static void setBaseProps(BaseTestSuite suite, Test test)
     {
         // set some debugging at database level properties
         Properties props = new Properties();

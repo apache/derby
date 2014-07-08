@@ -26,16 +26,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
-
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test of additional methods in JDBC2.0  methods in statement and
@@ -62,7 +60,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementJdbc20Test");
+        BaseTestSuite suite = new BaseTestSuite("StatementJdbc20Test");
         suite.addTest(baseSuite("StatementJdbc20Test:embedded"));
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -72,7 +70,7 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(StatementJdbc20Test.class);
         

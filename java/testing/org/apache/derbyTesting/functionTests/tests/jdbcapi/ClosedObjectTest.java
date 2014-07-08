@@ -39,8 +39,8 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -163,7 +163,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ClosedObjectTest suite");
+        BaseTestSuite suite = new BaseTestSuite("ClosedObjectTest suite");
         suite.addTest(baseSuite(false));
         suite.addTest(baseSuite(true));
         return suite;
@@ -179,10 +179,12 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @exception Exception if an error occurs while building the test suite
      */
     private static Test baseSuite(boolean network) {
-        TestSuite topSuite = new TestSuite(
+        BaseTestSuite topSuite = new BaseTestSuite(
             "ClosedObjectTest:" + (network ? "client" : "embedded"));
 
-        TestSuite dsSuite = new TestSuite("ClosedObjectTest DataSource");
+        BaseTestSuite dsSuite = new BaseTestSuite(
+            "ClosedObjectTest DataSource");
+
         DataSourceDecorator dsDecorator = new DataSourceDecorator(dsSuite);
         topSuite.addTest(dsDecorator);
         fillDataSourceSuite(dsSuite, dsDecorator);
@@ -201,7 +203,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                         "maxStatements", Integer.valueOf(5))));
             }
 
-            TestSuite xaSuite = new TestSuite("ClosedObjectTest XA");
+            BaseTestSuite xaSuite = new BaseTestSuite("ClosedObjectTest XA");
             XADataSourceDecorator xaDecorator = new XADataSourceDecorator(xaSuite);
             topSuite.addTest(xaDecorator);
             fillDataSourceSuite(xaSuite, xaDecorator);
@@ -220,7 +222,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @return a suite
      */
     private static Test poolSuite(Map dsProps) {
-        TestSuite poolSuite = new TestSuite(
+        BaseTestSuite poolSuite = new BaseTestSuite(
                 "ClosedObjectTest ConnectionPoolDataSource");
         PoolDataSourceDecorator poolDecorator =
                 new PoolDataSourceDecorator(poolSuite, dsProps);
@@ -238,34 +240,34 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * @param suite the test suite to fill
      * @param dsDecorator the decorator for the test suite
      */
-    private static void fillDataSourceSuite(TestSuite suite,
+    private static void fillDataSourceSuite(BaseTestSuite suite,
                                             DataSourceDecorator dsDecorator)
     {
-        TestSuite rsSuite = new TestSuite("Closed ResultSet");
+        BaseTestSuite rsSuite = new BaseTestSuite("Closed ResultSet");
         ResultSetObjectDecorator rsDecorator =
             new ResultSetObjectDecorator(rsSuite, dsDecorator);
         suite.addTest(rsDecorator);
         fillObjectSuite(rsSuite, rsDecorator, ResultSet.class);
 
-        TestSuite stmtSuite = new TestSuite("Closed Statement");
+        BaseTestSuite stmtSuite = new BaseTestSuite("Closed Statement");
         StatementObjectDecorator stmtDecorator =
             new StatementObjectDecorator(stmtSuite, dsDecorator);
         suite.addTest(stmtDecorator);
         fillObjectSuite(stmtSuite, stmtDecorator, Statement.class);
 
-        TestSuite psSuite = new TestSuite("Closed PreparedStatement");
+        BaseTestSuite psSuite = new BaseTestSuite("Closed PreparedStatement");
         PreparedStatementObjectDecorator psDecorator =
             new PreparedStatementObjectDecorator(psSuite, dsDecorator);
         suite.addTest(psDecorator);
         fillObjectSuite(psSuite, psDecorator, PreparedStatement.class);
 
-        TestSuite csSuite = new TestSuite("Closed CallableStatement");
+        BaseTestSuite csSuite = new BaseTestSuite("Closed CallableStatement");
         CallableStatementObjectDecorator csDecorator =
             new CallableStatementObjectDecorator(csSuite, dsDecorator);
         suite.addTest(csDecorator);
         fillObjectSuite(csSuite, csDecorator, CallableStatement.class);
 
-        TestSuite connSuite = new TestSuite("Closed Connection");
+        BaseTestSuite connSuite = new BaseTestSuite("Closed Connection");
         ConnectionObjectDecorator connDecorator =
             new ConnectionObjectDecorator(connSuite, dsDecorator);
         suite.addTest(connDecorator);
@@ -280,7 +282,7 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
      * closed object to test the method on)
      * @param iface the interface which contains the methods to test
      */
-    private static void fillObjectSuite(TestSuite suite,
+    private static void fillObjectSuite(BaseTestSuite suite,
                                         ObjectDecorator decorator,
                                         Class iface)
     {

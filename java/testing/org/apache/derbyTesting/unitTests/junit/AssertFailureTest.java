@@ -21,10 +21,9 @@
 package org.apache.derbyTesting.unitTests.junit;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.shared.common.sanity.AssertFailure;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
@@ -52,7 +51,7 @@ public class AssertFailureTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("AssertFailureTest");
+        BaseTestSuite suite = new BaseTestSuite("AssertFailureTest");
 
         try {
             //Only add the tests if this is a sane build.

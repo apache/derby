@@ -23,14 +23,12 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.security.AccessControlException;
-import java.sql.Connection;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DerbyConstants;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -89,7 +87,8 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite("SecurityPolicyReloadingTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("SecurityPolicyReloadingTest");
 
         // The reloaded policy requires restricted property-reading permissions,
         // which is easy to do if you can subdivide the protection domains by

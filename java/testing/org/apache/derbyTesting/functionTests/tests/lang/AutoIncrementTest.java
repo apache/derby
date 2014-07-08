@@ -26,11 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -1189,7 +1187,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 	
 	public static Test suite() {
 		return new CleanDatabaseTestSetup(
-				new TestSuite(AutoIncrementTest.class, "AutoIncrementTest")) {
+            new BaseTestSuite(AutoIncrementTest.class, "AutoIncrementTest")) {
 			protected void decorateSQL(Statement s)
 			throws SQLException
 			{

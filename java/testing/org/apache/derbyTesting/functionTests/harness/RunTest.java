@@ -42,10 +42,8 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import junit.framework.TestSuite;
-
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class RunTest
 {
@@ -2826,7 +2824,7 @@ clp.list(System.out);
             // Cannot use junit.textui.TestRunner.main() since it will exit 
             // the JVM when done.
             
-            // Extract/create a TestSuite object, which is either
+            // Extract/create a BaseTestSuite object, which is either
             //      a) retreived from a static suite() method in the test class
             //
             // or, if a) fails
@@ -2839,22 +2837,22 @@ clp.list(System.out);
             // Load the test class
             Class<?> testClass = Class.forName(testName);
             
-            TestSuite junitTestSuite = null;
+            BaseTestSuite junitTestSuite = null;
             
             try{
                 // Get the static suite() method if it exists.
                 Method suiteMethod = testClass.getMethod("suite", null);
-                // Get the TestSuite object returned by the suite() method
+                // Get the BaseTestSuite object returned by the suite() method
                 // by invoking it.
                 // Method is static, hence param1 is null
                 // Method has no formal parameters, hence param2 is null
-                junitTestSuite = (TestSuite) suiteMethod.invoke(null, null);
+                junitTestSuite = (BaseTestSuite)suiteMethod.invoke(null, null);
             } catch(Exception ex){
                 // Not able to access static suite() method (with no params)
-                // returning a TestSuite object.
-                // Use JUnit to create a TestSuite with all methods in the test
-                // class starting with "test"
-                junitTestSuite = new TestSuite(testClass);
+                // returning a BaseTestSuite object.
+                // Use JUnit to create a BaseTestSuite with all methods in the
+                // test class starting with "test"
+                junitTestSuite = new BaseTestSuite(testClass);
             }
             
             if(junitTestSuite != null){
@@ -2862,8 +2860,9 @@ clp.list(System.out);
                 junit.textui.TestRunner.run(junitTestSuite);    
             }
             else{
-                System.out.println("Not able to extract JUnit TestSuite from " +
-                        "test class " + testName);
+                System.out.println(
+                    "Not able to extract JUnit BaseTestSuite from " +
+                    "test class " + testName);
             }
         
             // Reset System.out and System.err

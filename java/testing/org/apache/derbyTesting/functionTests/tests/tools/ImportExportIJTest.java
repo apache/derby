@@ -21,11 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -51,7 +49,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
 	 * Return the suite that runs the script.
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("importExportIJ");
+        BaseTestSuite suite = new BaseTestSuite("importExportIJ");
 		
         // only run with embedded
         // network server makes slightly different output

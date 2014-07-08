@@ -30,7 +30,7 @@ import java.sql.Statement;
 import java.util.Hashtable;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.BasicEmbeddedDataSource40;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
@@ -96,7 +96,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests to be run with client and/or embedded
      */
     private static Test baseSuite(String postfix) {
-        TestSuite suite = new TestSuite("ClientAndEmbedded" + postfix);
+        BaseTestSuite
+            suite = new BaseTestSuite("ClientAndEmbedded" + postfix);
+
         suite.addTest(new DataSourceTest("testBadConnectionAttributeSyntax"));
         suite.addTest(new DataSourceTest("testDescriptionProperty"));
         suite.addTest(new DataSourceTest("testAllDataSources"));
@@ -110,7 +112,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
-        TestSuite suite = new TestSuite("Client/Server");
+        BaseTestSuite suite = new BaseTestSuite("Client/Server");
         suite.addTest(new DataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new DataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
@@ -126,13 +128,13 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with embedded only
      */
     private static Test getEmbeddedSuite(String postfix) {
-        TestSuite suite = new TestSuite("Embedded" + postfix);
+        BaseTestSuite suite = new BaseTestSuite("Embedded" + postfix);
         suite.addTest(new DataSourceTest("testDSRequestAuthentication"));
         return suite;
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("DataSourceTest suite");
+        BaseTestSuite suite = new BaseTestSuite("DataSourceTest suite");
         // Add the tests that only run with embedded
         suite.addTest(getEmbeddedSuite("embedded"));
         // Add tests that will run with embedded

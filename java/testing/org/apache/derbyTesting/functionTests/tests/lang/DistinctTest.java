@@ -24,21 +24,17 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests for DISTINCT. These tests mostly assume: no indexes, no order by, no grouping
@@ -51,7 +47,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-		Test s = new TestSuite(DistinctTest.class);
+        Test s = new BaseTestSuite(DistinctTest.class);
 		Properties p = new Properties();
 		p.put("derby.optimizer.noTimeout", "true");
 		Test t = new SystemPropertyTestSetup(s, p);

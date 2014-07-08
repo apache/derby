@@ -28,15 +28,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.XML;
-
 import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * <p>
@@ -99,7 +96,8 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        Test result = (TestSuite) TestConfiguration.defaultSuite(BooleanValuesTest.class);
+        Test result = (BaseTestSuite)TestConfiguration.defaultSuite(
+            BooleanValuesTest.class);
 
         return result;
     }

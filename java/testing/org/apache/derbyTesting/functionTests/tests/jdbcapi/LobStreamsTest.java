@@ -24,20 +24,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -577,11 +574,12 @@ public class LobStreamsTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
                 
-        TestSuite ts  = new TestSuite ("LobStreamsTest");
+        BaseTestSuite ts  = new BaseTestSuite ("LobStreamsTest");
         ts.addTest(TestConfiguration.defaultSuite (LobStreamsTest.class));
         // JSR169 does not have support for encryption
         if (JDBC.vmSupportsJDBC3()) {
-            TestSuite encSuite = new TestSuite ("LobStreamsTest:encrypted");
+            BaseTestSuite encSuite =
+                new BaseTestSuite ("LobStreamsTest:encrypted");
             encSuite.addTestSuite (LobStreamsTest.class);
             ts.addTest(Decorator.encryptedDatabase (encSuite));
         }

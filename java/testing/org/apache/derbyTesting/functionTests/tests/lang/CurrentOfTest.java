@@ -25,10 +25,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /** This tests the current of statements, i.e.
      * delete where current of and update where current of.
@@ -47,7 +46,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("CurrentOfTest");
+        BaseTestSuite suite = new BaseTestSuite("CurrentOfTest");
 		suite.addTestSuite(CurrentOfTest.class);
 		//To run the test in both embedded and client/server mode
 		//commenting it for the time being sicne the test fails in the client/server mode

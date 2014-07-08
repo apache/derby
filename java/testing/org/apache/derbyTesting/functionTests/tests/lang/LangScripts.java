@@ -20,9 +20,8 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -120,14 +119,14 @@ public final class LangScripts extends ScriptTestCase {
 	 */
 	public static Test suite() {
         
-        TestSuite suite = new TestSuite("LangScripts");
+        BaseTestSuite suite = new BaseTestSuite("LangScripts");
         suite.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
         if (JDBC.vmSupportsJDBC3())
             suite.addTest(getSuite(JDBC3_TESTS));
         
         // Set up the scripts run with the network client
-        TestSuite clientTests = new TestSuite("LangScripts:client");
+        BaseTestSuite clientTests = new BaseTestSuite("LangScripts:client");
         clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         Test client = TestConfiguration.clientServerDecorator(clientTests);
         
@@ -151,7 +150,7 @@ public final class LangScripts extends ScriptTestCase {
       */
 	private static Test getSuite(String[] list)
 	{
-        TestSuite suite = new TestSuite("SQL scripts");
+        BaseTestSuite suite = new BaseTestSuite("SQL scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
             		new CleanDatabaseTestSetup(

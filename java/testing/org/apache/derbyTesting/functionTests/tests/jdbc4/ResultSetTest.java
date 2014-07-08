@@ -21,34 +21,32 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.NClob;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.Reader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.HashMap;
+import junit.framework.Test;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -1746,7 +1744,7 @@ public class ResultSetTest  extends Wrapper41Test
      ************************************************************************/
 
     public static Test suite() {
-        TestSuite rsSuite = new TestSuite("ResultSetTest suite");
+        BaseTestSuite rsSuite = new BaseTestSuite("ResultSetTest suite");
         rsSuite.addTest(decorateTestSuite(TestConfiguration.defaultSuite
             (ResultSetTest.class,false)));
         return rsSuite;

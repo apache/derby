@@ -22,17 +22,9 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Arrays;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 

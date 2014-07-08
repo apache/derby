@@ -1,20 +1,15 @@
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
 
 
 /*
@@ -319,7 +314,7 @@ public class Derby6317Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("Derby6317Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby6317Test");
         suite.addTest(baseSuite("Derby6317Test:embedded"));
         return suite;
     }
@@ -439,7 +434,7 @@ public class Derby6317Test extends BaseJDBCTestCase
 
     protected static Test baseSuite(String name) 
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby6317Test.class);
         return new CleanDatabaseTestSetup(suite)
         {

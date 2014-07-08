@@ -24,16 +24,13 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.InitialDirContext;
 import javax.sql.XADataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -53,18 +50,33 @@ public class XAJNDITest extends BaseJDBCTestCase {
         // the test requires XADataSource to run, so check for JDBC3 support
         if (JDBC.vmSupportsJDBC3()) {
             ldapServer=getSystemProperty("derbyTesting.ldapServer");
-            if (ldapServer == null || ldapServer.length() < 1)
-                return new TestSuite("XAJNDITest requires property derbyTesting.ldapServer set, eg: -DderbyTesting.ldapServer=myldapserver.myorg.org");
+
+            if (ldapServer == null || ldapServer.length() < 1) {
+                return new BaseTestSuite(
+                    "XAJNDITest requires property derbyTesting.ldapServer " +
+                    "set, eg: -DderbyTesting.ldapServer=myldapserver." +
+                    "myorg.org");
+            }
+
             ldapPort=getSystemProperty("derbyTesting.ldapPort");
-            if (ldapPort == null || ldapPort.length() < 1)
-                return new TestSuite("XAJNDITest requires property derbyTesting.ldapPort set, eg: -DderbyTesting.ldapPort=333");
+
+            if (ldapPort == null || ldapPort.length() < 1) {
+                return new BaseTestSuite(
+                    "XAJNDITest requires property derbyTesting.ldapPort " +
+                    "set, eg: -DderbyTesting.ldapPort=333");
+            }
+
             dnString=getSystemProperty("derbyTesting.dnString");
-            if (dnString == null || dnString.length() < 1)
-                return new TestSuite("XAJNDITest requires property derbyTesting.dnString for setting o=, eg: -DderbyTesting.dnString=myJNDIstring");
-            
+
+            if (dnString == null || dnString.length() < 1) {
+                return new BaseTestSuite(
+                    "XAJNDITest requires property derbyTesting.dnString " +
+                    "for setting o=, eg: -DderbyTesting.dnString=myJNDIstring");
+            }
+
             return TestConfiguration.defaultSuite(XAJNDITest.class);
         }
-        return new TestSuite("XAJNDITest cannot run without XA support");
+        return new BaseTestSuite("XAJNDITest cannot run without XA support");
     }
     
     public void tearDown() throws Exception {

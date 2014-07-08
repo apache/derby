@@ -27,10 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.BasicClientDataSource40;
+import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -56,7 +56,7 @@ public class SimplePerfTest_Verify extends BaseJDBCTestCase
         dbPath = System.getProperty("test.dbPath", "wombat");
         tuplesToInsert= Integer.parseInt(System.getProperty("test.inserts", "0"));
         
-        TestSuite suite = new TestSuite("SimplePerfTest_Verify");
+        BaseTestSuite suite = new BaseTestSuite("SimplePerfTest_Verify");
         
         suite.addTest(SimplePerfTest_Verify.suite(masterHostName, masterPortNo, dbPath));
         return (Test)suite;

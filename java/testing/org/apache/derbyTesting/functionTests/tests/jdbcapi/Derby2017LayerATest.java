@@ -21,30 +21,24 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-
 import java.math.BigInteger;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.Arrays;
+import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests that inserts with streams whose lengths differs from the the length
@@ -70,11 +64,11 @@ public class Derby2017LayerATest
      * @return A suite of tests.
      */
     public static Test suite() {
-        TestSuite ts = new TestSuite();
+        BaseTestSuite ts = new BaseTestSuite();
         ts.addTest(
                 TestConfiguration.defaultSuite(Derby2017LayerATest.class));
         // Run the tests below with the client driver only.
-        TestSuite clientSuite = new TestSuite("Client only tests");
+        BaseTestSuite clientSuite = new BaseTestSuite("Client only tests");
         clientSuite.addTest(new Derby2017LayerATest(
                 "cs_FailedStreamInsertCharBufferBoundaries"));
         clientSuite.addTest(new Derby2017LayerATest(

@@ -28,11 +28,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
@@ -355,7 +353,7 @@ public class NullIfTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("NullIfTest");
+        BaseTestSuite suite = new BaseTestSuite("NullIfTest");
 
         suite.addTest(baseSuite("NullIfTest:embedded"));
 
@@ -365,7 +363,7 @@ public class NullIfTest extends BaseJDBCTestCase {
     }
 
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(NullIfTest.class);
 
         return new CleanDatabaseTestSetup(suite) {

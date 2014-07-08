@@ -21,16 +21,23 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
+import java.sql.Statement;
 import java.util.Arrays;
-import javax.sql.*;
-import junit.framework.*;
-
+import java.util.Enumeration;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
+import javax.sql.StatementEvent;
+import javax.sql.StatementEventListener;
+import javax.sql.XADataSource;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.util.Enumeration;
 
 /*
     This class is used to test the JDBC4 statement event 
@@ -164,7 +171,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * @return a test suite
      */
     private static Test baseSuite(String name) {
-        TestSuite suites = new TestSuite(name);
+        BaseTestSuite suites = new BaseTestSuite(name);
         boolean[] truefalse = new boolean[] { true, false };
         for (boolean xa : truefalse) {
             for (boolean callable : truefalse) {
@@ -176,7 +183,7 @@ public class StatementEventsTest extends BaseJDBCTestCase {
 
     /** Create a test suite with all tests in the class. */
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementEventsTest suite");
+        BaseTestSuite suite = new BaseTestSuite("StatementEventsTest suite");
         suite.addTest(baseSuite("StatementEventsTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
               baseSuite("StatementEventsTest:client")));
@@ -187,12 +194,14 @@ public class StatementEventsTest extends BaseJDBCTestCase {
      * Test suite class which contains all test cases in
      * <code>StatementEventsTest</code> for a given configuration.
      */
-    private static class Suite extends TestSuite {
+    private static class Suite extends BaseTestSuite {
         private Suite(boolean xa, boolean callable) {
             super(StatementEventsTest.class);
-            for (Enumeration e = tests(); e.hasMoreElements(); ) {
+
+            // Iterate over the sorted fixtures and tinker with them
+            for (Enumeration<?> i = tests(); i.hasMoreElements(); ) {
                 StatementEventsTest test =
-                    (StatementEventsTest) e.nextElement();
+                        (StatementEventsTest) i.nextElement();
                 test.setXA(xa);
                 test.setCallable(callable);
             }

@@ -25,12 +25,10 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-
-import org.apache.derby.iapi.services.io.DataInputUtil;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.apache.derby.iapi.services.io.DataInputUtil;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Test case for DataInputUtil.
@@ -70,6 +68,7 @@ public class DataInputUtilTest extends TestCase {
      * Returns a suite of tests.
      */
     public static Test suite() {
-        return new TestSuite(DataInputUtilTest.class, "DataInputUtilTest tests");
+        return new BaseTestSuite(
+            DataInputUtilTest.class, "DataInputUtilTest tests");
     }
 }

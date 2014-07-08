@@ -21,15 +21,12 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -56,7 +53,7 @@ public class DSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("DSCreateShutdownDBTest"); 
+        BaseTestSuite suite = new BaseTestSuite("DSCreateShutdownDBTest");
         Test test = TestConfiguration.defaultSuite(DSCreateShutdownDBTest.class);        
         //Test test = TestConfiguration.clientServerSuite(DSCreateShutdownDBTest.class);
         suite.addTest(test);

@@ -22,25 +22,22 @@
  */
 package org.apache.derbyTesting.unitTests.junit;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UTFDataFormatException;
-
+import junit.framework.Test;
 import org.apache.derby.iapi.types.CharStreamHeaderGenerator;
 import org.apache.derby.iapi.types.ClobStreamHeaderGenerator;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derby.iapi.util.UTF8Util;
-
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Tests that <code>skipFully</code> and <code>skipUntilEOF</code> behaves
@@ -320,6 +317,6 @@ public class UTF8UtilTest
      * Returns a suite of tests.
      */
     public static Test suite() {
-        return new TestSuite(UTF8UtilTest.class, "UTF8Util tests");
+        return new BaseTestSuite(UTF8UtilTest.class, "UTF8Util tests");
     }
 }

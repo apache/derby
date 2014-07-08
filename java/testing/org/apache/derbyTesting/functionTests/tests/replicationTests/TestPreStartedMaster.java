@@ -26,7 +26,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -50,7 +50,7 @@ public class TestPreStartedMaster extends ClientRunner
         // String masterHostName = System.getProperty("test.serverHost", "localhost");
         // int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         
-        TestSuite suite = new TestSuite("TestPreStartedMaster");
+        BaseTestSuite suite = new BaseTestSuite("TestPreStartedMaster");
                 
         suite.addTest(TestPreStartedMaster.suite(masterServerHost, masterServerPort));
         System.out.println("*** Done suite.addTest(TestPreStartedMaster.suite())");

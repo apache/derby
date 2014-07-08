@@ -23,11 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -851,7 +848,7 @@ public class ConcurrencyTest extends SURBaseTest {
      */
     public static Test suite()
     {
-        final TestSuite suite = new TestSuite("ConcurrencyTest");
+        final BaseTestSuite suite = new BaseTestSuite("ConcurrencyTest");
         suite.addTest(baseSuite("ConcurrencyTest:embedded", true));
         
         suite.addTest(
@@ -864,7 +861,7 @@ public class ConcurrencyTest extends SURBaseTest {
     }
     
     private static Test baseSuite(String name, boolean embedded) {
-        final TestSuite suite = new TestSuite(name);
+        final BaseTestSuite suite = new BaseTestSuite(name);
         
         // This testcase does not require JDBC3/JSR169, since it does not
         // specify result set concurrency) in Connection.createStatement().

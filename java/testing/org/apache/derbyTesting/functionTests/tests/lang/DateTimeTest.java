@@ -31,11 +31,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -56,7 +54,7 @@ public final class DateTimeTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("DateTimeTest");
+        BaseTestSuite suite = new BaseTestSuite("DateTimeTest");
         suite.addTest(baseSuite("DateTimeTest:Embedded"));
         suite.addTest(TestConfiguration
                 .clientServerDecorator(baseSuite("DateTimeTest:Client")));
@@ -64,7 +62,7 @@ public final class DateTimeTest extends BaseJDBCTestCase {
     }
 
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DateTimeTest.class);
         return new CleanDatabaseTestSetup(suite) {
             /**

@@ -23,7 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -79,7 +79,8 @@ public class Test_6496 extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(Test_6496.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            Test_6496.class);
 
         return suite;
     }

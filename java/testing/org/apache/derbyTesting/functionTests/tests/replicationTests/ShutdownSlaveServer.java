@@ -22,15 +22,9 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -53,7 +47,7 @@ public class ShutdownSlaveServer extends ShutdownSlave
         
         setEnv();
         
-        TestSuite suite = new TestSuite("ShutdownSlaveServer");
+        BaseTestSuite suite = new BaseTestSuite("ShutdownSlaveServer");
         suite.addTest(ShutdownSlaveServer.suite(masterServerHost, masterServerPort));
         return (Test)suite;
     }

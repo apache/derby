@@ -23,11 +23,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -198,7 +196,7 @@ public class CursorTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("CursorTest");
+        BaseTestSuite suite = new BaseTestSuite("CursorTest");
         
         suite.addTest(TestConfiguration.defaultSuite(CursorTest.class));
         

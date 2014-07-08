@@ -21,22 +21,19 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
-
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test that an exception is raised if the flow of data from the server to the
@@ -137,10 +134,11 @@ public class SuicideOfStreamingTest
             //      may be required.
             return new CleanDatabaseTestSetup(
                     TestConfiguration.clientServerDecorator(
-                        new TestSuite(SuicideOfStreamingTest.class,
+                        new BaseTestSuite(SuicideOfStreamingTest.class,
                                       "SuicideOfStreamingTest")));
         }
-        return new TestSuite("SuicideOfStreamingTest <DISABLED IN INSANE MODE>");
+        return new BaseTestSuite(
+            "SuicideOfStreamingTest <DISABLED IN INSANE MODE>");
     }
 
 } // End class SuicideOfStreamingTest

@@ -24,14 +24,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.tests.store.AccessTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * A suite that runs a set of tests using encrypted
@@ -68,7 +66,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Encrpytion Suite");
+        BaseTestSuite suite = new BaseTestSuite("Encrpytion Suite");
         
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
@@ -96,7 +94,8 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
      */
     private static Test baseSuite(String algorithm)
     {
-        TestSuite suite = new TestSuite("Encryption Algorithm: " + algorithm);
+        BaseTestSuite suite =
+            new BaseTestSuite("Encryption Algorithm: " + algorithm);
         
         // Very simple test to get the setup working while we have
         // no tests that were previously run under encryption converted.

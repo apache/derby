@@ -21,9 +21,8 @@
 package org.apache.derby;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class PackagePrivateTestSuite
     extends BaseTestCase {
@@ -37,7 +36,7 @@ public class PackagePrivateTestSuite
 
     public static Test suite() throws Exception {
 
-        TestSuite suite = new TestSuite("Package-private tests");
+        BaseTestSuite suite = new BaseTestSuite("Package-private tests");
 
         suite.addTest(org.apache.derby.impl.jdbc._Suite.suite());
         suite.addTest(org.apache.derby.client.am._Suite.suite());

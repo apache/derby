@@ -24,10 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -45,10 +43,12 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     public static Test suite() {
         // This test uses driverManager and so is not suitable for JSR169
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("DriverManager not available with JSR169;" +
+            return new BaseTestSuite(
+                "DriverManager not available with JSR169;" +
                 "empty DriverMgrAuthenticationTest");
         else {
-            TestSuite suite = new TestSuite("DriverMgrAuthenticationTest");
+            BaseTestSuite suite =
+                new BaseTestSuite("DriverMgrAuthenticationTest");
             suite.addTest(
                 baseSuite("DriverMgrAuthenticationTest:embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(
@@ -60,7 +60,8 @@ public class DriverMgrAuthenticationTest extends AuthenticationTest {
     // baseSuite takes advantage of setting system properties as defined
     // in AuthenticationTest
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite("DriverMgrAuthenticationTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("DriverMgrAuthenticationTest");
         
         Test test = new DriverMgrAuthenticationTest(
             "testConnectShutdownAuthentication");

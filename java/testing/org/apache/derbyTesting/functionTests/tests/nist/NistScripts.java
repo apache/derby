@@ -20,9 +20,8 @@
 package org.apache.derbyTesting.functionTests.tests.nist;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -171,10 +170,10 @@ public final class NistScripts extends ScriptTestCase {
 	 * Return the suite that runs the NIST SQL scripts.
 	 */
 	public static Test suite() {
-        TestSuite suite = new TestSuite("NIST");
+        BaseTestSuite suite = new BaseTestSuite("NIST");
         
         String suiteUser = null;
-        TestSuite userSuite = null; 
+        BaseTestSuite userSuite = null;
         for (int i = 0; i < TESTS.length; i++) {
             
             String testScript = TESTS[i][0];
@@ -190,7 +189,7 @@ public final class NistScripts extends ScriptTestCase {
             
             // Add the new user suite with the change user decorator to
             // the main suite but continue to add tests to the user suite.
-            userSuite = new TestSuite("NIST user="+testUser); 
+            userSuite = new BaseTestSuite("NIST user="+testUser);
             String password = testUser.concat("ni8s4T");
             suite.addTest(
                     TestConfiguration.changeUserDecorator(userSuite, testUser, password));

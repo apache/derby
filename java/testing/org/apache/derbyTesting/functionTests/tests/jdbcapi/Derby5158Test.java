@@ -19,15 +19,13 @@
 */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.Statement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 public class Derby5158Test extends BaseJDBCTestCase
@@ -40,7 +38,7 @@ public class Derby5158Test extends BaseJDBCTestCase
 
     protected static Test makeSuite(String name)
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         Test cst = TestConfiguration.defaultSuite(Derby5158Test.class);
 

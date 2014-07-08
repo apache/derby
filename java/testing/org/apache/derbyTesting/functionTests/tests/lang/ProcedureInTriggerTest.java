@@ -24,14 +24,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -457,7 +454,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
     
     
     private static Test basesuite() {
-        Test basesuite = new TestSuite(ProcedureInTriggerTest.class);
+        Test basesuite = new BaseTestSuite(ProcedureInTriggerTest.class);
         Test clean = new CleanDatabaseTestSetup(basesuite) {
         protected void decorateSQL(Statement s) throws SQLException {
             s.execute("create table t1 (i int primary key, b char(15))");
@@ -491,7 +488,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         }
                 
         public static Test suite() { 
-            TestSuite suite = new TestSuite();
+            BaseTestSuite suite = new BaseTestSuite();
             if (!JDBC.vmSupportsJSR169()) {
                 suite.addTest(basesuite());
                 suite.addTest(TestConfiguration.clientServerDecorator(basesuite()));

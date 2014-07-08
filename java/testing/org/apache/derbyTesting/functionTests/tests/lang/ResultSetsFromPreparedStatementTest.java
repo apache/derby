@@ -34,7 +34,7 @@ import java.io.PrintStream;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -499,7 +499,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite
+        BaseTestSuite suite = new BaseTestSuite
             ("Create ResultSets from PreparedStatements");
         suite.addTestSuite(ResultSetsFromPreparedStatementTest.class);
 

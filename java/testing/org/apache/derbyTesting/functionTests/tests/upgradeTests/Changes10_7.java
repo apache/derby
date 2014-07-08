@@ -20,19 +20,16 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
-import org.apache.derbyTesting.junit.SupportFilesSetup;
-
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 
 /**
@@ -89,7 +86,7 @@ public class Changes10_7 extends UpgradeChange
      * @return the test suite created.
      */
     public static Test suite(int phase) {
-        TestSuite suite = new TestSuite("Upgrade test for 10.7");
+        BaseTestSuite suite = new BaseTestSuite("Upgrade test for 10.7");
 
         suite.addTestSuite(Changes10_7.class);
         return new SupportFilesSetup((Test) suite);

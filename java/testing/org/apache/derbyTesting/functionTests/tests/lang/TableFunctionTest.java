@@ -21,16 +21,25 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.*;
-import java.sql.*;
+import java.io.LineNumberReader;
+import java.io.StringReader;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Types;
 import java.text.NumberFormat;
 import java.util.Arrays;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test Table Functions. See DERBY-716 for a description of
@@ -911,7 +920,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite( "TableFunctionTest" );
+        BaseTestSuite      suite = new BaseTestSuite( "TableFunctionTest" );
 
         suite.addTest( new TableFunctionTest( "noSpecialCollation" ) );
         suite.addTest( collatedSuite( "en", "specialCollation" ) );
@@ -929,7 +938,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
      */
     private static Test collatedSuite(String locale, String baseFixture)
     {
-        TestSuite suite = new TestSuite( "TableFunctionTest:territory=" + locale );
+        BaseTestSuite suite =
+            new BaseTestSuite( "TableFunctionTest:territory=" + locale );
+
         suite.addTest( new TableFunctionTest( baseFixture ) );
 
         return Decorator.territoryCollatedDatabase( suite, locale );

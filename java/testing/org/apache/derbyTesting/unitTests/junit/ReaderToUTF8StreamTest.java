@@ -28,13 +28,13 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.Random;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.types.ClobStreamHeaderGenerator;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Unit tests for ReaderToUTF8Stream.
@@ -55,7 +55,7 @@ public class ReaderToUTF8StreamTest
     }
 
     public static Test suite() {
-        return new TestSuite(ReaderToUTF8StreamTest.class);
+        return new BaseTestSuite(ReaderToUTF8StreamTest.class);
     }
 
     /**

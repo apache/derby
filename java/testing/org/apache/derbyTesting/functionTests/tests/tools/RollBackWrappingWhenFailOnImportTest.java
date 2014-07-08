@@ -20,19 +20,14 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.sql.CallableStatement;
-
-
 import java.sql.Connection;
-
 import java.sql.SQLException;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -77,7 +72,8 @@ public class RollBackWrappingWhenFailOnImportTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("RollBackWrappingWhenFailOnImportTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("RollBackWrappingWhenFailOnImportTest");
         
         if (!JDBC.vmSupportsJDBC3()) {
             return suite;

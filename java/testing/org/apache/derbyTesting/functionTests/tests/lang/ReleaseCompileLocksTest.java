@@ -25,14 +25,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 
 /**
@@ -85,14 +83,16 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
-        	TestSuite suite = new TestSuite("ReleasecompileLocksTest");
+            BaseTestSuite suite =
+                new BaseTestSuite("ReleasecompileLocksTest");
+
         	suite.addTest(baseSuite("ReleaseCompileLocksTest:embedded"));
         	suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ReleaseCompileLocksTest:client")));
         	return suite;
     	}
 
 	protected static Test baseSuite(String name) {
-        	TestSuite suite = new TestSuite(name);
+            BaseTestSuite suite = new BaseTestSuite(name);
         	suite.addTestSuite(ReleaseCompileLocksTest.class);
         	
 		return new CleanDatabaseTestSetup(suite) 

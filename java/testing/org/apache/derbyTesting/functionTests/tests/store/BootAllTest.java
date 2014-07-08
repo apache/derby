@@ -26,11 +26,9 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -56,14 +54,14 @@ public class BootAllTest  extends BaseJDBCTestCase {
     
     public static Test suite() {
         
-        TestSuite suite = new TestSuite("BootAllTest");
+        BaseTestSuite suite = new BaseTestSuite("BootAllTest");
         
         // Test uses driver manager so JDBC 2 required.
         if (JDBC.vmSupportsJDBC3())
         {           
             // Suite to create the third (inner) database and
             // perform the actual test (will be run last)
-            TestSuite db3 = new TestSuite("db3");
+            BaseTestSuite db3 = new BaseTestSuite("db3");
             db3.addTest(new BootAllTest("createShutdownDatabase"));
             db3.addTest(new BootAllTest("shutdownDerby"));
             
@@ -76,13 +74,13 @@ public class BootAllTest  extends BaseJDBCTestCase {
             
             // Suite to create the second database (middle) and
             // embed in it the third database suite.
-            TestSuite db2 = new TestSuite("db2");
+            BaseTestSuite db2 = new BaseTestSuite("db2");
             db2.addTest(new BootAllTest("createShutdownDatabase"));
             db2.addTest(TestConfiguration.singleUseDatabaseDecorator(db3));
             
             // Suite to create the first database (outer) and
             // embed in it the second database suite.
-            TestSuite db1 = new TestSuite("db1");
+            BaseTestSuite db1 = new BaseTestSuite("db1");
             db1.addTest(new BootAllTest("createShutdownDatabase"));
             db1.addTest(TestConfiguration.singleUseDatabaseDecorator(db2));
             

@@ -21,14 +21,12 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -48,7 +46,9 @@ public class SynonymTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(SynonymTest.class, "SynonymTest");
+        BaseTestSuite suite =
+            new BaseTestSuite(SynonymTest.class, "SynonymTest");
+
         return new CleanDatabaseTestSetup(suite);
     }
 

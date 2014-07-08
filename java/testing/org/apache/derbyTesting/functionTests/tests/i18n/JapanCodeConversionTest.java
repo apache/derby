@@ -25,8 +25,8 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -51,8 +51,9 @@ public class JapanCodeConversionTest extends BaseJDBCTestCase {
                 (String[]) null);
         }
 
-        return new TestSuite("JapanCodeConversionTest - skipped because of " +
-                             "missing support for EUC_JP and SJIS");
+        return new BaseTestSuite(
+            "JapanCodeConversionTest - skipped because of " +
+            "missing support for EUC_JP and SJIS");
     }
 
     protected void tearDown() throws Exception {

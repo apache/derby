@@ -23,11 +23,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
@@ -154,7 +152,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DeadlockModeTest.class);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 
@@ -177,7 +175,7 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
     } 
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("DeadlockModeTest ");
+        BaseTestSuite suite = new BaseTestSuite("DeadlockModeTest ");
         suite.addTest(
                 baseSuite("DeadlockModeTest:embedded")
                 );

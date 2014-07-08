@@ -25,11 +25,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -52,7 +50,7 @@ public class SubqueryTest extends BaseJDBCTestCase {
         props.setProperty("derby.language.statementCacheSize", "0");
         return new DatabasePropertyTestSetup(
             new SystemPropertyTestSetup(new CleanDatabaseTestSetup(
-               new TestSuite(SubqueryTest.class, "SubqueryTest")) {
+               new BaseTestSuite(SubqueryTest.class, "SubqueryTest")) {
 
                     /**
                      * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)

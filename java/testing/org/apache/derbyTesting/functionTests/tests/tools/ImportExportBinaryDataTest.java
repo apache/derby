@@ -20,21 +20,17 @@
  */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.IOException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This class tests import/export of  a table with simple binary data types 
@@ -58,7 +54,9 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite(ImportExportBinaryDataTest.class);
+        BaseTestSuite suite =
+            new BaseTestSuite(ImportExportBinaryDataTest.class);
+
         suite.addTest(TestConfiguration.clientServerSuite(
                       ImportExportBinaryDataTest.class));
         Test test = suite;

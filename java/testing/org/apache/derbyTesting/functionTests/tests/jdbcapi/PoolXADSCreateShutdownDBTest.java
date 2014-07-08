@@ -21,16 +21,13 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.XADataSource;
-
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -60,7 +57,7 @@ public class PoolXADSCreateShutdownDBTest extends BaseJDBCTestCase {
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("PoolXADSCreateShutdownTest"); 
+        BaseTestSuite suite = new BaseTestSuite("PoolXADSCreateShutdownTest");
         Test test = TestConfiguration.defaultSuite(PoolXADSCreateShutdownDBTest.class);        
         //Test test = TestConfiguration.clientServerSuite(DSCreateShutdownDBTest.class);
         suite.addTest(test);

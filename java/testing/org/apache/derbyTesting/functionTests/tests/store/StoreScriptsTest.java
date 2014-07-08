@@ -23,14 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 public class StoreScriptsTest extends ScriptTestCase {
@@ -113,7 +110,7 @@ public class StoreScriptsTest extends ScriptTestCase {
     
     private static Test getSuite(String[] list)
     {
-        TestSuite suite = new TestSuite("SQL scripts");
+        BaseTestSuite suite = new BaseTestSuite("SQL scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
                     new CleanDatabaseTestSetup(
@@ -135,7 +132,7 @@ public class StoreScriptsTest extends ScriptTestCase {
         // Lock timeout settings that were set for the old harness store tests
         test = DatabasePropertyTestSetup.setLockTimeouts(test, 1, 4);
         
-        TestSuite suite = new TestSuite("StoreScripts");
+        BaseTestSuite suite = new BaseTestSuite("StoreScripts");
         suite.addTest(test);
 
         return getIJConfig(suite); 

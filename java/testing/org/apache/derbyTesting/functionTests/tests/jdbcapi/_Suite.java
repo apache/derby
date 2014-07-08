@@ -21,11 +21,10 @@
 */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test; 
-import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -43,7 +42,7 @@ public class _Suite extends BaseTestCase  {
 
 	public static Test suite() {
 
-		TestSuite suite = new TestSuite("jdbcapi");
+        BaseTestSuite suite = new BaseTestSuite("jdbcapi");
 
         suite.addTest(BlobSetBytesBoundaryTest.suite());
 		suite.addTest(ConcurrencyTest.suite());
@@ -156,7 +155,7 @@ public class _Suite extends BaseTestCase  {
             // pointless (unless we can find a test LDAP Server)
             String ldapServer=getSystemProperty("derbyTesting.ldapServer");
             if (ldapServer == null || ldapServer.length() < 1)
-                suite.addTest(new TestSuite(
+                suite.addTest(new BaseTestSuite(
                     "LDAPAuthenticationTest and XAJNDITest require " +
                     "derbyTesting.ldap* properties."));
             else

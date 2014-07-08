@@ -27,11 +27,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
@@ -196,7 +194,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String name) {
 
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(SetTransactionIsolationTest.class);
 
         // Some test cases expect lock timeouts, so reduce the timeout to
@@ -256,7 +254,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("SetTransactionIsolation");
+        BaseTestSuite suite = new BaseTestSuite("SetTransactionIsolation");
 
         suite.addTest(baseSuite("SetTransactionIsolation:embedded"));
 

@@ -30,9 +30,8 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Properties;
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.DatabaseChangeSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -344,7 +343,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      */
     public static Test suite() throws Exception
     {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
 
         //
         // Special version of the test which uses an encrypted database for credentials.
@@ -394,7 +393,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      */
     private static Test allConfigurations(boolean clientServer) throws Exception
     {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
 
         //
         // No authentication. 

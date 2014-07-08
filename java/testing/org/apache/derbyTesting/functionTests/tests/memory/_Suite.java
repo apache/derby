@@ -22,9 +22,8 @@
 package org.apache.derbyTesting.functionTests.tests.memory;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class _Suite extends BaseJDBCTestCase {
 
@@ -34,7 +33,7 @@ public class _Suite extends BaseJDBCTestCase {
     }
 
     public static Test suite() throws Exception{
-        TestSuite suite = new TestSuite("Memory Suite");
+        BaseTestSuite suite = new BaseTestSuite("Memory Suite");
         suite.addTest(TriggerTests.suite());
         suite.addTest(BlobMemTest.suite());
         suite.addTest(ClobMemTest.suite());

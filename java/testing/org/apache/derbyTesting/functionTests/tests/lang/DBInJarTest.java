@@ -24,16 +24,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -236,7 +234,7 @@ public class DBInJarTest extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(DBInJarTest.class);
         // Don't run with security manager, we need access to user.dir to archive
         // the database.
@@ -260,7 +258,7 @@ public class DBInJarTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("DBInJarTest");      
+        BaseTestSuite suite = new BaseTestSuite("DBInJarTest");
         suite.addTest(baseSuite("DBInJarTest:embedded"));
         return suite;
     

@@ -25,11 +25,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -60,10 +58,11 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      * @return A suite containing embedded, client and embedded with XA suites
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("SavepointJdbc30_JSR169Test suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("SavepointJdbc30_JSR169Test suite");
 
         // Get the tests for embedded
-        TestSuite embedded = new TestSuite(
+        BaseTestSuite embedded = new BaseTestSuite(
                 "SavepointJdbc30_JSR169Test:embedded");
         embedded.addTestSuite(SavepointJdbc30Test.class);
         embedded.addTest(getEmbeddedSuite("SavepointJdbc30_JSR169Test:"
@@ -71,7 +70,9 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         suite.addTest(embedded);
 
         // Get the tests for client.
-        TestSuite client = new TestSuite("SavepointJdbc30_JSR169Test:client");
+        BaseTestSuite client =
+            new BaseTestSuite("SavepointJdbc30_JSR169Test:client");
+
         client.addTestSuite(SavepointJdbc30Test.class);
         suite.addTest(TestConfiguration.clientServerDecorator(client));
 
@@ -79,7 +80,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         // an XA data source if it is supported. This is not supported
         // under JSR169.
         if (JDBC.vmSupportsJDBC3()) {
-            embedded = new TestSuite(
+            embedded = new BaseTestSuite(
             "SavepointJdbc30_JSR169Test:embedded XADataSource");
             embedded.addTestSuite(SavepointJdbc30Test.class);
             embedded.addTest(getEmbeddedSuite("SavepointJdbc30_JSR169Test:"
@@ -88,7 +89,9 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
             //        	 Repeat the client tests obtaining a connection from
             // an XA data source if it is supported. This is not supported
             // under JSR169.
-            client = new TestSuite("SavepointJdbc30_JSR169Test:client XADatasource");
+            client = new BaseTestSuite(
+                "SavepointJdbc30_JSR169Test:client XADatasource");
+
             client.addTestSuite(SavepointJdbc30Test.class);
             suite.addTest(TestConfiguration.clientServerDecorator(TestConfiguration.connectionXADecorator(client)));        	
         }	
@@ -116,7 +119,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      * mode. These tests have names starting with x and are added automatically.
      */
     private static Test getEmbeddedSuite(String name) {
-        TestSuite embedded = new TestSuite(name);
+        BaseTestSuite embedded = new BaseTestSuite(name);
         Method[] methods = SavepointJdbc30Test.class.getMethods();
         for (int i = 0; i < methods.length; i++) {
             Method m = methods[i];

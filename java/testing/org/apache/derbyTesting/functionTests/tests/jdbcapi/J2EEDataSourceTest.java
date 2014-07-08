@@ -33,14 +33,13 @@ import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
@@ -51,18 +50,15 @@ import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.jdbc.BasicClientDataSource40;
-
 import org.apache.derby.jdbc.ClientConnectionPoolDataSourceInterface;
-import org.apache.derby.jdbc.ClientDataSourceInterface;
 import org.apache.derby.jdbc.ClientXADataSourceInterface;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.functionTests.util.TestRoutines;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
@@ -126,7 +122,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with a lower lock timeout.
      */
     private static Test getTimeoutSuite(String postfix) {
-        TestSuite suite = new TestSuite("Lower lock timeout" + postfix);
+        BaseTestSuite suite =
+            new BaseTestSuite("Lower lock timeout" + postfix);
+
         suite.addTest(new J2EEDataSourceTest("timeoutTestDerby1144PooledDS"));
         suite.addTest(new J2EEDataSourceTest("timeoutTestDerby1144XADS"));
         // Reduce the timeout threshold to make the tests run faster.
@@ -140,7 +138,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests to be run with client and/or embedded
      */
     private static Test baseSuite(String postfix) {
-        TestSuite suite = new TestSuite("ClientAndEmbedded" + postfix);
+        BaseTestSuite suite =
+            new BaseTestSuite("ClientAndEmbedded" + postfix);
+
         suite.addTest(new J2EEDataSourceTest("testGlobalLocalInterleaf"));
         suite.addTest(new J2EEDataSourceTest("testSetIsolationWithStatement"));
         suite.addTest(new J2EEDataSourceTest("testJira95pds"));
@@ -176,7 +176,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
-        TestSuite suite = new TestSuite("Client/Server");
+        BaseTestSuite suite = new BaseTestSuite("Client/Server");
         suite.addTest(new J2EEDataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
@@ -198,7 +198,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @return A suite of tests being run with embedded only
      */
     private static Test getEmbeddedSuite(String postfix) {
-        TestSuite suite = new TestSuite("Embedded" + postfix);
+        BaseTestSuite suite = new BaseTestSuite("Embedded" + postfix);
         suite.addTest(new J2EEDataSourceTest("testDSRequestAuthentication"));
         // Following cannot run with client because of DERBY-2533; it hangs
         // when fixed, this can be moved to baseSuite.
@@ -213,13 +213,15 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             // test uses unsupported classes like DriverManager, XADataSource,
             // ConnectionPoolDataSource, ConnectionEvenListenere, as well as
             // unsupported methods, like Connection.setTypeMap()...
-            TestSuite suite = 
-                new TestSuite("J2EEDatasourceTest cannot run with JSR169");
+            BaseTestSuite suite =
+                new BaseTestSuite("J2EEDatasourceTest cannot run with JSR169");
             return suite;
         }
         else
         {
-            TestSuite suite = new TestSuite("J2EEDataSourceTest suite");
+            BaseTestSuite suite =
+                new BaseTestSuite("J2EEDataSourceTest suite");
+
             // Add tests that will run with both embedded
             suite.addTest(baseSuite(":embedded"));
             //  and network server/client

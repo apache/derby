@@ -22,27 +22,24 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.util.HashMap;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.CallableStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.sql.Connection;
 import java.sql.DriverManager;
-import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
 import javax.sql.PooledConnection;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * This class tests the security mechanisms supported by Network Server
@@ -126,10 +123,10 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("NSSecurityMechanismTest");
+        BaseTestSuite suite = new BaseTestSuite("NSSecurityMechanismTest");
 
-        TestSuite clientSuite =
-            new TestSuite("NSSecurityMechanismTest - client");
+        BaseTestSuite clientSuite =
+            new BaseTestSuite("NSSecurityMechanismTest - client");
         clientSuite.addTest(new NSSecurityMechanismTest(
             "testNetworkServerSecurityMechanism"));
         suite.addTest(TestConfiguration.clientServerDecorator(clientSuite));

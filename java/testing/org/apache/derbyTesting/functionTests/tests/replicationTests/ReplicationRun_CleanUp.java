@@ -21,7 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -47,7 +47,7 @@ public class ReplicationRun_CleanUp extends ReplicationRun
         
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_CleanUp");
+        BaseTestSuite suite = new BaseTestSuite("ReplicationRun_CleanUp");
         
         suite.addTestSuite( ReplicationRun_CleanUp.class );
         

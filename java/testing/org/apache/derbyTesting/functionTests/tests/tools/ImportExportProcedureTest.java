@@ -26,14 +26,12 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Converted from ieptests.sql
@@ -53,7 +51,7 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ImportExportProcedureTest");
+        BaseTestSuite suite = new BaseTestSuite("ImportExportProcedureTest");
         suite.addTest(TestConfiguration.defaultSuite(ImportExportProcedureTest.class));
         return new SupportFilesSetup(suite, new String[] { 
         		"functionTests/testData/ImportExport/db2ttypes.del",

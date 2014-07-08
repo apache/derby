@@ -26,11 +26,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -54,7 +52,7 @@ public class SelectivityTest extends BaseJDBCTestCase {
         props.setProperty("derby.language.statementCacheSize", "0");
         // set the props, and boot the db
         Test test = new DatabasePropertyTestSetup(
-            new TestSuite(SelectivityTest.class), props, true);
+            new BaseTestSuite(SelectivityTest.class), props, true);
         
         return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException

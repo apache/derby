@@ -21,11 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 

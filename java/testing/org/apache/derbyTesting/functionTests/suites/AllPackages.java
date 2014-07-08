@@ -24,12 +24,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * All package suites for the function tests.
@@ -52,7 +50,7 @@ public class AllPackages extends BaseTestCase {
 
     public static Test suite() throws Exception {
 
-        TestSuite suite = new TestSuite("AllPackages");
+        BaseTestSuite suite = new BaseTestSuite("AllPackages");
 
         for (Iterator it = getTestClasses().iterator(); it.hasNext(); ) {
             Object testClass = it.next();
@@ -147,12 +145,12 @@ public class AllPackages extends BaseTestCase {
         try {
             return invokeSuite(Class.forName(className));
         } catch (LinkageError  e) {
-            return new TestSuite("SKIPPED: " + className + " - " +
+            return new BaseTestSuite("SKIPPED: " + className + " - " +
                     e.getMessage());
         } catch (InvocationTargetException ite) {
             Throwable cause = ite.getCause();
             if (cause instanceof LinkageError) {
-               return new TestSuite("SKIPPED: " + className + " - " +
+               return new BaseTestSuite("SKIPPED: " + className + " - " +
                        cause.getMessage());
             } else {
                 System.err.println("FAILED to invoke " + className);
@@ -160,7 +158,7 @@ public class AllPackages extends BaseTestCase {
                throw ite;
             }
         } catch (ClassNotFoundException ce) { // Do not add a suite not built.
-            return new TestSuite("SKIPPED: Class not found: " + className + 
+            return new BaseTestSuite("SKIPPED: Class not found: " + className +
                     " - " + ce.getMessage());
         }
     }

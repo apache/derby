@@ -26,16 +26,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * Test sequences.
@@ -60,7 +57,9 @@ public class SequenceTest extends GeneratedColumnsHelper {
      * Construct top level suite in this JUnit test
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(SequenceTest.class, "Sequence Test");
+        BaseTestSuite suite =
+            new BaseTestSuite(SequenceTest.class, "Sequence Test");
+
         // Need atleast JSR169 to run these tests
         if (!JDBC.vmSupportsJSR169() && !JDBC.vmSupportsJDBC3()) {
             return suite;

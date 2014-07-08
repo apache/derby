@@ -32,33 +32,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derby.optional.api.LuceneIndexDescriptor;
+import org.apache.derby.optional.api.LuceneUtils;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.util.Version;
-
-import org.apache.derby.optional.api.LuceneIndexDescriptor;
-import org.apache.derby.optional.api.LuceneUtils;
-
-import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.LocaleTestSetup;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  * <p>
@@ -75,7 +69,7 @@ public class LuceneSupportTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-		TestSuite suite = new TestSuite("LuceneSupportTest");
+        BaseTestSuite suite = new BaseTestSuite("LuceneSupportTest");
 
         Test    baseTest = TestConfiguration.embeddedSuite(LuceneSupportTest.class);
         Test        singleUseTest = TestConfiguration.singleUseDatabaseDecorator( baseTest );

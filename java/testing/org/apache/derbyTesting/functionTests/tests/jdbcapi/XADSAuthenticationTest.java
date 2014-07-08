@@ -23,12 +23,9 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.SQLException;
-
 import javax.sql.XADataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -46,9 +43,9 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     public static Test suite() {
         // This test uses XADataSource and so is not suitable for JSR169
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("");
+            return new BaseTestSuite("");
         else {
-            TestSuite suite = new TestSuite("XADSAuthenticationTest");
+            BaseTestSuite suite = new BaseTestSuite("XADSAuthenticationTest");
             suite.addTest(baseSuite("XADSAuthenticationTest:embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("XADSAuthenticationTest:client")));
@@ -59,7 +56,7 @@ public class XADSAuthenticationTest extends AuthenticationTest {
     // baseSuite takes advantage of setting system properties as defined
     // in AuthenticationTest
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite("XADSAuthenticationTest");
+        BaseTestSuite suite = new BaseTestSuite("XADSAuthenticationTest");
 
         Test test = new XADSAuthenticationTest(
             "testConnectShutdownAuthentication");

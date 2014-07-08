@@ -21,17 +21,30 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
-import org.apache.derby.iapi.types.HarmonySerialBlob;
-import org.apache.derby.iapi.types.HarmonySerialClob;
-
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
+import junit.framework.Test;
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests of the <code>java.sql.CallableStatement</code> JDBC40 API.
@@ -831,7 +844,9 @@ public class CallableStatementTest  extends Wrapper41Test
      * Return suite with all tests of the class.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("CallableStatementTest suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("CallableStatementTest suite");
+
         suite.addTest(baseSuite("CallableStatementTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("CallableStatementTest:client")));
@@ -842,7 +857,9 @@ public class CallableStatementTest  extends Wrapper41Test
     }
 
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(CallableStatementTest.class, name);
+        BaseTestSuite suite =
+            new BaseTestSuite(CallableStatementTest.class, name);
+
         return new CallableStatementTestSetup(suite);
     }
     

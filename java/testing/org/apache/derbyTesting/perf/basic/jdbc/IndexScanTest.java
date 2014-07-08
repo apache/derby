@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 
@@ -80,7 +80,7 @@ public class IndexScanTest extends JDBCPerfTestCase {
      * @return a test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("IndexScanTest");
+        BaseTestSuite suite = new BaseTestSuite("IndexScanTest");
         suite.addTest(new IndexScanTest("varchar10", 5000, 4));
         suite.addTest(new IndexScanTest("varchar100", 5000, 4));
         suite.addTest(new IndexScanTest("varchar1000", 5000, 4));

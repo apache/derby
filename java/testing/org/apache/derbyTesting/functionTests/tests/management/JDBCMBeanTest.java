@@ -21,17 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.io.BufferedReader;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.util.Hashtable;
 import javax.management.ObjectName;
 import junit.framework.Test;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derbyTesting.junit.Utilities;
 
 
 /**

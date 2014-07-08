@@ -27,24 +27,22 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.Properties;
-import javax.sql.DataSource;
 import javax.sql.CommonDataSource;
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
 import javax.sql.XADataSource;
-
-import junit.framework.*;
-
+import junit.framework.Test;
 import org.apache.derby.authentication.UserAuthenticator;
-
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCClientSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -213,15 +211,17 @@ public class LoginTimeoutTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite   suite = new TestSuite();
+        BaseTestSuite  suite = new BaseTestSuite();
 
-        Test    embedded = new TestSuite( LoginTimeoutTest.class, "embedded LoginTimeoutTest" );
+        Test embedded = new BaseTestSuite(
+            LoginTimeoutTest.class, "embedded LoginTimeoutTest" );
+
         embedded = TestConfiguration.singleUseDatabaseDecorator( embedded );
         embedded = new SystemPropertyTestSetup( embedded, systemProperties() );
         suite.addTest( embedded );
 
         if (Derby.hasServer() && Derby.hasClient()) {
-            Test clientServer = new TestSuite(
+            Test clientServer = new BaseTestSuite(
                     LoginTimeoutTest.class, "client/server LoginTimeoutTest");
             clientServer =
                     TestConfiguration.singleUseDatabaseDecorator(clientServer);

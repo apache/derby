@@ -20,20 +20,33 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.*;
-import javax.sql.*;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 

@@ -25,8 +25,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
@@ -110,7 +110,7 @@ public class UniqueConstraintMultiThreadedTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("UniqueConstraintTest");
+        BaseTestSuite suite = new BaseTestSuite("UniqueConstraintTest");
         suite.addTest(TestConfiguration.embeddedSuite(UniqueConstraintMultiThreadedTest.class));
         return suite;
     }

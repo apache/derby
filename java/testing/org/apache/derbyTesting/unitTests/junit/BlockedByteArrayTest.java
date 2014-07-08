@@ -24,13 +24,11 @@ package org.apache.derbyTesting.unitTests.junit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.impl.io.vfmem.BlockedByteArray;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Basic tests of the {@code BlockedByteArrayTest}.
@@ -163,7 +161,7 @@ public class BlockedByteArrayTest
     }
 
     public static Test suite() {
-        return new TestSuite(BlockedByteArrayTest.class);
+        return new BaseTestSuite(BlockedByteArrayTest.class);
     }
 
     /**

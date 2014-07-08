@@ -27,11 +27,9 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -46,11 +44,13 @@ public class ConnectWrongSubprotocolTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         // Test does not run on J2ME
-        if (JDBC.vmSupportsJSR169())
-            return new TestSuite("empty: no support for Driver.sql.Manager with jsr 169");
+        if (JDBC.vmSupportsJSR169()) {
+            return new BaseTestSuite(
+                "empty: no support for Driver.sql.Manager with jsr 169");
+        }
         
         if (!Derby.hasTools())
-            return new TestSuite("empty: no tools support");
+            return new BaseTestSuite("empty: no tools support");
         
     	Properties props = new Properties();        
         props.setProperty("ij.connection.wrongSubprotocol", "jdbc:noone:fruitfly;create=true");

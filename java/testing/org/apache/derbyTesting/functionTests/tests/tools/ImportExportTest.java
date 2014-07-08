@@ -23,16 +23,15 @@ package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test import and export procedures 
@@ -44,13 +43,13 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-        TestSuite suite = new TestSuite("ImportExportTest");
+        BaseTestSuite suite = new BaseTestSuite("ImportExportTest");
 
         // disabled on weme6.1 due at the moment due 
         // to problems with security exceptions.
         if (JDBC.vmSupportsJSR169())
         {
-        	return new TestSuite();
+            return new BaseTestSuite();
         }
         suite.addTest(baseSuite("ImportExportTest:embedded"));
 
@@ -61,7 +60,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test baseSuite(String name) {
-		TestSuite suite = new TestSuite(ImportExportTest.class, name);
+        BaseTestSuite suite = new BaseTestSuite(ImportExportTest.class, name);
 		Test test = new SupportFilesSetup(suite, new String[] {"functionTests/testData/ImportExport/TwoLineBadEOF.dat"} );
 		return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {

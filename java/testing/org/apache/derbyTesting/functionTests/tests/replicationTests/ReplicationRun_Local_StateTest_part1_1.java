@@ -21,7 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -51,7 +51,8 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local_StateTest_part1_1 Suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("ReplicationRun_Local_StateTest_part1_1 Suite");
         
         suite.addTestSuite( ReplicationRun_Local_StateTest_part1_1.class );
         

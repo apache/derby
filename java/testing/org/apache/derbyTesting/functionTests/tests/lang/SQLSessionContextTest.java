@@ -21,19 +21,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * SQLSessionContextTest tests the SQL session context stacking,
@@ -111,7 +110,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("SQLSessionContextTest");
+        BaseTestSuite suite = new BaseTestSuite("SQLSessionContextTest");
 
         /* Positive tests */
         if (!JDBC.vmSupportsJSR169()) {
@@ -146,8 +145,8 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
          */
 
         // add decorator for different users authenticated
-        TestSuite usersSuite =
-            new TestSuite("suite: positiveSuite");
+        BaseTestSuite usersSuite =
+            new BaseTestSuite("suite: positiveSuite");
 
         // First decorate with users, then with authorization
         // decorator

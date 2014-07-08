@@ -23,13 +23,11 @@
 package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.io.PrintStream;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestNullOutputStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -70,7 +68,7 @@ public class IjSecurityManagerTest extends BaseTestCase {
         return test;
 	}
 	public static Test suite() {		
-		TestSuite suite = new TestSuite("IjSecurityManagerTest");
+        BaseTestSuite suite = new BaseTestSuite("IjSecurityManagerTest");
 		suite.addTest(decorateTest());
 		return suite;
 	}

@@ -29,14 +29,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -56,10 +53,9 @@ public class ShutdownDatabaseTest extends BaseJDBCTestCase {
     public static Test suite() {
         // Only run in embedded as running in client/server
         // hits a problem. See DERBY-2477. To see the bug
-        // juts use the defaultSuite.
-        return new CleanDatabaseTestSetup(
-            new TestSuite(ShutdownDatabaseTest.class, "ShutdownDatabaseTest"));
-        // return TestConfiguration.defaultSuite(ShutdownDatabaseTest.class);
+        // just use the defaultSuite.
+        return new CleanDatabaseTestSetup(new BaseTestSuite(
+            ShutdownDatabaseTest.class, "ShutdownDatabaseTest"));
     }
 
     protected void initializeConnection(Connection conn) throws SQLException {

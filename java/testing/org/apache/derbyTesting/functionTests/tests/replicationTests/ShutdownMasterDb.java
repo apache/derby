@@ -24,7 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.io.IOException;
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ShutdownMasterDb extends ShutdownMaster
@@ -44,7 +44,7 @@ public class ShutdownMasterDb extends ShutdownMaster
         
         setEnv();
         
-        TestSuite suite = new TestSuite("ShutdownMasterDb");
+        BaseTestSuite suite = new BaseTestSuite("ShutdownMasterDb");
         suite.addTest(ShutdownMasterDb.suite(masterServerHost,masterServerPort)); // (masterHostName, masterPortNo));
         return (Test)suite;
     }

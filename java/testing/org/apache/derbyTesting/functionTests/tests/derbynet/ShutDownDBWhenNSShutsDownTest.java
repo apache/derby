@@ -24,13 +24,11 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -48,7 +46,8 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
      * Only run the fixtures in network server mode as that's what they are testing.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ShutDownDBWhenNSShutsDownTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("ShutDownDBWhenNSShutsDownTest");
         
         suite.addTest(TestConfiguration.clientServerDecorator(
            new ShutDownDBWhenNSShutsDownTest(

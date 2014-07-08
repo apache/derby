@@ -27,13 +27,11 @@ import java.security.AccessController;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
@@ -69,7 +67,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ServerPropertiesTest");
+        BaseTestSuite suite = new BaseTestSuite("ServerPropertiesTest");
           
         if (!Derby.hasServer()) return suite;
         // don't run with JSR169 for 1. this is network server and

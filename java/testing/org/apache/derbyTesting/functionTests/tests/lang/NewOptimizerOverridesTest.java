@@ -22,35 +22,26 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.StringWriter;
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import junit.framework.Test;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.Decorator;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.iapi.sql.Activation;
 
 /**
  * <p>
@@ -106,7 +97,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite( "NewOptimizerOverridesTest" );
+        BaseTestSuite suite = new BaseTestSuite("NewOptimizerOverridesTest");
 
         suite.addTest( TestConfiguration.embeddedSuite( NewOptimizerOverridesTest.class ) );
 

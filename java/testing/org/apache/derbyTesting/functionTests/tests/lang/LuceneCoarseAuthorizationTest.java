@@ -21,39 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
-import java.sql.Date;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Properties;
-import org.apache.lucene.analysis.Analyzer;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.optional.api.LuceneIndexDescriptor;
 import org.apache.derby.optional.api.LuceneUtils;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.lucene.analysis.Analyzer;
 
 /**
  * <p>
@@ -121,7 +101,8 @@ public class LuceneCoarseAuthorizationTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(LuceneCoarseAuthorizationTest.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            LuceneCoarseAuthorizationTest.class);
 
         Test        unsecureTest = SecurityManagerSetup.noSecurityManager( suite );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication

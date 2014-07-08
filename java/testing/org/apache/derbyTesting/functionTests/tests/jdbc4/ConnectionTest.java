@@ -20,18 +20,26 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.sql.*;
+import java.sql.Blob;
+import java.sql.ClientInfoStatus;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for the JDBC 4.0 specific methods in the connection object(s).
@@ -378,16 +386,16 @@ public class ConnectionTest
     /**
      * Create suite containing client-only tests.
      */
-    private static TestSuite clientSuite(String name) {
-        TestSuite clientSuite = new TestSuite(name);
+    private static BaseTestSuite clientSuite(String name) {
+        BaseTestSuite clientSuite = new BaseTestSuite(name);
         return clientSuite; 
     }
     
     /**
      * Create suite containing embedded-only tests.
      */
-    private static TestSuite embeddedSuite(String name) {
-        TestSuite embeddedSuite = new TestSuite(name);
+    private static BaseTestSuite embeddedSuite(String name) {
+        BaseTestSuite embeddedSuite = new BaseTestSuite(name);
         embeddedSuite.addTest(new ConnectionTest(
                     "embeddedCreateBlob"));
         embeddedSuite.addTest(new ConnectionTest(
@@ -401,29 +409,29 @@ public class ConnectionTest
      *  when appropriate.
      */
     public static Test suite() {
-        TestSuite connSuite = new TestSuite("ConnectionTest suite");
+        BaseTestSuite connSuite = new BaseTestSuite("ConnectionTest suite");
 
-        TestSuite embedded = new TestSuite("ConnectionTest:embedded");
+        BaseTestSuite embedded = new BaseTestSuite("ConnectionTest:embedded");
         embedded.addTestSuite(ConnectionTest.class);
         embedded.addTest(embeddedSuite("ConnectionTest:embedded-only"));
         connSuite.addTest(embedded);
         
         // repeat the embedded tests obtaining a connection from
         // an XA data source.
-        embedded = new TestSuite("ConnectionTest:embedded XADataSource");
+        embedded = new BaseTestSuite("ConnectionTest:embedded XADataSource");
         embedded.addTestSuite(ConnectionTest.class);
         embedded.addTest(embeddedSuite("ConnectionTest:embedded-only XADataSource"));
         connSuite.addTest(TestConfiguration.connectionXADecorator(embedded));
         
 
-        TestSuite client = new TestSuite("ConnectionTest:client");
+        BaseTestSuite client = new BaseTestSuite("ConnectionTest:client");
         client.addTestSuite(ConnectionTest.class);
         client.addTest(clientSuite("ConnectionTest:client-only"));
         connSuite.addTest(TestConfiguration.clientServerDecorator(client));
 
         // repeat the client tests obtaining a connection from
         // an XA data source.
-        client = new TestSuite("ConnectionTest:client XADataSource");
+        client = new BaseTestSuite("ConnectionTest:client XADataSource");
         client.addTestSuite(ConnectionTest.class);
         client.addTest(clientSuite("ConnectionTest:client-only XADataSource"));
         connSuite.addTest(

@@ -21,14 +21,12 @@
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * LocalizedAttributeScriptTest runs the ij scripts (.sql file) 
@@ -61,7 +59,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
      */
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("LocalizedScripts");
+        BaseTestSuite suite = new BaseTestSuite("LocalizedScripts");
 
         // Note that it doesn't really make sense to run with network 
         // server/client, as LocalizedConnectionAttributes.sql has a hardcoded
@@ -71,7 +69,8 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
         // statement automatically invokes DriverManager.
         if (JDBC.vmSupportsJSR169())
             return suite;
-        TestSuite localizedTests = new TestSuite("LocalizedScripts:embedded");
+        BaseTestSuite localizedTests =
+            new BaseTestSuite("LocalizedScripts:embedded");
         localizedTests.addTest(getSuite());
         Test local = TestConfiguration.singleUseDatabaseDecoratorNoShutdown(
             localizedTests);
@@ -99,7 +98,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite() {
-        TestSuite suite = new TestSuite("localized scripts");
+        BaseTestSuite suite = new BaseTestSuite("localized scripts");
         Properties uiProps = new Properties();
 
         uiProps.put("derby.ui.locale","de_DE");

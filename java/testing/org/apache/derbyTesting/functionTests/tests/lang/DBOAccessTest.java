@@ -21,15 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.net.URL;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests that certain operations can only be performed by the DBO.
@@ -121,7 +118,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         Test    unauthorizedRun = TestConfiguration.embeddedSuite( NoAuthorization.class );
         unauthorizedRun = new SupportFilesSetup( unauthorizedRun, testFiles );
 
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
         suite.addTest( authorizedRun );
         suite.addTest( unauthorizedRun );
 

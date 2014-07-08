@@ -22,12 +22,11 @@
  */
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Test basic operations on a read-wrote Clob that is kept on disk.
@@ -72,7 +71,8 @@ public class BiggerTemporaryClobTest
     public static Test suite()
             throws Exception {
         Class<? extends TestCase> theClass = BiggerTemporaryClobTest.class;
-        TestSuite suite = new TestSuite(theClass, "BiggerTemporaryClobTest suite");
+        BaseTestSuite suite = new BaseTestSuite(
+            theClass, "BiggerTemporaryClobTest suite");
         suite.addTest(addModifyingTests(theClass));
         return suite;
     }

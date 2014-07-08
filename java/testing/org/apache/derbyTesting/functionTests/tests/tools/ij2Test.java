@@ -23,11 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.tools;
 
 import java.util.Locale;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
@@ -52,7 +50,7 @@ public class ij2Test extends ScriptTestCase {
         test = TestConfiguration.singleUseDatabaseDecorator(test, "wombat1");
         test = new CleanDatabaseTestSetup(test);
 
-        TestSuite suite = new TestSuite("ij2Scripts");
+        BaseTestSuite suite = new BaseTestSuite("ij2Scripts");
         suite.addTest(test);
 
         if (JDBC.vmSupportsJDBC3()) {

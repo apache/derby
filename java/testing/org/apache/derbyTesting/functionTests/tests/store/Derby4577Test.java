@@ -1,23 +1,15 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /*
@@ -312,7 +304,7 @@ public class Derby4577Test extends StoreBaseTest
     
     protected static Test baseSuite(String name) 
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby4577Test.class);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 
@@ -345,7 +337,7 @@ public class Derby4577Test extends StoreBaseTest
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("Derby4577Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby4577Test");
         suite.addTest(baseSuite("Derby4577Test:embedded"));
         return suite;
     }

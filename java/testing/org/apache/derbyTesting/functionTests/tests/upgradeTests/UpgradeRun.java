@@ -22,13 +22,11 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -78,13 +76,13 @@ class UpgradeRun extends UpgradeClassLoader
         // If no jars then just skip.
         if (oldLoader == null)
         {
-            TestSuite suite = new TestSuite(
+            BaseTestSuite suite = new BaseTestSuite(
                     "Empty: Skipped upgrade Tests (no jars) for " + getTextVersion(version));
             return suite;
         }
         
 
-        TestSuite suite = new TestSuite(
+        BaseTestSuite suite = new BaseTestSuite(
                 "Upgrade Tests from " + getTextVersion(version));
         BaseTestCase.traceit("Prepare to run upgrade tests from " + getTextVersion(version));
 
@@ -158,7 +156,7 @@ class UpgradeRun extends UpgradeClassLoader
      * 
      */
     private static Test baseSuite(String name, int phase, int[] version) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         
         int oldMajor = version[0];
         int oldMinor = version[1];
@@ -328,9 +326,12 @@ class UpgradeRun extends UpgradeClassLoader
      * add the DatabaseMetaDataTest.class as is.
      * Note also, that this does not execute fixture initialCompilationTest.
      */
-    private static void runDataBaseMetaDataTest (TestSuite suite, int oldMinor)
+    private static void runDataBaseMetaDataTest (
+        BaseTestSuite suite, int oldMinor)
     {
-        TestSuite dmdSuite = new TestSuite("DatabaseMetaData subsuite");
+        BaseTestSuite dmdSuite =
+            new BaseTestSuite("DatabaseMetaData subsuite");
+
         Method[] methods = DatabaseMetaDataTest.class.getMethods();
         for (int i = 0; i < methods.length; i++) {
             Method m = methods[i];

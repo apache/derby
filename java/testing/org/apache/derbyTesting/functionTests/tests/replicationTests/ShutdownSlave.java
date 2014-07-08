@@ -28,10 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ShutdownSlave extends BaseJDBCTestCase
 {
@@ -76,7 +73,7 @@ public class ShutdownSlave extends BaseJDBCTestCase
         
         setEnv();
         
-        TestSuite suite = new TestSuite("ShutdownSlave");
+        BaseTestSuite suite = new BaseTestSuite("ShutdownSlave");
         suite.addTest(ShutdownSlave.suite(masterServerHost, masterServerPort));
         return (Test)suite;
     }

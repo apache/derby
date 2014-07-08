@@ -24,15 +24,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -50,7 +46,7 @@ public final class RecoveryTest extends BaseJDBCTestCase
     public static Test suite()
     {
         // Add the test case into the test suite
-        TestSuite suite = new TestSuite("RecoveryTest");
+        BaseTestSuite suite = new BaseTestSuite("RecoveryTest");
         suite.addTest(decorateTest());
         return suite;
     }

@@ -21,12 +21,11 @@
 */
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test;  
-import junit.framework.TestSuite;
+import junit.framework.Test;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -50,7 +49,7 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("store");
+        BaseTestSuite suite = new BaseTestSuite("store");
 
         suite.addTest(BootAllTest.suite());
         suite.addTest(ClassLoaderBootTest.suite());

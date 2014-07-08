@@ -23,12 +23,9 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.SQLException;
-
 import javax.sql.ConnectionPoolDataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -47,10 +44,12 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
         // This test uses ConnectionPoolDataSource and so is not suitable for 
         // JSR169
         if (JDBC.vmSupportsJSR169())
-            return new TestSuite("ConnectionPoolDataSource not available" +
+            return new BaseTestSuite("ConnectionPoolDataSource not available" +
                 " with JSR169; empty test");
         else {
-            TestSuite suite = new TestSuite("PoolDSAuthenticationTest");
+            BaseTestSuite suite =
+                new BaseTestSuite("PoolDSAuthenticationTest");
+
             suite.addTest(baseSuite("PoolDSAuthenticationTest:embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(baseSuite(
                 "PoolDSAuthenticationTest:client")));
@@ -61,7 +60,7 @@ public class PoolDSAuthenticationTest extends AuthenticationTest {
     // baseSuite takes advantage of setting system properties as defined
     // in AuthenticationTest
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite("PoolDSAuthenticationTest");
+        BaseTestSuite suite = new BaseTestSuite("PoolDSAuthenticationTest");
 
         Test test = new PoolDSAuthenticationTest(
             "testConnectShutdownAuthentication");

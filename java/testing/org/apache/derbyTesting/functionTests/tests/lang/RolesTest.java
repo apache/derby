@@ -21,22 +21,21 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import javax.sql.PooledConnection;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.J2EEDataSource;
 
 /**
  * This JUnit tests the SQL roles feature. This feature relies on
@@ -128,7 +127,7 @@ public class RolesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("RolesTest");
+        BaseTestSuite suite = new BaseTestSuite("RolesTest");
 
         /* Negative syntax tests */
         suite.addTest(negativeSyntaxSuite("suite: negative syntax, embedded"));
@@ -168,11 +167,11 @@ public class RolesTest extends BaseJDBCTestCase
      */
     private static Test negativeSyntaxSuite(String framework)
     {
-        TestSuite suite = new TestSuite("roles:"+framework);
+        BaseTestSuite suite = new BaseTestSuite("roles:"+framework);
 
         /* Tests running without sql authorization set.
          */
-        TestSuite noauthSuite = new TestSuite(
+        BaseTestSuite noauthSuite = new BaseTestSuite(
             "suite: security level=noSqlAuthorization");
         noauthSuite.addTest(new RolesTest("testNegativeSyntax",
                                           NO_SQLAUTHORIZATION,
@@ -329,7 +328,7 @@ public class RolesTest extends BaseJDBCTestCase
          * Tests running without sql authorization set.  The purpose
          * of this is just to make sure the proper errors are given.
          */
-        TestSuite noauthSuite = new TestSuite(
+        BaseTestSuite noauthSuite = new BaseTestSuite(
             "suite: security level=noSqlAuthorization");
         noauthSuite.addTest(new RolesTest("testSemantics",
                                           NO_SQLAUTHORIZATION,
@@ -340,7 +339,7 @@ public class RolesTest extends BaseJDBCTestCase
          * First decorate with users, then with authentication +
          * sqlAuthorization.
          */
-        TestSuite suite = new TestSuite("roles:"+framework);
+        BaseTestSuite suite = new BaseTestSuite("roles:"+framework);
 
         suite.addTest(noauthSuite);
         suite.addTest(wrapInAuthorization("testSemantics"));
@@ -357,8 +356,8 @@ public class RolesTest extends BaseJDBCTestCase
     private static Test wrapInAuthorization(String testName)
     {
         // add decorator for different users authenticated
-        TestSuite usersSuite =
-            new TestSuite("suite: security level=sqlAuthorization");
+        BaseTestSuite usersSuite =
+            new BaseTestSuite("suite: security level=sqlAuthorization");
 
         // First decorate with users (except "additionaluser"), then
         // with authorization decorator

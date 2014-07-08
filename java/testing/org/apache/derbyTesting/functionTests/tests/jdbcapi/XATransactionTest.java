@@ -30,16 +30,13 @@ import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.shared.common.reference.SQLState;
-
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XATestUtil;
 
@@ -636,6 +633,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             return test;
         }
 
-        return new TestSuite("XATransactionTest cannot run without XA support");
+        return new BaseTestSuite(
+            "XATransactionTest cannot run without XA support");
     }
 }

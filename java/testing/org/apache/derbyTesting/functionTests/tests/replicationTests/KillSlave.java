@@ -28,8 +28,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class KillSlave extends BaseJDBCTestCase
@@ -50,7 +50,7 @@ public class KillSlave extends BaseJDBCTestCase
         System.out.println("**** KillSlave.suite()");
         System.out.println("'KillSlave' can not be run outside the 'ReplicationRun' framework.");
         
-        TestSuite suite = new TestSuite("KillSlave");
+        BaseTestSuite suite = new BaseTestSuite("KillSlave");
         
         String masterHostName = System.getProperty("test.serverHost", "localhost");
         int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));

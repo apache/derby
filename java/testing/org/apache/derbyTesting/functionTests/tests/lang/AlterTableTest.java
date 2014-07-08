@@ -20,25 +20,24 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.InputStream;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLWarning;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.Arrays;
+import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestInputStream;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DerbyConstants;
-
-import junit.framework.Assert;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public final class AlterTableTest extends BaseJDBCTestCase {
 
@@ -50,7 +49,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("AlterTableTest Test");
+        BaseTestSuite suite = new BaseTestSuite("AlterTableTest Test");
         suite.addTest(TestConfiguration.defaultSuite(AlterTableTest.class));
         return TestConfiguration.sqlAuthorizationDecorator(suite);
     }

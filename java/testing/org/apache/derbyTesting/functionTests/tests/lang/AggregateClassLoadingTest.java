@@ -23,20 +23,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 /**
  * Test for ensuring the aggregate implementation classes are loaded correctly,
@@ -79,9 +73,9 @@ public class AggregateClassLoadingTest extends BaseJDBCTestCase {
 		 * but the tests continue to pass. 
 		 */		
 		return SecurityManagerSetup.noSecurityManager(
-						new CleanDatabaseTestSetup(
-								new TestSuite(AggregateClassLoadingTest.class,
-										"AggregateClassLoadingTest")) {
+            new CleanDatabaseTestSetup(
+                new BaseTestSuite(AggregateClassLoadingTest.class,
+                                   "AggregateClassLoadingTest")) {
                             
                             /**
                              * Save the class loader upon entry to the

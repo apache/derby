@@ -25,14 +25,13 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.util.Arrays;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.impl.jdbc.PositionedStoreStream;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Tests of the repositioning logic in {@link PositionedStoreStream}.
@@ -240,7 +239,7 @@ public class PositionedStoreStreamTest
     }
 
     public static Test suite() {
-        return new TestSuite(
+        return new BaseTestSuite(
                 PositionedStoreStreamTest.class, "PositionedStoreStreamTest");
     }
 }

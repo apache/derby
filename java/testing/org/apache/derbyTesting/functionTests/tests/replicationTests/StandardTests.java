@@ -24,7 +24,6 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.suites.AllPackages;
 import org.apache.derbyTesting.functionTests.suites.EncryptionSuite;
 import org.apache.derbyTesting.functionTests.tests.derbynet.PrepareStatementTest;
@@ -34,6 +33,7 @@ import org.apache.derbyTesting.functionTests.tests.lang.DatabaseClassLoadingTest
 import org.apache.derbyTesting.functionTests.tests.lang.LangScripts;
 import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -190,7 +190,8 @@ public class StandardTests extends BaseJDBCTestCase
         throws Exception 
     {
 
-        TestSuite suite = new TestSuite("All_"+serverHost+":"+serverPort);
+        BaseTestSuite suite =
+            new BaseTestSuite("All_"+serverHost+":"+serverPort);
 
         // All package tests 
         // This won't work as there are no 'testXXXX' methods 

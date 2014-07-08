@@ -20,12 +20,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 public class I18NImportExport extends ScriptTestCase {
     
@@ -39,7 +38,7 @@ public class I18NImportExport extends ScriptTestCase {
     
     public static Test suite() {
         
-        TestSuite suite = new TestSuite("I18NImportExport");
+        BaseTestSuite suite = new BaseTestSuite("I18NImportExport");
         suite.addTest(
                 new CleanDatabaseTestSetup(
                 new I18NImportExport("I18NImportExport")));

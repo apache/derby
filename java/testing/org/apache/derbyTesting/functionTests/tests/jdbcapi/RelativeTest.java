@@ -23,15 +23,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.*;
-
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * Tests relative scrolling of a resultset. This is the JUnit conversion of
@@ -139,7 +139,7 @@ public class RelativeTest extends BaseJDBCTestCase {
 	 * @return test suite
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("RelativeTest");
+        BaseTestSuite suite = new BaseTestSuite("RelativeTest");
 		suite.addTest(baseSuite("RelativeTest:embedded"));
 		suite.addTest(TestConfiguration
 				.clientServerDecorator(baseSuite("RelativeTest:client")));
@@ -153,7 +153,7 @@ public class RelativeTest extends BaseJDBCTestCase {
 	 *            Name for the suite.
 	 */
 	private static Test baseSuite(String name) {
-		TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 		suite.addTestSuite(RelativeTest.class);
 		return new CleanDatabaseTestSetup(DatabasePropertyTestSetup
 				.setLockTimeouts(suite, 2, 4)) {

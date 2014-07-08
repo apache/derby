@@ -24,16 +24,15 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBCDataSource;
 
 
 /**
@@ -58,7 +57,7 @@ public class SSLTest extends BaseJDBCTestCase
     {
         //NetworkServerTestSetup.setWaitTime(10000L);
         
-        TestSuite suite = new TestSuite("SSLTest");
+        BaseTestSuite suite = new BaseTestSuite("SSLTest");
         
         // Server booting requires that we run from the jar files
         if (!TestConfiguration.loadingFromJars()) { return suite; }

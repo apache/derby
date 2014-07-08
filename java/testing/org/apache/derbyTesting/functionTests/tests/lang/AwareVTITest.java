@@ -22,17 +22,11 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -82,7 +76,8 @@ public class AwareVTITest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(AwareVTITest.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            AwareVTITest.class);
         Test        result = new CleanDatabaseTestSetup( suite );
 
         return result;

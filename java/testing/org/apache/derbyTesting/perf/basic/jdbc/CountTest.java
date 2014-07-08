@@ -21,9 +21,12 @@ limitations under the License.
 package org.apache.derbyTesting.perf.basic.jdbc;
 
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 
 /**
@@ -40,7 +43,7 @@ public class CountTest extends JDBCPerfTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("CountTest");
+        BaseTestSuite suite = new BaseTestSuite("CountTest");
         int iterations = 1200, repeats = 4;
 
         suite.addTest(new CountTest("Count100",iterations,repeats));

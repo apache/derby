@@ -1,23 +1,14 @@
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /*
@@ -139,7 +130,7 @@ public class Derby5624Test extends BaseJDBCTestCase
 
     protected static Test baseSuite(String name) 
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby5624Test.class);
         return new CleanDatabaseTestSetup(suite)
         {
@@ -173,7 +164,7 @@ public class Derby5624Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("Derby5624Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby5624Test");
         suite.addTest(baseSuite("Derby5624Test:embedded"));
         return suite;
     }

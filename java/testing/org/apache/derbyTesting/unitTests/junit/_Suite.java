@@ -22,11 +22,9 @@
 package org.apache.derbyTesting.unitTests.junit;
 
 import java.sql.SQLException;
-
-import org.apache.derbyTesting.junit.BaseTestCase;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -44,7 +42,7 @@ public class _Suite extends BaseTestCase {
 
     public static Test suite() throws SQLException {
 
-        TestSuite suite = new TestSuite("JUnit unit tests");
+        BaseTestSuite suite = new BaseTestSuite("JUnit unit tests");
 
         suite.addTest(ArrayInputStreamTest.suite());
         suite.addTest(FormatableBitSetTest.suite());

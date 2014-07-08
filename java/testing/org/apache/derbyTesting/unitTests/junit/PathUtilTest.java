@@ -23,10 +23,9 @@ package org.apache.derbyTesting.unitTests.junit;
 
 import java.io.File;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.impl.io.vfmem.PathUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Basic tests for the {@code PathUtil} class.
@@ -67,7 +66,7 @@ public class PathUtilTest
     }
 
     public static Test suite() {
-        return new TestSuite(PathUtilTest.class, "PathUtilTest suite");
+        return new BaseTestSuite(PathUtilTest.class, "PathUtilTest suite");
     }
 
     // Simple utility methods to join / create paths.

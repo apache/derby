@@ -36,18 +36,15 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
-
+import org.apache.derbyTesting.functionTests.tests.lang.Price;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.functionTests.tests.lang.Price;
 
 /**
  * Tests of stored procedures.
@@ -1032,7 +1029,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ProcedureTest");
+        BaseTestSuite suite = new BaseTestSuite("ProcedureTest");
 
         suite.addTest(baseSuite("ProcedureTest:embedded"));
 
@@ -1049,7 +1046,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private static Test baseSuite(String name)
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         
         // Need JDBC DriverManager to run these tests
         if (!JDBC.vmSupportsJDBC3())

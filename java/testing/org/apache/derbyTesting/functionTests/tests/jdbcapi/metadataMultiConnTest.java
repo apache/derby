@@ -27,11 +27,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 
 public class metadataMultiConnTest extends BaseJDBCTestCase {
@@ -42,7 +40,7 @@ public class metadataMultiConnTest extends BaseJDBCTestCase {
 	}
 
 	public static Test suite() {
-		return new TestSuite(metadataMultiConnTest.class);
+        return new BaseTestSuite(metadataMultiConnTest.class);
 	}
 
 

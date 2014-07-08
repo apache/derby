@@ -24,22 +24,13 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -123,7 +114,8 @@ public class LuceneBackupTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite( LuceneBackupTest.class );
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            LuceneBackupTest.class );
 
         Test        secureTest = new SecurityManagerSetup( suite, POLICY_FILE );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication

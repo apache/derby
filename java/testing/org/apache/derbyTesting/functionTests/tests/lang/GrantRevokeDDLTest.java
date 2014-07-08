@@ -28,11 +28,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -65,10 +63,15 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        if (JDBC.vmSupportsJSR169())
-            return new TestSuite("GrantRevokeDDLTest"); // return empty suite;
-                //test uses triggers and procedures that use DriverManager.
-        TestSuite suite = new TestSuite(GrantRevokeDDLTest.class, "GrantRevokeDDL Test");
+        if (JDBC.vmSupportsJSR169()) {
+             // return empty suite;
+            return new BaseTestSuite("GrantRevokeDDLTest");
+        }
+
+        //test uses triggers and procedures that use DriverManager.
+        BaseTestSuite suite = new BaseTestSuite(
+            GrantRevokeDDLTest.class, "GrantRevokeDDL Test");
+
 	    Test test = new SupportFilesSetup(suite);
 	    test = new CleanDatabaseTestSetup(test);
 	    test = DatabasePropertyTestSetup.builtinAuthentication(

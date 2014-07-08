@@ -25,11 +25,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
@@ -61,8 +59,10 @@ public class CharUTF8Test extends BaseJDBCTestCase {
 	 *         run.
 	 */
 	public static Test suite() {
-		return new CleanDatabaseTestSetup(new TestSuite(CharUTF8Test.class)) {
-			protected void decorateSQL(Statement stmt) throws SQLException {
+        return new CleanDatabaseTestSetup(
+            new BaseTestSuite(CharUTF8Test.class)) {
+
+            protected void decorateSQL(Statement stmt) throws SQLException {
 				stmt.execute("CREATE TABLE TEST(id int not null primary key, body varchar(60))");
 			}
 		};

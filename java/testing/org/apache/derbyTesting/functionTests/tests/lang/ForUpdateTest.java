@@ -23,22 +23,16 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests for forupdate. 
@@ -62,14 +56,14 @@ public class ForUpdateTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
-        	TestSuite suite = new TestSuite("ForUpdateTest");
+            BaseTestSuite suite = new BaseTestSuite("ForUpdateTest");
         	suite.addTest(baseSuite("ForUpdateTest:embedded"));
         	suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ForUpdateTest:client")));
         	return suite;
     	}
 
 	protected static Test baseSuite(String name) {
-        	TestSuite suite = new TestSuite(name);
+            BaseTestSuite suite = new BaseTestSuite(name);
         	suite.addTestSuite(ForUpdateTest.class);	
 		return new CleanDatabaseTestSetup(suite) 
         	{

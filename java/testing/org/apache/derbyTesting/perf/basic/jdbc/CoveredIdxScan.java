@@ -21,10 +21,11 @@
 package org.apache.derbyTesting.perf.basic.jdbc;
 
 
-import java.sql.*;
-
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Index scan tests.
@@ -37,7 +38,7 @@ public class CoveredIdxScan extends HeapScan {
      */
     public static Test suite()
     {
-        TestSuite scan = new TestSuite("CoveredIdxScanTests");
+        BaseTestSuite scan = new BaseTestSuite("CoveredIdxScanTests");
         int iterations = 700, repeats = 4;
 
         scan.addTest(new CoveredIdxScan("ScanCoveredIdxInt",iterations,repeats));

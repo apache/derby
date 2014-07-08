@@ -19,8 +19,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import junit.framework.*;
-
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -56,7 +56,7 @@ public class Compat_BlobClob4BlobTest extends BlobClob4BlobTest {
      *
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("Compat_BlobClob4BlobTest");
+        BaseTestSuite suite = new BaseTestSuite("Compat_BlobClob4BlobTest");
         /* Embedded is not relevant for a running server....
          suite.addTest(
                 TestConfiguration.embeddedSuite(BlobClob4BlobTest.class)); */

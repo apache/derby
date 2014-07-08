@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -52,7 +52,8 @@ public class ReplicationRun_Distributed extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Distributed Suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("ReplicationRun_Distributed Suite");
         
         suite.addTestSuite( ReplicationRun_Distributed.class );
         

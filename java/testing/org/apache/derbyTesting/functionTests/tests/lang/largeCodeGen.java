@@ -18,15 +18,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 
 
 // This test tries to push byte code generation to the limit.
@@ -47,7 +47,7 @@ public class largeCodeGen extends BaseJDBCTestCase
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
         
         // Code generation test, just invoke on embedded
         // as the main function is to test the byte code compiler.

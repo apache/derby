@@ -23,12 +23,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.Locale;
-
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derbyTesting.junit.Derby;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 
 /**
@@ -129,7 +127,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
         // Need the tools to run the scripts as this
         // test uses ij as the script runner.
         if (!Derby.hasTools())
-            return new TestSuite("empty: no tools support");
+            return new BaseTestSuite("empty: no tools support");
             
 		// No decorator needed currently.
 		return test;

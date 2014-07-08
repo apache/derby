@@ -29,7 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -54,7 +54,7 @@ public class TestPreStoppedSlaveServer extends ClientRunner
         // String masterHostName = System.getProperty("test.serverHost", "localhost");
         // int masterPortNo = Integer.parseInt(System.getProperty("test.serverPort", "1527"));
         
-        TestSuite suite = new TestSuite("TestPreStoppedSlaveServer");
+        BaseTestSuite suite = new BaseTestSuite("TestPreStoppedSlaveServer");
                 
         suite.addTest(TestPreStoppedSlaveServer.suite(slaveServerHost, slaveServerPort));
         System.out.println("*** Done suite.addTest(TestPreStoppedSlaveServer.suite())");

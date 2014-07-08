@@ -20,14 +20,10 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Upgrade test cases for changes made in 10.1.
@@ -44,7 +40,7 @@ import junit.framework.TestSuite;
 public class Changes10_1 extends UpgradeChange {
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("Upgrade changes for 10.1");
+        BaseTestSuite suite = new BaseTestSuite("Upgrade changes for 10.1");
         
         suite.addTestSuite(Changes10_1.class);
         

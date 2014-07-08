@@ -23,18 +23,13 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.net.URL;
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -87,7 +82,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
     {
         String[]    testFiles = new String[] { "functionTests/tests/lang/" + SAVED_TRACE_NAME };
 
-        TestSuite       suite = new TestSuite( "XMLOptimizerTraceTest" );
+        BaseTestSuite suite = new BaseTestSuite("XMLOptimizerTraceTest");
 
         suite.addTest( TestConfiguration.defaultSuite( XMLOptimizerTraceTest.class ) );
  

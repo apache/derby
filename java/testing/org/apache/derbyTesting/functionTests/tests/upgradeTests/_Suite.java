@@ -21,12 +21,9 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Run the full upgrade suite. This is the only
@@ -127,7 +124,7 @@ public class _Suite extends BaseTestCase {
         String id = "Upgrade Suite: "
                 + OLD_RELEASE_PATH_PROPERTY + "=" + UpgradeRun.jarPath
                 + " / " + OLD_VERSIONS_PATH_PROPERTY + "=" + UpgradeRun.oldVersionsPath;
-        TestSuite suite = new TestSuite(id);       
+        BaseTestSuite suite = new BaseTestSuite(id);
 
         old = OldVersions.getSupportedVersions();
         

@@ -24,7 +24,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
@@ -81,7 +81,7 @@ public class SelectDistinctTest extends JDBCPerfTestCase {
      * @return all test cases in this class
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("SelectDistinctTest");
+        BaseTestSuite suite = new BaseTestSuite("SelectDistinctTest");
         suite.addTest(new SelectDistinctTest(TEST_CHAR5, 2000, 4));
         suite.addTest(new SelectDistinctTest(TEST_BINARY5, 2000, 4));
 

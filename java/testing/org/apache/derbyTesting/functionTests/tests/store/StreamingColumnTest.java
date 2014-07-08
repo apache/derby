@@ -28,20 +28,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -2077,7 +2075,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
         Properties strColProperties = new Properties();
         strColProperties.setProperty("derby.storage.sortBufferMax", "5");
         strColProperties.setProperty("derby.debug.true", "testSort");
-        TestSuite suite = new TestSuite("StreamingColumnTest");
+        BaseTestSuite suite = new BaseTestSuite("StreamingColumnTest");
         suite.addTest(baseSuite("StreamingColumnTest:embedded"));
         suite
                 .addTest(TestConfiguration
@@ -2086,7 +2084,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
     }
 
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(StreamingColumnTest.class);
         Test test = new SupportFilesSetup(suite, new String[] {
                 "functionTests/tests/store/short.data",

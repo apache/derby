@@ -24,8 +24,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -55,7 +55,7 @@ public class XMLConcurrencyTest extends BaseJDBCTestCase {
                     }
                 };
         } else {
-            return new TestSuite("XMLConcurrencyTest - empty");
+            return new BaseTestSuite("XMLConcurrencyTest - empty");
         }
     }
 

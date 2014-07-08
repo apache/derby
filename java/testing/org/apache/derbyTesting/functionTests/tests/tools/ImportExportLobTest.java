@@ -21,26 +21,22 @@
  */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Connection;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.JDBC;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -71,7 +67,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite(ImportExportLobTest.class);
+        BaseTestSuite suite = new BaseTestSuite(ImportExportLobTest.class);
         suite.addTest(TestConfiguration.clientServerSuite(
                              ImportExportLobTest.class));
         Test test = suite;

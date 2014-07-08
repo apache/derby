@@ -23,12 +23,10 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
-
-import junit.framework.Test; 
-import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -46,7 +44,7 @@ public class _Suite extends BaseTestCase  {
 
 	public static Test suite() throws SQLException {
 
-		TestSuite suite = new TestSuite("jdbc4");
+        BaseTestSuite suite = new BaseTestSuite("jdbc4");
 
         // These really need to run standalone.
 		//suite.addTestSuite(AutoloadBooting.class);

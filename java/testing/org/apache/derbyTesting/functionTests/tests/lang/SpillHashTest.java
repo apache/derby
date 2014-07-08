@@ -27,12 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.BitSet;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
@@ -88,8 +86,11 @@ public class SpillHashTest extends BaseJDBCTestCase {
 	 *         run.
 	 */
 	public static Test suite() {
-		TestSuite light = new TestSuite(); // suite of tests with light load on the tables
-		TestSuite heavy = new TestSuite(); // suite of tests with heavy load on the tables
+        // suite of tests with light load on the tables
+        BaseTestSuite light = new BaseTestSuite();
+
+        // suite of tests with heavy load on the tables
+        BaseTestSuite heavy = new BaseTestSuite();
 		
 		light.addTest(new SpillHashTest("testJoinLight"));
 		light.addTest(new SpillHashTest("testDistinctLight"));
@@ -140,7 +141,7 @@ public class SpillHashTest extends BaseJDBCTestCase {
 			}
 		};
 		
-		TestSuite mainSuite = new TestSuite();
+        BaseTestSuite mainSuite = new BaseTestSuite();
 		
 		mainSuite.addTest(lightSetup);
 		mainSuite.addTest(heavySetup);

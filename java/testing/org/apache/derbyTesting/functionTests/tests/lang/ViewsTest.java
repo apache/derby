@@ -26,11 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -47,7 +45,7 @@ public final class ViewsTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("views Test");
+        BaseTestSuite suite = new BaseTestSuite("views Test");
         suite.addTest(TestConfiguration.embeddedSuite(ViewsTest.class));
         return new CleanDatabaseTestSetup(suite);
     }

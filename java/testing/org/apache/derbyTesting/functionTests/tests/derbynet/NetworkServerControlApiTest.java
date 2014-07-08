@@ -21,17 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.Derby;
-import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -41,9 +30,17 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
@@ -246,15 +243,8 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      */
     private static Test decorateTest()
     {
-        // Use a fixed ordering of the test cases. Some of the test cases set
-        // properties that will be seen by subsequent test cases, but only if
-        // they run in one particular order. Also, some test cases depend on
-        // the exact connection number, which can only be guaranteed if we
-        // know exactly how many connections have been established so far, and
-        // then we need a stable ordering of the test cases.
         Test test = TestConfiguration.clientServerDecorator(
-                TestConfiguration.orderedSuite(
-                        NetworkServerControlApiTest.class));
+                new BaseTestSuite(NetworkServerControlApiTest.class));
         //
         // Install a security manager using the initial policy file.
         //
@@ -264,7 +254,8 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         
-        TestSuite suite = new TestSuite("NetworkServerControlApiTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("NetworkServerControlApiTest");
         
         // Need derbynet.jar in the classpath!
         if (!Derby.hasServer())
@@ -280,7 +271,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         return suite;
     }
 
-    private static TestSuite decorateSystemPropertyTests(TestSuite suite) {
+    private static BaseTestSuite decorateSystemPropertyTests(
+        BaseTestSuite suite) {
+
         Properties traceProps = new Properties();
         traceProps.put("derby.drda.traceDirectory","/");
         traceProps.put("derby.drda.traceAll","true");

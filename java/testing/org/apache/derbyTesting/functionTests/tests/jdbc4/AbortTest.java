@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.security.AccessControlException;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,20 +30,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBCDataSource;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests for the new JDBC 4.1 Connection.abort(Executor) method. This
@@ -88,7 +82,7 @@ public class AbortTest extends Wrapper41Test
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite( "AbortTest" );
+        BaseTestSuite suite = new BaseTestSuite( "AbortTest" );
 
         suite.addTest( baseSuite( true ) );
         suite.addTest( baseSuite( false ) );

@@ -19,8 +19,9 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derbyTesting.junit.*;
-import junit.framework.*;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 /**
  * Test basic functionality on a database encrypted with the AES algorithm.
@@ -41,7 +42,7 @@ public class EncryptionKeyAESTest
 
     public static Test suite() {
         // This test runs only in embedded due to the use of external files.
-        TestSuite suite = new TestSuite(EncryptionKeyAESTest.class,
+        BaseTestSuite suite = new BaseTestSuite(EncryptionKeyAESTest.class,
                                         "EncryptionKey AES suite");
         return new SupportFilesSetup(suite);
     }

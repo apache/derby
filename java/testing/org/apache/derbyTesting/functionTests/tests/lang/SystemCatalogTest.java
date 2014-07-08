@@ -22,19 +22,13 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.Types;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derbyTesting.functionTests.tests.compatibility.JDBCDriverTest.TypeDescriptor;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DerbyVersion;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests concerning the system catalogs.

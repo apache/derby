@@ -21,48 +21,34 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.util.ArrayList;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ParameterMetaData;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilePermission;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.SQLException;
+import java.io.OutputStream;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
-import java.security.AccessController;
-import java.security.*;
-import java.util.concurrent.Executor;
-import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBCDataSource;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * This class is used to test the implementations of the JDBC 4.0 methods
@@ -112,7 +98,7 @@ public class ConnectionMethodsTest extends Wrapper41Test
     ///////////////////////////////////////////////////////////////////////
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("ConnectionMethodsTest");
+        BaseTestSuite suite = new BaseTestSuite("ConnectionMethodsTest");
 
         suite.addTest(baseSuite("ConnectionMethodsTest:embedded"));
 
@@ -123,7 +109,9 @@ public class ConnectionMethodsTest extends Wrapper41Test
     }
 
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(ConnectionMethodsTest.class, name);
+        BaseTestSuite suite =
+            new BaseTestSuite(ConnectionMethodsTest.class, name);
+
         Test test = new SupportFilesSetup(suite, new String[] {"functionTests/testData/ConnectionMethods/short.txt"} );
         return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {

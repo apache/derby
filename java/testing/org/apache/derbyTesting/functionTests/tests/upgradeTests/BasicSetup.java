@@ -28,16 +28,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import javax.sql.DataSource;
-
+import junit.framework.Test;
 import org.apache.derby.catalog.SystemProcedures;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Basic fixtures and setup for the upgrade test, not
@@ -46,26 +44,9 @@ import junit.framework.TestSuite;
 public class BasicSetup extends UpgradeChange {
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("Upgrade basic setup");
+        BaseTestSuite suite = new BaseTestSuite("Upgrade basic setup");
 
-        // Make the test cases run in a fixed order so they become
-        // more deterministic. Some orderings may make them run into
-        // problems in old versions. Since it's too late to fix bugs
-        // in old versions, we have to work around them like this
-        // instead.
-        //
-        // The specific problem that prompted this particular
-        // workaround, was a combination of DERBY-5947 and DERBY-4577.
-        // DERBY-5947 changed the size of the trigger plans stored in
-        // SYS.SYSSTATEMENTS. Although that change should be harmless
-        // in itself, it happened to make some of the triggers in this
-        // test have plans of the exact right size to hit DERBY-4577
-        // when downgrading to a version without the fix for
-        // DERBY-4577 in the post soft-upgrade phase. This only
-        // happened for some orderings, so always run the test with a
-        // known good ordering.
-
-        suite.addTest(TestConfiguration.orderedSuite(BasicSetup.class));
+        suite.addTest(new BaseTestSuite(BasicSetup.class));
 
         if (XML.classpathMeetsXMLReqs()) {
             // Only test XML operators if they are supported by the version

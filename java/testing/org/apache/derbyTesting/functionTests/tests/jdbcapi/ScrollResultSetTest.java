@@ -19,14 +19,16 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.*;
-
-import java.sql.*;
 
 /**
  * Tests scrollable result sets
@@ -59,7 +61,7 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         }
         
         // empty suite, no holdability supported.
-        return new TestSuite(
+        return new BaseTestSuite(
                 "Empty ScrollResultSetTest suite, no support for holdability");
     }
 

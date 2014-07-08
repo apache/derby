@@ -24,8 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
 /**
@@ -38,7 +38,7 @@ public class ReferentialActionsTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("ReferentialActionsTest");
+        BaseTestSuite suite = new BaseTestSuite("ReferentialActionsTest");
 
         // DERBY-2353: Need to set derby.language.logQueryPlan to expose the
         // bug (got a NullPointerException when writing the plan to derby.log)

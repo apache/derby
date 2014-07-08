@@ -24,11 +24,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.types.PositionedStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Simple tests of the character stream descriptor class.
@@ -158,7 +158,7 @@ public class CharacterStreamDescriptorTest
     }
 
     public static Test suite() {
-        return new TestSuite(CharacterStreamDescriptorTest.class,
+        return new BaseTestSuite(CharacterStreamDescriptorTest.class,
                 "CharacterStreamDescriptorTest suite");
     }
 

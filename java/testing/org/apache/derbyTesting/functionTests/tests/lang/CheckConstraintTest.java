@@ -21,16 +21,15 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -49,7 +48,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("checkConstraint Test");
+        BaseTestSuite suite = new BaseTestSuite("checkConstraint Test");
         suite.addTest(TestConfiguration.defaultSuite(CheckConstraintTest.class));
 
         return new SupportFilesSetup(

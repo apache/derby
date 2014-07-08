@@ -24,12 +24,10 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class OCRecoveryTest extends BaseJDBCTestCase {
@@ -42,7 +40,7 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("OCRecoveryTest");
+        BaseTestSuite suite = new BaseTestSuite("OCRecoveryTest");
         //DERBY-4647 exec does not work on weme
         if (BaseTestCase.isJ9Platform())
             return suite;

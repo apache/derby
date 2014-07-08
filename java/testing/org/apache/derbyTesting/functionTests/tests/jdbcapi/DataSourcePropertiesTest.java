@@ -28,9 +28,8 @@ import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
@@ -57,7 +56,7 @@ public class DataSourcePropertiesTest extends BaseJDBCTestCase {
     public static Test suite() {
         
         
-        TestSuite suite = new TestSuite("DataSourcePropertiesTest");
+        BaseTestSuite suite = new BaseTestSuite("DataSourcePropertiesTest");
         
         // TODO: Run fixtures in J2ME and JDBC2 (with extensions)
         // that can be supported there. This disabling matches

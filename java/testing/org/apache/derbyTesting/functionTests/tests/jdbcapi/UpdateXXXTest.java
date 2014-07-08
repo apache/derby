@@ -19,20 +19,17 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Connection;
-
-import java.math.BigDecimal;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -56,7 +53,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      */
     public static Test suite() {
         
-        TestSuite suite = baseSuite("UpdateXXXTest");
+        BaseTestSuite suite = baseSuite("UpdateXXXTest");
         
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -69,8 +66,8 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      * Base suite of tests that will run in both embedded and client.
      * @param name Name for the suite.
      */
-    private static TestSuite baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+    private static BaseTestSuite baseSuite(String name) {
+        BaseTestSuite suite = new BaseTestSuite(name);
           
         suite.addTestSuite(UpdateXXXTest.class);
         

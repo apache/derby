@@ -47,10 +47,10 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.tests.upgradeTests.Version;
 import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -217,7 +217,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return the suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("DatabaseMetaDataTest");
+        BaseTestSuite suite = new BaseTestSuite("DatabaseMetaDataTest");
         suite.addTest(
             TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
 
@@ -267,18 +267,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     private static Test connectionPoolingSuite(String jdbcClient) {
         // Return an empty suite if running in JavaME environment.
         if (JDBC.vmSupportsJSR169()) {
-            return new TestSuite("Base connection pooling suite:DISABLED");
+            return new BaseTestSuite("Base connection pooling suite:DISABLED");
         }
 
-        TestSuite baseCpSuite = new TestSuite("Base connection pooling suite");
+        BaseTestSuite baseCpSuite =
+            new BaseTestSuite("Base connection pooling suite");
         // Add the tests here.
         baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
 
         // Setup the two configurations; CPDS and XADS.
-        TestSuite fullCpSuite = new TestSuite(
+        BaseTestSuite fullCpSuite = new BaseTestSuite(
                 "DatabaseMetaData with connection pooling:" + jdbcClient);
-        TestSuite cpSuite = new TestSuite("ConnectionPoolDataSource");
-        TestSuite xaSuite = new TestSuite("XADataSource");
+        BaseTestSuite cpSuite = new BaseTestSuite("ConnectionPoolDataSource");
+        BaseTestSuite xaSuite = new BaseTestSuite("XADataSource");
         cpSuite.addTest(TestConfiguration.connectionCPDecorator(baseCpSuite));
         xaSuite.addTest(TestConfiguration.connectionXADecorator(baseCpSuite));
         fullCpSuite.addTest(cpSuite);

@@ -21,17 +21,25 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Vector;
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.sql.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
 
 /* This class is used to store the details of the methods that
  * throw a SQLFeatureNotSupportedException in the implementation

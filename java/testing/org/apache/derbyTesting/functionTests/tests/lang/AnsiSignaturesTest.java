@@ -21,26 +21,20 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -94,7 +88,8 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.defaultSuite(AnsiSignaturesTest.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.defaultSuite(
+            AnsiSignaturesTest.class);
 
         return new CleanDatabaseTestSetup( suite );
     }

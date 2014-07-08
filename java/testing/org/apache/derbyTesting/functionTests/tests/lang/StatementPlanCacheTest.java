@@ -25,11 +25,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
@@ -64,7 +62,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
      * Runs in embedded only since it's testing the server side cache.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementPlanCacheTest");
+        BaseTestSuite suite = new BaseTestSuite("StatementPlanCacheTest");
         
         CACHE_SIZE = 100; // default cache size
         suite.addTest(baseSuite("default"));
@@ -91,7 +89,8 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite("StatementPlanCacheTest:derby.language.statementCacheSize=" + name);
+        BaseTestSuite suite = new BaseTestSuite(
+            "StatementPlanCacheTest:derby.language.statementCacheSize=" + name);
         suite.addTestSuite(StatementPlanCacheTest.class);
         return suite;
     }

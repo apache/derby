@@ -21,20 +21,18 @@
 package org.apache.derbyTesting.functionTests.tests.compatibility;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import junit.extensions.TestSetup;
-import junit.framework.TestSuite;
-
 import org.apache.derby.tools.sysinfo;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DerbyDistribution;
 import org.apache.derbyTesting.junit.DerbyVersion;
 import org.apache.derbyTesting.junit.JDBC;
@@ -167,7 +165,7 @@ public class VersionCombinationConfigurator {
      * @param suite the suite to add the tests to
      * @return Number of compatibility runs added.
      */
-    public int addTests(TestSuite suite) {
+    public int addTests(BaseTestSuite suite) {
         int runsAdded = 0;
         List<DerbyDistribution> dists = filterVersions();
         DerbyDistribution newestDist = dists.get(0);
@@ -181,7 +179,7 @@ public class VersionCombinationConfigurator {
                 continue;
             }
 
-            TestSuite clientSuites = new TestSuite(
+            BaseTestSuite clientSuites = new BaseTestSuite(
                     "Client runs against server " + serverVersion.toString());
             for (DerbyDistribution client : dists) {
                 if (limitToTrunk && !server.equals(newestDist) &&

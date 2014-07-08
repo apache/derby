@@ -23,10 +23,7 @@
 package org.apache.derbyTesting.functionTests.tests.i18n;
 
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.tests.tools.ImportExportProcedureTest;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.SupportFilesSetup;

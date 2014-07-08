@@ -19,20 +19,19 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
-
+import java.sql.Statement;
 import java.sql.Timestamp;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -50,7 +49,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     public static Test suite()
     {
         //Add the test case into the test suite
-        TestSuite suite = new TestSuite("OuterJoinTest Test");
+        BaseTestSuite suite = new BaseTestSuite("OuterJoinTest Test");
         return TestConfiguration.defaultSuite(OuterJoinTest.class);
     }
 

@@ -28,11 +28,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -378,7 +376,7 @@ public class DecryptDatabaseTest
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("DecryptDatabaseTest suite");
+        BaseTestSuite suite = new BaseTestSuite("DecryptDatabaseTest suite");
         suite.addTest(wrapTest());
         suite.addTest(wrapTest("AES/OFB/NoPadding"));
         return suite;

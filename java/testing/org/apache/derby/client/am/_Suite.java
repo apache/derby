@@ -22,10 +22,9 @@
  */
 package org.apache.derby.client.am;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class _Suite
     extends BaseTestCase {
@@ -40,7 +39,7 @@ public class _Suite
     public static Test suite()
             throws Exception {
 
-        TestSuite suite = new TestSuite("client.am package-private");
+        BaseTestSuite suite = new BaseTestSuite("client.am package-private");
 
         suite.addTest(LogicalStatementEntityTest.suite());
 

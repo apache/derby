@@ -22,11 +22,9 @@
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.sql.SQLException;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestCase;
-
-import junit.framework.Test; 
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 
@@ -46,7 +44,7 @@ public class ReplicationSuite extends BaseTestCase
 
 	public static Test suite() throws SQLException {
 
-		TestSuite suite = new TestSuite("ReplicationSuite");
+        BaseTestSuite suite = new BaseTestSuite("ReplicationSuite");
 
         // DERBY-5998: The replication code uses javax.net.ServerSocketFactory
         // to set up communication channels between the master and the slave.

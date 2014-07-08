@@ -32,8 +32,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -331,7 +331,9 @@ public class DataSourceSerializationTest
      * @return A test suite.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("DataSourceSerializationTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("DataSourceSerializationTest");
+
         String filePrefix = "functionTests/testData/serializedDataSources/";
         // De-serialize embedded data sources only if we have the engine code.
         if (Derby.hasEmbedded()) {

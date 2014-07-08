@@ -21,19 +21,34 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.sql.Blob;
+import java.sql.CallableStatement;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLXML;
+import java.sql.Statement;
+import java.sql.Types;
+import junit.framework.Test;
+import org.apache.derby.iapi.services.io.DerbyIOException;
+import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.io.*;
-import java.sql.*;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.DerbyIOException;
 
 /**
  * This class is used to test JDBC4 specific methods in the PreparedStatement(s)
@@ -162,7 +177,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("PreparedStatementTest suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("PreparedStatementTest suite");
+
         suite.addTest(baseSuite("PreparedStatementTest:embedded"));
         suite.addTest(
                 TestConfiguration.connectionXADecorator(
@@ -188,7 +205,7 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(PreparedStatementTest.class);
         return new CleanDatabaseTestSetup(suite) {
 
@@ -208,7 +225,9 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * Returns a suite for tests that need JDBC statement caching to be enabled.
      */
     private static Test statementCachingSuite() {
-        TestSuite suite = new TestSuite("JDBC statement caching suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("JDBC statement caching suite");
+
         suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintFalse"));
         suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintTrue"));
         return TestConfiguration.connectionCPDecorator(

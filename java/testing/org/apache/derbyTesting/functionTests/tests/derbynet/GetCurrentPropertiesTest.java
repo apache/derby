@@ -21,14 +21,15 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.File;
-import java.util.Properties;
 import java.util.Enumeration;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import java.util.Properties;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This tests getCurrentProperties
@@ -45,14 +46,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        // Use a fixed order for the test cases so that we know the exact
-        // order in which they run. Some of them depend on the connection
-        // number having a specific value, which can only be guaranteed if
-        // we know exactly how many connections have been opened, hence the
-        // need for a fixed order. Some also depend on seeing property values
-        // set by the previous test case.
-        Test test =
-                TestConfiguration.orderedSuite(GetCurrentPropertiesTest.class);
+        Test test = new BaseTestSuite(GetCurrentPropertiesTest.class);
         test = TestConfiguration.clientServerDecorator(test);
 
         // Install a security manager using the special policy file.

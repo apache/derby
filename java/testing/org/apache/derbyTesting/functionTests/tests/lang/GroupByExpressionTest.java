@@ -25,12 +25,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 public class GroupByExpressionTest extends BaseJDBCTestCase
@@ -618,7 +616,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("GROUP BY expression tests");
+        BaseTestSuite suite = new BaseTestSuite("GROUP BY expression tests");
         suite.addTestSuite(GroupByExpressionTest.class);
         
         TestSetup wrapper = new CleanDatabaseTestSetup(suite) { 

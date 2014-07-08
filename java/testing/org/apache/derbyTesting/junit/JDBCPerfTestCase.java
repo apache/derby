@@ -60,11 +60,11 @@ package org.apache.derbyTesting.junit;
  *  // repeat the test 4 times.
  *  int iterations = 100; 
  *  int repeats = 4; 
- *  TestSuite suite = new TestSuite();
+ *  BaseTestSuite suite = new BaseTestSuite();
  *  suite.addTest(new ScanCoveredIdxTest("scanAllRows",iterations,repeats));
  * 
  *  // To add client tests. 
- * TestSuite client = new TestSuite("Client");
+ * BaseTestSuite client = new BaseTestSuite("Client");
  * client.addTest(new ScanCoveredIdxTest("scanAllRows",iterations,repeats));
  * client.addTest(new ScanCoveredIdxTest("scanAndRetrieveAllRows",iterations,repeats));
  * 

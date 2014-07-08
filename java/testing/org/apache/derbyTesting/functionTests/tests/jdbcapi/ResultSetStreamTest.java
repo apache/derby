@@ -38,12 +38,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.zip.CRC32;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -478,7 +476,9 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     }
 
     public static Test basesuite(String name) {
-        TestSuite suite = new TestSuite(ResultSetStreamTest.class, name);
+        BaseTestSuite suite =
+            new BaseTestSuite(ResultSetStreamTest.class, name);
+
         Test test = new SupportFilesSetup(suite, new String[] {
                 "functionTests/testData/ResultSetStream/littleclob.utf",
                 "functionTests/testData/ResultSetStream/short.utf",
@@ -497,7 +497,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("ResultSetStreamTest");
+        BaseTestSuite suite = new BaseTestSuite("ResultSetStreamTest");
         suite.addTest(basesuite("ResultSetStreamTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(basesuite("ResultSetStreamTest:client")));
         return suite;

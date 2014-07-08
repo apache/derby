@@ -19,14 +19,13 @@
  */
 package org.apache.derbyTesting.perf.basic.jdbc;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Add performance tests that use VALUES statement 
@@ -43,14 +42,14 @@ public class ValuesTest extends JDBCPerfTestCase{
         int iterations = 100000;
         int repeats = 4;
         
-        TestSuite suite = new TestSuite("ValuesTest");
+        BaseTestSuite suite = new BaseTestSuite("ValuesTest");
         
         // To add embed tests.
         suite.addTest(new ValuesTest("fetchByColumnName",iterations,repeats));
         suite.addTest(new ValuesTest("fetchByColumnNumber",iterations,repeats));
         
         // To add client tests.
-        TestSuite client = new TestSuite("Client_ValuesTest");
+        BaseTestSuite client = new BaseTestSuite("Client_ValuesTest");
         client.addTest(new ValuesTest("fetchByColumnName",iterations,repeats));
         client.addTest(new ValuesTest("fetchByColumnNumber",iterations,repeats));
         suite.addTest(TestConfiguration.clientServerDecorator(client));

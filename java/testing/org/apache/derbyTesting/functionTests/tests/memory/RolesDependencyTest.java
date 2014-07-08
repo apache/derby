@@ -26,8 +26,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -43,7 +43,7 @@ public class RolesDependencyTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        Test test = new TestSuite(RolesDependencyTest.class);
+        Test test = new BaseTestSuite(RolesDependencyTest.class);
 
         // Populate database with data as DBO
         test = new CleanDatabaseTestSetup(test) {

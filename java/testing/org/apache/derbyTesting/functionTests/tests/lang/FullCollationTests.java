@@ -22,12 +22,11 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 
 
-public class FullCollationTests extends TestSuite {
+public class FullCollationTests extends BaseTestSuite {
 
     /**
      * Return a suite that uses a single use database with
@@ -35,7 +34,8 @@ public class FullCollationTests extends TestSuite {
      */
     public static Test suite() throws Exception
     {
-        TestSuite suite = new TestSuite("FullCollationTests:territory=" +"no_NO");
+        BaseTestSuite suite =
+            new BaseTestSuite("FullCollationTests:territory=" +"no_NO");
         suite.addTest(new CollationTest("testNorwayCollation"));
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.suite());

@@ -20,12 +20,9 @@
 package org.apache.derbyTesting.system.oe.run;
 
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.system.oe.client.Load;
@@ -152,7 +149,7 @@ public class Populate extends JDBCPerfTestCase {
      */
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("Order Entry");
+        BaseTestSuite suite = new BaseTestSuite("Order Entry");
         
         suite.addTest(new Populate("testCreateDB"));
 

@@ -23,8 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.sql.Connection;
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -34,6 +34,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
  * NOT accepted as user supplied connection attr.
  * 
  */
+
 
 public class ReplicationRun_Local_3_p4 extends ReplicationRun
 {
@@ -49,7 +50,8 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local_3_p4 Suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("ReplicationRun_Local_3_p4 Suite");
         
         suite.addTestSuite( ReplicationRun_Local_3_p4.class        );
         

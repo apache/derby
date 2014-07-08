@@ -20,26 +20,23 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
-
+import java.util.Properties;
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 /**
  * Class which holds information about the configuration of a Test.
@@ -247,7 +244,7 @@ public final class TestConfiguration {
      */
     public static Test defaultSuite(Class testClass, boolean cleanDB)
     {
-         final TestSuite suite = new TestSuite(suiteName(testClass));
+         final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
          
         if (cleanDB)
         {
@@ -297,7 +294,7 @@ public final class TestConfiguration {
      */
     public static Test defaultExistingServerSuite(Class testClass, boolean cleanDB)
     {
-         final TestSuite suite = new TestSuite(suiteName(testClass));
+         final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
          
         if (cleanDB)
         {
@@ -339,7 +336,7 @@ public final class TestConfiguration {
             String hostName,
             int portNumber)
     {
-         final TestSuite suite = new TestSuite(suiteName(testClass));
+         final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
          
         if (cleanDB)
         {
@@ -359,7 +356,7 @@ public final class TestConfiguration {
             int portNumber,
             String dbPath)
     {
-         final TestSuite suite = new TestSuite(suiteName(testClass));
+         final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
          
         if (cleanDB)
         {
@@ -385,7 +382,7 @@ public final class TestConfiguration {
      */
     public static Test forceJDBC3Suite(Class testClass)
     {
-        final TestSuite suite = new TestSuite(suiteName(testClass));
+        final BaseTestSuite suite = new BaseTestSuite(suiteName(testClass));
 
         suite.addTest(
             new CleanDatabaseTestSetup(
@@ -402,7 +399,7 @@ public final class TestConfiguration {
      * Generate a suite name from a class name, taking
      * only the last element of the fully qualified class name.
      */
-    private static String suiteName(Class testClass)
+    static String suiteName(Class testClass)
     {
         int lastDot = testClass.getName().lastIndexOf('.');
         String suiteName = testClass.getName();
@@ -413,50 +410,12 @@ public final class TestConfiguration {
     }
 
     /**
-     * A comparator that orders {@code TestCase}s lexicographically by
-     * their names.
-     */
-    private static final Comparator<TestCase> TEST_ORDERER =
-            new Comparator<TestCase>() {
-        public int compare(TestCase t1, TestCase t2) {
-            return t1.getName().compareTo(t2.getName());
-        }
-    };
-
-    /**
-     * Create a test suite with all the test cases in the specified class. The
-     * test cases should be ordered lexicographically by their names.
-     *
-     * @param testClass the class with the test cases
-     * @return a lexicographically ordered test suite
-     */
-    public static Test orderedSuite(Class testClass) {
-        // Extract all tests from the test class and order them.
-        ArrayList<TestCase> tests = new ArrayList<TestCase>();
-
-        Enumeration e = new TestSuite(testClass).tests();
-        while (e.hasMoreElements()) {
-            tests.add((TestCase) e.nextElement());
-        }
-
-        Collections.sort(tests, TEST_ORDERER);
-
-        // Build a new test suite with the tests in lexicographic order.
-        TestSuite suite = new TestSuite(suiteName(testClass));
-        for (Iterator it = tests.iterator(); it.hasNext(); ) {
-            suite.addTest((Test) it.next());
-        }
-
-        return suite;
-    }
-    
-    /**
      * Create a suite for the passed test class that includes
      * all the default fixtures from the class.
       */
     public static Test embeddedSuite(Class testClass)
     {
-        return new TestSuite(testClass,
+        return new BaseTestSuite(testClass,
                 suiteName(testClass)+":embedded");
     }
     
@@ -575,7 +534,9 @@ public final class TestConfiguration {
         if (!(Derby.hasClient())
                 || JDBC.vmSupportsJSR169())
         {
-            return new TestSuite("empty: no network server support in JSR169 (or derbyclient.jar missing).");
+            return new BaseTestSuite(
+                "empty: no network server support in JSR169 " +
+                "(or derbyclient.jar missing).");
         }
         
         Test r =
@@ -593,7 +554,7 @@ public final class TestConfiguration {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!supportsClientServer()) {
-            return new TestSuite("empty: no network server support");
+            return new BaseTestSuite("empty: no network server support");
         }
 
         //
@@ -613,7 +574,7 @@ public final class TestConfiguration {
     	// Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!supportsClientServer()) {
-            return new TestSuite("empty: no network server support");
+            return new BaseTestSuite("empty: no network server support");
         }
 
         Test r =
@@ -631,7 +592,7 @@ public final class TestConfiguration {
     	// Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!supportsClientServer()) {
-            return new TestSuite("empty: no network server support");
+            return new BaseTestSuite("empty: no network server support");
         }
 
         Test r =
@@ -648,7 +609,7 @@ public final class TestConfiguration {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!supportsClientServer()) {
-            return new TestSuite("empty: no network server support");
+            return new BaseTestSuite("empty: no network server support");
         }
 
         int port = getCurrent().getNextAvailablePort();
@@ -678,7 +639,9 @@ public final class TestConfiguration {
      * environment
      */
     private static Test bareClientServerSuite(Class testClass) {
-        TestSuite suite = new TestSuite(suiteName(testClass) + ":client");
+        BaseTestSuite suite =
+            new BaseTestSuite(suiteName(testClass) + ":client");
+
         if (supportsClientServer()) {
             suite.addTestSuite(testClass);
         }
@@ -1019,7 +982,7 @@ public final class TestConfiguration {
             return new ConnectorSetup(test,
              "org.apache.derbyTesting.junit.ConnectionPoolDataSourceConnector");
         } else {
-            return new TestSuite("ConnectionPoolDataSource not supported");
+            return new BaseTestSuite("ConnectionPoolDataSource not supported");
         }
 
     }
@@ -1041,7 +1004,7 @@ public final class TestConfiguration {
             return new ConnectorSetup(test,
                 "org.apache.derbyTesting.junit.XADataSourceConnector");
         } else {
-            return new TestSuite("XADataSource not supported");
+            return new BaseTestSuite("XADataSource not supported");
         }
     }
     /**

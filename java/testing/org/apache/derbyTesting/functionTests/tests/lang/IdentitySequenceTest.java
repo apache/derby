@@ -24,19 +24,10 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.Decorator;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test for identity columns backed by sequence generators.
@@ -85,7 +76,7 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
 
         Test    cleanTest = new CleanDatabaseTestSetup
             (

@@ -23,11 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.compatibility;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.DerbyDistribution;
 import org.apache.derbyTesting.junit.DerbyVersion;
@@ -65,7 +63,7 @@ public class _Suite
      * @param suite the suite to add the tests to
      * @return The number of tests added.
      */
-    private static int addVersionCombinations(TestSuite suite) {
+    private static int addVersionCombinations(BaseTestSuite suite) {
         String include = getSystemProperty(INCLUDE_RELEASES);
         String exclude = getSystemProperty(EXCLUDE_RELEASES);
         List<DerbyVersion> toInclude = parseVersionList(include);
@@ -125,13 +123,13 @@ public class _Suite
             String msg = ("tests.compatibility disabled on Windows " +
                     "with UNC paths, see DERBY-5889");
             println(msg);
-            return new TestSuite(msg);
+            return new BaseTestSuite(msg);
         }
         if (!Derby.hasClient() || !Derby.hasServer()) {
-            return new TestSuite("Compatibility tests skipped because " +
+            return new BaseTestSuite("Compatibility tests skipped because " +
                                  "client or server is missing");
         }
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
         addVersionCombinations(suite);
         TestConfiguration config = TestConfiguration.getCurrent();
         return new SecurityManagerSetup(

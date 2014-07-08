@@ -27,11 +27,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -59,7 +57,7 @@ public class PrepStmtNullTest extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("PrepStmtNullTest");
+        BaseTestSuite suite = new BaseTestSuite("PrepStmtNullTest");
         suite.addTest(baseSuite("PrepStmtNullTest:embedded"));
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
@@ -68,7 +66,7 @@ public class PrepStmtNullTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(PrepStmtNullTest.class);
         

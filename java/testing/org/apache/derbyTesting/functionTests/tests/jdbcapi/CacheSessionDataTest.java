@@ -27,15 +27,15 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.sql.ResultSet;
 import java.util.Arrays;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.client.am.ClientConnection;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -107,15 +107,15 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
 
     /**
      * Adds both the embedded and client-server versions of the baseSuite to
-     * the Test. An empty TestSuite is returned unless we have JDBC3 support, because
-     * all test cases call verifyCachedIsolation() which in turn 
-     * makes use of getTransactionIsolationJDBC()
-     * (GET_TRANSACTION_ISOLATION_JDBC) which uses DriverManager to access the 
-     * default connection.
+     * the Test. An empty BaseTestSuite is returned unless we have JDBC3
+ support, because all test cases call verifyCachedIsolation() which in
+ turn makes use of getTransactionIsolationJDBC()
+ (GET_TRANSACTION_ISOLATION_JDBC) which uses DriverManager to access the
+ default connection.
      * @return the resulting Test object
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("CacheSessionDataTest");
+        BaseTestSuite suite = new BaseTestSuite("CacheSessionDataTest");
         if (JDBC.vmSupportsJDBC3()) {
             suite.addTest(baseSuite("CacheSessionDataTest:embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(
@@ -125,13 +125,13 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Creates a new TestSuite with all the tests, and wraps it in a 
-     * CleanDatabaseSetup with a custom decorator.
-     * @param name TestSuite name
+     * Creates a new BaseTestSuite with all the tests, and wraps it in a
+ CleanDatabaseSetup with a custom decorator.
+     * @param name BaseTestSuite name
      * @return wrapped TestSuite
      */
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(CacheSessionDataTest.class);
         
         return new CleanDatabaseTestSetup(suite) {

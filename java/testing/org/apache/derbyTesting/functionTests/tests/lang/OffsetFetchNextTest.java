@@ -29,8 +29,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -65,7 +65,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("OffsetFetchNextTest");
+        BaseTestSuite suite = new BaseTestSuite("OffsetFetchNextTest");
 
         suite.addTest(
             baseSuite("OffsetFetchNextTest:embedded"));
@@ -78,7 +78,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String suiteName) {
         return new CleanDatabaseTestSetup(
-            new TestSuite(OffsetFetchNextTest.class,
+            new BaseTestSuite(OffsetFetchNextTest.class,
                           suiteName)) {
             @Override
             protected void decorateSQL(Statement s)

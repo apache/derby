@@ -18,19 +18,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
-import java.sql.ResultSet;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.DriverManager;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -47,7 +46,7 @@ public class HoldCursorTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("HoldCursorTest");
+        BaseTestSuite suite = new BaseTestSuite("HoldCursorTest");
 
         suite.addTest(baseSuite(true));
         suite.addTest(baseSuite(false));
@@ -57,7 +56,7 @@ public class HoldCursorTest extends BaseJDBCTestCase {
 
     private static Test baseSuite(boolean embeddedMode) {
         String name = "HoldCursorTest:" + (embeddedMode ? "embedded" : "client");
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         // Add tests that every JVM jdk1.4 or above should be able to run.
         suite.addTestSuite(HoldCursorTest.class);

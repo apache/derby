@@ -24,11 +24,14 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.List;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.*;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -60,7 +63,7 @@ public class EncryptDatabaseTest  extends BaseJDBCTestCase
      * @return A suite containing embedded suites
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("EncryptDatabase");
+        BaseTestSuite suite = new BaseTestSuite("EncryptDatabase");
         suite.addTest(wrapTest());
         suite.addTest(wrapTest("DESede/CBC/NoPadding")); // from encryption
         suite.addTest(wrapTest("DESede/CFB/NoPadding")); // from encryptionCFB

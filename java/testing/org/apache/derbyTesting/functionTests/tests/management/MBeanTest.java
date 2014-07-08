@@ -27,7 +27,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -37,11 +36,9 @@ import javax.management.MBeanServerConnection;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -67,9 +64,9 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     
     protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
                 
-        TestSuite outerSuite = new TestSuite(suiteName);
+        BaseTestSuite outerSuite = new BaseTestSuite(suiteName);
         
-        Test platform = new TestSuite(testClass,  suiteName + ":platform");
+        Test platform = new BaseTestSuite(testClass,  suiteName + ":platform");
         
         // Start the network server to ensure Derby is running and
         // all the MBeans are running.
@@ -81,7 +78,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         outerSuite.addTest(platform);
         
         // Create a suite of all "test..." methods in the class.
-        Test suite = new TestSuite(testClass,  suiteName + ":client");
+        Test suite = new BaseTestSuite(testClass,  suiteName + ":client");
         
         // Set up to get JMX connections using remote JMX
         suite = JMXConnectionDecorator.remoteNoSecurity(suite);

@@ -21,9 +21,9 @@
 package org.apache.derbyTesting.functionTests.tests.compatibility;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.Compat_BlobClob4BlobTest;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Returns the test suite run by each client in the compatibility test.
@@ -41,7 +41,7 @@ public class ClientCompatibilitySuite
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("Client compatibility suite");
+        BaseTestSuite suite = new BaseTestSuite("Client compatibility suite");
         suite.addTest(JDBCDriverTest.suite());
         // Adding the LOB suite adds around 5 minutes to each client-server
         // combination. There are also errors and/or failures when run with

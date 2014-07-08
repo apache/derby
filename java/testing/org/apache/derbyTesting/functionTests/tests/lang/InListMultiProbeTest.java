@@ -24,9 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -37,16 +36,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 
 /**
  * Test to verify that Derby will perform "multi-probing" of an index
@@ -175,7 +172,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("IN-list MultiProbe Suite");
+        BaseTestSuite suite = new BaseTestSuite("IN-list MultiProbe Suite");
 
         /* This is a language/optimization test so behavior will be the
          * same for embedded and client/server.  Therefore we only need

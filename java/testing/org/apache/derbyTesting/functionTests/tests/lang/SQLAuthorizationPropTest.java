@@ -20,21 +20,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 
@@ -43,8 +39,8 @@ public class SQLAuthorizationPropTest extends BaseJDBCTestCase {
 	}
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite(SQLAuthorizationPropTest.class,
-                "SQLAuthorizationPropTest");
+        BaseTestSuite suite = new BaseTestSuite(
+            SQLAuthorizationPropTest.class, "SQLAuthorizationPropTest");
 		
 		// Use DatabasePropertyTestSetup decorator to set the property
 		// required by this test (and shutdown the database for the

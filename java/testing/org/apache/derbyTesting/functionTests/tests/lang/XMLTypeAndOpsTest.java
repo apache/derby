@@ -19,24 +19,22 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.XML;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.sql.Types;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * XMLTypeAndOpsTest this test is the JUnit equivalent to what used
@@ -79,7 +77,9 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("XML Type and Operators Suite\n");
+        BaseTestSuite suite =
+            new BaseTestSuite("XML Type and Operators Suite\n");
+
         if (!XML.classpathMeetsXMLReqs())
             return suite;
 
@@ -2726,7 +2726,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     private static class XMLTestSetup extends BaseJDBCTestSetup
     {
-        public XMLTestSetup(TestSuite tSuite) {
+        public XMLTestSetup(BaseTestSuite tSuite) {
             super(tSuite);
         }
 

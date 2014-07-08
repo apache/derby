@@ -29,8 +29,8 @@ import java.net.URLClassLoader;
 import java.util.Locale;
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -109,10 +109,10 @@ public class SysinfoLocaleTest extends BaseTestCase {
      */
     public static Test suite() {
         if (!Derby.hasTools()) {
-            return new TestSuite("empty: no tools support");
+            return new BaseTestSuite("empty: no tools support");
         }
 
-        TestSuite suite = new TestSuite("SysinfoLocaleTest");
+        BaseTestSuite suite = new BaseTestSuite("SysinfoLocaleTest");
 
         // Create test combinations. Messages should be localized to the
         // locale specified by derby.ui.locale, if it's set. Otherwise, the

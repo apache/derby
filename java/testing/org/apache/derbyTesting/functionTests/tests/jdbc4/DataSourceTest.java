@@ -21,18 +21,23 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import junit.framework.*;
-
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import javax.sql.CommonDataSource;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XADataSource;
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import java.sql.*;
-
-import javax.sql.*;
 
 /**
  * Tests of the <code>javax.sql.DataSource</code> JDBC40 API.
@@ -328,7 +333,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         // Use explicit ordering of fixtures until fix of DERBY-5988
-        TestSuite s = new TestSuite("datasourcetestsuite-embedded");
+        BaseTestSuite s = new BaseTestSuite("datasourcetestsuite-embedded");
         s.addTest(new DataSourceTest("testIsNotWrapperForPoolDataSource"));
         s.addTest(new DataSourceTest("testIsNotWrapperForXADataSource"));
         s.addTest(new DataSourceTest("testUnwrapConnectionPoolDataSource"));
@@ -339,7 +344,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         s.addTest(new DataSourceTest("testUnwrapResultSet"));
         s.addTest(new DataSourceTest("testUnwrapDataSource"));
         s.addTest(new DataSourceTest("test_jdbc4_1"));
-        TestSuite ns = new TestSuite("datasourcetestsuite-net");
+        BaseTestSuite ns = new BaseTestSuite("datasourcetestsuite-net");
         ns.addTest(new DataSourceTest("testIsNotWrapperForPoolDataSource"));
         ns.addTest(new DataSourceTest("testIsNotWrapperForXADataSource"));
         ns.addTest(new DataSourceTest("testUnwrapConnectionPoolDataSource"));
@@ -351,7 +356,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         ns.addTest(new DataSourceTest("testUnwrapDataSource"));
         ns.addTest(new DataSourceTest("test_jdbc4_1"));
 
-        TestSuite totalsuite = new TestSuite("datasourcetest");
+        BaseTestSuite totalsuite = new BaseTestSuite("datasourcetest");
         totalsuite.addTest(new CleanDatabaseTestSetup(s));
         totalsuite.addTest(TestConfiguration.clientServerDecorator(
                                new CleanDatabaseTestSetup(ns)));

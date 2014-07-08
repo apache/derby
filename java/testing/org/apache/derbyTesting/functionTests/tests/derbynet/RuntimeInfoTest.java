@@ -27,11 +27,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -76,7 +74,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 * @return The test suite with both English and German locales.
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("RuntimeInfoTest");
+        BaseTestSuite suite = new BaseTestSuite("RuntimeInfoTest");
 
         // Run testRunTests in both English and German locale
         suite.addTest(decorateTest(englishLocale, "testRunTests"));

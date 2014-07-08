@@ -24,12 +24,10 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-
+import junit.framework.Test;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Test case for InputStreamUtil.
@@ -101,6 +99,7 @@ public class InputStreamUtilTest extends BaseTestCase {
      * Returns a suite of tests.
      */
     public static Test suite() {
-        return new TestSuite(InputStreamUtilTest.class, "InputStreamUtil tests");
+        return new BaseTestSuite(
+            InputStreamUtilTest.class, "InputStreamUtil tests");
     }
 }

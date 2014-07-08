@@ -30,8 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.perf.clients.BackToBackLoadGenerator;
@@ -125,12 +125,12 @@ public class ClobAccessTest
     }
 
     public static Test suite() {
-        TestSuite mainSuite = new TestSuite("ClobAccessTest suite");
+        BaseTestSuite mainSuite = new BaseTestSuite("ClobAccessTest suite");
         if (!disableSmallClobs) {
             int iters = 50;
             int reps = 1;
             println("Adding small Clob tests.");
-            TestSuite smallSuite = new TestSuite("Small Clob suite");
+            BaseTestSuite smallSuite = new BaseTestSuite("Small Clob suite");
             smallSuite.addTest(new ClobAccessTest(
                     "testFetchSmallClobs", iters, reps));
             smallSuite.addTest(new ClobAccessTest(
@@ -164,7 +164,7 @@ public class ClobAccessTest
                 }
             }
             println("Adding " + tests.length + " large Clob tests.");
-            TestSuite largeSuite = new TestSuite("Large Clob suite");
+            BaseTestSuite largeSuite = new BaseTestSuite("Large Clob suite");
             for (int i=0; i < tests.length; i++) {
                 largeSuite.addTest(new ClobAccessTest(tests[i] , iters, reps));
             }

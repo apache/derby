@@ -26,10 +26,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -69,7 +69,7 @@ public class Derby5937SlaveShutdownTest extends BaseJDBCTestCase {
         // Likely a jvm issue, so don't run on that OS...
         if (BaseTestCase.isJ9Platform())
         {
-            Test test = new TestSuite("Derby5937SlaveShutdownTest");
+            Test test = new BaseTestSuite("Derby5937SlaveShutdownTest");
             return test;
         }
         Class klass = Derby5937SlaveShutdownTest.class;

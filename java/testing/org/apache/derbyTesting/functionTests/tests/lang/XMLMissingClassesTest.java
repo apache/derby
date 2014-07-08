@@ -19,14 +19,12 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.XML;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import java.sql.Statement;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * This JUnit test is only run when the test classpath does not
@@ -75,7 +73,7 @@ public final class XMLMissingClassesTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("XML Missing Classes Suite");
+        BaseTestSuite suite = new BaseTestSuite("XML Missing Classes Suite");
         if (!XML.classpathMeetsXMLReqs())
         {
             // Run this test in embedded and client modes.

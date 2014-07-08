@@ -24,18 +24,16 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
 /**
 	This tests the sysinfo command
@@ -100,7 +98,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
      *      6 tests, 3 with properties set, 3 without.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("SysinfoTest");
+        BaseTestSuite suite = new BaseTestSuite("SysinfoTest");
 
         // we need to be able to run the server
         if (!Derby.hasServer()) return suite;

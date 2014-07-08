@@ -27,7 +27,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -798,7 +798,8 @@ final public class BLOBTest extends BaseJDBCTestCase
      */
     public static Test suite() 
     {
-        TestSuite mainSuite = new TestSuite(BLOBTest.class, "BLOBTest");
+        BaseTestSuite mainSuite =
+            new BaseTestSuite(BLOBTest.class, "BLOBTest");
         return new BLOBDataModelSetup(mainSuite);
     }
 

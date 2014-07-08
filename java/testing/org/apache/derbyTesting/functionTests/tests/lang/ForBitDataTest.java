@@ -21,24 +21,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.io.IOException;
+import java.sql.Statement;
 import java.sql.Types;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.extensions.TestSetup;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 public class ForBitDataTest extends BaseJDBCTestCase {
@@ -883,14 +881,14 @@ public class ForBitDataTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
-        	TestSuite suite = new TestSuite("ForBitTestData");
+            BaseTestSuite suite = new BaseTestSuite("ForBitTestData");
         	suite.addTest(baseSuite("ForBitTestData:embedded"));
         	suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ForBitTestData:client")));
         	return suite;
     	}
 
 	protected static Test baseSuite(String name) {
-        	TestSuite suite = new TestSuite(name);
+            BaseTestSuite suite = new BaseTestSuite(name);
         	suite.addTestSuite(ForBitDataTest.class);
         	
 		return new CleanDatabaseTestSetup(suite) 

@@ -1,24 +1,3 @@
-package org.apache.derbyTesting.functionTests.tests.store;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
-
-import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-
-
 /*
 Class org.apache.derbyTesting.functionTests.tests.jdbc4.Derby3650Test
 
@@ -38,6 +17,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
+
+package org.apache.derbyTesting.functionTests.tests.store;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import junit.framework.Assert;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+
 
 
 /**

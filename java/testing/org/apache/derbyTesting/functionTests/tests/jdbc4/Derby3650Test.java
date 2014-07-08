@@ -11,17 +11,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 
 /*
 Class org.apache.derbyTesting.functionTests.tests.jdbc4.Derby3650Test
@@ -572,7 +568,7 @@ public class Derby3650Test extends BaseJDBCTestCase
 
     
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(Derby3650Test.class);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 
@@ -599,7 +595,7 @@ public class Derby3650Test extends BaseJDBCTestCase
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("Derby3650Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby3650Test");
         suite.addTest(baseSuite("Derby3650Test:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("Derby3650Test:client")));

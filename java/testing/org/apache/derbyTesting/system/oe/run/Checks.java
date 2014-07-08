@@ -22,11 +22,9 @@ package org.apache.derbyTesting.system.oe.run;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.system.oe.util.HandleCheckError;
 import org.apache.derbyTesting.system.oe.util.OEChecks;
@@ -78,7 +76,9 @@ public class Checks extends JDBCPerfTestCase {
      * @param scale
      */
     public static Test checkAllRowCounts(short scale) {
-        TestSuite suite = new TestSuite("Order Entry -Check Row Counts");
+        BaseTestSuite suite =
+            new BaseTestSuite("Order Entry -Check Row Counts");
+
         suite.addTest(new Checks("testWarehouseRows", scale));
         suite.addTest(new Checks("testStockRows", scale));
         suite.addTest(new Checks("testItemRows", scale));
@@ -98,7 +98,9 @@ public class Checks extends JDBCPerfTestCase {
      */
     public static Test consistencyChecks()
     {
-        TestSuite suite = new TestSuite("Order Entry -Consistency checks");
+        BaseTestSuite suite =
+            new BaseTestSuite("Order Entry -Consistency checks");
+
         suite.addTest(new Checks("testCondition1"));
         suite.addTest(new Checks("testCondition2"));
         suite.addTest(new Checks("testCondition3"));
@@ -112,7 +114,7 @@ public class Checks extends JDBCPerfTestCase {
      *         database
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("OrderEntry - checks");
+        BaseTestSuite suite = new BaseTestSuite("OrderEntry - checks");
         suite.addTest(checkAllRowCounts((short) 1));
         suite.addTest(consistencyChecks());
         

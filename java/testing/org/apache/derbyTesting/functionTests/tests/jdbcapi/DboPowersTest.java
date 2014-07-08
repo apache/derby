@@ -21,12 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import javax.sql.DataSource;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -111,7 +111,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("DboPowersTest");
+        BaseTestSuite suite = new BaseTestSuite("DboPowersTest");
 
         /* Database shutdown powers */
 
@@ -178,8 +178,8 @@ public class DboPowersTest extends BaseJDBCTestCase
         /* Tests without any authorization active (level ==
          * NOAUTHENTICATION).
          */
-        TestSuite noauthSuite =
-            new TestSuite("suite: security level=" +
+        BaseTestSuite noauthSuite =
+            new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
         noauthSuite.addTest(new DboPowersTest("testShutDown",
                                               NOAUTHENTICATION));
@@ -196,7 +196,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             tests[autLev] = wrapShutdownUserTests(autLev);
         }
 
-        TestSuite suite = new TestSuite("dboPowers:"+framework);
+        BaseTestSuite suite = new BaseTestSuite("dboPowers:"+framework);
 
         /* run tests with no authentication enabled */
         suite.addTest(tests[NOAUTHENTICATION]);
@@ -225,8 +225,8 @@ public class DboPowersTest extends BaseJDBCTestCase
     private static Test wrapShutdownUserTests(int autLev)
     {
         // add decorator for different users authenticated
-        TestSuite usersSuite =
-            new TestSuite("usersSuite: security level=" +
+        BaseTestSuite usersSuite =
+            new BaseTestSuite("usersSuite: security level=" +
                           secLevelNames[autLev]);
 
         // First decorate with users, then with
@@ -336,8 +336,8 @@ public class DboPowersTest extends BaseJDBCTestCase
          * variants: Necessary since framework doesn't know
          * bootPassword.
          */
-        TestSuite noauthSuite =
-            new TestSuite("suite: security level=" +
+        BaseTestSuite noauthSuite =
+            new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
 
         for (int tNo = 0; tNo < cryptoTests.length; tNo++) {
@@ -357,7 +357,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             tests[autLev] = wrapCryptoUserTests(autLev);
         }
 
-        TestSuite suite = new TestSuite("dboPowers:"+framework);
+        BaseTestSuite suite = new BaseTestSuite("dboPowers:"+framework);
 
         /* run tests with no authentication enabled */
         suite.addTest(tests[NOAUTHENTICATION]);
@@ -383,8 +383,8 @@ public class DboPowersTest extends BaseJDBCTestCase
     private static Test wrapCryptoUserTests(int autLev)
     {
         // add decorator for different users authenticated
-        TestSuite usersSuite =
-            new TestSuite("usersSuite: security level=" +
+        BaseTestSuite usersSuite =
+            new BaseTestSuite("usersSuite: security level=" +
                           secLevelNames[autLev]);
 
         // First decorate with users, then with authentication.  Note
@@ -658,8 +658,8 @@ public class DboPowersTest extends BaseJDBCTestCase
         /* Tests without any authorization active (level ==
          * NOAUTHENTICATION).
          */
-        TestSuite noauthSuite =
-            new TestSuite("suite: security level=" +
+        BaseTestSuite noauthSuite =
+            new BaseTestSuite("suite: security level=" +
                           secLevelNames[NOAUTHENTICATION]);
         noauthSuite.addTest(new DboPowersTest("testHardUpgrade",
                                               NOAUTHENTICATION,
@@ -677,7 +677,7 @@ public class DboPowersTest extends BaseJDBCTestCase
             tests[autLev] = wrapHardUpgradeUserTests(autLev);
         }
 
-        TestSuite suite = new TestSuite("dboPowers:"+framework);
+        BaseTestSuite suite = new BaseTestSuite("dboPowers:"+framework);
 
         // A priori, doing a hard upgrade is a no-op here; we are only
         // interested in checking if we have the powers to do it. However,
@@ -716,8 +716,8 @@ public class DboPowersTest extends BaseJDBCTestCase
     private static Test wrapHardUpgradeUserTests(int autLev)
     {
         // add decorator for different users authenticated
-        TestSuite usersSuite =
-            new TestSuite("usersSuite: security level=" +
+        BaseTestSuite usersSuite =
+            new BaseTestSuite("usersSuite: security level=" +
                           secLevelNames[autLev]);
 
         // First decorate with users, then with

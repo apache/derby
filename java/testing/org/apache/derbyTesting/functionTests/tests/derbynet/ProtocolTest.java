@@ -28,32 +28,27 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
-
 import java.nio.charset.Charset;
-
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
-
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.impl.drda.ProtocolTestAdapter;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.ProtocolTestGrammar;
-
-import org.apache.derbyTesting.junit.*;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This class is used to test error conditions in the protocol.
@@ -854,7 +849,7 @@ public class ProtocolTest
      */
     public static Test suite()
             throws Exception {
-        TestSuite suite = new TestSuite("Derby DRDA protocol tests");
+        BaseTestSuite suite = new BaseTestSuite("Derby DRDA protocol tests");
         // Process the list of files and create test cases for the sub-tests.
         // NOTE: We cannot assume anything about the order in which the tests
         //      are executed.

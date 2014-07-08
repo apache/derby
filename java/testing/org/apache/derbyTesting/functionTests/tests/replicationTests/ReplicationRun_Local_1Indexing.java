@@ -23,10 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.jdbc.ClientDataSourceInterface;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -52,7 +51,8 @@ public class ReplicationRun_Local_1Indexing extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local_1Indexing Suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("ReplicationRun_Local_1Indexing Suite");
         
         suite.addTestSuite( ReplicationRun_Local_1Indexing.class    );
         

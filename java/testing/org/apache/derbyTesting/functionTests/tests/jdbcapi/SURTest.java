@@ -18,19 +18,18 @@
  * language governing permissions and limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
-import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Iterator;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import java.util.Iterator;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for variants of scrollable updatable resultsets.
@@ -1740,7 +1739,7 @@ public class SURTest extends SURBaseTest {
      * Run the base suite in embedded and client mode.
      */
     public static Test suite() {
-        TestSuite mainSuite = new TestSuite("SURTest");
+        BaseTestSuite mainSuite = new BaseTestSuite("SURTest");
         mainSuite.addTest(baseSuite("SURTest:embedded"));
         mainSuite.addTest(
                 TestConfiguration.clientServerDecorator(baseSuite("SURTest:client")));
@@ -1753,7 +1752,7 @@ public class SURTest extends SURBaseTest {
      */
     private static Test baseSuite(String name) { 
         
-        TestSuite mainSuite = new TestSuite(name);
+        BaseTestSuite mainSuite = new BaseTestSuite(name);
         
         // Iterate over all data models and decorate the tests:
         for (Iterator i = SURDataModelSetup.SURDataModel.values().iterator();
@@ -1762,7 +1761,7 @@ public class SURTest extends SURBaseTest {
             SURDataModelSetup.SURDataModel model = 
                 (SURDataModelSetup.SURDataModel) i.next();
             
-            TestSuite suite = new TestSuite(SURTest.class);
+            BaseTestSuite suite = new BaseTestSuite(SURTest.class);
             TestSetup decorator = new SURDataModelSetup
                 (suite, model);
             

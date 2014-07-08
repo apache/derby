@@ -25,16 +25,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * This test converts the old jdbcapi/nullSQLText.java
@@ -58,7 +56,7 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
      * all tests in this class
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("NullSQLTextTest");
+        BaseTestSuite suite = new BaseTestSuite("NullSQLTextTest");
         
         suite.addTest(baseSuite("NullSQLTextTest:embedded"));
         
@@ -70,7 +68,7 @@ public class NullSQLTextTest extends BaseJDBCTestCase {
     }
     
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         
         suite.addTestSuite(NullSQLTextTest.class);
         

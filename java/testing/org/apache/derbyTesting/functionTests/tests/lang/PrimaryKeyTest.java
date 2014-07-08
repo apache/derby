@@ -26,8 +26,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 
 public class PrimaryKeyTest extends BaseJDBCTestCase
@@ -36,7 +36,7 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 		super(name);
 	}
 	public static Test suite() {
-		return new TestSuite(PrimaryKeyTest.class);
+        return new BaseTestSuite(PrimaryKeyTest.class);
 	}
 
     @Override

@@ -26,7 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -51,7 +51,8 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local_StateTest_part2 Suite");
+        BaseTestSuite suite =
+            new BaseTestSuite("ReplicationRun_Local_StateTest_part2 Suite");
         
         suite.addTestSuite( ReplicationRun_Local_StateTest_part2.class );
         

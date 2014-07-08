@@ -20,28 +20,20 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import java.io.File;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
-import java.lang.Integer;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.net.SocketTimeoutException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-
 import org.apache.derby.iapi.store.raw.data.DataFactory;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Testing file locks that prevent Derby "double boot" a.k.a "dual boot",
@@ -92,7 +84,7 @@ public class BootLockTest extends BaseJDBCTestCase {
      * @return The test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("BootLockTest");
+        BaseTestSuite suite = new BaseTestSuite("BootLockTest");
         suite.addTest(decorateTest());
         return suite;
     }
@@ -105,7 +97,7 @@ public class BootLockTest extends BaseJDBCTestCase {
      */
     private static Test decorateTest() {
 
-        Test test = new TestSuite(BootLockTest.class);
+        Test test = new BaseTestSuite(BootLockTest.class);
 
         if (JDBC.vmSupportsJSR169() && !isJ9Platform()) {
             // PhoneME requires forceDatabaseLock

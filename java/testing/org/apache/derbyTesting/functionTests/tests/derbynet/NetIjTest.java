@@ -22,9 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -70,10 +69,10 @@ public final class NetIjTest extends ScriptTestCase {
      * Return the suite that runs all the derbynet scripts.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("NetScripts");
+        BaseTestSuite suite = new BaseTestSuite("NetScripts");
 
         // Set up the scripts run with the network client
-        TestSuite clientTests = new TestSuite("NetScripts:client");
+        BaseTestSuite clientTests = new BaseTestSuite("NetScripts:client");
         clientTests.addTest(getSuite(CLIENT_TESTS));
 
         int port = TestConfiguration.getCurrent().getPort();
@@ -105,7 +104,7 @@ public final class NetIjTest extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite(String[] list) {
-        TestSuite suite = new TestSuite("Net scripts");
+        BaseTestSuite suite = new BaseTestSuite("Net scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
                 new CleanDatabaseTestSetup(

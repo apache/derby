@@ -26,8 +26,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
@@ -77,7 +77,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      */
     public static Test suite() {
         
-        TestSuite suite = new TestSuite("ConnectionHandlingJUnit");
+        BaseTestSuite suite = new BaseTestSuite("ConnectionHandlingJUnit");
         
         // Only support for java.sql.DriverManager has been implemented.
         if (JDBC.vmSupportsJDBC3()) {

@@ -23,18 +23,10 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.functionTests.util.JDBCTestDisplayUtil;
-import org.apache.derby.impl.tools.ij.util;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 

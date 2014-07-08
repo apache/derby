@@ -22,8 +22,8 @@
 package org.apache.derbyTesting.functionTests.tests.engine;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -44,7 +44,7 @@ public class _Suite extends BaseTestCase  {
     }
 
     public static Test suite() throws Exception {
-        TestSuite suite = new TestSuite("engine");
+        BaseTestSuite suite = new BaseTestSuite("engine");
 
         suite.addTest(ErrorStreamTest.suite());
         suite.addTest(LockInterruptTest.suite());

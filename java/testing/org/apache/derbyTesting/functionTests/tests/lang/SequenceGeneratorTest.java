@@ -21,31 +21,20 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.math.BigDecimal;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Timestamp;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-
+import org.apache.derby.catalog.SequencePreallocator;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.impl.sql.catalog.SequenceGenerator;
 import org.apache.derby.impl.sql.catalog.SequenceRange;
 import org.apache.derby.impl.sql.catalog.SequenceUpdater;
-import org.apache.derby.catalog.SequencePreallocator;
-import org.apache.derby.iapi.types.SQLLongint;
-import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -108,7 +97,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(SequenceGeneratorTest.class);
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            SequenceGeneratorTest.class);
+
         Test        cleanTest = new CleanDatabaseTestSetup( suite );
         Test        timeoutTest = DatabasePropertyTestSetup.setLockTimeouts( cleanTest, 5, 5 );
         Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication

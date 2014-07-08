@@ -21,31 +21,22 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.util.Properties;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.math.BigDecimal;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
 
 /**
  * Test the ParameterMetaData class in JDBC 30.
@@ -70,10 +61,14 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	 * all tests in this class
          */
 	public static Test suite() {
-        	TestSuite suite = new TestSuite("ParameterMetaDataJdbc30Test");
-		 if (JDBC.vmSupportsJSR169())
-			return new TestSuite("Empty ParameterMetaDataJDBC30. JSR169 does not support ParameterMetaData");
-		else {	
+        BaseTestSuite suite =
+            new BaseTestSuite("ParameterMetaDataJdbc30Test");
+
+        if (JDBC.vmSupportsJSR169()) {
+            return new BaseTestSuite(
+                "Empty ParameterMetaDataJDBC30. " +
+                "JSR169 does not support ParameterMetaData");
+        } else {
         		suite.addTest(baseSuite("ParameterMetaDataJdbc30Test:embedded"));
         		suite.addTest(
                 		TestConfiguration.clientServerDecorator(
@@ -84,7 +79,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
 	private static Test baseSuite(String name)
     	{
-        	TestSuite suite = new TestSuite(name);
+            BaseTestSuite suite = new BaseTestSuite(name);
 
         	suite.addTestSuite(ParameterMetaDataJdbc30Test.class);
 

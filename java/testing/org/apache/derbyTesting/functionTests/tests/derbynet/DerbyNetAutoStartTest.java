@@ -32,13 +32,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
@@ -310,14 +308,14 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
     } // end of checkLog
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("DerbyNetAutoStartTest");
+        BaseTestSuite suite = new BaseTestSuite("DerbyNetAutoStartTest");
         suite.addTest(baseSuite("DerbyNetAutoStartTest:embedded"));
         return suite;
     }
 
     private static Test baseSuite(String name) {
 
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         // Need derbynet.jar in the classpath, and cannot run with ME/JSR169/cdc profile
         if (!Derby.hasServer())
             return suite;

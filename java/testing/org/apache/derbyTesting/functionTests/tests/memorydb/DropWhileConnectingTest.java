@@ -29,12 +29,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * <em>WARNING: This test isn't finalized!</em>
@@ -104,7 +102,7 @@ public class DropWhileConnectingTest
     }
 
     public static Test suite() {
-       return new TestSuite(DropWhileConnectingTest.class);
+       return new BaseTestSuite(DropWhileConnectingTest.class);
     }
 
     /**

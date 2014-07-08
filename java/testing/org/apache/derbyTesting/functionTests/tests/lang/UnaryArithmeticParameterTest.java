@@ -27,8 +27,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 	/**
@@ -46,13 +46,17 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
      * Create a suite of tests.
      */
 	public static Test suite() {
-		// This test should not get run under jdk13 because it uses ParameterMetaData calls
-		// to ensure that the parameter type for dynamic parameter 
-		// for unary minus and plus get set correctly from the context in which they are used.
-		if ( !JDBC.vmSupportsJDBC3())
-            return new TestSuite("empty UnaryArithmeticParameterTest - supported only from JDBC3.0 and above");
-        else{
-            	return   TestConfiguration.defaultSuite(UnaryArithmeticParameterTest.class);
+        // This test should not get run under jdk13 because it uses
+        // ParameterMetaData calls to ensure that the parameter type for
+        // dynamic parameter for unary minus and plus get set correctly from
+        // the context in which they are used.
+        if ( !JDBC.vmSupportsJDBC3()) {
+            return new BaseTestSuite(
+                "empty UnaryArithmeticParameterTest - " +
+                "supported only from JDBC3.0 and above");
+        } else {
+            return TestConfiguration.defaultSuite(
+                UnaryArithmeticParameterTest.class);
         }
 	}
 	 /**

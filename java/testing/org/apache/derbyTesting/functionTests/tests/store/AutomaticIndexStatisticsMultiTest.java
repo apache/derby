@@ -28,14 +28,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.IndexStatsUtil.IdxStats;
 
@@ -244,7 +241,7 @@ public class AutomaticIndexStatisticsMultiTest
     }
 
     public static Test suite() {
-        return new TestSuite(AutomaticIndexStatisticsMultiTest.class);
+        return new BaseTestSuite(AutomaticIndexStatisticsMultiTest.class);
     }
 
     private static class MTCompileThread

@@ -21,24 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.util.HashMap;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -99,7 +86,9 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(OptionalToolsTest.class);        
+        BaseTestSuite suite = (BaseTestSuite)TestConfiguration.embeddedSuite(
+            OptionalToolsTest.class);
+
         Test        test = DatabasePropertyTestSetup.builtinAuthentication
             ( suite, LEGAL_USERS, "optionalToolsPermissions" );
 

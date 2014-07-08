@@ -25,11 +25,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -88,7 +86,7 @@ public class DMDBugsTest extends BaseJDBCTestCase {
 	/* Default suite for running this test.
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite("DMDBugsTest");
+        BaseTestSuite suite = new BaseTestSuite("DMDBugsTest");
 		suite.addTest(
 				TestConfiguration.defaultSuite(DMDBugsTest.class));
 		return suite;

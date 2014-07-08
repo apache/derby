@@ -30,12 +30,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
@@ -182,7 +180,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
 
     public static Test baseSuite(String name) {
 
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(LargeDataLocksTest.class);
 
         return new CleanDatabaseTestSetup(suite) {
@@ -231,7 +229,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("LargeDataLocksTest");
+        BaseTestSuite suite = new BaseTestSuite("LargeDataLocksTest");
         suite.addTest(baseSuite("LargeDataLocksTest:embedded"));
         // Disable for client until DERBY-2892 is fixed
         suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("LargeDataLocksTest:client")));

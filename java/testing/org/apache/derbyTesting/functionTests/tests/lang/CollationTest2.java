@@ -27,22 +27,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.Collator;
 import java.text.RuleBasedCollator;
-
 import java.util.Locale;
 import java.util.Properties; 
-
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -1997,7 +1993,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     {
         // only test in embedded mode, all tests are server side actions.
         
-        TestSuite suite = new TestSuite("CollationTest2");
+        BaseTestSuite suite = new BaseTestSuite("CollationTest2");
         suite.addTest(new CollationTest2("testDefaultCollation"));
         suite.addTest(collatedTest("en", "testEnglishCollation"));
         suite.addTest(caseInsensitiveCollationSuite());
@@ -2050,7 +2046,9 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @return A suite of tests.
      */
     private static Test caseInsensitiveCollationSuite() {
-        TestSuite suite = new TestSuite("Case insensitive specific tests");
+        BaseTestSuite suite =
+            new BaseTestSuite("Case insensitive specific tests");
+
         suite.addTest(new CollationTest2("ci_testDerby5367")); 
         return Decorator.territoryCollatedCaseInsensitiveDatabase(
                 suite, "en_US");

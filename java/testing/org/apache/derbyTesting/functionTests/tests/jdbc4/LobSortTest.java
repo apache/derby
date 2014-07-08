@@ -28,14 +28,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Random;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
@@ -200,7 +198,7 @@ public class LobSortTest
         Properties props = new Properties();
         // Adjust sort buffer size to trigger the bug situation with less data.
         props.setProperty("derby.storage.sortBufferMax", "4");
-        TestSuite suite = new TestSuite(LobSortTest.class,
+        BaseTestSuite suite = new BaseTestSuite(LobSortTest.class,
                                         "LobSortTestEmbedded");
         return new CleanDatabaseTestSetup(
                 new SystemPropertyTestSetup(suite, props, true)) {

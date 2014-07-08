@@ -26,26 +26,32 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.CRC32;
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.Formatters;
-
+import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.Utilities;
-
-import junit.framework.*;
-import java.sql.*;
-
-import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * Test of JDBC blob and clob
@@ -3162,7 +3168,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("BlobClob4BlobTest");
+        BaseTestSuite suite = new BaseTestSuite("BlobClob4BlobTest");
         suite.addTest(baseSuite("embedded"));
         suite.addTest(
                 TestConfiguration.clientServerDecorator(baseSuite("client")));
@@ -3178,7 +3184,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(
+        BaseTestSuite suite = new BaseTestSuite(
                 BlobClob4BlobTest.class, "BlobClob4BlobTest:" + name);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));

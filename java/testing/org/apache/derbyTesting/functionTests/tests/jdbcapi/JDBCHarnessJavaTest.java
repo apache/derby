@@ -21,9 +21,8 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -67,7 +66,9 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
+        BaseTestSuite suite =
+            new BaseTestSuite("jdbcapi: old harness java tests");
+
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_BOTH));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("clientserver", JDBCAPI_TESTS_BOTH)));
@@ -75,7 +76,7 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     }
    
     private static Test baseSuite(String which, String[] set) {
-        TestSuite suite = new TestSuite("jdbcapi: " + which);
+        BaseTestSuite suite = new BaseTestSuite("jdbcapi: " + which);
         for (int i = 0; i < set.length; i++)
         {
             suite.addTest(decorate(new JDBCHarnessJavaTest(set[i])));

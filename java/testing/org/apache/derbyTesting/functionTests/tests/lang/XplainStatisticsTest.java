@@ -38,26 +38,21 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.Random;
-
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory; 
-
-import org.xml.sax.InputSource;
-
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derby.impl.tools.planexporter.AccessDatabase;
 import org.apache.derby.tools.PlanExporter;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.XML;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 /**
  * This suite contains a set of tests for the new XPLAIN style of
@@ -85,12 +80,13 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-            timeSuiteStarted = (new Date()).getTime();
-            TestSuite allTests = new TestSuite(XplainStatisticsTest.class,
-                                    "XplainStatisticsTest");
+        timeSuiteStarted = (new Date()).getTime();
+        BaseTestSuite allTests =
+            new BaseTestSuite(XplainStatisticsTest.class,
+                               "XplainStatisticsTest");
             
-            Test test = allTests;
-            test = new SupportFilesSetup(test); //added by DERBY-4587
+        Test test = allTests;
+        test = new SupportFilesSetup(test); //added by DERBY-4587
             
 		return new CleanDatabaseTestSetup(test) {
 			protected void decorateSQL(Statement s)

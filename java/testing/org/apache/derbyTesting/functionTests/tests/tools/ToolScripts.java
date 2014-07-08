@@ -19,13 +19,11 @@
  */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
-import java.sql.Statement;
 import java.sql.SQLException;
-
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -106,7 +104,7 @@ public final class ToolScripts extends ScriptTestCase {
      */
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("ToolScripts");
+        BaseTestSuite suite = new BaseTestSuite("ToolScripts");
         suite.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         suite.addTest(getSuite(EMBEDDED_TESTS));
         if (JDBC.vmSupportsJDBC3())
@@ -114,7 +112,7 @@ public final class ToolScripts extends ScriptTestCase {
         suite.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
 
         // Set up the scripts run with the network client
-        TestSuite clientTests = new TestSuite("ToolScripts:client");
+        BaseTestSuite clientTests = new BaseTestSuite("ToolScripts:client");
         clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
         clientTests.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
         clientTests.addTest(getSuite(CLIENT_TESTS));
@@ -146,7 +144,7 @@ public final class ToolScripts extends ScriptTestCase {
      * that cleans the database.
      */
     private static Test getSuite(String[] list) {
-        TestSuite suite = new TestSuite("Tool scripts");
+        BaseTestSuite suite = new BaseTestSuite("Tool scripts");
         for (int i = 0; i < list.length; i++)
             suite.addTest(
                 new CleanDatabaseTestSetup(
@@ -165,7 +163,9 @@ public final class ToolScripts extends ScriptTestCase {
      *             </ul>
      */
     private static Test getAuthorizationSuite(String[][][] list) {
-        TestSuite suite = new TestSuite("Tool scripts w/authorization");
+        BaseTestSuite suite =
+            new BaseTestSuite("Tool scripts w/authorization");
+
         final String PWSUFFIX = "pwSuffix";
 
         for (int i = 0; i < list.length; i++) {

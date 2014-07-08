@@ -20,23 +20,18 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.io.File;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-
+import java.sql.Statement;
 import javax.sql.DataSource;
-
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -101,7 +96,7 @@ extends BaseJDBCTestCase {
 */
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("Encryption AES suite");
+        BaseTestSuite suite = new BaseTestSuite("Encryption AES suite");
         // we're using SupportFilesSetup so the created databases will get 
         // removed. Databases get created in subdirectory EXTINOUT.
         // However, this only happens after the test is finished, so we

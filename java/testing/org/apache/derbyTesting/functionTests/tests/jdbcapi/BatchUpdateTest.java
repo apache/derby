@@ -38,11 +38,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -158,7 +156,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite("BatchUpdateTest");
+        BaseTestSuite suite = new BaseTestSuite("BatchUpdateTest");
         suite.addTest(baseSuite("BatchUpdateTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("BatchUpdateTest:client")));
@@ -173,13 +171,13 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
      */
     public static Test embeddedSuite() {
         
-        TestSuite suite = new TestSuite("BatchUpdateTest");
+        BaseTestSuite suite = new BaseTestSuite("BatchUpdateTest");
         suite.addTest(baseSuite("BatchUpdateTest:embedded"));
         return suite;
     }
     
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(BatchUpdateTest.class);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4)) 

@@ -24,17 +24,17 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.SQLException;
-
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.*;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test for declared global temporary tables (introduced in Cloudscape 5.2)
@@ -55,7 +55,7 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
         super(name);
     }	
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
         suite.addTest(TestConfiguration.embeddedSuite(
                 DeclareGlobalTempTableJavaJDBC30Test.class));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -69,7 +69,7 @@ public class DeclareGlobalTempTableJavaJDBC30Test extends BaseJDBCTestCase {
      * @return A suite of tests being run with client only
      */
     private static Test getClientSuite() {
-        TestSuite suite = new TestSuite("Client/Server");
+        BaseTestSuite suite = new BaseTestSuite("Client/Server");
         // skip the tests with more than 1 savepoint -  
         // see (lack of support described in) DERBY-3687
         // so, only do the following with network server/client: 

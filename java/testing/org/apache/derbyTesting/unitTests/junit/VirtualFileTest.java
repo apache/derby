@@ -24,12 +24,12 @@ package org.apache.derbyTesting.unitTests.junit;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.impl.io.vfmem.DataStore;
 import org.apache.derby.impl.io.vfmem.VirtualFile;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Basic tests of the class {@code VirtualFile}.
@@ -350,7 +350,7 @@ public class VirtualFileTest
     }
 
     public static Test suite() {
-        return new TestSuite(VirtualFileTest.class);
+        return new BaseTestSuite(VirtualFileTest.class);
     }
 
     /** A counter used to obtain unique data store names. */

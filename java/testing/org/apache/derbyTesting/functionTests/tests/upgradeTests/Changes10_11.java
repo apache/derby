@@ -26,11 +26,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -78,7 +78,7 @@ public class Changes10_11 extends UpgradeChange
      * @return the test suite created.
      */
     public static Test suite(int phase) {
-        return new TestSuite(Changes10_11.class, "Upgrade test for 10.11");
+        return new BaseTestSuite(Changes10_11.class, "Upgrade test for 10.11");
     }
 
     //////////////////////////////////////////////////////////////////

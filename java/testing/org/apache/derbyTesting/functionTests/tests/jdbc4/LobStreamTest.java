@@ -23,14 +23,13 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.io.IOException;
-import junit.framework.*;
-
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.File;
 import java.sql.Blob;
 import java.sql.Connection;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -433,9 +432,11 @@ public class LobStreamTest extends BaseJDBCTestCase {
     public static Test suite() {
         //testing only embedded driver generic test suite testing both
         //client and ebedded is present in jdbcapi/LobStreamsTest
-        TestSuite ts  = new TestSuite ("LobStreamTest");
+        BaseTestSuite ts  = new BaseTestSuite("LobStreamTest");
         ts.addTest(TestConfiguration.embeddedSuite(LobStreamTest.class));
-        TestSuite encSuite = new TestSuite ("LobStreamsTest:encrypted");
+
+        BaseTestSuite encSuite =
+            new BaseTestSuite("LobStreamsTest:encrypted");
         encSuite.addTestSuite (LobStreamTest.class);
         ts.addTest(Decorator.encryptedDatabase (encSuite));
         return ts;

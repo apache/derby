@@ -23,17 +23,17 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for DERBY-3926. Optimizer is choosing to avoid sort which is
@@ -52,7 +52,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("OrderByAndSortAvoidance");
+        BaseTestSuite suite = new BaseTestSuite("OrderByAndSortAvoidance");
 
         suite.addTest(makeSuite());
 
@@ -70,7 +70,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
     private static Test makeSuite()
     {
         return new CleanDatabaseTestSetup(
-            new TestSuite(OrderByAndSortAvoidance.class)) {
+            new BaseTestSuite(OrderByAndSortAvoidance.class)) {
                 protected void decorateSQL(Statement st)
                         throws SQLException {
                     st.executeUpdate("create table a(col1 int, col2 int)");

@@ -30,14 +30,11 @@ import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -54,7 +51,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         super(name);
     }
     
-    private static Test newCleanDatabase(TestSuite s) {
+    private static Test newCleanDatabase(BaseTestSuite s) {
         return new CleanDatabaseTestSetup(s) {
         /**
          * Creates the database objects used in the test cases.
@@ -85,8 +82,8 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
 
     protected static Test baseSuite(String name) 
     {
-        TestSuite readonly = new TestSuite("OSReadOnly");
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite readonly = new BaseTestSuite("OSReadOnly");
+        BaseTestSuite suite = new BaseTestSuite(name);
         readonly.addTestSuite(OSReadOnlyTest.class);
         suite.addTest(TestConfiguration.singleUseDatabaseDecorator(newCleanDatabase(readonly)));
         
@@ -95,7 +92,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
 
     public static Test suite() 
     {
-        TestSuite suite = new TestSuite("OSReadOnlyTest");
+        BaseTestSuite suite = new BaseTestSuite("OSReadOnlyTest");
         suite.addTest(baseSuite("OSReadOnlyTest:embedded"));
         suite.addTest(TestConfiguration
             .clientServerDecorator(baseSuite("OSReadOnlyTest:client")));

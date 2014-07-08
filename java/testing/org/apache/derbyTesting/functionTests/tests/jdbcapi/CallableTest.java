@@ -28,35 +28,30 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-
-import java.util.Arrays;   // Used by testUpdateLongBinaryProc
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
-
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.Date;   // Used by testUpdateLongBinaryProc
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
-
-
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test the CallableStatement interface. 
@@ -175,7 +170,7 @@ public class CallableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("CallableTest");
+        BaseTestSuite suite = new BaseTestSuite("CallableTest");
 
         suite.addTest(baseSuite("CallableTest:embedded"));
 
@@ -198,7 +193,7 @@ public class CallableTest extends BaseJDBCTestCase {
 
     private static Test baseSuite(String name) {
 
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         // Add tests that every JVM should be able to run.
         suite.addTestSuite(CallableTest.class);

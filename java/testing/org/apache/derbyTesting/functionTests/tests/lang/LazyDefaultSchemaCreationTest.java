@@ -19,20 +19,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests the lazy creation functionality of default schema: the schema
@@ -335,11 +332,12 @@ protected void  tearDown() throws Exception {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("LazyDefaultSchemaCreationTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("LazyDefaultSchemaCreationTest");
 
-        TestSuite[] suites = {
-            new TestSuite("LazyDefaultSchemaCreationTest:embedded"),
-            new TestSuite("LazyDefaultSchemaCreationTest:clientServer") };
+        BaseTestSuite[] suites = {
+            new BaseTestSuite("LazyDefaultSchemaCreationTest:embedded"),
+            new BaseTestSuite("LazyDefaultSchemaCreationTest:clientServer") };
 
         for (int i=0; i < 2; i++) {
             suites[i].addTest(DatabasePropertyTestSetup.setLockTimeouts

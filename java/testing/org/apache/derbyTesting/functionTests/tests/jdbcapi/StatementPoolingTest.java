@@ -29,9 +29,9 @@ import java.sql.Statement;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -838,14 +838,16 @@ public class StatementPoolingTest
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("StatementPoolingTest suite");
-        TestSuite baseSuite = new TestSuite(StatementPoolingTest.class);
+        BaseTestSuite suite = new BaseTestSuite("StatementPoolingTest suite");
+        BaseTestSuite baseSuite =
+            new BaseTestSuite(StatementPoolingTest.class);
+
         // Statement pooling is not yet enabled for XA.
         //suite.addTest(TestConfiguration.connectionXADecorator(baseSuite));
         suite.addTest(TestConfiguration.connectionCPDecorator(baseSuite));
 
         // Add tests that require data from the database.
-        TestSuite reqDataSuite = new TestSuite("Requires data suite");
+        BaseTestSuite reqDataSuite = new BaseTestSuite("Requires data suite");
         reqDataSuite.addTest(new StatementPoolingTest(
                 "resTestCloseDoesNotAffectOtherStatement"));
         reqDataSuite.addTest(new StatementPoolingTest(

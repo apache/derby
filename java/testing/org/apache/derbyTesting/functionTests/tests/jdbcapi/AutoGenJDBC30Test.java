@@ -25,17 +25,15 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.SQLException;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Tests the JDBC 3.0 ability to establish a result set of auto-generated keys.
@@ -96,7 +94,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * Implements suite() to run in embedded and client configurations.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("AutoGenJDBC30Test");
+        BaseTestSuite suite = new BaseTestSuite("AutoGenJDBC30Test");
 
         suite.addTest(baseSuite("AutoGenJDBC30Test:embedded"));
 
@@ -113,7 +111,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     private static Test baseSuite(String name) {
 
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         if (!JDBC.vmSupportsJDBC3()) {
             // empty suite

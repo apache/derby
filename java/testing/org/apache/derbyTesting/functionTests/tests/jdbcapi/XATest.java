@@ -29,17 +29,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
@@ -1363,7 +1360,7 @@ public class XATest extends BaseJDBCTestCase {
     public static void zeroArg() {  }
 
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(XATest.class);
 
         return new CleanDatabaseTestSetup(suite) {
@@ -1423,7 +1420,7 @@ public class XATest extends BaseJDBCTestCase {
      * @return test suite
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("XATest");
+        BaseTestSuite suite = new BaseTestSuite("XATest");
         // no XA for JSR169
         if (JDBC.vmSupportsJSR169())
             return suite;

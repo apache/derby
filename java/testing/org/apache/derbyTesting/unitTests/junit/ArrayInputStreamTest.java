@@ -23,9 +23,9 @@ package org.apache.derbyTesting.unitTests.junit;
 
 import java.io.IOException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Unit tests for {@code org.apache.derby.iapi.services.io.ArrayInputStream}.
@@ -33,7 +33,7 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 public class ArrayInputStreamTest extends BaseTestCase {
 
     public static Test suite() {
-        return new TestSuite(ArrayInputStreamTest.class);
+        return new BaseTestSuite(ArrayInputStreamTest.class);
     }
 
     public ArrayInputStreamTest(String name) {

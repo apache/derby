@@ -28,15 +28,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -66,7 +63,9 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("TruncateTableAndOnlineBackupTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("TruncateTableAndOnlineBackupTest");
+
         suite.addTest(baseSuite("TruncateTableAndOnlineBackupTest:Embedded"));
         //suite.addTest(TestConfiguration
         //        .clientServerDecorator(baseSuite("TruncateTableAndOnlineBackupTest:Client")));
@@ -77,7 +76,7 @@ public class TruncateTableAndOnlineBackupTest  extends BaseJDBCTestCase {
     }
     
     protected static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
         suite.addTestSuite(TruncateTableAndOnlineBackupTest.class);
         return new CleanDatabaseTestSetup(suite); 
     }

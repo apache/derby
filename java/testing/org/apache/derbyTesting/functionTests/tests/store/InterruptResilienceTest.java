@@ -19,27 +19,21 @@
 */
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.Random;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.Random;
-import java.lang.Math;
-import java.util.Properties;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This test started out as a test reproduce and verify fix for DERBY-151.
@@ -63,7 +57,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
     protected static Test makeSuite(String name)
     {
-        TestSuite suite = new TestSuite(name);
+        BaseTestSuite suite = new BaseTestSuite(name);
 
         Test est = TestConfiguration.embeddedSuite(
             InterruptResilienceTest.class);
@@ -98,21 +92,21 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             if (getSystemProperty("java.version").startsWith("1.4.2"))
             {
                 println("InterruptResilienceTest skipped for this VM, cf. DERBY-5074/5109");
-                return new TestSuite(testName);
+                return new BaseTestSuite(testName);
             }
         }
 
         if (!JDBC.vmSupportsJDBC3()) {
             println("Test skipped for this VM, " +
                     "DriverManager is not supported with JSR169");
-            return new TestSuite(testName);
+            return new BaseTestSuite(testName);
         }
 
         if (hasInterruptibleIO()) {
             println("Test skipped due to interruptible IO.");
             println("This is default on Solaris/Sun Java <= 1.6, use " +
                     "-XX:-UseVMInterruptibleIO if available.");
-            return new TestSuite(testName);
+            return new BaseTestSuite(testName);
         }
 
         return makeSuite(testName);

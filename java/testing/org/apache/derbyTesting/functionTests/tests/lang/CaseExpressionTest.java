@@ -23,21 +23,19 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
@@ -275,7 +273,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite)
+        BaseTestSuite suite = (BaseTestSuite)
             TestConfiguration.embeddedSuite(CaseExpressionTest.class);
 
         return new CleanDatabaseTestSetup(suite) {

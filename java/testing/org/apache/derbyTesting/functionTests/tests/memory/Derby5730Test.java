@@ -27,9 +27,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SpawnedProcess;
 
@@ -48,9 +48,9 @@ public class Derby5730Test extends BaseTestCase {
     public static Test suite() {
         // The test case uses DriverManager, so require JDBC 3.0 or higher.
         if (JDBC.vmSupportsJDBC3()) {
-            return new TestSuite(Derby5730Test.class);
+            return new BaseTestSuite(Derby5730Test.class);
         }
-        return new TestSuite("Derby5730Test - skipped");
+        return new BaseTestSuite("Derby5730Test - skipped");
     }
 
     /**

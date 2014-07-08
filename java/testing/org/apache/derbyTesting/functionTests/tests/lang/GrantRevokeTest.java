@@ -31,14 +31,13 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Locale;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Test SQL GRANT and REVOKE statements
@@ -59,7 +58,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	 * statements. Metadata methods test also runs in client/server mode.
 	 */
 	public static Test suite() {
-		TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
 		
 		// following is useful for debugging the lock timeout seen in rollback tests,
 		// can connect via network server and look at the lock table.
@@ -75,7 +74,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	 * One set of grant/revoke tests for either client/server or embedded.
 	 */
 	public static Test basesuite() {
-        Test test = new TestSuite(GrantRevokeTest.class);
+        Test test = new BaseTestSuite(GrantRevokeTest.class);
 
         // DERBY-6238: Dump the contents of the lock table on lock timeout.
         // Helps debug intermittent lock timeouts seen in the test.

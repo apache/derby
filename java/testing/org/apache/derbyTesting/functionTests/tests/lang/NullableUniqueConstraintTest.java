@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,14 +29,11 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Enumeration;
-
 import junit.framework.Test;
 import junit.framework.TestFailure;
 import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -59,7 +55,9 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
      *         run.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("NullableUniqueConstraintTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("NullableUniqueConstraintTest");
+
         suite.addTest(TestConfiguration.defaultSuite(
                             NullableUniqueConstraintTest.class));
         return suite;

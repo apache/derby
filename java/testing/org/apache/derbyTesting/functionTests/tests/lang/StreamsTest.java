@@ -21,23 +21,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
@@ -75,7 +67,7 @@ public class StreamsTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         
-        Test test = new TestSuite(StreamsTest.class, "StreamsTest");
+        Test test = new BaseTestSuite(StreamsTest.class, "StreamsTest");
         
         test = DatabasePropertyTestSetup.singleProperty(test,
                 "derby.storage.pageSize", "2048");

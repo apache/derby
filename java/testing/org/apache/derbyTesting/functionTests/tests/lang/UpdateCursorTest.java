@@ -27,11 +27,9 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -76,8 +74,10 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 		props.setProperty("derby.language.maxMemoryPerTable", "1");
 		return new DatabasePropertyTestSetup(
-				new SystemPropertyTestSetup(new CleanDatabaseTestSetup(
-				new TestSuite(UpdateCursorTest.class, "UpdateCursorTest")) {
+            new SystemPropertyTestSetup(
+                new CleanDatabaseTestSetup(
+                    new BaseTestSuite(
+                        UpdateCursorTest.class, "UpdateCursorTest")) {
 
 			/**
 			 * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)

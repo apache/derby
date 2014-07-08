@@ -23,10 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.SQLException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class Derby5652 extends BaseJDBCTestCase
 {
@@ -63,7 +62,7 @@ public class Derby5652 extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite( "Derby5652" );
+        BaseTestSuite suite = new BaseTestSuite( "Derby5652" );
 
         Test    test = new Derby5652( "basicTest" );
 

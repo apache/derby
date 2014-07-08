@@ -20,9 +20,8 @@
 package org.apache.derbyTesting.system.oe.test;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 public class _Suite extends BaseTestCase  {
 
@@ -35,7 +34,7 @@ public class _Suite extends BaseTestCase  {
 
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("oe");
+        BaseTestSuite suite = new BaseTestSuite("oe");
         
         suite.addTest(OETest.suite());
         

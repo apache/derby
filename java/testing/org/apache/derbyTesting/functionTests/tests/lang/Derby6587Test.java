@@ -23,11 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
@@ -42,12 +40,12 @@ public class Derby6587Test extends BaseJDBCTestCase {
     }
 
     public static Test suite(){
-        TestSuite suite = new TestSuite("Derby6587Test");
+        BaseTestSuite suite = new BaseTestSuite("Derby6587Test");
         suite.addTest(baseSuite("Derby6587:embedded"));
         return suite;
     }
     public static Test baseSuite(String name) {
-        TestSuite suite = new TestSuite(Derby6587Test.class, name);
+        BaseTestSuite suite = new BaseTestSuite(Derby6587Test.class, name);
         Test test = new SupportFilesSetup(suite, 
             new String[] {
                 "functionTests/testData/Derby6587/Derby6587_TABLE1_T.csv",

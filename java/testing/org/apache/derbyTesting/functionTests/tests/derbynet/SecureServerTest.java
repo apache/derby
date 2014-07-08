@@ -26,17 +26,16 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
  * This Junit test class tests whether the server comes up under a security
@@ -152,7 +151,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     {
         //NetworkServerTestSetup.setWaitTime( 10000L );
         
-        TestSuite       suite = new TestSuite("SecureServerTest");
+        BaseTestSuite      suite = new BaseTestSuite("SecureServerTest");
 
         // Server booting requires that we run from the jar files
         if ( !TestConfiguration.loadingFromJars() ) { return suite; }

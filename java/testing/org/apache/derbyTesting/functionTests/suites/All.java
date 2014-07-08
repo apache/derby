@@ -21,9 +21,8 @@
 package org.apache.derbyTesting.functionTests.suites;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.EnvTest;
 
 public class All extends BaseTestCase {
@@ -41,7 +40,7 @@ public class All extends BaseTestCase {
      */
     public static Test suite() throws Exception {
 
-        TestSuite suite = new TestSuite("All");
+        BaseTestSuite suite = new BaseTestSuite("All");
 
         // Simple "test" that displays environment information
         // as fixture names.

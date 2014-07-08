@@ -23,8 +23,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -38,7 +38,7 @@ public class ModuleLoadingTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite ts = new TestSuite();
+        BaseTestSuite ts = new BaseTestSuite();
 
         // Run concurrentLoadingOfSortFactory in a separate database so that
         // the sort factory isn't already loaded.

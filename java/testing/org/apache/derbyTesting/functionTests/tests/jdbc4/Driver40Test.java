@@ -25,11 +25,9 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -73,7 +71,7 @@ public class Driver40Test extends BaseJDBCTestCase
     {
         if (JDBC.vmSupportsJSR169())
         {
-            return new TestSuite(
+            return new BaseTestSuite(
                 "DriverTest40 tests java.sql.Driver, not supported with JSR169");
         }
         return TestConfiguration.defaultSuite(Driver40Test.class);

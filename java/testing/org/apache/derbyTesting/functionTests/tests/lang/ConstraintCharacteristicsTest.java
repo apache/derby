@@ -40,13 +40,13 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derbyTesting.functionTests.tests.memorydb.MemoryDbManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -94,7 +94,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
     public static Test suite() {
         final String nameRoot = ConstraintCharacteristicsTest.class.getName();
-        final TestSuite suite = new TestSuite(nameRoot);
+        final BaseTestSuite suite = new BaseTestSuite(nameRoot);
 
         suite.addTest(baseSuite(nameRoot + ":embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -111,7 +111,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     // locks.waitTimeout setting.
     private static Test restSuite(final String name) {
 
-        final TestSuite suite = new TestSuite(name);
+        final BaseTestSuite suite = new BaseTestSuite(name);
 
         suite.addTest(new ConstraintCharacteristicsTest(
                 "testDeferredRowsInvalidation"));
@@ -127,7 +127,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
     
     private static Test baseSuite(final String name) {
-        final TestSuite suite = new TestSuite(name);
+        final BaseTestSuite suite = new BaseTestSuite(name);
 
         suite.addTest(new ConstraintCharacteristicsTest(
                       "testSyntaxAndBinding"));

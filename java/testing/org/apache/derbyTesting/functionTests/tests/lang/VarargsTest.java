@@ -23,15 +23,10 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.Decorator;
-import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -90,7 +85,7 @@ public class VarargsTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite       suite = new TestSuite( "UserDefinedAggregatesTest" );
+        BaseTestSuite suite = new BaseTestSuite("UserDefinedAggregatesTest");
 
         suite.addTest( TestConfiguration.defaultSuite( VarargsTest.class ) );
 

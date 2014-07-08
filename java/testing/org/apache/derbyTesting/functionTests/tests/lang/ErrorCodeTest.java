@@ -21,18 +21,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.LocaleTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Locale;
-
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 public final class ErrorCodeTest extends BaseJDBCTestCase {
 
@@ -46,7 +43,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("errorcode Test");
+        BaseTestSuite suite = new BaseTestSuite("errorcode Test");
         
         suite.addTest(TestConfiguration.defaultSuite(ErrorCodeTest.class));
         

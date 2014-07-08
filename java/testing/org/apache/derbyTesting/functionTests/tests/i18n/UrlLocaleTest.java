@@ -27,11 +27,9 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Locale;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -308,7 +306,7 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite suite = new TestSuite();
+        BaseTestSuite suite = new BaseTestSuite();
         suite.addTestSuite(UrlLocaleTest.class);
         suite.addTest(new LocaleTestSetup(
                 new UrlLocaleTest("messageLocale_unknown"),

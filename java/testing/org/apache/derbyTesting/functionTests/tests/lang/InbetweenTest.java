@@ -20,22 +20,20 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
-
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -51,7 +49,7 @@ public final class InbetweenTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("InbetweenTest Test");
+        BaseTestSuite suite = new BaseTestSuite("InbetweenTest Test");
         suite.addTest(DatabasePropertyTestSetup.singleProperty(
                 TestConfiguration.defaultSuite(InbetweenTest.class),
                 "derby.language.statementCacheSize", "0",true));

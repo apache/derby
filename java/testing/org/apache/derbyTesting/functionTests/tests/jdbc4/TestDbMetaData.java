@@ -27,12 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -81,7 +79,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     private static Test baseSuite(String name) {
-        TestSuite testSuite = new TestSuite(name);
+        BaseTestSuite testSuite = new BaseTestSuite(name);
         testSuite.addTestSuite(TestDbMetaData.class);
         return new CleanDatabaseTestSetup(testSuite) {
                 protected void decorateSQL(Statement s) throws SQLException {
@@ -91,7 +89,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("TestDbMetaData suite");
+        BaseTestSuite suite = new BaseTestSuite("TestDbMetaData suite");
         suite.addTest(baseSuite("TestDbMetaData:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("TestDbMetaData:client")));

@@ -21,15 +21,9 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
-import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-
 
 /**
  * LobLimitsLiteTest tests all the same functionality of 
@@ -51,7 +45,7 @@ public class LobLimitsLiteTest extends LobLimitsTest {
     
     public static Test suite() {
         Test test = LobLimitsTest.baseSuite(_1MB, _100K);
-        TestSuite suite = new TestSuite("LobLimitsLiteTest");
+        BaseTestSuite suite = new BaseTestSuite("LobLimitsLiteTest");
         suite.addTest(test);
         suite.addTest(TestConfiguration.clientServerDecorator(test));
         return suite;

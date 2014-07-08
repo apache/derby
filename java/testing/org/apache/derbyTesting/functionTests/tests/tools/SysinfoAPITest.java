@@ -21,18 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.tools;
 
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
 import java.io.PrintWriter;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import junit.framework.Test;
 import org.apache.derby.tools.sysinfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  *  Test all the static public methods of the sysinfo class.
@@ -52,7 +51,7 @@ public class SysinfoAPITest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-    	Test suite = new TestSuite(SysinfoAPITest.class, "Sysinfo API");
+        Test suite = new BaseTestSuite(SysinfoAPITest.class, "Sysinfo API");
     	
     	return suite;
     }

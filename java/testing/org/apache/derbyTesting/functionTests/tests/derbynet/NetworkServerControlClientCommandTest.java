@@ -23,14 +23,13 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.IOException;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.DerbyConstants;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DerbyConstants;
 
 public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
 
@@ -151,7 +150,8 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
 
     public static Test suite() {
 
-        TestSuite suite = new TestSuite("NetworkServerControlClientCommandTest");        
+        BaseTestSuite suite =
+            new BaseTestSuite("NetworkServerControlClientCommandTest");
 
         // need network server so we can compare command output 
         // and we don't run on J2ME because java command is different.

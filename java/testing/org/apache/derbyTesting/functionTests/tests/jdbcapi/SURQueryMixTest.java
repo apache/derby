@@ -19,10 +19,10 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -33,12 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
-import org.apache.derbyTesting.junit.TestConfiguration;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests for Scrollable Updatable ResultSet (SUR). This TestCase tests
@@ -515,8 +513,8 @@ public class SURQueryMixTest extends SURBaseTest
         "a,c"
     };
     
-    private static TestSuite createTestCases(final String modelName) {
-        TestSuite suite = new TestSuite();
+    private static BaseTestSuite createTestCases(final String modelName) {
+        BaseTestSuite suite = new BaseTestSuite();
         for (int doPos = 0; doPos<2; doPos++) {
             boolean positioned = doPos>0; // true if to use positioned updates
 
@@ -539,7 +537,7 @@ public class SURQueryMixTest extends SURBaseTest
      */
     public static Test suite() 
     {   
-        TestSuite mainSuite = new TestSuite("SURQueryMixTest suite");
+        BaseTestSuite mainSuite = new BaseTestSuite("SURQueryMixTest suite");
         
         mainSuite.addTest(baseSuite("SURQueryMixTest:embedded"));
         mainSuite.addTest(
@@ -554,7 +552,7 @@ public class SURQueryMixTest extends SURBaseTest
      * The suite contains all testcases in this class running on different data models
      */
     private static Test baseSuite(String name) {
-        TestSuite mainSuite = new TestSuite(name);
+        BaseTestSuite mainSuite = new BaseTestSuite(name);
       
         // Iterate over all data models and decorate the tests:
         for (Iterator i = SURDataModelSetup.SURDataModel.values().iterator();
@@ -563,7 +561,7 @@ public class SURQueryMixTest extends SURBaseTest
             SURDataModelSetup.SURDataModel model =
                 (SURDataModelSetup.SURDataModel) i.next();
             
-            TestSuite suite = createTestCases(model.toString());
+            BaseTestSuite suite = createTestCases(model.toString());
             TestSetup decorator = new SURDataModelSetup(suite, model);
             mainSuite.addTest(decorator);
         }

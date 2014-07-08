@@ -21,14 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.IOException;
+import java.sql.Clob;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import java.sql.*;
-import java.io.IOException;
 
 /**
  * Functional test for ansi trim functionality added for DERBY-1623.
@@ -62,7 +65,7 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into nt values (null)");
     }
    public static Test suite() {
-        TestSuite suite = new TestSuite("AnsiTrimTest");
+        BaseTestSuite suite = new BaseTestSuite("AnsiTrimTest");
         suite.addTestSuite(AnsiTrimTest.class);
         return new CleanDatabaseTestSetup(suite) {
             public void decorateSQL(Statement s)

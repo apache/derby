@@ -20,16 +20,13 @@
 */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derby.client.am.ByteArrayCombinerStream;
-
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import junit.framework.Test;
+import org.apache.derby.client.am.ByteArrayCombinerStream;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 
 /**
  * Test functionality of <code>ByteArrayCombinerStream</code>.
@@ -243,7 +240,7 @@ public class ByteArrayCombinerStreamTest
     }
 
     public static Test suite() {
-        return new TestSuite(ByteArrayCombinerStreamTest.class,
+        return new BaseTestSuite(ByteArrayCombinerStreamTest.class,
                              "ByteArrayCombinerStreamTest");
     }
 } // End class ByteArrayCombinerStreamTest

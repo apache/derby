@@ -28,9 +28,9 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.Barrier;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -46,7 +46,7 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
      * embedded driver.
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite("ErrorMessageTest");
+        BaseTestSuite suite = new BaseTestSuite("ErrorMessageTest");
 
         if (JDBC.vmSupportsJSR169()) {
             // Foundation 1.1 doesn't support the regex classes. Return an

@@ -25,11 +25,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Properties;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
@@ -146,7 +144,9 @@ public class KeepDisposableStatsPropertyTest
      */
     public static Test suite() {
         String property = "derby.storage.indexStats.debug.keepDisposableStats";
-        TestSuite suite = new TestSuite("KeepDisposableStatsPropertyTestSuite");
+        BaseTestSuite suite =
+            new BaseTestSuite("KeepDisposableStatsPropertyTestSuite");
+
         // Test the default (expected to be false).
         suite.addTest(
                 new KeepDisposableStatsPropertyTest("testPropertyDefault"));
@@ -154,7 +154,7 @@ public class KeepDisposableStatsPropertyTest
         // Test setting the property explicitly to true.
         Properties propsOn = new Properties();
         propsOn.setProperty(property, "true");
-        TestSuite suiteOn = new TestSuite("Do KeepDisposableStats");
+        BaseTestSuite suiteOn = new BaseTestSuite("Do KeepDisposableStats");
         suiteOn.addTest(
                 new KeepDisposableStatsPropertyTest("testPropertyTrue"));
         suite.addTest(new SystemPropertyTestSetup(suiteOn, propsOn, true));
@@ -162,7 +162,9 @@ public class KeepDisposableStatsPropertyTest
         // Test setting the property explicitly to false.
         Properties propsOff = new Properties();
         propsOff.setProperty(property, "false");
-        TestSuite suiteOff = new TestSuite("Don't KeepDisposableStats");
+        BaseTestSuite suiteOff =
+            new BaseTestSuite("Don't KeepDisposableStats");
+
         suiteOff.addTest(
                 new KeepDisposableStatsPropertyTest("testPropertyFalse"));
         suite.addTest(new SystemPropertyTestSetup(suiteOff, propsOff, true));

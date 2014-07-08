@@ -31,14 +31,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
-
 import javax.sql.DataSource;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.IndexStatsUtil.IdxStats;
@@ -76,7 +73,7 @@ public class AutomaticIndexStatisticsTest
     }
 
     public static Test suite() {
-        Test test = new TestSuite(AutomaticIndexStatisticsTest.class);
+        Test test = new BaseTestSuite(AutomaticIndexStatisticsTest.class);
         test = new CleanDatabaseTestSetup(test);
         test = TestConfiguration.additionalDatabaseDecorator(test, MASTERDB);
 

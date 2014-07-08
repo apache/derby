@@ -21,14 +21,11 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.Derby;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * NetHarnessJavaTest includes .java tests in the derbynet directory that
@@ -67,7 +64,8 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("derbynet: old harness java tests");
+        BaseTestSuite suite =
+            new BaseTestSuite("derbynet: old harness java tests");
         
         if (!Derby.hasServer())
             return suite;

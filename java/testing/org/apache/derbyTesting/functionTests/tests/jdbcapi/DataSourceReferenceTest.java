@@ -29,15 +29,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
-
 import javax.naming.Reference;
 import javax.naming.Referenceable;
 import javax.naming.spi.ObjectFactory;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -145,7 +142,7 @@ public class DataSourceReferenceTest
        Test suite;
        if (JDBC.vmSupportsJSR169() || !JDBC.vmSupportsJNDI()) {
             // Referenceable is not supported with JSR169 or without JNDI
-            suite = new TestSuite(
+            suite = new BaseTestSuite(
                     "DatasourceReferenceTest cannot run with JSR169");
         } else {
             suite = TestConfiguration.defaultSuite(

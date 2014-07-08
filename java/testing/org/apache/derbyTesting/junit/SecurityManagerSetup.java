@@ -32,12 +32,8 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.Properties;
-
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 /**
@@ -172,9 +168,12 @@ public final class SecurityManagerSetup extends TestSetup {
 	 */
 	public static Test noSecurityManager(Test test)
 	{
-		if (externalSecurityManagerInstalled)
-			return new TestSuite("skipped due to external security manager "
-                    + test.toString());
+        if (externalSecurityManagerInstalled) {
+            return new BaseTestSuite(
+                "skipped due to external security manager "
+                + test.toString());
+        }
+
         return new SecurityManagerSetup(test, NO_POLICY);
 	}
 

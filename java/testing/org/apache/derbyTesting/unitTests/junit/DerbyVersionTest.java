@@ -22,8 +22,8 @@
 package org.apache.derbyTesting.unitTests.junit;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DerbyVersion;
 
 /**
@@ -54,7 +54,8 @@ public class DerbyVersionTest
         super(name);
     }
     public static Test suite() {
-        return new TestSuite(DerbyVersionTest.class, "DerbyVersionTest tests");
+        return new BaseTestSuite(
+            DerbyVersionTest.class, "DerbyVersionTest tests");
     }
 
     public void testLessThan() {

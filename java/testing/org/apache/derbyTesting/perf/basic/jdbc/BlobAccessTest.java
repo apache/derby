@@ -31,8 +31,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.perf.clients.BackToBackLoadGenerator;
@@ -118,12 +118,12 @@ public class BlobAccessTest
      * @return A suite of tests.
      */
     public static Test suite() {
-        TestSuite mainSuite = new TestSuite("BlobAccessTest suite");
+        BaseTestSuite mainSuite = new BaseTestSuite("BlobAccessTest suite");
         if (!disableSmallBlobs) {
             int iters = 50;
             int reps = 3;
             println("Adding small Blob tests.");
-            TestSuite smallSuite = new TestSuite("Small Blob suite");
+            BaseTestSuite smallSuite = new BaseTestSuite("Small Blob suite");
             smallSuite.addTest(new BlobAccessTest(
                     "testFetchSmallBlobs", iters, reps));
             smallSuite.addTest(new BlobAccessTest(
@@ -136,7 +136,7 @@ public class BlobAccessTest
             int iters = 5;
             int reps = 3;
             println("Adding large Blob tests.");
-            TestSuite largeSuite = new TestSuite("Large Blob suite");
+            BaseTestSuite largeSuite = new BaseTestSuite("Large Blob suite");
             largeSuite.addTest(new BlobAccessTest(
                     "testFetchLargeBlobs", iters, reps));
             largeSuite.addTest(new BlobAccessTest(

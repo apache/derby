@@ -19,18 +19,14 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLWarning;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -49,7 +45,7 @@ public final class LojReorderTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("LojReorderTest Test");
+        BaseTestSuite suite = new BaseTestSuite("LojReorderTest Test");
         suite.addTest(TestConfiguration.defaultSuite(LojReorderTest.class));
         return suite;
     }

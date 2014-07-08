@@ -27,24 +27,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.text.Collator;
 import java.util.Locale;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.apache.derby.iapi.types.HarmonySerialClob;
-
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
-import org.apache.derbyTesting.junit.XML;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.XML;
 
 public class CollationTest extends BaseJDBCTestCase {
 
@@ -2087,7 +2083,7 @@ public void testMissingCollatorSupport() throws SQLException {
    */
   public static Test suite() {
       
-      TestSuite suite = new TestSuite("CollationTest");
+      BaseTestSuite suite = new BaseTestSuite("CollationTest");
       //Add the test case for a locale which does not exist. We have asked for
       //locale as 'xx' and since there is not support Collator support for such
       //a locale, we will get an exception during database create time.
@@ -2167,7 +2163,8 @@ public void testMissingCollatorSupport() throws SQLException {
   private static Test collatedSuite(
           String locale, boolean caseInsensitive, String[] testNames)
   {
-      TestSuite suite = new TestSuite("CollationTest:territory=" + locale);
+      BaseTestSuite suite =
+          new BaseTestSuite("CollationTest:territory=" + locale);
 
       for (int i = 0; i < testNames.length; i++) {
           suite.addTest(new CollationTest(testNames[i]));

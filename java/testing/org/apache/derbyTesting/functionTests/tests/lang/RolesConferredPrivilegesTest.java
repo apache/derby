@@ -21,23 +21,22 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
 import java.util.ArrayList;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * This tests that SQL roles actually confer the correct privileges, that is,
@@ -83,7 +82,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("RolesConferredPrivilegesTest");
+        BaseTestSuite suite =
+            new BaseTestSuite("RolesConferredPrivilegesTest");
 
         suite.addTest(makeSuite());
 
@@ -105,7 +105,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
          * sqlAuthorization.
          */
         Test clean = new CleanDatabaseTestSetup(
-            new TestSuite(RolesConferredPrivilegesTest.class)) {
+            new BaseTestSuite(RolesConferredPrivilegesTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException {
                     /*

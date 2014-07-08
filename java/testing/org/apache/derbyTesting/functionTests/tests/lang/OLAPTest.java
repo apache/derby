@@ -21,20 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-
+import java.sql.SQLException;
+import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.framework.Assert;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * OLAP functionality test.
@@ -54,7 +51,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 
 	public static Test makeSuite() {
         Test clean = new CleanDatabaseTestSetup(
-            new TestSuite(OLAPTest.class)) {
+            new BaseTestSuite(OLAPTest.class)) {
                 protected void decorateSQL(Statement s)
                         throws SQLException
                 {
@@ -86,7 +83,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 
 	public static Test suite()
     {
-		TestSuite suite = new TestSuite("OLAPTest");
+        BaseTestSuite suite = new BaseTestSuite("OLAPTest");
 		suite.addTest(makeSuite());
 		suite.addTest(TestConfiguration.clientServerDecorator(makeSuite()));
 		return suite;

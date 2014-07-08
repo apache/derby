@@ -32,10 +32,9 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -201,7 +200,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
         testBlobLength(false, 10000);  
     }
        public static Test suite() {
-        TestSuite suite =  new TestSuite();
+        BaseTestSuite suite =  new BaseTestSuite();
         // Just add Derby-6096 embedded as it takes time to run
         suite.addTest(new BlobMemTest("xtestderby6096BlobhashJoin"));
         suite.addTest(TestConfiguration.defaultSuite(BlobMemTest.class));

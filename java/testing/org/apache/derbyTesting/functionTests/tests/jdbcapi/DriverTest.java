@@ -29,15 +29,13 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-
+import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
 *
@@ -81,10 +79,10 @@ public class DriverTest extends BaseJDBCTestCase {
         // java.sql.Driver is not supported with JSR169, so return empty suite
         if (JDBC.vmSupportsJSR169())
         {
-            return new TestSuite(
+            return new BaseTestSuite(
                 "DriverTest tests java.sql.Driver, not supported with JSR169");
         }
-        TestSuite suite = new TestSuite("DriverTest");
+        BaseTestSuite suite = new BaseTestSuite("DriverTest");
         suite.addTest(baseSuite("DriverTest:embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("DriverTest:client")));
@@ -93,7 +91,7 @@ public class DriverTest extends BaseJDBCTestCase {
     
     private static Test baseSuite(String name) {
         
-        TestSuite suite = new TestSuite("DriverTest");
+        BaseTestSuite suite = new BaseTestSuite("DriverTest");
         setBaseProps(suite, new DriverTest("testDriverCompliantVersion"));
         setBaseProps(suite, new DriverTest("testAcceptsURL"));
         setBaseProps(suite, new DriverTest("testEmbeddedAttributes"));
@@ -104,7 +102,7 @@ public class DriverTest extends BaseJDBCTestCase {
         return suite;
     }
     
-    private static void setBaseProps(TestSuite suite, Test test) 
+    private static void setBaseProps(BaseTestSuite suite, Test test)
     {
         Properties dbprops = new Properties();
 

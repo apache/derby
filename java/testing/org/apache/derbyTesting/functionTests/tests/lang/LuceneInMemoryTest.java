@@ -21,18 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.SQLException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Properties;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.functionTests.tests.memorydb.MemoryDbManager;
+import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -90,7 +84,7 @@ public class LuceneInMemoryTest extends GeneratedColumnsHelper
 
     public static Test suite()
     {
-		TestSuite suite = new TestSuite( "LuceneInMemoryTest" );
+        BaseTestSuite suite = new BaseTestSuite( "LuceneInMemoryTest" );
         
         Test    baseTest = TestConfiguration.embeddedSuite( LuceneInMemoryTest.class );
 		suite.addTest( SecurityManagerSetup.noSecurityManager( baseTest) );
