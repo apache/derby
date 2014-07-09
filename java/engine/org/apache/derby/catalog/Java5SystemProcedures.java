@@ -23,7 +23,6 @@ package org.apache.derby.catalog;
 
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
@@ -31,7 +30,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassFactoryContext;
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * <p>
@@ -101,10 +99,19 @@ public  class   Java5SystemProcedures
             String              toolClassName = findToolClassName( toolName, optionalArgs );            
             OptionalTool    tool = null;
 
+            Class<?> toolClass;
             try {
-                tool = (OptionalTool) classFactory.loadApplicationClass( toolClassName ).newInstance();
+                toolClass = classFactory.loadApplicationClass( toolClassName );
             }
             catch (ClassNotFoundException cnfe) { throw wrap( cnfe ); }
+
+            if (!OptionalTool.class.isAssignableFrom(toolClass)) {
+                throw badCustomTool(toolClassName);
+            }
+
+            try {
+                tool = (OptionalTool) toolClass.newInstance();
+            }
             catch (InstantiationException ie) { throw wrap( ie ); }
             catch (IllegalAccessException iae) { throw wrap( iae ); }
 
@@ -145,6 +152,11 @@ public  class   Java5SystemProcedures
     private static  StandardException   badTool( String toolName )
     {
         return StandardException.newException( SQLState.LANG_UNKNOWN_TOOL_NAME,  toolName );
+    }
+
+    private static StandardException badCustomTool(String className) {
+        return StandardException.newException(
+                SQLState.LANG_UNKNOWN_CUSTOM_TOOL_NAME, className);
     }
 
     /**

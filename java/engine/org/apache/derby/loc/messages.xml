@@ -3860,6 +3860,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>X0Y88.S.1</name>
+                <text>The class '{0}' does not implement the org.apache.derby.iapi.sql.dictionary.OptionalTool interface.</text>
+                <arg>className</arg>
+            </msg>
+
+            <msg>
                 <name>X0Y89.S</name>
                 <text>Bad arguments passed to SYSCS_UTIL.SYSCS_REGISTER_TOOL(). Please consult the Reference Manual section which describes this system procedure.</text>
             </msg>

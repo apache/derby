@@ -425,7 +425,7 @@ public class OptionalToolsTest  extends GeneratedColumnsHelper
         expectExecutionError
             (
              dboConnection,
-             UNEXPECTED_USER_EXCEPTION,
+             UNKNOWN_TOOL,
              "call syscs_util.syscs_register_tool( 'customTool', true, 'java.lang.String' )"
              );
 

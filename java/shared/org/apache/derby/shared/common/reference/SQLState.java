@@ -1433,6 +1433,7 @@ public interface SQLState {
 	String LANG_CANT_FLUSH_PREALLOCATOR                                = "X0Y86.S";
 	String LANG_BAD_UDA_OR_FUNCTION_NAME                                = "X0Y87.S";
 	String LANG_UNKNOWN_TOOL_NAME                                = "X0Y88.S";
+    String LANG_UNKNOWN_CUSTOM_TOOL_NAME                              = "X0Y88.S.1";
 	String LANG_BAD_OPTIONAL_TOOL_ARGS                                = "X0Y89.S";
 	String LANG_CANT_INSTANTIATE_CLASS                                = "X0Y90.S";
     String LANG_SET_CONSTRAINT_NOT_DEFERRABLE                         = "X0Y91.S";
