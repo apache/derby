@@ -210,6 +210,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests SystemPrincipal.
      */
     public void testSystemPrincipal() {
+        // test a valid SystemPrincipal
+        SystemPrincipal p = new SystemPrincipal("superuser");
+        assertEquals("superuser", p.getName());
+
         // test SystemPrincipal with null name argument
         try {
             new SystemPrincipal(null);
@@ -667,6 +671,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     public void testSerialization() throws IOException {
         testDatabasePermissionSerialization();
         testSystemPermissionSerialization();
+        testSystemPrincipalSerialization();
     }
 
     /**
@@ -811,6 +816,23 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 VALID_SYSPERM_NAMES[0],
                 null),
             NullPointerException.class);
+    }
+
+    /**
+     * Test serialization of SystemPrincipal objects.
+     */
+    private void testSystemPrincipalSerialization() throws IOException {
+        // Serialize and deserialize a valid object.
+        SystemPrincipal p = new SystemPrincipal("superuser");
+        assertEquals(p, serializeDeserialize(p, null));
+
+        // Deserialize a SystemPrincipal whose name is null. Should fail.
+        setField(SystemPrincipal.class, "name", p, null);
+        serializeDeserialize(p, NullPointerException.class);
+
+        // Deserialize a SystemPrincipal whose name is empty. Should fail.
+        setField(SystemPrincipal.class, "name", p, "");
+        serializeDeserialize(p, IllegalArgumentException.class);
     }
 
     /**

@@ -21,6 +21,8 @@
 
 package org.apache.derby.authentication;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.security.Principal;
 
@@ -90,6 +92,17 @@ final public class SystemPrincipal implements Principal, Serializable {
      * @throws IllegalArgumentException if name is not a legal Principal name
      */
     public SystemPrincipal(String name) {
+        validateName(name);
+        this.name = name;
+    }
+
+    /**
+     * Verify that the specified name of the principal is valid.
+     * @param name the name of the principal
+     * @throws NullPointerException if name is null
+     * @throws IllegalArgumentException if name is not a legal Principal name
+     */
+    private static void validateName(String name) {
         // RuntimeException messages not localized
         if (name == null) {
             throw new NullPointerException("name can't be null");
@@ -97,7 +110,6 @@ final public class SystemPrincipal implements Principal, Serializable {
         if (name.length() == 0) {
             throw new IllegalArgumentException("name can't be empty");
         }
-        this.name = name;
     }
 
     /**
@@ -150,4 +162,18 @@ final public class SystemPrincipal implements Principal, Serializable {
     public String toString() {
         return getClass().getName() + "(" + name + ")";
     }
+
+    /**
+     * Called upon deserialization for restoring the state of this
+     * SystemPrincipal from a stream.
+     */
+    private void readObject(ObjectInputStream s)
+            throws IOException, ClassNotFoundException {
+        // Read the fields from the stream.
+        s.defaultReadObject();
+
+        // Make sure name is valid.
+        validateName(name);
+    }
+
 }
