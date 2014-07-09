@@ -60,8 +60,7 @@ public class BootLockTest extends BaseJDBCTestCase {
     
     private static String[] cmd = new String[]{
         "org.apache.derbyTesting.functionTests.tests.store.BootLockMinion",
-        dbDir,
-        ""
+        dbName,
     };
 
     private final static String DATA_MULTIPLE_JBMS_ON_DB = "XSDB6";
@@ -147,7 +146,7 @@ public class BootLockTest extends BaseJDBCTestCase {
             }
         }
         // Since all went OK, no need to keep the minion log file.
-        File minionLog = new File("BootLockMinion.log");
+        File minionLog = new File(DEFAULT_DB_DIR, "BootLockMinion.log");
         assertTrue(minionLog.delete());
 
         if (JDBC.vmSupportsJSR169()) {

@@ -24,7 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.io.File;
-import org.apache.derby.jdbc.EmbeddedDataSource;
+import javax.sql.DataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 
 /**
  * Create and boot the supplied db argument. This auxiliary program is used by
@@ -46,9 +47,8 @@ public class BootLockMinion {
                            "BootLockMinion.log");
         try
         {
-            EmbeddedDataSource ds = new EmbeddedDataSource();
-            ds.setDatabaseName(dbName);
-            ds.setCreateDatabase("create");
+            DataSource ds = JDBCDataSource.getDataSource(dbName);
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
 
             con = ds.getConnection();
             stmt = con.createStatement();
