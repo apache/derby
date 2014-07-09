@@ -26,11 +26,10 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 import java.security.AccessController;
-import org.apache.derby.iapi.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Locale;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,16 +118,16 @@ final public class DatabasePermission extends Permission {
     /**
      * The legal database permission action names.
      */
-    static protected final Set<String> LEGAL_ACTIONS = new HashSet<String>();
+    static protected final List<String> LEGAL_ACTIONS = new ArrayList<String>();
     static {
         // when adding new actions, check: implies(Permission), getActions()
         LEGAL_ACTIONS.add(CREATE);
     };
 
     /**
-     * The original location URL passed to constructor.
+     * The actions of this permission, as returned by {@link #getActions()}.
      */
-    private final String url;
+    private String actions;
 
     /**
      * This permission's canonical directory path.
@@ -166,8 +165,10 @@ final public class DatabasePermission extends Permission {
      * this field's value is URL_PATH_INCLUSIVE_CHAR, URL_PATH_RECURSIVE_CHAR,
      * or URL_PATH_WILDCARD_CHAR, respectively; otherwise, it's
      * URL_PATH_SEPARATOR_CHAR denoting a single location.
+     *
+     * This field gets recomputed upon deserialization.
      */
-    private char pathType;
+    private transient char pathType;
 
     /**
      * Creates a new DatabasePermission with the specified URL and actions.
@@ -211,9 +212,6 @@ final public class DatabasePermission extends Permission {
         super(url);
         initActions(actions);
         initLocation(url);
-
-        // store original URL for reconstructing path at deserialization
-        this.url = url;
     }
 
     /**
@@ -233,17 +231,24 @@ final public class DatabasePermission extends Permission {
             throw new IllegalArgumentException("actions can't be empty");
         }
 
+        // Get all the actions specified in the actions string
+        Set<String> actionSet = SystemPermission.parseActions(actions);
+
         // check for any illegal actions
-        actions = actions.toLowerCase(Locale.ENGLISH);
-        final String[] s = StringUtil.split(actions, ',');
-        for (int i = 0; i < s.length; i++) {
-            final String action = s[i].trim();
+        for (String action : actionSet) {
             if (!LEGAL_ACTIONS.contains(action)) {
                 // report illegal action
                 final String msg = "Illegal action '" + action + "'";
                 throw new IllegalArgumentException(msg);
             }
         }
+
+        // Get all the legal actions that are in actionSet, in the order
+        // of LEGAL_ACTIONS.
+        List<String> legalActions = new ArrayList<String>(LEGAL_ACTIONS);
+        legalActions.retainAll(actionSet);
+
+        this.actions = SystemPermission.buildActionsString(legalActions);
     }
 
     /**
@@ -466,8 +471,7 @@ final public class DatabasePermission extends Permission {
      * @see Permission#getActions()
      */
     public String getActions() {
-        // currently, the only supported action
-        return CREATE;
+        return actions;
     }
 
 
@@ -490,7 +494,12 @@ final public class DatabasePermission extends Permission {
     {
         // read the non-static and non-transient fields from the stream
         s.defaultReadObject();
+
+        // Validate the URL read from the object stream, and
         // restore the platform-dependent path from the original URL
-        initLocation(url);
+        initLocation(getName());
+
+        // Validate and normalize the actions read from the stream.
+        initActions(getActions());
     }
 }

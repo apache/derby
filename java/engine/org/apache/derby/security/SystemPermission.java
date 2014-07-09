@@ -160,30 +160,51 @@ final public class SystemPermission extends BasicPermission {
     /**
      * Return a canonical form of the passed in actions.
      * Actions are lower-cased, in the order of LEGAL_ACTIONS
-     * and on;ly appear once.
+     * and only appear once.
      */
     private static String getCanonicalForm(String actions) {
-        actions = actions.trim().toLowerCase(Locale.ENGLISH);
-        
-        boolean[] seenAction = new boolean[LEGAL_ACTIONS.size()];
-        StringTokenizer st = new StringTokenizer(actions, ",");
-        while (st.hasMoreTokens()) {
-            String action = st.nextToken().trim().toLowerCase(Locale.ENGLISH);
-            int validAction = LEGAL_ACTIONS.indexOf(action);
-            if (validAction != -1)
-                seenAction[validAction] = true;
+        Set<String> actionSet = parseActions(actions);
+
+        // Get all the legal actions that are in actionSet, in the order
+        // of LEGAL_ACTIONS.
+        List<String> legalActions = new ArrayList<String>(LEGAL_ACTIONS);
+        legalActions.retainAll(actionSet);
+
+        return buildActionsString(legalActions);
+    }
+
+    /**
+     * Get a set of all actions specified in a string. Actions are transformed
+     * to lower-case, and leading and trailing blanks are stripped off.
+     *
+     * @param actions the specified actions string
+     * @return a set of all the specified actions
+     */
+    static Set<String> parseActions(String actions) {
+        HashSet<String> actionSet = new HashSet<String>();
+        for (String s : actions.split(",", -1)) {
+            actionSet.add(s.trim().toLowerCase(Locale.ENGLISH));
         }
-        
-        StringBuffer sb = new StringBuffer();
-        for (int sa = 0; sa < seenAction.length; sa++)
-        {
-            if (seenAction[sa]) {
-                if (sb.length() != 0)
-                    sb.append(",");
-                sb.append(LEGAL_ACTIONS.get(sa));
+        return actionSet;
+    }
+
+    /**
+     * Build a comma-separated actions string suitable for returning from
+     * {@code getActions()}.
+     *
+     * @param actions the list of actions
+     * @return comma-separated string with the actions
+     */
+    static String buildActionsString(Iterable<String> actions) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String action : actions) {
+            if (sb.length() > 0) {
+                sb.append(',');
             }
+            sb.append(action);
         }
-        
+
         return sb.toString();
     }
 

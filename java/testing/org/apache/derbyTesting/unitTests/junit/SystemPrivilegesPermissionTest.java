@@ -33,6 +33,7 @@ import java.security.AccessController;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 import javax.security.auth.Subject;
@@ -282,6 +283,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         assertEquals("control,monitor",
                      new SystemPermission("server", "control, monitor, control")
                              .getActions());
+        assertEquals("control,monitor",
+                     new SystemPermission("server", "monitor, control, monitor")
+                             .getActions());
         assertEquals("control",
                      new SystemPermission("server", "CoNtRoL")
                              .getActions());
@@ -430,7 +434,15 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
-        
+
+        // test DatabasePermission with unsupported protocol
+        try {
+            new DatabasePermission("unknown:test", DatabasePermission.CREATE);
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
         // this test's commented out because it's platform-dependent
         // (no reliable way to make it pass on Unix)
         // test DatabasePermission with non-canonicalizable URL
@@ -476,9 +488,41 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             // expected exception
         }
     
+        // test DatabasePermission with illegal action list
+        try {
+            new DatabasePermission("directory:dir", "illegal,create,action");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
         // test DatabasePermission on illegal action list
         try {
             new DatabasePermission("directory:dir", "illegal;action");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
+        // test DatabasePermission with illegal action list
+        try {
+            new DatabasePermission("directory:dir", ",");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
+        // test DatabasePermission with illegal action list
+        try {
+            new DatabasePermission("directory:dir", " ");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
+        // test DatabasePermission with illegal action list
+        try {
+            new DatabasePermission("directory:dir", "create,");
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
@@ -563,6 +607,14 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         checkImplies(inclPerms, absDirPathAliasPerms, allTrue);
         checkImplies(absDirPathAliasPerms, inclPerms, allFalse);
 
+        // Actions string is washed (lower-cased, trimmed) and duplicates
+        // are removed.
+        DatabasePermission perm =
+                new DatabasePermission("directory:dir", "create, create");
+        assertEquals("create", perm.getActions());
+        perm = new DatabasePermission("directory:dir", "  CrEaTe  ");
+        assertEquals("create", perm.getActions());
+
         // DERBY-3476: The DatabasePermission class should be final.
         assertTrue(Modifier.isFinal(DatabasePermission.class.getModifiers()));
     }
@@ -613,7 +665,89 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * deserialization of invalid objects fails.
      */
     public void testSerialization() throws IOException {
+        testDatabasePermissionSerialization();
+        testSystemPermissionSerialization();
+    }
 
+    /**
+     * Test serialization and deserialization of DatabasePermission objects.
+     */
+    private void testDatabasePermissionSerialization() throws IOException {
+        // Simple test of serialization/deserialization of a valid object
+        DatabasePermission perm =
+                new DatabasePermission("directory:dir", "create");
+        assertEquals(perm, serializeDeserialize(perm, null));
+
+        // Test of relative paths
+        for (String url : relDirPaths) {
+            perm = new DatabasePermission(url, "create");
+            assertEquals(perm, serializeDeserialize(perm, null));
+        }
+
+        // Test of relative path aliases
+        for (String url : relDirPathAliases) {
+            perm = new DatabasePermission(url, "create");
+            assertEquals(perm, serializeDeserialize(perm, null));
+        }
+
+        // Test of absolute paths
+        for (String url : absDirPaths) {
+            perm = new DatabasePermission(url, "create");
+            assertEquals(perm, serializeDeserialize(perm, null));
+        }
+
+        // Test of absolute path aliases
+        for (String url : absDirPathAliases) {
+            perm = new DatabasePermission(url, "create");
+            assertEquals(perm, serializeDeserialize(perm, null));
+        }
+
+        // Actions should be normalized when read from the stream.
+        for (String actions :
+                Arrays.asList("create", "CrEaTe", " create ,  create")) {
+            perm = serializeDeserialize(
+                    createDBPermNoCheck("directory:dir", actions),
+                    null);
+            assertEquals("create", perm.getActions());
+        }
+
+        // Null URL should fail on deserialization (didn't before DERBY-3476)
+        perm = createDBPermNoCheck(null, "create");
+        serializeDeserialize(perm, NullPointerException.class);
+
+        // Empty URL should fail on deserialization (didn't before DERBY-3476)
+        perm = createDBPermNoCheck("", "create");
+        serializeDeserialize(perm, IllegalArgumentException.class);
+
+        // Unsupported protocol should fail on deserialization (didn't before
+        // DERBY-3476)
+        perm = createDBPermNoCheck("unknown:test", "create");
+        serializeDeserialize(perm, IllegalArgumentException.class);
+
+        // Null actions should fail on deserialization
+        serializeDeserialize(createDBPermNoCheck("directory:dir", null),
+                             NullPointerException.class);
+
+        // Empty and invalid actions should fail on deserialization
+        serializeDeserialize(createDBPermNoCheck("directory:dir", ""),
+                             IllegalArgumentException.class);
+        serializeDeserialize(createDBPermNoCheck("directory:dir", " "),
+                             IllegalArgumentException.class);
+        serializeDeserialize(createDBPermNoCheck("directory:dir", ","),
+                             IllegalArgumentException.class);
+        serializeDeserialize(createDBPermNoCheck("directory:dir", "create,"),
+                             IllegalArgumentException.class);
+        serializeDeserialize(createDBPermNoCheck("directory:dir", "invalid"),
+                             IllegalArgumentException.class);
+        serializeDeserialize(createDBPermNoCheck("directory:dir",
+                                                 "create,invalid"),
+                             IllegalArgumentException.class);
+    }
+
+    /**
+     * Test serialization and deserialization of SystemPermission objects.
+     */
+    private void testSystemPermissionSerialization() throws IOException {
         // Test all valid name/action combinations. All should succeed to
         // serialize and deserialize.
         for (String name : VALID_SYSPERM_NAMES) {
@@ -677,6 +811,29 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 VALID_SYSPERM_NAMES[0],
                 null),
             NullPointerException.class);
+    }
+
+    /**
+     * Create a DatabasePermission object without checking that the URL
+     * and the actions are valid.
+     *
+     * @param url the URL of the permission
+     * @param actions the actions of the permission
+     * @return a DatabasePermission instance
+     */
+    private static DatabasePermission createDBPermNoCheck(
+            String url, String actions) throws IOException {
+        // First create a valid permission object, so that the checks in
+        // the constructor are happy.
+        DatabasePermission perm =
+                new DatabasePermission("directory:dir", "create");
+
+        // Then use reflection to override the values of the fields with
+        // potentially invalid values.
+        setField(Permission.class, "name", perm, url);
+        setField(DatabasePermission.class, "actions", perm, actions);
+
+        return perm;
     }
 
     /**
