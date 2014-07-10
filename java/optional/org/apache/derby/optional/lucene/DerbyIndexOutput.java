@@ -22,9 +22,8 @@
 package org.apache.derby.optional.lucene;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.zip.CRC32;
 
-import org.apache.lucene.store.AlreadyClosedException;
 import org.apache.lucene.store.IndexOutput;
 
 import org.apache.derby.io.StorageFile;
@@ -54,6 +53,7 @@ class DerbyIndexOutput   extends IndexOutput
     private StorageFile                     _file;
     private DerbyLuceneDir              _parentDir;
     private StorageRandomAccessFile _sraf;
+    private final CRC32 _crc = new CRC32();
 
     /////////////////////////////////////////////////////////////////////
     //
@@ -72,7 +72,7 @@ class DerbyIndexOutput   extends IndexOutput
 
     /////////////////////////////////////////////////////////////////////
     //
-    //  IndexInput METHODS
+    //  IndexOutput METHODS
     //
     /////////////////////////////////////////////////////////////////////
 
@@ -110,21 +110,28 @@ class DerbyIndexOutput   extends IndexOutput
         return _sraf.length();
     }
 
+    public long getChecksum()
+    {
+        return _crc.getValue();
+    }
+
     /////////////////////////////////////////////////////////////////////
     //
-    //  DataInput METHODS
+    //  DataOutput METHODS
     //
     /////////////////////////////////////////////////////////////////////
 
     public void writeByte(byte b)   throws IOException
     {
         _sraf.writeByte( b );
+        _crc.update(b);
     }
 
     public void writeBytes(byte[] b, int offset, int length)
         throws IOException
     {
         _sraf.write( b, offset, length );
+        _crc.update(b, offset, length);
     }
 
 
