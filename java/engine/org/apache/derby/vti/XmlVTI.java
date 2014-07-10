@@ -193,9 +193,13 @@ public  class   XmlVTI  extends StringColumnVTI
 
     /**
      * <p>
-     * Build a XmlVTI given an xml resource stream, the  tag of the row
-     * element, and an array of attribute-names/element-tags underneath the row element
+     * Build an XmlVTI.
      * </p>
+     *
+     * @param   xmlResource The xml source as an InputStream.
+     * @param   rowTag  The tag of the master row Element.
+     * @param   firstChildTagIdx    The first (0-based) tag from columnTags which is a child tag.
+     * @param   columnTags  The tags which supply column data; all of the tag positions less than firstChildTagIdx come from Elements which are outer to the rowTag element; the remaining tags, starting at firstChildTagIdx, are tags of attributes or Elements inside the rowTag Element.
      */
     public  XmlVTI( InputStream xmlResource, String rowTag, int firstChildTagIdx, String... columnTags )
     {
