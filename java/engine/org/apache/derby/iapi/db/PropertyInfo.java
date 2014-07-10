@@ -24,6 +24,9 @@ package org.apache.derby.iapi.db;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
+
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -47,6 +50,7 @@ public final class PropertyInfo
 
 	/**
 		Set or delete the value of a property of the database on the current connection.
+        For security reasons (see DERBY-6616), this code is duplicated in SystemProcedures.
 
 		@param key the property key
 		@param value the new value, if null the property is deleted.
@@ -59,6 +63,8 @@ public final class PropertyInfo
 		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
 		try {
+            SecurityUtil.authorize( Securable.SET_DATABASE_PROPERTY );
+            
 		Authorizer a = lcc.getAuthorizer();
 		a.authorize((Activation) null, Authorizer.PROPERTY_WRITE_OP);
 

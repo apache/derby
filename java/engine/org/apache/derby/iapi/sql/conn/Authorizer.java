@@ -21,8 +21,12 @@
 
 package org.apache.derby.iapi.sql.conn;
 
+import java.util.List;
+
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.error.StandardException;
+
 /**
   The Authorizer verifies a connected user has the authorization 
   to perform a requested database operation using the current
@@ -121,6 +125,21 @@ public interface Authorizer
 	*/
 	public void authorize(Activation activation, int operation)
 				throws StandardException;
+
+	/**
+	  Verify the connected user possesses the indicated permissions
+
+	  @param requiredPermissionsList    the required permissions
+	  @param activation holds the execution logic
+
+	  @exception StandardException Thrown if the operation is not allowed
+	*/
+	public void authorize
+        (
+         List<StatementPermission> requiredPermissionsList,
+         Activation activation
+         )
+        throws StandardException;
 
    /**
 	 Get the readOnly status for this authorizer's connection.

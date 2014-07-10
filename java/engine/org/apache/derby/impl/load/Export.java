@@ -31,7 +31,8 @@ import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FileUtil;
-
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
 
 /**
  * This class provides ways to export data from
@@ -182,6 +183,12 @@ public class Export extends ExportAbstract{
 							  String columnDelimeter, String characterDelimeter,
 							  String codeset)
 		throws SQLException {
+
+        /** Make sure that the current user has permission to perform this operation */
+        try {
+            SecurityUtil.authorize( Securable.EXPORT_TABLE );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
 		
 		Export fex = new Export(con, schemaName, tableName, null,
 										outputFileName,	characterDelimeter,   

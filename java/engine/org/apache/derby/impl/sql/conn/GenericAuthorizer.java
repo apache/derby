@@ -134,64 +134,79 @@ class GenericAuthorizer implements Authorizer
         {
             List<StatementPermission> requiredPermissionsList =
                 activation.getPreparedStatement().getRequiredPermissionsList();
-            DataDictionary dd = lcc.getDataDictionary();
 
-            // Database Owner can access any object. Ignore 
-            // requiredPermissionsList for Database Owner
-            if( requiredPermissionsList != null    && 
-                !requiredPermissionsList.isEmpty() && 
-                !lcc.getCurrentUserId(activation).equals(
-                    dd.getAuthorizationDatabaseOwner()))
-            {
-                int ddMode = dd.startReading(lcc);
+            authorize( requiredPermissionsList, activation );
+        }
+    }
+
+	public void authorize
+        (
+         List<StatementPermission> requiredPermissionsList,
+         Activation activation
+         )
+        throws StandardException
+    {
+        DataDictionary dd = lcc.getDataDictionary();
+
+        // Database Owner can access any object. Ignore 
+        // requiredPermissionsList for Database Owner
+        if( requiredPermissionsList != null    && 
+            !requiredPermissionsList.isEmpty() && 
+            !lcc.getCurrentUserId(activation).equals(
+                                                     dd.getAuthorizationDatabaseOwner()))
+        {
+            int ddMode = dd.startReading(lcc);
                 
-                 /*
-                  * The system may need to read the permission descriptor(s) 
-                  * from the system table(s) if they are not available in the 
-                  * permission cache.  So start an internal read-only nested 
-                  * transaction for this.
-                  * 
-                  * The reason to use a nested transaction here is to not hold
-                  * locks on system tables on a user transaction.  e.g.:  when
-                  * attempting to revoke an user, the statement may time out
-                  * since the user-to-be-revoked transaction may have acquired 
-                  * shared locks on the permission system tables; hence, this
-                  * may not be desirable.  
-                  * 
-                  * All locks acquired by StatementPermission object's check()
-                  * method will be released when the system ends the nested 
-                  * transaction.
-                  * 
-                  * In Derby, the locks from read nested transactions come from
-                  * the same space as the parent transaction; hence, they do not
-                  * conflict with parent locks.
-                  */  
-                lcc.beginNestedTransaction(true);
+            /*
+             * The system may need to read the permission descriptor(s) 
+             * from the system table(s) if they are not available in the 
+             * permission cache.  So start an internal read-only nested 
+             * transaction for this.
+             * 
+             * The reason to use a nested transaction here is to not hold
+             * locks on system tables on a user transaction.  e.g.:  when
+             * attempting to revoke an user, the statement may time out
+             * since the user-to-be-revoked transaction may have acquired 
+             * shared locks on the permission system tables; hence, this
+             * may not be desirable.  
+             * 
+             * All locks acquired by StatementPermission object's check()
+             * method will be released when the system ends the nested 
+             * transaction.
+             * 
+             * In Derby, the locks from read nested transactions come from
+             * the same space as the parent transaction; hence, they do not
+             * conflict with parent locks.
+             */  
+            lcc.beginNestedTransaction(true);
             	
+            try 
+            {
                 try 
                 {
-                    try 
+                    // perform the permission checking
+                    for (StatementPermission rp : requiredPermissionsList)
                     {
-                    	// perform the permission checking
-                        for (StatementPermission rp : requiredPermissionsList)
-                        {
-                            rp.check(lcc, false, activation);
-                        }
-                    } 
-                    finally 
-                    {
-                        dd.doneReading(ddMode, lcc);
+                        rp.check(lcc, false, activation);
                     }
                 } 
                 finally 
                 {
-                	// make sure we commit; otherwise, we will end up with 
-                	// mismatch nested level in the language connection context.
-                    lcc.commitNestedTransaction();
+                    dd.doneReading(ddMode, lcc);
                 }
+            } 
+            finally 
+            {
+                // make sure we commit; otherwise, we will end up with 
+                // mismatch nested level in the language connection context.
+                lcc.commitNestedTransaction();
             }
         }
     }
+    
+    /**
+     * Throw an exception if the user does not have all of the required permissions.
+     */
 
 	private static StandardException externalRoutineException(int operation, int sqlAllowed) {
 

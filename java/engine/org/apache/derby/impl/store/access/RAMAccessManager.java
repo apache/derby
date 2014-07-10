@@ -21,6 +21,9 @@
 
 package org.apache.derby.impl.store.access;
 
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
+
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheableFactory;
 import org.apache.derby.iapi.services.cache.CacheFactory;
@@ -929,11 +932,19 @@ public abstract class RAMAccessManager
 
 	public void freeze() throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.FREEZE_DATABASE );
+            
 		rawstore.freeze();
 	}
 
 	public void unfreeze() throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.UNFREEZE_DATABASE );
+            
 		rawstore.unfreeze();
 	}
 
@@ -942,6 +953,14 @@ public abstract class RAMAccessManager
     boolean wait) 
         throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize
+            (
+             wait ?
+             Securable.BACKUP_DATABASE :
+             Securable.BACKUP_DATABASE_NOWAIT
+             );
 		rawstore.backup(backupDir, wait);
 	}
 
@@ -952,6 +971,14 @@ public abstract class RAMAccessManager
     boolean wait)
 		throws StandardException 
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize
+            (
+             wait ?
+             Securable.BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE :
+             Securable.BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT
+             );
 		rawstore.backupAndEnableLogArchiveMode(backupDir, 
                                                deleteOnlineArchivedLogFiles, 
                                                wait);
@@ -960,6 +987,10 @@ public abstract class RAMAccessManager
 	public void disableLogArchiveMode(boolean deleteOnlineArchivedLogFiles)
 		throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.DISABLE_LOG_ARCHIVE_MODE );
+            
 		rawstore.disableLogArchiveMode(deleteOnlineArchivedLogFiles);
 	}
 
@@ -967,6 +998,10 @@ public abstract class RAMAccessManager
 
 	public void checkpoint() throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.CHECKPOINT_DATABASE );
+            
 		rawstore.checkpoint();
 	}
 

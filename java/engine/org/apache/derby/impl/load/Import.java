@@ -30,6 +30,8 @@ import java.util.*;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 
@@ -123,6 +125,19 @@ public class Import extends ImportAbstract{
 		throws SQLException {
 
 
+        /** Make sure that the current user has permission to perform this operation */
+        try {
+            if ( lobsInExtFile )
+            {
+                SecurityUtil.authorize( Securable.IMPORT_TABLE_LOBS_FROM_EXTFILE );
+            }
+            else
+            {
+                SecurityUtil.authorize( Securable.IMPORT_TABLE );
+            }
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+		
 		performImport(connection,  schemaName,  null, //No columnList 
 					  null , //No column indexes
 					  tableName, inputFileName, columnDelimiter, 
@@ -161,7 +176,18 @@ public class Import extends ImportAbstract{
                                   boolean lobsInExtFile)
 		throws SQLException 
 	{
-		
+        /** Make sure that the current user has permission to perform this operation */
+        try {
+            if ( lobsInExtFile )
+            {
+                SecurityUtil.authorize( Securable.IMPORT_DATA_LOBS_FROM_EXTFILE );
+            }
+            else
+            {
+                SecurityUtil.authorize( Securable.IMPORT_DATA );
+            }
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
 
 			performImport(connection,  schemaName,  insertColumnList,columnIndexes, 
 						  tableName, inputFileName, columnDelimiter, 

@@ -21,12 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.security.AccessControlException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.SQLException;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+
+import org.apache.derby.catalog.SystemProcedures;
 
 /**
  * Tests that certain operations can only be performed by the DBO.
@@ -48,6 +53,45 @@ public class DBOAccessTest extends GeneratedColumnsHelper
 
     private static  final   String      ONLY_DBO = "4251D";
     private static  final   String      HIDDEN_COLUMN = "4251E";
+    private static  final   String      NULL_BACKUP_DIRECTORY = "XSRS6";
+    private static  final   String      FIRST_CREDENTIALS = "4251K";
+    private static  final   String      MISSING_OBJECT = "X0X13";
+    private static  final   String      MISSING_TABLE = "42X05";
+    private static  final   String      NO_SUCH_TABLE = "XIE0M";
+    private static  final   String      UNKNOWN_USER = "XK001";
+
+    private static  final   String      SYSCS_SET_DATABASE_PROPERTY = "SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY";
+    private static  final   String      SYSCS_GET_DATABASE_PROPERTY = "SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY";
+    private static  final   String      SYSCS_FREEZE_DATABASE = "SYSCS_UTIL.SYSCS_FREEZE_DATABASE";
+    private static  final   String      SYSCS_UNFREEZE_DATABASE = "SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE";
+    private static  final   String      SYSCS_CHECKPOINT_DATABASE = "SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE";
+    private static  final   String      SYSCS_BACKUP_DATABASE = "SYSCS_UTIL.SYSCS_BACKUP_DATABASE";
+    private static  final   String      SYSCS_BACKUP_DATABASE_NOWAIT = "SYSCS_UTIL.SYSCS_BACKUP_DATABASE_NOWAIT";
+    private static  final   String      SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE = "SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE";
+    private static  final   String      SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT = "SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT";
+    private static  final   String      SYSCS_DISABLE_LOG_ARCHIVE_MODE = "SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE";
+    private static  final   String      SYSCS_CHECK_TABLE = "SYSCS_UTIL.SYSCS_CHECK_TABLE";
+    private static  final   String      INSTALL_JAR = "SQLJ.INSTALL_JAR";
+    private static  final   String      REPLACE_JAR = "SQLJ.REPLACE_JAR";
+    private static  final   String      REMOVE_JAR = "SQLJ.REMOVE_JAR";
+    private static  final   String      SYSCS_EXPORT_TABLE = "SYSCS_UTIL.SYSCS_EXPORT_TABLE";
+    private static  final   String      SYSCS_IMPORT_TABLE = "SYSCS_UTIL.SYSCS_IMPORT_TABLE";
+    private static  final   String      SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE = "SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE";
+    private static  final   String      SYSCS_IMPORT_DATA = "SYSCS_UTIL.SYSCS_IMPORT_DATA";
+    private static  final   String      SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE = "SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE";
+    private static  final   String      SYSCS_BULK_INSERT = "SYSCS_UTIL.SYSCS_BULK_INSERT";
+    private static  final   String      SYSCS_RELOAD_SECURITY_POLICY = "SYSCS_UTIL.SYSCS_RELOAD_SECURITY_POLICY";
+    private static  final   String      SYSCS_SET_USER_ACCESS = "SYSCS_UTIL.SYSCS_SET_USER_ACCESS";
+    private static  final   String      SYSCS_GET_USER_ACCESS = "SYSCS_UTIL.SYSCS_GET_USER_ACCESS";
+    private static  final   String      SYSCS_INVALIDATE_STORED_STATEMENTS = "SYSCS_UTIL.SYSCS_INVALIDATE_STORED_STATEMENTS";
+    private static  final   String      SYSCS_EMPTY_STATEMENT_CACHE = "SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE";
+    private static  final   String      SYSCS_SET_XPLAIN_MODE = "SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE";
+    private static  final   String      SYSCS_GET_XPLAIN_MODE = "SYSCS_UTIL.SYSCS_GET_XPLAIN_MODE";
+    private static  final   String      SYSCS_SET_XPLAIN_SCHEMA = "SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA";
+    private static  final   String      SYSCS_GET_XPLAIN_SCHEMA = "SYSCS_UTIL.SYSCS_GET_XPLAIN_SCHEMA";
+    private static  final   String      SYSCS_CREATE_USER = "SYSCS_UTIL.SYSCS_CREATE_USER";
+    private static  final   String      SYSCS_RESET_PASSWORD = "SYSCS_UTIL.SYSCS_RESET_PASSWORD";
+    private static  final   String      SYSCS_DROP_USER = "SYSCS_UTIL.SYSCS_DROP_USER";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -234,8 +278,320 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         }
     }
 
+    /**
+     * <p>
+     * Tests that you can't subvert sql authorization by directly calling
+     * the entry points in SystemProcedures.
+     * </p>
+     */
+    public  void    test_6616() throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  janetConnection = openUserConnection( JANET );
+
+        goodStatement
+            (
+             dboConnection,
+             "create procedure runSystemRoutine( routineName varchar( 32672 ) )\n" +
+             "language java parameter style java modifies sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.DBOAccessTest.runSystemRoutine'\n"
+             );
+        if ( authorizationIsOn() )
+        {
+            goodStatement
+                (
+                 dboConnection,
+                 "grant execute on procedure runSystemRoutine to public"
+                 );
+        }
+
+        vet6616( dboConnection, janetConnection, SYSCS_SET_DATABASE_PROPERTY, false );
+        vet6616( dboConnection, janetConnection, SYSCS_GET_DATABASE_PROPERTY, true );
+        vet6616( dboConnection, janetConnection, SYSCS_FREEZE_DATABASE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_UNFREEZE_DATABASE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_CHECKPOINT_DATABASE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_BACKUP_DATABASE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_BACKUP_DATABASE_NOWAIT, false );
+        vet6616( dboConnection, janetConnection, SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT, false );
+        vet6616( dboConnection, janetConnection, SYSCS_DISABLE_LOG_ARCHIVE_MODE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_CHECK_TABLE, true );
+        vet6616( dboConnection, janetConnection, INSTALL_JAR, false );
+        vet6616( dboConnection, janetConnection, REPLACE_JAR, false );
+        vet6616( dboConnection, janetConnection, REMOVE_JAR, false );
+        vet6616( dboConnection, janetConnection, SYSCS_EXPORT_TABLE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_IMPORT_TABLE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_IMPORT_DATA, false );
+        vet6616( dboConnection, janetConnection, SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_BULK_INSERT, false );
+        vet6616( dboConnection, janetConnection, SYSCS_RELOAD_SECURITY_POLICY, false );
+        vet6616( dboConnection, janetConnection, SYSCS_SET_USER_ACCESS, false );
+        vet6616( dboConnection, janetConnection, SYSCS_GET_USER_ACCESS, true );
+        vet6616( dboConnection, janetConnection, SYSCS_INVALIDATE_STORED_STATEMENTS, false );
+        vet6616( dboConnection, janetConnection, SYSCS_EMPTY_STATEMENT_CACHE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_SET_XPLAIN_MODE, false );
+        vet6616( dboConnection, janetConnection, SYSCS_GET_XPLAIN_MODE, true );
+        vet6616( dboConnection, janetConnection, SYSCS_SET_XPLAIN_SCHEMA, false );
+        vet6616( dboConnection, janetConnection, SYSCS_GET_XPLAIN_SCHEMA, true );
+        vet6616( dboConnection, janetConnection, SYSCS_CREATE_USER, false );
+        vet6616( dboConnection, janetConnection, SYSCS_RESET_PASSWORD, false );
+        vet6616( dboConnection, janetConnection, SYSCS_DROP_USER, false );
+    }
+    private void    vet6616
+        ( Connection dboConnection, Connection janetConnection, String routineName, boolean isFunction )
+        throws Exception
+    {
+        vet6616( dboConnection, true, routineName );
+        vet6616( janetConnection, !authorizationIsOn(), routineName );
+
+        if ( authorizationIsOn() )
+        {
+            boolean isFreeze = SYSCS_FREEZE_DATABASE.equals( routineName );
+            String  routineType = isFunction ? "function" : "procedure";
+            goodStatement( dboConnection, "grant execute on " + routineType + " " + routineName + " to public" );
+
+            if ( isFreeze )
+            {
+                goodStatement( dboConnection, "grant execute on " + routineType + " " + SYSCS_UNFREEZE_DATABASE + " to public" );
+            }
+        
+            vet6616( janetConnection, true, routineName );
+            
+            goodStatement( dboConnection, "revoke execute on " + routineType + " " + routineName + " from public restrict" );
+
+            if ( isFreeze )
+            {
+                goodStatement
+                    ( dboConnection, "revoke execute on " + routineType + " " + SYSCS_UNFREEZE_DATABASE + " from public restrict" );
+            }
+        }
+    }
+    private void    vet6616( Connection conn, boolean shouldSucceed, String routineName )
+        throws Exception
+    {
+        CallableStatement   cs = conn.prepareCall( "call test_dbo.runSystemRoutine( ? )" );
+        cs.setString( 1, routineName );
+
+        try {
+            cs.execute();
+            if ( !shouldSucceed ) { fail( routineName + " should have failed!" ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldSucceed ) { fail( routineName + " should have succeeded: " + se.getSQLState() + " " + se.getMessage() ); }
+            else
+            {
+                assertSQLState( LACK_EXECUTE_PRIV, se );
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // SQL ROUTINES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Run various system procedures and functions by calling them directly */
+    public  static  void    runSystemRoutine( String routineName )
+        throws Exception
+    {
+        if ( SYSCS_SET_DATABASE_PROPERTY.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_SET_DATABASE_PROPERTY( "foo.bar.wibble", "wibble.bar.foo" );
+        }
+        else if ( SYSCS_GET_DATABASE_PROPERTY.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_GET_DATABASE_PROPERTY( "la.dee.dah" );
+        }
+        else if ( SYSCS_FREEZE_DATABASE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_FREEZE_DATABASE();
+
+            // if that succeeded, then unfreeze the database immediately
+            SystemProcedures.SYSCS_UNFREEZE_DATABASE();
+        }
+        else if ( SYSCS_UNFREEZE_DATABASE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_UNFREEZE_DATABASE();
+        }
+        else if ( SYSCS_CHECKPOINT_DATABASE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_CHECKPOINT_DATABASE();
+        }
+        else if ( SYSCS_BACKUP_DATABASE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_BACKUP_DATABASE( null );
+            }
+            catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
+        }
+        else if ( SYSCS_BACKUP_DATABASE_NOWAIT.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_BACKUP_DATABASE_NOWAIT( null );
+            }
+            catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
+        }
+        else if (SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE( null, (short) 0 );
+            }
+            catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
+        }
+        else if (SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT( null, (short) 0 );
+            }
+            catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
+        }
+        else if ( SYSCS_DISABLE_LOG_ARCHIVE_MODE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_DISABLE_LOG_ARCHIVE_MODE( (short) 0 );
+        }
+        else if ( SYSCS_CHECK_TABLE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_CHECK_TABLE( "SYS", "SYSTABLES" );
+        }
+        else if (INSTALL_JAR.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.INSTALL_JAR( "foo", "bar", 1 );
+            }
+            catch (AccessControlException se) { println( "Caught expected AccessControlException" ); }
+        }
+        else if (REPLACE_JAR.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.REPLACE_JAR( "foo", "bar" );
+            }
+            catch (AccessControlException se) { println( "Caught expected AccessControlException" ); }
+        }
+        else if (REMOVE_JAR.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.REMOVE_JAR( "test_dbo.foo", 0 );
+            }
+            catch (SQLException se) { vetError( MISSING_OBJECT, se ); }
+        }
+        else if ( SYSCS_EXPORT_TABLE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_EXPORT_TABLE( "TEST_DBO", "BAR", "WIBBLE", null, null, null );
+            }
+            catch (SQLException se) { vetError( JAVA_EXCEPTION, se ); }
+        }
+        else if ( SYSCS_IMPORT_TABLE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_IMPORT_TABLE( "TEST_DBO", "BAR", "WIBBLE", null, null, null, (short) 1 );
+            }
+            catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
+        }
+        else if ( SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE( "TEST_DBO", "BAR", "WIBBLE", null, null, null, (short) 1 );
+            }
+            catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
+        }
+        else if ( SYSCS_IMPORT_DATA.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_IMPORT_DATA
+                    ( "TEST_DBO", "BAR", null, "1,3,4", "WIBBLE", null, null, null, (short) 1 );
+            }
+            catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
+        }
+        else if ( SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE
+                    ( "TEST_DBO", "BAR", null, "1,3,4", "WIBBLE", null, null, null, (short) 1 );
+            }
+            catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
+        }
+        else if ( SYSCS_BULK_INSERT.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_BULK_INSERT
+                    ( "TEST_DBO", "BAR", "WIBBLE", "wombat" );
+            }
+            catch (SQLException se) { vetError( SYNTAX_ERROR, se ); }
+        }
+        else if ( SYSCS_RELOAD_SECURITY_POLICY.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_RELOAD_SECURITY_POLICY();
+        }
+        else if ( SYSCS_SET_USER_ACCESS.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_SET_USER_ACCESS( "FOO", "FULLACCESS" );
+        }
+        else if ( SYSCS_GET_USER_ACCESS.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_GET_USER_ACCESS( "FOO" );
+        }
+        else if ( SYSCS_INVALIDATE_STORED_STATEMENTS.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_INVALIDATE_STORED_STATEMENTS();
+        }
+        else if ( SYSCS_EMPTY_STATEMENT_CACHE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_EMPTY_STATEMENT_CACHE();
+        }
+        else if ( SYSCS_SET_XPLAIN_MODE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_SET_XPLAIN_MODE( 0 );
+        }
+        else if ( SYSCS_GET_XPLAIN_MODE.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_GET_XPLAIN_MODE();
+        }
+        else if ( SYSCS_SET_XPLAIN_SCHEMA.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_SET_XPLAIN_SCHEMA( "" );
+        }
+        else if ( SYSCS_GET_XPLAIN_SCHEMA.equals( routineName ) )
+        {
+            SystemProcedures.SYSCS_GET_XPLAIN_SCHEMA();
+        }
+        else if (SYSCS_CREATE_USER.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_CREATE_USER( "foo", "bar" );
+            }
+            catch (SQLException se) { vetError( FIRST_CREDENTIALS, se ); }
+        }
+        else if (SYSCS_RESET_PASSWORD.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_RESET_PASSWORD( "foo", "bar" );
+            }
+            catch (SQLException se) { vetError( UNKNOWN_USER, se ); }
+        }
+        else if (SYSCS_DROP_USER.equals( routineName ) )
+        {
+            try {
+                SystemProcedures.SYSCS_DROP_USER( "foo" );
+            }
+            catch (SQLException se) { vetError( UNKNOWN_USER, se ); }
+        }
+        else
+        {
+            throw new Exception( "Unknown routine name: " + routineName );
+        }
+    }
+    private static  void    vetError( String sqlState, SQLException se )
+        throws SQLException
+    {
+        if ( sqlState.equals( se.getSQLState() ) )
+        {
+            println( "Caught expected error: " + sqlState );
+        }
+        else { throw se; }
+    }
+
 }
-
-
-
-

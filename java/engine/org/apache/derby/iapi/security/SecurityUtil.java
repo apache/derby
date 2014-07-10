@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.security;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,9 +36,16 @@ import java.security.Permission;
 import javax.security.auth.Subject;
 
 import org.apache.derby.authentication.SystemPrincipal;
-import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * This class provides helper functions for security-related features.
@@ -164,4 +172,36 @@ public class SecurityUtil {
         final Subject subject = createSystemPrincipalSubject(user);
         checkSubjectHasPermission(subject, perm);
     }
+
+    /**
+     * Raise an exception if the current user does not have permission
+     * to perform the indicated operation.
+     */
+    public  static  void    authorize( Securable operation )
+        throws StandardException
+    {
+        LanguageConnectionContext lcc = (LanguageConnectionContext)
+				ContextService.getContextOrNull( LanguageConnectionContext.CONTEXT_ID );
+
+        if ( lcc.usesSqlAuthorization() )
+        {
+            Authorizer   authorizer = lcc.getAuthorizer();
+
+            DataDictionary dd = lcc.getDataDictionary();
+            AliasDescriptor ad = dd.getRoutineList
+                (
+                 operation.routineSchemaID,
+                 operation.routineName,
+                 operation.routineType
+                 ).get( 0 );
+            ArrayList<StatementPermission>   requiredPermissions = new ArrayList<StatementPermission>();
+            StatementRoutinePermission  executePermission = new StatementRoutinePermission( ad.getObjectID() );
+
+            requiredPermissions.add( executePermission );
+
+            authorizer.authorize( requiredPermissions, lcc.getLastActivation() );
+        }
+    }
+
+
 }

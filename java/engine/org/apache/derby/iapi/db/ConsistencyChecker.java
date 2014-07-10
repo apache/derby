@@ -24,6 +24,9 @@ package org.apache.derby.iapi.db;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
 
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
+
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -135,6 +138,9 @@ public class ConsistencyChecker
 		tc = lcc.getTransactionExecute();
 
 		try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.CHECK_TABLE );           
 
             dd = lcc.getDataDictionary();
 

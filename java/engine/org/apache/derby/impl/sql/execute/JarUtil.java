@@ -37,6 +37,8 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -97,6 +99,10 @@ public class JarUtil
             String schemaName, String sqlName, String externalPath)
 		 throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.INSTALL_JAR );
+            
 		JarUtil jutil = new JarUtil(lcc, schemaName, sqlName);
 		InputStream is = null;
 		
@@ -166,6 +172,10 @@ public class JarUtil
 	drop(LanguageConnectionContext lcc, String schemaName, String sqlName)
 		 throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.REMOVE_JAR );
+            
 		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
 		jutil.drop();
 	}
@@ -243,6 +253,10 @@ public class JarUtil
 			String externalPath)
 		 throws StandardException
 	{
+        // make sure that application code doesn't bypass security checks
+        // by calling this public entry point
+        SecurityUtil.authorize( Securable.REPLACE_JAR );
+            
 		JarUtil jutil = new JarUtil(lcc, schemaName,sqlName);
 		InputStream is = null;
 		

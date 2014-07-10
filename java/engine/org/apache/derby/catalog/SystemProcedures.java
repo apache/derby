@@ -31,21 +31,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.db.Factory;
 import org.apache.derby.iapi.db.PropertyInfo;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.security.Securable;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
@@ -62,10 +68,13 @@ import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 
@@ -684,8 +693,30 @@ public class SystemProcedures  {
     String  value)
         throws SQLException
     {
-        PropertyInfo.setDatabaseProperty(key, value);
+        setDatabaseProperty( key, value, Securable.SET_DATABASE_PROPERTY );
     }
+
+    private static void setDatabaseProperty( String key, String value, Securable authorizationCheck )
+        throws SQLException
+	{
+		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+
+		try {
+            if ( authorizationCheck != null )
+            {
+                SecurityUtil.authorize( authorizationCheck );
+            }
+            
+            Authorizer a = lcc.getAuthorizer();
+            a.authorize((Activation) null, Authorizer.PROPERTY_WRITE_OP);
+
+            // Get the current transaction controller
+            TransactionController tc = lcc.getTransactionExecute();
+
+            tc.setProperty(key, value, false);
+		} catch (StandardException se) {throw PublicAPI.wrapStandardException( se ); }
+	}
+
 
     /**
      * Get the value of a property of the database in current connection.
@@ -700,9 +731,26 @@ public class SystemProcedures  {
     String  key)
         throws SQLException
     {
+        return getProperty( key, Securable.GET_DATABASE_PROPERTY );
+    }
+
+    /**
+     * This method exists so that we can get a property value without performing
+     * authorization checks.
+     */
+    private static  String  getProperty( String key, Securable authorizationCheck )
+        throws SQLException
+    {
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
         try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            if ( authorizationCheck != null )
+            {
+                SecurityUtil.authorize( authorizationCheck );
+            }
+            
             return PropertyUtil.getDatabaseProperty(lcc.getTransactionExecute(), key);
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
@@ -1009,7 +1057,6 @@ public class SystemProcedures  {
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-
         Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
                 backupDir, 
                 (deleteOnlineArchivedLogFiles != 0),
@@ -1045,7 +1092,6 @@ public class SystemProcedures  {
     short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
-
         Factory.getDatabaseOfConnection().backupAndEnableLogArchiveMode(
                 backupDir,
                 (deleteOnlineArchivedLogFiles != 0),
@@ -1439,6 +1485,11 @@ public class SystemProcedures  {
 	String  codeset)
         throws SQLException
     {
+        //
+        // In case this routine is called directly by the application,
+        // authorization is performed by Export.exportTable().
+        //
+
 		Connection conn = getDefaultConn();
 		Export.exportTable(conn, schemaName , tableName , fileName ,
 							  columnDelimiter , characterDelimiter, codeset);
@@ -1735,6 +1786,13 @@ public class SystemProcedures  {
 	)
         throws SQLException
     {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.BULK_INSERT );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
 		Connection conn = getDefaultConn();
 
         // Use default schema if schemaName is null. This isn't consistent
@@ -1769,13 +1827,22 @@ public class SystemProcedures  {
     public static void SYSCS_RELOAD_SECURITY_POLICY()
         throws SQLException
     {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.RELOAD_SECURITY_POLICY );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
         // If no security manager installed then there
         // is no policy to refresh. Calling Policy.getPolicy().refresh()
         // without a SecurityManager seems to lock in a policy with
         // no permissions thus ignoring the system property java.security.policy
         // when later installing a SecurityManager.
         if (System.getSecurityManager() == null)
+        {
             return;
+        }
         
         try {
             AccessController.doPrivileged(
@@ -1862,8 +1929,10 @@ public class SystemProcedures  {
                 addListProperty = null;
             }
             else
+            {
                 throw StandardException.newException(SQLState.UU_UNKNOWN_PERMISSION,
                         connectionPermission);
+            }
 
             // Always remove from both lists to avoid any repeated
             // user on list errors.
@@ -1874,9 +1943,13 @@ public class SystemProcedures  {
             
             
             if (addListProperty != null) {
-                String addList = SYSCS_GET_DATABASE_PROPERTY(addListProperty);
-                SYSCS_SET_DATABASE_PROPERTY(addListProperty,
-                    IdUtil.appendNormalToList(userName, addList));
+                String addList = getProperty( addListProperty, Securable.SET_USER_ACCESS );
+                setDatabaseProperty
+                    (
+                     addListProperty,
+                     IdUtil.appendNormalToList(userName, addList),
+                     null
+                     );
             }
             
         } catch (StandardException se) {
@@ -1892,11 +1965,10 @@ public class SystemProcedures  {
             String listProperty, String userName)
         throws SQLException, StandardException
     {
-        String removeList = SYSCS_GET_DATABASE_PROPERTY(listProperty);
+        String removeList = getProperty( listProperty, Securable.SET_USER_ACCESS );
         if (removeList != null)
         {
-            SYSCS_SET_DATABASE_PROPERTY(listProperty,
-                    IdUtil.deleteId(userName, removeList));
+            setDatabaseProperty( listProperty, IdUtil.deleteId( userName, removeList ), null );
         }
     }
     
@@ -1913,25 +1985,35 @@ public class SystemProcedures  {
         try {
             
             if (userName == null)
+            {
                 throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME,
                         userName);
+            }
            
             String fullUserList =
-                SYSCS_GET_DATABASE_PROPERTY(Property.FULL_ACCESS_USERS_PROPERTY);
+                getProperty( Property.FULL_ACCESS_USERS_PROPERTY, Securable.GET_USER_ACCESS );
             if (IdUtil.idOnList(userName, fullUserList))
+            {
                 return Property.FULL_ACCESS;
+            }
             
             String readOnlyUserList =
-                SYSCS_GET_DATABASE_PROPERTY(Property.READ_ONLY_ACCESS_USERS_PROPERTY);
+                getProperty( Property.READ_ONLY_ACCESS_USERS_PROPERTY, Securable.GET_USER_ACCESS );
             if (IdUtil.idOnList(userName, readOnlyUserList))
+            {
                 return Property.READ_ONLY_ACCESS;
+            }
             
             String defaultAccess = 
-                SYSCS_GET_DATABASE_PROPERTY(Property.DEFAULT_CONNECTION_MODE_PROPERTY);
+                getProperty( Property.DEFAULT_CONNECTION_MODE_PROPERTY, Securable.GET_USER_ACCESS );
             if (defaultAccess != null)
+            {
                 defaultAccess = StringUtil.SQLToUpperCase(defaultAccess);
+            }
             else
+            {
                 defaultAccess = Property.FULL_ACCESS; // is the default.
+            }
             
             return defaultAccess;
             
@@ -1951,6 +2033,10 @@ public class SystemProcedures  {
         
         DataDictionary dd = lcc.getDataDictionary();
         try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.INVALIDATE_STORED_STATEMENTS );
+
         	dd.invalidateAllSPSPlans(lcc);
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
@@ -1966,13 +2052,22 @@ public class SystemProcedures  {
     public static void SYSCS_EMPTY_STATEMENT_CACHE()
        throws SQLException
     {
-       LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.EMPTY_STATEMENT_CACHE );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
+        LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
        
-       CacheManager statementCache =
+        CacheManager statementCache =
            lcc.getLanguageConnectionFactory().getStatementCache();
        
-       if (statementCache != null)
-           statementCache.ageOut();
+        if (statementCache != null)
+        {
+            statementCache.ageOut();
+        }
     }
   
 	 /**
@@ -1981,10 +2076,18 @@ public class SystemProcedures  {
      * @throws SQLException
      */
     public static void SYSCS_SET_XPLAIN_MODE(int mode)
-                throws SQLException, StandardException
-            {
+        throws SQLException, StandardException
+    {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.SET_XPLAIN_MODE );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
 		ConnectionUtil.getCurrentLCC().setXplainOnlyMode(mode != 0 ? true : false);
-            }
+    }
+    
     /**
      * This procedure returns the current status of the xplain mode.
      *
@@ -1995,10 +2098,17 @@ public class SystemProcedures  {
      * @throws SQLException
      */
     public static int SYSCS_GET_XPLAIN_MODE()
-                throws SQLException, StandardException
-           {
-                return ConnectionUtil.getCurrentLCC().getXplainOnlyMode()?1:0;
-           }
+        throws SQLException, StandardException
+    {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.GET_XPLAIN_MODE );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
+        return ConnectionUtil.getCurrentLCC().getXplainOnlyMode()?1:0;
+    }
     
     /**
      * This procedure sets the current xplain schema.
@@ -2011,6 +2121,13 @@ public class SystemProcedures  {
     public static void SYSCS_SET_XPLAIN_SCHEMA(String schemaName)
                 throws SQLException, StandardException
     {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.SET_XPLAIN_SCHEMA );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
         LanguageConnectionContext lcc       = ConnectionUtil.getCurrentLCC();
         TransactionController     tc        = lcc.getTransactionExecute();
 
@@ -2105,6 +2222,13 @@ public class SystemProcedures  {
     public static String SYSCS_GET_XPLAIN_SCHEMA()
                 throws SQLException, StandardException
     {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.GET_XPLAIN_SCHEMA );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
         String sd = ConnectionUtil.getCurrentLCC().getXplainSchema();
         if (sd == null)
             return "";
@@ -2129,6 +2253,10 @@ public class SystemProcedures  {
         // the first credentials must be those of the DBO and only the DBO
         // can add them
         try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.CREATE_USER );
+
             DataDictionary dd = lcc.getDataDictionary();
             String  dbo = dd.getAuthorizationDatabaseOwner();
 
@@ -2164,6 +2292,11 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        //
+        // Application code can call this method, and that is a security hole until
+        // we prevent the application from getting its hands on a transaction controller.
+        // DERBY-6648 may help prevent that.
+        //
         try {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
@@ -2230,6 +2363,13 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.RESET_PASSWORD );
+        }
+        catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
+
         resetAuthorizationIDPassword( normalizeUserName( userName ), password );
     }
 
@@ -2294,6 +2434,10 @@ public class SystemProcedures  {
         userName = normalizeUserName( userName );
             
         try {
+            // make sure that application code doesn't bypass security checks
+            // by calling this public entry point
+            SecurityUtil.authorize( Securable.DROP_USER );
+            
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
             String  dbo = dd.getAuthorizationDatabaseOwner();
