@@ -540,13 +540,15 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "on t1.c1 = t2.c1\n" +
               "when matched then delete\n"
               );
-        expectExecutionWarning
-            ( dboConnection, NO_ROWS_AFFECTED,
-              "merge into t1\n" +
-              "using v2\n" +
-              "on t1.c1 = v2.c1\n" +
-              "when matched then delete\n"
-              );
+        // allowed by sql standard, but we have problems using views
+        // as the source for MERGE statements with UPDATE clauses
+        //        expectExecutionWarning
+        //            ( dboConnection, NO_ROWS_AFFECTED,
+        //              "merge into t1\n" +
+        //              "using v2\n" +
+        //              "on t1.c1 = v2.c1\n" +
+        //              "when matched then delete\n"
+        //              );
         expectExecutionWarning
             ( dboConnection, NO_ROWS_AFFECTED,
               "merge into t1\n" +
@@ -4692,7 +4694,10 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "create view singlerow_028( x ) as values 1"
+             "create function singlerow_028() returns table\n" +
+             "( x int )\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.singlerow_028'\n"
              );
         goodStatement
             (
@@ -4711,7 +4716,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              "referencing new as new\n" +
              "for each row\n" +
              "merge into t2_028\n" +
-             "using singlerow_028 on t2_028.y = new.x\n" +
+             "using table( singlerow_028() ) sr on t2_028.y = new.x\n" +
              "when not matched then insert ( y ) values ( new.x )\n"
              );
 
@@ -4742,7 +4747,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( dboConnection, "drop table t1_028" );
         goodStatement( dboConnection, "drop table t2_028" );
-        goodStatement( dboConnection, "drop view singlerow_028" );
+        goodStatement( dboConnection, "drop function singlerow_028" );
     }
     
     /**
@@ -4869,72 +4874,73 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     
     /**
      * <p>
-     * Verify the fix to a query involving a view.
+     * Verify the fix to a query involving a view. This test was disabled when
+     * we disabled views as sources. See DERBY-6652.
      * </p>
      */
-    public  void    test_031_view()
-        throws Exception
-    {
-        Connection  dboConnection = openUserConnection( TEST_DBO );
-
-        //
-        // create schema
-        //
-        goodStatement
-            (
-             dboConnection,
-             "create table t1_031(x int, y int)"
-             );
-        goodStatement
-            (
-             dboConnection,
-             "create table tv_031(x int, y int)"
-             );
-        goodStatement
-            (
-             dboConnection,
-             "create view v_031 as select * from tv_031"
-             );
-        goodStatement
-            (
-             dboConnection,
-             "insert into t1_031 values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
-             );
-        goodStatement
-            (
-             dboConnection,
-             "insert into tv_031 values ( 1, 1000 ), ( 3, 3000 ), ( 4, 4000 )"
-             );
-
-        // verify the fix
-        goodUpdate
-            (
-             dboConnection,
-             "merge into t1_031\n" +
-             "using v_031 on t1_031.x = v_031.x\n" +
-             "when matched then update set t1_031.y = v_031.y\n",
-             2
-             );
-        assertResults
-            (
-             dboConnection,
-             "select * from t1_031 order by x",
-             new String[][]
-             {
-                 { "1", "1000" },
-                 { "2", "200" },
-                 { "3", "3000" },
-             },
-             false
-             );
-
-        //
-        // drop schema
-        //
-        goodStatement( dboConnection, "drop view v_031" );
-        goodStatement( dboConnection, "drop table t1_031" );
-        goodStatement( dboConnection, "drop table tv_031" );
-    }
+    //    public  void    test_031_view()
+    //        throws Exception
+    //    {
+    //        Connection  dboConnection = openUserConnection( TEST_DBO );
+    //
+    //        //
+    //        // create schema
+    //        //
+    //        goodStatement
+    //            (
+    //             dboConnection,
+    //             "create table t1_031(x int, y int)"
+    //             );
+    //        goodStatement
+    //            (
+    //             dboConnection,
+    //             "create table tv_031(x int, y int)"
+    //             );
+    //        goodStatement
+    //            (
+    //             dboConnection,
+    //             "create view v_031 as select * from tv_031"
+    //             );
+    //        goodStatement
+    //            (
+    //             dboConnection,
+    //             "insert into t1_031 values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
+    //             );
+    //        goodStatement
+    //            (
+    //             dboConnection,
+    //             "insert into tv_031 values ( 1, 1000 ), ( 3, 3000 ), ( 4, 4000 )"
+    //             );
+    //
+    //        // verify the fix
+    //        goodUpdate
+    //            (
+    //             dboConnection,
+    //             "merge into t1_031\n" +
+    //             "using v_031 on t1_031.x = v_031.x\n" +
+    //             "when matched then update set t1_031.y = v_031.y\n",
+    //             2
+    //             );
+    //        assertResults
+    //            (
+    //             dboConnection,
+    //             "select * from t1_031 order by x",
+    //             new String[][]
+    //             {
+    //                 { "1", "1000" },
+    //                 { "2", "200" },
+    //                 { "3", "3000" },
+    //             },
+    //             false
+    //             );
+    //
+    //        //
+    //        // drop schema
+    //        //
+    //        goodStatement( dboConnection, "drop view v_031" );
+    //        goodStatement( dboConnection, "drop table t1_031" );
+    //        goodStatement( dboConnection, "drop table tv_031" );
+    //    }
     
     /**
      * <p>
@@ -5478,7 +5484,10 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "create view sr_039( i ) as values 1"
+             "create function sr_039() returns table\n" +
+             "( i int )\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.singlerow_028'\n"
              );
         goodStatement
             (
@@ -5501,7 +5510,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_039\n" +
-             "using sr_039 on ( x = 1 )\n" +
+             "using table( sr_039() ) sr on ( x = 1 )\n" +
              "when matched then delete\n",
              1
              );
@@ -5519,7 +5528,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
-        goodStatement( dboConnection, "drop view sr_039" );
+        goodStatement( dboConnection, "drop function sr_039" );
         goodStatement( dboConnection, "drop table t1_039" );
     }
     
@@ -5539,7 +5548,10 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "create view sr_040( i ) as values 1"
+             "create function sr_040() returns table\n" +
+             "( i int )\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.singlerow_028'\n"
              );
         goodStatement
             (
@@ -5563,7 +5575,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_040\n" +
-             "using sr_040 on ( x = 1 )\n" +
+             "using table( sr_040() ) sr on ( x = 1 )\n" +
              "when matched and y = 101 then delete\n" +
              "when matched and y = 102 then update set z = -1000\n" +
              "when not matched and i > 1 then insert values ( -1, i, 0 )\n",
@@ -5587,7 +5599,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             (
              dboConnection,
              "merge into t1_040\n" +
-             "using sr_040 on ( x = 3 )\n" +
+             "using table( sr_040() ) sr on ( x = 3 )\n" +
              "when matched and y = 103 then delete\n" +
              "when matched and y = 102 then update set z = -10000\n" +
              "when not matched and i = 1 then insert values ( -1, i, 0 )\n",
@@ -5611,7 +5623,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
-        goodStatement( dboConnection, "drop view sr_040" );
+        goodStatement( dboConnection, "drop function sr_040" );
         goodStatement( dboConnection, "drop table t1_040" );
     }
     
@@ -5631,7 +5643,10 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         goodStatement
             (
              dboConnection,
-             "create view sr_041( i ) as values ( 1 ), ( 3 )"
+             "create function sr_041() returns table\n" +
+             "( i int )\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.tworow_041'\n"
              );
         goodStatement
             (
@@ -5688,7 +5703,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         expectExecutionError
             ( dboConnection, CARDINALITY_VIOLATION,
               "merge into t1_041\n" +
-              "using sr_041 on ( x = 1 )\n" +
+              "using table( sr_041() ) sr on ( x = 1 )\n" +
               "when matched and y = 101 then delete\n" +
               "when matched and y = 102 then update set z = -1000\n" +
               "when not matched and i > 1 then insert values ( -1, i, 0 )\n"
@@ -5731,7 +5746,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         // drop schema
         //
-        goodStatement( dboConnection, "drop view sr_041" );
+        goodStatement( dboConnection, "drop function sr_041" );
         goodStatement( dboConnection, "drop table t1_041" );
         goodStatement( dboConnection, "drop table t2_041" );
         goodStatement( dboConnection, "drop table t3_041" );
@@ -9539,6 +9554,35 @@ public class MergeStatementTest extends GeneratedColumnsHelper
                  new int[] { 3, 13, 103, 1003 },
                  new int[] { 4, 14, 104, 1004 },
                  new int[] { 5, 15, 105, 1005 },
+             }
+             );
+    }
+    
+    /** Table function returning one row */
+    public static IntegerArrayVTI singlerow_028()
+    {
+        // A
+        return new IntegerArrayVTI
+            (
+             new String[] { "X" },
+             new int[][]
+             {
+                 new int[] { 1 },
+             }
+             );
+    }
+    
+    /** Table function returning one row */
+    public static IntegerArrayVTI tworow_041()
+    {
+        // A
+        return new IntegerArrayVTI
+            (
+             new String[] { "I" },
+             new int[][]
+             {
+                { 1 },
+                { 3 },
              }
              );
     }

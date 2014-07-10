@@ -346,7 +346,7 @@ public final class MergeNode extends DMLModStatementNode
             !(_sourceTable instanceof FromBaseTable)
             )
         {
-            throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_VIEW_OR_VTI );
+            throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
         }
 
         // source and target may not have the same correlation names
@@ -473,7 +473,7 @@ public final class MergeNode extends DMLModStatementNode
     }
 
     /** Return true if the source table is a base table, view, or table function */
-    private boolean sourceIsBase_View_or_VTI() throws StandardException
+    private boolean sourceIsBase_or_VTI() throws StandardException
     {
         if ( _sourceTable instanceof FromVTI ) { return true; }
         if ( !( _sourceTable instanceof FromBaseTable) ) { return false; }
@@ -487,7 +487,6 @@ public final class MergeNode extends DMLModStatementNode
         case TableDescriptor.BASE_TABLE_TYPE:
         case TableDescriptor.SYSTEM_TABLE_TYPE:
         case TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE:
-        case TableDescriptor.VIEW_TYPE:
             return true;
 
         default:
@@ -533,9 +532,9 @@ public final class MergeNode extends DMLModStatementNode
             _leftJoinFromList = _hojn.makeFromList( true, true );
             _leftJoinFromList.bindTables( dd, new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() ) );
 
-            if ( !sourceIsBase_View_or_VTI() )
+            if ( !sourceIsBase_or_VTI() )
             {
-                throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_VIEW_OR_VTI );
+                throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
             }
 
             FromList    topFromList = new FromList( getOptimizerFactory().doJoinOrderOptimization(), getContextManager() );
@@ -682,7 +681,7 @@ public final class MergeNode extends DMLModStatementNode
         }
         else
         {
-            throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_VIEW_OR_VTI );
+            throw StandardException.newException( SQLState.LANG_SOURCE_NOT_BASE_OR_VTI );
         }
     }
 

@@ -2318,7 +2318,7 @@ Guide.
 
             <msg>
                 <name>42XAL</name>
-                <text>The source table of a MERGE statement must be a base table, view, or table function.</text>
+                <text>The source table of a MERGE statement must be a base table or table function.</text>
             </msg>
 
             <msg>

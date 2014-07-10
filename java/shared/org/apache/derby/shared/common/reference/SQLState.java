@@ -955,7 +955,7 @@ public interface SQLState {
     String LANG_SEQUENCE_REFERENCED_TWICE                                      = "42XAI";    
     String LANG_DUPLICATE_CS_CLAUSE                                      = "42XAJ";    
     String LANG_TARGET_NOT_BASE_TABLE                                  = "42XAK";    
-    String LANG_SOURCE_NOT_BASE_VIEW_OR_VTI                        = "42XAL";    
+    String LANG_SOURCE_NOT_BASE_OR_VTI                        = "42XAL";    
     String LANG_SAME_EXPOSED_NAME                                       = "42XAM";    
     String LANG_NOT_NULL_CHARACTERISTICS                               = "42XAN";
     String LANG_NO_SUBQUERIES_IN_MATCHED_CLAUSE         = "42XAO";
