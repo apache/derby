@@ -21,6 +21,7 @@
 
 package org.apache.derby.optional.lucene;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
@@ -56,7 +57,9 @@ class DerbyIndexInput   extends IndexInput
     // constructor state
     private StorageFile                     _file;
     private StorageRandomAccessFile _sraf;
-    private final   ArrayList<DerbyIndexInput>  _clones = new ArrayList<DerbyIndexInput>();
+    private final ArrayList<IndexInput> _slices = new ArrayList<IndexInput>();
+    private final long _offset;
+    private final long _length;
 
     // mutable state
     private boolean _closed = false;
@@ -71,9 +74,35 @@ class DerbyIndexInput   extends IndexInput
     DerbyIndexInput( StorageFile file )
         throws IOException
     {
-        super( file.getPath() );
+        this(file, file.getPath(), 0L, null);
+    }
+
+    /**
+     * Create a DerbyIndexInput that reads data from a StorageFile.
+     *
+     * @param file the file to read from
+     * @param description a description of the file (will be returned
+     *                    from {@code toString()})
+     * @param offset where to start reading in the file
+     * @param length how much of the file to read, {@code null} means
+     *               read till end of file
+     * @throws IOException if an I/O error occurs
+     */
+    private DerbyIndexInput(StorageFile file, String description,
+                            long offset, Long length)
+        throws IOException
+    {
+        super(description);
 
         setConstructorFields( file );
+
+        _offset = offset;
+        if (length == null) {
+            _length = _sraf.length() - offset;
+        } else {
+            _length = length;
+        }
+
     }
 
     /** Set the constructor fields */
@@ -107,17 +136,32 @@ class DerbyIndexInput   extends IndexInput
 
     public  IndexInput  clone()
     {
-        checkIfClosed();
-        
         try {
-            DerbyIndexInput clone = new DerbyIndexInput( _file );
-            _clones.add( clone );
+            // A clone is a slice that covers the entire range of this
+            // index input instance.
+            IndexInput clone = slice(_file.getPath(), 0L, _length);
 
             clone.seek( getFilePointer() );
 
             return clone;
         }
         catch (IOException ioe) { throw wrap( ioe ); }
+    }
+
+    public IndexInput slice(String sliceDescription, long offset, long length)
+        throws IOException
+    {
+        checkIfClosed();
+
+        if (offset < 0 || length < 0 || offset > _length - length) {
+            throw new IllegalArgumentException();
+        }
+
+        DerbyIndexInput slice = new DerbyIndexInput(
+                _file, sliceDescription, _offset + offset, length);
+        _slices.add(slice);
+        slice.seek(0L);
+        return slice;
     }
 
     public void close() throws IOException
@@ -127,8 +171,8 @@ class DerbyIndexInput   extends IndexInput
             _closed = true;
             _sraf.close();
 
-            for ( DerbyIndexInput clone : _clones ) { clone.close(); }
-            _clones.clear();
+            for ( IndexInput slice : _slices ) { slice.close(); }
+            _slices.clear();
 
             _file = null;
             _sraf = null;
@@ -140,7 +184,7 @@ class DerbyIndexInput   extends IndexInput
         checkIfClosed();
 
         try {
-            return _sraf.getFilePointer();
+            return _sraf.getFilePointer() - _offset;
         }
         catch (IOException ioe) { throw wrap( ioe ); }
     }
@@ -148,17 +192,13 @@ class DerbyIndexInput   extends IndexInput
     public long length()
     {
         checkIfClosed();
-
-        try {
-            return _sraf.length();
-        }
-        catch (IOException ioe) { throw wrap( ioe ); }
+        return _length;
     }
 
     public void seek( long pos )    throws IOException
     {
         checkIfClosed();
-        _sraf.seek( pos );
+        _sraf.seek( _offset + pos );
     }
 
     /////////////////////////////////////////////////////////////////////
@@ -169,14 +209,14 @@ class DerbyIndexInput   extends IndexInput
 
     public byte readByte()  throws IOException
     {
-        checkIfClosed();
+        checkEndOfFile(1);
         return _sraf.readByte();
     }
 
     public void readBytes( byte[] b, int offset, int len )
         throws IOException
     {
-        checkIfClosed();
+        checkEndOfFile(len);
 
         int     bytesRead = 0;
         while ( bytesRead < len )
@@ -194,6 +234,23 @@ class DerbyIndexInput   extends IndexInput
     //
     /////////////////////////////////////////////////////////////////////
 
+    /**
+     * Verify that we can read {@code length} bytes without hitting end
+     * of file (or end of the slice represented by this instance).
+     *
+     * @param length the number of bytes we need
+     * @throws EOFException if the requested number of bytes is not available
+     * @throws AlreadyClosedException if this object has been closed
+     */
+    private void checkEndOfFile(int length) throws EOFException {
+        // getFilePointer() calls checkIfClosed(), so no need to call it
+        // explicitly here.
+        long available = _length - getFilePointer();
+        if (length > available) {
+            throw new EOFException();
+        }
+    }
+
     /** Raise a Lucene error if this object has been closed */
     private void    checkIfClosed()
     {
@@ -209,10 +266,4 @@ class DerbyIndexInput   extends IndexInput
         return new RuntimeException( t.getMessage(), t );
     }
 
-    /** Wrap an exception in an IOException */
-    private IOException wrapWithIOException( Throwable t )
-    {
-        return new IOException( t.getMessage(), t );
-    }
-    
 }
