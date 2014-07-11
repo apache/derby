@@ -496,7 +496,7 @@ class LuceneQueryVTI extends StringColumnVTI
         Version     indexVersion = null;
 
         try {
-            indexVersion = Version.valueOf( indexVersionString );
+            indexVersion = Version.parseLeniently(indexVersionString);
         }
         catch (Exception e) {}
 
