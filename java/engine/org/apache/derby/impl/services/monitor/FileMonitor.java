@@ -29,11 +29,15 @@ import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.io.FileUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -119,6 +123,7 @@ public final class FileMonitor extends BaseMonitor
 			systemHome = System.getProperty(Property.SYSTEM_HOME_PROPERTY);
 		} catch (SecurityException se) {
 			// system home will be the current directory
+            report(se, Property.SYSTEM_HOME_PROPERTY);
 			systemHome = null;
 		}
 
@@ -155,6 +160,7 @@ public final class FileMonitor extends BaseMonitor
                         FileUtil.limitAccessToOwner(home);
                     }
 				} catch (SecurityException se) {
+                    report(se, home);
 					return false;
                 } catch (IOException ioe) {
                     return false;
@@ -181,9 +187,40 @@ public final class FileMonitor extends BaseMonitor
 			// SECURITY PERMISSION - OP1
 			return System.getProperty(key);
 		} catch (SecurityException se) {
+            report(se, key);
 			return null;
 		}
 	}
+
+
+    private final static Map<String, Void> securityProperties =
+            new HashMap<String, Void>();
+    static {
+        securityProperties.put("derby.authentication.builtin.algorithm", null);
+        securityProperties.put("derby.authentication.provider", null);
+        securityProperties.put("derby.database.fullAccessUsers", null);
+        securityProperties.put("derby.database.readOnlyAccessUsers", null);
+        securityProperties.put("derby.database.sqlAuthorization", null);
+        securityProperties.put("derby.connection.requireAuthentication", null);
+        securityProperties.put("derby.database.defaultConnectionMode", null);
+        securityProperties.put("derby.storage.useDefaultFilePermissions", null);
+        securityProperties.put(Property.SYSTEM_HOME_PROPERTY, null);
+    };
+
+    private void report(SecurityException e, String key) {
+         if (securityProperties.containsKey(key)) {
+            report(MessageService.getTextMessage(
+                MessageId.CANNOT_READ_SECURITY_PROPERTY, key, e.toString()));
+         }
+    }
+
+    private void report(SecurityException e, File file) {
+        report(MessageService.getTextMessage(
+                MessageId.CANNOT_CREATE_FILE_OR_DIRECTORY,
+                file.toString(),
+                e.toString()));
+    }
+
 
 	/*
 	** Priv block code, moved out of the old Java2 version.

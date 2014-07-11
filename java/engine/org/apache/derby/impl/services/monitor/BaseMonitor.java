@@ -245,8 +245,10 @@ abstract class BaseMonitor
 		logging = log;
 
 		// false indicates the full monitor is required, not the lite.
-		if (!initialize(false))
-			return;
+        if (!initialize(false)) {
+            dumpTempWriter(true);
+            return;
+        }
 
 		// if monitor is already set then the system is already
 		// booted or in the process of booting or shutting down.

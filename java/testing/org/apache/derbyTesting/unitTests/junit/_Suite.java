@@ -58,6 +58,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(ReaderToUTF8StreamTest.suite());
         suite.addTest(DataInputUtilTest.suite());
         suite.addTest(DerbyVersionTest.suite());
+        suite.addTest(MissingPermissionsTest.suite());
 
         return suite;
     }

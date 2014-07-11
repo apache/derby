@@ -225,6 +225,12 @@ public interface MessageId {
     /** Tell user not to edit/delete any files in the seg directory. */
     String README_AT_SEG_LEVEL                               = "M007";
 
+    /**
+     * Could not read security related Derby properties when running under a
+     * security manager
+     */
+    String CANNOT_READ_SECURITY_PROPERTY                     = "M008";
+    String CANNOT_CREATE_FILE_OR_DIRECTORY                   = "M009";
     /*
      * Misc
      */

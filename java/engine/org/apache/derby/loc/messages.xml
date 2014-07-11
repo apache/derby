@@ -8861,6 +8861,22 @@ page id:            {0}
             </msg>
 
             <msg>
+                <name>M008</name>
+                <text>WARNING: the property {0} could not be read due to a security exception: {1}. This could pose a security risk.
+                </text>
+                <arg>propertyName</arg>
+                <arg>error</arg>
+            </msg>
+
+            <msg>
+                <name>M009</name>
+                <text>The file or directory {0} could not be created due to a security exception: {1}.
+                </text>
+                <arg>fileName</arg>
+                <arg>error</arg>
+            </msg>
+
+            <msg>
                 <name>N001</name>
                 <text>This error is caused by the following error.</text>
             </msg>
