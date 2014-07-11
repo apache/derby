@@ -55,6 +55,12 @@ public class LuceneSuite extends BaseTestCase
             assertFalse( "Lucene analyzer jar file should not be on the classpath!", JDBC.HAVE_LUCENE_ANALYZERS );
             assertFalse( "Lucene query parser jar file should not be on the classpath!", JDBC.HAVE_LUCENE_QUERYPARSER );
         }
+        else if (JDBC.HAVE_LUCENE_CORE && suffersFromDerby6650())
+        {
+            alarm("Lucene tests are skipped on this platform because of "
+                    + "DERBY-6650. Please upgrade to Lucene 4.8 or higher "
+                    + "if you would like to run them.");
+        }
         else
         {
             suite.addTest(LuceneSupportTest.suite());
@@ -74,5 +80,44 @@ public class LuceneSuite extends BaseTestCase
     {
         return Boolean.valueOf( properties.getProperty( key ) ).booleanValue();
     }
-    
+
+    /**
+     * With Lucene versions up to 4.7, the Lucene plugin doesn't work on
+     * platforms without JMX (in particular: Java SE 8 Compact Profile 2).
+     * See DERBY-6650.
+     */
+    private static boolean suffersFromDerby6650() {
+        if (JDBC.vmSupportsJMX()) {
+            // Only platforms that lack JMX support have this problem.
+            return false;
+        }
+
+        Class versionClass = null;
+        try {
+            versionClass = Class.forName("org.apache.lucene.util.Version");
+        } catch (ClassNotFoundException cnfe) {
+            fail("Could not check Lucene version", cnfe);
+        }
+
+        // Check if the version is at least 4.8. Do that by looking for the
+        // existence of the LUCENE_48 field in the Version class. In 4.9
+        // that field was deprecated and one called LUCENE_4_8 was added.
+        // If we cannot find the former, look for the latter before giving up.
+        try {
+            versionClass.getField("LUCENE_48");
+        } catch (NoSuchFieldException nsfe1) {
+            try {
+                versionClass.getField("LUCENE_4_8");
+            } catch (NoSuchFieldException nsfe2) {
+                // Neither the LUCENE_48 field nor the LUCENE_4_8 field is
+                // present, so version is lower than 4.8. We suffer from
+                // DERBY-6650.
+                return true;
+            }
+        }
+
+        // One of the fields indicating version 4.8 or higher was found,
+        // so we don't suffer from DERBY-6650.
+        return false;
+    }
 }
