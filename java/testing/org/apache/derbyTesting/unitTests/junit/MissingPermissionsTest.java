@@ -226,16 +226,21 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         assertTrue(
             spawned.getFailMessage("subprocess run failed: "), exitCode == 0);
 
-        final String expectedMessageOnConsole =
-                "The file or directory system/nested could not be created " +
-                "due to a security exception: " +
-                "java.security.AccessControlException: access denied " +
-                "(\"java.io.FilePermission\" \"system/nested\" \"write\").";
+        final String expectedMessageOnConsole = isJava6() ?
+            "The file or directory system/nested could not be created " +
+            "due to a security exception: " +
+            "java.security.AccessControlException: access denied " +
+            "(java.io.FilePermission system/nested write)."
+            :
+            "The file or directory system/nested could not be created " +
+            "due to a security exception: " +
+            "java.security.AccessControlException: access denied " +
+            "(\"java.io.FilePermission\" \"system/nested\" \"write\").";
 
         final String output = spawned.getFullServerOutput(); // ignore
         final String err    = spawned.getFullServerError();
 
-        assertTrue(err.contains(expectedMessageOnConsole));
+        assertTrue( err, err.contains( expectedMessageOnConsole ) );
     }
 
     private String makeMessage(String property) {
@@ -243,13 +248,21 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         sb.append("WARNING: the property ");
         sb.append(property);
         sb.append(" could not be read due to a security exception: ");
-        sb.append("java.security.AccessControlException: access denied (\"");
-        sb.append("java.util.PropertyPermission\" ");
-        sb.append("\"");
-        sb.append(property);
-        sb.append("\" \"read\")");
+        sb.append("java.security.AccessControlException: access denied (");
+        sb.append( doubleQuoteIfNotJava6( "java.util.PropertyPermission" ) );
+        sb.append(" ");
+        sb.append( doubleQuoteIfNotJava6( property ) );
+        sb.append(" ");
+        sb.append( doubleQuoteIfNotJava6( "read" ) );
         return sb.toString();
     }
+
+    private String  doubleQuoteIfNotJava6( String text )
+    {
+        if ( isJava6() ) { return text; }
+        else { return "\"" + text + "\""; }
+    }
+    
 
 
     private void verifyMessagesInDerbyLog(int kind) throws
