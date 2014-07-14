@@ -134,3 +134,27 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar"
   permission java.io.FilePermission "java.runtime.version", "read";
   permission java.io.FilePermission "java.fullversion", "read";
 };
+
+// JUnit jar file tries to read junit.properties in the user's
+// home directory and seems to require permission to read the
+// property user.home as well.
+// junit.swingui.TestRunner writes to .junitsession on exit.
+grant codeBase "${derbyTesting.junit}" {
+    permission java.util.PropertyPermission "user.home", "read";
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+    permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};

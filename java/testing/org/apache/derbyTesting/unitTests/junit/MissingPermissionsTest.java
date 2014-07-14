@@ -22,7 +22,6 @@
 package org.apache.derbyTesting.unitTests.junit;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -205,14 +204,16 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         // The command runs ij with a security manager whose policy
         // lacks the permissions to create derby.system.home.
         final List<String> args = new ArrayList<String>();
-        final String codeJarUrl = "file:" + getDerbyJarPath();
         args.add("-Djava.security.manager");
-        args.add("-Djava.security.policy==extin/MissingPermissionsTest2.policy");
-        args.add("-DderbyTesting.codejar=" + codeJarUrl);
+        args.add("-Djava.security.policy=extin/MissingPermissionsTest2.policy");
+        args.add("-DderbyTesting.codejar="
+                    + getSystemProperty("derbyTesting.codejar"));
+        args.add("-DderbyTesting.testjar="
+                    + getSystemProperty("derbyTesting.testjar"));
+        args.add("-DderbyTesting.antjunit="
+                    + getSystemProperty("derbyTesting.antjunit"));
         args.add("-Dderby.system.home=system/nested");
         args.add("-Dij.connection.test=jdbc:derby:wombat;create=true");
-        args.add("-classpath");
-        args.add(getClassPath());
         args.add("org.apache.derby.tools.ij");
         final String[] argArray = args.toArray(new String[0]);
 
@@ -301,28 +302,5 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             public BufferedReader run() throws FileNotFoundException {
                 return new BufferedReader(new FileReader(file));
             }});
-    }
-
-
-    private static String getClassPath() throws PrivilegedActionException {
-        return AccessController.doPrivileged(
-                new PrivilegedExceptionAction<String>() {
-            @Override
-            public String run() {
-                return System.getProperty("java.class.path");
-            }});
-    }
-
-    private static String getDerbyJarPath() throws PrivilegedActionException {
-        final String classpath = getClassPath();
-        final String[] classpathEntries = classpath.split(File.pathSeparator);
-
-        for (String s: classpathEntries) {
-            int i = s.indexOf("derby.jar");
-            if (i >= 0) {
-                return s.substring(0, i);
-            }
-        }
-        return null;
     }
 }
