@@ -1796,84 +1796,95 @@ public class JDBC {
             List<String> seenRow,
             ResultSet rs) throws SQLException {
 
-        if (rs == null) {
-            return new AssertionFailedError(afe.getMessage() + "\n<NULL>");
-        }
-
-        final int c = rsmd.getColumnCount();
-        StringBuilder heading = new StringBuilder("    ");
-        StringBuilder underline = new StringBuilder("    ");
-
-        // Display column headings
-        for (int i=1; i<= c; i++) {
-            if (i > 1) {
-                heading.append(",");
-                underline.append(" ");
+        try {
+            if (rs == null) {
+                return BaseTestCase.newAssertionFailedError(
+                        afe.getMessage() + "\n<NULL>", afe);
             }
 
-            int len = heading.length();
-            heading.append(rsmd.getColumnLabel(i));
-            len = heading.length() - len;
+            final int c = rsmd.getColumnCount();
+            StringBuilder heading = new StringBuilder("    ");
+            StringBuilder underline = new StringBuilder("    ");
 
-            for (int j = len; j > 0; j--) {
-                underline.append("-");
+            // Display column headings
+            for (int i=1; i<= c; i++) {
+                if (i > 1) {
+                    heading.append(",");
+                    underline.append(" ");
+                }
+
+                int len = heading.length();
+                heading.append(rsmd.getColumnLabel(i));
+                len = heading.length() - len;
+
+                for (int j = len; j > 0; j--) {
+                    underline.append("-");
+                }
             }
-        }
 
-        heading.append("\n");
-        underline.append("\n");
+            heading.append("\n");
+            underline.append("\n");
 
-        StringBuilder rowImg = new StringBuilder();
-        rowImg.append(afe.getMessage()).
-               append("\n\n").
-               append(heading.toString()).
-               append(underline.toString());
+            StringBuilder rowImg = new StringBuilder();
+            rowImg.append(afe.getMessage()).
+                   append("\n\n").
+                   append(heading.toString()).
+                   append(underline.toString());
 
-        if (!rs.isClosed()) {
-            final int s = seenRow.size();
+            if (!rs.isClosed()) {
+                final int s = seenRow.size();
 
-            // Get any rest of columns of current row
-            for (int i=0; i < c - s; i++) {
-                String column = null;
+                // Get any rest of columns of current row
+                for (int i=0; i < c - s; i++) {
+                    String column = null;
 
-                try {
-                    column = rs.getString(s + i + 1);
-                } catch (SQLException e) {
-                    // We may not yet have called next?
-                    if (e.getSQLState().equals("24000")) {
-                        if (rs.next()) {
-                            column = rs.getString(s + i + 1);
-                        } else {
-                            break;
+                    try {
+                        column = rs.getString(s + i + 1);
+                    } catch (SQLException e) {
+                        // We may not yet have called next?
+                        if (e.getSQLState().equals("24000")) {
+                            if (rs.next()) {
+                                column = rs.getString(s + i + 1);
+                            } else {
+                                break;
+                            }
                         }
                     }
+                    seenRow.add(column);
                 }
-                seenRow.add(column);
-            }
 
-            if (seenRow.size() > 0) {
-                seen.add(new ArrayList<String>(seenRow));
-                seenRow.clear();
-            }
-
-            // Get any remaining rows
-            while (rs.next()) {
-                for (int i = 0; i < c; i++) {
-                    seenRow.add(rs.getString(i + 1));
+                if (seenRow.size() > 0) {
+                    seen.add(new ArrayList<String>(seenRow));
+                    seenRow.clear();
                 }
-                seen.add(new ArrayList<String>(seenRow));
-                seenRow.clear();
+
+                // Get any remaining rows
+                while (rs.next()) {
+                    for (int i = 0; i < c; i++) {
+                        seenRow.add(rs.getString(i + 1));
+                    }
+                    seen.add(new ArrayList<String>(seenRow));
+                    seenRow.clear();
+                }
             }
-        }
 
-        // Display data
-        for (List<String> row : seen) {
-            rowImg.append("   ").
-                   append(row.toString()).
-                   append("\n");
-        }
+            // Display data
+            for (List<String> row : seen) {
+                rowImg.append("   ").
+                       append(row.toString()).
+                       append("\n");
+            }
 
-        return new AssertionFailedError(rowImg.toString());
+            return BaseTestCase.newAssertionFailedError(rowImg.toString(), afe);
+
+        } catch (Throwable t) {
+            // Something went wrong when adding the ResultSet to the error
+            // message. Don't return this error, as it would shadow the
+            // original error. Print it to help debugging.
+            BaseTestCase.printStackTrace(t);
+
+            // Return the original error.
+            return afe;
+        }
     }
-
 }

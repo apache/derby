@@ -1153,12 +1153,23 @@ public abstract class BaseTestCase
      */
     public static void fail(String msg, Throwable t)
             throws AssertionFailedError {
-
-        AssertionFailedError ae = new AssertionFailedError(msg);
-        ae.initCause(t);
-        throw ae;
+        throw newAssertionFailedError(msg, t);
     }
-    
+
+    /**
+     * Create a new AssertionFailedError linked to another Throwable.
+     *
+     * @param message message explaining the failure
+     * @param cause the cause of the failure
+     * @return an AssertionFailedError
+     */
+    public static AssertionFailedError newAssertionFailedError(
+            String message, Throwable cause) {
+        AssertionFailedError e = new AssertionFailedError(message);
+        e.initCause(cause);
+        return e;
+    }
+
     /**
      * assert a method from an executing test
      * 
