@@ -291,6 +291,7 @@ public class FKInfo implements Formatable
 		ArrayUtil.writeIntArray(out, colArray);
 		ArrayUtil.writeIntArray(out, raRules);
         ArrayUtil.writeBooleanArray(out, deferrable);
+        ArrayUtil.writeArray(out, fkIds);
 	}
 
 	/**
@@ -334,6 +335,8 @@ public class FKInfo implements Formatable
 			colArray = ArrayUtil.readIntArray(in);
 			raRules = ArrayUtil.readIntArray(in);
             deferrable = ArrayUtil.readBooleanArray(in);
+            fkIds = new UUID[ArrayUtil.readArrayLength(in)];
+            ArrayUtil.readArrayItems(in, fkIds);
 		}
 		catch (StandardException exception)
 		{

@@ -65,6 +65,7 @@ public class TriggerTest extends BaseJDBCTestCase {
     private static final String HAS_DEPENDENT_SPS = "X0Y24";
     private static final String HAS_DEPENDENT_TRIGGER = "X0Y25";
     private static final String TRIGGER_DROPPED = "01502";
+    private static final String FOREIGN_KEY_VIOLATION = "23503";
    
     /**
      * Thread local that a trigger can access to
@@ -2544,5 +2545,32 @@ public class TriggerTest extends BaseJDBCTestCase {
         // disabled due to DERBY-6554
         //s.execute("insert into t1 values (1,2,3)");
         s.execute("insert into tp_t1 values cast(null as tp)");
+    }
+
+    /**
+     * Regression test case for DERBY-6663 (NPE when a trigger tries to
+     * insert into a table with a foreign key).
+     */
+    public void testDerby6663() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6663_t1(pk int primary key)");
+        s.execute("create table d6663_t2(x int references d6663_t1)");
+        s.execute("create table d6663_t3(y int)");
+        s.execute("create trigger d6663_tr after insert on d6663_t3 "
+                + "referencing new as new for each row "
+                + "insert into d6663_t2 values new.y");
+
+        // Used to fail with NPE instead of foreign key violation.
+        assertStatementError(
+                FOREIGN_KEY_VIOLATION, s, "insert into d6663_t3 values 1");
+
+        // Verify that trigger executes successfully if there is no
+        // foreign key violation.
+        s.execute("insert into d6663_t1 values 1");
+        s.execute("insert into d6663_t3 values 1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from d6663_t2"),
+                "1");
     }
 }
