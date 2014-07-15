@@ -862,11 +862,7 @@ public abstract class BaseTestCase
     public static final boolean isJava5() {
         return getSystemProperty("java.version").startsWith("1.5");
     }
-   
-    public static final boolean isJava6() {
-        return getSystemProperty("java.version").startsWith("1.6");
-    }
-   
+
     public static final boolean isJava7() {
         return getSystemProperty("java.version").startsWith("1.7");
     }

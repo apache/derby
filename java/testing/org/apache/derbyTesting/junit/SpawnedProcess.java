@@ -290,6 +290,8 @@ public final class SpawnedProcess {
      *          forcibly destroyed</li>
      *      <li>the hung-process watchdog mechanism forcibly terminates the
      *          process (see {@linkplain #scheduleKill})</li>
+     * @param timeout the number of milliseconds to wait for the process
+     *                to terminate normally before destroying it
      * @return The process exit code.
      * @throws IOException if printing diagnostics fails
      */

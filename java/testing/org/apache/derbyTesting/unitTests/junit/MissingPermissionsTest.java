@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import static junit.framework.Assert.assertTrue;
+import java.util.regex.Pattern;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
@@ -109,6 +109,11 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
     public static Test suite() {
         final BaseTestSuite suite =
                 new BaseTestSuite("SystemPrivilegesPermissionTest");
+
+        if (!TestConfiguration.loadingFromJars()) {
+            // This test only works with jar files.
+            return suite;
+        }
 
         suite.addTest(
                 new SupportFilesSetup(
@@ -210,8 +215,14 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
                     + getSystemProperty("derbyTesting.codejar"));
         args.add("-DderbyTesting.testjar="
                     + getSystemProperty("derbyTesting.testjar"));
-        args.add("-DderbyTesting.antjunit="
-                    + getSystemProperty("derbyTesting.antjunit"));
+        args.add("-DderbyTesting.junit="
+                    + getSystemProperty("derbyTesting.junit"));
+        String antjunit = getSystemProperty("derbyTesting.antjunit");
+        if (antjunit != null) {
+            // This property is only available when the test is started
+            // by Ant's JUnit task.
+            args.add("-DderbyTesting.antjunit=" + antjunit);
+        }
         args.add("-Dderby.system.home=system/nested");
         args.add("-Dij.connection.test=jdbc:derby:wombat;create=true");
         args.add("org.apache.derby.tools.ij");
@@ -221,48 +232,51 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
         SpawnedProcess spawned = new SpawnedProcess(p, "MPT");
         spawned.suppressOutputOnComplete(); // we want to read it ourselves
 
-        final int exitCode = spawned.complete(3000); // 3 seconds
+        // The started process is an interactive ij session that will wait
+        // for user input. Close stdin of the process so that it stops
+        // waiting and exits.
+        p.getOutputStream().close();
+
+        final int exitCode = spawned.complete(120000L); // 2 minutes
 
         assertTrue(
             spawned.getFailMessage("subprocess run failed: "), exitCode == 0);
 
-        final String expectedMessageOnConsole = isJava6() ?
-            "The file or directory system/nested could not be created " +
+        // The actual message may vary. On Java 6, the names are not quoted,
+        // whereas newer versions double-quote them. On Windows, the directory
+        // separator is different. Use a regular expression that matches any
+        // variant.
+        final String expectedMessageOnConsole =
+            "(?s).*The file or directory system.nested could not be created " +
             "due to a security exception: " +
             "java.security.AccessControlException: access denied " +
-            "(java.io.FilePermission system/nested write)."
-            :
-            "The file or directory system/nested could not be created " +
-            "due to a security exception: " +
-            "java.security.AccessControlException: access denied " +
-            "(\"java.io.FilePermission\" \"system/nested\" \"write\").";
+            "\\(\"?java.io.FilePermission\"? \"?system.nested\"? " +
+            "\"?write\"?\\).*";
 
         final String output = spawned.getFullServerOutput(); // ignore
         final String err    = spawned.getFullServerError();
 
-        assertTrue( err, err.contains( expectedMessageOnConsole ) );
+        assertTrue(err, err.matches(expectedMessageOnConsole));
     }
 
+    /**
+     * Make a regex that matches a warning for missing property permission.
+     * @param property the property for which read permission is missing
+     * @return a pattern that matches the expected warning
+     */
     private String makeMessage(String property) {
+        // A variable part in the message is whether or not the names are
+        // double-quoted. In Java 6 they are not. In newer versions they are.
         final StringBuilder sb = new StringBuilder();
-        sb.append("WARNING: the property ");
-        sb.append(property);
+        sb.append("(?s).*WARNING: the property ");
+        sb.append(Pattern.quote(property));
         sb.append(" could not be read due to a security exception: ");
-        sb.append("java.security.AccessControlException: access denied (");
-        sb.append( doubleQuoteIfNotJava6( "java.util.PropertyPermission" ) );
-        sb.append(" ");
-        sb.append( doubleQuoteIfNotJava6( property ) );
-        sb.append(" ");
-        sb.append( doubleQuoteIfNotJava6( "read" ) );
+        sb.append("java\\.security\\.AccessControlException: access denied \\(");
+        sb.append("\"?java\\.util\\.PropertyPermission\"? \"?");
+        sb.append(Pattern.quote(property));
+        sb.append("\"? \"?read\"?.*");
         return sb.toString();
     }
-
-    private String  doubleQuoteIfNotJava6( String text )
-    {
-        if ( isJava6() ) { return text; }
-        else { return "\"" + text + "\""; }
-    }
-    
 
 
     private void verifyMessagesInDerbyLog(int kind) throws
@@ -289,17 +303,21 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
                 log.append('\n');
             }
 
+            String logString = log.toString();
             if (kind == KIND_EXPECT_ERROR_MSG_PRESENT) {
                 // We should see SecurityException when reading security
                 // related properties in FileMonitor#PBgetJVMProperty
-                assertTrue(log.toString().contains(makeMessage(AUTH_MSG)));
+                assertTrue(logString, logString.matches(makeMessage(AUTH_MSG)));
 
                 // We should see SecurityException when reading
                 // derby.system.home in FileMonitor#PBinitialize
-                assertTrue(log.toString().contains(makeMessage(SYSTEM_HOME)));
+                assertTrue(logString,
+                           logString.matches(makeMessage(SYSTEM_HOME)));
             } else if (kind == KIND_EXPECT_ERROR_MSG_ABSENT) {
-                assertFalse(log.toString().contains(makeMessage(AUTH_MSG)));
-                assertFalse(log.toString().contains(makeMessage(SYSTEM_HOME)));
+                assertFalse(logString,
+                            logString.matches(makeMessage(AUTH_MSG)));
+                assertFalse(logString,
+                            logString.matches(makeMessage(SYSTEM_HOME)));
             }
         } finally {
             dl.close();
