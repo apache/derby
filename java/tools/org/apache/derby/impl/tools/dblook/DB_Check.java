@@ -49,7 +49,7 @@ public class DB_Check {
 
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, " +
-			"CS.TABLEID, CS.SCHEMAID, CK.CHECKDEFINITION FROM SYS.SYSCONSTRAINTS CS, " +
+			"CS.TABLEID, CS.SCHEMAID, CS.STATE, CK.CHECKDEFINITION FROM SYS.SYSCONSTRAINTS CS, " +
 			"SYS.SYSCHECKS CK WHERE CS.CONSTRAINTID = " +
 			"CK.CONSTRAINTID AND CS.STATE != 'D' ORDER BY CS.TABLEID");
 
@@ -69,6 +69,9 @@ public class DB_Check {
 			}
 
 			StringBuffer chkString = createCheckString(tableName, rs);
+
+            DB_Key.makeDeferredClauses( chkString, rs, 4 );
+            
 			Logs.writeToNewDDL(chkString.toString());
 			Logs.writeStmtEndToNewDDL();
 			Logs.writeNewlineToNewDDL();
@@ -104,7 +107,7 @@ public class DB_Check {
 		sb.append(" CONSTRAINT ");
 		sb.append(constraintName);
 		sb.append(" CHECK ");
-		sb.append(dblook.removeNewlines(aCheck.getString(4)));
+		sb.append(dblook.removeNewlines(aCheck.getString(5)));
 
 		return sb;
 

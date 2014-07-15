@@ -60,7 +60,7 @@ public class DB_Key {
 		// Non-foreign keys, first.
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, CS.TYPE, " +
-			"CS.TABLEID, CS.CONSTRAINTID, CS.SCHEMAID, CG.DESCRIPTOR, CG.ISCONSTRAINT " +
+			"CS.TABLEID, CS.CONSTRAINTID, CS.SCHEMAID, CS.STATE, CG.DESCRIPTOR, CG.ISCONSTRAINT " +
 			"FROM SYS.SYSCONSTRAINTS CS, SYS.SYSCONGLOMERATES CG, SYS.SYSKEYS K " +
 			"WHERE CS.STATE != 'D' AND CS.CONSTRAINTID = K.CONSTRAINTID AND " +
 			"CG.CONGLOMERATEID = K.CONGLOMERATEID ORDER BY CS.TABLEID");
@@ -68,7 +68,7 @@ public class DB_Key {
 
 		// Now, foreign keys.
 		rs = stmt.executeQuery("SELECT CS.CONSTRAINTNAME, CS.TYPE, CS.TABLEID, " +
-			"CS.CONSTRAINTID, CS.SCHEMAID, CG.DESCRIPTOR, CG.ISCONSTRAINT, " +
+			"CS.CONSTRAINTID, CS.SCHEMAID, CS.STATE, CG.DESCRIPTOR, CG.ISCONSTRAINT, " +
 			"K.DELETERULE, K.UPDATERULE, K.KEYCONSTRAINTID FROM SYS.SYSCONSTRAINTS CS, " +
 			"SYS.SYSCONGLOMERATES CG, SYS.SYSFOREIGNKEYS K WHERE CS.STATE != 'D' " +
 			"AND CS.CONSTRAINTID = K.CONSTRAINTID AND CG.CONGLOMERATEID = " +
@@ -99,7 +99,7 @@ public class DB_Key {
 		boolean firstTime = true;
 		while (rs.next()) {
 
-			if (!rs.getBoolean(7))
+			if (!rs.getBoolean(8))
 			// this row is NOT for a constraint, so skip it.
 				continue;
 
@@ -121,9 +121,11 @@ public class DB_Key {
 
 			if (rs.getString(2).equals("F")) {
 			// foreign key; we have to figure out the references info.
-				kString.append(makeFKReferenceClause(rs.getString(10),
-					rs.getString(8).charAt(0), rs.getString(9).charAt(0)));
+				kString.append(makeFKReferenceClause(rs.getString(11),
+					rs.getString(9).charAt(0), rs.getString(10).charAt(0)));
 			}
+
+            makeDeferredClauses( kString, rs, 6 );
 
 			Logs.writeToNewDDL(kString.toString());
 			Logs.writeStmtEndToNewDDL();
@@ -163,7 +165,7 @@ public class DB_Key {
 		// For keys, we need to get the column list.
 		sb.append("(");
 		sb.append(dblook.getColumnListFromDescription(
-			tableId, aKey.getString(6)));
+			tableId, aKey.getString(7)));
 		sb.append(")");
 
 		return sb;
@@ -251,6 +253,78 @@ public class DB_Key {
 		return refClause.toString();
 
 	}
+
+	/* ************************************************
+	 * Generate the clauses for deferred constraints.
+	 * @param buffer    Evolving buffer where we write additional clauses.
+	 * @param aKey Info on the key to generate.
+	 * @param stateColumn 1-based position of the STATE column in the result set
+	 * @return DDL for the specified key is returned as
+	 *  a string.
+	 ****/
+
+	static void makeDeferredClauses
+        ( StringBuffer buffer, ResultSet constraint, int stateColumn )
+		throws SQLException
+	{
+        String              state = constraint.getString( stateColumn );
+		String              constraintName =
+            dblook.addQuotes( dblook.expandDoubleQuotes( constraint.getString( 1 ) ) );
+        boolean             deferrable = false;
+        boolean             initiallyDeferred = false;
+        boolean             enforced = true;
+
+        // cloned from SYSCONSTRAINTSRowFactory.buildDescriptor()
+		switch ( state.charAt( 0 ) )
+		{
+        case 'E': 
+            deferrable = false;
+            initiallyDeferred = false;
+            enforced = true;
+            break;
+        case 'D':
+            deferrable = false;
+            initiallyDeferred = false;
+            enforced = false;
+            break;
+        case 'e':
+            deferrable = true;
+            initiallyDeferred = true;
+            enforced = true;
+            break;
+        case 'd':
+            deferrable = true;
+            initiallyDeferred = true;
+            enforced = false;
+            break;
+        case 'i':
+            deferrable = true;
+            initiallyDeferred = false;
+            enforced = true;
+            break;
+        case 'j':
+            deferrable = true;
+            initiallyDeferred = false;
+            enforced = false;
+            break;
+        default: 
+            Logs.debug
+                (
+                 "INTERNAL ERROR: Invalid state value '" + state + "' for constraint " + constraintName,
+                 (String) null
+                 );
+        }
+
+        if ( deferrable )
+        {
+            buffer.append( " DEFERRABLE " );
+            if ( initiallyDeferred )
+            {
+                buffer.append( " INITIALLY DEFERRED " );
+            }
+        }
+    }
+
 
 	/* ************************************************
 	 * Print a simple header to output.

@@ -491,6 +491,9 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 
         // Cf. the encoding description in javadoc for
         // #encodeCharacteristics.
+        //
+        // This code is cloned by DB_Key.makeDeferredClauses().
+        //
 		switch (constraintStateStr.charAt(0))
 		{
 			case 'E': 

@@ -1222,9 +1222,26 @@ public class dblook_test {
 				"jdbc:derby:" + newDBName +
 				";create=true;user=app;password=apppw" + territoryBased);
 
+        runDDL( conn, scriptName );
+
+		conn.close();
+
+		return;
+	}
+
+	/* **********************************************
+	 * runDDL:
+	 * Run an sql script.
+	 * @param conn database connection
+	 * @param scriptName Name of the script
+	 ****/
+
+	static  void runDDL( Connection conn, String scriptName)
+        throws Exception
+	{
 		Statement stmt = conn.createStatement();
 		BufferedReader ddlScript =
-			new BufferedReader(new FileReader(scriptName));
+			new BufferedReader( new FileReader( scriptName ) );
 
 		for (String sqlCmd = ddlScript.readLine(); sqlCmd != null;
 			sqlCmd = ddlScript.readLine()) {
@@ -1249,16 +1266,11 @@ public class dblook_test {
 					"from DDL script:\n" + sqlCmd + "\n");
 				System.out.println(e.getMessage());
 			}
-
 		}
 
 		// Cleanup.
 		ddlScript.close();
 		stmt.close();
-		conn.close();
-
-		return;
-
 	}
 
 	/* **********************************************
