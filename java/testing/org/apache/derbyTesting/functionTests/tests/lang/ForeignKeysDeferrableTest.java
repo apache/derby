@@ -1190,4 +1190,27 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
             commit();
         }
     }
+
+    public void testInsertTrigger() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6664_t1(pk int primary key)");
+        s.execute("create table d6664_t2(x int references d6664_t1 "
+                + "initially deferred)");
+        s.execute("create table d6664_t3(y int)");
+        s.execute("create trigger d6664_tr after insert on d6664_t3 "
+                + "referencing new as new for each row "
+                + "insert into d6664_t2 values new.y");
+
+        // Used to fail with "Schema 'null' does not exist" before DERBY-6664.
+        s.execute("insert into d6664_t3 values 1");
+
+        // Verify that the trigger fired.
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from d6664_t2"), "1");
+
+        // Trigger caused violation in deferred foreign key. Should be
+        // detected on commit.
+        assertCommitError(LANG_DEFERRED_FK_CONSTRAINT_T, getConnection());
+    }
 }

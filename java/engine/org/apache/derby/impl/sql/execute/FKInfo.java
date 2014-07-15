@@ -277,6 +277,7 @@ public class FKInfo implements Formatable
 		*/
 		FormatIdUtil.writeFormatIdInteger(out, rowLocation.getTypeFormatId());
 
+        out.writeObject(schemaName);
 		out.writeObject(tableName);
 		out.writeInt(type);
 		out.writeInt(stmtType);
@@ -317,6 +318,7 @@ public class FKInfo implements Formatable
 				SanityManager.ASSERT(rowLocation != null, "row location is null in readExternal");
 			}
 
+            schemaName = (String) in.readObject();
 			tableName = (String)in.readObject();
 			type = in.readInt();
 			stmtType = in.readInt();
