@@ -916,7 +916,7 @@ Guide.
 
             <msg>
                 <name>23516.T.1</name>
-                <text>The transaction was aborted because of a deferred constraint violation: Foreign key '{0}' defined on {1} referencing referencing constraint '{2}' defined on {3}, key '{4}'.</text>
+                <text>The transaction was aborted because of a deferred constraint violation: Foreign key '{0}' defined on {1} referencing constraint '{2}' defined on {3}, key '{4}'.</text>
                 <arg>indexOrConstraintName</arg>
                 <arg>tableName</arg>
                 <arg>indexOrConstraintName</arg>
