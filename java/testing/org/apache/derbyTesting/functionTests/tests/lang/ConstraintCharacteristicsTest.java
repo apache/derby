@@ -1405,26 +1405,6 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         s.executeUpdate("drop table t");
         commit();
 
-        //   T r u n c a t e   t h e   r e f e r e n c e d   t a b l e
-        //
-        //   This is only legal if all the referencing constraints are deferred
-        //   and have ON DELETE NO ACTION.
-        //
-        s.executeUpdate(
-            "create table t(i int, constraint c foreign key(i) " +
-            "references referenced(i) on delete NO ACTION initially deferred)");
-        s.executeUpdate("insert into referenced(i) values 4,5,6");
-        s.executeUpdate("insert into t values 4,5,6");
-        s.executeUpdate("set constraints c immediate");
-        s.executeUpdate("set constraints c deferred");
-        s.executeUpdate("delete from referenced where i=4");
-        s.executeUpdate("truncate table referenced");
-        assertStatementError(LANG_DEFERRED_FK_VIOLATION_S, s,
-                             "set constraints c immediate");
-        s.executeUpdate("drop table t");
-        s.executeUpdate("truncate table referenced");
-        commit();
-
         //   C o m p r e s s   t h e   r e f e r e n c i n g   t a b l e
 
         // Compress by recreating the conglomerate

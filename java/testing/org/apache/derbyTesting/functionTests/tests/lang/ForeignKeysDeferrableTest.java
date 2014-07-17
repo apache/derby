@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -1213,4 +1214,37 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
         // detected on commit.
         assertCommitError(LANG_DEFERRED_FK_CONSTRAINT_T, getConnection());
     }
+
+    /**
+     * Test that truncate table is not allowed on a referenced table.
+     * See DERBY-6668.
+     */
+    public  void    test_6668() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table tunique_6668\n" +
+             "(\n" +
+             "  a int not null unique\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table tref_6668\n" +
+             "(\n" +
+             "  a int references tunique_6668( a ) initially deferred\n" +
+             ")\n"
+             );
+
+        assertStatementError
+            (
+             "XCL48",
+             conn.prepareStatement( "truncate table tunique_6668" )
+             );
+    }
+    
 }

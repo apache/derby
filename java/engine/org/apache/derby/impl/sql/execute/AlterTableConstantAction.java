@@ -2464,19 +2464,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                     final ForeignKeyConstraintDescriptor fk =
                             (ForeignKeyConstraintDescriptor)fkcd;
 
-                    if (fk.deferrable() &&
-                        lcc.isEffectivelyDeferred(
-                                lcc.getCurrentSQLSessionContext(activation),
-                                fk.getUUID()) &&
-                        fk.getRaDeleteRule() == StatementType.RA_NOACTION) {
-                        // Allowed. We will update the indexCID later, see
-                        // updateIndex, so we know where to look when
-                        // checking time comes.
-                    } else {
-                        throw StandardException.newException(
-                            SQLState.LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE,
-                            td.getName());
-                    }
+                    throw StandardException.newException
+                        ( SQLState.LANG_NO_TRUNCATE_ON_FK_REFERENCE_TABLE, td.getName() );
 				}
 			}
 		}
