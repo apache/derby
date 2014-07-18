@@ -244,13 +244,15 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
 
         // The actual message may vary. On Java 6, the names are not quoted,
         // whereas newer versions double-quote them. On Windows, the directory
-        // separator is different. Use a regular expression that matches any
-        // variant.
+        // separator is different. Also, different JVM vendors capitalize
+        // the "access denied" message differently.
+        //
+        // Use a regular expression that matches all known variants.
         final String expectedMessageOnConsole =
             "(?s).*The file or directory system.nested could not be created " +
             "due to a security exception: " +
-            "java.security.AccessControlException: access denied " +
-            "\\(\"?java.io.FilePermission\"? \"?system.nested\"? " +
+            "java\\.security\\.AccessControlException: [Aa]ccess denied " +
+            "\\(\"?java\\.io\\.FilePermission\"? \"?system.nested\"? " +
             "\"?write\"?\\).*";
 
         final String output = spawned.getFullServerOutput(); // ignore
@@ -267,11 +269,13 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
     private String makeMessage(String property) {
         // A variable part in the message is whether or not the names are
         // double-quoted. In Java 6 they are not. In newer versions they are.
+        // Another variable part is that the captitalization of "access denied"
+        // varies depending on the JVM vendor.
         final StringBuilder sb = new StringBuilder();
         sb.append("(?s).*WARNING: the property ");
         sb.append(Pattern.quote(property));
         sb.append(" could not be read due to a security exception: ");
-        sb.append("java\\.security\\.AccessControlException: access denied \\(");
+        sb.append("java\\.security\\.AccessControlException: [Aa]ccess denied \\(");
         sb.append("\"?java\\.util\\.PropertyPermission\"? \"?");
         sb.append(Pattern.quote(property));
         sb.append("\"? \"?read\"?.*");
