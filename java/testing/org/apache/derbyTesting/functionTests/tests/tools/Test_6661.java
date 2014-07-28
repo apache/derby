@@ -89,9 +89,10 @@ public class Test_6661 extends BaseJDBCTestCase
 	public static Test suite()
     {
         BaseTestSuite baseTest = new BaseTestSuite( Test_6661.class, "Test_6661" );
-        Test        supportFileWrapper = new SupportFilesSetup( baseTest );
-        Test        cleanDatabaseWrapper = new CleanDatabaseTestSetup( supportFileWrapper );
-        Test        noSecurityWrapper = SecurityManagerSetup.noSecurityManager( cleanDatabaseWrapper );
+        Test        singleUseWrapper = TestConfiguration.singleUseDatabaseDecorator( baseTest );
+        Test        cleanDatabaseWrapper = new CleanDatabaseTestSetup( singleUseWrapper );
+        Test        supportFileWrapper = new SupportFilesSetup( cleanDatabaseWrapper );
+        Test        noSecurityWrapper = SecurityManagerSetup.noSecurityManager( supportFileWrapper );
 
         return noSecurityWrapper;
 	}
