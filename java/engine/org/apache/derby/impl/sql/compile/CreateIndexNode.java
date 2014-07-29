@@ -274,7 +274,8 @@ class CreateIndexNode extends DDLStatementNode
                     false, // it's not a UniqueWithDuplicateNulls Index
                     false, // it's not a constraint, so its checking
                            // is not deferrable
-                    false, // initialltDeferred: N/A
+                    false, // initiallyDeferred: N/A
+                    -1,    // constraintType: N/A
                     indexType,
                     sd.getSchemaName(),
                     indexName.getTableName(),

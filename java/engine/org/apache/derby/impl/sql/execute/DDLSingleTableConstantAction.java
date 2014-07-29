@@ -310,6 +310,7 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
                         false,          // deferred or not: shouldn't matter
                                         // since we know we already have a
                                         // unique index
+                        DataDictionary.UNIQUE_CONSTRAINT,
                         cd.getIndexDescriptor().indexType(), 
                         td.getSchemaName(), 
                         cd.getConglomerateName(), td.getName(), td.getUUID(),

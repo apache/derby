@@ -230,6 +230,7 @@ public class GenericConstantActionFactory
      *                              deferrable constraint
      * @param initiallyDeferred  True means the deferrable constraint has
      *                           deferred mode initially.
+     * @param constraintType  The constraint type
      * @param indexType	The type of index (BTREE, for example)
      * @param schemaName			the schema that table (and index) lives in.
      * @param indexName	Name of the index
@@ -248,6 +249,7 @@ public class GenericConstantActionFactory
 		boolean			uniqueWithDuplicateNulls,
         boolean         hasDeferrableChecking,
         boolean         initiallyDeferred,
+        int             constraintType,
 		String			indexType,
 		String			schemaName,
 		String			indexName,
@@ -266,6 +268,7 @@ public class GenericConstantActionFactory
             uniqueWithDuplicateNulls,
             hasDeferrableChecking,
             initiallyDeferred,
+            constraintType,
             indexType,
             schemaName,
             indexName,

@@ -75,6 +75,8 @@ import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
  */
 public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
 {
+    private static final String  LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T
+                                                                    = "23506";
     private static final String  LANG_DEFERRED_FK_CONSTRAINT_T = "23516";
     private static final String  LANG_DEFERRED_FK_CONSTRAINT_S = "23517";
     private static final String  LANG_ADD_FK_CONSTRAINT_VIOLATION = "X0Y45";
@@ -1247,4 +1249,63 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * Regression test case for DERBY-6665. The prevention of shared physical
+     * conglomerates in the presence of the deferrable constraint
+     * characteristic failed for foreign keys sometimes.  This sometimes made
+     * the deferred check of constraints miss violations if two deferred
+     * constraints erroneously shared a physical conglomerate.
+     */
+    public void testSharedConglomerates() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6665_t1(x int primary key)");
+        s.execute("create table d6665_t2(x int primary key)");
+
+        // Create a table with two foreign keys - they would share one
+        // conglomerate since they are declared on the same column and the hole
+        // in the sharing avoidance logic.
+        s.execute("create table d6665_t3(x int "
+                + "references d6665_t1 initially deferred "
+                + "references d6665_t2 initially deferred)");
+
+        s.execute("insert into d6665_t1 values 1");
+
+        // This violates the second foreign key, since T2 doesn't contain 1.
+        // No error here since the constraint is deferred.
+        s.execute("insert into d6665_t3 values 1");
+
+        // Now we're no longer violating the foreign key.
+        s.execute("insert into d6665_t2 values 1");
+
+        // Introduce a violation of the first foreign key. No error because
+        // the checking is deferred.
+        s.execute("delete from d6665_t1");
+
+        // Commit. Should fail because of the violation introduced by the
+        // delete statement above. Was not detected before DERBY-6665.
+        assertCommitError(LANG_DEFERRED_FK_CONSTRAINT_T, getConnection());
+
+        // Another example: A PRIMARY KEY constraint and a FOREIGN KEY
+        // constraint erroneously share a conglomerate.
+
+        s.execute("create table d6665_t4(x int primary key)");
+        s.execute("create table d6665_t5(x int "
+                + "primary key initially deferred "
+                + "references d6665_t4 initially deferred)");
+
+        // First violate the foreign key. No error, since it is deferred.
+        s.execute("insert into d6665_t5 values 1");
+
+        // No longer in violation of the foreign key after this statement.
+        s.execute("insert into d6665_t4 values 1");
+
+        // Violate the PRIMARY KEY constraint on T5.X.
+        s.execute("insert into d6665_t5 values 1");
+
+        // Commit. Should fail because the PRIMARY KEY constraint of T5
+        // is violated. Was not detected before DERBY-6665.
+        assertCommitError(LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T,
+                          getConnection());
+    }
 }

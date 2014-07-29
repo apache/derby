@@ -100,6 +100,13 @@ class CreateIndexConstantAction extends IndexConstantAction
      */
     private final boolean   initiallyDeferred;
 
+    /**
+     * The constraint type, see 
+     * {@link org.apache.derby.iapi.sql.dictionary.DataDictionary} 
+     * definition of constants.
+     */
+    private final int       constraintType;
+    
 	private String			indexType;
 	private String[]		columnNames;
 	private boolean[]		isAscending;
@@ -171,6 +178,7 @@ class CreateIndexConstantAction extends IndexConstantAction
             boolean			uniqueWithDuplicateNulls,
             boolean         hasDeferrableChecking,
             boolean         initiallyDeferred,
+            int             constraintType,
             String			indexType,
             String			schemaName,
             String			indexName,
@@ -189,6 +197,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		this.uniqueWithDuplicateNulls   = uniqueWithDuplicateNulls;
         this.hasDeferrableChecking      = hasDeferrableChecking;
         this.initiallyDeferred          = initiallyDeferred;
+        this.constraintType             = constraintType;
         this.uniqueDeferrable           = unique && hasDeferrableChecking;
 		this.indexType                  = indexType;
 		this.columnNames                = columnNames;
@@ -243,6 +252,7 @@ class CreateIndexConstantAction extends IndexConstantAction
         this.hasDeferrableChecking = false; // N/A such indexes are not shared
         this.uniqueDeferrable = false;      // N/A
         this.initiallyDeferred = false;     // N/A
+        this.constraintType = -1;           // N/A
 		this.indexType = irg.indexType();
 		this.columnNames = srcCD.getColumnNames();
 		this.isAscending = irg.isAscending();
@@ -661,14 +671,15 @@ class CreateIndexConstantAction extends IndexConstantAction
             if (dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
             {
                 indexRowGenerator = new IndexRowGenerator(
-                                            indexType, 
-                                            unique, 
-                                            uniqueWithDuplicateNulls,
-                                            uniqueDeferrable,
-                                            hasDeferrableChecking,
-                                            baseColumnPositions,
-                                            isAscending,
-                                            baseColumnPositions.length);
+                        indexType, 
+                        unique, 
+                        uniqueWithDuplicateNulls,
+                        uniqueDeferrable,
+                        (hasDeferrableChecking && 
+                         constraintType != DataDictionary.FOREIGNKEY_CONSTRAINT),
+                        baseColumnPositions,
+                        isAscending,
+                        baseColumnPositions.length);
 			}
 			else 
             {
@@ -857,7 +868,8 @@ class CreateIndexConstantAction extends IndexConstantAction
                             lcc,
                             DeferredConstraintsMemory.UNDEFINED_CONGLOMERATE,
                             true,
-                            hasDeferrableChecking,
+                            (hasDeferrableChecking && 
+                            constraintType != DataDictionary.FOREIGNKEY_CONSTRAINT),
                             initiallyDeferred,
                             indexOrConstraintName,
                             indexTemplateRow,

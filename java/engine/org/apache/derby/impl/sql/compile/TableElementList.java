@@ -1061,12 +1061,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 					indexAction = genIndexAction(
 						forCreateTable,
 						constraintDN.requiresUniqueIndex(), false,
-                        cChars[0] &                     // deferrable ?
-                                (constraintType !=
-                                 DataDictionary.FOREIGNKEY_CONSTRAINT),
-                        cChars[1] &                     // initiallyDeferred ?
-                                (constraintType !=
-                                 DataDictionary.FOREIGNKEY_CONSTRAINT),
+                        cChars[0],
+                        cChars[1],
 						null, constraintDN,
 						columnNames, true, tableSd, tableName,
 						constraintType, dd);
@@ -1257,6 +1253,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                     isUniqueWithDuplicateNulls,
                     hasDeferrableChecking,
                     initiallyDeferred,
+                    constraintType,
                     "BTREE", // indexType
                     sd.getSchemaName(),
                     indexName,
