@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -94,7 +95,7 @@ class ProjectRestrictNode extends SingleChildResultSetNode
      * constraints.
      */
     private boolean validatingCheckConstraints = false;
-    private long validatingBaseTableCID;
+    private String validatingBaseTableUUIDString;
 	/**
      * Constructor for a ProjectRestrictNode.
 	 *
@@ -1587,7 +1588,14 @@ class ProjectRestrictNode extends SingleChildResultSetNode
 		mb.push(getResultColumns().reusableResult());
 		mb.push(doesProjection);
         mb.push(validatingCheckConstraints);
-        mb.push(validatingBaseTableCID);
+        if ( validatingBaseTableUUIDString == null )
+        {
+            mb.push( UUID.NULL );
+        }
+        else
+        {
+            mb.push(validatingBaseTableUUIDString);
+        }
 		mb.push(getCostEstimate().rowCount());
 		mb.push(getCostEstimate().getEstimatedCost());
 
@@ -1897,8 +1905,8 @@ class ProjectRestrictNode extends SingleChildResultSetNode
         childResult.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
     }
 
-    void setValidatingCheckConstraints(long baseTableCID) {
+    void setValidatingCheckConstraints( String baseTableUUIDString ) {
         validatingCheckConstraints = true;
-        validatingBaseTableCID = baseTableCID;
+        validatingBaseTableUUIDString = baseTableUUIDString;
     }
 }

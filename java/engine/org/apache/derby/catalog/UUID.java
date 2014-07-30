@@ -35,6 +35,9 @@ package org.apache.derby.catalog;
 
 public interface UUID extends java.io.Externalizable
 {
+    /** NULL UUID */
+    static  final   String  NULL = "NULL";
+
 	/**
 	  UUID_BYTE_LENGTH
 

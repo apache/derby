@@ -319,7 +319,7 @@ public interface ResultSetFactory {
 		@param doesProjection	Whether or not this PRN does a projection
         @param validatingCheckConstraint {@code true if this PRN is used to
             for validating a deferred check constraint}.
-        @param validatingBaseTableCID The conglomerate id for the table being
+        @param validatingBaseTableUUIDString The uuid for the table being
             validated.
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
@@ -337,7 +337,7 @@ public interface ResultSetFactory {
 		boolean reuseResult,
 		boolean doesProjection,
         boolean validatingCheckConstraint,
-        long validatingBaseTableCID,
+        String validatingBaseTableUUIDString,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) throws StandardException;
 

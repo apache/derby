@@ -35,7 +35,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Special result set used when checking deferred CHECK constraints.  Activated
- * by a special {@code --DERBY_PROPERTY validateCheckConstraint=<conglomId>}
+ * by a special {@code --DERBY_PROPERTY validateCheckConstraint=<baseTableUUIDString>}
  * override on a SELECT query, cf DeferredConstraintsMemory#validateCheck.  It
  * relies on having a correct row location set prior to invoking {@code
  * getNewtRowCore}, cf. the special code path in
@@ -131,7 +131,7 @@ final class ValidateCheckConstraintResultSet extends TableScanResultSet
             // Only need to do 1 next per scan for 1 row scans.
             nextDone = oneRowScan;
 
-            if (scanControllerOpened) {
+            if ( scanControllerOpened) {
                 boolean moreRows = true;
 
                 while (moreRows) {

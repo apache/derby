@@ -118,8 +118,6 @@ public class ForeignKeyRIChecker extends GenericRIChecker
                         DeferredConstraintsMemory.rememberFKViolation(
                                 lcc,
                                 deferredRowsHashTable,
-                                fkInfo.fkConglomNumbers[0],
-                                fkInfo.refConglomNumber,
                                 fkInfo.fkIds[0],
                                 indexQualifierRow.getRowArray(),
                                 fkInfo.schemaName,

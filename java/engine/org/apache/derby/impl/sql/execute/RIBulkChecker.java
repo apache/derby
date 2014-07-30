@@ -290,8 +290,6 @@ public class RIBulkChecker
                     DeferredConstraintsMemory.rememberFKViolation(
                             lcc,
                             deferredRowsHashTable,
-                            fkCID,
-                            pkCID,
                             constraintId,
                             foreignKeyRow,
                             schemaName,

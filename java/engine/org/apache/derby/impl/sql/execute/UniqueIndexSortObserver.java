@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -40,15 +41,13 @@ class UniqueIndexSortObserver extends BasicSortObserver
     private final boolean                   deferred;
     private final String                    indexOrConstraintName;
     private final String                    tableName;
-    private final TransactionController     tc;
     private final LanguageConnectionContext lcc;
-    private final long                      indexCID;
+    private final UUID                      constraintId;
     private BackingStoreHashtable           deferredDuplicates;
 
     public UniqueIndexSortObserver(
-            TransactionController tc,
             LanguageConnectionContext lcc,
-            long indexCID,
+            UUID constraintId,
             boolean doClone,
             boolean deferrable,
             boolean deferred,
@@ -58,9 +57,8 @@ class UniqueIndexSortObserver extends BasicSortObserver
             String tableName)
 	{
         super(doClone, !deferred, execRow, reuseWrappers);
-        this.tc = tc;
         this.lcc = lcc;
-        this.indexCID = indexCID;
+        this.constraintId = constraintId;
         this.deferrable = deferrable;
         this.deferred = deferred;
 		this.indexOrConstraintName = indexOrConstraintName;
@@ -95,7 +93,7 @@ class UniqueIndexSortObserver extends BasicSortObserver
         deferredDuplicates = DeferredConstraintsMemory.rememberDuplicate(
                 lcc,
                 deferredDuplicates,
-                indexCID,
+                constraintId,
                 row);
     }
 

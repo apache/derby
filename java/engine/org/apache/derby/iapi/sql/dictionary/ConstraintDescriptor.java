@@ -735,15 +735,10 @@ public abstract class ConstraintDescriptor
             // information since they point to the same physical index.
             for (ConglomerateDescriptor cd : conglomDescs) {
                 if (cd.isConstraint()) {
-                    lcc.forgetDeferredConstraintsData(
-                            cd.getConglomerateNumber());
                     newBackingConglomCD = cd.drop(lcc, table);
                     break;
                 }
             }
-        } else {
-            lcc.forgetDeferredConstraintsData(
-                    getTableDescriptor().getHeapConglomerateId());
         }
 
         table.removeConstraintDescriptor(this);

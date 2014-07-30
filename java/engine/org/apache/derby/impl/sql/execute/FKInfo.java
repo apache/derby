@@ -72,6 +72,7 @@ public class FKInfo implements Formatable
     int                 type;
     UUID                refUUID; // index index conglomerate uuid
     long                refConglomNumber;
+    UUID                refConstraintID;
     boolean             refConstraintIsDeferrable;
     int                 stmtType;
     RowLocation         rowLocation;
@@ -102,6 +103,7 @@ public class FKInfo implements Formatable
 	 * @param type either FKInfo.REFERENCED_KEY or FKInfo.FOREIGN_KEY
      * @param refUUID UUID of the referenced constraint's supporting index
      * @param refConglomNumber conglomerate number of the referenced key
+     * @param refConstraintID UUID of the referenced constraint
      * @param refConstraintIsDeferrable {@code true} iff the referenced key
      *                                  constraint is deferrable
 	 * @param fkUUIDs an array of fkUUIDs of backing indexes.  if
@@ -130,6 +132,7 @@ public class FKInfo implements Formatable
 					int					type,
 					UUID				refUUID,
 					long				refConglomNumber,
+                    UUID                refConstraintID,
                     boolean             refConstraintIsDeferrable,
 					UUID[]				fkUUIDs,
 					long[]				fkConglomNumbers,
@@ -148,6 +151,7 @@ public class FKInfo implements Formatable
 		this.type = type;
 		this.refUUID = refUUID;
 		this.refConglomNumber = refConglomNumber;
+        this.refConstraintID = refConstraintID;
         this.refConstraintIsDeferrable = refConstraintIsDeferrable;
         this.fkUUIDs = ArrayUtil.copy(fkUUIDs);
         this.fkConglomNumbers = ArrayUtil.copy(fkConglomNumbers);
@@ -283,6 +287,7 @@ public class FKInfo implements Formatable
 		out.writeInt(stmtType);
 		out.writeObject(refUUID);
 		out.writeLong(refConglomNumber);
+        out.writeObject(refConstraintID);
         out.writeBoolean(refConstraintIsDeferrable);
 
 		ArrayUtil.writeArray(out, fkConstraintNames);
@@ -324,6 +329,7 @@ public class FKInfo implements Formatable
 			stmtType = in.readInt();
 			refUUID = (UUID)in.readObject();
 			refConglomNumber = in.readLong();
+            refConstraintID = (UUID)in.readObject();
             refConstraintIsDeferrable = in.readBoolean();
 
 			fkConstraintNames = new String[ArrayUtil.readArrayLength(in)];

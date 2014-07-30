@@ -20,6 +20,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -40,16 +41,15 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
     private final String                    tableName;
     private final boolean                   deferrable;
     private final boolean                   deferred;
-    private final TransactionController     tc;
     private final LanguageConnectionContext lcc;
-    private final long                      indexCID;
+    private final UUID                      constraintId;
     private BackingStoreHashtable           deferredDuplicates;
     /**
      * Constructs an object of UniqueWithDuplicateNullsIndexSortObserver
      * 
-     * @param tc      Transaction controller
      * @param lcc     Language Connection context
-     * @param indexCID Conglomerate id if the index
+     * @param constraintId Id of the constraint (only used for
+                      deferrable constraints)
      * @param doClone If true, then rows that are retained
      * 		by the sorter will be cloned.  This is needed
      * 		if language is reusing row wrappers.
@@ -61,9 +61,8 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      * @param tableName name of the table
      */
     public UniqueWithDuplicateNullsIndexSortObserver(
-            TransactionController tc,
             LanguageConnectionContext lcc,
-            long indexCID,
+            UUID constraintId,
             boolean doClone,
             boolean deferrable,
             boolean deferred,
@@ -72,9 +71,8 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
             boolean reuseWrappers,
             String  tableName) {
         super(doClone, false, execRow, reuseWrappers);
-        this.tc = tc;
         this.lcc = lcc;
-        this.indexCID = indexCID;
+        this.constraintId = constraintId;
         this.deferrable = deferrable;
         this.deferred = deferred;
         this.indexOrConstraintName = indexOrConstraintName;
@@ -121,7 +119,7 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
         deferredDuplicates = DeferredConstraintsMemory.rememberDuplicate(
                 lcc,
                 deferredDuplicates,
-                indexCID,
+                constraintId,
                 row);
     }
 

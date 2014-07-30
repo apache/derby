@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,6 +164,10 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                       "testCheckConstraintsWithDeferredRows"));
         suite.addTest(new ConstraintCharacteristicsTest(
                      "testSeveralCheckConstraints"));
+        suite.addTest(new ConstraintCharacteristicsTest(
+                     "testDerby6670_a"));
+        suite.addTest(new ConstraintCharacteristicsTest(
+                     "testDerby6670_b"));
         suite.addTest(new ConstraintCharacteristicsTest(
                      "testManySimilarDuplicates"));
 
@@ -2601,6 +2606,195 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         } catch (SQLException e) {
             // ignore, best effort here
             println("\"" + stm+ "\"failed: " + e);
+        }
+    }
+
+    /**
+     * DERBY-6670 test cases. The violation information would be released when
+     * we dropped a constraint. Unfortunately, an undo in the form of a
+     * rollback to save point would not redo the row operations (so as to
+     * regenerate the violation information), but just undo the conglomerate
+     * delete (which still isn't physically deleted. So, we'd need the
+     * violation information back too. After this fix, we do not release the
+     * violation information until commit/rollback, just make it robust to
+     * disappearance of constraints and their associated tables/schemas.
+     *
+     * @throws SQLException
+     */
+    public void testDerby6670_a() throws SQLException {
+        final Connection c = getConnection();
+        Statement s = createStatement();
+
+        String[] types = new String[]{"pk", "fk", "check"};
+
+        for (String type : types) {
+            String expectedErr = null;
+
+            try {
+                if (type.equals("pk")) {
+                    s.execute("create table derby6670_1(x int primary key " +
+                              "    initially deferred)");
+                    s.execute("insert into derby6670_1 values 1,1,1,1");
+                    expectedErr = LANG_DEFERRED_DUP_VIOLATION_T;
+
+                } else if (type.equals("fk")) {
+                    s.execute("create table derby6670_11(x int primary key)");
+                    s.execute("create table derby6670_1(x int " +
+                              "  references derby6670_11 initially deferred)");
+                    s.execute("insert into derby6670_1 values 1");
+                    expectedErr = LANG_DEFERRED_FK_VIOLATION_T;
+
+                } else if (type.equals("check")) {
+                    s.execute("create table derby6670_1(x int check (x < 0) " +
+                              "    initially deferred)");
+                    s.execute("insert into derby6670_1 values 1");
+                    expectedErr = LANG_DEFERRED_CHECK_VIOLATION_T;
+                }
+
+                Savepoint sp = c.setSavepoint();
+                s.execute("drop table derby6670_1");
+                c.rollback(sp);
+
+                // Since there are four identical rows in DERBY6670_1, this
+                // call should fail because the primary key was violated. It
+                // did not prior to DERBY-6670.
+                try {
+                    commit();
+                    fail();
+                } catch (SQLException e) {
+                    assertSQLState(expectedErr, e);
+                }
+
+                // In savepoint, create table and make a violation, then roll
+                // back.  Commit should work since no violation exists.
+                sp = c.setSavepoint();
+
+                if (type.equals("pk")) {
+                    s.execute("create table derby6670_2(x int primary key " +
+                              "    initially deferred)");
+                    s.execute("insert into derby6670_2 values 1,1,1,1");
+
+                } else if (type.equals("fk")) {
+                    s.execute("create table derby6670_22(x int primary key)");
+                    s.execute("create table derby6670_2(x int " +
+                              "  references derby6670_22 initially deferred)");
+                    s.execute("insert into derby6670_2 values 1");
+
+                } else if (type.equals("check")) {
+                    s.execute("create table derby6670_2(x int)");
+                    s.execute("alter table derby6670_2 add constraint c " +
+                              "  check(x > 0) deferrable initially deferred");
+                    s.execute("insert into derby6670_2 values -1");
+                }
+
+                c.rollback(sp);
+                commit();
+
+                // In a savepoint, add constraint with offending rows. After
+                // rollback, the commit should work since no violations exist.
+
+                s.execute("create table derby6670_3(x int not null)");
+                commit();
+                sp = c.setSavepoint();
+
+                if (type.equals("pk")) {
+                    s.execute("alter table derby6670_3 add constraint c " +
+                              "  primary key(x) deferrable " +
+                              "  initially deferred");
+                    s.execute("insert into derby6670_3 values 1,1");
+
+                } else if (type.equals("fk")) {
+                    s.execute("create table derby6670_33(x int primary key)");
+                    s.execute("alter table derby6670_3 add constraint c " +
+                              "   foreign key(x) references derby6670_33 " +
+                              "   deferrable initially deferred");
+                    s.execute("insert into derby6670_3 values -1");
+
+                } else if (type.equals("check")) {
+                    s.execute("alter table derby6670_3 add constraint c " +
+                              "   check(x > 0) deferrable initially deferred");
+                    s.execute("insert into derby6670_3 values -1");
+                }
+
+                c.rollback(sp);
+                commit();
+
+                // In a savepoint, drop a constraint, then rollback. We should
+                // still see violation at commit.
+                s.execute("create table derby6670_4(x int not null)");
+                c.commit();
+
+                if (type.equals("pk")) {
+                    s.execute("alter table derby6670_4 add constraint c " +
+                              "  primary key(x) deferrable " +
+                              "  initially deferred");
+                    s.execute("insert into derby6670_4 values 1,1");
+
+                } else if (type.equals("fk")) {
+                    s.execute("create table derby6670_44(x int primary key)");
+                    s.execute("alter table derby6670_4 add constraint c " +
+                              "   foreign key(x) references derby6670_44 " +
+                              "   deferrable initially deferred");
+                    s.execute("insert into derby6670_4 values -1");
+
+                } else if (type.equals("check")) {
+                    s.execute("alter table derby6670_4 add constraint c " +
+                              "   check(x > 0) deferrable initially deferred");
+                    s.execute("insert into derby6670_4 values -1");
+                }
+
+                sp = c.setSavepoint();
+                s.execute("alter table derby6670_4 drop constraint c");
+                c.rollback(sp);
+
+                try {
+                    c.commit();
+                    fail();
+                } catch (SQLException e) {
+                    assertSQLState(expectedErr, e);
+                }
+            } finally {
+                for (int i = 1; i <= 4; i++) {
+                    dropTable("derby6670_" + i);
+                }
+                c.commit();
+            }
+        }
+    }
+
+
+    /**
+     * Similarly to what happened for dropping of constraints, when we revert
+     * from deferred constraint mode to immediate, and no violations are seen,
+     * we used to drop the violation information, if any. Again, this is not
+     * safe iff a rollback to a savepoint re-introduces the violations. This
+     * test would fail prior to DERBY-6670.
+     */
+    public void testDerby6670_b() throws SQLException {
+        final Connection c = getConnection();
+        final Statement s = createStatement();
+
+        String[] forms = new String[]{"c", "all"};
+
+        for (String form : forms) {
+            s.execute("create table t1(x int primary key, " +
+                      "    constraint c check(x > 0) initially deferred)");
+            s.execute("insert into t1 values -1");
+
+            Savepoint sp = c.setSavepoint();
+            s.execute("delete from t1");
+            s.execute("set constraints " + form + " immediate");
+            c.rollback(sp);
+
+            try {
+                // Used to succeed because we released violation information of
+                // the successful constraint when moving to immediate mode
+                c.commit();
+                fail();
+
+            } catch (SQLException e) {
+                assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+            }
         }
     }
 }

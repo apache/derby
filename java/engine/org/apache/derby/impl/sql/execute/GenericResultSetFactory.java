@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -237,18 +238,26 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean reuseResult,
 		boolean doesProjection,
         boolean validatingCheckConstraint,
-        long validatingBaseTableCID,
+        String validatingBaseTableUUIDString,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
 			throws StandardException
 	{
+        UUID    validatingBaseTableUUID = UUID.NULL.equals( validatingBaseTableUUIDString ) ?
+            null :
+            source.getActivation()
+            .getLanguageConnectionContext()
+            .getDataDictionary()
+            .getUUIDFactory()
+            .recreateUUID( validatingBaseTableUUIDString );
+
 		return new ProjectRestrictResultSet(source, source.getActivation(), 
 			restriction, projection, resultSetNumber, 
             constantRestriction, mapRefItem, cloneMapItem,
 			reuseResult,
 			doesProjection,
             validatingCheckConstraint,
-            validatingBaseTableCID,
+            validatingBaseTableUUID,
 		    optimizerEstimatedRowCount,
 			optimizerEstimatedCost);
 	}

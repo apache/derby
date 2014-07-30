@@ -37,6 +37,9 @@ public abstract class IndexConstantAction extends DDLSingleTableConstantAction
 	String				tableName;
 	String				schemaName;
 
+    /** Set by CreateConstraintConstantAction */
+    protected transient   UUID    constraintID;
+
 	// CONSTRUCTORS
 
 	/**
@@ -84,4 +87,14 @@ public abstract class IndexConstantAction extends DDLSingleTableConstantAction
 	{
 		this.indexName = indexName;
 	}
+
+    /**
+     * Set the id for the constraint which may be driving this index action.
+     * This is called by CreateConstraintConstantAction.
+     * @param constraintID The id of the constraint
+     */
+    public void setConstraintID(UUID constraintID) {
+        this.constraintID = constraintID;
+    }
+
 }

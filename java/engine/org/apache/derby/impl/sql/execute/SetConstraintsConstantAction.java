@@ -27,11 +27,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.util.IdUtil;
@@ -129,30 +126,10 @@ class SetConstraintsConstantAction extends DDLConstantAction
                             cd.getConstraintName());
                 }
 
-                if (cd instanceof ForeignKeyConstraintDescriptor ||
-                    cd instanceof CheckConstraintDescriptor) {
-
-                    // Set check constraints and FKs
-                    lcc.setConstraintDeferred(
-                        activation,
-                        ( cd instanceof CheckConstraintDescriptor ?
-                          cd.getTableDescriptor().getHeapConglomerateId() :
-                          ((KeyConstraintDescriptor)cd).
-                          getIndexConglomerateDescriptor(dd).
-                          getConglomerateNumber() ),
-                        cd.getUUID(),
-                        deferred);
-
-                } else {
-                    // Set unique, primary key
-
-                    lcc.setConstraintDeferred(
-                            activation,
-                            ((KeyConstraintDescriptor)cd).
-                                    getIndexConglomerateDescriptor(dd).
-                                    getConglomerateNumber(),
-                            deferred);
-                }
+                lcc.setConstraintDeferred(
+                    activation,
+                    cd,
+                    deferred);
             }
         } else {
             lcc.setDeferredAll(activation, deferred);

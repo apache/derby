@@ -1028,6 +1028,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
                     pkIndexId,              // referenced backing index uuid
                     pkIndexConglom.getConglomerateNumber(),
                                             // referenced backing index conglom
+                    refcd.getUUID(),
                     refcd.deferrable(),     // referenced constraint is
                                             // deferrable?
                     uuids,                  // fk backing index uuids

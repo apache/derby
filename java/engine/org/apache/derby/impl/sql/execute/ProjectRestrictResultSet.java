@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import java.util.Enumeration;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
@@ -72,7 +73,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 
 	private ExecRow projRow;
     private final boolean validatingCheckConstraint;
-    private final long validatingBaseTableCID;
+    private final UUID validatingBaseTableUUID;
     Enumeration<Object> rowLocations;
 
     // class interface
@@ -88,7 +89,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 					boolean reuseResult,
 					boolean doesProjection,
                     boolean validatingCheckConstraint,
-                    long validatingBaseTableCID,
+                    UUID validatingBaseTableUUID,
 				    double optimizerEstimatedRowCount,
 					double optimizerEstimatedCost) 
 		throws StandardException
@@ -109,7 +110,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		this.reuseResult = reuseResult;
 		this.doesProjection = doesProjection;
         this.validatingCheckConstraint = validatingCheckConstraint;
-        this.validatingBaseTableCID = validatingBaseTableCID;
+        this.validatingBaseTableUUID = validatingBaseTableUUID;
 
 		// Allocate a result row if all of the columns are mapped from the source
 		if (projection == null)
@@ -172,7 +173,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
         if (validatingCheckConstraint) {
             rowLocations = DeferredConstraintsMemory.
                 getDeferredCheckConstraintLocations(
-                        activation, validatingBaseTableCID);
+                        activation, validatingBaseTableUUID);
         }
 
 

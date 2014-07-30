@@ -33,23 +33,13 @@ public class SQLSessionContextImpl implements SQLSessionContext {
     private SchemaDescriptor currentDefaultSchema;
 
     /**
-     * Maps a conglomerate id (key) into a Boolean for deferrable primary/unique
-     * constraints.
-     * There is a 1-1 correspondence for these backing indexes, they are not
-     * shared). If the Boolean value is {@code FALSE}, we have immediate
-     * checking, if it is {@code TRUE} we have deferred checking. Cf. SQL
-     * SET CONSTRAINT.
-     */
-    private HashMap<Long, Boolean> uniquePKConstraintModes;
-
-    /**
-     * Maps a constraint id (key) into a Boolean for deferrable check
+     * Maps a constraint id (key) into a Boolean for deferrable
      * constraints.
      * If the Boolean value is {@code FALSE}, we have immediate
      * checking, if it is {@code TRUE} we have deferred checking. Cf. SQL
      * SET CONSTRAINT.
      */
-    private HashMap<UUID, Boolean> checkConstraintModes;
+    private HashMap<UUID, Boolean> constraintModes;
 
     /**
      * True if all deferrable constraints are deferred in this transaction.
@@ -91,75 +81,39 @@ public class SQLSessionContextImpl implements SQLSessionContext {
     /**
      * {@inheritDoc}
      */
-    public HashMap<Long, Boolean> getUniquePKConstraintModes() {
-        return uniquePKConstraintModes != null ?
-            new HashMap<Long, Boolean>(uniquePKConstraintModes) :
-            null;
-    }
-
-    public HashMap<UUID, Boolean> getCheckConstraintModes() {
-        return checkConstraintModes != null ?
-            new HashMap<UUID, Boolean>(checkConstraintModes) :
+    public HashMap<UUID, Boolean> getConstraintModes() {
+        return constraintModes != null ?
+            new HashMap<UUID, Boolean>(constraintModes) :
             null;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void setConstraintModes(HashMap<Long, Boolean> hm) {
-        this.uniquePKConstraintModes = hm != null ?
-                new HashMap<Long, Boolean>(hm) : null;
-    }
-
-    public void setCheckConstraintModes(HashMap<UUID, Boolean> hm) {
-        this.checkConstraintModes = hm != null ?
+    public void setConstraintModes(HashMap<UUID, Boolean> hm) {
+        this.constraintModes = hm != null ?
                 new HashMap<UUID, Boolean>(hm) : null;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void setDeferred(long conglomId, boolean deferred) {
-        if (uniquePKConstraintModes == null) {
-            uniquePKConstraintModes = new HashMap<Long, Boolean>();
-        }
-
-        uniquePKConstraintModes.put(Long.valueOf(conglomId),
-                                Boolean.valueOf(deferred));
-    }
-
     public void setDeferred(UUID constraintId, boolean deferred) {
-        if (checkConstraintModes == null) {
-            checkConstraintModes = new HashMap<UUID, Boolean>();
+        if (constraintModes == null) {
+            constraintModes = new HashMap<UUID, Boolean>();
         }
 
-        checkConstraintModes.put(constraintId, Boolean.valueOf(deferred));
+        constraintModes.put(constraintId, Boolean.valueOf(deferred));
     }
 
     /**
      * {@inheritDoc}
      */
-    public Boolean isDeferred(long conglomId) {
-        Boolean v = null;
-
-        if (uniquePKConstraintModes != null) {
-            v = uniquePKConstraintModes.get(Long.valueOf(conglomId));
-        }
-
-        if (v != null) {
-            return v; // Trumps ALL setting since it must have been
-                      // set later otherwise it would have been
-                      // deleted
-        } else {
-            return deferredAll;
-        }
-    }
-
     public Boolean isDeferred(UUID constraintId) {
         Boolean v = null;
 
-        if (checkConstraintModes != null) {
-            v = checkConstraintModes.get(constraintId);
+        if (constraintModes != null) {
+            v = constraintModes.get(constraintId);
         }
 
         if (v != null) {
@@ -176,12 +130,8 @@ public class SQLSessionContextImpl implements SQLSessionContext {
      * {@inheritDoc}
      */
     public void resetConstraintModes() {
-        if (uniquePKConstraintModes != null) {
-            uniquePKConstraintModes.clear();
-        }
-
-        if (checkConstraintModes != null) {
-            checkConstraintModes.clear();
+        if (constraintModes != null) {
+            constraintModes.clear();
         }
 
         deferredAll = null;
@@ -194,12 +144,8 @@ public class SQLSessionContextImpl implements SQLSessionContext {
         deferredAll = deferred;
         // This now overrides any individual constraint setting, so
         // clear those.
-        if (uniquePKConstraintModes != null) {
-            uniquePKConstraintModes.clear();
-        }
-
-        if (checkConstraintModes != null) {
-            checkConstraintModes.clear();
+        if (constraintModes != null) {
+            constraintModes.clear();
         }
     }
 

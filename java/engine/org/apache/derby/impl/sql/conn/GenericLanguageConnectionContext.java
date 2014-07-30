@@ -65,6 +65,7 @@ import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
@@ -313,7 +314,7 @@ public class GenericLanguageConnectionContext
      * saved for deferred constraints in this transaction, keyed by the
      * conglomerate id. Checked at commit time, then discarded.
      */
-    private HashMap<Long, ValidationInfo> deferredHashTables;
+    private HashMap<UUID, ValidationInfo> deferredHashTables;
 
     /*
        constructor
@@ -3748,8 +3749,7 @@ public class GenericLanguageConnectionContext
 
         final SQLSessionContext ssc = getCurrentSQLSessionContext(a);
         sc.setDeferredAll(ssc.getDeferredAll());
-        sc.setConstraintModes(ssc.getUniquePKConstraintModes());
-        sc.setCheckConstraintModes(ssc.getCheckConstraintModes());
+        sc.setConstraintModes(ssc.getConstraintModes());
 
         StatementContext stmctx = getStatementContext();
 
@@ -3792,33 +3792,9 @@ public class GenericLanguageConnectionContext
         // Check all constraints that were deferred inside the routine
         // but whose constraint mode is immediate on the outside. If
         // any of these violate the constraints, roll back.
-        for (Map.Entry<Long, ValidationInfo> e : deferredHashTables.entrySet())
-        {
-            e.getValue().possiblyValidateOnReturn(e, this, nested, caller);
+        for (ValidationInfo info : deferredHashTables.values()) {
+            info.possiblyValidateOnReturn(this, nested, caller);
         }
-    }
-
-    public boolean isEffectivelyDeferred(SQLSessionContext sc, long indexCID)
-            throws StandardException {
-
-        Boolean deferred = sc.isDeferred(indexCID);
-        boolean effectivelyDeferred;
-        final DataDictionary dd = getDataDictionary();
-
-        if (deferred != null) {
-            effectivelyDeferred = deferred.booleanValue();
-        } else {
-            // no explicit setting applicable, use initial constraint mode
-            final ConglomerateDescriptor cd =
-                    dd.getConglomerateDescriptor(indexCID);
-            final TableDescriptor td =
-                    dd.getTableDescriptor(cd.getTableID());
-            final ConstraintDescriptor conDesc =
-                    dd.getConstraintDescriptor(td, cd.getUUID());
-            effectivelyDeferred = conDesc.initiallyDeferred();
-        }
-
-        return effectivelyDeferred;
     }
 
     public boolean isEffectivelyDeferred(SQLSessionContext sc, UUID constraintId)
@@ -3945,62 +3921,29 @@ public class GenericLanguageConnectionContext
     }
 
     /**
-     * For check constraints
+     * Set the constraint mode to deferred for the specified constraint.
      *
      * @param a             activation
-     * @param basetableCID  the conglomerate id of the base table on which
-     *                      the constraint is defined
-     * @param constraintId  the constraint id
+     * @param cd            the constraint descriptor
      * @param deferred      the constraint mode
      * @throws StandardException standard error policy
      */
     public void setConstraintDeferred(
             final Activation a,
-            final long basetableCID,
-            final UUID constraintId,
+            ConstraintDescriptor cd,
             final boolean deferred) throws StandardException {
 
         if (!deferred) {
             // Moving to immediate, check what's done in this transaction first
-            validateDeferredConstraint(basetableCID, constraintId);
+            validateDeferredConstraint(cd);
         }
 
-        getCurrentSQLSessionContext(a).setDeferred(constraintId, deferred);
-    }
-
-    /**
-     * For unique and primary key constraints
-     *
-     * @param a         activation
-     * @param indexCID  the conglomerate id of the supporting index
-     * @param deferred  constraint mode
-     * @throws StandardException standard error policy
- */
-    public void setConstraintDeferred(
-            final Activation a,
-            final long indexCID,
-            final boolean deferred) throws StandardException {
-
-        if (!deferred) {
-            // Moving to immediate, check what's done in this transaction first
-            validateDeferredConstraint(indexCID, null);
-        }
-
-        getCurrentSQLSessionContext(a).setDeferred(indexCID, deferred);
-
+        getCurrentSQLSessionContext(a).setDeferred(cd.getUUID(), deferred);
     }
 
     public void checkIntegrity() throws StandardException {
         validateDeferredConstraints(true);
         clearDeferreds();
-    }
-
-    public void forgetDeferredConstraintsData(final long conglomId)
-            throws StandardException {
-        if (deferredHashTables != null &&
-                deferredHashTables.containsKey(Long.valueOf(conglomId))) {
-            deferredHashTables.remove(Long.valueOf(conglomId));
-        }
     }
 
     /**
@@ -4016,20 +3959,25 @@ public class GenericLanguageConnectionContext
         if (!deferred) {
             validateDeferredConstraints(false);
 
-            // No violations, so reset the memory
-            deferredHashTables = null;
+            // No violations, bug can't forget since we might roll back to a
+            // savepoint that migh re-introduce the violations
+            // DERBY-6670
+            // deferredHashTables = null;
         }
         getCurrentSQLSessionContext(a).setDeferredAll(
             Boolean.valueOf(deferred));
     }
 
-    public HashMap<Long, ValidationInfo> getDeferredHashTables() {
+    public HashMap<UUID, ValidationInfo> getDeferredHashTables() {
         if (deferredHashTables == null) {
-            deferredHashTables = new HashMap<Long, ValidationInfo>();
+            deferredHashTables = new HashMap<UUID, ValidationInfo>();
         }
         return deferredHashTables;
     }
 
+    /**
+     * Validate all deferred constraints.
+     */
     private void validateDeferredConstraints(final boolean rollbackOnError)
             throws StandardException {
 
@@ -4038,29 +3986,41 @@ public class GenericLanguageConnectionContext
             return;
         }
 
-        final Set<Map.Entry<Long, ValidationInfo>> es =
-                deferredHashTables.entrySet();
-
-        for (Map.Entry<Long, ValidationInfo> e : es) {
-            final long cid = e.getKey().longValue();
-            e.getValue().validateConstraint(this, cid, null, rollbackOnError);
+        for (ValidationInfo info : deferredHashTables.values()) {
+            info.validateConstraint(this, null, rollbackOnError);
         }
     }
 
+    /**
+     * Validate a deferred constraint.
+     *
+     * @param cd the descriptor of the constraint to validate
+     */
+    private void validateDeferredConstraint(ConstraintDescriptor cd)
+            throws StandardException {
 
-    private void validateDeferredConstraint(
-        final long conglomCID,
-        final UUID constraintId) throws StandardException {
+        if (deferredHashTables == null) {
+            // Nothing to do.
+            return;
+        }
 
-        ValidationInfo vi = null;
+        // For CHECK constraints, the key is the table id. All other
+        // constraints use the constraint id as key.
+        UUID key = cd.hasBackingIndex() ? cd.getUUID() : cd.getTableId();
 
-        if (deferredHashTables == null ||
-            (vi = deferredHashTables.get(conglomCID)) == null) {
+        ValidationInfo vi = deferredHashTables.get(key);
+
+        if (vi == null) {
             // Nothing to do
             return;
         }
 
-        vi.validateConstraint(this, conglomCID, constraintId, false);
-        deferredHashTables.remove(conglomCID);
+        vi.validateConstraint(this, cd.getUUID(), false);
+
+        // No violations, bug can't forget since we might roll back to a
+        // savepoint that migh re-introduce the violations
+        // DERBY-6670-
+        //
+        // deferredHashTables.remove(key);
     }
 }

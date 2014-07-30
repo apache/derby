@@ -128,7 +128,7 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
             // violated. DERBY-6559
             if (lcc.isEffectivelyDeferred(
                     lcc.getCurrentSQLSessionContext(a),
-                    fkInfo.refConglomNumber)) {
+                    fkInfo.refConstraintID)) {
                 if (restrictCheckOnly) {
                     rememberKey(row);
                     return;
@@ -174,8 +174,6 @@ public class ReferencedKeyRIChecker extends GenericRIChecker
                             DeferredConstraintsMemory.rememberFKViolation(
                                     lcc,
                                     deferredRowsHashTable,
-                                    fkInfo.fkConglomNumbers[i],
-                                    fkInfo.refConglomNumber,
                                     fkInfo.fkIds[i],
                                     indexQualifierRow.getRowArray(),
                                     fkInfo.schemaName,

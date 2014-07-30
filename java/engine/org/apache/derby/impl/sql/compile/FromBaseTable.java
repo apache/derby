@@ -135,10 +135,10 @@ class FromBaseTable extends FromTable
 
     /*
     ** Used to validate deferred check constraints.
-    ** It is the conglomerate number of the target inserted into or updated
+    ** It is the uuid of the target table inserted into or updated
     ** when a violation was detected but deferred.
     */
-    private long            targetTableCID;
+    private String          targetTableUUIDString;
     private boolean         validatingCheckConstraint = false;
 
 	/* We may turn off bulk fetch for a variety of reasons,
@@ -875,7 +875,7 @@ class FromBaseTable extends FromTable
             String key = (String)e.nextElement();
             String value = (String) tableProperties.get(key);
             if (key.equals("validateCheckConstraint")) {
-                targetTableCID = getLongProperty(value, key);
+                targetTableUUIDString = value;
                 validatingCheckConstraint = true;
                 return true;
             }
@@ -3000,7 +3000,7 @@ class FromBaseTable extends FromTable
                         SQLState.LANG_SYNTAX_ERROR, "validateCheckConstraint");
             }
 
-            result.setValidatingCheckConstraints(targetTableCID);
+            result.setValidatingCheckConstraints(targetTableUUIDString);
         }
         return result;
 	}

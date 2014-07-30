@@ -2788,12 +2788,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Drop the old conglomerate
 		tc.dropConglomerate(indexConglomerateNumbers[index]);
 
-        DeferredConstraintsMemory.updateIndexCIDs(
-                lcc,
-                truncateTable,
-                indexConglomerateNumbers[index],
-                newIndexCongloms[index]);
-
 	}
 
 

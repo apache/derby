@@ -520,7 +520,7 @@ class UpdateResultSet extends DMLWriteResultSet
                         deferredChecks =
                             DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
-                                heapConglom,
+                                constants.targetUUID,
                                 constants.getSchemaName(),
                                 constants.getTableName(),
                                 deferredChecks,
@@ -597,7 +597,7 @@ class UpdateResultSet extends DMLWriteResultSet
                     deferredChecks =
                         DeferredConstraintsMemory.rememberCheckViolations(
                             lcc,
-                            heapConglom,
+                            constants.targetUUID,
                             constants.getSchemaName(),
                             constants.getTableName(),
                             deferredChecks,
@@ -893,7 +893,7 @@ class UpdateResultSet extends DMLWriteResultSet
                         deferredChecks =
                             DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
-                                heapConglom,
+                                constants.targetUUID,
                                 constants.getSchemaName(),
                                 constants.getTableName(),
                                 deferredChecks,

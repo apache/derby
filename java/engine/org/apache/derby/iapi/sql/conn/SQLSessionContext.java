@@ -105,39 +105,14 @@ public interface SQLSessionContext {
      * The caller is responsible for any cloning needed.
      * @return constraint modes map
      */
-    public HashMap<Long, Boolean> getUniquePKConstraintModes();
-
-    /**
-     * Get a handle to the session's check constraint modes.
-     * The caller is responsible for any cloning needed.
-     * @return constraint modes map
-     */
-    public HashMap<UUID, Boolean> getCheckConstraintModes();
+    public HashMap<UUID, Boolean> getConstraintModes();
 
     /**
      * Initialize a inferior session context with the constraint mode map
      * of the parent session context.
      * @param hm constraint mode map
      */
-    public void setConstraintModes(HashMap<Long, Boolean> hm);
-
-    /**
-     * Initialize a inferior session context with the check constraint mode map
-     * of the parent session context.
-     * @param hm constraint mode map
-     */
-    public void setCheckConstraintModes(HashMap<UUID, Boolean> hm);
-
-    /**
-     * Set the constraint mode for this constraint/index to {@code deferred}.
-     * If {@code deferred} is {@code false}, to immediate checking,
-     * if {@code true} to deferred checking.
-     *
-     * @param conglomId The conglomerate id of the backing index for the
-     *                  constraint .
-     * @param deferred  The new constraint mode
-     */
-    public void setDeferred(long conglomId, boolean deferred);
+    public void setConstraintModes(HashMap<UUID, Boolean> hm);
 
     /**
      * Set the constraint mode for this constraint to {@code deferred}.
@@ -148,16 +123,6 @@ public interface SQLSessionContext {
      * @param deferred  The new constraint mode
      */
     public void setDeferred(UUID constraintId, boolean deferred);
-
-    /**
-     * Return {@code Boolean.TRUE} if the constraint mode for this
-     * constraint/index has been set to deferred, {@code Boolean.FALSE} if
-     * it has been set to immediate.  Any ALL setting is considered also.
-     * If the constraint mode hasn't been set for this constraint,
-     * return {@code null}. The constraint mode is the effectively the initial
-     * constraint mode in this case.
-     */
-    public Boolean isDeferred(long conglomId);
 
     /**
      * Return {@code Boolean.TRUE} if the constraint mode for this

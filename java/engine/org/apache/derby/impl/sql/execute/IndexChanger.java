@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -34,8 +33,10 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
@@ -433,6 +434,25 @@ class IndexChanger
 		}
 	}
 
+    private UUID uniqueConstraintId; // cached copy
+
+    // Return the id of the corresponding unique or primary key
+    // constraint. Note: this only works because deferrable constraints
+    // do not share an index with other constraints and explicit indexes, so the
+    // mapping back from index conglomerate to constraint is one-to-one.
+    private UUID getUniqueConstraintId() throws StandardException {
+        if (uniqueConstraintId == null) {
+            DataDictionary dd = lcc.getDataDictionary();
+            ConglomerateDescriptor cd = dd.getConglomerateDescriptor(indexCID);
+            uniqueConstraintId =
+                    dd.getConstraintDescriptor(
+                    dd.getTableDescriptor(cd.getTableID()),
+                    cd.getUUID()).getUUID();
+        }
+
+        return uniqueConstraintId;
+    }
+
 	/**
 	 * Insert the given row into the given conglomerate and check for duplicate
 	 * key error.
@@ -470,7 +490,9 @@ class IndexChanger
             // constitute duplicates (not always the case), and check those keys
             // again at commit time.
             final boolean deferred = lcc.isEffectivelyDeferred(
-                    lcc.getCurrentSQLSessionContext(activation), indexCID);
+                    lcc.getCurrentSQLSessionContext(activation),
+                    getUniqueConstraintId());
+            // TODO add assert getUniqueConstraintId() != null
 
             ScanController idxScan = tc.openScan(
                     indexCID,
@@ -524,9 +546,7 @@ class IndexChanger
             }
 
             if (duplicate) {
-                if (lcc.isEffectivelyDeferred(
-                        lcc.getCurrentSQLSessionContext(activation),
-                        indexCID)) {
+                if (deferred) {
                     // Save duplicate row so we can check at commit time there is
                     // no longer any duplicate.
 
@@ -534,7 +554,7 @@ class IndexChanger
                         DeferredConstraintsMemory.rememberDuplicate(
                             lcc,
                             deferredDuplicates,
-                            indexCID,
+                            getUniqueConstraintId(),
                             row.getRowArray());
                 } else { // the constraint is not deferred, so throw
                     insertStatus = ConglomerateController.ROWISDUPLICATE;

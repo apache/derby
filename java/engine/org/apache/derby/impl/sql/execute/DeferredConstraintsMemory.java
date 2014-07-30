@@ -25,7 +25,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -34,10 +33,11 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
-import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -48,7 +48,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLRef;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * This class provides support for deferrable constraints. When the constraint
@@ -68,14 +67,6 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  */
 final public class DeferredConstraintsMemory
 {
-    /**
-     * For unique and primary key constraints, sometimes we need to save
-     * duplicate rows before we know the id of the constraint index, so we
-     * assign the duplicates row a temporary constraint id
-     * (UNDEFINED_CONGLOMERATE) and fix it up later.
-     * @see #associateDuplicatesWithConglomerate
-     */
-    public final static long UNDEFINED_CONGLOMERATE = -1;
 
     /**
      * Save the contents of an constraint supporting index row in a
@@ -85,8 +76,7 @@ final public class DeferredConstraintsMemory
      * @param lcc       the language connection context
      * @param deferredRowsHashTable
      *                  client cached value
-     * @param indexCID  the identity of the index conglomerate which supports
-     *                  the deferred constraint
+     * @param constraintId the id of the unique or primary key constraint
      * @param insertRow the duplicate row to be saved in the hash table
      *                  for later checking
      * @return the hash table (for caching by client to minimize lookups)
@@ -95,7 +85,7 @@ final public class DeferredConstraintsMemory
     public static BackingStoreHashtable rememberDuplicate(
             final LanguageConnectionContext lcc,
                   BackingStoreHashtable deferredRowsHashTable,
-            final long indexCID,
+            UUID constraintId,
             final DataValueDescriptor[] insertRow) throws StandardException {
 
         // Don't copy the RowLocation, we don't need it:
@@ -107,17 +97,17 @@ final public class DeferredConstraintsMemory
             // tables (one per index conglomerate).  Use it if it
             // exists, else make a new one.
 
-            final HashMap<Long, ValidationInfo> hashTables =
+            final HashMap<UUID, ValidationInfo> hashTables =
                 lcc.getDeferredHashTables();
-            final ValidationInfo vi = hashTables.get(Long.valueOf(indexCID));
+            final ValidationInfo vi = hashTables.get(constraintId);
 
             if (vi == null) {
                 deferredRowsHashTable =
                   makeDeferredHashTable(lcc.getTransactionExecute(), keyLength);
 
                 hashTables.put(
-                    Long.valueOf(indexCID),
-                    new UniquePkInfo(deferredRowsHashTable));
+                    constraintId,
+                    new UniquePkInfo(deferredRowsHashTable, constraintId));
             } else {
                 deferredRowsHashTable = vi.infoRows;
             }
@@ -138,8 +128,7 @@ final public class DeferredConstraintsMemory
      * The row locations are subject to invalidation, cf.
      * {@code CheckInfo#setInvalidatedRowLocations}.
      *
-     * @param basetableCID  the identity of the base table conglomerate for
-     *                  which we have seen a violated deferred check constraint
+     * @param basetableId the id of the target table
      * @param schemaName the schema of the target table
      * @param tableName the target table name
      * @param deferredCheckViolations
@@ -154,7 +143,7 @@ final public class DeferredConstraintsMemory
      */
     public static BackingStoreHashtable rememberCheckViolations(
             final LanguageConnectionContext lcc,
-            final long basetableCID,
+            UUID  basetableId,
             final String schemaName,
             final String tableName,
                   BackingStoreHashtable deferredCheckViolations,
@@ -172,10 +161,9 @@ final public class DeferredConstraintsMemory
             // tables (one per base table conglomerate).  Use it if it
             // exists, else make a new one.
 
-            final HashMap<Long, ValidationInfo> hashTables =
+            final HashMap<UUID, ValidationInfo> hashTables =
                     lcc.getDeferredHashTables();
-            final CheckInfo vi =
-                    (CheckInfo)hashTables.get(Long.valueOf(basetableCID));
+            final CheckInfo vi = (CheckInfo) hashTables.get(basetableId);
 
             if (vi == null) {
                 // size 1 below: the row location in the target table of the
@@ -186,7 +174,7 @@ final public class DeferredConstraintsMemory
                                    schemaName,
                                    tableName,
                                    violatingCheckConstraints);
-                hashTables.put(Long.valueOf(basetableCID), ci);
+                hashTables.put(basetableId, ci);
                 result[0] = ci;
             } else {
                 vi.addCulprits(violatingCheckConstraints);
@@ -205,12 +193,11 @@ final public class DeferredConstraintsMemory
 
     public static Enumeration<Object> getDeferredCheckConstraintLocations(
             Activation activation,
-            long validatingBaseTableCID) throws StandardException {
+            UUID validatingBaseTableUUID) throws StandardException {
 
         CheckInfo ci = (DeferredConstraintsMemory.CheckInfo)activation.
                 getLanguageConnectionContext().
-                getDeferredHashTables().get(
-                    Long.valueOf(validatingBaseTableCID));
+                getDeferredHashTables().get( validatingBaseTableUUID );
         return ci.infoRows.elements();
     }
 
@@ -220,8 +207,6 @@ final public class DeferredConstraintsMemory
      *
      * @param lcc the language connection context
      * @param deferredRowsHashTable cached client copy
-     * @param siCID the conglomerate ID of the supporting index of the FK
-     * @param rtCID the conglomerate id of the index of the referenced table
      * @param fkId the UUID of the foreign key constraint
      * @param indexRow the row in the supporting index which contains
      *        the key which is not present in the referenced index.
@@ -233,8 +218,6 @@ final public class DeferredConstraintsMemory
     public static BackingStoreHashtable rememberFKViolation(
             final LanguageConnectionContext lcc,
                   BackingStoreHashtable deferredRowsHashTable,
-            final long siCID,
-            final long rtCID,
             final UUID fkId,
             final DataValueDescriptor[] indexRow,
             String schemaName,
@@ -246,17 +229,17 @@ final public class DeferredConstraintsMemory
             // tables (one per index conglomerate).  Use it if it
             // exists, else make a new one.
 
-            final HashMap<Long, ValidationInfo> hashTables =
+            final HashMap<UUID, ValidationInfo> hashTables =
                 lcc.getDeferredHashTables();
-            final ValidationInfo vi = hashTables.get(Long.valueOf(siCID));
+            final ValidationInfo vi = hashTables.get(fkId);
 
             if (vi == null) {
                 deferredRowsHashTable = makeDeferredHashTable(
                     lcc.getTransactionExecute(), indexRow.length);
 
                 hashTables.put(
-                    Long.valueOf(siCID),
-                    new ForeignKeyInfo(deferredRowsHashTable, fkId, rtCID,
+                    fkId,
+                    new ForeignKeyInfo(deferredRowsHashTable, fkId,
                                        schemaName, tableName));
             } else {
                 deferredRowsHashTable = vi.infoRows;
@@ -269,59 +252,6 @@ final public class DeferredConstraintsMemory
         deferredRowsHashTable.putRow(true, hashRowArray, null);
 
         return deferredRowsHashTable;
-    }
-
-    /**
-     * After having belatedly learned the identity of the conglomerate, we now
-     * associate the conglomerate id information with the saved duplicates
-     * memory. Used for unique and primary key constraints.
-     * See {@link #UNDEFINED_CONGLOMERATE}.
-     *
-     * @param lcc language connection context
-     * @param indexCID the id of the index conglomerate supporting the
-     *                 deferred constraint
-     */
-    public static void associateDuplicatesWithConglomerate(
-            final LanguageConnectionContext lcc,
-            final long indexCID) {
-        updateKey(lcc, UNDEFINED_CONGLOMERATE, indexCID);
-    }
-
-    private static void updateKey(
-        LanguageConnectionContext lcc,
-        long oldCID,
-        long newCID) {
-
-        final HashMap<Long, ValidationInfo> hashTables =
-                    lcc.getDeferredHashTables();
-
-        if (hashTables == null) {
-            return; // no duplicates recorded in this transaction
-        }
-
-        final ValidationInfo ht = hashTables.remove(Long.valueOf(oldCID));
-
-        if (ht != null) {
-            hashTables.put(newCID, ht);
-        }
-    }
-
-    /**
-     * The conglomerate id for an index with deferred row checking needs
-     * updating in the memory if the underlying index is rebuilt
-     * on bulk insert for import.
-     *
-     * @param lcc the language connection context needed to find the
-     *            deferred rows information if any
-     * @param oldIndexCID the old id of the supporting index
-     * @param newIndexCID the new id of the supporting index after recreation
-     */
-    public static void updateIndexCID(
-            final LanguageConnectionContext lcc,
-            final long oldIndexCID,
-            final long newIndexCID) {
-
-        updateKey(lcc, oldIndexCID, newIndexCID);
     }
 
     private static BackingStoreHashtable makeDeferredHashTable(
@@ -350,79 +280,17 @@ final public class DeferredConstraintsMemory
                 false);
     }
 
-    /**
-     * Update the conglomerate ids of supporting indexes, when they change,
-     * under truncate and compress.
-     *
-     * @param lcc       the language connection context
-     * @param truncate  if {@code true} we are in a TRUNCATE TABLE context
-     * @param oldCID    the old conglomerate id of a supporting index
-     * @param newCID    the old conglomerate id of a supporting index
-     * @throws StandardException
-     */
-    public static void updateIndexCIDs(
-            LanguageConnectionContext lcc,
-            boolean truncate,
-            long oldCID,
-            long newCID) throws StandardException {
-
-        // Handle reference to the old index conglomerate ID for
-        // deferred constraints
-        final HashMap<Long, ValidationInfo> vis = lcc.getDeferredHashTables();
-
-        if (vis == null) {
-            return;
-        }
-
-        if (truncate) {
-            // Invalidate any deferred constraints information based on this
-            // index.
-            final ValidationInfo vi =  vis.get(oldCID);
-
-            if (vi != null &&
-                    (vi instanceof UniquePkInfo ||
-                     vi instanceof ForeignKeyInfo)) {
-                lcc.forgetDeferredConstraintsData(oldCID);
-            }
-        } else {
-            final ValidationInfo vi =  vis.get(oldCID);
-
-            if (vi != null && vi instanceof UniquePkInfo){
-                updateKey(lcc, oldCID, newCID);
-            }
-        }
-
-        // Update conglomerate information for deferred foreign keys involved
-        // with this index re-creation.
-        for (Map.Entry<Long, ValidationInfo> e : vis.entrySet()) {
-            final ValidationInfo vi = e.getValue();
-
-            if (vi instanceof ForeignKeyInfo) {
-                final ForeignKeyInfo fki = (ForeignKeyInfo)vi;
-
-                if (fki.getRtCID() == oldCID) {
-                    fki.updateRtCID(newCID);
-
-                } else if (e.getKey().longValue() == oldCID) {
-                    updateKey(lcc, oldCID, newCID);
-                }
-            }
-        }
-
-    }
-
-
     public static void compressOrTruncate(
             LanguageConnectionContext lcc,
             UUID tableId,
             String tableName) throws StandardException {
 
-        final HashMap<Long, DeferredConstraintsMemory.ValidationInfo> vis =
+        final HashMap<UUID, DeferredConstraintsMemory.ValidationInfo> vis =
                 lcc.getDeferredHashTables();
         final TableDescriptor td =
                 lcc.getDataDictionary().getTableDescriptor(tableId);
         final DeferredConstraintsMemory.ValidationInfo vi =
-                vis.get(td.getHeapConglomerateId());
+                vis.get( tableId );
 
         if (td == null) {
             throw StandardException.newException(
@@ -452,14 +320,12 @@ final public class DeferredConstraintsMemory
         }
 
         public abstract void possiblyValidateOnReturn(
-                Map.Entry<Long, ValidationInfo> e,
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException;
 
         public abstract void validateConstraint(
                 LanguageConnectionContext lcc,
-                long conglomerateId,
                 UUID constraintId,
                 boolean rollbackOnError) throws StandardException;
     }
@@ -468,56 +334,65 @@ final public class DeferredConstraintsMemory
      * Info needed for unique and primary key constraints
      */
     private static class UniquePkInfo extends ValidationInfo {
+        private final UUID constraintId;
 
-        public UniquePkInfo(final BackingStoreHashtable infoRows) {
+        public UniquePkInfo(BackingStoreHashtable infoRows, UUID constraintId) {
             super(infoRows);
+            this.constraintId = constraintId;
         }
 
+        @Override
         public final void possiblyValidateOnReturn(
-                Map.Entry<Long, ValidationInfo> e,
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException {
 
-                final long indexCID = e.getKey().longValue();
-
-                if (lcc.isEffectivelyDeferred(caller, indexCID)) {
+                if (lcc.isEffectivelyDeferred(caller, constraintId)) {
                     // the constraint is also deferred in the calling context
                     return;
                 }
 
-                validateUniquePK(lcc, indexCID, e.getValue().infoRows, true);
+                validateUniquePK(lcc, infoRows, true);
         }
 
         /**
          * Validate one primary key or unique constraint
          *
          * @param lcc       The language connection context
-         * @param indexCID The conglomerate id of the index backing the
-         *                 constraint
          * @param constraintId Not used by this constraint type
          * @param rollbackOnError {@code true} if we should roll back the
          *                  transaction if we see a violation of the constraint
          * @throws StandardException
          */
+        @Override
         public final void validateConstraint(
                 LanguageConnectionContext lcc,
-                long indexCID,
                 UUID constraintId,
                 boolean rollbackOnError) throws StandardException {
 
             validateUniquePK(
-                    lcc, indexCID, this.infoRows, rollbackOnError);
+                    lcc, this.infoRows, rollbackOnError);
         }
 
-        private static void validateUniquePK(
+        private void validateUniquePK(
                 final LanguageConnectionContext lcc,
-                final long indexCID,
                 final BackingStoreHashtable ht,
                 final boolean rollbackOnError) throws StandardException {
 
             final TransactionController tc = lcc.getTransactionExecute();
             final Enumeration<?> e = ht.elements();
+
+            DataDictionary dd = lcc.getDataDictionary();
+            KeyConstraintDescriptor cd = (KeyConstraintDescriptor)
+                    dd.getConstraintDescriptor(constraintId);
+
+            if (cd == null) {
+                // Constraint dropped, nothing to do.
+                return;
+            }
+
+            long indexCID = cd.getIndexConglomerateDescriptor(dd)
+                              .getConglomerateNumber();
 
             while (e.hasMoreElements()) {
                 final DataValueDescriptor[] key =
@@ -545,22 +420,14 @@ final public class DeferredConstraintsMemory
                     if (indexSC.next()) {
                         if (indexSC.next()) {
                             // two matching rows found, constraint violated
-                            final DataDictionary dd = lcc.getDataDictionary();
-                            final ConglomerateDescriptor cd =
-                                dd.getConglomerateDescriptor(indexCID);
-                            final TableDescriptor td =
-                                dd.getTableDescriptor(cd.getTableID());
-                            final ConstraintDescriptor conDesc =
-                                dd.getConstraintDescriptor(td, cd.getUUID());
-
                             throw StandardException.newException(
                                 rollbackOnError ?
                                 SQLState.
                                     LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T :
                                 SQLState.
                                     LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_S,
-                                conDesc.getConstraintName(),
-                                td.getName());
+                                cd.getConstraintName(),
+                                cd.getTableDescriptor().getName());
                         } // else exactly one row contains key: OK
                     } else {
                         // No rows contain key: OK, must have been deleted later
@@ -627,13 +494,11 @@ final public class DeferredConstraintsMemory
             return culprits;
         }
 
+        @Override
         public void possiblyValidateOnReturn(
-                Map.Entry<Long, ValidationInfo> e,
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException {
-
-            final long baseTableCID = e.getKey().longValue();
 
             // check if any of the constraints involved is immediate on
             // the outside
@@ -660,7 +525,7 @@ final public class DeferredConstraintsMemory
                 return;
             }
 
-            validateCheck(lcc, baseTableCID, null, true);
+            validateCheck(lcc, null, true);
         }
 
         /**
@@ -684,8 +549,6 @@ final public class DeferredConstraintsMemory
          * @see ValidateCheckConstraintResultSet
          *
          * @param lcc          The language connection context
-         * @param baseTableCID The conglomerate id of the base table for which
-         *                     we want to validate check constraints.
          * @param constraintId If not {@code null}, check only for this
          *                     constraint.  This is used when switching mode to
          *                     immediate.  If {@code null}, we check all check
@@ -696,18 +559,17 @@ final public class DeferredConstraintsMemory
          * @throws StandardException
          *                     Default error policy
          */
+        @Override
         public final void validateConstraint(
                 LanguageConnectionContext lcc,
-                long baseTableCID,
                 UUID constraintId,
                 boolean rollbackOnError) throws StandardException {
 
-            validateCheck(lcc, baseTableCID, constraintId, rollbackOnError);
+            validateCheck(lcc, constraintId, rollbackOnError);
         }
 
         private void validateCheck(
                 final LanguageConnectionContext lcc,
-                final long baseTableCID,
                 final UUID constraintId,
                 final boolean rollbackOnError) throws StandardException {
 
@@ -717,32 +579,26 @@ final public class DeferredConstraintsMemory
                     schemaName, tc, true);
 
             if (sd == null) {
-                if (SanityManager.DEBUG) {
-                    // dropping of a schema shouold drop any tables and their
-                    // constraints, which in turn should drop any deferred
-                    // constraint memory of them.
-                    SanityManager.NOTREACHED();
-                } else {
-                    return;
-                }
+                // Schema dropped, nothing to do
+                return;
             }
 
             final TableDescriptor td = dd.getTableDescriptor(tableName, sd, tc);
 
             if (td == null) {
-                if (SanityManager.DEBUG) {
-                    // dropping of a table shouold drop any
-                    // constraints, which in turn should drop any deferred
-                    // constraint memory of them. Renaming of a table with
-                    // constrants is not presently allowed. FIXME: use UUID
-                    // instead of string here, more stable reference.
-                    SanityManager.NOTREACHED();
-                }
+                // Nothing to do, table dropped
             } else {
+                final String baseTableUUIDString = td.getUUID().toString();
                 for (UUID id : culprits) {
                     if (constraintId == null || constraintId.equals(id)) {
                         final ConstraintDescriptor cd =
                                 dd.getConstraintDescriptor(id);
+
+                        if (cd == null) {
+                            // Constraint dropped, nothing to do.
+                            break;
+                        }
+
                         final StringBuilder checkStmt = new StringBuilder();
                         checkStmt.append("SELECT 1 FROM ");
                         checkStmt.append(td.getQualifiedName());
@@ -759,7 +615,7 @@ final public class DeferredConstraintsMemory
                                " --DERBY-PROPERTIES joinStrategy=nestedLoop, " +
                                "                    index=null, " +
                                "                    validateCheckConstraint=");
-                            checkStmt.append(Long.toString(baseTableCID));
+                            checkStmt.append( baseTableUUIDString );
                             checkStmt.append('\n');
                         }
 
@@ -809,24 +665,17 @@ final public class DeferredConstraintsMemory
          */
         private final UUID fkId;
 
-        /**
-         * The conglomerate id of the index of the referenced table
-         */
-        private long rtCID;
-
         final private String schemaName;
         final private String tableName;
 
         public ForeignKeyInfo(
                 final BackingStoreHashtable infoRows,
                 UUID fkId,
-                long rtCID,
                 String schemaName,
                 String tableName) {
 
             super(infoRows);
             this.fkId = fkId;
-            this.rtCID = rtCID;
             this.tableName = tableName;
             this.schemaName = schemaName;
         }
@@ -835,16 +684,8 @@ final public class DeferredConstraintsMemory
             return fkId;
         }
 
-        public void updateRtCID(long rtCID) {
-            this.rtCID = rtCID;
-        }
-
-        public long getRtCID() {
-            return rtCID;
-        }
-
+        @Override
         public void possiblyValidateOnReturn(
-                Map.Entry<Long, ValidationInfo> e,
                 LanguageConnectionContext lcc,
                 SQLSessionContext nested,
                 SQLSessionContext caller) throws StandardException {
@@ -854,23 +695,21 @@ final public class DeferredConstraintsMemory
                 return;
             }
 
-            final long indexCID = e.getKey().longValue();
-            validateForeignKey(lcc, indexCID, true);
+            validateForeignKey(lcc, true);
         }
 
+        @Override
         public final void validateConstraint(
                 LanguageConnectionContext lcc,
-                long conglomerateId,
                 UUID constraintId,
                 boolean rollbackOnError) throws StandardException {
 
-            validateForeignKey(lcc, conglomerateId, rollbackOnError);
+            validateForeignKey(lcc, rollbackOnError);
 
         }
 
         private void validateForeignKey(
             LanguageConnectionContext lcc,
-            long indexCID,
             boolean rollbackOnError) throws StandardException {
 
             // First check if the offending row is still present,
@@ -878,6 +717,28 @@ final public class DeferredConstraintsMemory
             // two index scans below.
 
             TransactionController tc = lcc.getTransactionExecute();
+
+            DataDictionary dd = lcc.getDataDictionary();
+
+            ForeignKeyConstraintDescriptor cd =
+                (ForeignKeyConstraintDescriptor)
+                    dd.getConstraintDescriptor(fkId);
+
+            // If the foreign key has been dropped, there is nothing to do.
+            // See DERBY-6670
+            //
+            if (cd == null) {
+                return;
+            }
+
+            ReferencedKeyConstraintDescriptor rcd =
+                    cd.getReferencedConstraint();
+
+            long[] cids = {
+                cd.getIndexConglomerateDescriptor(dd).getConglomerateNumber(),
+                rcd.getIndexConglomerateDescriptor(dd).getConglomerateNumber()
+
+            };
 
             final Enumeration<?> e = infoRows.elements();
 
@@ -889,8 +750,6 @@ final public class DeferredConstraintsMemory
                 // the hash table, and then check all rows using a single scan.
                 ScanController indexSC = null;
                 boolean violation = false;
-
-                long[] cids = new long[]{indexCID, getRtCID()};
 
                 for (int idx = 0; idx < 2; idx++) {
                     boolean sawException = false;
@@ -949,20 +808,11 @@ final public class DeferredConstraintsMemory
                 }
 
                 if (violation) {
-                    final DataDictionary dd = lcc.getDataDictionary();
-
                     final SchemaDescriptor sd =
                             dd.getSchemaDescriptor(schemaName, tc, true);
 
                     final TableDescriptor td  =
                             dd.getTableDescriptor(tableName, sd, tc);
-
-                    final ForeignKeyConstraintDescriptor cd =
-                            (ForeignKeyConstraintDescriptor)dd.
-                                    getConstraintDescriptor(getFkId());
-
-                    final ConstraintDescriptor rcd = dd.getConstraintDescriptor(
-                            cd.getReferencedConstraintId());
 
                     final TableDescriptor rtd = rcd.getTableDescriptor();
 

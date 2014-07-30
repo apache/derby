@@ -237,6 +237,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 		 */
 		UUIDFactory uuidFactory = dd.getUUIDFactory();
         
+        UUID constrId = uuidFactory.createUUID();
+
 		/* Create the index, if there's one for this constraint */
 		if (indexAction != null)
 		{
@@ -248,6 +250,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			}
 			else { backingIndexName = indexAction.getIndexName(); }
 
+            indexAction.setConstraintID( constrId );
 
 			/* Create the index */
 			indexAction.executeConstantAction(activation);
@@ -281,8 +284,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 
 			indexId = conglomDesc.getUUID();
 		}
-
-        UUID constrId=  uuidFactory.createUUID();
 
         boolean[] defaults = new boolean[]{
             ConstraintDefinitionNode.DEFERRABLE_DEFAULT,

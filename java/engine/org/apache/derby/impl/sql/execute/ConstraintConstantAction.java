@@ -352,7 +352,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
                         CheckInfo newCi[] = new CheckInfo[1];
                         DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
-                                td.getHeapConglomerateId(),
+                                td.getObjectID(),
                                 td.getSchemaName(),
                                 td.getName(),
                                 null,

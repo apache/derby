@@ -838,9 +838,8 @@ class CreateIndexConstantAction extends IndexConstantAction
                             baseColumnPositions.length + 1;
 
                     sortObserver = new UniqueIndexSortObserver(
-                        tc,
                         lcc,
-                        DeferredConstraintsMemory.UNDEFINED_CONGLOMERATE,
+                        constraintID,
                         true,
                         uniqueDeferrable,
                         initiallyDeferred,
@@ -864,9 +863,8 @@ class CreateIndexConstantAction extends IndexConstantAction
 					//use sort operator which treats nulls unequal
 					sortObserver = 
                         new UniqueWithDuplicateNullsIndexSortObserver(
-                            tc,
                             lcc,
-                            DeferredConstraintsMemory.UNDEFINED_CONGLOMERATE,
+                            constraintID,
                             true,
                             (hasDeferrableChecking && 
                             constraintType != DataDictionary.FOREIGNKEY_CONSTRAINT),
@@ -925,10 +923,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 					rowSource,
 					(long[]) null);
 
-            if (initiallyDeferred) {
-                DeferredConstraintsMemory.associateDuplicatesWithConglomerate(
-                    lcc, conglomId);
-            }
 		}
 		finally
 		{

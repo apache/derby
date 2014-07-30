@@ -50,8 +50,10 @@ import org.apache.derby.iapi.sql.dictionary.BulkInsertCounter;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatisticsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
@@ -298,7 +300,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             deferredChecks =
                     DeferredConstraintsMemory.rememberCheckViolations(
                             lcc,
-                            heapConglom,
+                            constants.targetUUID,
                             schemaName,
                             tableName,
                             deferredChecks,
@@ -1113,7 +1115,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                     deferredChecks =
                         DeferredConstraintsMemory.rememberCheckViolations(
                             lcc,
-                            heapConglom,
+                            constants.targetUUID,
                             schemaName,
                             tableName,
                             deferredChecks,
@@ -1235,7 +1237,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                         deferredChecks =
                             DeferredConstraintsMemory.rememberCheckViolations(
                                 lcc,
-                                heapConglom,
+                                constants.targetUUID,
                                 schemaName,
                                 tableName,
                                 deferredChecks,
@@ -1927,6 +1929,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
             boolean deferred = false;
             boolean deferrable = false;
 
+            UUID uniqueDeferrableConstraintId = null;
             if (cd.isConstraint())
             {
                 // so, the index is backing up a constraint
@@ -1937,8 +1940,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 indexOrConstraintName = conDesc.getConstraintName();
                 deferred = lcc.isEffectivelyDeferred(
                         lcc.getCurrentSQLSessionContext(activation),
-                        cd.getConglomerateNumber());
+                        conDesc.getUUID());
                 deferrable = conDesc.deferrable();
+                uniqueDeferrableConstraintId = conDesc.getUUID();
             }
 
             if (indDes.isUnique() || indDes.isUniqueDeferrable())
@@ -1949,9 +1953,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 				sortObserver = 
                     new UniqueIndexSortObserver(
-                            tc,
                             lcc,
-                            cd.getConglomerateNumber(),
+                            uniqueDeferrableConstraintId,
                             false, // don't clone rows
                             deferrable,
                             deferred,
@@ -1972,9 +1975,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 //use sort operator which treats nulls unequal
                 sortObserver =
                         new UniqueWithDuplicateNullsIndexSortObserver(
-                        tc,
                         lcc,
-                        cd.getConglomerateNumber(),
+                        uniqueDeferrableConstraintId,
                         true,
                         deferrable,
                         deferred,
@@ -2172,12 +2174,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 			// Drop the old conglomerate
 			tc.dropConglomerate(constants.indexCIDS[index]);
-
-            // We recreated the index, so any old deferred constraints
-            // information supported by the dropped index needs to be updated
-            // with the new index.
-            DeferredConstraintsMemory.updateIndexCID(
-                    lcc, constants.indexCIDS[index], newIndexCongloms[index]);
 
 			indexConversionTable.put(new Long(constants.indexCIDS[index]),
 									new Long(newIndexCongloms[index]));
@@ -2495,6 +2491,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 boolean deferred = false;
                 boolean uniqueDeferrable = false;
 
+                UUID uniqueDeferrableConstraintId = null;
 				if (cd.isConstraint()) 
 				{
                     // so, the index is backing up a constraint
@@ -2503,14 +2500,14 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 					indexOrConstraintName = conDesc.getConstraintName();
                     deferred = lcc.isEffectivelyDeferred(
                             lcc.getCurrentSQLSessionContext(activation),
-                            cd.getConglomerateNumber());
+                            conDesc.getUUID());
                     uniqueDeferrable = conDesc.deferrable();
+                    uniqueDeferrableConstraintId = conDesc.getUUID();
 				}
 				sortObserver = 
                     new UniqueIndexSortObserver(
-                            tc,
                             lcc,
-                            cd.getConglomerateNumber(),
+                            uniqueDeferrableConstraintId,
                             false, // don't clone rows
                             uniqueDeferrable,
                             deferred,
