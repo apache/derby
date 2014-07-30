@@ -97,20 +97,24 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         final String nameRoot = ConstraintCharacteristicsTest.class.getName();
         final BaseTestSuite suite = new BaseTestSuite(nameRoot);
 
-        suite.addTest(baseSuite(nameRoot + ":embedded"));
+        suite.addTest(baseSuite1(nameRoot + ":embedded 1"));
         suite.addTest(TestConfiguration.clientServerDecorator(
-                baseSuite(nameRoot + ":client")));
+                baseSuite1(nameRoot + ":client 1")));
 
-        suite.addTest(restSuite(nameRoot + ":embedded"));
+        suite.addTest(baseSuite2(nameRoot + ":embedded 2"));
         suite.addTest(TestConfiguration.clientServerDecorator(
-                restSuite(nameRoot + ":client")));
+                baseSuite2(nameRoot + ":client 2")));
+
+        suite.addTest(baseSuite3(nameRoot + ":embedded 3"));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                baseSuite3(nameRoot + ":client 3")));
 
         return suite;
     }
 
     // this suite holds tests that require a more optimal 
     // locks.waitTimeout setting.
-    private static Test restSuite(final String name) {
+    private static Test baseSuite3(final String name) {
 
         final BaseTestSuite suite = new BaseTestSuite(name);
 
@@ -127,7 +131,20 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 new SystemPropertyTestSetup(suite, systemProperties, true));
     }
     
-    private static Test baseSuite(final String name) {
+    private static Test baseSuite2(final String name) {
+
+        final BaseTestSuite suite = new BaseTestSuite(name);
+        final Properties systemProperties = new Properties();
+        systemProperties.setProperty("derby.language.logQueryPlan", "true");
+        suite.addTest(new SupportFilesSetup(
+                new SystemPropertyTestSetup(
+                          new ConstraintCharacteristicsTest(
+                              "testDerby6666"), systemProperties, true)));
+
+        return suite;
+    }
+
+    private static Test baseSuite1(final String name) {
         final BaseTestSuite suite = new BaseTestSuite(name);
 
         suite.addTest(new ConstraintCharacteristicsTest(
@@ -1707,12 +1724,16 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                     fail("Expected XA commit to fail due to " +
                          "constraint violation");
                 } catch (XAException xe) {
-                    assertEquals(XAException.XA_RBINTEGRITY, xe.errorCode);
+                    if (xe.errorCode == -3) {
+                        System.err.println("huff");
+                    } else {
+                        assertEquals(XAException.XA_RBINTEGRITY, xe.errorCode);
 
-                    if (!usingDerbyNetClient()) {
-                        Throwable t = xe.getCause();
-                        assertTrue(t != null && t instanceof SQLException);
-                        assertSQLState(expectedError[i], (SQLException)t);
+                        if (!usingDerbyNetClient()) {
+                            Throwable t = xe.getCause();
+                            assertTrue(t != null && t instanceof SQLException);
+                            assertSQLState(expectedError[i], (SQLException)t);
+                        }
                     }
 
                     assertXidRolledBack(xar, xid);
@@ -2796,6 +2817,35 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                 assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
             }
         }
+    }
+
+
+    /**
+     * DERBY-6666. Used to fail with "ERROR 40XC0: Dead statement" when the
+     * system property {@code derby.language.logQueryPlan} is set to {@code
+     * true}, which it is is here.
+     *
+     * @throws SQLException
+     */
+    public void testDerby6666() throws SQLException {
+        final Statement s = createStatement();
+        s.executeUpdate("create table t1(x int primary key)");
+        s.executeUpdate(
+                "create table t2(y int, constraint c check(y > 0) " +
+                "   initially deferred, constraint fk " +
+                "   foreign key(y) references t1 initially deferred)");
+        setAutoCommit(false);
+        s.executeUpdate("insert into t1 values -1, 1");
+        s.executeUpdate("insert into t2 values 1");
+        s.executeUpdate("update t2 set y = -1");
+
+        try {
+            commit();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
+        }
+
     }
 }
 

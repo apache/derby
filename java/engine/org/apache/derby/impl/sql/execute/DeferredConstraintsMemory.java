@@ -20,6 +20,7 @@
  */
 
 package org.apache.derby.impl.sql.execute;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
+import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
@@ -624,20 +626,29 @@ final public class DeferredConstraintsMemory
                         checkStmt.append(')');
 
                         BasicNoPutResultSetImpl rs = null;
+                        
                         final PreparedStatement ps =
                             lcc.prepareInternalStatement(
                                 lcc.getDefaultSchema(),
                                 checkStmt.toString(),
                                 true,
                                 true);
+
+                        StatementContext statementContext = null;
+                        
                         try {
+                            statementContext =
+                                    lcc.pushStatementContext(true,
+                                            true,
+                                            checkStmt.toString(),
+                                            null,
+                                            false, 0L);
                             rs = (BasicNoPutResultSetImpl)ps.execute(
                                     ps.getActivation(lcc, false), false, 0L);
                             final ExecRow row = rs.getNextRowCore();
 
                             if (row != null) {
                                 //check constraint violated
-
                                 throw StandardException.newException(
                                    rollbackOnError ?
                                      SQLState.LANG_DEFERRED_CHECK_CONSTRAINT_T :
@@ -647,6 +658,10 @@ final public class DeferredConstraintsMemory
                                    cd.getConstraintText());
                             }
                         } finally {
+                            if (statementContext != null) {
+                                lcc.popStatementContext(statementContext, null);
+                            }
+                            
                             if (rs != null) {
                                 try {
                                     rs.close();
