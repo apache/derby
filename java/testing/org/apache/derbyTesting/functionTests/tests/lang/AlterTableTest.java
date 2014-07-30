@@ -1593,13 +1593,6 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "constraint renc_5_unq unique(c5), constraint " +
                 "renc_5_t3ck check (c2-c3<80))");
 
-        // Attempt to rename a column referenced by a foreign key 
-        // constraint should fail:
-
-        assertStatementError(
-                "X0Y25", st,
-                "rename column renc_4.c4 to another_c4");
-
         // Rename a column with a unique constraint should work:
         st.executeUpdate(
                 "rename column renc_4.c1 to unq_c1");

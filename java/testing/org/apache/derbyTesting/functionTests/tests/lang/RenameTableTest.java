@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +39,13 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * 
  */
 public class RenameTableTest extends BaseJDBCTestCase {
+
+    private static  final   String  PRIMARY_VIOLATION = "23505";
+    private static  final   String  FOREIGN_VIOLATION = "23503";
+    private static  final   String  DEFERRED_PRIMARY_VIOLATION = "23506";
+    private static  final   String  DEFERRED_FOREIGN_VIOLATION = "23516";
+    private static  final   String  USER_ERROR = "38000";
+    
     public RenameTableTest(String name) {
         super(name);
     }
@@ -118,27 +127,6 @@ public class RenameTableTest extends BaseJDBCTestCase {
      * ResultSet rs = s.executeQuery("select * from t2"); rs.next();
      * assertStatementError("X0X95" , s , "rename table t2 to fake"); }
      */
-    // -- cannot rename a table when foreign key depends on it
-    /**
-     * We can't Rename a Table When there is a foreign key constraint depended
-     * on it.
-     * 
-     * @exception SQLException
-     */
-    public void testRenameOnDependencies() throws SQLException {
-        Statement s = createStatement();
-        s.executeUpdate("create table t4(c41 int not null primary key)");
-        // -- create table with foreign key constraint
-        s
-                .executeUpdate("create table t5 (c51 int, constraint fk foreign key(c51) references t4)");
-        assertStatementError("X0Y25", s, "rename table t4 to fake");
-        // -- only dropping the fk constraint can allow the table to be renamed
-        s.executeUpdate("alter table t5 drop constraint fk");
-        // -- this statement should not fail
-        s.executeUpdate("rename table t4 to realTab");
-        s.executeUpdate("drop table t5");
-        s.executeUpdate("drop table realTab");
-    }
 
     /**
      * Tests that We can rename a table when there is an index defined on it
@@ -257,4 +245,147 @@ public class RenameTableTest extends BaseJDBCTestCase {
         s.executeUpdate("drop table b");
     }
 
+    /**
+     * Test that you can rename a table referenced by a foreign key.
+     * See DERBY-6672.
+     */
+    public  void    test_6672_1() throws Exception
+    {
+        Connection  conn = getConnection();
+        conn.setAutoCommit( true );
+
+        goodStatement
+            (
+             conn,
+             "create procedure runStatementAndRaiseError( text varchar( 128 ) )\n" +
+             "language java parameter style java modifies sql data\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.RenameTableTest.runStatementAndRaiseError'\n"
+             );
+
+        //
+        // Basic test. Rename tables and try to violate constraints.
+        //
+        goodStatement( conn, "create table primary1( a int primary key )" );
+        goodStatement( conn, "create table foreign1( a int references primary1( a ) )" );
+        goodStatement( conn, "rename table primary1 to primary2" );
+        goodStatement( conn, "rename table foreign1 to foreign2" );
+        goodStatement( conn, "rename column primary2.a to b" );
+        goodStatement( conn, "rename column foreign2.a to b" );
+        
+        goodStatement( conn, "insert into primary2 values 1" );
+        assertPreparedStatementError
+            (
+             PRIMARY_VIOLATION,
+             conn.prepareStatement( "insert into primary2 values 1" )
+             );
+        
+        goodStatement( conn, "insert into foreign2 values 1" );
+        assertPreparedStatementError
+            (
+             FOREIGN_VIOLATION,
+             conn.prepareStatement( "insert into foreign2 values 2" )
+             );
+
+        //
+        // Simple test with deferrable constraints. Rename tables and violate
+        // constraints.
+        //
+        goodStatement( conn, "create table primary10( a int primary key initially deferred )" );
+        goodStatement( conn, "create table foreign10( a int references primary10( a ) initially deferred )" );
+        conn.setAutoCommit( false );
+
+        try {
+            goodStatement( conn, "insert into primary10 values 1" );
+            goodStatement( conn, "rename table primary10 to primary20" );
+            goodStatement( conn, "insert into primary20 values 1" );
+            try {
+                conn.commit();
+                fail( "Commit should not have succeeded!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( DEFERRED_PRIMARY_VIOLATION, se.getSQLState() );
+            }
+
+            goodStatement( conn, "insert into primary10 values 1" );
+            goodStatement( conn, "rename table primary10 to primary20" );
+            goodStatement( conn, "rename table foreign10 to foreign20" );
+            goodStatement( conn, "insert into foreign20 values 2" );
+            try {
+                conn.commit();
+                fail( "Commit should not have succeeded!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( DEFERRED_FOREIGN_VIOLATION, se.getSQLState() );
+            }
+        }
+        finally
+        {
+            conn.setAutoCommit( true );
+        }
+
+        //
+        // Try to rename the tables in a savepoint which is rolled back.
+        // See DERBY-6670.
+        //
+        goodStatement( conn, "create table primary100( a int primary key initially deferred )" );
+        goodStatement( conn, "create table foreign100( a int references primary100( a ) initially deferred )" );
+        conn.setAutoCommit( false );
+
+        try {
+            goodStatement( conn, "insert into primary100 values 1, 1" );
+            try {
+                conn.prepareStatement( "call runStatementAndRaiseError( 'rename table primary100 to primary200' )" ).execute();
+                fail( "Statement should have failed!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( USER_ERROR, se.getSQLState() );
+            }
+            try {
+                conn.commit();
+                fail( "Commit should not have succeeded!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( DEFERRED_PRIMARY_VIOLATION, se.getSQLState() );
+            }
+
+            goodStatement( conn, "insert into primary100 values 1" );
+            goodStatement( conn, "rename table primary100 to primary200" );
+            goodStatement( conn, "insert into foreign100 values 2" );
+            try {
+                conn.prepareStatement( "call runStatementAndRaiseError( 'rename table foreign100 to foreign200' )" ).execute();
+                fail( "Statement should have failed!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( USER_ERROR, se.getSQLState() );
+            }
+            try {
+                conn.commit();
+                fail( "Commit should not have succeeded!" );
+            }
+            catch (SQLException se)
+            {
+                assertEquals( DEFERRED_FOREIGN_VIOLATION, se.getSQLState() );
+            }
+        }
+        finally
+        {
+            conn.setAutoCommit( true );
+        }
+    }
+
+    public  static  void    runStatementAndRaiseError( String text )
+        throws SQLException
+    {
+        Connection  conn = DriverManager.getConnection( "jdbc:default:connection" );
+
+        conn.prepareStatement( text ).execute();
+        
+        throw new SQLException( "Oh sorry, an error occurred." );
+    }
+    
 }

@@ -547,6 +547,7 @@ public abstract class ConstraintDescriptor
 		    case DependencyManager.SET_CONSTRAINTS_DISABLE:
 		    case DependencyManager.SET_TRIGGERS_ENABLE:
 		    case DependencyManager.SET_TRIGGERS_DISABLE:
+		    case DependencyManager.RENAME:
 			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
 			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
 			//don't do anything here. Later in makeInvalid method, we make  
@@ -651,7 +652,8 @@ public abstract class ConstraintDescriptor
 			(action != DependencyManager.SET_TRIGGERS_ENABLE) &&
 			(action != DependencyManager.SET_TRIGGERS_DISABLE) &&
 			(action != DependencyManager.INTERNAL_RECOMPILE_REQUEST) &&
-			(action != DependencyManager.RECHECK_PRIVILEGES)
+			(action != DependencyManager.RECHECK_PRIVILEGES) &&
+			(action != DependencyManager.RENAME)
 		   )
 		{
 			/* 
