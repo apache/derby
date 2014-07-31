@@ -446,6 +446,11 @@ class TableScanResultSet extends ScanResultSet
 		openTime += getElapsedMillis(beginTime);
 	}
 
+
+    boolean loopControl(boolean moreRows) throws StandardException {
+        return scanController.fetchNext(candidate.getRowArray());
+    }
+
 	/**
      * Return the next row (if any) from the scan (if open).
 	 *
@@ -477,11 +482,15 @@ class TableScanResultSet extends ScanResultSet
 
 			if (scanControllerOpened)
 			{
-				boolean moreRows;
+                boolean moreRows = true;
 
-				while (moreRows =
-							scanController.fetchNext(candidate.getRowArray()))
+                while (true)
 				{
+                    // loop control overriden by subclass
+                    // ValidateCheckConstraintResultSet..
+                    if (! (moreRows = loopControl(moreRows))) {
+                        break;
+                    }
 					rowsSeen++;
 					rowsThisScan++;
 

@@ -27,11 +27,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Special result set used when checking deferred CHECK constraints.  Activated
@@ -97,120 +94,22 @@ final class ValidateCheckConstraintResultSet extends TableScanResultSet
                 optimizerEstimatedCost);
     }
 
-    /**
-     * Return the current row (if any) from the base table scan, positioned
-     * correctly by our caller (ProjectRestrictNode). It overrides
-     * getNextRowCore from TableSCanResultSet, by using "fetch" instead of
-     * "fetchNext" on the underlying controller, otherwise it's identical.
-     * (This means it's probably over-general for the usage we have of it,
-     * but it felt safer to keep the code as similar as possible.)
-     * @return the row retrieved
-     * @exception StandardException thrown on failure to get next row
-     */
     @Override
-    public ExecRow getNextRowCore() throws StandardException    {
-        if (isXplainOnlyMode()) {
-            return null;
-        }
-
-        checkCancellationFlag();
-
-        if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(scanRepositioned);
-        }
-
-        if (currentRow == null || scanRepositioned) {
-            currentRow = getCompactRow(candidate, accessedCols, isKeyed);
-        }
-
-        beginTime = getCurrentTimeMillis();
-
-        ExecRow result = null;
-
-        if (isOpen  && !nextDone) {
-            // Only need to do 1 next per scan for 1 row scans.
-            nextDone = oneRowScan;
-
-            if ( scanControllerOpened) {
-                boolean moreRows = true;
-
-                while (moreRows) {
-                    try {
-                        scanController.fetch(candidate.getRowArray());
-                    } catch (StandardException e) {
-                        // Offending rows may have been deleted in the
-                        // transaction.  As for compress, we won't even get here
-                        // since we use a normal SELECT query then.
-                        if (e.getSQLState().equals(
-                                ExceptionUtil.getSQLStateFromIdentifier(
-                                        SQLState.AM_RECORD_NOT_FOUND))) {
-                            moreRows = false;
-                            break;
-                        } else {
-                            throw e;
-                        }
-                    }
-
-                    rowsSeen++;
-                    rowsThisScan++;
-
-                    /*
-                    ** Skip rows where there are start or stop positioners
-                    ** that do not implement ordered null semantics and
-                    ** there are columns in those positions that contain
-                    ** null.
-                    ** No need to check if start and stop positions are the
-                    ** same, since all predicates in both will be ='s,
-                    ** and hence evaluated in the store.
-                    */
-                    if ((! sameStartStopPosition) && skipRow(candidate)) {
-                        rowsFiltered++;
-                        continue;
-                    }
-
-                    /* beetle 3865, updateable cursor use index. If we have a
-                     * hash table that holds updated records, and we hit it
-                     * again, skip it, and remove it from hash since we can't
-                     * hit it again, and we have a space in hash, so can stop
-                     * scanning forward.
-                     */
-                    if (past2FutureTbl != null) {
-                        RowLocation rowLoc = (RowLocation)currentRow.getColumn(
-                            currentRow.nColumns());
-                        if (past2FutureTbl.remove(rowLoc) != null) {
-                            continue;
-                        }
-                    }
-
-                    result = currentRow;
-                    break;
-                }
-
-                /*
-                ** If we just finished a full scan of the heap, update
-                ** the number of rows in the scan controller.
-                **
-                ** NOTE: It would be more efficient to only update the
-                ** scan controller if the optimizer's estimated number of
-                ** rows were wrong by more than some threshold (like 10%).
-                ** This would require a little more work than I have the
-                ** time for now, however, as the row estimate that is given
-                ** to this result set is the total number of rows for all
-                ** scans, not the number of rows per scan.
-                */
-                if (! moreRows) {
-                    setRowCountIfPossible(rowsThisScan);
-                    currentRow = null;
-                }
-            }
-        }
-
-        setCurrentRow(result);
-        currentRowIsValid = true;
-        scanRepositioned = false;
-        qualify = true;
-
-        nextTime += getElapsedMillis(beginTime);
-        return result;
+    boolean loopControl(boolean moreRows) throws StandardException {
+         try {
+             scanController.fetch(candidate.getRowArray());
+         } catch (StandardException e) {
+             // Offending rows may have been deleted in the
+             // transaction.  As for compress, we won't even get here
+             // since we use a normal SELECT query then.
+             if (e.getSQLState().equals(
+                     ExceptionUtil.getSQLStateFromIdentifier(
+                             SQLState.AM_RECORD_NOT_FOUND))) {
+                 moreRows = false;
+             } else {
+                 throw e;
+             }
+         }
+         return moreRows;
     }
 }
