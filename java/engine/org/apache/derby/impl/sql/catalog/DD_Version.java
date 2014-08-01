@@ -145,6 +145,8 @@ public	class DD_Version implements	Formatable
 			return "10.10";
 		case DataDictionary.DD_VERSION_DERBY_10_11:
 			return "10.11";
+		case DataDictionary.DD_VERSION_DERBY_10_12:
+			return "10.12";
 		default:
 			return null;
 		}
