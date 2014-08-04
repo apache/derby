@@ -4328,12 +4328,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFullResultSet(rs, expRS2, true);
         
         rs = getImportedKeys(null, schema, "REFTAB");
-        assertFullResultSet(rs, expRS1, true);
+        assertFullUnorderedResultSet(rs, expRS1, true);
         rs = getImportedKeys(null, schema, "REFTAB2");
         assertFullResultSet(rs, expRS2, true);
 
         rs = getImportedKeys(null, null, "REFTAB");
-        assertFullResultSet(rs, expRS1, true);
+        assertFullUnorderedResultSet(rs, expRS1, true);
 
         rs = getImportedKeys(null, "", "REFTAB");
         JDBC.assertEmpty(rs[0]);
