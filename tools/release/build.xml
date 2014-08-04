@@ -302,6 +302,8 @@
                   prefix="${derby.bin}/demo/databases"/>
       <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
+      <tarfileset dir="${basedir}/classes/org/apache/derbyDemo" includes="vtis/**"
+                  prefix="${derby.bin}/demo/programs/vtis/org/apache/derbyDemo"/>
       <!-- docs -->
       <tarfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif,**/*.css"
 		          prefix="${derby.bin}/docs/html"/>
