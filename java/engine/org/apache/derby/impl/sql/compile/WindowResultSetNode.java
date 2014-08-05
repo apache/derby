@@ -21,6 +21,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -58,6 +59,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
      *
      * @exception StandardException     Thrown on error
      */
+    @SuppressWarnings("LeakingThisInConstructor")
     WindowResultSetNode(ResultSetNode            bottomPR,
                         WindowDefinitionNode     windowDef,
                         List<WindowFunctionNode> windowFuncCalls,
@@ -82,7 +84,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         setResultColumns( childResult.getResultColumns() );
         childResult.setResultColumns(newBottomRCL);
 
-        // Wrao purselved int a project/restrict as per convention.
+        // Wrap ourselves in a project/restrict as per convention.
         addNewPRNode();
 
         // Add the extra result columns required
@@ -92,7 +94,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
     /**
      * Add a new PR node.  Put the new PR under any sort.
      *
-     * @exception standard exception
+     * @throws StandardException standard error policy
      */
     private void addNewPRNode()
         throws StandardException
@@ -167,9 +169,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
         ResultColumnList bottomRCL  = childResult.getResultColumns();
         ResultColumnList windowingRCL = getResultColumns();
 
-        for (int i= 0; i< uniqueCols.size(); i++) {
-            ValueNode crOrVcn = uniqueCols.get(i);
-
+        for (ValueNode crOrVcn : uniqueCols) {
             ResultColumn newRC = new ResultColumn(
                     "##UnWindowingColumn",
                     crOrVcn,
@@ -209,15 +209,18 @@ class WindowResultSetNode extends SingleChildResultSetNode
 
 
     /**
+     * @param uniqueColRefs list of unique column references
+     * @param cand the candidate to check is present in list
      * @return {@code true} if an equivalent column reference to {@code cand}
      *         is already present in {@code uniqueColRefs}
+     * @throws StandardException standard error policy
      */
     private boolean colRefAlreadySeen(List<ValueNode> uniqueColRefs,
                                       ColumnReference cand)
             throws StandardException {
 
-        for (int i= 0; i< uniqueColRefs.size(); i++) {
-            ColumnReference cr = (ColumnReference)uniqueColRefs.get(i);
+        for (ValueNode uniqueColRef : uniqueColRefs) {
+            ColumnReference cr = (ColumnReference) uniqueColRef;
 
             if (cr.isEquivalent(cand)) {
                 return true;
@@ -229,6 +232,8 @@ class WindowResultSetNode extends SingleChildResultSetNode
     /**
      * Substitute new result columns for window function calls and add the
      * result columns to childResult's list of columns.
+     *
+     * @throws StandardException standard error policy
      */
     private void addNewColumns() throws StandardException {
         /*
@@ -246,8 +251,7 @@ class WindowResultSetNode extends SingleChildResultSetNode
                 ResultSetNode.class);
         parent.getResultColumns().accept(replaceCallsVisitor);
 
-        for (int i=0; i < windowFuncCalls.size(); i++) {
-            WindowFunctionNode winFunc = windowFuncCalls.get(i);
+        for (WindowFunctionNode winFunc : windowFuncCalls) {
 
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
@@ -307,10 +311,6 @@ class WindowResultSetNode extends SingleChildResultSetNode
     }
 
 
-    /**
-     * override
-     * @see QueryTreeNode#generate
-     */
     @Override
     void generate(ActivationClassBuilder acb, MethodBuilder mb)
             throws StandardException

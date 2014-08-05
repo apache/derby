@@ -587,6 +587,12 @@ public class OLAPTest extends BaseJDBCTestCase {
             s,
             "select * from t4 t_1 join t4 t_2 on " +
             "                     t_1.a = row_number() over () + t_2.a");
+
+        // DERBY-6565
+        assertStatementError(
+                LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+                s,
+                "update t3 set y = y - row_number() over ()");
     }
 
 
