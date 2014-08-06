@@ -2740,19 +2740,20 @@
       <report format="frames" todir="junit_${derby.junit.timestamp}"/>
     </junitreport>
 
-    <!-- fix up unterminated elements in overview-frame.html -->
-    <replace token="href=&quot;stylesheet.css&quot;&gt;"
-             value="href=&quot;stylesheet.css&quot;/&gt;&lt;/META&gt;"
-             file="junit_${derby.junit.timestamp}/overview-frame.html"/>
     <replace token="Unit Test Results"
              value="Apache Derby Test Results - ${derby.junit.standardtime}&lt;br&gt;JVM: ${java.vm.vendor} ${java.vm.version}"
              file="junit_${derby.junit.timestamp}/overview-summary.html"/>
 
-    <xslt style="${basedir}/tools/ant/xsl/sysinfo_junitreport.xsl"
-          in="junit_${derby.junit.timestamp}/overview-frame.html"
-          out="junit_${derby.junit.timestamp}/overview-frame2.html"/>
-    <move file="junit_${derby.junit.timestamp}/overview-frame2.html"
-          tofile="junit_${derby.junit.timestamp}/overview-frame.html"/>
+    <!--
+        Insert a link to sysinfo.txt after the first h2 element in
+        overview-frame.html. (We use the replaceregexp task instead of
+        the replace task since we want to replace the first occurrence
+        only. The replace task replaces all occurrences.)
+    -->
+    <replaceregexp
+        match="&lt;/h2&gt;"
+        replace="&lt;/h2&gt;&lt;h2&gt;&lt;a href=&quot;sysinfo.txt&quot; target=&quot;classFrame&quot;&gt;sysinfo&lt;/a&gt;&lt;/h2&gt;"
+        file="junit_${derby.junit.timestamp}/overview-frame.html"/>
   	
   	<fail if="tests.failed">Tests Failed!</fail>
   </target>
