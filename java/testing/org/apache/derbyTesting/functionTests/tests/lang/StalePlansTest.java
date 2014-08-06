@@ -31,6 +31,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
 
 /**
@@ -249,8 +250,12 @@ public class StalePlansTest extends BaseJDBCTestCase {
         // Expect this to use table scan, as the above update has basically
         // made all the rows in the table be equal to "1", thus using the index
         // does not help if all the rows are going to qualify.
-        assertTrue(SQLUtilities.
-                   getRuntimeStatisticsParser(stmt).usedTableScan());
+        RuntimeStatisticsParser rsp =
+                SQLUtilities.getRuntimeStatisticsParser(stmt);
+        if (!rsp.usedTableScan()) {
+            // Dump the full plan to help debug DERBY-6336.
+            fail("Expected table scan. Full plan:\n" + rsp.toString());
+        }
 
         // Change the row count significantly
         stmt.executeUpdate("insert into t select c1,c2,c3 from t where c1<128");
