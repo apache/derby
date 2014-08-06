@@ -619,6 +619,11 @@ public class OLAPTest extends BaseJDBCTestCase {
             "select * from t3 where y = " +
                 "    (select y from t3 order by row_number() over () fetch first row only)"),
             new String[][]{{"0"}});
+
+        // DERBY-6689: NPE before
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "merge into t2 using t3 on (t2.x=t3.y) when not matched then insert values (row_number() over ())");
     }
 
 

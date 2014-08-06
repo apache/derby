@@ -385,6 +385,9 @@ public final class MergeNode extends DMLModStatementNode
             FromList    dummyFromList = cloneFromList( dd, dflTarget );
             FromBaseTable   dummyTargetTable = (FromBaseTable) dummyFromList.elementAt( TARGET_TABLE_INDEX );
             mcn.bind( dd, this, dummyFromList, dummyTargetTable );
+
+            // window function not allowed
+            SelectNode.checkNoWindowFunctions(mcn, "matching clause");
         }
         
         bindLeftJoin( dd );
