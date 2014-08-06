@@ -385,6 +385,36 @@ public class Changes10_11 extends UpgradeChange
         }
     }
 
+    /** Test that identity columns handle self-deadlock in soft-upgrade mode */
+    public void test_derby6692() throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        switch (getPhase())
+        {
+            case PH_CREATE:
+            case PH_SOFT_UPGRADE:
+            case PH_POST_SOFT_UPGRADE:
+            case PH_HARD_UPGRADE:
+
+                boolean originalAutoCommit = conn.getAutoCommit();
+                try
+                {
+                    conn.setAutoCommit( false );
+
+                    conn.prepareStatement( "create table t_6692(i int generated always as identity)" ).execute();
+                    conn.prepareStatement( "insert into t_6692 values (default)" ).execute();
+
+                    conn.rollback();
+                }
+                finally
+                {
+                    conn.setAutoCommit( originalAutoCommit );
+                }
+                break;
+        }
+    }
+
     /** Test the Lucene plugin */
     public void testLuceneSupport() throws Exception
     {

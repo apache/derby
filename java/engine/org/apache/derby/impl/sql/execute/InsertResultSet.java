@@ -885,7 +885,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                  throw se;
              }
  
-             if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT))
+             if ( se.getMessageId().equals(SQLState.LOCK_TIMEOUT) || se.isSelfDeadlock() )
              {
                  // if we couldn't do this with a nested xaction, retry with
                  // parent-- we need to wait this time!
