@@ -353,6 +353,11 @@ public final class SecurityManagerSetup extends TestSetup {
         if (antjunit != null)
             classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
 
+        URL ant = getURL("org.apache.tools.ant.Task");
+        if (ant != null) {
+            classPathSet.setProperty("derbyTesting.ant", ant.toExternalForm());
+        }
+
         // variables for lucene jar files
         URL luceneCore = getURL( "org.apache.lucene.store.FSDirectory" );
         if ( luceneCore != null )
