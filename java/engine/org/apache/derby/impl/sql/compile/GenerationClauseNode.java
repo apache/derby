@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.sql.depend.ProviderList;
 
@@ -146,7 +147,28 @@ class GenerationClauseNode extends ValueNode
         return visitor.getList();
     }
 
-	/*
+    /**
+     * Accept the visitor for all visitable children of this node.
+     *
+     * @param v the visitor
+     *
+     * @exception StandardException on error
+     */
+    @Override
+    void acceptChildren(Visitor v) throws StandardException {
+
+        super.acceptChildren(v);
+
+        if (_generationExpression != null) {
+            _generationExpression = (ValueNode)_generationExpression.accept(v);
+        }
+
+        if (_boundExpression != null) {
+            _boundExpression = (ValueNode)_boundExpression.accept(v);
+        }
+    }
+
+    /*
 		Stringify.
 	 */
     @Override

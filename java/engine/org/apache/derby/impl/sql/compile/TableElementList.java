@@ -731,6 +731,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
                 generationTree = generationClauseNode.bindExpression(
                         fromList, (SubqueryList) null, aggregates);
 
+                SelectNode.checkNoWindowFunctions(generationClauseNode, "generation clause");
+
                 //
                 // If the user did not declare a type for this column, then the column type defaults
                 // to the type of the generation clause.
