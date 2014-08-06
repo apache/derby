@@ -611,19 +611,28 @@ public class OLAPTest extends BaseJDBCTestCase {
         // Used to work before
         JDBC.assertFullResultSet(s.executeQuery(
             "select * from  " +
-            "    (select y from t3 order by row_number() over () fetch first 1 row only) tt"),
+            "    (select y from t3 order by row_number() over () " + 
+            "     fetch first 1 row only) tt"),
             new String[][]{{"0"}});
 
         // failed prior to DERBY-6688
         JDBC.assertFullResultSet(s.executeQuery(
             "select * from t3 where y = " +
-                "    (select y from t3 order by row_number() over () fetch first row only)"),
+            "    (select y from t3 order by row_number() over () " + 
+            "     fetch first row only)"),
             new String[][]{{"0"}});
 
-        // DERBY-6689: NPE before
+        // DERBY-6689: ArrayIndexOutOfBoundsException before
         assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
             s,
-            "merge into t2 using t3 on (t2.x=t3.y) when not matched then insert values (row_number() over ())");
+            "merge into t2 using t3 on (t2.x=t3.y) when not matched then " + 
+            "    insert values (row_number() over ())");
+        
+        // DERBY-6691: NPE before
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "call syscs_util.syscs_compress_table(" + 
+            "    'APP', 'T2', row_number() over ())");
     }
 
 
