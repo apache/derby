@@ -354,6 +354,11 @@ public final class SecurityManagerSetup extends TestSetup {
         if (antjunit != null)
             classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
 
+        URL ant = getURL("org.apache.tools.ant.Task");
+        if (ant != null) {
+            classPathSet.setProperty("derbyTesting.ant", ant.toExternalForm());
+        }
+
         // Load indirectly, normally no EMMA jars in the classpath.
         // This property is needed to set correct permissions in policy files.
         URL emma = getURL("com.vladium.emma.EMMAException");

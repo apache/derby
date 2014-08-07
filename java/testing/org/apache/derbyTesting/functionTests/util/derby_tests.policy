@@ -410,6 +410,13 @@ grant codeBase "${derbyTesting.antjunit}" {
     permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
 
+// Starting with Ant 1.9.3, write permission has to be granted to ant.jar
+// as well so that Ant's JUnit runner can write test results to a file.
+// Only needed when running the tests under Ant. See DERBY-6685.
+grant codeBase "${derbyTesting.ant}" {
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
+
 // functionTests.tests.lang.RoutineSecurityTest requires this grant
 // to check to see if permissions are granted through generated code
 // through this mechanism.
