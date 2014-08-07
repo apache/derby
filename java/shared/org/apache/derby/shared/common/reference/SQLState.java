@@ -1051,6 +1051,7 @@ public interface SQLState {
 	String LANG_USER_AGGREGATE_MULTIPLE_DISTINCTS                      = "42Z02";
 	String LANG_NO_AGGREGATES_IN_ON_CLAUSE                             = "42Z07";
 	String LANG_NO_BULK_INSERT_REPLACE_WITH_TRIGGER                    = "42Z08";
+    String LANG_NO_AGGREGATES_IN_MERGE_MATCHING_CLAUSE                 = "42Z09";
 
 	// MORE GENERIC LANGUAGE STUFF
 	String LANG_UDT_BUILTIN_CONFLICT										   = "42Z10";

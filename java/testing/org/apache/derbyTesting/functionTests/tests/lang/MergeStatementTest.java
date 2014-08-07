@@ -29,6 +29,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import junit.framework.Test;
@@ -78,6 +79,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     private static  final   String      NO_DCL_IN_MERGE = "42XAQ";
     private static  final   String      PARAMETER_NOT_SET = "07000";
     private static  final   String      CARDINALITY_VIOLATION = "21000";
+    private static  final   String      NO_AGGREGATE_IN_MATCHING = "42Z09";
 
     private static  final   String[]    TRIGGER_HISTORY_COLUMNS = new String[] { "ACTION", "ACTION_VALUE" };
 
@@ -9504,6 +9506,23 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         //
         goodStatement( dboConnection, "drop table t1_060" );
         goodStatement( dboConnection, "drop table t2_060" );
+    }
+
+    public void test_061_Derby6693() throws SQLException {
+        Statement s = createStatement();
+
+        try {
+            s.execute("create table t2(x int)");
+            s.execute("create table t1(x int)");
+            s.execute("insert into t2 values 3,4");
+            assertCompileError(
+                    NO_AGGREGATE_IN_MATCHING,
+                    "merge into t1 using t2 on (t1.x=t2.x) " +
+                    "when not matched then insert values (max(t2.x))");
+        } finally {
+            dropTable("t1");
+            dropTable("t2");
+        }
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

@@ -2883,6 +2883,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Z09</name>
+                <text>Aggregates are not permitted in the MERGE matching clause.</text>
+            </msg>
+
+            <msg>
                 <name>42Z15</name>
                 <text>Invalid type specified for column '{0}'. The type of a column may not be changed.  </text>
                 <arg>columnName</arg>

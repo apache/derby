@@ -388,10 +388,29 @@ public final class MergeNode extends DMLModStatementNode
 
             // window function not allowed
             SelectNode.checkNoWindowFunctions(mcn, "matching clause");
+
+            // aggregates not allowed
+            checkNoAggregates(mcn);
         }
         
         bindLeftJoin( dd );
 	}
+
+
+    static void checkNoAggregates(QueryTreeNode clause)
+            throws StandardException {
+
+        // Clause cannot contain window aggregates except inside subqueries
+        HasNodeVisitor visitor = new HasNodeVisitor(AggregateNode.class,
+                                                    SubqueryNode.class);
+        clause.accept(visitor);
+
+        if (visitor.hasNode()) {
+            throw StandardException.newException(
+                    SQLState.LANG_NO_AGGREGATES_IN_MERGE_MATCHING_CLAUSE);
+        }
+    }
+
 
     /////////////////////////////////////
     //
