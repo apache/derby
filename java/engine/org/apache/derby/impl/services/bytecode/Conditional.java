@@ -206,10 +206,27 @@ class Conditional {
 		
 		if (SanityManager.DEBUG)
 		{
-			if (stackNumber != stack.length)
-				SanityManager.THROWASSERT("ByteCode Conditional then/else stack depths differ then:"
+			if (stackNumber != stack.length) {
+                StringBuilder sb = new StringBuilder();
+                
+                sb.append("ByteCode Conditional then/else stack depths differ then:"
 						+ stack.length + " else: " + stackNumber);
-			
+                sb.append("\nif stack:\n");
+                
+                for (Type t: stack) {
+                    sb.append(t);
+                    sb.append('\n');
+                }
+                sb.append("else stack:\n");
+                
+                for (int i = 0; i < stackNumber; i++) {
+                    Type t = elseStack[i];
+                    sb.append(t);
+                    sb.append('\n');
+                }
+				SanityManager.THROWASSERT(sb.toString());
+            }
+            
 			for (int i = 0; i < stackNumber; i++)
 			{
 				if (stack[i].vmType() != elseStack[i].vmType()) {

@@ -47,6 +47,21 @@ final class Type {
 		vmNameSimple = ClassHolder.convertToInternalClassName(javaName);
 	}
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append(javaName);
+        sb.append(", ");
+        sb.append(vmType);
+        sb.append(", ");
+        sb.append(vmName);
+        sb.append(", ");
+        sb.append(vmNameSimple);
+        sb.append("]");
+        
+        return sb.toString();
+    }
 	/*
 	** Class specific methods.
 	*/
