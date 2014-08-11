@@ -158,3 +158,9 @@ grant codeBase "${derbyTesting.antjunit}" {
     // This permission is needed when running the tests using ant 1.7
     permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
+
+// Grant the required permissions for JaCoCo (code coverage tool).
+grant {
+  permission java.io.FilePermission "${jacoco.active}${user.dir}${/}*", "read, write";
+  permission java.lang.RuntimePermission "${jacoco.active}shutdownHooks";
+};

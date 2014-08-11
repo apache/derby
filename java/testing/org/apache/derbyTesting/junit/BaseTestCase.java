@@ -691,6 +691,7 @@ public abstract class BaseTestCase
             String agent = getSystemProperty(JACOCO_AGENT_PROP);
             cmdlist.add(agent + (agent.endsWith("=") ? "": ",") +
                     "destfile=" + getJaCoCoOutFile());
+            cmdlist.add("-Djacoco.active=");
         }
 
         if (isSunJVM() && Boolean.valueOf(

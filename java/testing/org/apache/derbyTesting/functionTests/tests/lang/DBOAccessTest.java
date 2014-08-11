@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.security.AccessControlException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -59,6 +58,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
     private static  final   String      MISSING_TABLE = "42X05";
     private static  final   String      NO_SUCH_TABLE = "XIE0M";
     private static  final   String      UNKNOWN_USER = "XK001";
+    private static  final   String      SQLJ_INVALID_JAR = "46001";
 
     private static  final   String      SYSCS_SET_DATABASE_PROPERTY = "SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY";
     private static  final   String      SYSCS_GET_DATABASE_PROPERTY = "SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY";
@@ -379,7 +379,10 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         }
         catch (SQLException se)
         {
-            if ( shouldSucceed ) { fail( routineName + " should have succeeded: " + se.getSQLState() + " " + se.getMessage() ); }
+            if ( shouldSucceed )
+            {
+                fail( routineName + " should have succeeded", se );
+            }
             else
             {
                 assertSQLState( LACK_EXECUTE_PRIV, se );
@@ -424,6 +427,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_BACKUP_DATABASE( null );
+                fail();
             }
             catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
         }
@@ -431,6 +435,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_BACKUP_DATABASE_NOWAIT( null );
+                fail();
             }
             catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
         }
@@ -438,6 +443,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE( null, (short) 0 );
+                fail();
             }
             catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
         }
@@ -445,6 +451,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT( null, (short) 0 );
+                fail();
             }
             catch (SQLException se) { vetError( NULL_BACKUP_DIRECTORY, se ); }
         }
@@ -459,35 +466,50 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         else if (INSTALL_JAR.equals( routineName ) )
         {
             try {
-                SystemProcedures.INSTALL_JAR( "foo", "bar", 1 );
+                SystemProcedures.INSTALL_JAR( SupportFilesSetup.getReadOnlyFileName("foo"), "bar", 1 );
+                fail();
             }
-            catch (AccessControlException se) { println( "Caught expected AccessControlException" ); }
+            catch (SQLException se) {
+                vetError(SQLJ_INVALID_JAR, se);
+            }
         }
         else if (REPLACE_JAR.equals( routineName ) )
         {
             try {
-                SystemProcedures.REPLACE_JAR( "foo", "bar" );
+                SystemProcedures.REPLACE_JAR( SupportFilesSetup.getReadOnlyFileName("foo"), "bar" );
+                fail();
             }
-            catch (AccessControlException se) { println( "Caught expected AccessControlException" ); }
+            catch (SQLException se) {
+                vetError(SQLJ_INVALID_JAR, se);
+            }
         }
         else if (REMOVE_JAR.equals( routineName ) )
         {
             try {
                 SystemProcedures.REMOVE_JAR( "test_dbo.foo", 0 );
+                fail();
             }
             catch (SQLException se) { vetError( MISSING_OBJECT, se ); }
         }
         else if ( SYSCS_EXPORT_TABLE.equals( routineName ) )
         {
             try {
-                SystemProcedures.SYSCS_EXPORT_TABLE( "TEST_DBO", "BAR", "WIBBLE", null, null, null );
+                SystemProcedures.SYSCS_EXPORT_TABLE(
+                        "TEST_DBO", "BAR",
+                        SupportFilesSetup.getReadWriteFileName("WIBBLE"),
+                        null, null, null);
+                fail();
             }
-            catch (SQLException se) { vetError( JAVA_EXCEPTION, se ); }
+            catch (SQLException se) { vetError( MISSING_TABLE, se ); }
         }
         else if ( SYSCS_IMPORT_TABLE.equals( routineName ) )
         {
             try {
-                SystemProcedures.SYSCS_IMPORT_TABLE( "TEST_DBO", "BAR", "WIBBLE", null, null, null, (short) 1 );
+                SystemProcedures.SYSCS_IMPORT_TABLE(
+                        "TEST_DBO", "BAR",
+                        SupportFilesSetup.getReadWriteFileName("WIBBLE"),
+                        null, null, null, (short) 1);
+                fail();
             }
             catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
         }
@@ -495,6 +517,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE( "TEST_DBO", "BAR", "WIBBLE", null, null, null, (short) 1 );
+                fail();
             }
             catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
         }
@@ -503,6 +526,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
             try {
                 SystemProcedures.SYSCS_IMPORT_DATA
                     ( "TEST_DBO", "BAR", null, "1,3,4", "WIBBLE", null, null, null, (short) 1 );
+                fail();
             }
             catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
         }
@@ -511,6 +535,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
             try {
                 SystemProcedures.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE
                     ( "TEST_DBO", "BAR", null, "1,3,4", "WIBBLE", null, null, null, (short) 1 );
+                fail();
             }
             catch (SQLException se) { vetError( NO_SUCH_TABLE, se ); }
         }
@@ -519,6 +544,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
             try {
                 SystemProcedures.SYSCS_BULK_INSERT
                     ( "TEST_DBO", "BAR", "WIBBLE", "wombat" );
+                fail();
             }
             catch (SQLException se) { vetError( SYNTAX_ERROR, se ); }
         }
@@ -562,6 +588,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_CREATE_USER( "foo", "bar" );
+                fail();
             }
             catch (SQLException se) { vetError( FIRST_CREDENTIALS, se ); }
         }
@@ -569,6 +596,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_RESET_PASSWORD( "foo", "bar" );
+                fail();
             }
             catch (SQLException se) { vetError( UNKNOWN_USER, se ); }
         }
@@ -576,6 +604,7 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         {
             try {
                 SystemProcedures.SYSCS_DROP_USER( "foo" );
+                fail();
             }
             catch (SQLException se) { vetError( UNKNOWN_USER, se ); }
         }
