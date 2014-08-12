@@ -54,6 +54,9 @@ public class StalePlansTest extends BaseJDBCTestCase {
         // Check for stale plans on every 10th execution (default 100) to
         // reduce the number of times we need to execute each statement.
         props.setProperty("derby.language.stalePlanCheckInterval", "10");
+        // Disable the index statistics daemon so that it doesn't cause
+        // recompilation of statements at random times.
+        props.setProperty("derby.storage.indexStats.auto", "false");
         Test suite = new DatabasePropertyTestSetup(
             new BaseTestSuite(StalePlansTest.class), props, true);
         return new CleanDatabaseTestSetup(suite);
