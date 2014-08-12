@@ -4109,6 +4109,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     ioe,
                     getLogFileName(logFileNumber).getPath()));
 			}
+            catch (NullPointerException e) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.DEBUG_PRINT("DERBY-5003 [1]:", this.toString());
+                }
+                throw e;
+            }
 		} // unfreeze log manager to accept more log records
 
 		boolean syncSuceed = false;
@@ -4166,6 +4172,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 ioe,
                 getLogFileName(logFileNumber).getPath()));
 		}
+        catch (NullPointerException e) {
+            if (SanityManager.DEBUG) {
+                SanityManager.DEBUG_PRINT("DERBY-5003 [2]", this.toString());
+            }
+            throw e;
+        }
 		finally
 		{
 			synchronized(this)
@@ -5870,4 +5882,76 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			return null;
 		}
 	}
+    
+    @Override
+    @SuppressWarnings("StringConcatenationInsideStringBufferAppend")
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (SanityManager.DEBUG) { // to reduce footprint in insane code
+            sb.append("LogToFile: [\n");
+            sb.append("  logOut=" + logOut + "\n");
+            sb.append("  dataDirectory=" + dataDirectory + "\n");
+            sb.append("  logStorageFactory=" + logStorageFactory + "\n");
+            sb.append("  logBeingFlushed=" + logBeingFlushed + "\n");
+            sb.append("  firstLog=" + firstLog + "\n");
+            sb.append("  endPosition=" + endPosition + "\n");
+            sb.append("  lastFlush=" + lastFlush + "\n");
+            sb.append("  logFileNumber=" + logFileNumber + "\n");
+            sb.append("  bootTimeLogFileNumber=" + bootTimeLogFileNumber + "\n");
+            sb.append("  firstLogFileNumber=" + firstLogFileNumber + "\n");
+            sb.append("  maxLogFileNumber=" + maxLogFileNumber + "\n");
+            sb.append("  currentCheckpoint=" + currentCheckpoint + "\n");
+            sb.append("  checkpointInstant=" + checkpointInstant + "\n");
+            sb.append("  currentCheckpoint=" + currentCheckpoint + "\n");
+            sb.append("  checkpointDaemon=" + checkpointDaemon + "\n");
+            sb.append("  myClientNumber=" + myClientNumber + "\n");
+            sb.append("  checkpointDaemonCalled=" + checkpointDaemonCalled + "\n");
+            sb.append("  logWrittenFromLastCheckPoint=" + logWrittenFromLastCheckPoint + "\n");
+            sb.append("  rawStoreFactory=" + rawStoreFactory + "\n");
+            sb.append("  dataFactory=" + dataFactory + "\n");
+            sb.append("  ReadOnlyDB=" + ReadOnlyDB + "\n");
+            sb.append("  masterFactory=" + masterFactory + "\n");
+            sb.append("  inReplicationMasterMode=" + inReplicationMasterMode + "\n");
+            sb.append("  inReplicationSlaveMode=" + inReplicationSlaveMode + "\n");
+            sb.append("  replicationSlaveException=" + replicationSlaveException + "\n");
+            sb.append("  inReplicationSlaveMode=" + inReplicationSlaveMode + "\n");
+            sb.append("  replicationSlaveException=" + replicationSlaveException + "\n");
+            sb.append("  inReplicationSlavePreMode=" + inReplicationSlavePreMode + "\n");
+            sb.append("  replicationSlaveException=" + replicationSlaveException + "\n");
+            sb.append("  slaveRecoveryMonitor=" + slaveRecoveryMonitor + "\n");
+            sb.append("  allowedToReadFileNumber=" + allowedToReadFileNumber + "\n");
+            sb.append("  slaveRecoveryMonitor=" + slaveRecoveryMonitor + "\n");
+            sb.append("  keepAllLogs=" + keepAllLogs + "\n");
+            sb.append("  databaseEncrypted=" + databaseEncrypted + "\n");
+            sb.append("  keepAllLogs=" + keepAllLogs + "\n");
+            sb.append("  recoveryNeeded=" + recoveryNeeded + "\n");
+            sb.append("  inCheckpoint=" + inCheckpoint + "\n");
+            sb.append("  inRedo=" + inRedo + "\n");
+            sb.append("  inLogSwitch=" + inLogSwitch + "\n");
+            sb.append("  stopped=" + stopped + "\n");
+            sb.append("  logDevice=" + logDevice + "\n");
+            sb.append("  logNotSynced=" + logNotSynced + "\n");
+            sb.append("  logArchived=" + logArchived + "\n");
+            sb.append("  logSwitchRequired=" + logSwitchRequired + "\n");
+            sb.append("  test_logWritten=" + test_logWritten + "\n");
+            sb.append("  test_numRecordToFillLog=" + test_numRecordToFillLog + "\n");
+            sb.append("  mon_flushCalls=" + mon_flushCalls + "\n");
+            sb.append("  mon_syncCalls=" + mon_syncCalls + "\n");
+            sb.append("  mon_numLogFlushWaits=" + mon_numLogFlushWaits + "\n");
+            sb.append("  mon_LogSyncStatistics=" + mon_LogSyncStatistics + "\n");
+            sb.append("  corrupt=" + corrupt + "\n");
+            sb.append("  isFrozen=" + isFrozen + "\n");
+            sb.append("  jbmsVersion=" + jbmsVersion + "\n");
+            sb.append("  onDiskMajorVersion=" + onDiskMajorVersion + "\n");
+            sb.append("  onDiskMinorVersion=" + onDiskMinorVersion + "\n");
+            sb.append("  onDiskBeta=" + onDiskBeta + "\n");
+            sb.append("  checksum=" + checksum + "\n");
+            sb.append("  onDiskBeta=" + onDiskBeta + "\n");
+            sb.append("  isWriteSynced=" + isWriteSynced + "\n");
+            sb.append("  jvmSyncErrorChecked=" + jvmSyncErrorChecked + "\n");
+            sb.append("  logFileToBackup=" + logFileToBackup + "\n");
+            sb.append("  backupInProgress=" + backupInProgress + "]\n");
+        }
+        return sb.toString();
+    }
 }
