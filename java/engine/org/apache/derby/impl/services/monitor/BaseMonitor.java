@@ -89,6 +89,7 @@ import java.util.NoSuchElementException;
 import java.lang.reflect.InvocationTargetException;
 
 import java.net.URL;
+import java.security.AccessControlException;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -364,7 +365,10 @@ abstract class BaseMonitor
 			dumpTempWriter(true);
 
 			return;
-		}
+        } catch (AccessControlException e) {
+            dumpTempWriter(true);
+            throw e;
+        }
 
 		// switch cover to the real error stream and
 		// dump any messages we have been saving ...

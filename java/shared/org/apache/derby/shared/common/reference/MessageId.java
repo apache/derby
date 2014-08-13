@@ -231,6 +231,7 @@ public interface MessageId {
      */
     String CANNOT_READ_SECURITY_PROPERTY                     = "M008";
     String CANNOT_CREATE_FILE_OR_DIRECTORY                   = "M009";
+    String CANNOT_SET_DAEMON                                 = "M010";
     /*
      * Misc
      */

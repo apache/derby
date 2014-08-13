@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.services.monitor;
 
 import java.io.PrintWriter;
+import java.security.AccessControlException;
 import java.util.Locale;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
@@ -280,12 +281,17 @@ public class Monitor {
 			until an InfoStreams module is successfully started.
 	*/
 
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void startMonitor(Properties bootProperties, PrintWriter logging) {
-
-		new org.apache.derby.impl.services.monitor.FileMonitor(bootProperties, logging);			
+        try {
+            new org.apache.derby.impl.services.monitor.FileMonitor(bootProperties, logging);
+        } catch (AccessControlException e) {
+            clearMonitor();
+            throw e;
+        }
 	}
 	/**
-		Initialise this class, must only be called by an implementation
+        Initialize this class, must only be called by an implementation
 		of the monitor (ModuleFactory).
 	*/
 	public static boolean setMonitor(ModuleFactory theMonitor) {

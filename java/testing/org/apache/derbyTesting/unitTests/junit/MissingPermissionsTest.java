@@ -25,7 +25,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.AccessControlException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
@@ -67,6 +69,8 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             "MissingPermissionsTest.policy";
     private final static String OK_POLICY_T =
             testPrefix + OK_POLICY;
+    private final static String OK_POLICY_R =
+            resourcePrefix + OK_POLICY;
 
     private final static String POLICY_MINUS_PROPERTYPERMISSION =
             "MissingPermissionsTest1.policy";
@@ -85,6 +89,11 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
 
     private final int KIND_EXPECT_ERROR_MSG_PRESENT = 0;
     private final int KIND_EXPECT_ERROR_MSG_ABSENT = 1;
+
+    /**
+     * Used for running #testModifyThreadGroup
+     */
+    private static boolean inSubProcess = false;
 
     public MissingPermissionsTest(String name) {
         super(name);
@@ -107,27 +116,37 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+        inSubProcess = Boolean.getBoolean("inSubProcess");
+
         final BaseTestSuite suite =
                 new BaseTestSuite("SystemPrivilegesPermissionTest");
 
-        if (!TestConfiguration.loadingFromJars()) {
-            // This test only works with jar files.
+        if (!inSubProcess && !TestConfiguration.loadingFromJars()) {
+            // This test only works with jar files. Only check at top
+            // level
             return suite;
         }
 
-        suite.addTest(
-                new SupportFilesSetup(
-                        makeTest("testMissingFilePermission",
-                                POLICY_MINUS_FILEPERMISSION_T),
-                        new String[] {
-                            POLICY_MINUS_FILEPERMISSION_R}));
+        if (!inSubProcess) {
+            suite.addTest(
+                    new SupportFilesSetup(
+                            makeTest("testMissingFilePermission",
+                                    POLICY_MINUS_FILEPERMISSION_T),
+                            new String[] {
+                                POLICY_MINUS_FILEPERMISSION_R}));
 
-        suite.addTest(makeTest("testPresentPropertiesPermission",
-                OK_POLICY_T));
+            suite.addTest(makeTest("testPresentPropertiesPermission",
+                    OK_POLICY_T));
 
-        suite.addTest(makeTest("testMissingPropertiesPermission",
-                POLICY_MINUS_PROPERTYPERMISSION_T));
+            suite.addTest(makeTest("testMissingPropertiesPermission",
+                    POLICY_MINUS_PROPERTYPERMISSION_T));
+        }
 
+        // This test runs in both the top process and a subprocess since it has
+        // two parts:
+        suite.addTest(new SupportFilesSetup(makeTest("testModifyThreadGroup",
+                OK_POLICY_T),
+                new String[] {OK_POLICY_R}));
         return suite;
     }
 
@@ -337,5 +356,133 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             public BufferedReader run() throws FileNotFoundException {
                 return new BufferedReader(new FileReader(file));
             }});
+    }
+
+
+    public void testModifyThreadGroup() throws Throwable {
+        if (!inSubProcess) {
+            // Set up run of this test in a sub process, so we can catch its
+            // standard err/standard out.
+            final List<String> args = new ArrayList<String>();
+            args.add("-DinSubProcess=true");
+            args.add("-Djava.security.manager");
+            args.add(
+                "-Djava.security.policy=extin/MissingPermissionsTest.policy");
+            args.add("-DderbyTesting.codejar="
+                    + getSystemProperty("derbyTesting.codejar"));
+            args.add("-DderbyTesting.testjar="
+                    + getSystemProperty("derbyTesting.testjar"));
+            args.add("-DderbyTesting.junit="
+                    + getSystemProperty("derbyTesting.junit"));
+            String antjunit = getSystemProperty("derbyTesting.antjunit");
+            if (antjunit != null) {
+                // This property is only available when the test is started
+                // by Ant's JUnit task.
+                args.add("-DderbyTesting.antjunit=" + antjunit);
+            }
+            args.add("-Dderby.system.home=system/nested_tMTG");
+            args.add("-Dderby.system.durability=" +
+                     getSystemProperty("derby.system.durability"));
+            args.add("-Dderby.tests.trace=" +
+                     getSystemProperty("derby.tests.trace"));
+            args.add("-Dderby.system.debug=" +
+                     getSystemProperty("derby.tests.debug"));
+            args.add("junit.textui.TestRunner");
+            args.add(this.getClass().getName());
+
+            final String[] argArray = args.toArray(new String[0]);
+            final Process p = execJavaCmd(argArray);
+            SpawnedProcess spawned = new SpawnedProcess(p, "MPT");
+            spawned.suppressOutputOnComplete(); // we want to read it ourselves
+
+            // The started process is an interactive ij session that will wait
+            // for user input. Close stdin of the process so that it stops
+            // waiting and exits.
+            p.getOutputStream().close();
+
+            final int exitCode = spawned.complete(120000L); // 2 minutes
+
+            assertTrue(spawned.getFailMessage("subprocess run failed: "),
+                    exitCode == 0);
+
+            final String expectedMessageOnConsole =
+                    "WARNING: could not do ThreadGroup#setDaemon on Derby " +
+                    "daemons due to a security exception";
+
+            final String output = spawned.getFullServerOutput(); // ignore
+            final String err    = spawned.getFullServerError();
+
+            assertTrue(err, err.contains(expectedMessageOnConsole));
+
+            // Print sub process' output if this test specifies any such
+            if (Boolean.parseBoolean(
+                        getSystemProperty("derby.tests.trace")) ||
+                Boolean.parseBoolean(
+                    getSystemProperty("derby.tests.debug"))) {
+
+                System.out.println("\n[ (subprocess) " +
+                        output.replace("\n", "\n  (subprocess) ") + "]\n");
+            }
+
+        } else {
+            final SystemThreadRun mst = new SystemThreadRun(this);
+
+            Thread t = AccessController.doPrivileged(
+                new PrivilegedAction<Thread>() {
+                    @Override
+                    public Thread run() {
+                        return new Thread(
+                            Thread.currentThread().getThreadGroup().getParent(),
+                            mst);
+                    }});
+
+
+            t.start();
+            t.join();
+
+            // The boot will fail since operation that require
+            // modifyThreadGroup lead to boot failure. So the fact that the
+            // same permission is missing in FileMonitor#createDaemonGroup
+            // isn't an issue: it will not go undetected. It fails at this line
+            // in BaseMonitor#runWithState:
+            //
+            //  timerFactory = (TimerFactory)Monitor.startSystemModule(
+            //         "org.apache.derby.iapi.services.timer.TimerFactory");
+            //
+            // and the AccessControlException isn't caught and percolates all
+            // the way out.
+            assertTrue(mst.f instanceof AccessControlException);
+
+            // This patch also fixes the fact that previously, the monitor in such
+            // an event, thought it was already initialized so subsequent boot
+            // attempt (from a non-system thread) would also fail. We now clean up,
+            // so a boot here should work.
+            openDefaultConnection("APP", "APPPW").close();
+        }
+    }
+
+    private class SystemThreadRun implements Runnable {
+        public Throwable f;
+        private final BaseJDBCTestCase test;
+
+        public SystemThreadRun(BaseJDBCTestCase test) {
+            super();
+            this.test = test;
+        }
+
+        @SuppressWarnings({"BroadCatchBlock", "TooBroadCatch"})
+        @Override
+        public void run() {
+            try {
+                assertEquals(
+                    Thread.currentThread().getThreadGroup().getName(),
+                    "system");
+                // Expect this to fail with AccessControlException
+                test.openDefaultConnection("APP", "APPPW").close();
+                fail();
+            } catch (Throwable e) {
+                this.f = e;
+            }
+        }
     }
 }

@@ -115,6 +115,8 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
   permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+  permission java.lang.RuntimePermission "modifyThread";
   permission java.security.SecurityPermission "getPolicy";
 
   // derbyTesting.junit.TestConfiguration... modifies System properties
@@ -124,7 +126,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission javax.security.auth.AuthPermission "doAsPrivileged";
 
   // **** Needed by this test
-  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
+  permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete,execute";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
@@ -133,6 +135,8 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 // junit.swingui.TestRunner writes to .junitsession on exit.
 grant codeBase "${derbyTesting.junit}" {
     permission java.util.PropertyPermission "user.home", "read";
+    permission java.util.PropertyPermission "user.dir", "read";
+    permission java.util.PropertyPermission "inSubProcess", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
     permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
 

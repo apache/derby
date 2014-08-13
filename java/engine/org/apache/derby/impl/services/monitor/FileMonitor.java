@@ -38,6 +38,7 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -84,15 +85,21 @@ public final class FileMonitor extends BaseMonitor
      * the group is destroyed and garbage collected when all its
      * members have finished (i.e., either when the driver is
      * unloaded, or when the last database is shut down).
+     *
+     * @return the thread group "derby.daemons" or null if we saw
+     * a SecurityException
      */
-    private static ThreadGroup createDaemonGroup() {
+    private ThreadGroup createDaemonGroup() {
         try {
             ThreadGroup group = new ThreadGroup("derby.daemons");
             group.setDaemon(true);
             return group;
         } catch (SecurityException se) {
-            // In case of a lacking privilege, silently return null and let
-            // the daemon threads be created in the default thread group.
+            // In case of a lacking privilege, issue a warning, return null and
+            // let the daemon threads be created in the default thread group.
+            // This can only happen if the current Derby thread is a part of
+            // the root thread group "system".
+            reportThread(se);
             return null;
         }
     }
@@ -221,6 +228,10 @@ public final class FileMonitor extends BaseMonitor
                 e.toString()));
     }
 
+    private void reportThread(SecurityException e) {
+        report(MessageService.getTextMessage(
+                MessageId.CANNOT_SET_DAEMON, e.toString()));
+    }
 
 	/*
 	** Priv block code, moved out of the old Java2 version.
