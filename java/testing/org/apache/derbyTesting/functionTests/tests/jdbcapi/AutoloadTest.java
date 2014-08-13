@@ -27,7 +27,9 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import javax.sql.DataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -247,13 +249,38 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     public void spawnProcess() throws Exception {
         if (TestConfiguration.isDefaultBasePort()) {
-            String[] cmd = {
-                    "junit.textui.TestRunner", spawnedTestClass.getName()
-                           };
+            final List<String> args = new ArrayList<String>();
+            args.add("-Dderby.system.durability=" +
+                     getSystemProperty("derby.system.durability"));
+            args.add("-Dderby.tests.trace=" +
+                     getSystemProperty("derby.tests.trace"));
+            args.add("-Dderby.system.debug=" +
+                     getSystemProperty("derby.tests.debug"));
+            args.add("junit.textui.TestRunner");
+            args.add(spawnedTestClass.getName());
+            final String[] cmd = args.toArray(new String[0]);
+            
             SpawnedProcess proc = new SpawnedProcess
                     (execJavaCmd(cmd), spawnedTestClass.getName());
-            if (proc.complete() != 0) {
-                fail(proc.getFailMessage("Test process failed"));
+            proc.suppressOutputOnComplete(); // we want to read it ourselves
+            final int exitCode = proc.complete(180000L); // 3 minutes
+
+            assertTrue(proc.getFailMessage("subprocess run failed: "),
+                    exitCode == 0);
+            
+            final String output = proc.getFullServerOutput(); // ignore
+            final String err    = proc.getFullServerError();
+
+            // Print sub process' outputs if this test specifies any such
+            if (Boolean.parseBoolean(
+                        getSystemProperty("derby.tests.trace")) ||
+                Boolean.parseBoolean(
+                    getSystemProperty("derby.tests.debug"))) {
+
+                System.out.println("\n[ (stdout subprocess) " +
+                        output.replace("\n", "\n  (stdout subprocess) ") + "]\n");
+                System.out.println("\n[ (stderr subprocess) " +
+                        err.replace("\n", "\n  (stderr subprocess) ") + "]\n");
             }
         }
         else 
