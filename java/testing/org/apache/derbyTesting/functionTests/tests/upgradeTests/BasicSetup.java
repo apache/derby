@@ -401,8 +401,21 @@ public class BasicSetup extends UpgradeChange {
         Statement s = createStatement();
         boolean modeDb2SqlOptional = oldAtLeast(10, 3);
 
-        dropTable("ATDC_BKUP1");
+        //DERBY-6684(Failure in testDERBY5120NumRowsInSydependsForTrigger when 
+        // upgrading from 10.11.1.0 to trunk)
+        //We ran into DERBY-6684 after the fix for DERBY-2041 went into 10.11
+        //The failure is the expected behavior since when dropping a table,
+        // we should detect any dependent triggers defined on other tables
+        // and drop table should fail if such dependencies exist. To fix the
+        // test failure, we just need to switch the order of drop table
+        //DERBY-2041(Trigger should register a dependency on tables and 
+        // columns used in its body)
+        //Drop ATDC_TAB1 before ATDC_BKUP1 because ATDC_TAB1 has a trigger
+        // on it which references ATDC_BKUP1. If we try dropping ATDC_BKUP1
+        // without first dropping ATDC_TAB1, there will be an error message
+        // that trigger ATDC_TAB1_TRG1 depends on ATDC_BKUP1
         dropTable("ATDC_TAB1");
+        dropTable("ATDC_BKUP1");
         s.execute("create table ATDC_TAB1(c11 int, c12 int)");
         s.execute("insert into ATDC_TAB1 values (1,11)");
         s.execute("create table ATDC_BKUP1(c111 int, c112 int)");
