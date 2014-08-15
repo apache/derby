@@ -942,9 +942,11 @@ public final class MergeNode extends DMLModStatementNode
     {
         if ( cr.getTableName() == null )
         {
-            ResultColumn    rc = _leftJoinFromList.bindColumnReference( cr );
+            cr = cr.bindExpression(
+                    _leftJoinFromList,
+                    new SubqueryList(getContextManager()),
+                    new ArrayList<AggregateNode>());
             TableName       tableName = cr.getQualifiedTableName();
-            if ( tableName == null ) { tableName = new TableName( null, rc.getTableName(), getContextManager() ); }
             cr = new ColumnReference( cr.getColumnName(), tableName, getContextManager() );
         }
 

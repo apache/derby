@@ -387,7 +387,7 @@ public class ColumnReference extends ValueNode
 	 * @exception StandardException		Thrown on error
 	 */
     @Override
-    ValueNode bindExpression(FromList fromList,
+    ColumnReference bindExpression(FromList fromList,
                              SubqueryList subqueryList,
                              List<AggregateNode> aggregates)
             throws StandardException

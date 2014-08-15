@@ -622,7 +622,8 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 * @param columnReference	The ColumnReference describing the column to bind
 	 *
-	 * @return	ResultColumn	The matching ResultColumn
+     * @return ResultColumn     The matching ResultColumn, or {@code null} if
+     *                          there is no matching column
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

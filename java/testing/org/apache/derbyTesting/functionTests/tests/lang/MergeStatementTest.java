@@ -324,6 +324,13 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "when matched then delete\n"
               );
 
+        // Variant of the above, where no table name is specified in the
+        // column reference that is out of scope. Used to fail with a
+        // NullPointerException (DERBY-6703).
+        expectCompilationError(dboConnection, COLUMN_OUT_OF_SCOPE,
+                "merge into t1 using t2 on no_such_column " +
+                "when matched then delete");
+
         //
         // The matching refinement clauses can only mention columns in the
         // source and target tables.
