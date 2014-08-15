@@ -36,6 +36,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
@@ -611,6 +612,16 @@ public abstract class BaseTestCase
 	    }
 	}
 
+    /**
+     * Same as {@link #execJavaCmd(
+     * String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)}
+     * but with {@code addClassPath == true}.
+     */
+    public static Process execJavaCmd(
+        String jvm, String cp, String[] cmd, final File dir)
+            throws IOException {
+        return execJavaCmd(jvm, cp, cmd, dir, true);
+    }
 
 	/**
 	 * Execute a java command and return the process.
@@ -628,11 +639,12 @@ public abstract class BaseTestCase
 	 * @param cmd array of java arguments for command
      * @param dir working directory for the sub-process, or {@code null} to
      *            run in the same directory as the main test process
+     * @param addClassPath if {@code true},add classpath
 	 * @return the process that was started
 	 * @throws IOException
 	 */
     public static Process execJavaCmd(
-        String jvm, String cp, String[] cmd, final File dir)
+        String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)
             throws IOException {
 
         // Is this an invocation of a jar file with java -jar ...?
@@ -706,7 +718,7 @@ public abstract class BaseTestCase
             // been set in addition to -jar, as that's probably a mistake in
             // the calling code.
             assertNull("Both -jar and classpath specified", cp);
-        } else {
+        } else if (addClassPath) {
             cmdlist.add("-classpath");
             cmdlist.add(cp == null ? getSystemProperty("java.class.path") : cp);
         }

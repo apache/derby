@@ -297,6 +297,12 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 
   // Needed by ClasspathSetup for freeing resources.
   permission java.lang.RuntimePermission "closeClassLoader";
+
+  // Needed by AutoloadTest to get at spawned process pid (Unixen) and call jstack:
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
+  permission java.lang.reflect.ReflectPermission "suppressAccessChecks";
+  // Presumes we have a JDK: First "..": back up past "jre"
+  permission java.io.FilePermission "${java.home}${/}..${/}bin${/}-", "execute, read";
 };
 
 //

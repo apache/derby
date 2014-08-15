@@ -55,7 +55,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class AutoloadTest extends BaseJDBCTestCase
 {
-    private Class spawnedTestClass;
+    private Class<?> spawnedTestClass;
 
 	public	AutoloadTest( String name ) { super( name ); }
 
@@ -65,14 +65,16 @@ public class AutoloadTest extends BaseJDBCTestCase
      * @param wrapper a test class that decorates {@code AutoloadTest} with the
      * desired configuration
      */
-    private AutoloadTest(Class wrapper) {
+    private AutoloadTest(Class<?> wrapper) {
         this("spawnProcess");
         spawnedTestClass = wrapper;
     }
 
     /**
      * Get the name of the test case.
+     * @return
      */
+    @Override
     public String getName() {
         String name = super.getName();
         if (spawnedTestClass != null) {
@@ -86,6 +88,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     /**
      * Only run a test if the driver will be auto-loaded.
      * See class desciption for details.
+     * @return the test
      */
     public static Test suite() {
         if (!JDBC.vmSupportsJDBC3())
@@ -118,10 +121,10 @@ public class AutoloadTest extends BaseJDBCTestCase
                 jdbcDrivers = "";
 
             embeddedAutoLoad = jdbcDrivers
-                    .indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+                    .contains("org.apache.derby.jdbc.EmbeddedDriver");
 
             clientAutoLoad = jdbcDrivers
-                    .indexOf("org.apache.derby.jdbc.ClientDriver") != -1;
+                    .contains("org.apache.derby.jdbc.ClientDriver");
 
         } catch (SecurityException se) {
             // assume there is no autoloading if
@@ -176,6 +179,9 @@ public class AutoloadTest extends BaseJDBCTestCase
     
     /**
      * Return the ordered set of tests when autoloading is enabled.
+     *
+     * @param which embedded or client
+     * @return the constructed test suite
      */
     private static Test baseAutoLoadSuite(String which)
     {
@@ -225,6 +231,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * <li>jdbc.drivers property specifying client driver</li>
      * <li>jdbc.drivers property specifying both drivers</li>
      * </ul>
+     * @return the test constructed
      */
     static Test fullAutoloadSuite() {
         BaseTestSuite suite = new BaseTestSuite("AutoloadTest:All");
@@ -238,6 +245,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         // stop the engine in the main test process to prevent attempts to
         // double-boot the database.
         return new TestSetup(suite) {
+            @Override
             protected void setUp() {
                 TestConfiguration.getCurrent().shutdownEngine();
             }
@@ -246,56 +254,82 @@ public class AutoloadTest extends BaseJDBCTestCase
 
     /**
      * Run {@code AutoloadTest} in a separate JVM.
+     *
+     * @throws java.lang.Exception something went wrong
      */
     public void spawnProcess() throws Exception {
-        if (TestConfiguration.isDefaultBasePort()) {
-            final List<String> args = new ArrayList<String>();
-            args.add("-Dderby.system.durability=" +
-                     getSystemProperty("derby.system.durability"));
-            args.add("-Dderby.tests.trace=" +
-                     getSystemProperty("derby.tests.trace"));
-            args.add("-Dderby.system.debug=" +
-                     getSystemProperty("derby.tests.debug"));
-            args.add("junit.textui.TestRunner");
-            args.add(spawnedTestClass.getName());
-            final String[] cmd = args.toArray(new String[0]);
-            
-            SpawnedProcess proc = new SpawnedProcess
-                    (execJavaCmd(cmd), spawnedTestClass.getName());
-            proc.suppressOutputOnComplete(); // we want to read it ourselves
-            final int exitCode = proc.complete(180000L); // 3 minutes
+        final List<String> args = new ArrayList<String>();
+        args.add("-Dderby.system.durability=" +
+                getSystemProperty("derby.system.durability"));
+        args.add("-Dderby.tests.trace=" +
+                getSystemProperty("derby.tests.trace"));
+        args.add("-Dderby.system.debug=" +
+                getSystemProperty("derby.tests.debug"));
 
-            assertTrue(proc.getFailMessage("subprocess run failed: "),
-                    exitCode == 0);
-            
-            final String output = proc.getFullServerOutput(); // ignore
-            final String err    = proc.getFullServerError();
-
-            // Print sub process' outputs if this test specifies any such
-            if (Boolean.parseBoolean(
-                        getSystemProperty("derby.tests.trace")) ||
-                Boolean.parseBoolean(
-                    getSystemProperty("derby.tests.debug"))) {
-
-                System.out.println("\n[ (stdout subprocess) " +
-                        output.replace("\n", "\n  (stdout subprocess) ") + "]\n");
-                System.out.println("\n[ (stderr subprocess) " +
-                        err.replace("\n", "\n  (stderr subprocess) ") + "]\n");
-            }
+        if (!TestConfiguration.isDefaultBasePort()) {
+            args.add("-Dderby.tests.basePort=" + TestConfiguration.getBasePort());
         }
-        else 
-        {
-            // if we're not using the default port of 1527, ensure we're
-            // passing on the baseport value to the spawned process.
-            String[] cmd = {
-                    "-Dderby.tests.basePort=" + TestConfiguration.getBasePort(),
-                    "junit.textui.TestRunner", spawnedTestClass.getName()
-            };            
-            SpawnedProcess proc = new SpawnedProcess
-                    (execJavaCmd(cmd), spawnedTestClass.getName());
-            if (proc.complete() != 0) {
-                fail(proc.getFailMessage("Test process failed"));
-            }
+
+        args.add("junit.textui.TestRunner");
+        args.add(spawnedTestClass.getName());
+        final String[] cmd = args.toArray(new String[0]);
+
+        final SpawnedProcess proc = new SpawnedProcess
+                            (execJavaCmd(cmd), spawnedTestClass.getName());
+        // Close stdin of the process so that it stops
+        // any waiting for it and exits (shoudln't matter for this test)
+        proc.suppressOutputOnComplete(); // we want to read it ourselves
+
+        final boolean completed = proc.waitForExit(120000L /* 2m */, 1000L);
+
+        final StringBuilder jstackReport = new StringBuilder();
+        if (!completed) {
+            jstackReport.append("\n\n\n[Subprocess ");
+            jstackReport.append(proc.getPid());
+            jstackReport.append(" hanging, jstack result:");
+            jstackReport.append(proc.jstack());
+            jstackReport.append("End of jstack output]\n\n");
+        }
+
+        final int exitCode = proc.complete(0); // kill right away if not done
+
+        final String output = proc.getFullServerOutput();
+        final String err    = proc.getFullServerError();
+
+        final String headerOut = "\n[ (stdout subprocess) ";
+        final String headerErr = headerOut.replace("out", "err");
+        final String contLineOut = headerOut.replace('[', ' ');
+        final String contLineErr = contLineOut.replace("out", "err");
+
+        if (exitCode != 0) {
+            final StringBuilder errMsg = new StringBuilder();
+            
+            errMsg.append("subprocess run failed: exit code==");
+            errMsg.append(exitCode);
+            errMsg.append("\n");
+            errMsg.append(headerOut);
+            errMsg.append(output.replaceAll("\n", contLineOut));
+            errMsg.append("]\n");
+            errMsg.append(headerErr);
+            errMsg.append(err.replaceAll("\n", contLineErr));
+            errMsg.append("]\n");
+
+            errMsg.append(jstackReport);
+
+            fail(errMsg.toString());
+        }
+
+
+        // Print sub process' outputs if this test specifies any such
+        if (Boolean.parseBoolean(
+                getSystemProperty("derby.tests.trace")) ||
+                Boolean.parseBoolean(
+                        getSystemProperty("derby.tests.debug"))) {
+
+            System.out.println(
+                    headerOut + output.replace("\n", contLineOut) + "]\n");
+            System.out.println(
+                    headerErr + err.replace("\n", contLineErr) + "]\n");
         }
     }
 
@@ -401,10 +435,10 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         String  clientDriverName = getClientDriverName();
         
-        for (Enumeration e = DriverManager.getDrivers();
+        for (Enumeration<Driver> e = DriverManager.getDrivers();
                 e.hasMoreElements(); )
         {
-            Driver d = (Driver) e.nextElement();
+            Driver d = e.nextElement();
             String driverClass = d.getClass().getName();
             if (!driverClass.startsWith("org.apache.derby."))
                 continue;
@@ -420,8 +454,9 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
 
 	/**
-     	 * Test we can connect successfully to a database.
-	 */
+     * Test we can connect successfully to a database.
+     * @throws SQLException test error
+     */
 	public void testSuccessfulConnect()
        throws SQLException
 	{
@@ -437,9 +472,9 @@ public class AutoloadTest extends BaseJDBCTestCase
     /**
      * Test the error code on an unsuccessful connect
      * to ensure it is not one returned by DriverManager.
+     * @throws SQLException test error
      */
-    public void testUnsuccessfulConnect()
-       throws SQLException
+    public void testUnsuccessfulConnect() throws SQLException
     {     
         // Test we can connect successfully to a database!
         String url = getTestConfiguration().getJDBCUrl("nonexistentDatabase");
@@ -456,7 +491,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     
     /**
-     * Test an explict load of the driver works as well
+     * Test an explicit load of the driver works as well
      * even though the drivers were loaded automatically.
      * @throws Exception 
      *
@@ -564,17 +599,17 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     
     /**
-     * Return true if a full auto-boot of the engine is expected
+     * @return {@code true} if a full auto-boot of the engine is expected
      * due to jdbc.drivers containing the name of the embedded driver.
      */
     private boolean fullEngineAutoBoot()
     {
         String jdbcDrivers = getSystemProperty("jdbc.drivers");
-        return jdbcDrivers.indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+        return jdbcDrivers.contains("org.apache.derby.jdbc.EmbeddedDriver");
     }
     
     /**
-     * Test indirect artifiacts through public apis that
+     * Test indirect artifacts through public apis that
      * the embedded engine has not been started.
      */
     
@@ -596,11 +631,11 @@ public class AutoloadTest extends BaseJDBCTestCase
 
     private boolean getRegisteredDrivers(String driver) {
 
-	Enumeration e = DriverManager.getDrivers();
+    Enumeration<Driver> e = DriverManager.getDrivers();
 
         while(e.hasMoreElements())
         {
-                Driver drv = (Driver)e.nextElement();
+                Driver drv = e.nextElement();
                 if(drv.getClass().getName().equals(driver))	
 			return true;
         }
@@ -676,6 +711,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * thread groups. Since this not testing Derby functionality
      * there's harm to not having a security manager, since
      * no code is executed against Derby.
+     * @return see above
      */
     private boolean hasDerbyThreadGroup() {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();

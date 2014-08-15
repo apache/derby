@@ -20,13 +20,23 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import static junit.framework.Assert.assertTrue;
+import static org.apache.derbyTesting.junit.BaseTestCase.execJavaCmd;
+import static org.apache.derbyTesting.junit.BaseTestCase.getJavaExecutableName;
+import static org.apache.derbyTesting.junit.BaseTestCase.isIBMJVM;
+import static org.apache.derbyTesting.junit.BaseTestCase.isWindowsPlatform;
 
 /**
  * Utility code that wraps a spawned process (Java Process object).
@@ -504,4 +514,110 @@ public final class SpawnedProcess {
             process = null;
         }
     }
+
+    /**
+     * Return {@code true} if the subprocess {@code p} has exited within {@code
+     * patience} milliseconds. Sleep {@code sleepInterval} between each check}.
+     * Note: you still need to call one of the {@link #complete} overloads even
+     * if using this method (which is optional). It can be used before trying
+     * a {@link #jstack} call.
+     *
+     * @param patience the maximum milliseconds we want to wait for
+     * @param sleepInterval sleep for this amount of milliseconds before trying
+     *                      testing again if not already exited the first time
+     *                      we check. If patience &lt;= sleepInterval we only
+     *                      check once.
+     * @return true if the process exited before our patience is up.
+     * @throws java.lang.InterruptedException
+     */
+    @SuppressWarnings("SleepWhileInLoop")
+    public boolean waitForExit(long patience, long sleepInterval)
+            throws InterruptedException {
+        boolean completed = false;
+        while (!completed && patience > 0) {
+            try {
+                try {
+                    javaProcess.exitValue();
+                    completed = true;
+                } catch (IllegalThreadStateException e) {
+                    // try again after sleeping
+                    Thread.sleep(sleepInterval);
+                    patience = patience - sleepInterval;
+                }
+            } catch (InterruptedException e) {
+                throw e;
+            }
+        }
+        return completed;
+    }
+
+
+    /**
+     * Return the jstack(1) dump of the process if possible.
+     * It will only work if we are running with a full JDK, not a simple JRE.
+     * It will not work on Windows, and just return an empty string.
+     * @return jstack dump if possible
+     * @throws PrivilegedActionException
+     * @throws InterruptedException
+     */
+    public String jstack()
+            throws PrivilegedActionException, InterruptedException{
+
+        String output = "";
+
+        if (!isWindowsPlatform() && !isIBMJVM()) {
+            // Get the pid of the subprocess using reflection. Dirty,
+            // for Unix there is a private field pid in the implementing
+            // class.
+            final int pid = getPid();
+            final String execName = getJavaExecutableName().replace(
+                    "jre" + File.separator + "bin" + File.separator + "java",
+                    "bin" + File.separator + "jstack");
+            final String[] arguments =
+                    new String[]{Integer.toString(pid)};
+            try {
+                final Process p2 =
+                        execJavaCmd(execName, null, arguments, null, false);
+                final SpawnedProcess spawn2 = new SpawnedProcess(p2, "jstack");
+                spawn2.suppressOutputOnComplete();
+                // Close stdin of the process so that it stops
+                // any waiting for it and exits (shouldn't matter for this test)
+                p2.getOutputStream().close();
+                final int exitCode2 = spawn2.complete(30000); // 30 seconds
+                assertTrue(spawn2.getFailMessage("jstack failed: "),
+                        exitCode2 == 0);
+                output = spawn2.getFullServerOutput();
+            } catch (IOException e) {
+                output = "Tried to catch jstack of hanging subprocess but it "
+                        + "failed (using JDK or JRE?): " + e;
+            }
+        }
+
+        return output;
+    }
+
+    /**
+     * Return the pid if on Unixen, or -1 on Windows (can't be obtained).
+     * @return pid
+     * @throws PrivilegedActionException
+     */
+    public int getPid() throws PrivilegedActionException {
+        if (!isWindowsPlatform() && !isIBMJVM()) {
+            return AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Integer>() {
+                    @Override
+                    public Integer run() throws IllegalAccessException,
+                            NoSuchFieldException {
+                        final Field f = javaProcess.getClass().
+                                getDeclaredField("pid");
+                        f.setAccessible(true);
+
+                        return f.getInt(javaProcess);
+                    }
+                });
+        } else {
+            return -1;
+        }
+    }
+
 }
