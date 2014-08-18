@@ -1610,5 +1610,17 @@ public class MatchingClauseNode extends QueryTreeNode
 
         return false;
     }
-    
+
+    @Override
+    public boolean referencesSessionSchema() throws StandardException {
+        return referencesSessionSchema(_matchingRefinement)
+                || referencesSessionSchema(_updateColumns)
+                || referencesSessionSchema(_insertColumns)
+                || referencesSessionSchema(_insertValues);
+    }
+
+    private static boolean referencesSessionSchema(QueryTreeNode node)
+            throws StandardException {
+        return node != null && node.referencesSessionSchema();
+    }
 }

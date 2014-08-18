@@ -2022,6 +2022,24 @@ public class TriggerTest extends BaseJDBCTestCase {
                 + "(select count(*) from session.temptable) = "
                 + "(select count(*) from sysibm.sysdummy1)");
 
+        // DERBY-6705
+        assertCompileError("XCL51",
+                "create trigger tr7 after insert on t1 "
+                + "merge into t2 using session.temptable on i=x "
+                + "when matched then delete");
+
+        // DERBY-6705
+        assertCompileError("XCL51",
+                "create trigger tr8 after insert on t1 "
+                + "merge into session.temptable using t2 on i=x "
+                + "when matched then delete");
+
+        // DERBY-6705
+        assertCompileError("XCL51",
+                "create trigger tr9 after insert on t1 "
+                + "merge into t2 using t1 "
+                + "on exists(select * from session.temptable where t1.x=t2.i) "
+                + "when matched then delete");
     }
 
     /**

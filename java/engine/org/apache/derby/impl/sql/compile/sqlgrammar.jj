@@ -3660,7 +3660,7 @@ mergeStatement() throws StandardException :
 	FromTable   targetTable;
     FromTable       sourceTable;
     ValueNode       searchCondition;
-    ArrayList<MatchingClauseNode>   matchingClauses;
+    QueryTreeNodeVector<MatchingClauseNode> matchingClauses;
 }
 {
 	<MERGE> <INTO> targetTable = tableFactor()
@@ -3686,10 +3686,12 @@ mergeStatement() throws StandardException :
 /*
  * <A NAME="matchingClauseList">matchingClauseList</A>
  */
-ArrayList<MatchingClauseNode>
+QueryTreeNodeVector<MatchingClauseNode>
 matchingClauseList() throws StandardException :
 {
-    ArrayList<MatchingClauseNode>   matchingClauses = new ArrayList<MatchingClauseNode>();
+    QueryTreeNodeVector<MatchingClauseNode> matchingClauses =
+            new QueryTreeNodeVector<MatchingClauseNode>(
+                    MatchingClauseNode.class, getContextManager());
 }
 {
     matchingClause( matchingClauses ) ( matchingClause( matchingClauses ) ) *
@@ -3702,7 +3704,8 @@ matchingClauseList() throws StandardException :
  * <A NAME="matchingClause">matchingClause</A>
  */
 void
-matchingClause( ArrayList<MatchingClauseNode> matchingClauses ) throws StandardException :
+matchingClause(QueryTreeNodeVector<MatchingClauseNode> matchingClauses)
+    throws StandardException :
 {
     ValueNode   matchingRefinement = null;
     ResultColumnList               updateColumns = null;
@@ -3731,7 +3734,7 @@ matchingClause( ArrayList<MatchingClauseNode> matchingClauses ) throws StandardE
             ( matchingRefinement, getContextManager() );
         }
 
-        matchingClauses.add( matchingClause );
+        matchingClauses.addElement(matchingClause);
 	}
 |
     LOOKAHEAD ( { getToken(1).kind == WHEN && getToken(2).kind == NOT } )
@@ -3743,7 +3746,7 @@ matchingClause( ArrayList<MatchingClauseNode> matchingClauses ) throws StandardE
         matchingClause = MatchingClauseNode.makeInsertClause
         ( matchingRefinement, insertColumns, insertValues, getContextManager() );
 
-        matchingClauses.add( matchingClause );
+        matchingClauses.addElement(matchingClause);
 	}
 }
 

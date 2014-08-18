@@ -183,7 +183,7 @@ public final class MergeNode extends DMLModStatementNode
     private FromBaseTable   _targetTable;
     private FromTable   _sourceTable;
     private ValueNode   _searchCondition;
-    private ArrayList<MatchingClauseNode>   _matchingClauses;
+    private QueryTreeNodeVector<MatchingClauseNode> _matchingClauses;
 
     //
     // Filled in at bind() time.
@@ -214,7 +214,7 @@ public final class MergeNode extends DMLModStatementNode
          FromTable          targetTable,
          FromTable          sourceTable,
          ValueNode          searchCondition,
-         ArrayList<MatchingClauseNode>  matchingClauses,
+         QueryTreeNodeVector<MatchingClauseNode> matchingClauses,
          ContextManager     cm
          )
         throws StandardException
@@ -422,6 +422,14 @@ public final class MergeNode extends DMLModStatementNode
     private String  getExposedName( FromTable ft ) throws StandardException
     {
         return ft.getTableName().getTableName();
+    }
+
+    @Override
+    public boolean referencesSessionSchema() throws StandardException {
+        return _sourceTable.referencesSessionSchema()
+                || _targetTable.referencesSessionSchema()
+                || _searchCondition.referencesSessionSchema()
+                || _matchingClauses.referencesSessionSchema();
     }
 
     /**
@@ -1031,7 +1039,7 @@ public final class MergeNode extends DMLModStatementNode
         ConstantAction[]    clauseActions = new ConstantAction[ clauseCount ];
         for ( int i = 0; i < clauseCount; i++ )
         {
-            MatchingClauseNode  mcn = _matchingClauses.get( i );
+            MatchingClauseNode mcn = _matchingClauses.elementAt(i);
 
             mcn.generate( acb, _selectList, generatedScan, _hojn, i );
             clauseActions[ i ] = mcn.makeConstantAction( acb );
