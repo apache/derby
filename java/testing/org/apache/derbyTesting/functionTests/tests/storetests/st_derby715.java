@@ -22,13 +22,10 @@
 package org.apache.derbyTesting.functionTests.tests.storetests;
 
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-
 import org.apache.derbyTesting.functionTests.tests.store.BaseTest;
+import org.apache.derbyTesting.functionTests.util.Barrier;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -95,10 +92,12 @@ public class st_derby715 extends BaseTest
     public static class t1 implements Runnable
     {
         String[] argv;
+        private final Barrier barrier;
 
-        public t1(String[] argv)
+        public t1(Barrier barrier, String[] argv)
         {
             argv = argv;
+            this.barrier = barrier;
         }
         public void run()
         {
@@ -129,7 +128,7 @@ public class st_derby715 extends BaseTest
                     System.out.println("Thread 1 after all next.");
 
                 // give thread 2 a chance to catch up.
-                waitForLocks(conn, 2);
+                barrier.await();
 
                 if (verbose)
                     System.out.println("Thread 1 before inserting into a...");
@@ -172,9 +171,11 @@ public class st_derby715 extends BaseTest
     public static class t2 implements Runnable
     {
         String[] argv;
-        public t2 (String[] argv)
+        private final Barrier barrier;
+        public t2 (Barrier barrier, String[] argv)
         {
             argv = argv;
+            this.barrier = barrier;
         }
         public void run()
         {
@@ -204,7 +205,10 @@ public class st_derby715 extends BaseTest
 
                 if (verbose)
                     System.out.println("Thread 2 after all next.");
-                waitForLocks(conn,2);
+
+                // Wait till thread 1 has executed the query and obtained
+                // locks on the rows in table B.
+                barrier.await();
 
                 if (verbose)
                     System.out.println("Thread 2 before inserting into b");
@@ -243,34 +247,6 @@ public class st_derby715 extends BaseTest
         }
     }
     
-    /**
-     * Wait for a specified number of locks before continuing
-     *
-     * @param conn Connection to use for lock query
-     * @param num  Number of locks to check for
-     */
-    private static void waitForLocks(Connection conn, int num) throws InterruptedException, SQLException {
-        int totalWait = 0;
-        do {
-            totalWait += 500;
-            Thread.sleep(500);
-        } while (numlocks(conn) < num && totalWait < 60000);
-       
-    }
-    /**
-     * Get the number of locks in the lock table 
-     * @return number of locks
-     * @throws SQLException
-     */
-    private static int numlocks(Connection conn) throws SQLException {
-        Statement s = conn.createStatement();
-        ResultSet rs = s.executeQuery("SELECT count(*) from syscs_diag.lock_table");
-        rs.next();
-        int num = rs.getInt(1);
-        rs.close();
-        return num;
-    }
-    
     public void testList(Connection conn)
         throws SQLException
     {
@@ -288,8 +264,9 @@ public class st_derby715 extends BaseTest
         {
             for (int i = 0; i < 5; i++)
             {
-                Thread test1 = new Thread(new t1(argv));
-                Thread test2 = new Thread(new t2(argv));
+                Barrier barrier = new Barrier(2);
+                Thread test1 = new Thread(new t1(barrier, argv));
+                Thread test2 = new Thread(new t2(barrier, argv));
                 test1.start();
                 test2.start();
                 test1.join();
