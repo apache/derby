@@ -34,7 +34,7 @@ grant codeBase "${derby.install.url}derby.jar"
   // need to *also* grant this permission to the first of those jar files in
   // your classpath. The reason is that some Derby properties (derby.ui.locale,
   // derby.ui.codeset) are read by the class LocalizedResource which is present
-  // in more than one jar file. The the first jar in the path gets used to load
+  // in more than one jar file. The first jar in the path gets used to load
   // the class and hence that jar needs the permission.
   permission java.util.PropertyPermission "derby.*", "read";
 
