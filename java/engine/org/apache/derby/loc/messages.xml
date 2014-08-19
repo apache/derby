@@ -8882,6 +8882,20 @@ page id:            {0}
             </msg>
 
             <msg>
+                <name>M00A</name>
+                <text>WARNING: cannot get the context class loader due to a security exception: {0}. This may lead to class loader leak.
+                </text>
+                <arg>error</arg>
+            </msg>
+
+            <msg>
+                <name>M00B</name>
+                <text>WARNING: cannot set the context class loader due to a security exception: {0}. This may lead to class loader leak.
+                </text>
+                <arg>error</arg>
+            </msg>
+
+            <msg>
                 <name>M010</name>
                 <text>WARNING: could not do ThreadGroup#setDaemon on Derby daemons due to a security exception: {0}. This may impact operation.
                 </text>

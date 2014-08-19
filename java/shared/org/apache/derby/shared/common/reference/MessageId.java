@@ -226,11 +226,14 @@ public interface MessageId {
     String README_AT_SEG_LEVEL                               = "M007";
 
     /**
-     * Could not read security related Derby properties when running under a
-     * security manager
+     * Security related Derby messages used when running under the
+     * Java security manager and something doesn't work, possibly leading
+     * to lower security unless fixed.
      */
     String CANNOT_READ_SECURITY_PROPERTY                     = "M008";
     String CANNOT_CREATE_FILE_OR_DIRECTORY                   = "M009";
+    String CANNOT_GET_CLASSLOADER                            = "M00A";
+    String CANNOT_SET_CLASSLOADER                            = "M00B";
     String CANNOT_SET_DAEMON                                 = "M010";
     /*
      * Misc

@@ -21,75 +21,64 @@
 
 package org.apache.derby.impl.services.monitor;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.monitor.ModuleFactory;
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.monitor.ModuleSupportable;
-
-import org.apache.derby.iapi.services.monitor.PersistentService;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.RegisteredFormatIds;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.context.Context;
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.services.stream.InfoStreams;
-import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.StringTokenizer;
+import java.util.Vector;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.iapi.services.timer.TimerFactory;
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Attribute;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
-import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
-import org.apache.derby.iapi.services.loader.ClassInfo;
-import org.apache.derby.iapi.services.loader.InstanceGetter;
-import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
-import org.apache.derby.iapi.error.ExceptionSeverity;
-
-import  org.apache.derby.io.StorageFactory;
-
-import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.BundleFinder;
 import org.apache.derby.iapi.services.i18n.MessageService;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.ByteArrayInputStream;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.NoSuchElementException;
-
-import java.lang.reflect.InvocationTargetException;
-
-import java.net.URL;
-import java.security.AccessControlException;
+import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.services.io.AccessibleByteArrayOutputStream;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
+import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
+import org.apache.derby.iapi.services.io.RegisteredFormatIds;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.loader.ClassInfo;
+import org.apache.derby.iapi.services.loader.InstanceGetter;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
+import org.apache.derby.iapi.services.monitor.ModuleSupportable;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.monitor.PersistentService;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.stream.InfoStreams;
+import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
+import org.apache.derby.iapi.services.timer.TimerFactory;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.io.StorageFactory;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -105,7 +94,8 @@ abstract class BaseMonitor
 	/**
 		Hash table of objects that implement PersistentService keyed by their getType() method.
 	*/
-	private HashMap<String,PersistentService> serviceProviders = new HashMap<String,PersistentService>();
+    private final HashMap<String,PersistentService> serviceProviders =
+            new HashMap<String,PersistentService>();
 	private static final String LINE = 
         "----------------------------------------------------------------";
 
@@ -114,7 +104,7 @@ abstract class BaseMonitor
 
     private List<List<Class<?>>> implementationSets;
 
-	private Vector<TopService>	  services;					// Vector of TopServices
+    private final Vector<TopService> services; // Vector of TopServices
 
 	Properties bootProperties;		// specifc properties provided by the boot method, override everything else
 	Properties applicationProperties;
@@ -779,11 +769,35 @@ abstract class BaseMonitor
 	}
 
 	/**
-	*/
-	private Object newInstance(Class classObject) {
+     * Return a new instance of class {@code classObject} using
+     * a no-param constructor.
+     * @param classObject the class to instantiate
+     * @return the instantiated object
+     */
+    private Object newInstance(Class<?> classObject) {
 
 		try {
-			return classObject.newInstance();
+            final Object module = classObject.newInstance();
+
+            // Get and report any warnings generated during initialization
+            try {
+                final Method getWarn = classObject.getMethod("getWarnings");
+                final String warnings = (String)getWarn.invoke(module);
+
+                if (warnings != null) {
+                    report(warnings);
+                }
+            } catch (NoSuchMethodException e) {
+                // Ok, not all modules support this method
+            } catch (InvocationTargetException e) {
+                // Should never happen
+                if (SanityManager.DEBUG) {
+                    SanityManager.NOTREACHED();
+                }
+                report(e.toString());
+            }
+
+            return module;
 		}
 		catch (InstantiationException e) {
 			report(classObject.getName() + " " + e.toString());

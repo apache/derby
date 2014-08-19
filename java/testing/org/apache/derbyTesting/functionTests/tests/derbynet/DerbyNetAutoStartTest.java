@@ -277,7 +277,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
         ns.shutdown();
     }
 
-    private static boolean checkLog( String logFileName, String[] expected)
+    static boolean checkLog( String logFileName, String[] expected)
             throws IOException
     {
         boolean allFound = true;
@@ -293,8 +293,9 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
             // System.out.println(logLine);
             for( int i = 0; i < expected.length; i++)
             {
-                if( (! found[i]) && logLine.indexOf( expected[i]) >= 0)
+                if( (! found[i]) && logLine.contains( expected[i])) {
                     found[i] = true;
+                }
             }
         }
         for( int i = 0; i < expected.length; i++)
@@ -304,6 +305,7 @@ public class DerbyNetAutoStartTest extends BaseJDBCTestCase {
                 allFound = false;
             }
         }
+        br.close();
         return allFound;
     } // end of checkLog
 

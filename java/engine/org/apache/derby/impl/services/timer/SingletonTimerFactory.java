@@ -21,16 +21,18 @@
 
 package org.apache.derby.impl.services.timer;
 
-import org.apache.derby.iapi.services.timer.TimerFactory;
-import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.error.StandardException;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.Timer;
 import java.util.Properties;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.timer.TimerFactory;
+import org.apache.derby.shared.common.reference.MessageId;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 
 /**
@@ -51,7 +53,7 @@ public class SingletonTimerFactory
     /**
      * Singleton Timer instance.
      */
-    private Timer singletonTimer;
+    private final Timer singletonTimer;
 
     /**
      * The number of times {@link #cancel(TimerTask)} has been called.
@@ -59,6 +61,11 @@ public class SingletonTimerFactory
      * the timer.
      */
     private final AtomicInteger cancelCount = new AtomicInteger();
+
+    /**
+     * Initialization warnings. See {@link #getWarnings}.
+     */
+    private StringBuilder warnings = new StringBuilder();
 
     /**
      * Initializes this TimerFactory with a singleton Timer instance.
@@ -89,12 +96,12 @@ public class SingletonTimerFactory
 
     // TimerFactory interface methods
 
-    /** {@inheritDoc} */
+    @Override
     public void schedule(TimerTask task, long delay) {
         singletonTimer.schedule(task, delay);
     }
 
-    /** {@inheritDoc} */
+    @Override
     public void cancel(TimerTask task) {
         task.cancel();
 
@@ -124,8 +131,12 @@ public class SingletonTimerFactory
      *
      * Implements the ModuleControl interface.
      *
+     * @param create not used
+     * @param properties not used
+     * @throws StandardException not used
      * @see ModuleControl
      */
+    @Override
     public void boot(boolean create, Properties properties)
         throws
             StandardException
@@ -140,6 +151,7 @@ public class SingletonTimerFactory
      *
      * @see ModuleControl
      */
+    @Override
     public void stop()
     {
         singletonTimer.cancel();
@@ -147,10 +159,11 @@ public class SingletonTimerFactory
 
     // Helper methods
 
-    private static ClassLoader getContextClassLoader() {
+    private ClassLoader getContextClassLoader() {
         try {
             return AccessController.doPrivileged(
                     new PrivilegedAction<ClassLoader>() {
+                @Override
                 public ClassLoader run() {
                     return Thread.currentThread().getContextClassLoader();
                 }
@@ -160,13 +173,15 @@ public class SingletonTimerFactory
             // the DERBY-3745 fix did not require getContextClassLoader
             // privileges. We may leak class loaders if we are not
             // able to do this, but we can't just fail.
+            report(se, MessageId.CANNOT_GET_CLASSLOADER);
             return null;
         }
     }
 
-    private static void setContextClassLoader(final ClassLoader cl) {
+    private void setContextClassLoader(final ClassLoader cl) {
         try {
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                @Override
                 public Void run() {
                     Thread.currentThread().setContextClassLoader(cl);
                     return null;
@@ -177,7 +192,30 @@ public class SingletonTimerFactory
             // the DERBY-3745 fix, did not require setContextClassLoader
             // permissions. We may leak class loaders if we are not able to
             // set this, but cannot just fail.
+            report(se, MessageId.CANNOT_SET_CLASSLOADER);
         }
     }
 
+    private void report (SecurityException se, String id) {
+        warnings.append(MessageService.getTextMessage(id, se.toString()));
+        warnings.append('\n');
+
+        if (SanityManager.DEBUG) {
+            for (StackTraceElement elt : se.getStackTrace()) {
+                warnings.append(elt.toString());
+                warnings.append('\n');
+            }
+            warnings.append('\n');
+        }
+    }
+    /**
+     * Return any warnings generated during the initialization of this class, or
+     * null if none
+     * @return See legend
+     */
+    public String getWarnings() {
+        String result = warnings.toString();
+        warnings = null;
+        return "".equals(result) ? null : result;
+    }
 }

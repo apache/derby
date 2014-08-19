@@ -21,7 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -321,6 +325,10 @@ public class SecureServerTest extends BaseJDBCTestCase
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
 
+        if (!_unsecureSet) {
+            assertWarningDerby6619();
+        }
+
         if (!(runsWithEmma() || runsWithJaCoCo())) {
             // With Emma we run without the security manager, so we can't
             // assert on seeing it.
@@ -493,5 +501,19 @@ public class SecureServerTest extends BaseJDBCTestCase
             nsTestSetup.getServerProcess().getProcess(), true);
     }
 
+    final String[] expected6619 =
+         new String[]{
+             "WARNING: cannot set the context class loader due to a " +
+                 "security exception:",
+             "This may lead to class loader leak"};
+
+    private void assertWarningDerby6619() throws IOException {
+        final String logFileName =
+                getSystemProperty("derby.system.home").replace("/system","") +
+                File.separator + "/derby.log";
+        if (!DerbyNetAutoStartTest.checkLog(logFileName, expected6619)) {
+            fail("Expected warning on derby.log cf DERBY-6619");
+        }
+    }
 }
 
