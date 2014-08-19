@@ -72,7 +72,7 @@ public class AutoloadTest extends BaseJDBCTestCase
 
     /**
      * Get the name of the test case.
-     * @return
+     * @return the test name
      */
     @Override
     public String getName() {

@@ -613,8 +613,7 @@ public abstract class BaseTestCase
 	}
 
     /**
-     * Same as {@link #execJavaCmd(
-     * String jvm, String cp, String[] cmd, final File dir, boolean addClassPath)}
+     * Same as {@link #execJavaCmd( String, String, String[], File, boolean )}
      * but with {@code addClassPath == true}.
      */
     public static Process execJavaCmd(
