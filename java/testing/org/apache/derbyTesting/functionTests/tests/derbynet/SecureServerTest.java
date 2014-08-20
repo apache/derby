@@ -509,8 +509,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void assertWarningDerby6619() throws IOException {
         final String logFileName =
-                getSystemProperty("derby.system.home").replace("/system","") +
-                File.separator + "/derby.log";
+                getSystemProperty("user.dir") + File.separator + "derby.log";
         if (!DerbyNetAutoStartTest.checkLog(logFileName, expected6619)) {
             fail("Expected warning on derby.log cf DERBY-6619");
         }
