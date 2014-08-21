@@ -45,7 +45,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
-import org.apache.derbyTesting.functionTests.tests.memorydb.MemoryDbManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.J2EEDataSource;
@@ -81,10 +80,6 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
                                                    // import/export
     private static boolean exportFilesCreatedEmbedded = false;
     private static boolean exportFilesCreatedClient = false;
-
-    // Use in memory database for speed for some tests
-    private static final MemoryDbManager dbm =
-            MemoryDbManager.getSharedInstance();
 
     private static final int WAIT_TIMEOUT_DURATION = 1;
 
@@ -246,17 +241,12 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         setAutoCommit(true);
         getConnection().createStatement().
                 executeUpdate("drop table referenced");
-        dbm.cleanUp();
         super.tearDown();
     }
 
     public void testSyntaxAndBinding() throws SQLException {
-        final Connection c = dbm.createDatabase("cct");
-        c.setAutoCommit(false);
-
+        final Connection c = getConnection();
         final Statement s = c.createStatement();
-        s.executeUpdate("create table referenced(i int primary key)");
-        c.commit();
 
         //
         //   T A B L E    L E V E L    C O N S T R A I N T S
@@ -1787,15 +1777,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    final static long NO_OF_INSERTED_ROWS = (1024L * 1024L * 10) / 256;
+    final static long NO_OF_INSERTED_ROWS = (1024L * 4);
     public void testManySimilarDuplicates() throws SQLException {
         if (usingDerbyNetClient()) {
-            // skip, too heavy fixture to do twice... we use
-            // in memory db in any case...
+            // skip, too heavy fixture to do twice...
             return;
         }
 
-        final Connection c = dbm.createDatabase("cct");
+        final Connection c = getConnection();
         c.setAutoCommit(false);
 
         final Statement s = c.createStatement();
@@ -1874,8 +1863,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
         }
     }
 
-    private static void setupTab1(final String db) throws SQLException {
-        final Connection c = dbm.getConnection(db);
+    private static void setupTab1(final Connection c) throws SQLException {
         final Statement stmt = c.createStatement();
         stmt.execute(
                 "create table tab1 (i integer)");
@@ -1895,8 +1883,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
     }
 
 
-    private static void dropTab1(final String db) throws SQLException {
-        final Connection c = dbm.getConnection(db);
+    private static void dropTab1(final Connection c) throws SQLException {
         final Statement stmt = c.createStatement();
 
         try {
@@ -1929,21 +1916,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws java.lang.Exception
      */
     public void testLockingForUniquePKWithCommit () throws Exception {
-        final String db = "cct";
-        dbm.createDatabase(db).close();
-        setupTab1(db);
+        setupTab1(getConnection());
 
         try {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     executeThreads(
-                        db,
+                        this,
                         (int)Math.pow(2,i),
                         (int)Math.pow(2,j), true);
                 }
             }
         } finally {
-            dropTab1(db);
+            dropTab1(getConnection());
         }
     }
 
@@ -1956,21 +1941,19 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws java.lang.Exception
      */
     public void testLockingForUniquePKWithRollback () throws Exception {
-        final String db = "cct";
-        dbm.createDatabase(db).close();
-        setupTab1(db);
+        setupTab1(getConnection());
 
         try {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     executeThreads(
-                        db,
+                        this,
                         (int)Math.pow(2,i),
                         (int)Math.pow(2,j), false);
                 }
             }
         } finally {
-            dropTab1(db);
+            dropTab1(getConnection());
         }
     }
 
@@ -2119,7 +2102,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * first transaction is committed or rolled back based on third
      * parameter (boolean commit).
      *
-     * @param db string of in-memory db to use
+     * @param thisTest the test object to operate on
      * @param isolation1 isolation level for 1st thread
      * @param isolation2 isolation level for 2nd thread
      * @param commit whether or not to commit
@@ -2130,14 +2113,14 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * @throws java.lang.Exception
      */
     private static void executeThreads (
-        final String db,
+        final ConstraintCharacteristicsTest thisTest,
         final int isolation1,
         final int isolation2,
         final boolean commit) throws Exception {
 
-        final Connection con1 = dbm.getConnection(db);
+        final Connection con1 = thisTest.openDefaultConnection();
         con1.setTransactionIsolation(isolation1);
-        final Connection con2 = dbm.getConnection(db);
+        final Connection con2 = thisTest.openDefaultConnection();
 
         try {
             con2.setTransactionIsolation(isolation2);
@@ -2790,6 +2773,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
      * we used to drop the violation information, if any. Again, this is not
      * safe iff a rollback to a savepoint re-introduces the violations. This
      * test would fail prior to DERBY-6670.
+     * @throws SQLException test error
      */
     public void testDerby6670_b() throws SQLException {
         final Connection c = getConnection();
