@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.harness.procedure
+   Derby - Class org.apache.derbyTesting.functionTests.tests.storetests.st_reclaim_longcol
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -22,20 +22,19 @@
 package org.apache.derbyTesting.functionTests.tests.storetests;
 
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-
-import org.apache.derbyTesting.functionTests.tests.store.BaseTest;
-
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.Arrays;
 
-import org.apache.derby.tools.ij;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
@@ -49,7 +48,7 @@ the case of long columns, the actual row on the main page can be quite small
 as the long data is streamed onto other pages.  So the table can grow 
 unexpectedly quite large before the default space reclamation kicks in.  The
 change queues space reclamation in the case of long columns (blob/clob),
-imediately post commit of the single delete.
+immediately post commit of the single delete.
 
 The testing strategy is to loop doing insert, delete, commit of a blob for
 a number of iterations and check that the actual size of the table is 
@@ -59,21 +58,17 @@ of background activities.
 
 **/
 
-public class st_reclaim_longcol extends BaseTest
+public class st_reclaim_longcol extends BaseJDBCTestCase
 {
     static boolean verbose = false;
 
-    public st_reclaim_longcol()
-    {
+    public st_reclaim_longcol(String name) {
+        super(name);
     }
 
-
-    /**
-     * Create the base table.
-     **/
-    private static void setup()
-        throws Exception
-    {
+    public static Test suite() {
+        return new CleanDatabaseTestSetup(
+                TestConfiguration.embeddedSuite(st_reclaim_longcol.class));
     }
 
     /**
@@ -84,33 +79,30 @@ public class st_reclaim_longcol extends BaseTest
      * tests that space from the long column row is reclaimed even though
      * there are non-deleted rows on the page.
      **/
-    private static final int SHORT_BLOB_SIZE = 10;
-    public void test1(Connection conn, int blob_size, int num_rows)
-        throws SQLException
+    private void test1(int blob_size, int num_rows) throws SQLException
     {
         byte[]  long_byteVal    = new byte[blob_size];
         byte[]  short_byteVal   = new byte[10];
 
-        beginTest(
-            conn, 
+        println(
             "test1:insert/delete of " + num_rows + 
                 " rows with blob(" + blob_size + ")"); 
 
         Arrays.fill(long_byteVal,  (byte)'L');
         Arrays.fill(short_byteVal, (byte)'S');
 
-        createTable(
-            conn, 
-            "longcol", 
+        Statement s = createStatement();
+        dropTable("LONGCOL");
+        s.execute(
             "create table longcol (id int primary key not null, val blob(" + 
             blob_size + "))");
 
-        conn.commit();
+        commit();
 
         PreparedStatement ins_stmt = 
-            conn.prepareStatement("insert into longcol values (?, ?)");
+            prepareStatement("insert into longcol values (?, ?)");
         PreparedStatement del_stmt = 
-            conn.prepareStatement("delete from longcol where id = ?");
+            prepareStatement("delete from longcol where id = ?");
 
         // worst case is a mixture of rows with long columns and those without.
         // Insert of row with a long column always first goes onto a new 
@@ -155,22 +147,31 @@ public class st_reclaim_longcol extends BaseTest
 
             // commit the xact, post commit should kick in to reclaim the
             // blob space sometime after the commit.
-            conn.commit();
+            commit();
 
             // after each commit give the background thread a chance to 
             // reclaim the deleted rows.
-            wait_for_max_allocated(conn, "test1", worst_case_max_allocated);
+            wait_for_max_allocated("test1", worst_case_max_allocated);
         }
 
         // get total pages = allocated pages + free pages
-        int[] sp_info = getSpaceInfo(conn, "APP", "LONGCOL", true);
+        ResultSet rs = getSpaceTable("LONGCOL");
+        assertTrue("Space table was empty", rs.next());
 
-        int total_pages = 
-            sp_info[SPACE_INFO_NUM_ALLOC] + sp_info[SPACE_INFO_NUM_FREE];
+        int allocated = rs.getInt("NUMALLOCATEDPAGES");
+        int free = rs.getInt("NUMFREEPAGES");
+        int total_pages = allocated + free;
+
+        println("Space information after " + num_rows +
+                "insert/delete pairs of rows in longcol table containing " +
+                blob_size + "blobs:");
+        printCurrentRow(rs);
+
+        JDBC.assertEmpty(rs);  // There should only be one row.
 
         int total_expected_page_max = 12 + num_rows;
 
-        while (total_pages > total_expected_page_max)
+        if (total_pages > total_expected_page_max)
         {
             // for the above test case we expect the following space:
             //     page 0
@@ -183,34 +184,14 @@ public class st_reclaim_longcol extends BaseTest
             //         marked "half-filled" and can be used in future for
             //         short rows that don't fit on the last page inserted.
 
-            System.out.println(
+            fail(
                 "Test 1 failed, expected less than " + 
                 total_expected_page_max + " pages - count is:\n" +
-                "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
-                "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC]);
-
-            break;
+                "free pages     : " + free +
+                "\nallocated pages: " + allocated);
         }
 
-        if (verbose)
-        {
-            System.out.println(
-                "Space information after " + num_rows + 
-                "insert/delete pairs of rows in longcol table containing " + 
-                blob_size + "blobs:");
-
-            System.out.println("isindex = "   + sp_info[SPACE_INFO_IS_INDEX]);
-            System.out.println("num_alloc = " + sp_info[SPACE_INFO_NUM_ALLOC]);
-            System.out.println("num_free = "  + sp_info[SPACE_INFO_NUM_FREE]);
-            System.out.println("page_size = " + sp_info[SPACE_INFO_PAGE_SIZE]);
-            System.out.println(
-                "estimspacesaving = " + sp_info[SPACE_INFO_ESTIMSPACESAVING]);
-        }
-
-        endTest(
-            conn, 
-            "test1:insert/delete of " + num_rows + 
-                " rows with blob(" + blob_size + ")"); 
+        commit();
     }
 
     /**
@@ -223,8 +204,7 @@ public class st_reclaim_longcol extends BaseTest
      * immediately marked for post commit on individual delete, rather
      * than waiting for all rows on a page to be deleted.
      **/
-    public void test2(
-    Connection  conn, 
+    private void test2(
     int         blob_size, 
     int         work_size, 
     int         total_work)
@@ -233,8 +213,7 @@ public class st_reclaim_longcol extends BaseTest
         byte[]  long_byteVal    = new byte[blob_size];
         byte[]  short_byteVal   = new byte[10];
 
-        beginTest(
-            conn, 
+        println(
             "test2:queue of " + work_size + 
                 " rows with blob(" + blob_size + "), total_work = " + 
                 total_work); 
@@ -242,18 +221,16 @@ public class st_reclaim_longcol extends BaseTest
         Arrays.fill(long_byteVal,  (byte)'L');
         Arrays.fill(short_byteVal, (byte)'S');
 
-        createTable(
-            conn, 
-            "longcol", 
+        Statement s = createStatement();
+        dropTable("LONGCOL");
+        s.execute(
             "create table longcol (id int primary key not null, val blob(" + 
             blob_size + "))");
 
-        conn.commit();
-
         PreparedStatement ins_stmt = 
-            conn.prepareStatement("insert into longcol values (?, ?)");
+            prepareStatement("insert into longcol values (?, ?)");
         PreparedStatement del_stmt = 
-            conn.prepareStatement("delete from longcol where id = ?");
+            prepareStatement("delete from longcol where id = ?");
 
         // insert the "work_size" number of elements into the table
         for (int iter = 0; iter < work_size; iter++)
@@ -264,7 +241,7 @@ public class st_reclaim_longcol extends BaseTest
             ins_stmt.executeUpdate();
 
         }
-        conn.commit();
+        commit();
 
 
         // for each subsequent work item, queue it to the end and delete
@@ -282,7 +259,7 @@ public class st_reclaim_longcol extends BaseTest
 
             // commit the xact, post commit should kick in to reclaim the
             // blob space sometime after the commit.
-            conn.commit();
+            commit();
         }
 
 
@@ -304,24 +281,19 @@ public class st_reclaim_longcol extends BaseTest
         // on availability of background cpu, so just wait to get under
         // an expected max of allocated pages.  Expect 10 allocated pages per
         // item in work size and add 5 pages for misc overhead.
-        wait_for_max_allocated(conn, "test2", (10 * work_size) + 5);
+        wait_for_max_allocated("test2", (10 * work_size) + 5);
 
-        int[] sp_info = getSpaceInfo(conn, "APP", "LONGCOL", true);
+        ResultSet rs = getSpaceTable("LONGCOL");
+        assertTrue("Space table was empty", rs.next());
 
-        int total_pages = 
-            sp_info[SPACE_INFO_NUM_ALLOC] + sp_info[SPACE_INFO_NUM_FREE];
+        int total_pages =
+                rs.getInt("NUMALLOCATEDPAGES") + rs.getInt("NUMFREEPAGES");
 
-        if (verbose)
-        {
-            System.out.println("Space information:");
+        println("Space information:");
+        printCurrentRow(rs);
+        JDBC.assertEmpty(rs);
 
-            System.out.println("isindex = "   + sp_info[SPACE_INFO_IS_INDEX]);
-            System.out.println("num_alloc = " + sp_info[SPACE_INFO_NUM_ALLOC]);
-            System.out.println("num_free = "  + sp_info[SPACE_INFO_NUM_FREE]);
-            System.out.println("page_size = " + sp_info[SPACE_INFO_PAGE_SIZE]);
-            System.out.println(
-                "estimspacesaving = " + sp_info[SPACE_INFO_ESTIMSPACESAVING]);
-        }
+        commit();
 
         // Run another iteration of the work loop, by now memory should 
         // have gotten to constant.
@@ -338,7 +310,7 @@ public class st_reclaim_longcol extends BaseTest
 
             // commit the xact, post commit should kick in to reclaim the
             // blob space sometime after the commit.
-            conn.commit();
+            commit();
         }
 
         // Wait for background thread to convert all deleted rows to 
@@ -346,43 +318,55 @@ public class st_reclaim_longcol extends BaseTest
         // on availability of background cpu, so just wait to get under
         // an expected max of allocated pages.  Expect 10 allocated pages per
         // item in work size and add 5 pages for misc overhead.
-        wait_for_max_allocated(conn, "test2_2", (10 * work_size) + 5);
+        wait_for_max_allocated("test2_2", (10 * work_size) + 5);
 
+        rs = getSpaceTable("LONGCOL");
+        assertTrue("Space table was empty", rs.next());
 
-        int[] second_sp_info = getSpaceInfo(conn, "APP", "LONGCOL", true);
+        int second_total_pages =
+                rs.getInt("NUMALLOCATEDPAGES") + rs.getInt("NUMFREEPAGES");
 
-        int second_total_pages = 
-            sp_info[SPACE_INFO_NUM_ALLOC] + sp_info[SPACE_INFO_NUM_FREE];
+        println("Space information:");
+        printCurrentRow(rs);
+        JDBC.assertEmpty(rs);
+
+        commit();
 
         // This could fail due to machine variability, leaving it for now
         // as I have not seen this failure reported.
         if (total_pages != second_total_pages)
         {
-            System.out.println(
+            fail(
                 "Test 2 failed, expected constant memory after second run." +
                 "initial total = " + total_pages +
                 "second total = " + second_total_pages);
         }
-
-        if (verbose)
-        {
-            System.out.println("Space information:");
-
-            System.out.println("isindex = "   + sp_info[SPACE_INFO_IS_INDEX]);
-            System.out.println("num_alloc = " + sp_info[SPACE_INFO_NUM_ALLOC]);
-            System.out.println("num_free = "  + sp_info[SPACE_INFO_NUM_FREE]);
-            System.out.println("page_size = " + sp_info[SPACE_INFO_PAGE_SIZE]);
-            System.out.println(
-                "estimspacesaving = " + sp_info[SPACE_INFO_ESTIMSPACESAVING]);
-        }
-
-        endTest(
-            conn, 
-            "test2:queue of " + work_size + 
-                " rows with blob(" + blob_size + "), total_work = " + 
-                total_work); 
     }
 
+    /**
+     * Invoke SYSCS_DIAG.SPACE_TABLE on the specified table in the current
+     * schema.
+     */
+    private ResultSet getSpaceTable(String table) throws SQLException {
+        PreparedStatement ps = prepareStatement(
+                "select * from table(syscs_diag.space_table(?)) t "
+                        + "where isindex = 0");
+        ps.setString(1, table);
+        return ps.executeQuery();
+    }
+
+    /**
+     * Print the value of all columns in the current row of the specified
+     * result set, if debugging is enabled.
+     */
+    private void printCurrentRow(ResultSet rs) throws SQLException {
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            ResultSetMetaData rsmd = rs.getMetaData();
+            for (int col = 1; col <= rsmd.getColumnCount(); col++) {
+                println(rsmd.getColumnName(col) + ": " + rs.getObject(col));
+            }
+        }
+    }
 
     /**
      * wait for background thread to convert allocated pages to free pages
@@ -399,25 +383,14 @@ public class st_reclaim_longcol extends BaseTest
      * were seeing failures, see DERBY-1913.
      **/
     private void wait_for_max_allocated(
-    Connection  conn,
     String      test_name,
     int         alloc_wait_count)
         throws SQLException 
     {
         // an initial 1/10 of second which should work for most environments.
-        try
-        {
-            Thread.sleep(100);
-        }
-        catch (Exception ex)
-        {
-            // just ignore interupts of sleep.
-        }
+        sleep(100);
 
-        // get number of allocated pages
-        int[] sp_info     = getSpaceInfo(conn, "APP", "LONGCOL", true);
-        int   total_alloc = sp_info[SPACE_INFO_NUM_ALLOC];
-        int   save_total_alloc = total_alloc;
+        Integer save_total_alloc = null;
 
         // wait for maximum 100 seconds.
 
@@ -425,27 +398,34 @@ public class st_reclaim_longcol extends BaseTest
         int max_wait_for_bg_thread = 10000;
         int ms_waited              = 100;
 
-        while (total_alloc > alloc_wait_count)
+        while (true)
         {
+            ResultSet rs = getSpaceTable("LONGCOL");
+            assertTrue("Space table was empty", rs.next());
+            int total_alloc = rs.getInt("NUMALLOCATEDPAGES");
+            int free = rs.getInt("NUMFREEPAGES");
+            JDBC.assertEmpty(rs);
+
+            if (total_alloc <= alloc_wait_count) {
+                // The number of allocated pages has shrunk enough. Break
+                // out of the loop.
+                break;
+            }
+
+            // Save the first count so that we can see if we've made
+            // progress later.
+            if (save_total_alloc == null) {
+                save_total_alloc = total_alloc;
+            }
+
             if (ms_waited < max_wait_for_bg_thread)
             {
                 // The result is dependent on background activity which may
                 // differ from machine to machine.  Loop, sleeping in this
                 // thread to allow background thread to run.
 
-                try
-                {
-                    ms_waited += 1000;
-                    Thread.sleep(1000);
-                }
-                catch (Exception ex)
-                {
-                    // just ignore interupts of sleep.
-                }
-
-                // get number of allocated pages
-                sp_info     = getSpaceInfo(conn, "APP", "LONGCOL", true);
-                total_alloc = sp_info[SPACE_INFO_NUM_ALLOC];
+                ms_waited += 1000;
+                sleep(1000);
 
             }
             else if (total_alloc < save_total_alloc)
@@ -468,47 +448,25 @@ public class st_reclaim_longcol extends BaseTest
                 //         marked "half-filled" and can be used in future for
                 //         short rows that don't fit on the last page inserted.
 
-                System.out.println(
+                fail(
                     "Test " + test_name + 
                     " failed in wait_for_max_allocated(), expected less than " + 
                     alloc_wait_count + " allocated pages:\n" +
-                    "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
-                    "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC] +
+                    "free pages     : "   + free +
+                    "\nallocated pages: " + total_alloc +
                     "\nWaited " + ms_waited + "ms. for background work.");
-
-                break;
             }
         }
     }
 
-
-    public void testList(Connection conn)
-        throws SQLException
+    public void testList() throws SQLException
     {
-        test1(conn, 250000, 20);
+        setAutoCommit(false);
+
+        test1(250000, 20);
 
         // DERBY-1913 - disabling test2 as it is too sensitive to background
         // processing.
-        // test2(conn, 250000, 5, 500);
-    }
-
-    public static void main(String[] argv) 
-        throws Throwable
-    {
-        st_reclaim_longcol test = new st_reclaim_longcol();
-
-        ij.getPropertyArg(argv); 
-        Connection conn = ij.startJBMS();
-
-        try
-        {
-            test.testList(conn);
-        }
-        catch (SQLException sqle)
-        {
-			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(
-                System.out, sqle);
-			sqle.printStackTrace(System.out);
-		}
+        // test2(250000, 5, 500);
     }
 }

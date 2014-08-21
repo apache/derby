@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.harness.procedure
+   Derby - Class org.apache.derbyTesting.functionTests.tests.storetests.st_derby715
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,17 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.storetests;
 
-
-import org.apache.derbyTesting.functionTests.tests.store.BaseTest;
-import org.apache.derbyTesting.functionTests.util.Barrier;
-
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import org.apache.derby.tools.ij;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.Barrier;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
 
@@ -44,242 +46,126 @@ incorrect timeout vs. a deadlock).
 
 **/
 
-public class st_derby715 extends BaseTest
-{
-    static boolean verbose = false;
+public class st_derby715 extends BaseJDBCTestCase {
+    private Barrier barrier;
+    private List<Throwable> errors;
 
-    public st_derby715()
-    {
+    public st_derby715(String name) {
+        super(name);
     }
 
+    public static Test suite() {
+        Test test = TestConfiguration.embeddedSuite(st_derby715.class);
+        test = DatabasePropertyTestSetup.setLockTimeouts(test, 1, 60);
+        test = new CleanDatabaseTestSetup(test);
+        return test;
+    }
+
+    @Override
+    protected void initializeConnection(Connection conn) throws SQLException {
+        conn.setAutoCommit(false);
+        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+    }
 
     /**
-     * Create the base table that the 2 threads will use.
-     **/
-    private static void setup()
-        throws Exception
-    {
-        Connection conn = ij.startJBMS();
-        Statement  stmt = conn.createStatement();
-
-        // drop table, ignore table does not exist error.
-
-        try
-        {
-            stmt.executeUpdate("drop table a");
-        }
-        catch (Exception e)
-        {
-            // ignore drop table errors.
-        }
-
-        try
-        {
-            stmt.executeUpdate("drop table b");
-        }
-        catch (Exception e)
-        {
-            // ignore drop table errors.
-        }
-
+     * Run two threads, where thread 1 first reads from table A and then
+     * inserts a row into table B, and thread 2 first reads from table B
+     * and then inserts a row into table A. This should cause a deadlock
+     * in one of the threads. Before DERBY-715, sometimes a timeout would
+     * be raised instead of a deadlock.
+     */
+    public void test_st_derby715() throws Exception {
+        Statement stmt = createStatement();
         stmt.executeUpdate("create table a (a integer)");
         stmt.executeUpdate("create table b (b integer)");
         stmt.close();
-        conn.commit();
-        conn.close();
+        commit();
+
+        Connection c1 = openDefaultConnection();
+        Connection c2 = openDefaultConnection();
+        Statement stmt1 = c1.createStatement();
+        Statement stmt2 = c2.createStatement();
+
+        // Run the test five times.
+        for (int i = 0; i < 5; i++) {
+            barrier = new Barrier(2);
+            errors = Collections.synchronizedList(new ArrayList<Throwable>());
+            Thread test1 = new WorkerThread(stmt1, "Thread 1", "a", "b");
+            Thread test2 = new WorkerThread(stmt2, "Thread 2", "b", "a");
+            test1.start();
+            test2.start();
+            test1.join();
+            test2.join();
+
+            // We expect exactly one of the threads to fail, and that it
+            // failed with a deadlock.
+
+            assertFalse("Both threads succeeded", errors.isEmpty());
+
+            if (errors.size() > 1) {
+                for (Throwable t: errors) {
+                    printStackTrace(t);
+                }
+                fail("Both threads failed");
+            }
+
+            Throwable t = errors.get(0);
+            if (t instanceof SQLException) {
+                assertSQLState("40001", (SQLException) t);
+                println("Got expected deadlock: " + t);
+            } else {
+                fail("Unexpected exception", t);
+            }
+        }
+
+        stmt1.close();
+        stmt2.close();
     }
 
-    public static class t1 implements Runnable
-    {
-        String[] argv;
-        private final Barrier barrier;
-
-        public t1(Barrier barrier, String[] argv)
-        {
-            argv = argv;
-            this.barrier = barrier;
-        }
-        public void run()
-        {
-            try
-            {
-                ij.getPropertyArg(argv); 
-                Connection conn = ij.startJBMS();
-                conn.setAutoCommit(false);
-                conn.setTransactionIsolation(
-                        Connection.TRANSACTION_SERIALIZABLE);
-
-                Statement stmt = conn.createStatement();
-                if (verbose)
-                    System.out.println("Thread 1 before selecting from b");
-
-                // get row locks on all rows in b
-                ResultSet rs = stmt.executeQuery("select * from b");
-
-                if (verbose)
-                    System.out.println("Thread 1 before selecting next from b");
-
-                while (rs.next())
-                {
-                    if (verbose)
-                        System.out.println("Thread t1 got " + rs.getString(1));
-                }
-                if (verbose)
-                    System.out.println("Thread 1 after all next.");
-
-                // give thread 2 a chance to catch up.
-                barrier.await();
-
-                if (verbose)
-                    System.out.println("Thread 1 before inserting into a...");
-
-                // now wait on lock inserting row into table a - either 
-                // thread 1 or thread 2 should get a deadlock, NOT a timeout.
-                stmt.executeUpdate("insert into a values(1)");
-
-                if (verbose)
-                    System.out.println("Thread 1 after inserting into a...");
-
-                conn.rollback();
-            }
-            catch (SQLException sqle)
-            {
-                if (sqle.getSQLState().equals("40001"))
-                {
-                    // only expected exception is a deadlock, we should
-                    // get at least one deadlock, so print it to output.
-                    // Don't know which thread will get the deadlock, so
-                    // don't label it.
-                    System.out.println("Got a Deadlock.");
-                }
-                else
-                {
-                    org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(
-                        System.out, sqle);
-                    sqle.printStackTrace(System.out);
-                }
-                if (verbose)
-                    System.out.println("Thread 1 got exception:\n");
-            }
-            catch (Exception ex)
-            {
-                System.out.println("got unexpected exception: " + ex);
-            }
-        }
+    @Override
+    protected void tearDown() throws Exception {
+        barrier = null;
+        errors = null;
+        super.tearDown();
     }
 
-    public static class t2 implements Runnable
-    {
-        String[] argv;
-        private final Barrier barrier;
-        public t2 (Barrier barrier, String[] argv)
-        {
-            argv = argv;
-            this.barrier = barrier;
+    private class WorkerThread extends Thread {
+        private final Statement stmt;
+        private final String id;
+        private final String readTable;
+        private final String writeTable;
+
+        WorkerThread(Statement stmt, String id,
+                     String readTable, String writeTable) {
+            this.stmt = stmt;
+            this.id = id;
+            this.readTable = readTable;
+            this.writeTable = writeTable;
         }
-        public void run()
-        {
-            try
-            {
-                ij.getPropertyArg(argv); 
-                Connection conn = ij.startJBMS();
-                conn.setAutoCommit(false);
-                conn.setTransactionIsolation(
-                        Connection.TRANSACTION_SERIALIZABLE);
 
-                Statement stmt = conn.createStatement();
-
-                if (verbose)
-                    System.out.println("Thread 2 before selecting from a");
-
-                ResultSet rs = stmt.executeQuery("select * from a");
-
-                if (verbose)
-                    System.out.println("Thread 2 before selecting next from a");
-
-                while (rs.next())
-                {
-                    if (verbose)
-                        System.out.println("Thread t2 got " + rs.getString(1));
-                }
-
-                if (verbose)
-                    System.out.println("Thread 2 after all next.");
-
-                // Wait till thread 1 has executed the query and obtained
-                // locks on the rows in table B.
-                barrier.await();
-
-                if (verbose)
-                    System.out.println("Thread 2 before inserting into b");
-
-                stmt.executeUpdate("insert into b values(2)");
-
-                if (verbose)
-                    System.out.println("Thread 2 after inserting into b");
-
-                conn.rollback();
-            }
-            catch (SQLException sqle)
-            {
-                if (verbose)
-                    System.out.println("Thread 1 got exception:\n");
-
-                if (sqle.getSQLState().equals("40001"))
-                {
-                    // only expected exception is a deadlock, we should
-                    // get at least one deadlock, so print it to output.
-                    // Don't know which thread will get the deadlock, so
-                    // don't label it.
-                    System.out.println("Got a Deadlock.");
-                }
-                else
-                {
-                    org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(
-                        System.out, sqle);
-                    sqle.printStackTrace(System.out);
-                }
-            }
-            catch (Exception ex)
-            {
-                System.out.println("got unexpected exception: " + ex);
+        @Override
+        public void run() {
+            try {
+                _run();
+            } catch (Throwable t) {
+                errors.add(t);
             }
         }
-    }
-    
-    public void testList(Connection conn)
-        throws SQLException
-    {
-    }
 
-    public static void main(String[] argv) 
-        throws Throwable
-    {
-        ij.getPropertyArg(argv); 
+        private void _run() throws SQLException, InterruptedException {
+            println(id + " before selecting from " + readTable);
+            JDBC.assertEmpty(stmt.executeQuery("select * from " + readTable));
+            println(id + " after reading all rows");
 
-        st_derby715 setup_ddl = new st_derby715();
-        setup_ddl.setup();
-        setup_ddl = null;
+            // Wait till the other thread has completed reading and is ready
+            // to insert a row.
+            barrier.await();
 
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                Barrier barrier = new Barrier(2);
-                Thread test1 = new Thread(new t1(barrier, argv));
-                Thread test2 = new Thread(new t2(barrier, argv));
-                test1.start();
-                test2.start();
-                test1.join();
-                test2.join();
-            }
+            println(id + " before inserting into " + writeTable);
+            stmt.execute("insert into " + writeTable + " values (1)");
+            println(id + " after inserting");
+
+            stmt.getConnection().rollback();
         }
-        /*
-        catch (SQLException sqle)
-        {
-			org.apache.derby.tools.JDBCDisplayUtil.ShowSQLException(
-                System.out, sqle);
-			sqle.printStackTrace(System.out);
-		}
-        */
     }
 }

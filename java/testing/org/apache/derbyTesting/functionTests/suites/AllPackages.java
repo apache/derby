@@ -93,6 +93,7 @@ public class AllPackages extends BaseTestCase {
              org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsLiteTest.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.store._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.storetests._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.tools._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.engine._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.demo._Suite.class);

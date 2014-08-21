@@ -81,6 +81,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
+        <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <compilerarg value="-Xlint"/>

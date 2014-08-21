@@ -22,9 +22,14 @@
  */
 package org.apache.derbyTesting.functionTests.tests.storetests;
 
-import org.apache.derby.tools.ij;
 
 import java.sql.*;
+import java.util.Properties;
+import junit.framework.Test;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Repro for DERBY-1939.  In effect what we have to do is execute
@@ -50,57 +55,48 @@ import java.sql.*;
  * data in the tables, but having found it we can now reliably
  * reproduce the failure.
  */
-public class st_derby1939 {
+public class st_derby1939 extends BaseJDBCTestCase {
 
 	// We have a VARCHAR column in the table to help with the
 	// hash table "spill-over".
 	private final int VC_SIZE = 1024;
-	private char[] cArr = new char[VC_SIZE];
 
-	public static void main(String [] args)
+    public st_derby1939(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        Properties sysprops = new Properties();
+        sysprops.setProperty("derby.language.maxMemoryPerTable", "140");
+        sysprops.setProperty("derby.optimizer.noTimeout", "true");
+        return new SystemPropertyTestSetup(
+                new CleanDatabaseTestSetup(
+                        TestConfiguration.embeddedSuite(st_derby1939.class)),
+                sysprops, true);
+    }
+
+    public void testDerby1939() throws SQLException {
+        setAutoCommit(false);
+        doLoad();
+        doQuery();
+    }
+
+    private void doLoad() throws SQLException
 	{
+        Statement st = createStatement();
 
-		try {
-            System.setProperty("derby.language.maxMemoryPerTable", "140");
-            System.setProperty("derby.optimizer.noTimeout", "true");
-
-            ij.getPropertyArg(args);
-            Connection conn = ij.startJBMS();
-
-            st_derby1939 test = new st_derby1939();
-            test.doLoad(conn);
-            test.doQuery(conn);
-            conn.close();
-		} catch (Throwable t) {
-			System.out.println("OOPS, unexpected error:");
-			t.printStackTrace();
-		}
-	}
-
-	private void doLoad(Connection conn) throws Exception
-	{
-		conn.setAutoCommit(false);
-		Statement st = conn.createStatement();
-		try {
-			st.execute("drop table d1939_t1");
-		} catch (SQLException se) {}
-		try {
-			st.execute("drop table d1939_t2");
-		} catch (SQLException se) {}
-
-		System.out.println("Creating tables and index...");
+        println("Creating tables and index...");
 		st.execute("create table d1939_t1 (i smallint, vc varchar(" + VC_SIZE + "))");
 		st.execute("create table d1939_t2 (j smallint, val double, vc varchar(" + VC_SIZE + "))");
 		st.execute("create index ix_d1939_t1 on d1939_t1 (i)");
 
-		PreparedStatement pSt = conn.prepareStatement(
+        PreparedStatement pSt = prepareStatement(
 			"insert into d1939_t1(i, vc) values (?, ?)");
 
-		PreparedStatement pSt2 = conn.prepareStatement(
+        PreparedStatement pSt2 = prepareStatement(
 			"insert into d1939_t2 values (?, ?, ?)");
 
-		String str = null;
-		System.out.println("Doing inserts...");
+        println("Doing inserts...");
 	
 		// Number of rows and columns here is pretty much just "magic";
 		// changing any of them can make it so that the problem doesn't
@@ -115,7 +111,7 @@ public class st_derby1939 {
 			 */
 			for (int j = 0; j < 10; j++)
 			{
-				str = buildString(i + ":" + j);
+                String str = buildString(i + ":" + j);
 				pSt.setInt(1, i % 10);
 				pSt.setString(2, str);
 				pSt.execute();
@@ -138,10 +134,10 @@ public class st_derby1939 {
 		pSt2.setNull(1, Types.INTEGER);
 		pSt2.setDouble(2, 48.0d);
 		pSt.close();
-		conn.commit();
+        commit();
 	}
 
-	private void doQuery(Connection conn) throws Exception
+    private void doQuery() throws SQLException
 	{
 		/* Set Derby properties to allow the optimizer to find the
 		 * best plan (Hash Join with Index) and also to set a max
@@ -149,9 +145,7 @@ public class st_derby1939 {
 		 * to "spill" to disk.
 		 */
 
-
-		conn.setAutoCommit(false);
-		PreparedStatement pSt = conn.prepareStatement(
+        PreparedStatement pSt = prepareStatement(
 			"select * from d1939_t2 " +
 			"  left outer join " +
 			"    (select distinct d1939_t1.i, d1939_t2.j, d1939_t1.vc from d1939_t2 " + 
@@ -161,7 +155,7 @@ public class st_derby1939 {
 			"    ) x1 " + 
 			"  on d1939_t2.j = x1.i");
 
-		System.out.println("Done preparing, about to execute...");
+        println("Done preparing, about to execute...");
 		pSt.setShort(1, (short)8);
 		int count = 0;
 		try {
@@ -173,15 +167,13 @@ public class st_derby1939 {
 			// so just get the first 10 rows as a sanity check.
 			for (count = 0; rs.next() && count < 10; count++);
 			rs.close();
-			System.out.println("-=-> Ran without error, retrieved first "
-				 + count + " rows.");
+            println("Ran without error, retrieved first " + count + " rows.");
 
 		} catch (SQLException se) {
 
 			if (se.getSQLState().equals("XSDA7"))
 			{
-				System.out.println("-=-> Reproduced DERBY-1939:\n" +
-					" -- " + se.getMessage());
+                fail("Reproduced DERBY-1939", se);
 			}
 			else
 				throw se;
@@ -189,15 +181,14 @@ public class st_derby1939 {
 		}
 
 		pSt.close();
-		conn.rollback();
+        rollback();
 	}
 
 	private String buildString(String s) {
-
-		char [] sArr = new char [] { s.charAt(0), s.charAt(1), s.charAt(2) };
-		for (int i = 0; i < cArr.length; i++)
-			cArr[i] = sArr[i % 3];
-
-		return new String(cArr);
+        StringBuilder sb = new StringBuilder(VC_SIZE);
+        for (int i = 0; i < VC_SIZE; i++) {
+            sb.append(s.charAt(i % s.length()));
+        }
+        return sb.toString();
 	}
 }
