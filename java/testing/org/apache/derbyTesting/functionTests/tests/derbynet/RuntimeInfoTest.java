@@ -177,18 +177,34 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 * @throws Exception
 	 */
 	public void x_testRuntimeInfoAfterConnClose() throws Exception {
-		// give the network server a second to clean up (DERBY-1455)
-		Thread.sleep(1000);
 
-		String s = NetworkServerTestSetup
+        String expectedOutput =
+            outputs.get(Locale.getDefault()).get("RuntimeInfoAfterConnClose");
+
+        // DERBY-1455 and DERBY-6701: The closed connections may not be
+        // cleaned up by the network server immediately. Retry the
+        // getRuntimeInfo() call for up to one minute until we get the
+        // expected response.
+        String s = null;
+        int retriesLeft = 60;
+        while (true) {
+            s = sed(NetworkServerTestSetup
 					.getNetworkServerControl(TestConfiguration.getCurrent().getPort())
-					.getRuntimeInfo();
-		s = sed(s);
+                    .getRuntimeInfo());
+
+            // Keep retrying until we either get the expected response, or
+            // we reach the maximum number of retries.
+            if (expectedOutput.equals(s) || (--retriesLeft <= 0)) {
+                break;
+            }
+
+            sleep(1000L);
+        }
+
 		NetworkServerTestSetup.getNetworkServerControl().shutdown();
 		
 		printIfVerbose("testRuntimeInfoMethod", s);
 		
-		String expectedOutput = ((HashMap)outputs.get(Locale.getDefault())).get("RuntimeInfoAfterConnClose").toString();
 		assertEquals("Output doesn't match", expectedOutput, s);
 	}
 
@@ -236,9 +252,11 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
      * @return the string with the lines removed
      */
     private String sed(String s) {
-    	String searchString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemorySearch").toString();
-    	String replaceString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemoryReplace").toString();
-		s = s.replaceAll(searchString, replaceString);
+        HashMap<String, String> strings = outputs.get(Locale.getDefault());
+        s = s.replaceAll(strings.get("sedMemorySearch"),
+                         strings.get("sedMemoryReplace"));
+        s = s.replaceAll(strings.get("sedSessionNumberSearch"),
+                         strings.get("sedSessionNumberReplace"));
 		s = s.replaceAll(stdout_err_tags, "");
 		s = s.trim();
 		return s;
@@ -283,7 +301,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		englishOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Derby Network Server Runtime Information ---\n" + 
 				"---------- Session Information ---------------\n" + 
-				"Session # :2\n" + 
+                "Session # :##\n" +
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
@@ -295,7 +313,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		englishOutputs.put("RuntimeInfoAfterConnClose", 
 				"--- Derby Network Server Runtime Information ---\n" + 
 				"---------- Session Information ---------------\n" + 
-				"Session # :8\n" + 
+                "Session # :##\n" +
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
@@ -306,13 +324,15 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 				"Total Memory : #####	Free Memory : #####");
 		englishOutputs.put("sedMemorySearch", "(?m)Memory : [0-9]*");
 		englishOutputs.put("sedMemoryReplace", "Memory : #####");
+        englishOutputs.put("sedSessionNumberSearch", "(?m)^(Session # :)\\d+");
+        englishOutputs.put("sedSessionNumberReplace", "$1##");
 		englishOutputs.put("RuntimeInfoLocaleString", "\tStmt ID\t\tSQLText\n\t-------------\t-----------\n\n\n\nSession");
 		
 		HashMap<String, String> germanOutputs = new HashMap<String, String>();
 		germanOutputs.put("RuntimeInfoWithActiveConn",
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
 				"---------- Sessioninformationen ---------------\n" + 
-				"Sessionnummer:2\n" + 
+                "Sessionnummer:##\n" +
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
@@ -324,7 +344,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 		germanOutputs.put("RuntimeInfoAfterConnClose", 
 				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
 				"---------- Sessioninformationen ---------------\n" + 
-				"Sessionnummer:8\n" + 
+                "Sessionnummer:##\n" +
 				"\n" + 
 				"\n" + 
 				"-------------------------------------------------------------\n" + 
@@ -335,6 +355,8 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 				"Speicher gesamt: #####	Freier Speicher: #####");
 		germanOutputs.put("sedMemorySearch", "Speicher gesamt: [0-9]*	Freier Speicher: [0-9]*");
 		germanOutputs.put("sedMemoryReplace", "Speicher gesamt: #####	Freier Speicher: #####");
+        germanOutputs.put("sedSessionNumberSearch", "(?m)^(Sessionnummer:)\\d+");
+        germanOutputs.put("sedSessionNumberReplace", "$1##");
 		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSessionnummer");
 		
 		outputs = new HashMap<Locale, HashMap<String, String>>();
