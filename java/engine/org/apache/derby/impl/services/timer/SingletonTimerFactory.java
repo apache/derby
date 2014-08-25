@@ -175,13 +175,14 @@ public class SingletonTimerFactory
                 public ClassLoader run() {
                     ClassLoader cl =
                         Thread.currentThread().getContextClassLoader();
-                    if (cl == ClassLoader.getSystemClassLoader()) {
-                        // If the context class loader is the same as the
-                        // system class loader, we are not worried that the
-                        // timer thread will lead a class loader. (The
-                        // system class loader will stay in memory for the
+                    if (cl == getClass().getClassLoader() ||
+                        cl == Thread.class.getClassLoader()) {
+                        // If the context class loader is the same as any of
+                        // these class loaders, we are not worried that the
+                        // timer thread will lead a class loader. These
+                        // class loaders will stay in memory for the
                         // lifetime of the JVM anyway, so it's not a problem
-                        // that the timer thread keeps a reference to it.)
+                        // that the timer thread keeps a reference to it.
                         // Return null to signal that the context class loader
                         // doesn't need to be changed.
                         return null;
