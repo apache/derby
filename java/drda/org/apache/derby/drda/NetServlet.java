@@ -122,7 +122,7 @@ public class NetServlet extends HttpServlet {
             boolean start = Boolean.valueOf(startup).booleanValue();
             if (start)
             {
-                LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
+                LocalizedResource langUtil = new LocalizedResource(SERVLET_PROP_MESSAGES);
                 runServer(langUtil, null, null);
                 return;
             }
@@ -967,7 +967,7 @@ public class NetServlet extends HttpServlet {
     {
         LocalizedResource localUtil;
         String acceptLanguage = request.getHeader("Accept-Language");
-        localUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
+        localUtil = new LocalizedResource(SERVLET_PROP_MESSAGES);
         // if no language specified use one set by derby.locale, derby.codeset
         locale[ 0 ] = null;
         if (acceptLanguage == null)

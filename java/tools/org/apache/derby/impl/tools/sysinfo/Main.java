@@ -106,7 +106,7 @@ public final class Main {
      * <code>main()</code>.
      */
     private final static LocalizedResource LOCALIZED_RESOURCE =
-        new LocalizedResource(null, null, MESSAGE_FILE);
+        new LocalizedResource(MESSAGE_FILE);
 
   /**
     Application entry point for SysInfo.   This will print out

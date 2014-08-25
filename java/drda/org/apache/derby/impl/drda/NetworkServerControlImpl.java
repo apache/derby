@@ -464,8 +464,12 @@ public final class NetworkServerControlImpl {
     private void init() throws Exception
     {
 
+        final String codeSet = 
+                PropertyUtil.getSystemProperty(LocalizedResource.ENV_CODESET);
+        final String locale = 
+                PropertyUtil.getSystemProperty(LocalizedResource.ENV_LOCALE);
         // adjust the application in accordance with derby.ui.locale and derby.ui.codeset
-        langUtil = new LocalizedResource(null,null,DRDA_PROP_MESSAGES);
+        langUtil = new LocalizedResource(codeSet, locale, DRDA_PROP_MESSAGES);
 
         serverInstance = this;
         
@@ -1689,7 +1693,8 @@ public final class NetworkServerControlImpl {
         try {
             String protocolStr = reader.readCmdString(4);
             String locale = DEFAULT_LOCALE;
-            String codeset = null;
+            String codeset = 
+                PropertyUtil.getSystemProperty(LocalizedResource.ENV_CODESET);
             // get the version
             int version = reader.readNetworkShort();
             if (version <= 0 || version > MAX_ALLOWED_PROTOCOL_VERSION) {

@@ -23,24 +23,21 @@ package org.apache.derby.iapi.tools.i18n;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-
-import java.util.ResourceBundle;
-import java.util.Date;
-import java.util.Locale;
-import java.util.StringTokenizer;
-
-import java.text.MessageFormat;
-import java.text.NumberFormat;
-import java.text.DecimalFormat;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.FieldPosition;
-
-import java.sql.Timestamp;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.StringTokenizer;
 
 
 public final class LocalizedResource  implements java.security.PrivilegedAction<String> {
@@ -49,8 +46,8 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	private Locale locale;
 	private String encode;
 	private final static String MESSAGE_FILE = "org.apache.derby.loc.toolsmessages";
-	private final static String ENV_CODESET = "derby.ui.codeset";
-	private final static String ENV_LOCALE = "derby.ui.locale";
+    public final static String ENV_CODESET = "derby.ui.codeset";
+    public final static String ENV_LOCALE = "derby.ui.locale";
 	private String messageFileName;
 	private String resourceKey;
 	private LocalizedOutput out;
@@ -65,13 +62,27 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	private DateFormat formatTimestamp;
 	private NumberFormat formatNumber;
     private DecimalFormat formatDecimal;
-	public LocalizedResource(){
+
+    private LocalizedResource(){
 		init();
 	}
-	public LocalizedResource(String encStr, String locStr, String msgF){
-		init(encStr,locStr,msgF);
+    public LocalizedResource(String msgF){
+        init(null, null, msgF, true);
 	}
-	public static LocalizedResource getInstance(){
+
+    /**
+     * This overload version does <b>not</b> check the environment for values of
+     * encoding via {@link #ENV_CODESET} and locale via {@link #ENV_LOCALE}.
+     * The others do if value of either is null. DERBY-6680.
+     * @param encStr encoding
+     * @param locStr locale
+     * @param msgF message file
+     */
+    public LocalizedResource(String encStr, String locStr, String msgF){
+        init(encStr,locStr,msgF, false);
+    }
+
+    public static LocalizedResource getInstance(){
 		if (local == null){
 			local = new  LocalizedResource();
 		}
@@ -88,12 +99,18 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public void init(){
 		init(null,null,null);
 	}
-	public void init (String encStr, String locStr, String msgF){
+
+
+    public void init (String encStr, String locStr, String msgF) {
+        init(encStr, locStr, msgF, true);
+    }
+
+    private void init (String encStr, String locStr, String msgF, boolean readEnv){
 		if (encStr != null){
 			encode = encStr;
 		}
 		//then get encoding string from environment
-		if (encode == null) {
+        if (encode == null && readEnv) {
 			String eEncode = getEnvProperty(ENV_CODESET);
 			if ( eEncode != null ){
 				encode = eEncode;
@@ -107,7 +124,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		locale = getNewLocale(locStr);
 
 		//if null, get locale again from the environment variable
-		if (locale==null) {
+        if (locale==null && readEnv) {
 			String s = getEnvProperty(ENV_LOCALE);
 			locale = getNewLocale(s);
 		}

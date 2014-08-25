@@ -27,15 +27,6 @@ grant codeBase "${derby.install.url}derby.jar"
 
   // Next, the permission to read "derby.*" properties is granted to
   // derby.jar. This is necessary for the engine to read derby properties.
-  // 
-  // NOTE: This works under the assumption that derby.jar precedes
-  // derbytools.jar (and possibly derbyclient.jar) - if present. If that is
-  // *not* the case, i.e. derby.jar follows any of those other jars, you will
-  // need to *also* grant this permission to the first of those jar files in
-  // your classpath. The reason is that some Derby properties (derby.ui.locale,
-  // derby.ui.codeset) are read by the class LocalizedResource which is present
-  // in more than one jar file. The first jar in the path gets used to load
-  // the class and hence that jar needs the permission.
   permission java.util.PropertyPermission "derby.*", "read";
 
   permission java.util.PropertyPermission "user.dir", "read";
