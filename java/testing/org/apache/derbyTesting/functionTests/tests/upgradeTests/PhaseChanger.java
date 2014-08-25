@@ -31,6 +31,7 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSetup;
+import org.apache.derbyTesting.junit.ClassLoaderTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -87,7 +88,7 @@ final class PhaseChanger extends BaseTestSetup {
         
         if (loader != null) {
             previousLoader = Thread.currentThread().getContextClassLoader();
-            UpgradeClassLoader.setThreadLoader(loader);
+            ClassLoaderTestSetup.setThreadLoader(loader);
         }
          
         DataSource ds = JDBCDataSource.getDataSource();
@@ -154,7 +155,7 @@ final class PhaseChanger extends BaseTestSetup {
         clearDerby23ThreadLocals(contextService);
 
         if (loader != null)
-            UpgradeClassLoader.setThreadLoader(previousLoader);       
+            ClassLoaderTestSetup.setThreadLoader(previousLoader);
         loader = null;
         previousLoader = null;
         

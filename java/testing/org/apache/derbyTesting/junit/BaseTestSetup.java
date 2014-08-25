@@ -42,7 +42,8 @@ public abstract class BaseTestSetup extends TestSetup {
      * and then call the part's run method to run the decorator and
      * the test it wraps.
      */
-    public final void run(TestResult result)
+    @Override
+    public void run(TestResult result)
     {
         // install a default security manager if one has not already been
         // installed

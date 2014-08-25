@@ -159,13 +159,35 @@ public class SingletonTimerFactory
 
     // Helper methods
 
+    /**
+     * Get the context class loader if it's different from the system
+     * class loader.
+     *
+     * @return the context class loader of the current thread if it is
+     *   different from the system class loader and we have permission
+     *   to read the class loader, or {@code null} otherwise
+     */
     private ClassLoader getContextClassLoader() {
         try {
             return AccessController.doPrivileged(
                     new PrivilegedAction<ClassLoader>() {
                 @Override
                 public ClassLoader run() {
-                    return Thread.currentThread().getContextClassLoader();
+                    ClassLoader cl =
+                        Thread.currentThread().getContextClassLoader();
+                    if (cl == ClassLoader.getSystemClassLoader()) {
+                        // If the context class loader is the same as the
+                        // system class loader, we are not worried that the
+                        // timer thread will lead a class loader. (The
+                        // system class loader will stay in memory for the
+                        // lifetime of the JVM anyway, so it's not a problem
+                        // that the timer thread keeps a reference to it.)
+                        // Return null to signal that the context class loader
+                        // doesn't need to be changed.
+                        return null;
+                    } else {
+                        return cl;
+                    }
                 }
             });
         } catch (SecurityException se) {

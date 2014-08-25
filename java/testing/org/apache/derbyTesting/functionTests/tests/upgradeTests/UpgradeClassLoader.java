@@ -92,34 +92,6 @@ public class UpgradeClassLoader
     }
 
     /**
-     * <p>
-     * Force this thread to use a specific class loader.
-     * </p>
-     */
-    public static void setThreadLoader(final ClassLoader which) {
-        AccessController.doPrivileged(new PrivilegedAction<Void>() {
-            public Void run() {
-                java.lang.Thread.currentThread().setContextClassLoader(which);
-              return null;
-            }
-        });
-    }
-    
-    /**
-     * <p>
-     * Retrieve the class loader currently being used by this thread.
-     * </p>
-     */
-    public static ClassLoader getThreadLoader() {
-        return AccessController.doPrivileged(
-                new PrivilegedAction<ClassLoader>() {
-            public ClassLoader run() {
-                return Thread.currentThread().getContextClassLoader();
-            }
-        });
-    }
-
-    /**
      * Get the location of jars of old release. The location is specified 
      * in the property derbyTesting.oldReleasePath. If derbyTesting.oldReleasePath
      * is set to the empty string it is ignored.

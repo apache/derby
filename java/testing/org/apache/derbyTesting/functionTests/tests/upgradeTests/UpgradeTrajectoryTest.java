@@ -34,6 +34,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.ClassLoaderTestSetup;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCClientSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -522,7 +523,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private void compareDatabases( Version version, String leftDatabaseName, String rightDatabaseName )
         throws Exception
     {
-        UpgradeClassLoader.setThreadLoader( version.getClassLoader() );
+        ClassLoaderTestSetup.setThreadLoader( version.getClassLoader() );
 
         DataSource leftDS = makeDataSource( leftDatabaseName );
         DataSource rightDS = makeDataSource( rightDatabaseName );
@@ -811,7 +812,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private void createDatabase( Version version, String logicalDatabaseName )
         throws Exception
     {
-        UpgradeClassLoader.setThreadLoader( version.getClassLoader() );
+        ClassLoaderTestSetup.setThreadLoader( version.getClassLoader() );
 
         DataSource ds = bootDatabase( logicalDatabaseName );
 
@@ -830,7 +831,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private void upgradeDatabase( Version softwareVersion, Version dataVersion, boolean hardUpgrade, String logicalDatabaseName )
         throws Exception
     {
-        UpgradeClassLoader.setThreadLoader( softwareVersion.getClassLoader() );
+        ClassLoaderTestSetup.setThreadLoader(softwareVersion.getClassLoader());
 
         DataSource ds = upgradeDatabase( logicalDatabaseName, hardUpgrade );
 
@@ -971,11 +972,14 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private void saveOriginalClassLoader()
     {
         // remember the original class loader so that we can reset
-        if ( _originalClassLoader.get() == null ) { _originalClassLoader.set( UpgradeClassLoader.getThreadLoader() ); }
+        if ( _originalClassLoader.get() == null ) { 
+            _originalClassLoader.set( ClassLoaderTestSetup.getThreadLoader() ); 
+        }
     }
     private void restoreOriginalClassLoader()
     {
-        UpgradeClassLoader.setThreadLoader( (ClassLoader) _originalClassLoader.get() );
+        ClassLoaderTestSetup.setThreadLoader(
+                (ClassLoader) _originalClassLoader.get() );
     }
 
     private String stringifyUpgradeRequests()

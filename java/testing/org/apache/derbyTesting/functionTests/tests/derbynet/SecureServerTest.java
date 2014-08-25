@@ -21,19 +21,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import junit.framework.Test;
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
+import org.apache.derbyTesting.junit.ClassLoaderTestSetup;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -142,6 +141,10 @@ public class SecureServerTest extends BaseJDBCTestCase
          _outcome = outcome;
     }
 
+    public SecureServerTest(String fixture) {
+        super(fixture);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // JUnit MACHINERY
@@ -181,9 +184,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         // this wildcard port is rejected by the server right now
         //suite.addTest( decorateTest( false,  true, null, IPV6W, RUNNING_SECURITY_BOOTED ) );
         
-        suite.addTest( decorateTest( true,  false, null, null, RUNNING_SECURITY_NOT_BOOTED ) );
-        suite.addTest( decorateTest( true,  true, null, null, RUNNING_SECURITY_NOT_BOOTED ) );
-        
+        suite.addTest( makeDerby6619Test() );
         return suite;
     }
 
@@ -306,12 +307,33 @@ public class SecureServerTest extends BaseJDBCTestCase
         return list.toArray(new String[list.size()]);
     }
     
+    // Policy which lacks the permission to set the context class loader.
+    final static String POLICY6619 =
+            "org/apache/derbyTesting/functionTests/" +
+            "tests/derbynet/SecureServerTest.policy";
+
+    private static Test makeDerby6619Test() {
+        Test t = new SecureServerTest("test6619");
+        t = TestConfiguration.clientServerDecorator(t);
+        t = new SecurityManagerSetup(t, POLICY6619);
+        t = new ClassLoaderTestSetup(t);
+        return t;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // JUnit TESTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
     
+    public void test6619() throws Exception {
+        NetworkServerControl nsc =
+                NetworkServerTestSetup.getNetworkServerControl();
+        NetworkServerTestSetup.waitForServerStart(nsc);
+         // non standard class loader, so expect to see the warning on derby.log
+        assertWarningDerby6619("derby.system.home", true);
+    }
+
     /**
      * Verify if the server came up and if so, was a security manager installed.
      */
@@ -325,9 +347,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
 
-        if (!_unsecureSet) {
-            assertWarningDerby6619();
-        }
+        assertWarningDerby6619("user.dir", false); // standard class loader
 
         if (!(runsWithEmma() || runsWithJaCoCo())) {
             // With Emma we run without the security manager, so we can't
@@ -507,11 +527,20 @@ public class SecureServerTest extends BaseJDBCTestCase
                  "security exception:",
              "This may lead to class loader leak"};
 
-    private void assertWarningDerby6619() throws IOException {
+
+    private void assertWarningDerby6619(String logLocation, boolean expected)
+            throws IOException {
+
         final String logFileName =
-                getSystemProperty("user.dir") + File.separator + "derby.log";
-        if (!DerbyNetAutoStartTest.checkLog(logFileName, expected6619)) {
-            fail("Expected warning on derby.log cf DERBY-6619");
+                getSystemProperty(logLocation) + File.separator + "derby.log";
+        if (DerbyNetAutoStartTest.checkLog(logFileName, expected6619)) {
+            if (!expected) {
+                fail("Expected no warning on derby.log cf DERBY-6619");
+            }
+        } else {
+            if (expected) {
+                fail("Expected warning on derby.log cf DERBY-6619");
+            }
         }
     }
 }
