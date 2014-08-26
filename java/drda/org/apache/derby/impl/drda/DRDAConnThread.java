@@ -9180,10 +9180,13 @@ class DRDAConnThread extends Thread {
 
     protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil )
     {
-        if (!hasSession()) {
+        // DERBY-6714: session can be null if the session gets closed just
+        // as we try to read its runtime info.
+        Session s = session;
+        if (s == null) {
             return "";
         } else {
-            return session.buildRuntimeInfo("", localLangUtil) + "\n";
+            return s.buildRuntimeInfo("", localLangUtil) + "\n";
         }
     }
 
