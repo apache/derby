@@ -38,7 +38,6 @@ import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.shared.common.reference.MessageId;
-import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	Implementation of the monitor that uses the class loader
@@ -297,15 +296,6 @@ public final class FileMonitor extends BaseMonitor
             }
         });
     }
-
-	public final void setThreadPriority(final int priority) {
-        AccessController.doPrivileged(new PrivilegedAction<Object>() {
-            public Object run() {
-                FileMonitor.super.setThreadPriority(priority);
-                return null;
-            }
-        });
-	}
 
 	final InputStream applicationPropertiesStream()
 	  throws IOException {

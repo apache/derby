@@ -31,6 +31,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Vector;
 import java.util.List;
 import org.apache.derby.iapi.util.InterruptStatus;
@@ -727,20 +729,27 @@ public class BasicDaemon implements DaemonService, Runnable
 		else
 		{
 			ModuleFactory mf = Monitor.getMonitor();
-			if (mf != null)
-				mf.setThreadPriority(Thread.MIN_PRIORITY);
+            setThreadPriority(mf, Thread.MIN_PRIORITY);
 			Thread.yield();
-			if (mf != null)
-				mf.setThreadPriority(oldPriority);
+            setThreadPriority(mf, oldPriority);
 		}
 	}
+
+    /**
+     * Change the priority of the current thread, but only if it was created
+     * by {@link ModuleFactory#getDaemonThread}.
+     */
+    private static void setThreadPriority(
+            ModuleFactory mf, final int priority) {
+        final Thread t = Thread.currentThread();
+        if (mf != null && mf.isDaemonThread(t)) {
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                @Override
+                public Void run() {
+                    t.setPriority(priority);
+                    return null;
+                }
+            });
+        }
+    }
 }
-
-
-
-
-
-
-
-
-

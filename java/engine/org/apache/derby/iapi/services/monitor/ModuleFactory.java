@@ -289,11 +289,14 @@ public interface ModuleFactory
 	*/
 	public Thread getDaemonThread(Runnable task, String name, boolean setMinPriority);
 
-	/**
-		Set the priority of the current thread.
-		If the current thread was not returned by getDaemonThread() then no action is taken.
-	*/
-	public void setThreadPriority(int priority);
+    /**
+     * Check if a thread is a daemon thread created by {@link #getDaemonThread}.
+     *
+     * @param thread the thread to check
+     * @return {@code true} if {@code thread} was created by
+     *   {@code getDaemonThread()}, {@code false} otherwise.
+     */
+    public boolean isDaemonThread(Thread thread);
 
 	public ProductVersionHolder getEngineVersion();
 

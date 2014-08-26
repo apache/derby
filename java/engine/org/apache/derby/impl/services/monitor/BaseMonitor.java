@@ -2075,14 +2075,10 @@ nextModule:
 
 	}
 
-	public void setThreadPriority(int priority) {
-
-		Thread t = Thread.currentThread();
-
-		if (t.getThreadGroup() == daemonGroup) {
-			t.setPriority(priority);
-		}
-	}
+    @Override
+    public final boolean isDaemonThread(Thread thread) {
+        return thread.getThreadGroup() == daemonGroup;
+    }
 
 	/**
 		Initialize the monitor wrt the current environemnt.
