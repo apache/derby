@@ -160,12 +160,14 @@ public class SingletonTimerFactory
     // Helper methods
 
     /**
-     * Get the context class loader if it's different from the system
-     * class loader.
+     * Check if the current context class loader could cause a memory leak
+     * (DERBY-3745) if it is inherited by the timer thread, and return it if
+     * that is the case.
      *
      * @return the context class loader of the current thread if it is
-     *   different from the system class loader and we have permission
-     *   to read the class loader, or {@code null} otherwise
+     *   not the same class loader as the one used by the system classes
+     *   or the Derby classes and we have permission to read the class
+     *   loaders, or {@code null} otherwise
      */
     private ClassLoader getContextClassLoader() {
         try {
@@ -179,10 +181,12 @@ public class SingletonTimerFactory
                         cl == Thread.class.getClassLoader()) {
                         // If the context class loader is the same as any of
                         // these class loaders, we are not worried that the
-                        // timer thread will lead a class loader. These
-                        // class loaders will stay in memory for the
-                        // lifetime of the JVM anyway, so it's not a problem
-                        // that the timer thread keeps a reference to it.
+                        // timer thread will leak a class loader. These
+                        // class loaders will stay in memory at least for the
+                        // lifetime of the Derby engine anyway, so it's not
+                        // a problem that the timer thread keeps a reference
+                        // to any of them until the engine is shut down.
+                        //
                         // Return null to signal that the context class loader
                         // doesn't need to be changed.
                         return null;
@@ -193,9 +197,14 @@ public class SingletonTimerFactory
             });
         } catch (SecurityException se) {
             // Ignore security exception. Versions of Derby before
-            // the DERBY-3745 fix did not require getContextClassLoader
+            // the DERBY-3745 fix did not require getClassLoader
             // privileges. We may leak class loaders if we are not
             // able to do this, but we can't just fail.
+            //
+            // In most cases the above calls will succeed, even if
+            // RuntimePermission("getClassLoader") has not been granted.
+            // See the javadoc for Thread.getContextClassLoader() and
+            // Class.getClassLoader() for details.
             report(se, MessageId.CANNOT_GET_CLASSLOADER);
             return null;
         }
