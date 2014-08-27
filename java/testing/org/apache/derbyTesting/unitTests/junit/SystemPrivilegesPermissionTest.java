@@ -379,7 +379,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                             f = a;
                             s = oa;
                         }
-                        if (oa < a)
                         assertEquals(validActions[f] + "," + validActions[s],
                                 p.getActions());
                     }
@@ -1071,7 +1070,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         assertEquals(p1.hashCode(), p2.hashCode());
         
         assertTrue(p1.implies(p2));
-        assertTrue(p1.implies(p2));
+        assertTrue(p2.implies(p1));
     }
     
     /**
