@@ -68,6 +68,7 @@ public class SetDerbyVersion {
         "derbynet.jar",
         "derbyclient.jar",
         "derbytools.jar",
+        "derbyoptionaltools.jar",
         // Ignore derbyTesting.jar, not part of the Maven 2 artifacts.
         // "derbyTesting.jar",
         // Ignore derbyrun.jar, not part of the Maven 2 artifacts.
