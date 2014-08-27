@@ -97,11 +97,14 @@ public final class SecurityManagerSetup extends TestSetup {
     private static boolean checkIfJacocoIsRunning() {
         return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
                 public Boolean run() {
-                    if (getURL("org.jacoco.agent.rt.RT") != null) {
-                        System.setProperty("jacoco.active", "");
-                        return Boolean.TRUE;
+                    try {
+                        Class.forName("org.jacoco.agent.rt.RT");
+                        return true;
+                    } catch (ClassNotFoundException e) {
+                        return false;
+                    } catch (LinkageError e) {
+                        return false;
                     }
-                    return Boolean.FALSE;
                 }
         });
     }
