@@ -88,6 +88,7 @@
     <module>net</module>
     <module>client</module>
     <module>tools</module>
+    <module>optionaltools</module>
     <module>war</module>
     <module>derbyLocale_cs</module>
     <module>derbyLocale_de_DE</module>
