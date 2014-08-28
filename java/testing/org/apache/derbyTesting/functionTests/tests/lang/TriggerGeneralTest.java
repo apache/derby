@@ -858,15 +858,12 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         assertUpdateCount(st, 1,
             "delete from t1 where a = 3");
 
-        rs = st.executeQuery("select type, mode, tablename from " +
-                "syscs_diag.lock_table " +
-                "where tablename not like 'SYS%'" + // DERBY-6628: filter
-                                                    // any such compilation lock
-                "order by tablename, type");
-
+        // Check the locks, but retry the correctness of the result set for
+        // a while since we have seen extraneous locks here on several system
+        // tables, which should be released (DERBY-6628)
+        long millis = 60000;
+        boolean ok = false;
         expColNames = new String [] {"TYPE", "MODE", "TABLENAME"};
-        JDBC.assertColumnNames(rs, expColNames);
-
         expRS = new String [][]
         {
             {"ROW", "X", "PARENT"},
@@ -875,14 +872,32 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
             {"TABLE", "IX", "T1"}
         };
 
-        try {
-            JDBC.assertFullResultSet(rs, expRS, true);
-        } catch (AssertionFailedError e) {
+
+        while (millis >= 0) {
+            rs = st.executeQuery("select type, mode, tablename from " +
+                    "syscs_diag.lock_table " +
+                    "order by tablename, type");
+
+            JDBC.assertColumnNames(rs, expColNames);
+
+            try {
+                JDBC.assertFullResultSet(rs, expRS, true);
+                ok = true;
+                break;
+            } catch (AssertionFailedError t) {
+                millis -= 2000;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {}
+            }
+        }
+
+        if (!ok) {
             // DERBY-6628: get more information
             dumpRs(st.executeQuery(
                     "select * from syscs_diag.lock_table " + 
                     "    order by tablename, type"));
-            throw e;
+            fail("Unexpected set of locks found");
         }
 
         rollback();
