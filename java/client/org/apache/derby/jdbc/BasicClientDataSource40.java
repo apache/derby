@@ -643,7 +643,10 @@ public class BasicClientDataSource40
 
 
     /**
-     * Read the value of the passed system property.
+     * Read the value of the passed system property. If we are running under
+     * the Java security manager and permission to read the property is 
+     * missing,a null is returned, and no diagnostic is given (DERBY-6620).
+     * 
      * @param key name of the system property
      * @return value of the system property, null if there is no
      *         permission to read the property
@@ -658,6 +661,8 @@ public class BasicClientDataSource40
                         // does not have permission to read the property, so
                         // if a security exception occurs, just return null
                         // and continue with the connection.
+                        // See also the discussion in DERBY-6620 on why we do
+                        // not write a warning message on the console here.
                         return null;
                     }
                 }
