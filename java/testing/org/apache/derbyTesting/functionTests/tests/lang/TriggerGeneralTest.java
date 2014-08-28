@@ -858,8 +858,11 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
         assertUpdateCount(st, 1,
             "delete from t1 where a = 3");
 
-        rs = st.executeQuery("select type, mode, tablename from "
-            + "syscs_diag.lock_table order by tablename, type");
+        rs = st.executeQuery("select type, mode, tablename from " +
+                "syscs_diag.lock_table " +
+                "where tablename not like 'SYS%'" + // DERBY-6628: filter
+                                                    // any such compilation lock
+                "order by tablename, type");
 
         expColNames = new String [] {"TYPE", "MODE", "TABLENAME"};
         JDBC.assertColumnNames(rs, expColNames);
