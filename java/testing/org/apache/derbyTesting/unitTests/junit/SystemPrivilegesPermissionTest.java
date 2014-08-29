@@ -30,10 +30,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.AccessControlException;
 import java.security.AccessController;
+import java.security.AllPermission;
 import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.security.PrivilegedAction;
 import java.util.HashSet;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
 import javax.security.auth.Subject;
@@ -178,6 +183,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             new SystemPrivilegesPermissionTest("testSystemPrincipal"));
         suite.addTest(
             new SystemPrivilegesPermissionTest("testSystemPermission"));
+        suite.addTest(
+            new SystemPrivilegesPermissionTest(
+                    "testSystemPermissionCollections"));
+
         // the DatabasePermission test attempts to canonicalize various
         // directory path names and requires an all-files-read-permission,
         // which is not granted by default derby_tests.policy
@@ -388,6 +397,97 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
         // DERBY-3476: The SystemPermission class should be final.
         assertTrue(Modifier.isFinal(SystemPermission.class.getModifiers()));
+    }
+
+    /**
+     * Test that collections of SystemPermissions behave as expected.
+     * Before DERBY-6717, adding multiple single-action permissions with
+     * the same name didn't work.
+     */
+    public void testSystemPermissionCollections() {
+        Permissions allPerms = new Permissions();
+        for (String name : VALID_SYSPERM_NAMES) {
+            for (String action : VALID_SYSPERM_ACTIONS) {
+                allPerms.add(new SystemPermission(name, action));
+            }
+        }
+
+        assertEquals(VALID_SYSPERM_NAMES.length,
+                     Collections.list(allPerms.elements()).size());
+
+        // Check that the collection of all system permissions also implies
+        // all system permissions.
+        for (String name : VALID_SYSPERM_NAMES) {
+            for (String a1 : VALID_SYSPERM_ACTIONS) {
+                // allPerms should imply any valid (name, action) pair.
+                assertTrue(allPerms.implies(new SystemPermission(name, a1)));
+
+                // allPerms should also imply any valid multi-action
+                // system permission.
+                for (String a2 : VALID_SYSPERM_ACTIONS) {
+                    assertTrue(allPerms.implies(
+                            new SystemPermission(name, a1 + ',' + a2)));
+                }
+            }
+        }
+
+        Permissions somePerms = new Permissions();
+        somePerms.add(new SystemPermission("server", "shutdown"));
+        somePerms.add(new SystemPermission("jmx", "shutdown,monitor"));
+        somePerms.add(new SystemPermission("engine", "shutdown,control"));
+        somePerms.add(new SystemPermission("engine", "control,monitor"));
+
+        // somePerms implies the shutdown action for server
+        assertTrue(somePerms.implies(
+                new SystemPermission("server", "shutdown")));
+        assertFalse(somePerms.implies(
+                new SystemPermission("server", "control")));
+        assertFalse(somePerms.implies(
+                new SystemPermission("server", "monitor")));
+        assertFalse(somePerms.implies(
+                new SystemPermission("server", "shutdown,monitor")));
+
+        // somePerms implies the shutdown and monitor actions for jmx
+        assertTrue(somePerms.implies(new SystemPermission("jmx", "shutdown")));
+        assertTrue(somePerms.implies(new SystemPermission("jmx", "monitor")));
+        assertFalse(somePerms.implies(new SystemPermission("jmx", "control")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("jmx", "shutdown,monitor")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("jmx", "monitor,shutdown")));
+        assertFalse(somePerms.implies(
+                new SystemPermission("jmx", "monitor,shutdown,control")));
+
+        // somePerms implies shutdown, control and monitor for engine
+        assertTrue(somePerms.implies(
+                new SystemPermission("engine", "shutdown")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("engine", "control")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("engine", "monitor")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("engine", "shutdown,monitor")));
+        assertTrue(somePerms.implies(
+                new SystemPermission("engine", "shutdown,monitor,control")));
+
+        // A SystemPermission collection should not accept other permissions.
+        SystemPermission sp = new SystemPermission("engine", "monitor");
+        PermissionCollection collection = sp.newPermissionCollection();
+        try {
+            collection.add(new AllPermission());
+            fail();
+        } catch (IllegalArgumentException iae) {
+            // expected
+        }
+
+        // Read-only collections cannot be added to.
+        collection.setReadOnly();
+        try {
+            collection.add(sp);
+            fail();
+        } catch (SecurityException se) {
+            // expected
+        }
     }
     
     /**
@@ -815,6 +915,37 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 VALID_SYSPERM_NAMES[0],
                 null),
             NullPointerException.class);
+
+        // Test serialization of SystemPermission collections.
+
+        // Serialization should work on empty collection.
+        PermissionCollection collection = sp.newPermissionCollection();
+        PermissionCollection readCollection =
+                serializeDeserialize(collection, null);
+        assertFalse(readCollection.elements().hasMoreElements());
+
+        // Serialization should work on non-empty collection.
+        sp = new SystemPermission(
+                VALID_SYSPERM_NAMES[0], VALID_SYSPERM_ACTIONS[0]);
+        collection = sp.newPermissionCollection();
+        collection.add(sp);
+        readCollection = serializeDeserialize(collection, null);
+        assertEquals(Arrays.asList(sp),
+                     Collections.list(readCollection.elements()));
+
+        // Deserialization should fail if the collection contains a
+        // permission with invalid name.
+        collection.add(createSyspermNoCheck("invalid_name", "control"));
+        serializeDeserialize(collection, IllegalArgumentException.class);
+
+        // Deserialization should fail if the collection contains a
+        // permission that is not a SystemPermission.
+        collection = sp.newPermissionCollection();
+        HashMap<String, Permission> permissions =
+                new HashMap<String, Permission>();
+        permissions.put("engine", new AllPermission());
+        setField(collection.getClass(), "permissions", collection, permissions);
+        serializeDeserialize(collection, ClassCastException.class);
     }
 
     /**

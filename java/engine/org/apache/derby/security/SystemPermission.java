@@ -23,9 +23,14 @@ package org.apache.derby.security;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.BasicPermission;
 import java.security.Permission;
+import java.security.PermissionCollection;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -116,6 +121,12 @@ final public class SystemPermission extends BasicPermission {
      * Actions for this permission.
      */
     private String actions;
+
+    /**
+     * Bit mask representing the actions. It is not serialized, and has
+     * to be recalculated when the object is deserialized.
+     */
+    private transient int actionMask;
     
     /**
      * Creates a new SystemPermission with the specified name.
@@ -131,8 +142,8 @@ final public class SystemPermission extends BasicPermission {
     }
 
     /**
-     * Check if name and actions are valid, and normalize the actions
-     * string.
+     * Check if name and actions are valid, normalize the actions string,
+     * and calculate the actions mask.
      *
      * @param name the name of the permission
      * @param actions the actions of the permission
@@ -147,7 +158,8 @@ final public class SystemPermission extends BasicPermission {
             throw new IllegalArgumentException("Unknown permission " + name);
         }
       
-        this.actions = getCanonicalForm(actions);   
+        this.actions = getCanonicalForm(actions);
+        this.actionMask = getActionMask(this.actions);
     }
     
     /**
@@ -155,6 +167,13 @@ final public class SystemPermission extends BasicPermission {
      */
     public String getActions() {
         return actions;
+    }
+
+    // DERBY-6717: Must override newPermissionCollection() since
+    // BasicPermission's implementation ignores actions.
+    @Override
+    public PermissionCollection newPermissionCollection() {
+        return new SystemPermissionCollection();
     }
     
     /**
@@ -214,12 +233,13 @@ final public class SystemPermission extends BasicPermission {
      * name and (canonical) actions.
      */
     public boolean equals(Object other) {
-        
+        // Check if the types and names match.
         if (!super.equals(other))
             return false;
-        
+
+        // Check if the actions match.
         SystemPermission osp = (SystemPermission) other;
-        return getActions().equals(osp.getActions());
+        return actionMask == osp.actionMask;
     }
     
     /**
@@ -232,11 +252,13 @@ final public class SystemPermission extends BasicPermission {
      */
     public boolean implies(Permission permission)
     {
+        // Check if the types and names match.
         if (!super.implies(permission))
             return false;
-        
-        int myActionMask = getActionMask(getActions());
-        int permissionMask = getActionMask(permission.getActions());
+
+        // Check if the actions match.
+        int myActionMask = actionMask;
+        int permissionMask = ((SystemPermission) permission).actionMask;
         
         return
             (myActionMask & permissionMask) == permissionMask;
@@ -270,5 +292,108 @@ final public class SystemPermission extends BasicPermission {
 
         // Make sure the name and actions fields contain legal values.
         validateNameAndActions(getName(), getActions());
+    }
+
+    /**
+     * A collection of {@code SystemPermission} objects. Instances of this
+     * class must be thread-safe and serializable, per the specification of
+     * {@code java.security.PermissionCollection}.
+     */
+    private static class SystemPermissionCollection
+                                extends PermissionCollection {
+        private static final long serialVersionUID = 0L;
+
+        private HashMap<String, Permission> permissions
+                = new HashMap<String, Permission>();
+
+        @Override
+        public void add(Permission permission) {
+            // The contract of PermissionCollection.add() requires
+            // IllegalArgumentException if permission is not SystemPermission.
+            if (!(permission instanceof SystemPermission)) {
+                throw new IllegalArgumentException();
+            }
+
+            // The contract of PermissionCollection.add() requires
+            // SecurityException if the collection is read-only.
+            if (isReadOnly()) {
+                throw new SecurityException();
+            }
+
+            String name = permission.getName();
+
+            synchronized (this) {
+                Permission existing = permissions.get(name);
+                if (existing == null) {
+                    permissions.put(name, permission);
+                } else {
+                    String actions = existing.getActions() + ','
+                                        + permission.getActions();
+                    permissions.put(name, new SystemPermission(name, actions));
+                }
+            }
+        }
+
+        @Override
+        public boolean implies(Permission permission) {
+            if (!(permission instanceof SystemPermission)) {
+                return false;
+            }
+
+            String name = permission.getName();
+            Permission perm;
+
+            synchronized (this) {
+                perm = permissions.get(name);
+            }
+
+            return (perm != null) && perm.implies(permission);
+        }
+
+        @Override
+        public synchronized Enumeration<Permission> elements() {
+            return Collections.enumeration(permissions.values());
+        }
+
+        /**
+         * Called upon Serialization for saving the state of this
+         * SystemPermissionCollection to a stream.
+         */
+        private void writeObject(ObjectOutputStream s)
+                throws IOException {
+            // Only the values of the HashMap need to be serialized.
+            // The keys can be reconstructed from the values during
+            // deserialization.
+            ArrayList<Permission> perms;
+            synchronized (this) {
+                perms = new ArrayList<Permission>(permissions.values());
+            }
+
+            ObjectOutputStream.PutField fields = s.putFields();
+            fields.put("permissions", perms);
+            s.writeFields();
+        }
+
+        /**
+         * Called upon deserialization for restoring the state of this
+         * SystemPermissionCollection from a stream.
+         */
+        private void readObject(ObjectInputStream s)
+                throws IOException, ClassNotFoundException {
+            ObjectInputStream.GetField fields = s.readFields();
+            List perms = (List) fields.get("permissions", null);
+
+            permissions = new HashMap<String, Permission>();
+
+            // Insert the permissions one at a time, and verify that they
+            // in fact are SystemPermissions by doing an explicit cast. If
+            // a corrupted stream contains other kinds of permissions, a
+            // ClassCastException is raised instead of returning an invalid
+            // collection.
+            for (Object p : perms) {
+                SystemPermission sp = (SystemPermission) p;
+                permissions.put(sp.getName(), sp);
+            }
+        }
     }
 }
