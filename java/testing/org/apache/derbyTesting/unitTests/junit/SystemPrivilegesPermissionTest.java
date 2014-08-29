@@ -431,6 +431,16 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             }
         }
 
+        Permissions onePerm = new Permissions();
+        onePerm.add(new SystemPermission("server", "shutdown"));
+
+        // onePerm implies server shutdown and nothing else
+        assertTrue(onePerm.implies(new SystemPermission("server", "shutdown")));
+        assertFalse(onePerm.implies(
+                        new SystemPermission("engine", "shutdown")));
+        assertFalse(onePerm.implies(
+                        new SystemPermission("server", "shutdown,monitor")));
+
         Permissions somePerms = new Permissions();
         somePerms.add(new SystemPermission("server", "shutdown"));
         somePerms.add(new SystemPermission("jmx", "shutdown,monitor"));
@@ -488,6 +498,9 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (SecurityException se) {
             // expected
         }
+
+        // The collection does not imply other permission types.
+        assertFalse(collection.implies(new AllPermission()));
     }
     
     /**
