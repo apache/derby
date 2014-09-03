@@ -122,6 +122,7 @@ public class _Suite extends BaseTestCase  {
             // Tests uses JDBC 3.0 datasources
             suite.addTest(PoolDSAuthenticationTest.suite());
             suite.addTest(PoolXADSCreateShutdownDBTest.suite());
+            suite.addTest(Derby5165Test.suite());
             suite.addTest(XADSAuthenticationTest.suite());
             suite.addTest(XATransactionTest.suite());
             suite.addTest(XATest.suite());
