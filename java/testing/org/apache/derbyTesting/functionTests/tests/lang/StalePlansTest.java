@@ -41,6 +41,14 @@ import org.apache.derbyTesting.junit.SQLUtilities;
  * execution.
  */
 public class StalePlansTest extends BaseJDBCTestCase {
+    /**
+     * The value of derby.language.stalePlanCheckInterval to use in this
+     * test. The default value is 100, but we use 10 to reduce the number
+     * of times the test has to execute statements to get to the desired
+     * state.
+     */
+    private static final int STALE_PLAN_CHECK_INTERVAL = 10;
+
     public StalePlansTest(String name) {
         super(name);
     }
@@ -53,7 +61,8 @@ public class StalePlansTest extends BaseJDBCTestCase {
         Properties props = new Properties();
         // Check for stale plans on every 10th execution (default 100) to
         // reduce the number of times we need to execute each statement.
-        props.setProperty("derby.language.stalePlanCheckInterval", "10");
+        props.setProperty("derby.language.stalePlanCheckInterval",
+                          String.valueOf(STALE_PLAN_CHECK_INTERVAL));
         // Disable the index statistics daemon so that it doesn't cause
         // recompilation of statements at random times.
         props.setProperty("derby.storage.indexStats.auto", "false");
@@ -298,5 +307,30 @@ public class StalePlansTest extends BaseJDBCTestCase {
         insert.close();
         insert2.close();
         ps.close();
+    }
+
+    /**
+     * Regression test case for DERBY-6724, where an INSERT statement would
+     * fail with a NullPointerException if it had fired a trigger, and it
+     * was detected during execution that the statement plan was stale and
+     * had to be recompiled.
+     */
+    public void testDerby6724() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table d6724_t(x int)");
+        s.execute("create trigger d6724_tr after insert on d6724_t values 1");
+        s.execute("insert into d6724_t values 1");
+
+        // Before DERBY-6724 this statement would fail with an NPE in the
+        // (STALE_PLAN_CHECK_INTERVAL+1)'th execution.
+        PreparedStatement ps = prepareStatement(
+                "insert into d6724_t select * from d6724_t");
+        for (int i = 0; i < STALE_PLAN_CHECK_INTERVAL + 1; i++) {
+            // Execute the statement and verify that the correct number of
+            // rows are inserted. The number doubles for each execution.
+            assertUpdateCount(ps, 1 << i);
+        }
+
+        rollback();
     }
 }

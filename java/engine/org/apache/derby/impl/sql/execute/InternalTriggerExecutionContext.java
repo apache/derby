@@ -23,7 +23,6 @@ package org.apache.derby.impl.sql.execute;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
@@ -233,20 +232,21 @@ class InternalTriggerExecutionContext
 	protected void cleanup()
 		throws StandardException
 	{
-		lcc.popTriggerExecutionContext(this);
+        if (lcc != null) {
+            lcc.popTriggerExecutionContext(this);
+        }
 
 		/*
 		** Explicitly close all result sets that we have
 		** given out to the user.  
 	 	*/
-		for (Enumeration<java.sql.ResultSet> e = resultSetVector.elements();
-			 e.hasMoreElements(); )
-		{
-			java.sql.ResultSet rs = e.nextElement();
-			try
-			{
-				rs.close();
-			} catch (SQLException se) {}
+        if (resultSetVector != null) {
+            for (ResultSet rs : resultSetVector) {
+                try {
+                    rs.close();
+                } catch (SQLException se) {
+                }
+            }
 		}
 		resultSetVector = null;
 	
