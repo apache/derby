@@ -456,8 +456,9 @@ class LuceneQueryVTI extends StringColumnVTI
             
             // make sure the user has SELECT privilege on all relevant columns of the underlying table
             vetPrivileges();
-        
-            DerbyLuceneDir  derbyLuceneDir = LuceneSupport.getDerbyLuceneDir( _connection, _schema, _table, _column );
+
+            String      delimitedColumnName = LuceneSupport.delimitID( _column );
+            DerbyLuceneDir  derbyLuceneDir = LuceneSupport.getDerbyLuceneDir( _connection, _schema, _table, delimitedColumnName );
             StorageFile propertiesFile = LuceneSupport.getIndexPropertiesFile( derbyLuceneDir );
             Properties  indexProperties = readIndexProperties( propertiesFile );
             String          indexDescriptorMaker = indexProperties.getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
@@ -522,9 +523,9 @@ class LuceneQueryVTI extends StringColumnVTI
         for ( int i = 0; i < _maxKeyID; i++ )
         {
             if ( i > 0 ) { buffer.append( ", " ); }
-            buffer.append( getColumnName( i + 1 ) );
+            buffer.append( LuceneSupport.delimitID( getColumnName( i + 1 ) ) );
         }
-        buffer.append( ", " + _column );
+        buffer.append( ", " + LuceneSupport.delimitID( _column ) );
         buffer.append( " from " + LuceneSupport.makeTableName( _schema, _table ) );
         buffer.append( " where 1=2" );
 

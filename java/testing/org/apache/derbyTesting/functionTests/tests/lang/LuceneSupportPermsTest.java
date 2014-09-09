@@ -1224,6 +1224,216 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
         goodStatement( dboConnection, UNLOAD_TOOL );
     }
     
+    /**
+     * <p>
+     * Test identifier casing for keys and text columns. See DERBY-6730.
+     * </p>
+     */
+    public  void    test_6730()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        createSchema( ruthConnection, Types.INTEGER );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_1 ( poemID, poemText ) as select poemID, poemText from ruth.poems"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_2 ( poemID, \"poemText\" ) as select poemID, poemText from ruth.poems"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_3 ( \"poemID\", poemText ) as select poemID, poemText from ruth.poems"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_4 ( \"poemID\", \"poemText\" ) as select poemID, poemText from ruth.poems"
+             );
+
+        goodStatement( dboConnection, LOAD_TOOL );
+
+        // Index the views
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_1',\n" +
+             "  'poemText',\n" +
+             "  null,\n" +
+             "  'poemID'\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_2',\n" +
+             "  '\"poemText\"',\n" +
+             "  null,\n" +
+             "  'poemID'\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_3',\n" +
+             "  'poemText',\n" +
+             "  null,\n" +
+             "  '\"poemID\"'\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_4',\n" +
+             "  '\"poemText\"',\n" +
+             "  null,\n" +
+             "  '\"poemID\"'\n" +
+             ")\n"
+             );
+
+        // Verify the expected casing of identifiers
+        vet6730( ruthConnection );
+
+        // Update the indexes and re-verify
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_1',\n" +
+             "  'poemText',\n" +
+             "  null\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_2',\n" +
+             "  '\"poemText\"',\n" +
+             "  null\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_3',\n" +
+             "  'poemText',\n" +
+             "  null\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_4',\n" +
+             "  '\"poemText\"',\n" +
+             "  null\n" +
+             ")\n"
+             );
+        vet6730( ruthConnection );
+
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_1', 'poemText' )" );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_2', '\"poemText\"' )" );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_3', 'poemText' )" );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_4', '\"poemText\"' )" );
+        goodStatement( dboConnection, UNLOAD_TOOL );
+        goodStatement( ruthConnection, "drop view v_6730_4" );
+        goodStatement( ruthConnection, "drop view v_6730_3" );
+        goodStatement( ruthConnection, "drop view v_6730_2" );
+        goodStatement( ruthConnection, "drop view v_6730_1" );
+        dropSchema( ruthConnection );
+    }
+    private void vet6730( Connection conn ) throws Exception
+    {
+        // Verify the expected casing of identifiers
+        String[][]  expectedResults = new String[][]
+        {
+            { "5", "0.26756266" },
+            { "4", "0.22933942" },
+            { "3", "0.22933942" },
+        };
+        assertResults
+            (
+             conn,
+             "select i.poemID, i.score\n" +
+             "from table ( ruth.v_6730_1__poemText( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+             expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select i.poemID, i.score\n" +
+             "from table ( ruth.\"V_6730_2__poemText\"( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+             expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select i.\"poemID\", i.score\n" +
+             "from table ( ruth.v_6730_3__poemText( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+             expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select i.\"poemID\", i.score\n" +
+             "from table ( ruth.\"V_6730_4__poemText\"( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+             expectedResults,
+             false
+             );
+        
+        String[][]  expectedListResults = new String[][]
+        {
+            { "RUTH", "V_6730_1", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+            { "RUTH", "V_6730_2", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+            { "RUTH", "V_6730_3", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+            { "RUTH", "V_6730_4", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+        };
+        assertResults
+            (
+             conn,
+             "select schemaName, tableName, columnName, analyzer\n" +
+             "from table( lucenesupport.listIndexes() ) t\n" +
+             "order by schemaName, tableName, columnName\n",
+             expectedListResults,
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

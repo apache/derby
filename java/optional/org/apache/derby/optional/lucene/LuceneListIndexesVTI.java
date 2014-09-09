@@ -205,7 +205,8 @@ class LuceneListIndexesVTI extends StringColumnVTI
         {
             try {
                 readSchemaTableColumn();
-                StorageFile    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, column );
+                String      delimitedColumnName = LuceneSupport.delimitID( column );
+                StorageFile    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, delimitedColumnName );
                 rowProperties = readIndexProperties( indexPropertiesFile );
             }
             catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }

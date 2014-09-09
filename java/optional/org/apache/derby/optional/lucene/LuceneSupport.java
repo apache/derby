@@ -518,7 +518,7 @@ public class LuceneSupport implements OptionalTool
         
             for ( VTITemplate.ColumnDescriptor keyDesc : primaryKeys )
             {
-                String  keyName = derbyIdentifier( keyDesc.columnName );
+                String  keyName = delimitID( keyDesc.columnName );
                 if ( keyCount > 0 ) { query.append( ", " ); }
                 query.append( keyName );
 
@@ -540,7 +540,7 @@ public class LuceneSupport implements OptionalTool
             }
         
             query.append(", ");
-            query.append( derbyIdentifier( textcol ) );
+            query.append( delimitID( derbyIdentifier( textcol ) ) );
             query.append(" from " + makeTableName( schema, table ) );
 
             ps = conn.prepareStatement( query.toString() );
@@ -1420,6 +1420,12 @@ public class LuceneSupport implements OptionalTool
         catch (StandardException se)  { throw sqlException( se ); }
     }
 
+    /** Double quote an identifier in order to preserver casing */
+    static String delimitID( String id )
+    {
+        return IdUtil.normalToDelimited( id );
+    }
+
     /** Raise an error if an argument is being given a null value */
     static  void    checkNotNull( String argumentName, String argumentValue )
         throws SQLException
@@ -1549,10 +1555,10 @@ public class LuceneSupport implements OptionalTool
         for ( String key : keyColumns )
         {
             checkNotNull( "KEYCOLUMNS", key );
-            
+
             if ( counter > 0 ) { buffer.append( ", " ); }
             counter++;
-            buffer.append( derbyIdentifier( key ) );
+            buffer.append( delimitID( derbyIdentifier( key ) ) );
         }
         buffer.append( "\nfrom " + qualifiedName );
         buffer.append( "\nwhere 1=2" );
