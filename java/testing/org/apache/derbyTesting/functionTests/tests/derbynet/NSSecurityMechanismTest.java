@@ -22,6 +22,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -136,7 +138,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             DatabasePropertyTestSetup.builtinAuthentication(
                 new NSSecurityMechanismTest("testSecurityMechanismOnEmbedded"),
                 new String[] { "calvin" }, "pw"));
-
         return suite;
     }
     
@@ -576,9 +577,35 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                 if (!(sqle.getSQLState().equals("XJ112")))
                     assertSQLState(expectedValue, sqle);
             }
+            else if (sqle.getSQLState().equals("XJ001"))
+            {
+                // we might have hit DERBY-6702. We know the stack trace
+                // of that situation, so skip if we see it, except to repeat
+                // the passed in values.
+                StringWriter sw = new StringWriter();
+                sqle.printStackTrace(new PrintWriter(sw));
+                if (!sw.toString().contains(
+                    "java.lang.InternalError: unexpected CryptoAPI failure"))
+                    assertSQLState(expectedValue, sqle);
+                else
+                    alarm("hit DERBY-6702; for values:" +
+                    "\n\t dbURL: " + dbUrl +
+                    "\n\t msg: " + msg + 
+                    "\n\t expectedValue: " + expectedValue + "\n");
+            }
             else 
             {
-                assertSQLState(expectedValue, sqle);
+                if (expectedValue.length() < 5) {
+                    StringWriter sw = new StringWriter();
+                    sqle.printStackTrace(new PrintWriter(sw));
+                    String emsgtxt = "unexpected failure..." +
+                        "\n\t dbURL: " + dbUrl +
+                        "\n\t msg: " + msg + 
+                        "\n\t expectedValue: " + expectedValue ; 
+                    fail (emsgtxt, sqle);
+                }
+                else
+                    assertSQLState(expectedValue, sqle);
             }
             //for debugging sqles, uncomment: 
             // dumpSQLException(sqle.getNextException());
