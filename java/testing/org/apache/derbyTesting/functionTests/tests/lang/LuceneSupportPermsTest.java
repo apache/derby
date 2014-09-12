@@ -1256,6 +1256,16 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              ruthConnection,
              "create view v_6730_4 ( \"poemID\", \"poemText\" ) as select poemID, poemText from ruth.poems"
              );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_5 ( poemID, \"c l o b\" ) as select poemID, poemText from ruth.poems"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create view v_6730_6 ( \"k e y\", poemText ) as select poemID, poemText from ruth.poems"
+             );
 
         goodStatement( dboConnection, LOAD_TOOL );
 
@@ -1308,6 +1318,30 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "  '\"poemID\"'\n" +
              ")\n"
              );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_5',\n" +
+             "  '\"c l o b\"',\n" +
+             "  null,\n" +
+             "  'poemID'\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.createIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_6',\n" +
+             "  'poemText',\n" +
+             "  null,\n" +
+             "  '\"k e y\"'\n" +
+             ")\n"
+             );
 
         // Verify the expected casing of identifiers
         vet6730( ruthConnection );
@@ -1357,13 +1391,39 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              "  null\n" +
              ")\n"
              );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_5',\n" +
+             "  '\"c l o b\"',\n" +
+             "  null\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "call luceneSupport.updateIndex\n" +
+             "(\n" +
+             "  'ruth',\n" +
+             "  'v_6730_6',\n" +
+             "  'poemText',\n" +
+             "  null\n" +
+             ")\n"
+             );
         vet6730( ruthConnection );
 
         goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_1', 'poemText' )" );
         goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_2', '\"poemText\"' )" );
         goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_3', 'poemText' )" );
         goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_4', '\"poemText\"' )" );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_5', '\"c l o b\"' )" );
+        goodStatement( ruthConnection, "call LuceneSupport.dropIndex( 'ruth', 'v_6730_6', 'poemText' )" );
         goodStatement( dboConnection, UNLOAD_TOOL );
+        goodStatement( ruthConnection, "drop view v_6730_6" );
+        goodStatement( ruthConnection, "drop view v_6730_5" );
         goodStatement( ruthConnection, "drop view v_6730_4" );
         goodStatement( ruthConnection, "drop view v_6730_3" );
         goodStatement( ruthConnection, "drop view v_6730_2" );
@@ -1415,6 +1475,24 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
              expectedResults,
              false
              );
+        assertResults
+            (
+             conn,
+             "select i.poemID, i.score\n" +
+             "from table ( ruth.\"V_6730_5__c l o b\"( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+            expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select i.\"k e y\", i.score\n" +
+             "from table ( ruth.v_6730_6__poemText( 'star', 1000, null ) ) i\n" +
+             "order by i.score desc\n",
+             expectedResults,
+             false
+             );
         
         String[][]  expectedListResults = new String[][]
         {
@@ -1422,6 +1500,8 @@ public class LuceneSupportPermsTest extends GeneratedColumnsHelper
             { "RUTH", "V_6730_2", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
             { "RUTH", "V_6730_3", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
             { "RUTH", "V_6730_4", "poemText", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+            { "RUTH", "V_6730_5", "c l o b", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
+            { "RUTH", "V_6730_6", "POEMTEXT", "org.apache.lucene.analysis.en.EnglishAnalyzer" },
         };
         assertResults
             (

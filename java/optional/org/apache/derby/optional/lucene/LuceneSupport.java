@@ -462,7 +462,7 @@ public class LuceneSupport implements OptionalTool
         }
 
         // don't let the user create a table function with duplicate column names
-        vetColumnName( textcol );
+        vetColumnName( derbyIdentifier( textcol ) );
         for ( VTITemplate.ColumnDescriptor key : primaryKeys )
         {
             vetColumnName(  key.columnName );
@@ -1090,7 +1090,7 @@ public class LuceneSupport implements OptionalTool
     private static  void    vetColumnName( String columnName )
         throws SQLException
     {
-        String  derbyColumnName = derbyIdentifier( columnName );
+        String  derbyColumnName = columnName;
 
         if (
             DOCUMENT_ID.equals( derbyColumnName ) ||
