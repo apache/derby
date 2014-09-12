@@ -117,6 +117,10 @@ final public class SystemPermission extends BasicPermission {
         LEGAL_ACTIONS.add(SHUTDOWN);
     }
     
+    /** Constant representing {@code SystemPermission("engine, "monitor")}. */
+    public static final SystemPermission ENGINE_MONITOR =
+            new SystemPermission(ENGINE, MONITOR);
+
     /**
      * Actions for this permission.
      */

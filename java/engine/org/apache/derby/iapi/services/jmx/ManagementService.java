@@ -22,9 +22,7 @@
 package org.apache.derby.iapi.services.jmx;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.mbeans.ManagementMBean;
-
 
 /**
 * This interface represents a Management Service. An implementation of this 
@@ -60,7 +58,7 @@ public interface ManagementService extends ManagementMBean {
      * type should be first with a short name for the bean, typically the
      * class name without the package.
      * 
-     * @return An idenitifier that can later be used to unregister the mbean.
+     * @return An identifier that can later be used to unregister the mbean.
      */
     public <T> Object registerMBean(T bean,
             Class<T> beanInterface,
@@ -73,4 +71,15 @@ public interface ManagementService extends ManagementMBean {
      * @param mbeanIdentifier An identifier returned by registerMBean.
      */
     public void unregisterMBean(Object mbeanIdentifier);
+
+    /**
+     * Quote an MBean key property value, so that it is safe to pass to
+     * {@link #registerMBean} even if it potentially contains special
+     * characters.
+     *
+     * @param value the value to quote
+     * @return the quoted value
+     * @see javax.management.ObjectName#quote(String)
+     */
+    String quotePropertyValue(String value);
 }

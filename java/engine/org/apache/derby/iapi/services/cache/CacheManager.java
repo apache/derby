@@ -269,4 +269,14 @@ public interface CacheManager {
 	 * @return a Collection of all the elements in the cache
 	 */
 	public Collection values();
+
+    /**
+     * Register an MBean that allows user to monitor this cache instance.
+     * This is a no-op if the platform does not support Java Management
+     * Extensions (JMX).
+     *
+     * @param dbName the unique name of the database to which the cache belongs
+     * @throws StandardException if an error occurs when registering the MBean
+     */
+    void registerMBean(String dbName) throws StandardException;
 }

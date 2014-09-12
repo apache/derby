@@ -134,6 +134,11 @@ final class ClockPolicy implements ReplacementPolicy {
         clock = new ArrayList<Holder>(initialSize);
     }
 
+    @Override
+    public int freeEntries() {
+        return freeEntries.get();
+    }
+
     /**
      * Insert an entry into the cache. If the maximum size is exceeded, evict a
      * <em>not recently used</em> object from the cache. If there are no

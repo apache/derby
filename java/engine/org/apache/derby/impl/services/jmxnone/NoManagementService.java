@@ -25,7 +25,7 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 
 /** 
  * Dummy management service for environments that do not support
- * JMX, such as JDK 1.4 and J2ME.
+ * JMX, such as Java SE compact profile 2.
 */
 public final class NoManagementService implements ManagementService {
     public NoManagementService() {
@@ -46,6 +46,9 @@ public final class NoManagementService implements ManagementService {
     public void stopManagement() {
     }
     public String getSystemIdentifier() {
+        return null;
+    }
+    public String quotePropertyValue(String value) {
         return null;
     }
 }

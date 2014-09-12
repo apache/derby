@@ -27,6 +27,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
+import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -252,12 +253,21 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
         final ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
+        return queryMBeans(derbyDomain);
+    }
+
+    /**
+     * Get all MBeans that match the specified name.
+     * @param name the name pattern to look for
+     * @return a set of names that match
+     */
+    Set<ObjectName> queryMBeans(final ObjectName name) throws Exception {
         final MBeanServerConnection serverConn = getMBeanServerConnection(); 
         
         return AccessController.doPrivileged(
             new PrivilegedExceptionAction<Set<ObjectName>>() {
                 public Set<ObjectName> run() throws IOException {
-                    return serverConn.queryNames(derbyDomain, null);
+                    return serverConn.queryNames(name, null);
                }   
             }
         );   
@@ -357,6 +367,27 @@ abstract class MBeanTest extends BaseJDBCTestCase {
                 }
             }
         );
+    }
+
+    /**
+     * Set the value of an attribute via JMX.
+     *
+     * @param objName the name of the object that has the attribute
+     * @param name the name of the attribute
+     * @param value the new value of the attribute
+     * @throws Exception if an error occurs when changing the attribute
+     */
+    void setAttribute(final ObjectName objName, String name, Object value)
+            throws Exception {
+        final MBeanServerConnection jmxConn = getMBeanServerConnection();
+        final Attribute attribute = new Attribute(name, value);
+        AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+            @Override
+            public Void run() throws Exception {
+                jmxConn.setAttribute(objName, attribute);
+                return null;
+            }
+        });
     }
     
     /**

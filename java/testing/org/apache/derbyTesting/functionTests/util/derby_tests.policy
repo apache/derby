@@ -271,7 +271,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission javax.management.MBeanTrustPermission "register";
    
   // And to find and use Derby's MBeans
-  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
@@ -372,7 +372,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   
    
   // And to find and use Derby's MBeans
-  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";

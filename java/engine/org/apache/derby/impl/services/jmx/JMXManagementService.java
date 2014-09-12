@@ -424,4 +424,9 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     public synchronized String getSystemIdentifier() {
         return systemIdentifier;
     }
+
+    @Override
+    public String quotePropertyValue(String value) {
+        return ObjectName.quote(value);
+    }
 }

@@ -442,6 +442,11 @@ public class BaseDataFileFactory
             cf.newCacheManager(
                 this, "ContainerCache", fileCacheSize / 2, fileCacheSize);
 
+        // Register MBeans that allow users to monitor the page cache
+        // and the container cache.
+        pageCache.registerMBean(dataDirectory);
+        containerCache.registerMBean(dataDirectory);
+
 		if (create)
 		{
 			String noLog =

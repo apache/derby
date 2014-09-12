@@ -56,6 +56,14 @@ interface ReplacementPolicy {
     void doShrink();
 
     /**
+     * Get the number of free entries that could be reused for new objects
+     * without growing the cache.
+     *
+     * @return the number of free entries
+     */
+    int freeEntries();
+
+    /**
      * The interface for the callback objects that <code>ConcurrentCache</code>
      * uses to notify the replacement algorithm about events such as look-ups
      * and removals. Each <code>Callback</code> object is associated with a

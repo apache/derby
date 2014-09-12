@@ -24,14 +24,19 @@ package org.apache.derby.impl.services.cache;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheableFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
+import org.apache.derby.iapi.services.jmx.ManagementService;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.util.Matchable;
+import org.apache.derby.mbeans.CacheManagerMBean;
 
 /**
  * A cache manager based on the utilities found in the
@@ -61,6 +66,19 @@ final class ConcurrentCache implements CacheManager {
     private final int maxSize;
     /** Replacement policy to be used for this cache. */
     private final ReplacementPolicy replacementPolicy;
+
+    // Fields used by the MBean that monitors this instance.
+
+    /** The identifier of the MBean that allows monitoring of this instance. */
+    private Object mbean;
+    /** Flag that tells if hit/miss/eviction counts should be collected. */
+    private volatile boolean collectAccessCounts;
+    /** The number of cache hits. */
+    private final AtomicLong hits = new AtomicLong();
+    /** The number of cache misses. */
+    private final AtomicLong misses = new AtomicLong();
+    /** The number of evictions from the cache. */
+    private final AtomicLong evictions = new AtomicLong();
 
     /**
      * Flag that indicates whether this cache instance has been shut down. When
@@ -187,6 +205,7 @@ final class ConcurrentCache implements CacheManager {
         CacheEntry entry = cache.remove(key);
         entry.getCacheable().clearIdentity();
         entry.setCacheable(null);
+        countEviction();
     }
 
     /**
@@ -277,11 +296,13 @@ final class ConcurrentCache implements CacheManager {
                 // The object is already cached. Increase the use count and
                 // return it.
                 entry.keep(true);
+                countHit();
                 return item;
             } else {
                 // The object is not cached. Insert the entry into a free
                 // slot and retrieve a reusable Cacheable.
                 item = insertIntoFreeSlot(key, entry);
+                countMiss();
             }
         } finally {
             entry.unlock();
@@ -322,6 +343,7 @@ final class ConcurrentCache implements CacheManager {
         CacheEntry entry = cache.get(key);
         if (entry == null) {
             // No such object was found in the cache.
+            countMiss();
             return null;
         }
 
@@ -332,11 +354,15 @@ final class ConcurrentCache implements CacheManager {
             // for it to complete so that we don't return a cacheable that
             // isn't fully initialized.
             entry.waitUntilIdentityIsSet();
+
             // Return the cacheable. If the entry was removed right before we
             // locked it, getCacheable() returns null and so should we do.
             Cacheable item = entry.getCacheable();
             if (item != null) {
+                countHit();
                 entry.keep(true);
+            } else {
+                countMiss();
             }
             return item;
         } finally {
@@ -599,6 +625,14 @@ final class ConcurrentCache implements CacheManager {
         if (cleaner != null) {
             cleaner.unsubscribe();
         }
+
+        if (mbean != null) {
+            ManagementService managementService =
+                (ManagementService) Monitor.getSystemModule(Module.JMX);
+            if (managementService != null) {
+                managementService.unregisterMBean(mbean);
+            }
+        }
     }
 
     /**
@@ -680,5 +714,84 @@ final class ConcurrentCache implements CacheManager {
             }
         }
         return values;
+    }
+
+    @Override
+    public void registerMBean(String dbName) throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mbean == null, "registerMBean() called twice");
+        }
+
+        ManagementService managementService =
+                (ManagementService) Monitor.getSystemModule(Module.JMX);
+
+        if (managementService != null) {
+            mbean = managementService.registerMBean(
+                    new ConcurrentCacheMBeanImpl(this),
+                    CacheManagerMBean.class,
+                    "type=CacheManager,name=" + name +
+                    ",db=" + managementService.quotePropertyValue(dbName));
+        }
+    }
+
+    /** Count a cache hit. */
+    private void countHit() {
+        if (collectAccessCounts) {
+            hits.getAndIncrement();
+        }
+    }
+
+    /** Count a cache miss. */
+    private void countMiss() {
+        if (collectAccessCounts) {
+            misses.getAndIncrement();
+        }
+    }
+
+    /** Count an eviction from the cache. */
+    private void countEviction() {
+        if (collectAccessCounts) {
+            evictions.getAndIncrement();
+        }
+    }
+
+    /** Enable or disable collection of hit/miss/eviction counts. */
+    void setCollectAccessCounts(boolean collect) {
+        collectAccessCounts = collect;
+    }
+
+    /** Check if collection of hit/miss/eviction counts is enabled. */
+    boolean getCollectAccessCounts() {
+        return collectAccessCounts;
+    }
+
+    /** Get the number of cache hits. */
+    long getHitCount() {
+        return hits.get();
+    }
+
+    /** Get the number of cache misses. */
+    long getMissCount() {
+        return misses.get();
+    }
+
+    /** Get the number of evictions from the cache. */
+    long getEvictionCount() {
+        return evictions.get();
+    }
+
+    /** Get the maximum number of entries in the cache. */
+    long getMaxEntries() {
+        return maxSize;
+    }
+
+    /** Get the number of allocated entries. */
+    long getAllocatedEntries() {
+        return cache.size();
+    }
+
+    /** Get the number of allocated entries that hold valid objects. */
+    long getUsedEntries() {
+        return cache.size() - replacementPolicy.freeEntries();
     }
 }
