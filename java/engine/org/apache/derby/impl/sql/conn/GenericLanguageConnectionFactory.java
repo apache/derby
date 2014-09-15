@@ -74,6 +74,7 @@ import java.util.Dictionary;
 import java.io.Serializable;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.services.daemon.Serviceable;
+import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
@@ -309,25 +310,32 @@ public class GenericLanguageConnectionFactory
 												"StatementCache",
 												cacheSize/4,
 												cacheSize);
+
+            // Start a management bean for the statement cache to allow
+            // monitoring through JMX, if it is available and enabled.
+            DataFactory df = (DataFactory)
+                    Monitor.findServiceModule(this, DataFactory.MODULE);
+            singleStatementCache.registerMBean(df.getRootDirectory());
 		}
 
 	}
 
 	/**
 	 * returns the statement cache that this connection should use; currently
-	 * there is a statement cache per connection.
+     * there is a statement cache per database.
 	 */
-	
-
 	public CacheManager getStatementCache()
 	{
 		return singleStatementCache;
 	}
 
 	/**
-	 * Stop this module.  In this case, nothing needs to be done.
+     * Stop this module.
 	 */
 	public void stop() {
+        if (singleStatementCache != null) {
+            singleStatementCache.deregisterMBean();
+        }
 	}
 
 	/*

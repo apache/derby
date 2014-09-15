@@ -271,12 +271,26 @@ public interface CacheManager {
 	public Collection values();
 
     /**
+     * <p>
      * Register an MBean that allows user to monitor this cache instance.
      * This is a no-op if the platform does not support Java Management
      * Extensions (JMX).
+     * </p>
+     *
+     * <p>
+     * The MBean will be automatically deregistered when {@link #shutdown()}
+     * is called, or it can be manually deregistered by calling
+     * {@link #deregisterMBean()}.
+     * </p>
      *
      * @param dbName the unique name of the database to which the cache belongs
      * @throws StandardException if an error occurs when registering the MBean
      */
     void registerMBean(String dbName) throws StandardException;
+
+    /**
+     * Deregister the MBean that monitors this cache. If there is no MBean
+     * for this instance, this is a no-op.
+     */
+    void deregisterMBean();
 }

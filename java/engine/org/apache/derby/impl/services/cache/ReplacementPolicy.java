@@ -56,12 +56,14 @@ interface ReplacementPolicy {
     void doShrink();
 
     /**
-     * Get the number of free entries that could be reused for new objects
-     * without growing the cache.
+     * Get the number of entries allocated in the data structure that holds
+     * cached objects. This number could include empty entries for objects
+     * that have been removed from the cache, if those entries are still
+     * kept in the data structure for reuse.
      *
-     * @return the number of free entries
+     * @return the number of entries allocated in the cache
      */
-    int freeEntries();
+    int size();
 
     /**
      * The interface for the callback objects that <code>ConcurrentCache</code>

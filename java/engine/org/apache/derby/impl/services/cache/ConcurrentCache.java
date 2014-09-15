@@ -625,14 +625,7 @@ final class ConcurrentCache implements CacheManager {
         if (cleaner != null) {
             cleaner.unsubscribe();
         }
-
-        if (mbean != null) {
-            ManagementService managementService =
-                (ManagementService) Monitor.getSystemModule(Module.JMX);
-            if (managementService != null) {
-                managementService.unregisterMBean(mbean);
-            }
-        }
+        deregisterMBean();
     }
 
     /**
@@ -734,6 +727,18 @@ final class ConcurrentCache implements CacheManager {
         }
     }
 
+    @Override
+    public void deregisterMBean() {
+        if (mbean != null) {
+            ManagementService managementService =
+                (ManagementService) Monitor.getSystemModule(Module.JMX);
+            if (managementService != null) {
+                managementService.unregisterMBean(mbean);
+            }
+            mbean = null;
+        }
+    }
+
     /** Count a cache hit. */
     private void countHit() {
         if (collectAccessCounts) {
@@ -785,13 +790,13 @@ final class ConcurrentCache implements CacheManager {
         return maxSize;
     }
 
-    /** Get the number of allocated entries. */
+    /** Get the number of allocated entries in the cache. */
     long getAllocatedEntries() {
-        return cache.size();
+        return replacementPolicy.size();
     }
 
-    /** Get the number of allocated entries that hold valid objects. */
+    /** Get the number of cached objects. */
     long getUsedEntries() {
-        return cache.size() - replacementPolicy.freeEntries();
+        return cache.size();
     }
 }

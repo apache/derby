@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.management;
 
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.Set;
 import javax.management.ObjectName;
@@ -33,6 +34,10 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test cases for {@code CacheManagerMBean}.
  */
 public class CacheManagerMBeanTest extends MBeanTest {
+
+    private final static int DEFAULT_PAGE_CACHE_SIZE = 1000;
+    private final static int DEFAULT_CONTAINER_CACHE_SIZE = 100;
+    private final static int DEFAULT_STATEMENT_CACHE_SIZE = 100;
 
     public CacheManagerMBeanTest(String name) {
         super(name);
@@ -97,11 +102,11 @@ public class CacheManagerMBeanTest extends MBeanTest {
         // Boot the database, so that the MBeans are started.
         getConnection();
 
-        // There should be two CacheManager beans. One for the page cache
-        // and one for the container cache.
+        // There should be three CacheManager beans. One for the page cache,
+        // one for the container cache, and one for the statement cache.
         names = queryMBeans(pattern);
         assertEquals("Incorrect number of MBeans found in " + names,
-                     2, names.size());
+                     3, names.size());
 
         // Shut down the database.
         TestConfiguration.getCurrent().shutdownDatabase();
@@ -130,8 +135,7 @@ public class CacheManagerMBeanTest extends MBeanTest {
         assertLongAttribute(0, name, "HitCount");
         assertLongAttribute(0, name, "MissCount");
         assertLongAttribute(0, name, "EvictionCount");
-        // Default page cache size is 1000
-        assertLongAttribute(1000, name, "MaxEntries");
+        assertLongAttribute(DEFAULT_PAGE_CACHE_SIZE, name, "MaxEntries");
         // Cannot reliably tell how many entries to expect.
         // More than 0 for sure.
         Long allocated = (Long) getAttribute(name, "AllocatedEntries");
@@ -180,13 +184,109 @@ public class CacheManagerMBeanTest extends MBeanTest {
         assertLongAttribute(0, name, "HitCount");
         assertLongAttribute(0, name, "MissCount");
         assertLongAttribute(0, name, "EvictionCount");
-        // Default container cache size is 100
-        assertLongAttribute(100, name, "MaxEntries");
+        assertLongAttribute(DEFAULT_CONTAINER_CACHE_SIZE, name, "MaxEntries");
         // Cannot reliably tell how many entries to expect.
         // More than 0 for sure.
         Long allocated = (Long) getAttribute(name, "AllocatedEntries");
         assertTrue("Allocated entries: " + allocated, allocated > 0);
         Long used = (Long) getAttribute(name, "UsedEntries");
         assertTrue("Used entries: " + used, used > 0);
+    }
+
+    /**
+     * Test the {@code CacheManagerMBean} for the statement cache.
+     */
+    public void testStatementCache() throws Exception {
+        getConnection(); // boot the database
+        Set<ObjectName> names =
+                queryMBeans(createObjectName("StatementCache", null));
+
+        assertEquals("Should have a single statement cache", 1, names.size());
+
+        ObjectName name = names.iterator().next();
+
+        assertBooleanAttribute(false, name, "CollectAccessCounts");
+        assertLongAttribute(0, name, "HitCount");
+        assertLongAttribute(0, name, "MissCount");
+        assertLongAttribute(0, name, "EvictionCount");
+        assertLongAttribute(DEFAULT_STATEMENT_CACHE_SIZE, name, "MaxEntries");
+        // The statement cache is initially empty
+        assertLongAttribute(0, name, "AllocatedEntries");
+        assertLongAttribute(0, name, "UsedEntries");
+
+        // Prepare a statement. Now there should be one allocated entry, and
+        // that entry is also a used entry.
+        prepareStatement("values 1").close();
+        assertLongAttribute(1, name, "AllocatedEntries");
+        assertLongAttribute(1, name, "UsedEntries");
+
+        // One more...
+        prepareStatement("values 2").close();
+        assertLongAttribute(2, name, "AllocatedEntries");
+        assertLongAttribute(2, name, "UsedEntries");
+
+        // Now clear the statement cache. One more entry is allocated (for
+        // the statement that clears the cache), but no entries should be
+        // used after the statement cache is cleared.
+        Statement s = createStatement();
+        s.execute("call syscs_util.syscs_empty_statement_cache()");
+        assertLongAttribute(3, name, "AllocatedEntries");
+        assertLongAttribute(0, name, "UsedEntries");
+
+        // None of the accesses to the statement cache should have been
+        // counted so far.
+        assertLongAttribute(0, name, "HitCount");
+        assertLongAttribute(0, name, "MissCount");
+        assertLongAttribute(0, name, "EvictionCount");
+
+        // Enable counting of cache accesses.
+        setAttribute(name, "CollectAccessCounts", Boolean.TRUE);
+        assertBooleanAttribute(true, name, "CollectAccessCounts");
+
+        // Prepare a statement. Since the cache is empty, it must be a miss.
+        prepareStatement("values 1").close();
+        assertLongAttribute(0, name, "HitCount");
+        assertLongAttribute(1, name, "MissCount");
+        assertLongAttribute(0, name, "EvictionCount");
+
+        // One more...
+        prepareStatement("values 2").close();
+        assertLongAttribute(0, name, "HitCount");
+        assertLongAttribute(2, name, "MissCount");
+        assertLongAttribute(0, name, "EvictionCount");
+
+        // Now, this should cause a hit.
+        prepareStatement("values 1").close();
+        assertLongAttribute(1, name, "HitCount");
+        assertLongAttribute(2, name, "MissCount");
+        assertLongAttribute(0, name, "EvictionCount");
+
+        // Prepare so many statements that the cache is filled twice.
+        for (int i = 0; i < DEFAULT_STATEMENT_CACHE_SIZE * 2; i++) {
+            prepareStatement("values 1, " + i).close();
+        }
+
+        // None of the above statements were already in the cache, so expect
+        // all of them to cause misses.
+        assertLongAttribute(1, name, "HitCount");
+        assertLongAttribute(
+                2 + DEFAULT_STATEMENT_CACHE_SIZE * 2, name, "MissCount");
+
+        // We have prepared 2 + (DEFAULT_STATEMENT_CACHE_SIZE * 2) statements,
+        // and the cache can only hold DEFAULT_STATEMENT_CACHE_SIZE of them,
+        // so expect DEFAULT_STATEMENT_CACHE_SIZE + 2 statements to have been
+        // evicted from the cache.
+        assertLongAttribute(2 + DEFAULT_STATEMENT_CACHE_SIZE,
+                            name, "EvictionCount");
+
+        // Expect the cache to be full.
+        assertLongAttribute(DEFAULT_STATEMENT_CACHE_SIZE, name, "MaxEntries");
+        assertLongAttribute(DEFAULT_STATEMENT_CACHE_SIZE,
+                            name, "AllocatedEntries");
+        assertLongAttribute(DEFAULT_STATEMENT_CACHE_SIZE, name, "UsedEntries");
+
+        // Disable the access counts.
+        setAttribute(name, "CollectAccessCounts", Boolean.FALSE);
+        assertBooleanAttribute(false, name, "CollectAccessCounts");
     }
 }

@@ -379,6 +379,24 @@ public interface DataFactory extends Corruptable {
      */
     public StorageFactory getStorageFactory();
 
+    /**
+     * <p>
+     * Get the root directory of the data storage area. It is always
+     * guaranteed to be an absolute path, and it is prefixed with the
+     * JDBC sub-sub-protocol if it is not a directory database. Examples:
+     * </p>
+     *
+     * <dl>
+     *     <dt>{@code /path/to/database}</dt>
+     *     <dd>in case of a directory database</dd>
+     *     <dt>{@code memory:/path/to/database}</dt>
+     *     <dd> in case of a memory database</dd>
+     * </dl>
+     *
+     * @return the root directory of the data storage area
+     */
+    String getRootDirectory();
+
 	public void	stop();
 
     /**

@@ -135,8 +135,10 @@ final class ClockPolicy implements ReplacementPolicy {
     }
 
     @Override
-    public int freeEntries() {
-        return freeEntries.get();
+    public int size() {
+        synchronized (clock) {
+            return clock.size();
+        }
     }
 
     /**

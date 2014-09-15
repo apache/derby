@@ -1432,10 +1432,7 @@ public class BaseDataFileFactory
 		return rawStoreFactory;
 	}
 
-	/**
-		Get the root directory of the data storage area. Is always guaranteed 
-        to be an absolute path.
-	*/
+    @Override
 	public String getRootDirectory() 
     {
 		return dataDirectory;
