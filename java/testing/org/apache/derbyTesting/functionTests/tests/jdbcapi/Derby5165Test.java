@@ -62,6 +62,8 @@ public class Derby5165Test extends BaseJDBCTestCase {
             
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db" );
             test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db2");
+            test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db3" );
+            test = TestConfiguration.singleUseDatabaseDecorator( test, "d5165db4");
             
             return test;
         }
@@ -82,12 +84,12 @@ public class Derby5165Test extends BaseJDBCTestCase {
         Connection conn = xac.getConnection();
         // step 1 - perform update with XA, using Xid xid1 
         Statement s = conn.createStatement();
-        s.executeUpdate("create table d5165t(x int)");
-        s.executeUpdate("insert into d5165t values 1");
+        String tableName = "d5165t";
+        createAndLoadTable(conn, tableName, true);
         conn.commit();
         
         JDBC.assertSingleValueResultSet(
-                s.executeQuery("select * from d5165t"),
+                s.executeQuery("select * from " + tableName),
                 "1");
         
         conn.close();
@@ -97,7 +99,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         xar.start(xid1, XAResource.TMNOFLAGS);
         Connection c1 = xac.getConnection();
         Statement s1 = c1.createStatement();
-        s1.execute("update d5165t set x = 2 where x = 1");
+        s1.execute("update " + tableName + " set x = 2 where x = 1");
         xar.end(xid1, XAResource.TMSUCCESS);
 
         // step 2-prepare xid1 with XA but do NOT commit
@@ -119,7 +121,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         // time out.
         Statement s2 = c2.createStatement();
         try { 
-            ResultSet rs = s2.executeQuery("select * from d5165t");
+            ResultSet rs = s2.executeQuery("select * from " + tableName);
             //System.out.println("Contents of T:");
             while (rs.next()) {
                 //    System.out.println(rs.getInt(1));
@@ -155,14 +157,14 @@ public class Derby5165Test extends BaseJDBCTestCase {
         XAConnection xac = xads.getXAConnection();
         XAResource xar = xac.getXAResource();
         Connection conn = xac.getConnection();
-        // step 1 - perform update with XA, using Xid xid1 
+        // step 1 - perform insert with XA, using Xid xid1 
         Statement s = conn.createStatement();
-        s.executeUpdate("create table d5165t(x int)");
-        s.executeUpdate("insert into d5165t values 1");
+        String tableName = "d5165t";
+        createAndLoadTable(conn, tableName, true);
         conn.commit();
         
         JDBC.assertSingleValueResultSet(
-                s.executeQuery("select * from d5165t"),
+                s.executeQuery("select * from " + tableName),
                 "1");
         
         conn.close();
@@ -172,7 +174,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         xar.start(xid1, XAResource.TMNOFLAGS);
         Connection c1 = xac.getConnection();
         Statement s1 = c1.createStatement();
-        s1.execute("insert into d5165t values 2");
+        s1.execute("insert into " + tableName + " values 2");
         xar.end(xid1, XAResource.TMSUCCESS);
 
         // step 2-prepare xid1 with XA but do NOT commit
@@ -194,7 +196,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         // timed out.
         Statement s2 = c2.createStatement();
         try { 
-            ResultSet rs = s2.executeQuery("select * from d5165t");
+            ResultSet rs = s2.executeQuery("select * from " + tableName);
             while (rs.next()) {
                 //    System.out.println(rs.getInt(1));
                 rs.getInt(1);
@@ -210,6 +212,194 @@ public class Derby5165Test extends BaseJDBCTestCase {
         s2.close();
         
         xac.close();
+    }
+    
+    public void xtestXAUpdateLockKeptPastCrashedDBRestart() throws Exception
+    {
+        // call a forked process - this one will do something,
+        // then *not* shutdown, but not doing anything else either,
+        // implying a crash when the jvm is done
+        // This will force the connect to recover the database.
+        // Pass in the name of the database to be used.
+        assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
+                "functionTests.tests.jdbcapi.Derby5165Test.launchUpdate",
+                "d5165db3");
+        // Call the second forked process. This will connect and check,
+        // forcing recovery.
+        assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
+                "functionTests.tests.jdbcapi.Derby5165Test.checkUpdate",
+                "d5165db3");
+    }
+
+    public void testXAInsertLockKeptPastCrashedDBRestart() throws Exception
+    {
+        // call a forked process - this one will do something,
+        // then *not* shutdown, but not doing anything else either,
+        // implying a crash when the jvm is done
+        // This will force the connect to recover the database.
+        // Pass in the name of the database to be used.
+        assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
+                "functionTests.tests.jdbcapi.Derby5165Test.launchInsert",
+                "d5165db4");
+        // Call the second forked process. This will connect and check,
+        // forcing recovery.
+        assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
+                "functionTests.tests.jdbcapi.Derby5165Test.checkInsert",
+                "d5165db4");
+    }
+
+    public void launchUpdate() throws Exception
+    {
+        // setup to setup for update
+        // open a connection to the database
+        Connection simpleconn = getConnection();
+        setAutoCommit(false);
+        String tableName = "d5165t2";
+        createAndLoadTable(simpleconn, tableName, true);
+        
+        // step 0 - initialize db and xa constructs
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "d5165db3");
+        XAConnection xac = xads.getXAConnection();
+        XAResource xar = xac.getXAResource();
+        Connection conn = xac.getConnection();
+        // step 1 - perform update with XA, using Xid xid1 
+        Statement s = conn.createStatement();
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from " + tableName),
+                "1");
+        
+        conn.close();
+        s.close();
+        
+        Xid xid1 = new MyXid(1, 2, 3);
+        xar.start(xid1, XAResource.TMNOFLAGS);
+        Connection c1 = xac.getConnection();
+        Statement s1 = c1.createStatement();
+        s1.execute("update " + tableName + " set x = 2 where x = 1");
+        xar.end(xid1, XAResource.TMSUCCESS);
+
+        // step 2-prepare xid1 with XA but do NOT commit
+        xar.prepare(xid1);
+        
+        // doing nothing further should stop this jvm process.
+    }
+
+    public void checkUpdate() throws Exception
+    {
+        String tableName = "d5165t2";
+        // getting the connection will start and thus recover the db
+        Connection c2 = getConnection();
+        setAutoCommit(false);
+
+        // step 4 - if the bug occurs, the updates of step 1 will be visible
+        // however, the XA transaction was not committed, so this should
+        // time out.
+        Statement s2 = c2.createStatement();
+        try { 
+            ResultSet rs = s2.executeQuery(
+                    "select * from " + tableName);
+            while (rs.next()) {
+                rs.getInt(1);
+            }
+            rs.close();
+            fail("expected a timeout");
+        } catch (SQLException sqle ) {
+            assertSQLState("40XL1", sqle);
+        }
+    }
+
+    public void launchInsert() throws Exception
+    {
+        String tableName = "d5165t3";
+        // setup to setup for update
+        // open a connection to the database
+        Connection simpleconn = getConnection();
+        setAutoCommit(false);        
+        createAndLoadTable(simpleconn, tableName, true);
+        
+        // step 0 - initialize db and xa constructs
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "d5165db4");
+        XAConnection xac = xads.getXAConnection();
+        XAResource xar = xac.getXAResource();
+        Connection conn = xac.getConnection();
+        // step 1 - perform insert with XA, using Xid xid1 
+        Statement s = conn.createStatement();
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from " + tableName),
+                "1");
+        
+        conn.close();
+        s.close();
+        
+        Xid xid1 = new MyXid(1, 2, 3);
+        xar.start(xid1, XAResource.TMNOFLAGS);
+        Connection c1 = xac.getConnection();
+        Statement s1 = c1.createStatement();
+        // insert
+        s1.execute("insert into " + tableName + " values 2");
+        xar.end(xid1, XAResource.TMSUCCESS);
+
+        // step 2-prepare xid1 with XA but do NOT commit
+        xar.prepare(xid1);
+        
+        // doing nothing further should stop this jvm process.
+    }
+
+    public void checkInsert() throws Exception
+    {
+        String tableName = "d5165t3";
+        // getting the connection will start and thus recover the db
+        Connection c2 = getConnection();
+        setAutoCommit(false);
+
+        // step 4 - if the bug occurs, the updates of step 1 will be visible
+        // however, the XA transaction was not committed, so this should
+        // time out.
+        Statement s2 = c2.createStatement();
+        try { 
+            ResultSet rs = s2.executeQuery(
+                    "select * from " + tableName);
+            while (rs.next()) {
+                rs.getInt(1);
+            }
+            rs.close();
+            fail("expected a timeout");
+        } catch (SQLException sqle ) {
+            assertSQLState("40XL1", sqle);
+        }
+    }
+    
+    /**
+     * Create and load a table.
+     *
+     * @param create_table  If true, create new table - otherwise load into
+     *                      existing table.
+     * @param tblname       table to use.
+     *
+     * @exception  SQLException  Standard exception policy.
+     **/
+    private void createAndLoadTable(
+            Connection conn, 
+            String     tblname,
+            boolean    create_table)
+                    throws SQLException
+                    {
+        if (create_table)
+        {
+            Statement s = conn.createStatement();
+
+            s.executeUpdate("create table " + tblname + "(x int)");
+            s.executeUpdate("insert into " + tblname + " values 1");
+            conn.commit();
+            
+            JDBC.assertSingleValueResultSet(
+                    s.executeQuery("select * from " + tblname),
+                    "1");
+            s.close();
+            println("table created: " + tblname);
+        }
     }
 
     private static class MyXid implements Xid {
