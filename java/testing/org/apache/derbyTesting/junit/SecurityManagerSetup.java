@@ -98,7 +98,16 @@ public final class SecurityManagerSetup extends TestSetup {
         return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
                 public Boolean run() {
                     try {
+                        // Check if some arbitrary class from jacocoagent.jar
+                        // is available.
                         Class.forName("org.jacoco.agent.rt.RT");
+
+                        // If we got here, it means the tests are running
+                        // under JaCoCo. Set the jacoco.active property to
+                        // the empty string in order to activate the
+                        // JaCoCo-specific permissions in derby_tests.policy,
+                        // and return true.
+                        System.setProperty("jacoco.active", "");
                         return true;
                     } catch (ClassNotFoundException e) {
                         return false;
