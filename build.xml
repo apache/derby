@@ -937,7 +937,6 @@
       <jvmarg value="-Dprefix.1=org.apache.derby.iapi.types"/>            
       <jvmarg value="-Dprefix.2=org.apache.derby.impl"/>
       <arg value="org.apache.derby.iapi.types.DataValueDescriptor"/>
-      <arg value="org.apache.derby.impl.services.cache.CachedItem"/>
       <arg value="org.apache.derby.impl.store.raw.data.RecordId"/>
       <arg value="org.apache.derby.iapi.store.raw.ContainerKey"/>
       <arg value="org.apache.derby.iapi.services.cache.SizedCacheable"/>
@@ -974,8 +973,6 @@
       <and>
         <uptodate srcfile="${derby.engine.dir}/iapi/types/DataValueDescriptor.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/types/DataValueDescriptor.class"/>
-        <uptodate srcfile="${derby.engine.dir}/impl/services/cache/CachedItem.java"
-                  targetfile="${out.dir}/org/apache/derby/impl/services/cache/CachedItem.class"/>
         <uptodate srcfile="${derby.engine.dir}/impl/store/raw/data/RecordId.java"
                   targetfile="${out.dir}/org/apache/derby/impl/store/raw/data/RecordId.class"/>
         <uptodate srcfile="${derby.engine.dir}/iapi/store/raw/ContainerKey.java"
