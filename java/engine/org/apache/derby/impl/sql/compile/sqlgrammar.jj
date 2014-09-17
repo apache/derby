@@ -12565,6 +12565,12 @@ valueSpecification() throws StandardException :
         ValueNodeList whenList = new ValueNodeList(cm);
         ValueNodeList thenElseList = new ValueNodeList(cm);
 
+        // DERBY-6569: The left operand will be grafted into the conditional
+        // twice (both in the WHEN clause and in the THEN clause), but we
+        // only want it to be evaluated once. Wrap it in a CachedValueNode
+        // to prevent multiple evaluations.
+        leftExpression = new CachedValueNode(leftExpression);
+
         // Generate L = R for the WHEN clause.
         whenList.addElement(new BinaryRelationalOperatorNode(
                                     BinaryRelationalOperatorNode.K_EQUALS,

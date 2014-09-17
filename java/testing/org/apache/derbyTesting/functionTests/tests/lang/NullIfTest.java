@@ -348,6 +348,34 @@ public class NullIfTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test how NULLIF behaves if the left operand calls a non-deterministic
+     * function. DERBY-6569.
+     */
+    public void testNonDeterministicLeftOperand() throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery(
+                "SELECT NULLIF(INT(RANDOM()*2), 1) FROM ("
+                + "VALUES 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+                + ") AS V(X)");
+
+        // INT(RANDOM()*2) evaluates to 0 or 1. Since NULLIF(0, 1) evaluates
+        // to 0 and NULLIF(1, 1) evaluates to NULL, one would expect
+        // NULLIF(INT(RANDOM()*2), 1) to evaluate to either 0 or NULL.
+        // Before DERBY-6569, it sometimes evaluated to 1.
+        int count = 0;
+        while (rs.next()) {
+            int i = rs.getInt(1);
+            if (!rs.wasNull() && i != 0) {
+                fail("Expected NULL or 0, got " + i);
+            }
+            count++;
+        }
+        rs.close();
+
+        assertEquals(20, count);
+    }
+
+    /**
      * Runs the test fixtures in embedded and client.
      * 
      * @return test suite
