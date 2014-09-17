@@ -162,7 +162,7 @@ final class ClientThread extends Thread {
                                 // Cannot just aimlessly loop
                                 // writing errors
                                 return serverSocket.accept();
-                            } catch (IOException acceptE) {
+                            } catch (Exception acceptE) {
                                 // If not a normal shutdown,
                                 // log and shutdown the server
                                 if (!parent.getShutdown()) {
