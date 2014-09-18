@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.cache.CacheFactory;
 import org.apache.derby.iapi.services.cache.CacheManager;
 
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.LockFactory;
@@ -66,6 +67,8 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -548,16 +551,16 @@ public abstract class RAMAccessManager
      */
     RAMTransactionContext getCurrentTransactionContext() {
         RAMTransactionContext rtc =
-            (RAMTransactionContext) ContextService.getContext(
+            (RAMTransactionContext) getContext(
                 AccessFactoryGlobals.RAMXACT_INTERNAL_CONTEXT_ID);
 
         if (rtc == null) {
-            rtc = (RAMTransactionContext) ContextService.getContext(
+            rtc = (RAMTransactionContext) getContext(
                     AccessFactoryGlobals.RAMXACT_CHILD_CONTEXT_ID);
         }
 
         if (rtc == null) {
-            rtc = (RAMTransactionContext) ContextService.getContext(
+            rtc = (RAMTransactionContext) getContext(
                     AccessFactoryGlobals.RAMXACT_CONTEXT_ID);
         }
 
@@ -1053,7 +1056,7 @@ public abstract class RAMAccessManager
         // Create the conglom conglom from within a separate system xact
         RAMTransaction tc =
             (RAMTransaction) getAndNameTransaction(
-                ContextService.getFactory().getCurrentContextManager(),
+                getContextService().getCurrentContextManager(),
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
         // looking up lock_mode is dependant on access booting, but
@@ -1271,5 +1274,57 @@ public abstract class RAMAccessManager
 	public Cacheable newCacheable(CacheManager cm) {
 		return new CacheableConglomerate(this);
 	}
+
+    // ///////////////////////////////////////////////////////////////
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 
 }

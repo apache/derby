@@ -1294,7 +1294,7 @@ abstract class SQLBinary
                     getLength(), desiredWidth);
 
             StatementContext statementContext = (StatementContext)
-                ContextService.getContext(ContextId.LANG_STATEMENT);
+                DataValueFactoryImpl.getContext(ContextId.LANG_STATEMENT);
             statementContext.getActivation().
                     getResultSet().addWarning(warning);
         }

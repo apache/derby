@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.security.Securable;
 import org.apache.derby.iapi.security.SecurityUtil;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -438,7 +440,7 @@ public class JarUtil
 
         if (!upgrading) {
             LanguageConnectionContext lcc =
-                (LanguageConnectionContext)ContextService.getContextOrNull(
+                (LanguageConnectionContext)getContextOrNull(
                     LanguageConnectionContext.CONTEXT_ID);
 
             // DERBY-5357 UUIDs introduced in jar file names in 10.9
@@ -499,4 +501,30 @@ public class JarUtil
                 new File(oldFile.getPath()),
                 new File(newFile.getPath()), null);
     }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

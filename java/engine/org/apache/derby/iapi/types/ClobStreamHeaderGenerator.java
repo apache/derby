@@ -20,10 +20,14 @@
 */
 package org.apache.derby.iapi.types;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import java.io.IOException;
 import java.io.ObjectOutput;
 import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
@@ -255,7 +259,7 @@ public final class ClobStreamHeaderGenerator
      */
     private void determineHeaderFormat() {
         DatabaseContext dbCtx = (DatabaseContext)
-                ContextService.getContext(DatabaseContext.CONTEXT_ID);
+                getContext(DatabaseContext.CONTEXT_ID);
         if (dbCtx == null) {
             throw new IllegalStateException("No context, unable to determine " +
                     "which stream header format to generate");
@@ -279,4 +283,30 @@ public final class ClobStreamHeaderGenerator
             callbackDVD.setStreamHeaderFormat(isPreDerbyTenFive);
         }
     }
+
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

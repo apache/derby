@@ -91,7 +91,6 @@ import org.apache.derby.impl.jdbc.Util;
 public class EmbeddedDriver  implements Driver {
 
 	static {
-
 		EmbeddedDriver.boot();
 	}
 
@@ -196,7 +195,14 @@ public class EmbeddedDriver  implements Driver {
             pw = new PrintWriter(System.err, true);
         }
 
-        new JDBCBoot().boot(Attribute.PROTOCOL, pw);
+        try {
+            new JDBCBoot().boot(Attribute.PROTOCOL, pw);
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace( pw );
+            if ( t instanceof RuntimeException ) { throw (RuntimeException) t; }
+        }
 	}
 
     ////////////////////////////////////////////////////////////////////

@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.sql.SQLWarning;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -1237,7 +1239,7 @@ recompileOutOfDatePlan:
 			if (!isValid || (inUseCount != 0))
 				return;
 
-			ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+			ContextManager cm = getContextService().getCurrentContextManager();
 			LanguageConnectionContext lcc = 
 				(LanguageConnectionContext) 
 				(cm.getContext(LanguageConnectionContext.CONTEXT_ID));
@@ -1392,4 +1394,30 @@ recompileOutOfDatePlan:
     public long getInitialRowCount(int rsNum, long currentRowCount) {
         return rowCountStats.getInitialRowCount(rsNum, currentRowCount);
     }
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

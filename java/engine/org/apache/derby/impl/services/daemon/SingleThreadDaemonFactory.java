@@ -37,7 +37,7 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 	
 	public SingleThreadDaemonFactory()
 	{
-		contextService = ContextService.getFactory();
+		contextService = getContextService();
 	}
 
 	/*
@@ -71,5 +71,30 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 		daemonThread.start();
 		return daemon;
 	}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 }
 

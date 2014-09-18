@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -59,7 +60,7 @@ class MaxMinAggregateDefinition
 				StringBuffer aggregatorClass) 
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+			QueryTreeNode.getContext(LanguageConnectionContext.CONTEXT_ID);
 
 			/*
 			** MIN and MAX may return null
@@ -99,4 +100,5 @@ class MaxMinAggregateDefinition
 	{
 		return(isMax);
 	}
+    
 }

@@ -160,7 +160,7 @@ public final class Timeout
 
         // need language here to print out tablenames
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-            ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+            Deadlock.getContext(LanguageConnectionContext.CONTEXT_ID);
         if( lcc != null )
             tc = lcc.getTransactionExecute();
 

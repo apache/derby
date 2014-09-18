@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -52,6 +53,8 @@ import org.apache.derby.impl.sql.compile.TableName;
 import java.util.List;
 import java.util.Properties;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Timestamp;
 
 /**
@@ -1005,7 +1008,7 @@ public class GenericConstantActionFactory
 	static protected Authorizer getAuthorizer()
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+			getContext(LanguageConnectionContext.CONTEXT_ID);
 		return lcc.getAuthorizer();
 	}
 
@@ -1195,5 +1198,30 @@ public class GenericConstantActionFactory
 	{
 		return new MergeConstantAction( matchingClauses );
 	}
+
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 
 }

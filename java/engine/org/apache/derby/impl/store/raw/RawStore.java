@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.raw;
 import org.apache.derby.iapi.services.daemon.DaemonFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.crypto.CipherFactoryBuilder;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
@@ -67,6 +68,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.SecureRandom;
 
@@ -508,7 +510,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         RawTransaction t = 
                 xactFactory.findUserTransaction(
                 this,
-                ContextService.getFactory().getCurrentContextManager(), 
+                getContextService().getCurrentContextManager(), 
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
         //back up blocking operations are unlogged operations.
@@ -629,7 +631,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// to open the container through page cache
 		RawTransaction t = 
             xactFactory.findUserTransaction(this,
-                ContextService.getFactory().getCurrentContextManager(), 
+                getContextService().getCurrentContextManager(), 
                 AccessFactoryGlobals.USER_TRANS_NAME);
 
 		try {
@@ -809,7 +811,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 createBackupDirectory(backupJarDir);
 
                 LanguageConnectionContext lcc = 
-                    (LanguageConnectionContext)ContextService.getContextOrNull(
+                    (LanguageConnectionContext)getContextOrNull(
                         LanguageConnectionContext.CONTEXT_ID);
         
                 // DERBY-5357 UUIDs introduced in jar file names in 10.9
@@ -1655,7 +1657,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         RawTransaction transaction =
             xactFactory.startTransaction(
                    this,
-                    ContextService.getFactory().getCurrentContextManager(),
+                    getContextService().getCurrentContextManager(),
                     AccessFactoryGlobals.USER_TRANS_NAME);
 
         try 
@@ -2824,4 +2826,56 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             }
         }
     }
+    
+    /**
+     * Privileged lookup of the ContextService. Private so that user code
+     * can't call this entry point.
+     */
+    private static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

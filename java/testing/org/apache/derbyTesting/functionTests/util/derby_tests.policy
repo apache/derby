@@ -55,6 +55,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
   // (called from derbyTesting.jar through code in derby.jar)
@@ -241,6 +242,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
+  // Need by various tests which call the ContextService
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
 

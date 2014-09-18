@@ -31,6 +31,8 @@ import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 /**
 	A context that shutdowns down the database on a databsae exception.
@@ -71,7 +73,7 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
         }
 
         if (se.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
-		    ContextService.getFactory().notifyAllActiveThreads(this);
+		    getContextService().notifyAllActiveThreads(this);
             // This may be called multiple times, but is short-circuited
             // in the monitor.
 		    Monitor.getMonitor().shutdown(db);
@@ -90,4 +92,30 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 	}
 
 	public Database getDatabase() {return db;}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

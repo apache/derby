@@ -46,6 +46,8 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.reference.Property;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 
 public class T_Heap extends T_Generic
@@ -96,7 +98,7 @@ public class T_Heap extends T_Generic
 		try {
 
             tc = store.getTransaction(
-                    ContextService.getFactory().getCurrentContextManager());
+                    getContextService().getCurrentContextManager());
 
             if (t_001(tc))
 			{
@@ -145,4 +147,30 @@ public class T_Heap extends T_Generic
 
         return(test_result);
     }
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

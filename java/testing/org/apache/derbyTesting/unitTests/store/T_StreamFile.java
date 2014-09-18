@@ -50,6 +50,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
 import java.io.*;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 
 /**
@@ -92,7 +94,7 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 	public void boot(boolean create, Properties startParams)
 		 throws StandardException {
 		super.boot(create, startParams);
-		contextService = ContextService.getFactory();
+		contextService = getContextService();
 	}
 
 
@@ -389,4 +391,30 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 		
 		PASS("SF002");
 	}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

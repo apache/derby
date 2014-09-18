@@ -21,6 +21,8 @@
 package org.apache.derby.impl.services.daemon;
 
 import java.io.PrintWriter;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
@@ -227,7 +229,7 @@ public class IndexStatisticsDaemonImpl
         this.db = db;
         this.dbOwner = userName;
         this.databaseName = databaseName;
-        this.ctxMgr = ContextService.getFactory().newContextManager();
+        this.ctxMgr = getContextService().newContextManager();
         this.timeOfCreation = System.currentTimeMillis();
         trace(0, "created{log=" + doLog + ", traceLog=" +
                 traceToDerbyLog + ", traceOut=" + traceToStdOut +
@@ -843,7 +845,7 @@ public class IndexStatisticsDaemonImpl
         // Implement the outer-level exception handling here.
         try {
             // DERBY-5088: Factory-call may fail.
-            ctxService = ContextService.getFactory();
+            ctxService = getContextService();
             ctxService.setCurrentContextManager(ctxMgr);
             processingLoop();
         } catch (ShutdownException se) {
@@ -1333,6 +1335,31 @@ public class IndexStatisticsDaemonImpl
         return "<" + t.getClass() + ", msg=" + t.getMessage() + sqlState +
                 "> " + trace;
     }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }    
 
     /**
      * Support class used to compare keys when scanning indexes.

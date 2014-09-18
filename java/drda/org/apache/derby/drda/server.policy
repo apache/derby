@@ -22,6 +22,7 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.util.PropertyPermission "user.dir", "read";
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 
   // The next two properties are used to determine if the VM is 32 or 64 bit.
   //

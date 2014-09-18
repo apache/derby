@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
@@ -68,6 +69,8 @@ import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
 import org.apache.derby.iapi.types.SQLChar;
 
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 
 
@@ -111,7 +114,7 @@ public class T_b2i extends T_MultiIterations
 			store_module = Monitor.createPersistentService(
 				getModuleToTestProtocolName(), testService, startParams);
 			
-			contextService = ContextService.getFactory();
+			contextService = getContextService();
 
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -855,7 +858,7 @@ public class T_b2i extends T_MultiIterations
             }
             catch (StandardException e)
             {
-                ContextService contextFactory = ContextService.getFactory();
+                ContextService contextFactory = getContextService();
 
                 // Get the context manager.
                 ContextManager cm = contextFactory.getCurrentContextManager();
@@ -3261,7 +3264,7 @@ public class T_b2i extends T_MultiIterations
 					throw e;
 
                 ContextService contextFactory = 
-                    ContextService.getFactory();
+                    getContextService();
 
                 // Get the context manager.
                 ContextManager cm = contextFactory.getCurrentContextManager();
@@ -5096,11 +5099,63 @@ public class T_b2i extends T_MultiIterations
      * @return {@code true} if the database is active, {@code false} otherwise
      */
     public boolean isdbActive() {
-        LanguageConnectionContext lcc = (LanguageConnectionContext) ContextService
-                .getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+        LanguageConnectionContext lcc = (LanguageConnectionContext)
+                getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
         Database db = (Database) (lcc != null ? lcc.getDatabase() : null);
         return (db != null ? db.isActive() : false);
     }
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 
 }
 

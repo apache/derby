@@ -605,7 +605,7 @@ public final class SQLTime extends DataType
 		restoreToNull();
 		if (theValue != null)
         {
-            DatabaseContext databaseContext = (DatabaseContext) ContextService.getContext(DatabaseContext.CONTEXT_ID);
+            DatabaseContext databaseContext = (DatabaseContext) DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             parseTime( theValue,
                        false,
                        (databaseContext == null) ? null : databaseContext.getDatabase(),

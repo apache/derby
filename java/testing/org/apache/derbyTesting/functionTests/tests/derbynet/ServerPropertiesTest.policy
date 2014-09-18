@@ -51,6 +51,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   permission java.util.PropertyPermission "java.runtime.version", "read, write";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read, write";//sysinfo
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
   // (called from derbyTesting.jar through code in derby.jar)

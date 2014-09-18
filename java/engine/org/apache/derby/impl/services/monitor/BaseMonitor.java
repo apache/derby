@@ -31,6 +31,8 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -198,7 +200,7 @@ abstract class BaseMonitor
 		Monitor.getStream().println(LINE);
 		(services.get(0)).shutdown();
 
-		ContextService.stop();
+		stopContextService();
 		Monitor.clearMonitor();
 	}
 
@@ -2053,7 +2055,7 @@ nextModule:
 	public ResourceBundle getBundle(String messageId) {
 		ContextManager cm;
 		try {
-			cm = ContextService.getFactory().getCurrentContextManager();
+			cm = getContextService().getCurrentContextManager();
 		} catch (ShutdownException se) {
 			cm = null;
 		}
@@ -2079,6 +2081,57 @@ nextModule:
     public final boolean isDaemonThread(Thread thread) {
         return thread.getThreadGroup() == daemonGroup;
     }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }    
+
+    /**
+     * Privileged shutdown of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  void    stopContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            ContextService.stop();
+        }
+        else
+        {
+            AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Object>()
+                 {
+                     public Object run()
+                     {
+                         ContextService.stop();
+                         return null;
+                     }
+                 }
+                 );
+        }
+    }    
 
 	/**
 		Initialize the monitor wrt the current environemnt.

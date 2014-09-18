@@ -29,6 +29,7 @@ import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 
@@ -54,6 +55,8 @@ import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -300,7 +303,7 @@ public abstract class AuthenticationServiceBase
         if ( store == null ) { return null; }
         else
         {
-            return store.getTransaction( ContextService.getFactory().getCurrentContextManager() );
+            return store.getTransaction( getContextService().getCurrentContextManager() );
         }
     }
 
@@ -344,7 +347,7 @@ public abstract class AuthenticationServiceBase
 
 		  if (store != null)
 			tc = store.getTransaction(
-                ContextService.getFactory().getCurrentContextManager());
+                getContextService().getCurrentContextManager());
 
 		  propertyValue =
 			PropertyUtil.getDatabaseProperty(tc, key);
@@ -667,7 +670,7 @@ public abstract class AuthenticationServiceBase
      */
     private static DataDictionary getDataDictionary() {
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-            ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+            getContext(LanguageConnectionContext.CONTEXT_ID);
         return lcc.getDataDictionary();
     }
 
@@ -817,4 +820,55 @@ public abstract class AuthenticationServiceBase
         return StringUtil.toHexString(passwordSubstitute, 0,
                                       passwordSubstitute.length);
     }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

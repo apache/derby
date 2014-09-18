@@ -42,6 +42,8 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.error.StandardException; 
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties; 
 
 import javax.transaction.xa.XAResource;
@@ -179,7 +181,7 @@ public class T_XA extends T_Generic
         REPORT("(XATest_1) starting");
 
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         // COMMIT AN IDLE TRANSACTION.
 
@@ -272,7 +274,7 @@ public class T_XA extends T_Generic
     {
         REPORT("(XATest_2) starting");
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         // COMMIT AN IDLE TRANSACTION.
 
@@ -437,7 +439,7 @@ public class T_XA extends T_Generic
         REPORT("(XATest_3) starting");
 
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         // ABORT AN IDLE TRANSACTION.
 
@@ -557,7 +559,7 @@ public class T_XA extends T_Generic
         REPORT("(XATest_4) starting");
 
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         // ABORT AN IDLE TRANSACTION.
 
@@ -827,7 +829,7 @@ public class T_XA extends T_Generic
         }
 
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         // COMMIT AN IDLE TRANSACTION.
 
@@ -1068,7 +1070,7 @@ public class T_XA extends T_Generic
         REPORT("(XATest_5) starting");
 
         ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                getContextService().getCurrentContextManager();
 
         TransactionController   tc = store.getTransaction(cm);
 
@@ -1180,6 +1182,32 @@ public class T_XA extends T_Generic
         REPORT("(XATest_6) finishing");
     }
 
+    
+    /**
+     * Privileged lookup of the ContextService. Package protected so that user code
+     * can't call this entry point.
+     */
+    static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 
 class commit_method
@@ -1230,10 +1258,10 @@ class commit_method
 
                 SanityManager.ASSERT(
                     cm == 
-                    ContextService.getFactory().getCurrentContextManager(),
+                    T_XA.getContextService().getCurrentContextManager(),
                     "cm = " + cm +
                     "current = " + 
-                        ContextService.getFactory().getCurrentContextManager());
+                        T_XA.getContextService().getCurrentContextManager());
             }
 
             ((XAResourceManager) store.getXAResourceManager()).commit(
@@ -1275,10 +1303,10 @@ class commit_method
 
                 SanityManager.ASSERT(
                     cm == 
-                    ContextService.getFactory().getCurrentContextManager(),
+                    T_XA.getContextService().getCurrentContextManager(),
                     "cm = " + cm +
                     "current = " + 
-                        ContextService.getFactory().getCurrentContextManager());
+                        T_XA.getContextService().getCurrentContextManager());
             }
 
             ((XAResourceManager) store.getXAResourceManager()).rollback(

@@ -59,6 +59,8 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.io.*;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 
 /**
@@ -120,7 +122,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		 throws StandardException
 	{
 		super.boot(create, startParams);
-		contextService = ContextService.getFactory();
+		contextService = getContextService();
 	}
 
 	/*
@@ -7632,6 +7634,32 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		PASS(testInfo);
 	}
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 
 }
 

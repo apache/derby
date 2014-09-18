@@ -21,6 +21,10 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
+import java.security.AccessControlException;
+import java.security.AccessControlContext;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -683,7 +687,7 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 			(!valid ||
 			 (preparedStatement == null)))
 		{
-			ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+			ContextManager cm = getContextService().getCurrentContextManager();
 
 			/*
 			** Find the language connection context.  Get
@@ -1159,6 +1163,30 @@ public class SPSDescriptor extends UniqueSQLObjectDescriptor
 	// getDescriptorName! 
     @Override
 	public String getDescriptorName() { return name; }
-	
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 }
 

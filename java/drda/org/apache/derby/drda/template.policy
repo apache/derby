@@ -24,6 +24,7 @@ grant codeBase "${derby.install.url}derby.jar"
   // These permissions are needed for everyday, embedded Derby usage.
   //
   permission java.lang.RuntimePermission "createClassLoader";
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 
   // Next, the permission to read "derby.*" properties is granted to
   // derby.jar. This is necessary for the engine to read derby properties.

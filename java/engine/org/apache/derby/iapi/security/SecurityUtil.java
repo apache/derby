@@ -38,6 +38,7 @@ import javax.security.auth.Subject;
 import org.apache.derby.authentication.SystemPrincipal;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -46,11 +47,18 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.security.SystemPermission;
 
 /**
  * This class provides helper functions for security-related features.
  */
 public class SecurityUtil {
+
+    /**
+     * Permission to access Derby contexts (permissions are immutable).
+     */
+    private final static SystemPermission USE_DERBY_INTERNALS = new SystemPermission
+        ( SystemPermission.ENGINE, SystemPermission.USE_DERBY_INTERNALS );
 
     /**
      * Creates a (read-only) Subject representing a given user
@@ -181,7 +189,7 @@ public class SecurityUtil {
         throws StandardException
     {
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-				ContextService.getContextOrNull( LanguageConnectionContext.CONTEXT_ID );
+				getContextOrNull( LanguageConnectionContext.CONTEXT_ID );
 
         if ( lcc.usesSqlAuthorization() )
         {
@@ -203,5 +211,41 @@ public class SecurityUtil {
         }
     }
 
+    /**
+     * Verify that we have been granted permission to use Derby internals
+     */
+    public  static  void    checkDerbyInternalsPrivilege()
+    {
+        if ( System.getSecurityManager() != null )
+        {
+            AccessController.checkPermission( USE_DERBY_INTERNALS );
+        }
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 
 }

@@ -21,12 +21,15 @@
 
 package org.apache.derby.iapi.sql.conn;
 
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.sql.SQLException;
 
 public class ConnectionUtil {
@@ -42,7 +45,7 @@ public class ConnectionUtil {
 		throws SQLException {
 
 			LanguageConnectionContext lcc = (LanguageConnectionContext)
-				ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+				getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 
 			if (lcc == null)
 				throw new SQLException(
@@ -54,4 +57,30 @@ public class ConnectionUtil {
 
 			return lcc;
 	}
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

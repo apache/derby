@@ -49,6 +49,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -58,6 +59,8 @@ import org.apache.derby.iapi.services.io.Formatable;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Timestamp;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -152,7 +155,7 @@ public class GenericStorablePreparedStatement
 		throws StandardException
 	{
 		LanguageConnectionContext lcc =
-			(LanguageConnectionContext) ContextService.getContext
+			(LanguageConnectionContext) getContext
 				                                  (LanguageConnectionContext.CONTEXT_ID);
 		ClassFactory classFactory = lcc.getLanguageConnectionFactory().getClassFactory();
 
@@ -278,4 +281,29 @@ public class GenericStorablePreparedStatement
 			return "";
 		}
 	} 
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 }

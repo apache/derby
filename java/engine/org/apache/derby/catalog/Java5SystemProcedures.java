@@ -21,12 +21,15 @@
 
 package org.apache.derby.catalog;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassFactoryContext;
@@ -93,7 +96,7 @@ public  class   Java5SystemProcedures
         throws SQLException
     {
         try {
-			ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContext( ClassFactoryContext.CONTEXT_ID );
+			ClassFactoryContext cfc = (ClassFactoryContext) getContext( ClassFactoryContext.CONTEXT_ID );
             ClassFactory    classFactory = cfc.getClassFactory();
 
             String              toolClassName = findToolClassName( toolName, optionalArgs );            
@@ -183,5 +186,31 @@ public  class   Java5SystemProcedures
     ///////////////////////////////////////////////////////////////////////////////////
 
     private static  StandardException wrap( Throwable t )   { return StandardException.plainWrapException( t ); }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 

@@ -89,6 +89,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 
 import java.util.Properties;
@@ -884,7 +885,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				RawTransaction recoveryTransaction =
                     tf.startTransaction(
                         rawStoreFactory,
-                        ContextService.getFactory().getCurrentContextManager(),
+                        getContextService().getCurrentContextManager(),
                         AccessFactoryGlobals.USER_TRANS_NAME);
 
 				// make this transaction aware that it is a recovery transaction
@@ -1671,7 +1672,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			// start a checkpoint transaction 
 			if (needCPTran)
 				cptran = tf.startInternalTransaction(rsf,
-				ContextService.getFactory().getCurrentContextManager());
+				getContextService().getCurrentContextManager());
 
 			/////////////////////////////////////////////////////
 			// gather a snapshot of the various interesting points of the log
@@ -4956,7 +4957,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			{
 				TransactionController tc = null;
 				tc = af.getTransaction(
-                        ContextService.getFactory().getCurrentContextManager());
+                        getContextService().getCurrentContextManager());
 				tc.setProperty(Property.LOG_ARCHIVE_MODE , "true", true);
 			}
 		}
@@ -4970,7 +4971,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		if (af != null)
 		{
 			TransactionController tc = null;
-			tc = af.getTransaction(ContextService.getFactory().getCurrentContextManager());
+			tc = af.getTransaction(getContextService().getCurrentContextManager());
 			tc.setProperty(Property.LOG_ARCHIVE_MODE , "false", true);
 		}
         logArchived = false;
@@ -5954,4 +5955,30 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
         return sb.toString();
     }
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

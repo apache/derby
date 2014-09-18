@@ -21,8 +21,12 @@
 
 package org.apache.derby.diag;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -41,7 +45,7 @@ abstract    class   DiagUtil
     static void    checkAccess()   throws StandardException
     {
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-            ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+            getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
         DataDictionary  dd = lcc.getDataDictionary();
 
         if ( dd.usesSqlAuthorization() )
@@ -53,6 +57,32 @@ abstract    class   DiagUtil
             {
                 throw StandardException.newException( SQLState.DBO_ONLY );
             }
+        }
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
         }
     }
 

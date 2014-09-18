@@ -24,10 +24,13 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.types.IndexDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -394,7 +397,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 			ExecutionContext	ec;
 
 			ec = (ExecutionContext)
-					ContextService.getContext(ExecutionContext.CONTEXT_ID);
+					getContext(ExecutionContext.CONTEXT_ID);
 			ef = ec.getExecutionFactory();
 		}
 		return ef;
@@ -431,5 +434,31 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	{
 		return StoredFormatIds.INDEX_ROW_GENERATOR_V01_ID;
 	}
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 
 }

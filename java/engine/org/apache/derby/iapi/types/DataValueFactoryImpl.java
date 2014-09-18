@@ -34,6 +34,9 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
@@ -47,6 +50,7 @@ import java.util.Properties;
 import java.util.Locale;
 
 import org.apache.derby.iapi.db.DatabaseContext;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 
 /**
@@ -1143,11 +1147,36 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
         {
                 if (localeFinder == null)
                 {
-                        DatabaseContext dc = (DatabaseContext) ContextService.getContext(DatabaseContext.CONTEXT_ID);
+                        DatabaseContext dc = (DatabaseContext) getContext(DatabaseContext.CONTEXT_ID);
                         if( dc != null)
                             localeFinder = dc.getDatabase();
                 }
 
                 return localeFinder;
         }
+    
+    /**
+     * Privileged lookup of a Context. Package protected so that user code
+     * can't call this entry point.
+     */
+    static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 }

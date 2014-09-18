@@ -68,6 +68,7 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.io.InvalidClassException;
 import java.io.Externalizable;
+import java.security.PrivilegedAction;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
@@ -409,7 +410,7 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
             (af == null) ? 
                 null : 
                 af.getTransaction(
-                    ContextService.getFactory().getCurrentContextManager());
+                    getContextService().getCurrentContextManager());
 
 		bufferSize = 
 			PropertyUtil.getServiceInt(tc, prop,
@@ -1195,6 +1196,31 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
         }
 
         return null;
+    }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
     }
 
 }

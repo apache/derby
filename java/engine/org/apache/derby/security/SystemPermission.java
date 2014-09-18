@@ -96,6 +96,11 @@ final public class SystemPermission extends BasicPermission {
     public static final String MONITOR = "monitor";
 
     /**
+     * Action (<code>"useDerbyInternals"</code>) by the engine to lookup Derby contexts.
+     */
+    public static final String USE_DERBY_INTERNALS = "usederbyinternals";
+
+    /**
      * The legal system permission names.
      */
     static private final Set<String> LEGAL_NAMES = new HashSet<String>();    
@@ -115,6 +120,7 @@ final public class SystemPermission extends BasicPermission {
         LEGAL_ACTIONS.add(CONTROL);
         LEGAL_ACTIONS.add(MONITOR);
         LEGAL_ACTIONS.add(SHUTDOWN);
+        LEGAL_ACTIONS.add( USE_DERBY_INTERNALS );
     }
     
     /** Constant representing {@code SystemPermission("engine, "monitor")}. */
@@ -141,7 +147,7 @@ final public class SystemPermission extends BasicPermission {
      * @see BasicPermission#BasicPermission(String)
      */
     public SystemPermission(String name, String actions) {
-        super(name);
+        super( name );
         validateNameAndActions(name, actions);
     }
 
@@ -191,6 +197,7 @@ final public class SystemPermission extends BasicPermission {
         // Get all the legal actions that are in actionSet, in the order
         // of LEGAL_ACTIONS.
         List<String> legalActions = new ArrayList<String>(LEGAL_ACTIONS);
+
         legalActions.retainAll(actionSet);
 
         return buildActionsString(legalActions);
@@ -399,5 +406,20 @@ final public class SystemPermission extends BasicPermission {
                 permissions.put(sp.getName(), sp);
             }
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return getClass().getName() +
+            "( " +
+            doubleQuote( getName() ) +
+            ", " +
+            doubleQuote( actions ) +
+            " )";
+    }
+    private String  doubleQuote( String raw )
+    {
+        return "\"" + raw + "\"";
     }
 }

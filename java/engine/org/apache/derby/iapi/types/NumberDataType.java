@@ -22,8 +22,11 @@
 package org.apache.derby.iapi.types;
 
 import java.math.BigDecimal;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.reference.SQLState;
@@ -568,7 +571,7 @@ public abstract class NumberDataType extends DataType
      */
      private static boolean useDB2Limits() throws StandardException {
          LanguageConnectionContext lcc =
-             (LanguageConnectionContext)ContextService.getContextOrNull(
+             (LanguageConnectionContext)getContextOrNull(
                  LanguageConnectionContext.CONTEXT_ID);
          if (lcc != null) {
              return !lcc.getDataDictionary().checkVersion(
@@ -581,5 +584,31 @@ public abstract class NumberDataType extends DataType
              return false;
          }
     }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 

@@ -67,7 +67,7 @@ class SumAvgAggregateDefinition
 			TypeId compType = inputType.getTypeId();
 		
 			CompilerContext cc = (CompilerContext)
-				ContextService.getContext(CompilerContext.CONTEXT_ID);
+				QueryTreeNode.getContext(CompilerContext.CONTEXT_ID);
 			TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 			TypeCompiler tc = tcf.getTypeCompiler(compType);
 		

@@ -193,7 +193,7 @@ public class D_DiagnosticUtil
 
             TransactionController tc =
                 store_module.getTransaction(
-                    ContextService.getFactory().getCurrentContextManager());
+                    FileContainer.getContextService().getCurrentContextManager());
 
             ConglomerateController open_table = 
                 tc.openConglomerate(
@@ -243,7 +243,8 @@ public class D_DiagnosticUtil
 			RawStoreFactory store_module = (RawStoreFactory)
 				Monitor.findServiceModule(module, RawStoreFactory.MODULE);
 
-			xact = store_module.startInternalTransaction(ContextService.getFactory().getCurrentContextManager());
+			xact = store_module.startInternalTransaction
+                (FileContainer.getContextService().getCurrentContextManager());
 
 			ContainerKey id = new ContainerKey(segmentid, containerid);
 			ContainerHandle container = 
@@ -332,7 +333,7 @@ public class D_DiagnosticUtil
             {
                 TransactionController tc = 
                     store_module.getTransaction(
-                        ContextService.getFactory().getCurrentContextManager());
+                        FileContainer.getContextService().getCurrentContextManager());
 
                 conglom_id = tc.findConglomid(containerid);
             }
@@ -409,7 +410,7 @@ public class D_DiagnosticUtil
             {
                 TransactionController tc =
                     store_module.getTransaction(
-                        ContextService.getFactory().getCurrentContextManager());
+                        FileContainer.getContextService().getCurrentContextManager());
 
                 container_id = tc.findContainerid(conglomid);
             }

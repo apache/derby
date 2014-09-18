@@ -554,7 +554,7 @@ public final class SQLDate extends DataType
 
 		if (theValue != null)
 		{
-            DatabaseContext databaseContext = (DatabaseContext) ContextService.getContext(DatabaseContext.CONTEXT_ID);
+            DatabaseContext databaseContext = (DatabaseContext) DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             parseDate( theValue,
                        false,
                        (databaseContext == null) ? null : databaseContext.getDatabase(),

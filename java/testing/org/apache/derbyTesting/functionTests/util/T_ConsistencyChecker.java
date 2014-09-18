@@ -21,9 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.util;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -239,7 +242,7 @@ public class T_ConsistencyChecker
 		throws StandardException
 	{
 		lcc = (LanguageConnectionContext)
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+			getContext(LanguageConnectionContext.CONTEXT_ID);
 		tc = lcc.getTransactionExecute();
 
 		dd = lcc.getDataDictionary();
@@ -455,7 +458,7 @@ public class T_ConsistencyChecker
         TransactionController   tc;
 
         lcc = (LanguageConnectionContext)
-            ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+           getContext(LanguageConnectionContext.CONTEXT_ID);
         tc = lcc.getTransactionExecute();
 
         numOpens = tc.countOpens(TransactionController.OPEN_TOTAL);
@@ -489,7 +492,7 @@ public class T_ConsistencyChecker
         StringBuffer            debugBuf = new StringBuffer();
 
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-             ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+             getContext(LanguageConnectionContext.CONTEXT_ID);
 
         dd = lcc.getDataDictionary();
         dm = dd.getDependencyManager();
@@ -507,4 +510,30 @@ public class T_ConsistencyChecker
 
         return debugBuf.toString();
     }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

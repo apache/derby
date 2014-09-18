@@ -259,6 +259,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LuceneSuite.suite());
         suite.addTest(ConsistencyCheckerTest.suite());
         suite.addTest(Derby5866TriggerOrderTest.suite());
+        suite.addTest(NoDBInternalsPermissionTest.suite());
         return suite;
 	}
 }

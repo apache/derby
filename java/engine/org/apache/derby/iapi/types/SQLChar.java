@@ -1944,7 +1944,7 @@ readingLoop:
                 warning.initCause(se);
 
                 StatementContext statementContext = (StatementContext)
-                    ContextService.getContext(ContextId.LANG_STATEMENT);
+                    DataValueFactoryImpl.getContext(ContextId.LANG_STATEMENT);
                 statementContext.getActivation().
                         getResultSet().addWarning(warning);
             }
@@ -3096,7 +3096,7 @@ readingLoop:
         if (localeFinder == null)
         {
             DatabaseContext dc = (DatabaseContext) 
-                ContextService.getContext(DatabaseContext.CONTEXT_ID);
+                DataValueFactoryImpl.getContext(DatabaseContext.CONTEXT_ID);
             if( dc != null)
                 localeFinder = dc.getDatabase();
         }

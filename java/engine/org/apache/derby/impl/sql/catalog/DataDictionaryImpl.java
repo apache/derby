@@ -24,6 +24,8 @@ package org.apache.derby.impl.sql.catalog;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -63,6 +65,7 @@ import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheableFactory;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -701,7 +704,7 @@ public final class	DataDictionaryImpl
 		 * We assume the System boot process has created a context
 		 * manager already, but not that contexts we need are there.
 		 */
-		ContextService csf = ContextService.getFactory();
+		ContextService csf = getContextService();
 
 		ContextManager cm = csf.getCurrentContextManager();
 		if (SanityManager.DEBUG)
@@ -4501,7 +4504,7 @@ public final class	DataDictionaryImpl
 	public void invalidateAllSPSPlans() throws StandardException
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext) 
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+			getContext(LanguageConnectionContext.CONTEXT_ID);
 		invalidateAllSPSPlans(lcc);
 	}
 
@@ -9523,7 +9526,7 @@ public final class	DataDictionaryImpl
             // print the lock table
             // will get a NullPointerException if lcc doesn't yet exist e.g. at boot time
             LanguageConnectionContext lcc = (LanguageConnectionContext)
-                ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+                getContext(LanguageConnectionContext.CONTEXT_ID);
             if (lcc != null)
             {
                 long currentTime = System.currentTimeMillis();
@@ -10508,7 +10511,7 @@ public final class	DataDictionaryImpl
 
 	private static LanguageConnectionContext getLCC() {
 		return (LanguageConnectionContext) 
-					ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+					getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 	}
 
     private SchemaDescriptor newSystemSchemaDesc(
@@ -14518,4 +14521,79 @@ public final class	DataDictionaryImpl
              );
     }
 
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 }

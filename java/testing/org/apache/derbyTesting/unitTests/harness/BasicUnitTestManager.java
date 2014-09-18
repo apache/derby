@@ -28,6 +28,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -70,7 +72,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 		output = Monitor.getStream();
 
-		contextService = ContextService.getFactory();
+		contextService = getContextService();
 
 		this.currentOutput = output;
 
@@ -285,5 +287,31 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 		this.performanceReportOn = performanceReportOn;
 		return;
 	}	
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 

@@ -29,6 +29,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
       "write"; 
   permission java.io.FilePermission "${derby.system.home}","read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 
 // getProtectionDomain is an optional permission needed for printing classpath information
 // to derby.log

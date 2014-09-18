@@ -21,10 +21,14 @@
 
 package org.apache.derby.iapi.util;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
@@ -77,7 +81,7 @@ public class InterruptStatus {
     public static void setInterrupted() {
         LanguageConnectionContext lcc = null;
         try {
-            lcc = (LanguageConnectionContext)ContextService.getContextOrNull(
+            lcc = (LanguageConnectionContext)getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
         } catch (ShutdownException e) {
@@ -188,7 +192,7 @@ public class InterruptStatus {
         LanguageConnectionContext lcc = null;
         try {
             lcc =
-                (LanguageConnectionContext)ContextService.getContextOrNull(
+                (LanguageConnectionContext)getContextOrNull(
                     LanguageConnectionContext.CONTEXT_ID);
         } catch (ShutdownException e) {
             // Ignore. DERBY-4911 Restoring interrupt flag is moot anyway if we
@@ -235,7 +239,7 @@ public class InterruptStatus {
         if (SanityManager.DEBUG) {
             LanguageConnectionContext ctxLcc = null;
             try {
-                ctxLcc = (LanguageConnectionContext)ContextService.
+                ctxLcc = (LanguageConnectionContext)
                     getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 
                 SanityManager.ASSERT(
@@ -287,4 +291,30 @@ public class InterruptStatus {
         }
 
     }
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

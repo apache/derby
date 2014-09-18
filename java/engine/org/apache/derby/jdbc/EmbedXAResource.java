@@ -21,6 +21,8 @@
 
 package org.apache.derby.jdbc;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -94,7 +96,7 @@ class EmbedXAResource implements XAResource {
             // RM also does not know about this xid.
             if (inDoubtCM == null)
                 throw new XAException(XAException.XAER_NOTA);
-            ContextService csf = ContextService.getFactory();
+            ContextService csf = getContextService();
             csf.setCurrentContextManager(inDoubtCM);
             try {
                 rm.commit(inDoubtCM, xid_im, onePhase);
@@ -406,7 +408,7 @@ class EmbedXAResource implements XAResource {
             if (inDoubtCM == null)
                 throw new XAException(XAException.XAER_NOTA);
             
-            ContextService csf = ContextService.getFactory();
+            ContextService csf = getContextService();
             
             csf.setCurrentContextManager(inDoubtCM);
             try {
@@ -456,7 +458,7 @@ class EmbedXAResource implements XAResource {
             if (inDoubtCM == null)
                 throw new XAException(XAException.XAER_NOTA);
             
-            ContextService csf = ContextService.getFactory();
+            ContextService csf = getContextService();
             
             csf.setCurrentContextManager(inDoubtCM);
             try {
@@ -927,6 +929,32 @@ class EmbedXAResource implements XAResource {
     
     void setCurrentXid(XAXactId aCurrentXid) {
         currentXid = aCurrentXid;
+    }
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
     }
 
 }

@@ -73,7 +73,7 @@ class RFResource implements FileResource {
             }
 
             ContextManager cm = 
-                ContextService.getFactory().getCurrentContextManager();
+                FileContainer.getContextService().getCurrentContextManager();
 
             RawTransaction tran = 
                 factory.getRawStoreFactory().getXactFactory().findUserTransaction(
@@ -156,7 +156,7 @@ class RFResource implements FileResource {
             throw StandardException.newException(SQLState.FILE_READ_ONLY);
 
         ContextManager cm =
-            ContextService.getFactory().getCurrentContextManager();
+            FileContainer.getContextService().getCurrentContextManager();
 
         RawTransaction tran =
             factory.getRawStoreFactory().getXactFactory().findUserTransaction(
@@ -188,7 +188,7 @@ class RFResource implements FileResource {
 			throw StandardException.newException(SQLState.FILE_READ_ONLY);
 
 			
-		ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+		ContextManager cm = FileContainer.getContextService().getCurrentContextManager();
 
         RawTransaction tran = 
             factory.getRawStoreFactory().getXactFactory().findUserTransaction(

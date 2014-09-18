@@ -20,6 +20,8 @@
  */
 package org.apache.derby.iapi.store.access;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,6 +34,7 @@ import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
 
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -93,7 +96,7 @@ public class DiskHashtable
         this.remove_duplicates          = remove_duplicates;
         this.keepAfterCommit            = keepAfterCommit;
         LanguageConnectionContext lcc   = (LanguageConnectionContext)
-            ContextService.getContextOrNull(
+            getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
         keepStatistics = (lcc != null) && lcc.getRunTimeStatisticsMode();
@@ -391,6 +394,32 @@ public class DiskHashtable
         throws StandardException
     {
         return new ElementEnum();
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
     }
 
     private class ElementEnum implements Enumeration<Object>

@@ -44,6 +44,8 @@ import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.reference.Property;
 
 import java.io.*;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 /**
 	An Impl unittest for rawstore data that is based on the FileSystem
@@ -87,7 +89,7 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
 		 throws StandardException
 	{
 		super.boot(create, startParams);
-		contextService = ContextService.getFactory();
+		contextService = getContextService();
 	}
 
 
@@ -1105,4 +1107,30 @@ public class T_FileSystemData extends T_MultiThreadedIterations {
 			return;
         }
 	}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

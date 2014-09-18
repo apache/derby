@@ -26,6 +26,8 @@ import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.context.Context;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Vector;
 
 public class T_Bomb implements Runnable { 
@@ -115,7 +117,7 @@ public class T_Bomb implements Runnable {
 	private void blowUp()
 	{
 			performLastGasp();
-			ContextService csf = ContextService.getFactory();
+			ContextService csf = getContextService();
 			if (csf != null)
 			{
 				System.out.println("ran out of time");
@@ -146,4 +148,30 @@ public class T_Bomb implements Runnable {
 		} //end for
 
 	}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

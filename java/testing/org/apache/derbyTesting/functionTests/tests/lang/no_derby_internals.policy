@@ -1,5 +1,5 @@
 //
-// *  Derby - Class org.apache.derbyTesting.functionTests.util.derby_tests.policy
+// *  Derby - Class org.apache.derbyTesting.functionTests.util.no_derby_internals.policy
 // *  
 // * Licensed to the Apache Software Foundation (ASF) under one
 // * or more contributor license agreements.  See the NOTICE file
@@ -20,8 +20,7 @@
 // *
 
 //
-// Policy file with minimal set of permissions to run derby's
-// functional tests.
+// Policy file which does not grant the testing jar the userderbyinternals system permission.
 //
 // The test harness sets up four variables used by this policy file
 //
@@ -71,10 +70,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // null for daemon threads to avoid class loader leak.
   // DERBY-3745
   permission java.lang.RuntimePermission "getClassLoader";
-
-  // DERBY-6619: removed next permission to test 6619. Otherwise identical
-  // to util/derby_tests.policy
-  // permission java.lang.RuntimePermission "setContextClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
 
   permission java.security.SecurityPermission "getPolicy";
   
@@ -275,7 +271,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission javax.management.MBeanTrustPermission "register";
    
   // And to find and use Derby's MBeans
-  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
@@ -376,7 +372,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   
    
   // And to find and use Derby's MBeans
-  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";

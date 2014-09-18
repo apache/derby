@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.Stack;
 
 import org.apache.derby.iapi.error.ShutdownException;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -189,7 +190,11 @@ public final class ContextService //OLD extends Hashtable
 	/**
 		So it can be given to us and taken away...
 	 */
-	public static void stop() {
+	public static void stop()
+    {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		// For some unknown reason, the ContextManager and
 		// ContextService objects will not be garbage collected
 		// without the next two lines.
@@ -203,7 +208,11 @@ public final class ContextService //OLD extends Hashtable
         }
 	}
 
-	public static ContextService getFactory() {
+	public static ContextService getFactory()
+    {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		ContextService csf = factory;
 
 		if (csf == null)
@@ -216,8 +225,11 @@ public final class ContextService //OLD extends Hashtable
 
 		@return The requested context, null if it doesn't exist.
 	*/
-	public static Context getContext(String contextId) {
-
+	public static Context getContext(String contextId)
+    {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		ContextManager cm = getFactory().getCurrentContextManager();
 
         if( cm == null)
@@ -235,7 +247,11 @@ public final class ContextService //OLD extends Hashtable
 
 		@return The requested context, null if it doesn't exist.
 	*/
-	public static Context getContextOrNull(String contextId) {
+	public static Context getContextOrNull(String contextId)
+    {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		ContextService csf = factory;
 
 		if (csf == null)

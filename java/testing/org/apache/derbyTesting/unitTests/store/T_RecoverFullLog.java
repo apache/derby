@@ -51,6 +51,8 @@ import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.File;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 
 
@@ -165,7 +167,7 @@ public class T_RecoverFullLog extends T_Generic {
 
 		try {
 
-			contextService = ContextService.getFactory();
+			contextService = getContextService();
 
 			File ifile = new File(infoPath);
 			
@@ -861,6 +863,32 @@ public class T_RecoverFullLog extends T_Generic {
 		}
 	}
 
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 
 
 }

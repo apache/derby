@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.List;
 
 import org.apache.derby.catalog.Dependable;
@@ -32,6 +34,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.StatementType;
@@ -169,7 +172,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 	private FormatableBitSet referencedColumnMapGet() {
 
         LanguageConnectionContext lcc =
-            (LanguageConnectionContext)ContextService.getContextOrNull(
+            (LanguageConnectionContext)getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
         if (SanityManager.DEBUG) {
@@ -184,7 +187,7 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
 		(FormatableBitSet newReferencedColumnMap) {
 
         LanguageConnectionContext lcc =
-            (LanguageConnectionContext)ContextService.getContextOrNull(
+            (LanguageConnectionContext)getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
 
         if (SanityManager.DEBUG) {
@@ -1525,6 +1528,32 @@ public class TableDescriptor extends UniqueSQLObjectDescriptor
     public  static  String  makeSequenceName( UUID tableID )
     {
         return tableID.toANSIidentifier();
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
     }
 
 }

@@ -27,10 +27,13 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.TransactionInfo;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Hashtable;
 import java.util.Dictionary;
 import java.util.Stack;
@@ -444,7 +447,7 @@ inner:		for (;;) {
 
 
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
-			ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+			getContext(LanguageConnectionContext.CONTEXT_ID);
 
 		TableNameInfo tabInfo = null;
 		TransactionInfo[] tt = null;
@@ -562,5 +565,30 @@ inner:		for (;;) {
 			data = "?";
 		sb.append(data);
 	}
+
+    /**
+     * Privileged lookup of a Context. Must be package protected so that user code
+     * can't call this entry point.
+     */
+    static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 
 } 

@@ -22,8 +22,10 @@
 
 package org.apache.derby.jdbc;
 
+import java.security.AccessController;
 import java.security.AccessControlException;
 import java.security.Permission;
+import java.security.PrivilegedAction;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -122,7 +124,7 @@ public class InternalDriver implements ModuleControl, Driver {
 	}
 
 	public InternalDriver() {
-		contextServiceFactory = ContextService.getFactory();
+		contextServiceFactory = getContextService();
 	}
 
 	/*
@@ -963,6 +965,32 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     static boolean getDeregister() {
         return InternalDriver.deregister;
+    }
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
     }
 
 

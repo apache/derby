@@ -62,6 +62,9 @@ import org.apache.derby.iapi.util.ByteArray;
 import java.io.IOException;
 import java.io.DataInput;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
+
 import java.util.Properties;
 import java.util.zip.CRC32;
 
@@ -1157,7 +1160,7 @@ abstract class FileContainer
             (af == null) ? 
                 null : 
                 af.getTransaction(
-                        ContextService.getFactory().getCurrentContextManager());
+                        getContextService().getCurrentContextManager());
 
 		pageSize = 
 			PropertyUtil.getServiceInt(tc, createArgs,
@@ -3546,4 +3549,30 @@ abstract class FileContainer
 	protected abstract void backupContainer(BaseContainerHandle handle,	
                                             String backupLocation)
 	    throws StandardException;
+    
+    /**
+     * Privileged lookup of the ContextService. Must be limited to
+     * package visibility so that user code
+     * can't call this entry point.
+     */
+    static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 }

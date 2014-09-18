@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.reflect;
 
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -40,6 +41,7 @@ import org.apache.derby.iapi.reference.Property;
 
 import java.io.InputStream;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
@@ -307,7 +309,7 @@ final class UpdateLoader implements LockOwner {
 		if (lf == null)
 			return false;
 
-		ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+		ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
 
 		// This method can be called from outside of the database
 		// engine, in which case tc will be null. In that case
@@ -379,7 +381,7 @@ final class UpdateLoader implements LockOwner {
 	private String getClasspath()
 		throws StandardException {
 
-		ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+		ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
 
 		PersistentSet ps = cfc.getPersistentSet();
 		
@@ -398,7 +400,7 @@ final class UpdateLoader implements LockOwner {
 	JarReader getJarReader() {
 		if (jarReader == null) {
 
-			ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContextOrNull(ClassFactoryContext.CONTEXT_ID);
+			ClassFactoryContext cfc = (ClassFactoryContext) getContextOrNull(ClassFactoryContext.CONTEXT_ID);
 
 			jarReader = cfc.getJarReader(); 
 		}
@@ -425,6 +427,31 @@ final class UpdateLoader implements LockOwner {
         return false;
     }
     
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 }
 
 

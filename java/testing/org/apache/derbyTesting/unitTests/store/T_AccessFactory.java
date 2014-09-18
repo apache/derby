@@ -46,6 +46,8 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -119,7 +121,7 @@ public class T_AccessFactory extends T_Generic
 		try {
 
             ContextManager cm = 
-                    ContextService.getFactory().getCurrentContextManager();
+                    getContextService().getCurrentContextManager();
 
 			tc = store.getAndNameTransaction(
                     cm, AccessFactoryGlobals.USER_TRANS_NAME);
@@ -2980,7 +2982,7 @@ public class T_AccessFactory extends T_Generic
 
         TransactionController current_xact = 
             store.getTransaction(
-                ContextService.getFactory().getCurrentContextManager());
+                getContextService().getCurrentContextManager());
 
         // get a nested user transaction
         TransactionController child_tc = 
@@ -2988,7 +2990,7 @@ public class T_AccessFactory extends T_Generic
 
         TransactionController current_xact_after_nest = 
             store.getTransaction(
-                ContextService.getFactory().getCurrentContextManager());
+                getContextService().getCurrentContextManager());
 
         if (current_xact_after_nest != current_xact)
         {
@@ -3337,9 +3339,9 @@ public class T_AccessFactory extends T_Generic
 
 
 		// get another transaction going
-		ContextManager cm2 = ContextService.getFactory().newContextManager();
+		ContextManager cm2 = getContextService().newContextManager();
 
-		ContextService.getFactory().setCurrentContextManager(cm2);
+		getContextService().setCurrentContextManager(cm2);
 
 		TransactionController tc2 = null;
 		ConglomerateController cc2 = null;
@@ -3368,7 +3370,7 @@ public class T_AccessFactory extends T_Generic
 				throw lfe;
 		}
 		finally {
-			ContextService.getFactory().resetCurrentContextManager(cm2);
+			getContextService().resetCurrentContextManager(cm2);
 		}
 
 
@@ -3382,7 +3384,7 @@ public class T_AccessFactory extends T_Generic
 		// now really commit the transaction
 		tc.commit();
 		
-		ContextService.getFactory().setCurrentContextManager(cm2);
+		getContextService().setCurrentContextManager(cm2);
 
 		try {
 		cc2.fetch(rowloc, r1.getRowArray(), (FormatableBitSet)null);
@@ -3391,7 +3393,7 @@ public class T_AccessFactory extends T_Generic
 		tc2.destroy();
 		}
 		finally {
-			ContextService.getFactory().resetCurrentContextManager(cm2);
+			getContextService().resetCurrentContextManager(cm2);
 		}
 
 		REPORT("(commitTest) succeeded");
@@ -4366,5 +4368,31 @@ public class T_AccessFactory extends T_Generic
 
 		return s;
 	}
+
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
 
 }

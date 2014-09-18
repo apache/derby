@@ -144,7 +144,7 @@ public class T_SortController extends T_Generic
 		}
 
 		tc = store.getTransaction(
-                ContextService.getFactory().getCurrentContextManager());
+                getContextService().getCurrentContextManager());
 
 		if (!sortExample(tc))
 			failcount++;
@@ -838,6 +838,32 @@ public class T_SortController extends T_Generic
 
 		return (!mismatch && !toofew && !toomany);
 	}
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 
 

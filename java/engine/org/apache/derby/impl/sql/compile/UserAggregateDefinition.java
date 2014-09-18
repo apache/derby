@@ -100,7 +100,7 @@ class UserAggregateDefinition implements AggregateDefinition
 		try
 		{
 			CompilerContext cc = (CompilerContext)
-				ContextService.getContext(CompilerContext.CONTEXT_ID);
+				QueryTreeNode.getContext(CompilerContext.CONTEXT_ID);
             ClassFactory    classFactory = cc.getClassFactory();
             TypeCompilerFactory tcf = cc.getTypeCompilerFactory();
 

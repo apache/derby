@@ -21,6 +21,8 @@
 
 package org.apache.derby.diag;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -31,6 +33,7 @@ import java.util.Vector;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.cache.CacheManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -78,7 +81,7 @@ public final class StatementCache extends VTITemplate {
         DiagUtil.checkAccess();
         
         LanguageConnectionContext lcc = (LanguageConnectionContext)
-            ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+            getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 
         CacheManager statementCache =
             lcc.getLanguageConnectionFactory().getStatementCache();
@@ -181,4 +184,30 @@ public final class StatementCache extends VTITemplate {
 
 		return metadata;
 	}
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

@@ -20,6 +20,11 @@
  */
 
 package org.apache.derbyTesting.functionTests.util;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import java.io.Serializable;
@@ -31,15 +36,41 @@ public abstract class PropertyUtil extends org.apache.derby.iapi.util.PropertyUt
 	public static Serializable getDatabasePropertyDefault(String k) throws Exception
 	{
         LanguageConnectionContext lcc =
-			(LanguageConnectionContext) ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+			(LanguageConnectionContext) getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 		if (lcc == null) throw new Exception("getPropertyDefault only works in a connection");
 		return lcc.getTransactionExecute().getPropertyDefault(k);
 	}
 	public static void setDatabasePropertyDefault(String k,Serializable v) throws Exception
 	{
         LanguageConnectionContext lcc =
-			(LanguageConnectionContext) ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+			(LanguageConnectionContext) getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 		if (lcc == null) throw new Exception("getPropertyDefault only works in a connection");
 		lcc.getTransactionExecute().setPropertyDefault(k,v);
 	}
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

@@ -60,6 +60,8 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -138,7 +140,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
                     properties);
 		
 
-		contextFactory = ContextService.getFactory();
+		contextFactory = getContextService();
 
 		lockFactory = 
             (LockFactory) Monitor.bootServiceModule(false, this,
@@ -1161,4 +1163,30 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		}
 	}
 	
+    
+    /**
+     * Privileged lookup of the ContextService. Private so that user code
+     * can't call this entry point.
+     */
+    private static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

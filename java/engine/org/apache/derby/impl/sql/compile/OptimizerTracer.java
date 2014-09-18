@@ -28,6 +28,7 @@ import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import org.apache.derby.iapi.db.OptimizerTrace;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -107,7 +108,7 @@ public	class   OptimizerTracer  implements OptionalTool
             String  customOptTraceName = configurationParameters[ 1 ];
 
             try {
-                ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContext( ClassFactoryContext.CONTEXT_ID );
+                ClassFactoryContext cfc = (ClassFactoryContext) getContext( ClassFactoryContext.CONTEXT_ID );
                 ClassFactory    classFactory = cfc.getClassFactory();
 
                 tracer = (OptTrace) classFactory.loadApplicationClass( customOptTraceName ).newInstance();
@@ -199,5 +200,30 @@ public	class   OptimizerTracer  implements OptionalTool
 
         return new SQLException( errorMessage, sqlState );
     }
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }
 

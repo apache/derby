@@ -21,6 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
@@ -1593,4 +1597,28 @@ public abstract class QueryTreeNode implements Visitable
         return visitor.getNodes();
     }
 
+    /**
+     * Privileged lookup of a Context. Must be package protected so that user code
+     * can't call this entry point.
+     */
+    static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
 }

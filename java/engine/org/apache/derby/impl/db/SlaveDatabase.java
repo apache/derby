@@ -35,6 +35,9 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.jdbc.InternalDriver;
 
+import java.security.PrivilegedAction;
+import java.security.AccessController;
+
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.MessageId;
@@ -222,7 +225,7 @@ public class SlaveDatabase extends BasicDatabase {
             throw StandardException.
                 newException(SQLState.REPLICATION_STOPSLAVE_NOT_INITIATED);
         }
-        pushDbContext(ContextService.getFactory().
+        pushDbContext(getContextService().
                       getCurrentContextManager());
     }
 
@@ -308,8 +311,8 @@ public class SlaveDatabase extends BasicDatabase {
             ContextManager bootThreadCm = null;
             try {
 
-                bootThreadCm = ContextService.getFactory().newContextManager();
-                ContextService.getFactory().
+                bootThreadCm = getContextService().newContextManager();
+                getContextService().
                     setCurrentContextManager(bootThreadCm);
 
                 bootBasicDatabase(create, params); // will be blocked
@@ -319,7 +322,7 @@ public class SlaveDatabase extends BasicDatabase {
                 inReplicationSlaveMode = false; 
 
                 if (bootThreadCm != null) {
-                    ContextService.getFactory().
+                    getContextService().
                         resetCurrentContextManager(bootThreadCm);
                     bootThreadCm = null;
                 }
@@ -446,4 +449,30 @@ public class SlaveDatabase extends BasicDatabase {
         // active
         super.boot(create, params);
     }
+    
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
 }

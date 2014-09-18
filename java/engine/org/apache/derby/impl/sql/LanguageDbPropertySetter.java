@@ -27,11 +27,14 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.io.Serializable;
 import java.util.Dictionary;
 
@@ -63,7 +66,7 @@ public class LanguageDbPropertySetter implements PropertySetCallback
 		if (key.trim().equals(Property.SQL_AUTHORIZATION_PROPERTY))
 		{
 			LanguageConnectionContext lcc = (LanguageConnectionContext)
-					ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
+					getContext(LanguageConnectionContext.CONTEXT_ID);
 
 			if (lcc.usesSqlAuthorization() && !Boolean.valueOf((String)value).booleanValue())
 				throw StandardException.newException(SQLState.PROPERTY_UNSUPPORTED_CHANGE,
@@ -103,4 +106,29 @@ public class LanguageDbPropertySetter implements PropertySetCallback
 	{
 		return null;
 	}
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContext( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContext( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContext( contextID );
+                     }
+                 }
+                 );
+        }
+    }
+
 }

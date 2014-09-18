@@ -20,6 +20,8 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 
 import org.apache.derby.catalog.SequencePreallocator;
@@ -30,6 +32,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -469,7 +472,7 @@ public abstract class SequenceUpdater implements Cacheable
 				SanityManager.ASSERT( oldValue == null, "We should be flushing unused sequence values here." );
 			}
             
-            ContextService csf = ContextService.getFactory();
+            ContextService csf = getContextService();
             ContextManager cm = csf.getCurrentContextManager();
             AccessFactory af = _dd.af;
             TransactionController   dummyTransaction = af.getTransaction( cm );
@@ -592,13 +595,64 @@ public abstract class SequenceUpdater implements Cacheable
 	private static LanguageConnectionContext getLCC()
     {
 		return (LanguageConnectionContext) 
-					ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+					getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 	}
 
     /** Report an unimplemented feature */
     private StandardException unimplementedFeature()
     {
         return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+    }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
+    }
+
+    
+    /**
+     * Privileged lookup of a Context. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Context    getContextOrNull( final String contextID )
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getContextOrNull( contextID );
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<Context>()
+                 {
+                     public Context run()
+                     {
+                         return ContextService.getContextOrNull( contextID );
+                     }
+                 }
+                 );
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

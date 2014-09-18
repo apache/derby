@@ -74,6 +74,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
@@ -584,7 +585,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	{
 		
 		TransactionController tc = af.getTransaction(
-				ContextService.getFactory().getCurrentContextManager());
+				getContextService().getCurrentContextManager());
 
 		String  upgradeID = null;
 		UUID	databaseID;
@@ -784,7 +785,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		throws StandardException {
 
 		TransactionController tc = af.getTransaction(
-                    ContextService.getFactory().getCurrentContextManager());
+                    getContextService().getCurrentContextManager());
 		Properties dbProps = tc.getProperties();
 		tc.commit();
 		tc.destroy();
@@ -834,7 +835,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		long generationId = fid.getGenerationId();
 
-        ContextManager cm = ContextService.getFactory().getCurrentContextManager();
+        ContextManager cm = getContextService().getCurrentContextManager();
 		FileResource fr = af.getTransaction(cm).getFileHandler();
 
         String externalName = JarUtil.mkExternalName(
@@ -939,6 +940,31 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         }
         catch (IOException ioe) { throw StandardException.plainWrapException( ioe ); }
         catch (PrivilegedActionException pae) { throw StandardException.plainWrapException( pae ); }
+    }
+
+    /**
+     * Privileged lookup of the ContextService. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextService    getContextService()
+    {
+        if ( System.getSecurityManager() == null )
+        {
+            return ContextService.getFactory();
+        }
+        else
+        {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedAction<ContextService>()
+                 {
+                     public ContextService run()
+                     {
+                         return ContextService.getFactory();
+                     }
+                 }
+                 );
+        }
     }
 
 }
