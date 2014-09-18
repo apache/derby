@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -36,13 +37,16 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *
  * Tests:
  * - testNextOnLastRowForwardOnly: tests that the result set is closed when all
- * rows have been retreived and next has been called from the last row, 
+ * rows have been retrieved and next has been called from the last row,
  * autocommit = true, the result set is not holdable and type forward 
  * only. (DERBY-1295)
  * - testNextOnLastRowScrollable: tests that the result set is not closed when 
  * next is called while the result set is positioned in the last row, 
  * autocommit = true, the result set is not holdable type scrollable 
  * insensitive. (DERBY-1295)
+ * - testDerby6737: tests that a LOB can be accessed after using an absolute
+ * positioning method to move the position to the row on which the result set
+ * is currently positioned. (DERBY-6737)
  *
  */
 public class ScrollResultSetTest extends BaseJDBCTestCase {
@@ -157,5 +161,73 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
         rs.close();
 
     }
-       
+
+    /**
+     * <p>
+     * Test that it is possible to access LOBs after moving the position of
+     * a scrollable result set from one row to the same row. Before DERBY-6737
+     * the following sequence of calls
+     * </p>
+     *
+     * <pre>
+     * rs.last();
+     * rs.first();
+     * rs.getClob(1).length();
+     * </pre>
+     *
+     * <p>
+     * would fail with 'invalid locator' on the client, if the result set
+     * contained only one row.
+     * </p>
+     */
+    public void testDerby6737() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table d6737(c clob)");
+        s.execute("insert into d6737 values 'abc'");
+
+        PreparedStatement ps = prepareStatement("select * from d6737",
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.last());
+        assertTrue(rs.first());
+        assertEquals(3, rs.getClob(1).length()); // used to fail on client
+        rs.close();
+
+        rs = ps.executeQuery();
+        assertTrue(rs.next());
+        assertTrue(rs.first());
+        assertEquals(3, rs.getClob(1).length()); // used to fail on client
+        rs.close();
+
+        rs = ps.executeQuery();
+        assertTrue(rs.first());
+        assertTrue(rs.last());
+        assertEquals(3, rs.getClob(1).length()); // used to fail on client
+        rs.close();
+
+        rs = ps.executeQuery();
+        assertTrue(rs.last());
+        assertTrue(rs.absolute(1));
+        assertEquals(3, rs.getClob(1).length()); // used to fail on client
+        rs.close();
+
+        // This case, where the CLOB had been accessed, but not explicitly
+        // freed before the result set was repositioned, passed even before
+        // the fix.
+        rs = ps.executeQuery();
+        assertTrue(rs.last());
+        assertEquals(3, rs.getClob(1).length());
+        assertTrue(rs.first());
+        assertEquals(3, rs.getClob(1).length());
+        rs.close();
+
+        // But it failed if the CLOB was explicitly freed before repositioning.
+        rs = ps.executeQuery();
+        assertTrue(rs.last());
+        rs.getClob(1).free();
+        assertTrue(rs.first());
+        assertEquals(3, rs.getClob(1).length()); // used to fail on client
+        rs.close();
+    }
 }

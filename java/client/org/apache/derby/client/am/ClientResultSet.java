@@ -4839,6 +4839,11 @@ public abstract class ClientResultSet implements ResultSet,
             default:
                 return false;
             }
+        } else if (resultSetMetaData_.hasLobColumns()) {
+            // DERBY-6737: If the result set has LOB columns, we cannot use
+            // the cached locator since it might have been released, so
+            // always fetch the row from the server.
+            return false;
         } else {
             return rowIsInCurrentRowset(rowNumber);
         }
