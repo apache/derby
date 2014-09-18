@@ -282,6 +282,11 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	 * @param 	i	the column number
 	 */
 	public String getColumnName(int i) { return columnNames[i]; }
+	
+	/**
+	 * get the array of column names in the target table.
+	 */
+	public String[] getColumnNames() { return columnNames; }
 
 	/**
 	 * gets the increment value for a column.

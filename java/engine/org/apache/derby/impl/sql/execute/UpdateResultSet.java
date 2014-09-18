@@ -24,6 +24,8 @@ package org.apache.derby.impl.sql.execute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
+
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.StandardException;
@@ -42,16 +44,16 @@ import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
-import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLRef;
 import org.apache.derby.impl.sql.execute.DeferredConstraintsMemory.CheckInfo;
 import org.apache.derby.shared.common.sanity.SanityManager;
-
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 /**
  * Update the rows from the specified
  * base table. This will cause constraints to be checked
@@ -59,7 +61,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * compiled into the update plan.
  *
  */
-class UpdateResultSet extends DMLWriteResultSet
+class UpdateResultSet extends DMLWriteGeneratedColumnsResultSet
 {
 	private TransactionController 	tc;
 	private ExecRow					newBaseRow;
@@ -67,7 +69,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow 					deferredSparseRow;
 	UpdateConstantAction		constants;
 	
-	private NoPutResultSet			source;
 	NoPutResultSet			savedSource;
 	private RowChanger				rowChanger;
 
@@ -181,7 +182,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		// Get the current transaction controller
         tc = activation.getTransactionController();
-		this.source = source;
+        this.sourceResultSet = source;
         this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
 
@@ -253,6 +254,8 @@ class UpdateResultSet extends DMLWriteResultSet
 			beforeUpdateCopyRequired = true;
 		}
 		
+        identitySequenceUUIDString = constants.identitySequenceUUIDString;
+        initializeAIcache(constants.getAutoincRowLocation());
 	}
 	/**
 		@exception StandardException Standard Derby error policy
@@ -287,6 +290,8 @@ class UpdateResultSet extends DMLWriteResultSet
 		rowChanger.finish();
 		}
 
+		saveAIcacheInformation(constants.getSchemaName(), 
+			constants.getTableName(), constants.getColumnNames());
 		cleanUp();
     }
 
@@ -310,7 +315,7 @@ class UpdateResultSet extends DMLWriteResultSet
 		if (lcc.getRunTimeStatisticsMode())
 		{
 			/* savedSource nulled after run time statistics generation */
-			savedSource = source;
+			savedSource = sourceResultSet;
 		}
 
 		/* Get or re-use the row changer.
@@ -344,11 +349,11 @@ class UpdateResultSet extends DMLWriteResultSet
 
 		if (numOpens++ == 0)
 		{
-			source.openCore();
+			sourceResultSet.openCore();
 		}
 		else
 		{
-			source.reopenCore();
+			sourceResultSet.reopenCore();
 		}
 
 		/* The source does not know whether or not we are doing a
@@ -465,7 +470,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	{
 
 		boolean rowsFound = false;
-		row = getNextRowCore(source);
+		row = getNextRowCore(sourceResultSet);
 
 		if (row!=null)
 			rowsFound = true;
@@ -485,7 +490,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
         while ( row != null )
         {
-            evaluateGenerationClauses( generationClauses, activation, source, row, true );
+            evaluateGenerationClauses( generationClauses, activation, sourceResultSet, row, true );
 
 			/* By convention, the last column in the result set for an
 			 * update contains a SQLRef containing the RowLocation of
@@ -624,7 +629,7 @@ class UpdateResultSet extends DMLWriteResultSet
                     riChecker.doFKCheck(activation, newBaseRow);
 				}
 
-				source.updateRow(newBaseRow, rowChanger);
+				sourceResultSet.updateRow(newBaseRow, rowChanger);
 				rowChanger.updateRow(row,newBaseRow,baseRowLocation);
 
 				//beetle 3865, update cursor use index.
@@ -642,7 +647,7 @@ class UpdateResultSet extends DMLWriteResultSet
 			}
 			else
 			{
-				row = getNextRowCore(source);
+				row = getNextRowCore(sourceResultSet);
 			}
 		}
 
@@ -799,13 +804,38 @@ class UpdateResultSet extends DMLWriteResultSet
 		{
 			if (triggerInfo != null)
 			{
+				Vector<AutoincrementCounter> v = null;
+				if (aiCache != null)
+				{
+					v = new Vector<AutoincrementCounter>();
+					for (int i = 0; i < aiCache.length; i++)
+					{
+						String s, t, c;
+						if (aiCache[i] == null)
+							continue;
+					
+						Long initialValue = 
+							lcc.lastAutoincrementValue(
+								(s = constants.getSchemaName()),
+								(t = constants.getTableName()),
+								(c = constants.getColumnName(i)));
+
+						AutoincrementCounter aic = 
+							new AutoincrementCounter(
+								 initialValue,
+								 constants.getAutoincIncrement(i),
+								 aiCache[i].getLong(),
+								 s, t, c, i + 1);
+						v.addElement(aic);
+					}
+				}
 				if (triggerActivator == null)
 				{
 				triggerActivator = new TriggerEventActivator(lcc, 
 											constants.targetUUID,
 											triggerInfo,
 											TriggerExecutionContext.UPDATE_EVENT,
-											activation, null);
+											activation, v);
 				}
 				else
 				{
@@ -877,7 +907,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
 					if (triggerInfo != null)
 					{
-						source.setCurrentRow(deferredTempRow);
+						sourceResultSet.setCurrentRow(deferredTempRow);
                         allOk = evaluateCheckConstraints();
 					}
 
@@ -928,7 +958,7 @@ class UpdateResultSet extends DMLWriteResultSet
 				}
 			} finally
 			{
-				source.clearCurrentRow();
+				sourceResultSet.clearCurrentRow();
 				rs.close();
 			}
 		}
@@ -1116,9 +1146,9 @@ class UpdateResultSet extends DMLWriteResultSet
 		numOpens = 0;
 
 		/* Close down the source ResultSet tree */
-		if (source != null)
+		if (sourceResultSet != null)
 		{
-			source.close();
+			sourceResultSet.close();
 			// cache source across open()s
 		}
 
@@ -1175,4 +1205,64 @@ class UpdateResultSet extends DMLWriteResultSet
 
         violatingCheckConstraints.add(cid);
     }
+
+    /**
+     * getSetAutoincrementValue will get the autoincrement value of the 
+     * columnPosition specified for the target table. If increment is 
+     * non-zero we will also update the autoincrement value. 
+     *
+     * @param columnPosition	position of the column in the table (1-based)
+     * @param increment			amount of increment. 
+     *
+     * @exception StandardException if anything goes wrong.
+     */
+    public NumberDataValue
+    	getSetAutoincrementValue(int columnPosition, long increment)
+    	throws StandardException
+    {
+        int index = columnPosition - 1;	// all our indices are 0 based.
+        NumberDataValue newValue;
+        newValue = activation.getCurrentValueAndAdvance
+                ( identitySequenceUUIDString, aiCache[ index ].getTypeFormatId() );
+        aiCache[index] = newValue;
+        return (NumberDataValue) aiCache[index];
+    }
+	
+    /*
+     * The implementation of this method is slightly different than the one
+     *  in InsertResultSet. This code was originally written for insert but
+     *  with DERBY-6414, we have started supporting update of auto generated
+     *  column with keyword DEFAULT. The reason of different implementation is
+     *  that the array used in InsertResultSet's implementation of this method,  
+     *  ColumnDescriptors in resultDescription hold different entries for
+     *  insert and update case. For insert case, the array holds the column
+     *  descriptors of all the columns in the table. This is because all the
+     *  columns in the table are going to get some value into them whether
+     *  or not they were included directly in the actual INSERT statement.
+     *  The 2nd array, rla has a spot for each of the columns in the table, 
+     *  with non null value for auto generated column. But in case of Update,
+     *  resultDescription does not include all the columns in the table. It
+     *  only has the columns being touched by the Update statement(the rest of
+     *  the columns in the table will retain their original values), and for 
+     *  each of those touched columns, it has a duplicate entry in 
+     *  resultDescription in order to have before and after values for the 
+     *  changed column values. Lastly, it has a row location information for 
+     *  the row being updated. This difference in array content of 
+     *  resultDescription requires us to have separate implementation of this
+     *  method for insert and update.
+     */
+	protected void  initializeAIcache(RowLocation[] rla) 
+			throws StandardException{
+        if (rla != null)
+        {
+        	aiCache = new DataValueDescriptor[ rla.length ];
+        	ColumnDescriptorList columns = lcc.getDataDictionary().getTableDescriptor(constants.targetUUID).getColumnDescriptorList();
+       		for (int i = 0; i < columns.size(); i++)
+        	{
+        		if (rla[i] == null)
+        			continue;        		
+        		aiCache[i] = columns.elementAt(i).getType().getNull();
+    		}
+        }
+	}
 }

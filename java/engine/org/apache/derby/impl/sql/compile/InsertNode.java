@@ -41,13 +41,11 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.IndexLister;
-import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecRowBuilder;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.vti.DeferModification;
@@ -74,7 +72,7 @@ import org.apache.derby.vti.DeferModification;
  * <p>
  * After optimizing, ...
  */
-public final class InsertNode extends DMLModStatementNode
+public final class InsertNode extends DMLModGeneratedColumnsStatementNode
 {
     private     ResultColumnList    targetColumnList;
     private     boolean             deferred;
@@ -88,10 +86,6 @@ public final class InsertNode extends DMLModStatementNode
     private     ValueNode           offset;
     private     ValueNode           fetchFirst;
     private     boolean           hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
-
-	protected   RowLocation[] 		autoincRowLocation;
-
-    private     String              identitySequenceUUIDString;
     
 	/**
      * Constructor for an InsertNode.
@@ -555,20 +549,7 @@ public final class InsertNode extends DMLModStatementNode
                                                   resultSet);
 		}
 
-        // if this is 10.11 or higher and the table has an identity column,
-        // get the uuid of the sequence generator backing the identity column
-        if (
-            targetTableDescriptor.tableHasAutoincrement() &&
-            dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )
-            )
-        {
-            SequenceDescriptor  seq = dd.getSequenceDescriptor
-                (
-                 dd.getSystemSchemaDescriptor(),
-                 TableDescriptor.makeSequenceName( targetTableDescriptor.getUUID() )
-                 );
-            identitySequenceUUIDString = seq.getUUID().toString();
-        }
+        identitySequenceUUIDString = getUUIDofSequenceGenerator();
         
         getCompilerContext().removePrivilegeFilter( ignorePermissions );
 		getCompilerContext().popCurrentPrivType();

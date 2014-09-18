@@ -116,6 +116,283 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * DERBY-6414 - support updating identity columns with DEFAULT keyword.
+     */
+    public void testDerby_6414() throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs = null;
+        setAutoCommit(false);
+    	
+        //Try update of generated always as identity column
+        s.execute("create table t1_6414(a int, "+
+        "b generated always as (-a),"+
+        "c int generated always as identity," +
+        "d char(3)," +
+        "e char(5)" +
+        ")");
+        s.execute("create table t1_after_update_changes_6414(abc int, "+
+        "bbc int,"+
+        "cbc int," +
+        "dbc char(3)," +
+        "ebc char(5)," +
+        "aac int, " +
+        "bac int,"+
+        "cac int," +
+        "dac char(3)," +
+        "eac char(5)" +
+        ")");
+        s.execute("create trigger tr1_t1_6414_after_update_row "+
+                "after update on t1_6414\n" +
+                "referencing old as br new as ar\n" +
+                "for each row\n" +
+                "insert into t1_after_update_changes_6414 values "+
+                "(br.a, br.b, br.c, br.d, br.e, ar.a, ar.b, ar.c, ar.d, ar.e)"
+                );
+
+        goodStatement
+        (
+                getConnection(),
+                "insert into t1_6414(b,a) values (default,1), (default, 2)"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_6414",
+         new String[][]
+         {
+             { "1", "-1", "1", null, null },
+             { "2", "-2", "2", null, null },
+         },
+         false
+         );
+        goodStatement
+        (
+                getConnection(),
+                "update t1_6414 set e='ccccc', a=-a, c=default"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_6414",
+         new String[][]
+         {
+             { "-1", "1", "3", null, "ccccc" },
+             { "-2", "2", "4", null, "ccccc" },
+         },
+         false
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_after_update_changes_6414",
+         new String[][]
+         {
+             { "1", "-1", "1", null, null, "-1", "1", "3", null, "ccccc" },
+             { "2", "-2", "2", null, null, "-2", "2", "4", null, "ccccc" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "delete from t1_after_update_changes_6414"
+        );
+
+        goodStatement
+        (
+                getConnection(),
+                "update t1_6414 set c=default, b=default"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_6414",
+         new String[][]
+         {
+             { "-1", "1", "5", null, "ccccc" },
+             { "-2", "2", "6", null, "ccccc" },
+         },
+         false
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_after_update_changes_6414",
+         new String[][]
+         {
+             { "-1", "1", "3", null, "ccccc", "-1", "1", "5", null, "ccccc" },
+             { "-2", "2", "4", null, "ccccc", "-2", "2", "6", null, "ccccc" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "delete from t1_after_update_changes_6414"
+        );
+
+        goodStatement
+        (
+                getConnection(),
+                "update t1_6414 set d='ccc'"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_6414",
+         new String[][]
+         {
+             { "-1", "1", "5", "ccc", "ccccc" },
+             { "-2", "2", "6", "ccc", "ccccc" },
+         },
+         false
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_after_update_changes_6414",
+         new String[][]
+         {
+             { "-1", "1", "5", null, "ccccc", "-1", "1", "5", "ccc", "ccccc" },
+             { "-2", "2", "6", null, "ccccc", "-2", "2", "6", "ccc", "ccccc" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "delete from t1_after_update_changes_6414"
+        );
+
+        PreparedStatement select = prepareStatement("select a, c from t1_6414 where d='ccc' for update");
+        ResultSet cursor;
+        Statement update = createStatement();
+        String cursorName;
+        cursor = select.executeQuery(); // cursor is now open
+        cursorName = cursor.getCursorName();
+        assertEquals(cursor.next(), true);
+        update.execute("update t1_6414 set a = a+3, c=default  where current of " + cursorName);
+        assertEquals(cursor.next(), true);
+        update.execute("update t1_6414 set a = a+300, c=default  where current of " + cursorName);
+        cursor.close();
+        update.close();
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_6414",
+         new String[][]
+         {
+             { "2", "-2", "7", "ccc", "ccccc" },
+             { "298", "-298", "8", "ccc", "ccccc" },
+         },
+         false
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t1_after_update_changes_6414",
+         new String[][]
+         {
+             { "-1", "1", "5", "ccc", "ccccc", "2", "-2", "7", "ccc", "ccccc" },
+             { "-2", "2", "6", "ccc", "ccccc", "298", "-298", "8", "ccc", "ccccc" },
+         },
+         false
+        );
+
+        //Test update of generated by default identity column
+        s.execute("create table t2_6414(a int, "+
+        "b generated always as (-a),"+
+        "c int generated by default as identity," +
+        "d char(3)," +
+        "e char(5)" +
+        ")");
+        goodStatement
+        (
+                getConnection(),
+                "insert into t2_6414(b,a,d,e,c) "+
+                "values (default,1,'aaa','aaaaa',1), " +
+        		"(default,2,'bbb','bbbbb',default)"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t2_6414",
+         new String[][]
+         {
+             { "1", "-1", "1", "aaa", "aaaaa" },
+             { "2", "-2", "1", "bbb", "bbbbb" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "update t2_6414 set e='ccccc', a=-a, c=default, d='ccc'"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t2_6414",
+         new String[][]
+         {
+             { "-1", "1", "2", "ccc", "ccccc" },
+             { "-2", "2", "3", "ccc", "ccccc" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "update t2_6414 set c=default, b=default"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t2_6414",
+         new String[][]
+         {
+             { "-1", "1", "4", "ccc", "ccccc" },
+             { "-2", "2", "5", "ccc", "ccccc" },
+         },
+         false
+        );
+        goodStatement
+        (
+                getConnection(),
+                "update t2_6414 set d=null"
+        );
+        assertResults
+        (
+         getConnection(),
+         "select * from t2_6414",
+         new String[][]
+         {
+             { "-1", "1", "4", null, "ccccc" },
+             { "-2", "2", "5", null, "ccccc" },
+         },
+         false
+        );
+        select = prepareStatement("select a, c from t2_6414 where b=2 for update");
+        update = createStatement();
+        cursor = select.executeQuery(); // cursor is now open
+        cursorName = cursor.getCursorName();
+        assertEquals(cursor.next(), true);
+        update.execute("update t2_6414 set a = a+3, c=default  where current of " + cursorName);
+        cursor.close();
+        update.close();
+        assertResults
+        (
+         getConnection(),
+         "select * from t2_6414",
+         new String[][]
+         {
+             { "-1", "1", "4", null, "ccccc" },
+             { "1", "-1", "6", null, "ccccc" },
+         },
+         false
+        );
+    }
+    /**
      * Test for DERBY-4448 and DERBY-4451: removal of explicitly given values
      * for generated column failed if there is more than one row in the VALUES
      * clause.

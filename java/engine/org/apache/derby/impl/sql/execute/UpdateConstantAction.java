@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.util.Properties;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.types.RowLocation;
 
 /**
  *	This class  describes compiled constants that are passed into
@@ -69,6 +70,19 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 
     private String schemaName;
     private String tableName;
+    private String columnNames[];
+
+    String  identitySequenceUUIDString;
+
+    /**
+     * An array of row location objects (0 based), one for each
+     * column in the table. If the column is an 
+     * autoincrement table then the array points to
+     * the row location of the column in SYSCOLUMNS.
+     * if not, then it contains null.
+     */
+    RowLocation[] autoincRowLocation;
+    private long[] autoincIncrement;
 
 	// CONSTRUCTORS
 
@@ -102,28 +116,33 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *  @param numColumns	Number of columns being read.
 	 *  @param positionedUpdate	is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param autoincRowLocation Array of rowlocations of autoincrement
+	 * 					    values in SYSCOLUMNS for each ai column.
 	 *  @param underMerge   True if this is an action of a MERGE statement.
+	 *  @param identitySequenceUUIDString   For 10.11 and higher, the handle on the sequence for the identity column
 	 */
     UpdateConstantAction(
                                 TableDescriptor     targetTableDesc,
-								StaticCompiledOpenConglomInfo heapSCOCI,
-								IndexRowGenerator[]	irgs,
-								long[]				indexCIDS,
-								StaticCompiledOpenConglomInfo[] indexSCOCIs,
-								String[]			indexNames,
-								boolean				deferred,
-								UUID				targetUUID,
-								int					lockMode,
-								int[]				changedColumnIds,
-								FKInfo[]			fkInfo,
-								TriggerInfo			triggerInfo,
-								FormatableBitSet				baseRowReadList,
-								int[]				baseRowReadMap,
-								int[]               streamStorableHeapColIds,
-								int					numColumns,
-								boolean				positionedUpdate,
-								boolean				singleRowSource,
-                                boolean             underMerge)
+                                StaticCompiledOpenConglomInfo heapSCOCI,
+                                IndexRowGenerator[]	irgs,
+                                long[]				indexCIDS,
+                                StaticCompiledOpenConglomInfo[] indexSCOCIs,
+                                String[]			indexNames,
+                                boolean				deferred,
+                                UUID				targetUUID,
+                                int					lockMode,
+                                int[]				changedColumnIds,
+                                FKInfo[]			fkInfo,
+                                TriggerInfo			triggerInfo,
+                                FormatableBitSet				baseRowReadList,
+                                int[]				baseRowReadMap,
+                                int[]               streamStorableHeapColIds,
+                                int					numColumns,
+                                boolean				positionedUpdate,
+                                boolean				singleRowSource,
+                                RowLocation[]		autoincRowLocation,
+                                boolean             underMerge,
+                                String		identitySequenceUUIDString)
             throws StandardException
 	{
 		super(
@@ -151,6 +170,28 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		this.numColumns = numColumns;
         this.schemaName = targetTableDesc.getSchemaName();
         this.tableName = targetTableDesc.getName();
+        this.columnNames = targetTableDesc.getColumnNamesArray();
+        this.autoincIncrement = targetTableDesc.getAutoincIncrementArray();
+        this.identitySequenceUUIDString = identitySequenceUUIDString;
+        this.autoincRowLocation = autoincRowLocation;
+	}
+
+	/**
+	 * Does the target table has autoincrement columns.
+	 *
+	 * @return 	True if the table has ai columns
+	 */
+	public boolean hasAutoincrement()
+	{
+		return (autoincRowLocation != null);
+	}
+
+	/**
+	 * gets the row location 
+	 */
+	RowLocation[] getAutoincRowLocation()
+	{
+		return autoincRowLocation;
 	}
 
 	// INTERFACE METHODS
@@ -170,6 +211,8 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		changedColumnIds = ArrayUtil.readIntArray(in);
 		positionedUpdate = in.readBoolean();
 		numColumns = in.readInt();
+		autoincIncrement = ArrayUtil.readLongArray(in);
+		identitySequenceUUIDString = (String) in.readObject();
 	}
 
 	/**
@@ -184,6 +227,8 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 		ArrayUtil.writeIntArray(out,changedColumnIds);
 		out.writeBoolean(positionedUpdate);
 		out.writeInt(numColumns);
+		ArrayUtil.writeLongArray(out, autoincIncrement);
+		out.writeObject( identitySequenceUUIDString );
 	}
 
 	/**
@@ -201,4 +246,23 @@ public class UpdateConstantAction extends WriteCursorConstantAction
     public String getTableName() {
         return tableName;
     }
+
+    /**
+     * gets the name of the desired column in the taget table.
+     * 
+     * @param 	i	the column number
+     */
+    public String getColumnName(int i) { return columnNames[i]; }
+
+    /**
+     * get the array of column names in the target table.
+     */
+    public String[] getColumnNames() { return columnNames; }
+
+    /**
+     * gets the increment value for a column.
+     *
+     * @param 	i 	the column number
+     */
+    public long   getAutoincIncrement(int i) { return autoincIncrement[i]; }
 }

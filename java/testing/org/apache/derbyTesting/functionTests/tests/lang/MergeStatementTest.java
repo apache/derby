@@ -429,15 +429,6 @@ public class MergeStatementTest extends GeneratedColumnsHelper
               "when matched and t1.c2 != t2.c2 then update set c3 = t2.c2\n"
               );
 
-        // and you can't update an identity column at all
-        expectCompilationError
-            ( dboConnection, CANT_MODIFY_IDENTITY,
-              "merge into t1\n" +
-              "using t2\n" +
-              "on t1.c1 = t2.c1\n" +
-              "when matched and t1.c2 != t2.c2 then update set c1 = default, c2 = t2.c2\n"
-              );
-
         // Column may not appear twice in INSERT list.
         expectCompilationError
             ( dboConnection, DUPLICATE_COLUMNS,
@@ -1730,6 +1721,16 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              false
              );
 
+        /* update an identity column with default should work once we change 
+         * MergeStatement implementation to handle auto generated keys
+        goodStatement
+            ( dboConnection, 
+              "merge into t1_007\n" +
+              "using t2_007\n" +
+              "on t1_007.c1 = t2_007.c1\n" +
+              "when matched and t1_007.c2 != t2_007.c2 then update set c1 = default, c2 = t2_007.c2\n"
+              );*/
+
         //
         // drop schema
         //
@@ -2581,16 +2582,15 @@ public class MergeStatementTest extends GeneratedColumnsHelper
              );
 
         //
-        // The following statement fails because of derby-6414. Revisit this
-        // case when that bug is fixed.
-        //
+        /*update an identity column with default should work once we change
+        // MergeStatement implementation to handle auto generated keys
         expectCompilationError
             ( dboConnection, CANT_MODIFY_IDENTITY,
               "merge into t1_014\n" +
               "using t2_014\n" +
               "on t1_014.c2 = t2_014.c2\n" +
               "when matched then update set c1 = default, c3 = default, c2 = 2 * t2_014.c2, c5 = default\n"
-              );
+              );*/
 
         //
         // drop schema
@@ -2607,7 +2607,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
      * the behavior for standalone UPDATE statements.
      * </p>
      */
-    public  void    test_015_bug_6414()
+    public  void    atest_015_bug_6414()
         throws Exception
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
@@ -2651,8 +2651,8 @@ public class MergeStatementTest extends GeneratedColumnsHelper
         // column to the next DEFAULT value, i.e., the next value from the
         // sequence generator.
         //
-        expectCompilationError
-            ( dboConnection, CANT_MODIFY_IDENTITY,
+        goodStatement
+            ( dboConnection, 
               "update t1_bug_6414 set a = default, b = -b"
               );
         expectCompilationError

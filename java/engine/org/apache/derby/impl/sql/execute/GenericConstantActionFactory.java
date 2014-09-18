@@ -941,7 +941,10 @@ public class GenericConstantActionFactory
 	 *  @param numColumns			The number of columns being read.
 	 *	@param positionedUpdate		is this a positioned update
 	 *  @param singleRowSource		Whether or not source is a single row source
+	 *  @param autoincRowLocation array of row locations into syscolumns for
+	                              autoincrement columns
 	 *  @param underMerge   True if this is an action of a MERGE statement.
+	 *  @param identitySequenceUUIDString   For 10.11 and higher, the handle on the sequence for the identity column
      *  @return                     The constant action constructed
 	 *
 	 *  @exception StandardException Thrown on failure
@@ -968,7 +971,9 @@ public class GenericConstantActionFactory
 								int					numColumns,
 								boolean				positionedUpdate,
 								boolean				singleRowSource,
-								boolean				underMerge
+								RowLocation[]		autoincRowLocation,
+								boolean				underMerge,
+								String		identitySequenceUUIDString
 							)
 			throws StandardException
 	{
@@ -991,7 +996,9 @@ public class GenericConstantActionFactory
 										numColumns,
 										positionedUpdate,
 										singleRowSource,
-										underMerge
+										autoincRowLocation,
+										underMerge,
+										identitySequenceUUIDString
 										);
 	}
 

@@ -68,7 +68,7 @@ import org.apache.derby.vti.DeferModification;
  *
  */
 
-public final class UpdateNode extends DMLModStatementNode
+public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
 {
 	//Note: These are public so they will be visible to
 	//the RepUpdateNode.
@@ -371,9 +371,25 @@ public final class UpdateNode extends DMLModStatementNode
         forbidGenerationOverrides( resultSet.getResultColumns(),
 								   addedGeneratedColumns );
         
-		LanguageConnectionContext lcc = getLanguageConnectionContext();
-		if (lcc.getAutoincrementUpdate() == false)
-			resultSet.getResultColumns().forbidOverrides(null);
+        //DERBY-6414(Incorrect handling when using an UPDATE to SET an 
+        // identity column to DEFAULT)
+        //The bug is fixed only for Derby 10.11 and higher. Starting 10.11,
+        // we have started using sequence generator to create unique ids
+        //If we fix this jira for prior releases, we will need to maintain
+        // the code for old way of generating unique ids.
+        if (dataDictionary.checkVersion( DataDictionary.DD_VERSION_DERBY_10_11, null )) {
+            //Replace any DEFAULTs with the associated tree for the default if
+            // allowed, otherwise throw an exception
+            resultSet.getResultColumns().replaceOrForbidDefaults(
+            		targetTableDescriptor, 
+            		resultSet.getResultColumns(), true);
+            resultSet.getResultColumns().checkForInvalidDefaults();
+            resultSet.getResultColumns().forbidOverrides(resultSet.getResultColumns());
+        } else {
+    		LanguageConnectionContext lcc = getLanguageConnectionContext();
+    		if (lcc.getAutoincrementUpdate() == false)
+    			resultSet.getResultColumns().forbidOverrides(null);
+        }
 
 		/*
 		** Mark the columns in this UpdateNode's result column list as
@@ -635,7 +651,14 @@ public final class UpdateNode extends DMLModStatementNode
             {
                 deferred = true;
             }
+            TransactionController tc = 
+                    getLanguageConnectionContext().getTransactionCompile();
+
+            autoincRowLocation = 
+                    dataDictionary.computeAutoincRowLocations(tc, targetTableDescriptor);
         }
+
+		identitySequenceUUIDString = getUUIDofSequenceGenerator();
 
 		getCompilerContext().popCurrentPrivType();
 
@@ -934,7 +957,9 @@ public final class UpdateNode extends DMLModStatementNode
 				  readColsBitSet.getNumBitsSet(),			
 			  positionedUpdate,
 			  resultSet.isOneRowResultSet(),
-			  inMatchingClause()
+			  autoincRowLocation,
+			  inMatchingClause(),
+			  identitySequenceUUIDString
 			  );
 	}
 

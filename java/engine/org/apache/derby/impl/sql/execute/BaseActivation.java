@@ -739,7 +739,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	       throws StandardException
 	{
 		DataValueDescriptor l =
-			((InsertResultSet)resultSet).getSetAutoincrementValue(columnPosition, increment);
+			((DMLWriteGeneratedColumnsResultSet)resultSet).getSetAutoincrementValue(columnPosition, increment);
 		return l;
 
 	}
