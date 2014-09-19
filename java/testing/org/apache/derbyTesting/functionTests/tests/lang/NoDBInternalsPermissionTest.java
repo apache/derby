@@ -32,6 +32,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 
 /**
  * <p>
@@ -124,4 +125,19 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
         catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
     }
 
+    /**
+     * <p>
+     * Verify that user code can't call EmbedConnection.getContextManager().
+     * </p>
+     */
+    public  void    test_002_EmbedConnection()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        try {
+            ((EmbedConnection) conn).getContextManager();
+            fail( "Should have raised an AccessControlException" );
+        }
+        catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
+    }
 }

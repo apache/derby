@@ -527,8 +527,7 @@ public class NewOptimizerOverridesTest  extends GeneratedColumnsHelper
     /** Get an xml-based picture of the plan chosen for the last query. The query is identified by its JDBC ResultSet */
     public  static  Document    getLastQueryPlan( Connection conn, ResultSet rs ) throws Exception
     {
-        ContextManager      contextManager = ((EmbedConnection) conn).getContextManager();
-        LanguageConnectionContext   lcc = (LanguageConnectionContext) contextManager.getContext( "LanguageConnectionContext" );
+        LanguageConnectionContext   lcc = ConstraintCharacteristicsTest.getLCC( conn );
         org.apache.derby.iapi.sql.ResultSet derbyRS = lcc.getLastActivation().getResultSet();
 
         Document    doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

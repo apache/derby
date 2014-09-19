@@ -672,9 +672,11 @@ class EmbedXAResource implements XAResource {
                     throw wrapInXAException(sqle);
                 }
                 
-                tranState = new XATransactionState(
-                    con.realConnection.getContextManager(),
-                    con.realConnection, this, xid_im);
+                tranState = new XATransactionState
+                    (
+                     getContextManager( con.realConnection ),
+                     con.realConnection, this, xid_im
+                     );
                 if (!ra.addConnection(xid_im, tranState))
                     throw new XAException(XAException.XAER_DUPID);
                 
@@ -938,23 +940,34 @@ class EmbedXAResource implements XAResource {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
+    }
+
+    /**
+     * Privileged lookup of the ContextManager. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ContextManager    getContextManager( final EmbedConnection conn )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextManager>()
+             {
+                 public ContextManager run()
+                 {
+                     return conn.getContextManager();
+                 }
+             }
+             );
     }
 
 }

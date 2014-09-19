@@ -226,6 +226,9 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
 grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
+
+  // Needed to look up the LanguageConnectionContext
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
   
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 

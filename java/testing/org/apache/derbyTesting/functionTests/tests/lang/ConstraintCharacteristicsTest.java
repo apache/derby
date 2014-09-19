@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -408,11 +410,7 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
 
         s.executeUpdate("alter table t alter constraint c enforced ");
 
-        final ContextManager contextManager =
-                ((EmbedConnection)c).getContextManager();
-        final LanguageConnectionContext lcc =
-                (LanguageConnectionContext)contextManager.getContext(
-                "LanguageConnectionContext");
+        final LanguageConnectionContext lcc = getLCC( c );
         final GenericPreparedStatement derbyPs =
                 (GenericPreparedStatement)lcc.getLastActivation().
                 getPreparedStatement();
@@ -2830,6 +2828,26 @@ public class ConstraintCharacteristicsTest extends BaseJDBCTestCase
             assertSQLState(LANG_DEFERRED_CHECK_VIOLATION_T, e);
         }
 
+    }
+    
+    /**
+     * Privileged lookup of the LCC from a Connection.
+     */
+    public  static  LanguageConnectionContext    getLCC( final Connection conn )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     final ContextManager contextManager =
+                         ((EmbedConnection)conn).getContextManager();
+                     return (LanguageConnectionContext)
+                         contextManager.getContext( "LanguageConnectionContext" );
+                 }
+             }
+             );
     }
 }
 

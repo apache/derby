@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.security.DatabasePermission;
+import org.apache.derby.iapi.security.SecurityUtil;
 
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.impl.db.SlaveDatabase;
@@ -2891,6 +2892,9 @@ public class EmbedConnection implements EngineConnection
 		Return the context manager for this connection.
 	*/
 	public final ContextManager getContextManager() {
+
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
 
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(!isClosed(), "connection is closed");
