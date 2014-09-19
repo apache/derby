@@ -1380,11 +1380,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>42601.S.372</name>
-                <text>ALTER TABLE statement cannot add an IDENTITY column to a table.</text>
-            </msg>
-
-            <msg>
                 <name>42605</name>
                 <text>The number of arguments for function '{0}' is incorrect.</text>
                 <arg>functionName</arg>

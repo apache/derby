@@ -24,7 +24,6 @@ package org.apache.derby.impl.sql.execute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.IndexDescriptor;
@@ -82,7 +81,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -1227,7 +1225,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                    td,
                    defaultUUID,
                    columnInfo[ix].autoincStart,
-                   columnInfo[ix].autoincInc
+                   columnInfo[ix].autoincInc,
+                   columnInfo[ix].autoinc_create_or_modify_Start_Increment
                    );
 
 		dd.addDescriptor(columnDescriptor, td,
@@ -1236,15 +1235,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// now add the column to the tables column descriptor list.
 		td.getColumnDescriptorList().add(columnDescriptor);
 
-        if (SanityManager.DEBUG)
+        if (columnDescriptor.isAutoincrement())
 		{
-            // support for adding identity columns was removed before Derby
-            // was open-sourced
-			SanityManager.ASSERT( !columnDescriptor.isAutoincrement(), "unexpected attempt to add an identity column" );
+            //
+            // Create a sequence generator for the auto-increment column.
+            // See DERBY-6542.
+            //
+            CreateSequenceConstantAction csca =
+                    CreateTableConstantAction.makeCSCA(
+                            columnInfo[ ix],
+                            TableDescriptor.makeSequenceName(td.getUUID()));
+            csca.executeConstantAction(activation);
 		}
 
 		// Update the new column to its default, if it has a non-null default
-		if (columnDescriptor.hasNonNullDefault())
+        if (columnDescriptor.isAutoincrement() ||
+                columnDescriptor.hasNonNullDefault())
 		{
             updateNewColumnToDefault(columnDescriptor);
 		}	
@@ -3403,20 +3409,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 */
     private void updateNewColumnToDefault(ColumnDescriptor columnDescriptor)
             throws StandardException {
-        DefaultInfo defaultInfo = columnDescriptor.getDefaultInfo();
         String  columnName = columnDescriptor.getColumnName();
-        String  defaultText;
 
-        if ( defaultInfo.isGeneratedColumn() ) { defaultText = "default"; }
-        else { defaultText = columnDescriptor.getDefaultInfo().getDefaultText(); }
-            
 		/* Need to use delimited identifiers for all object names
 		 * to ensure correctness.
 		 */
         String updateStmt = "UPDATE " +
                 IdUtil.mkQualifiedName(td.getSchemaName(), td.getName()) +
-                " SET " + IdUtil.normalToDelimited(columnName) + "=" +
-                defaultText;
+                " SET " + IdUtil.normalToDelimited(columnName) + "=DEFAULT";
 
 
 		AlterTableConstantAction.executeUpdate(lcc, updateStmt);

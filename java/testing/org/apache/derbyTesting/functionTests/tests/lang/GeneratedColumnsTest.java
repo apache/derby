@@ -3836,7 +3836,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
         expectCompilationError
             (
-             CANT_ADD_IDENTITY,
+             NEED_EXPLICIT_DATATYPE,
              "alter table t_nd_1 add c generated always as identity"
              );
 

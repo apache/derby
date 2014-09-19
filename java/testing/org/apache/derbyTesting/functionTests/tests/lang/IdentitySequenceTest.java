@@ -198,11 +198,11 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              false
              );
 
-        // can't add an identity column to a table
+        // can add an identity column to a table (DERBY-3888)
         goodStatement( conn, "create table T2_01_IST( b int )" );
-        expectCompilationError
-            ( conn, CANT_ADD_IDENTITY,
+        goodStatement( conn,
               "alter table T2_01_IST add column a int generated always as identity ( start with 10, increment by 20 )" );
+        goodStatement( conn, "drop table T2_01_IST" );
 
         // dropping an identity column should drop the sequence generator too
         goodStatement

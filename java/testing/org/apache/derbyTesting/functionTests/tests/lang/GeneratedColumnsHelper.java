@@ -77,7 +77,6 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  LACK_COLUMN_PRIV = "42502";
     protected static  final   String  LACK_EXECUTE_PRIV = "42504";
     protected static  final   String  LACK_USAGE_PRIV = "42504";
-    protected static  final   String  CANT_ADD_IDENTITY = "42601";
     protected static  final   String  CANT_MODIFY_IDENTITY = "42Z23";
     
     protected static  final   String  CASCADED_COLUMN_DROP_WARNING = "01009";

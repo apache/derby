@@ -335,8 +335,14 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 		}
 
 		/* Can have only one autoincrement column in DB2 mode */
-		if (numAutoCols > 1)
+        // Raise an error if we have more than one autoincrement column in a
+        // CREATE TABLE statement, or if we are adding a new autoincrement
+        // column to an existing table that already has an autoincrement column,
+        // with ALTER TABLE ADD COLUMN.
+        if (numAutoCols > 1 ||
+                (numAutoCols > 0 && td != null && td.tableHasAutoincrement())) {
 			throw StandardException.newException(SQLState.LANG_MULTIPLE_AUTOINCREMENT_COLUMNS);
+        }
 
 	}
 

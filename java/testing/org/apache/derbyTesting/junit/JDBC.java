@@ -830,7 +830,7 @@ public class JDBC {
      * @param expectedColNames Array of expected column names.
      */
     public static void assertColumnNames(ResultSet rs,
-        String [] expectedColNames) throws SQLException
+        String... expectedColNames) throws SQLException
     {
         ResultSetMetaData rsmd = rs.getMetaData();
         int actualCols = rsmd.getColumnCount();

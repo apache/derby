@@ -663,12 +663,46 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		Statement pst=createStatement();
 		Statement s=createStatement();
 		pst.executeUpdate("insert into base values (1),(2),(3),(4),(5),(6)");
-		assertStatementError("42601", pst,"alter table base add column y smallint generated always as identity (start with  10)");
-		assertStatementError("42601", pst,"alter table base add column y int generated always as identity (start with  10)");
-		assertStatementError("42601", pst,"alter table base add column y bigint generated always as identity (start with  10)");
-		assertStatementError("42601", pst,"alter table base add column y bigint generated always as identity (start with  10)");
+
+        String[][] expectedRows = {
+            {"1", "10"},
+            {"2", "11"},
+            {"3", "12"},
+            {"4", "13"},
+            {"5", "14"},
+            {"6", "15"},
+        };
+
+        assertUpdateCount(pst, 0, "alter table base add column y "
+                + "smallint generated always as identity (start with 10)");
+        JDBC.assertFullResultSet(
+                pst.executeQuery("select * from base order by x"),
+                expectedRows);
+        assertUpdateCount(pst, 0, "alter table base drop column y");
+
+        assertUpdateCount(pst, 0, "alter table base add column y "
+                + "int generated always as identity (start with 10)");
+        JDBC.assertFullResultSet(
+                pst.executeQuery("select * from base order by x"),
+                expectedRows);
+        assertUpdateCount(pst, 0, "alter table base drop column y");
+
+        assertUpdateCount(pst, 0, "alter table base add column y "
+                + "bigint generated always as identity (start with 10)");
+        JDBC.assertFullResultSet(
+                pst.executeQuery("select * from base order by x"),
+                expectedRows);
+        assertUpdateCount(pst, 0, "alter table base drop column y");
+
+        assertUpdateCount(pst, 0, "alter table base add column y "
+                + "bigint generated always as identity (start with 10)");
+        JDBC.assertFullResultSet(
+                pst.executeQuery("select * from base order by x"),
+                expectedRows);
+        assertUpdateCount(pst, 0, "alter table base drop column y");
+
 		rs=pst.executeQuery("select * from base order by x");
-		String[][]expectedRows=new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"},{"6"}};
+        expectedRows = new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"},{"6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("insert into idt1(c2) values (8)");
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
@@ -700,6 +734,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select * from idt1 order by c1");
 		expectedRows=new String[][]{{"1","8"},{"2","1"},{"3","8"},{"4","9"},{"5","1"},{"6","2"},{"7","3"},{"8","4"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
 		s.executeUpdate("delete from idt1");
 		rs=s.executeQuery("values IDENTITY_VAL_LOCAL()");
 		expectedRows=new String[][]{{"2"}};

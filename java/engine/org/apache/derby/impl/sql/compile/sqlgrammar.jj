@@ -13522,10 +13522,12 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	{
 		if (tableElement instanceof ColumnDefinitionNode)
 		{
-			//bug 5724 - auto increment columns not allowed in ALTER TABLE statement
+            // IDENTITY columns can only be added if the database format
+            // is 10.11 or higher. DERBY-3888.
 			ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
 			if ( cdn.isAutoincrementColumn())
-				throw StandardException.newException(SQLState.LANG_ALTER_TABLE_AUTOINCREMENT_COLUMN_NOT_ALLOWED);
+                checkVersion(DataDictionary.DD_VERSION_DERBY_10_11,
+                             "ADD IDENTITY COLUMN");
 		}
 		changeType[0] = DDLStatementNode.ADD_TYPE;
 		tableElementList.addTableElement(tableElement);

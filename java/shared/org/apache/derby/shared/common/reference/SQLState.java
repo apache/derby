@@ -1174,7 +1174,6 @@ public interface SQLState {
 	String LANG_LONG_DATA_TYPE_NOT_ALLOWED = "42962";
 
 	String LANG_MULTIPLE_AUTOINCREMENT_COLUMNS                         = "428C1";
-	String LANG_ALTER_TABLE_AUTOINCREMENT_COLUMN_NOT_ALLOWED           = "42601.S.372";
 	String LANG_TOO_MANY_INDEX_KEY_COLS                                = "54008";
 	String LANG_TRIGGER_RECURSION_EXCEEDED                             = "54038";
 
