@@ -1,0 +1,95 @@
+//
+//   Licensed to the Apache Software Foundation (ASF) under one or more
+//   contributor license agreements.  See the NOTICE file distributed with
+//   this work for additional information regarding copyright ownership.
+//   The ASF licenses this file to You under the Apache License, Version 2.0
+//   (the "License"); you may not use this file except in compliance with
+//   the License.  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+
+// A minimal policy file for running the withPermsTest test case of
+// CacheManagerMBeanTest. The only difference between this policy file
+// and CacheManagerMBeanTest.withoutPerm.policy, is that this file
+// grants SystemPermission("engine", "monitor") to derbyTesting.jar.
+
+grant codeBase "${derbyTesting.codejar}derby.jar"
+{
+  // These permissions are needed for everyday, embedded Derby usage.
+  //
+  permission java.lang.RuntimePermission "createClassLoader";
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission java.util.PropertyPermission "derby.*", "read";
+  permission java.util.PropertyPermission "user.dir", "read";
+
+  permission java.io.FilePermission "${derby.system.home}","read";
+  permission java.io.FilePermission "${derby.system.home}${/}-",
+      "read,write,delete";
+
+  // Trusts Derby code to be a source of MBeans and to register these in the
+  // MBean server.
+  //
+  permission javax.management.MBeanTrustPermission "register";
+
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+};
+
+//
+// Permissions for the tests (derbyTesting.jar)
+//
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+  // Allow tests to install and uninstall the security manager and
+  // to refresh the policy
+  permission java.util.PropertyPermission "java.security.policy", "read,write";
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+
+  // derbyTesting.junit.TestConfiguration... modifies System properties
+  permission java.util.PropertyPermission "*", "read,write";
+
+  // Access all files under ${user.dir} to write the test directory structure
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete";
+
+  // Allow the test to start the platform MBean server
+  permission javax.management.MBeanServerPermission "createMBeanServer";
+
+  // And to find and use Derby's MBeans
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,setAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
+  permission javax.management.MBeanPermission "-#-[-]", "queryNames";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
+
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+};
+
+// JUnit jar file tries to read junit.properties in the user's
+// home directory and seems to require permission to read the
+// property user.home as well.
+// junit.swingui.TestRunner writes to .junitsession on exit.
+grant codeBase "${derbyTesting.junit}" {
+    permission java.util.PropertyPermission "user.home", "read";
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+    permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};

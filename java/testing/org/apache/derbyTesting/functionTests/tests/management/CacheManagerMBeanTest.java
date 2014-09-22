@@ -21,13 +21,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
+import java.security.Permission;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.Set;
 import javax.management.ObjectName;
+import javax.management.RuntimeMBeanException;
 import junit.framework.Test;
+import org.apache.derby.security.SystemPermission;
+import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -39,13 +44,40 @@ public class CacheManagerMBeanTest extends MBeanTest {
     private final static int DEFAULT_CONTAINER_CACHE_SIZE = 100;
     private final static int DEFAULT_STATEMENT_CACHE_SIZE = 100;
 
+    private static String[] ALL_ATTRIBUTES = {
+        "CollectAccessCounts", "HitCount", "MissCount", "EvictionCount",
+        "MaxEntries", "AllocatedEntries", "UsedEntries"
+    };
+
     public CacheManagerMBeanTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return MBeanTest.suite(CacheManagerMBeanTest.class,
-                               "CacheManagerMBeanTest");
+        BaseTestSuite suite = new BaseTestSuite();
+        suite.addTest(MBeanTest.suite(CacheManagerMBeanTest.class,
+                                      "CacheManagerMBeanTest"));
+
+        // Test that the management bean can only be accessed with proper
+        // permissions. The custom policy files only have entries for jar
+        // files, so skip these test cases when running from classes.
+        if (TestConfiguration.loadingFromJars()) {
+            Test negative = new CacheManagerMBeanTest("withoutPermsTest");
+            negative = JMXConnectionDecorator.platformMBeanServer(negative);
+            negative = new SecurityManagerSetup(negative,
+                    "org/apache/derbyTesting/functionTests/tests/management/"
+                        + "CacheManagerMBeanTest.withoutPerm.policy");
+            suite.addTest(negative);
+
+            Test positive = new CacheManagerMBeanTest("withPermsTest");
+            positive = JMXConnectionDecorator.platformMBeanServer(positive);
+            positive = new SecurityManagerSetup(positive,
+                    "org/apache/derbyTesting/functionTests/tests/management/"
+                            + "CacheManagerMBeanTest.withPerm.policy");
+            suite.addTest(positive);
+        }
+
+        return suite;
     }
 
     @Override
@@ -288,5 +320,85 @@ public class CacheManagerMBeanTest extends MBeanTest {
         // Disable the access counts.
         setAttribute(name, "CollectAccessCounts", Boolean.FALSE);
         assertBooleanAttribute(false, name, "CollectAccessCounts");
+    }
+
+    /**
+     * Test that the CacheManagerMBean cannot be accessed if the code
+     * base lacks SystemPermission("engine", "monitor").
+     */
+    public void withoutPermsTest() throws Exception {
+        getConnection(); // boot the database
+        Set<ObjectName> names =
+                queryMBeans(createObjectName("StatementCache", null));
+
+        assertEquals("Should have a single statement cache", 1, names.size());
+
+        ObjectName name = names.iterator().next();
+
+        // This is the permission required to access the MBean, but we don't
+        // have it.
+        SystemPermission monitorPerm =
+                new SystemPermission("engine", "monitor");
+
+        // Reading attributes should cause security exception.
+        for (String attrName : ALL_ATTRIBUTES) {
+            try {
+                getAttribute(name, attrName);
+                fail();
+            } catch (RuntimeMBeanException e) {
+                vetException(e, monitorPerm);
+            }
+        }
+
+        // Modifying attributes should also cause security exception.
+        try {
+            setAttribute(name, "CollectAccessCounts", Boolean.FALSE);
+            fail();
+        } catch (RuntimeMBeanException e) {
+            vetException(e, monitorPerm);
+        }
+    }
+
+    /**
+     * Check that an exception raised when accessing an MBean, is caused
+     * by missing a specific permission.
+     *
+     * @param e the exception to check
+     * @param perm the missing permission to check for
+     */
+    private void vetException(RuntimeMBeanException e, Permission perm) {
+        Throwable cause = e.getCause();
+        if (cause instanceof SecurityException) {
+            String msg = cause.getMessage();
+            if (msg != null && msg.contains(perm.toString())) {
+                // This is the expected exception.
+                return;
+            }
+        }
+
+        fail("Unexpected exception", e);
+    }
+
+    /**
+     * Test that the CacheManagerMBean can be accessed if the code base
+     * runs with the same permissions as the {@link #withoutPermsTest} test
+     * case plus SystemPermission("engine", "monitor").
+     */
+    public void withPermsTest() throws Exception {
+        getConnection(); // boot the database
+        Set<ObjectName> names =
+                queryMBeans(createObjectName("StatementCache", null));
+
+        assertEquals("Should have a single statement cache", 1, names.size());
+
+        ObjectName name = names.iterator().next();
+
+        // Expect no SecurityException when reading attributes ...
+        for (String attrName : ALL_ATTRIBUTES) {
+            getAttribute(name, attrName);
+        }
+
+        // ... or when modifying them.
+        setAttribute(name, "CollectAccessCounts", Boolean.FALSE);
     }
 }
