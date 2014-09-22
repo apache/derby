@@ -319,6 +319,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.lang.RuntimePermission "createClassLoader";
 
+  // Needed for the engine to access its internal structures
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+
   // permissions so that we can set the context class loader to
   // null for daemon threads to avoid class loader leak.
   // DERBY-3745
