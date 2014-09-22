@@ -20,10 +20,12 @@
  */
 
 package org.apache.derby.impl.services.reflect;
+
+import org.apache.derby.iapi.sql.compile.CodeGeneration;
 import org.apache.derby.iapi.util.ByteArray;
 
 /**
-	Relfect loader with Privileged block for Java 2 security. 
+	Reflect loader with Privileged block for Java 2 security. 
 */
 
 public class ReflectClassesJava2 extends DatabaseClasses
@@ -58,6 +60,20 @@ public class ReflectClassesJava2 extends DatabaseClasses
 			}
 		}
 
+        // Generated class. Make sure that it lives in the org.apache.derby.exe package
+        int     lastDot = fullyQualifiedName.lastIndexOf( "." );
+        String  actualPackage;
+        if ( lastDot < 0 ) { actualPackage = ""; }
+        else
+        {
+            actualPackage = fullyQualifiedName.substring( 0, lastDot + 1 );
+        }
+
+        if ( !CodeGeneration.GENERATED_PACKAGE_PREFIX.equals( actualPackage ) )
+        {
+            throw new IllegalArgumentException( fullyQualifiedName );
+        }
+        
 		action = 1;
 		return ((ReflectLoaderJava2) java.security.AccessController.doPrivileged(this)).loadGeneratedClass(fullyQualifiedName, classDump);
 	}
