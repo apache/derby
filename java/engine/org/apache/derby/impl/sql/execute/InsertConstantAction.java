@@ -286,7 +286,7 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	/**
 	 * get the array of column names in the target table.
 	 */
-	public String[] getColumnNames() { return columnNames; }
+    String[] getColumnNames() { return columnNames; }
 
 	/**
 	 * gets the increment value for a column.
