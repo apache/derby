@@ -216,11 +216,10 @@ public class GroupByList extends OrderedColumnList
 		}
 
 		/* Verify that no subqueries got added to the dummy list */
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(dummySubqueryList.size() == 0,
-				"dummySubqueryList.size() is expected to be 0");
-		}
+        if (dummySubqueryList.size() != 0) {
+            throw StandardException.newException(
+                    SQLState.LANG_SUBQUERY_IN_GROUPBY_LIST);
+        }
 
 		numGroupingColsAdded+= numColsAddedHere;
 	}

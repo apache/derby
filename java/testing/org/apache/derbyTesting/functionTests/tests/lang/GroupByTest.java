@@ -370,7 +370,13 @@ public class GroupByTest extends BaseJDBCTestCase {
         
         assertStatementError("X0X67", st,
             " select c1, max(1) from unmapped group by c1");
-		st.close();
+
+        // group by on aggregate
+        assertCompileError("42Y26", "select sum(a) from t1 group by sum(a)");
+
+        // group by on subquery (DERBY-4403)
+        assertCompileError("42Y26",
+                "select sum(a) from t1 group by (select a from t1)");
 	}
 
 	/**

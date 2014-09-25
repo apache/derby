@@ -2373,8 +2373,13 @@ Guide.
             </msg>
 
             <msg>
-                <name>42Y26</name>
+                <name>42Y26.S.0</name>
                 <text>Aggregates are not allowed in the GROUP BY list.</text>
+            </msg>
+
+            <msg>
+                <name>42Y26.S.1</name>
+                <text>Subqueries are not allowed in the GROUP BY list.</text>
             </msg>
 
             <msg>
