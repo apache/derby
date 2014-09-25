@@ -46,6 +46,7 @@ public class _Suite extends BaseTestCase  {
         // Tests are not yet compatible with JSR169 / JavaME
         if (!JDBC.vmSupportsJSR169()) {
             suite.addTest(BasicInMemoryDbTest.suite());
+            suite.addTest(Derby6662Test.suite());
             suite.addTest(MogTest.suite());
         }
         return suite;

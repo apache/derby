@@ -331,7 +331,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if so
      */
 	public boolean usesLocalFiles() {
-		return true;
+        if (url.contains("memory"))
+            return false;
+        else
+            return true;
 	}
 
     /**
@@ -340,7 +343,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if the database uses a local file for each table
      */
 	public boolean usesLocalFilePerTable() {
-		return true;
+        if (url.contains("memory"))
+            return false;
+        else
+            return true;
 	}
 
     /**
