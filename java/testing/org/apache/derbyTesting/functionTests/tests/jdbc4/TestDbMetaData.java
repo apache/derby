@@ -111,7 +111,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
 
     public void testGetClientInfoProperties() throws SQLException {
         ResultSet rs = meta.getClientInfoProperties();
-        JDBC.assertColumnNames(rs, new String[] {
+        JDBC.assertDatabaseMetaDataColumns(rs, null, new String[] {
             "NAME", "MAX_LEN", "DEFAULT_VALUE", "DESCRIPTION" });
         JDBC.assertEmpty(rs);
     }
@@ -130,12 +130,12 @@ public class TestDbMetaData extends BaseJDBCTestCase {
 
     /** Check that the column names are as expected from getFunctions(). */
     private void assertGetFunctionsRs(ResultSet rs) throws SQLException {
-        JDBC.assertColumnNames(rs, new String[] {
+        int[] ColTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.SMALLINT, Types.VARCHAR };
+        JDBC.assertDatabaseMetaDataColumns(rs, ColTypes, new String[] {
             "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "REMARKS",
             "FUNCTION_TYPE", "SPECIFIC_NAME" });
-        JDBC.assertColumnTypes(rs, new int[] {
-            Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-            Types.SMALLINT, Types.VARCHAR });
     }
     
     private static final JDBC.GeneratedId GENERIC_NAME = new JDBC.GeneratedId();
@@ -301,7 +301,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     /** Check that the column names are as expected from
      * getFunctionColumns(). */
     private void assertGetFunctionColumnsRs(ResultSet rs) throws SQLException {
-        JDBC.assertColumnNames(rs, new String[] {
+        JDBC.assertDatabaseMetaDataColumns(rs, null, new String[] {
             "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "COLUMN_NAME",
             "COLUMN_TYPE", "DATA_TYPE", "TYPE_NAME", "PRECISION", "LENGTH",
             "SCALE", "RADIX", "NULLABLE", "REMARKS", "CHAR_OCTET_LENGTH",
@@ -405,7 +405,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
 
     /** Check that the column names are as expected from getSchemas(). */
     private void assertGetSchemasRs(ResultSet rs) throws SQLException {
-        JDBC.assertColumnNames(rs, new String[] {
+        JDBC.assertDatabaseMetaDataColumns(rs, null, new String[] {
             "TABLE_SCHEM", "TABLE_CATALOG" });
     }
 

@@ -845,6 +845,122 @@ public class JDBC {
         }
     }
     /**
+     * Takes a result set and an array of expected colum names (as
+     * Strings)  and asserts that the column names in the result
+     * set metadata match the number, order, and names of those
+     * in the array.
+     * Does the same for column types
+     *      *
+     * @param rs ResultSet for which we're checking column names.
+     * @param expectedTypes Array of expected types for the columns.
+     * @param expectedColNames Array of expected column names.
+     */
+    public static void assertDatabaseMetaDataColumns(ResultSet rs,
+            int[] expectedTypes, 
+            String... expectedColNames) throws SQLException
+    {
+        assertDatabaseMetaDataColumns(rs, null, expectedTypes, expectedColNames);
+    }    
+    /**
+     * Takes a result set and an array of expected colum names (as
+     * Strings)  and asserts that the column names in the result
+     * set metadata match the number, order, and names of those
+     * in the array.
+     * Does the same for column types and nullability.
+     * 
+     * This is a variation of JDBC.assertColumnNames, here we only compare
+     * the expected columns and ignore additional ones, because columns 
+     * returned from DatabaseMetaData can be added to with newer JDBC versions.
+     * If the ResultSet can not change over time, JDBC.assertColumnNames 
+     * should be used. See DERBY-6180.
+     *
+     * @param rs ResultSet for which we're checking column names.
+     * @param expectedTypes Array of expected types for the columns.
+     * @param nullability Array of expected nullability values for the columns.
+     * @param expectedColNames Array of expected column names.
+     */
+    public static void assertDatabaseMetaDataColumns(ResultSet rs,
+            boolean[] nullability, int[] expectedTypes, 
+            String... expectedColNames) throws SQLException
+    {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int actualCols = rsmd.getColumnCount();
+        String actualColNames="[";
+        for (int c = 0; c < rsmd.getColumnCount(); c++) {
+            if (c==0)
+                actualColNames=actualColNames + rsmd.getColumnName(c+1);
+            else
+                actualColNames=actualColNames + ", " + rsmd.getColumnName(c+1);
+        }
+        actualColNames=actualColNames + "]";
+        
+        if (nullability != null)
+            Assert.assertEquals("Number of items in expected ColumnNames and " +
+                "expected nullability arrays don't match; fix up the test", 
+                expectedColNames.length, nullability.length);
+        if (expectedTypes != null)
+            Assert.assertEquals("Number of items in expected ColumnNames and " +
+                "expected ColumnTypes arrays don't match; fix up the test", 
+                expectedColNames.length, expectedTypes.length);
+        
+        if (expectedColNames.length == rsmd.getColumnCount()) {
+            // the count is the same, expect the names to be the same too
+            for (int i = 0; i < actualCols; i++)
+            {
+                Assert.assertEquals("Column names do not match:",
+                        expectedColNames[i], rsmd.getColumnName(i+1));
+                if (expectedTypes != null)
+                    Assert.assertEquals("Column types do not match for column " 
+                        + (i+1),
+                        expectedTypes[i], rsmd.getColumnType(i+1));
+                if (nullability != null) {
+                    int expected = nullability[i] ?
+                            ResultSetMetaData.columnNullable : 
+                                ResultSetMetaData.columnNoNulls;
+                    Assert.assertEquals(
+                            "Column nullability do not match for column " +
+                            (i+1), expected, rsmd.isNullable(i+1));
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < expectedColNames.length; i++)
+            {
+                String expectedColName = expectedColNames[i];
+                boolean found=false;
+                for (int j = 0 ; j < rsmd.getColumnCount(); j++)
+                {
+                    if (expectedColNames[i].equalsIgnoreCase(
+                            rsmd.getColumnName(j+1)))
+                    {
+                        found = true;
+                        if (expectedTypes != null)
+                            Assert.assertEquals("Column Type does not match for column " +
+                                expectedColNames[i] + "(" + (i) + ")",
+                                expectedTypes[i], rsmd.getColumnType(j+1));
+                        if (nullability != null) {
+                            int expected = nullability[i] ?
+                                ResultSetMetaData.columnNullable : 
+                                    ResultSetMetaData.columnNoNulls;
+                        Assert.assertEquals(
+                            "Column nullability does not match for " +
+                            "column " + (i), expected, rsmd.isNullable(j+1));
+                        }
+                        break;
+                    }
+                    else {
+                        continue;
+                    }
+                }
+                Assert.assertTrue("Missing an expected column: " + expectedColName + 
+                        "\n Expected: " + Arrays.toString(expectedColNames) +
+                        "\n Actual  : " + actualColNames,
+                        found);
+            }
+        }
+    }
+    /**
      * Takes a result set and an array of expected column types
      * from java.sql.Types 
      * and asserts that the column types in the result
