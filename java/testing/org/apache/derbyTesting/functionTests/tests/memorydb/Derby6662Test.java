@@ -41,6 +41,7 @@ public class Derby6662Test extends BaseJDBCTestCase {
     protected void tearDown() throws Exception
     {
       super.tearDown();
+      dropInMemoryDb();
     }
     
     public void testDatabaseMetaDataCalls() throws SQLException
@@ -48,6 +49,22 @@ public class Derby6662Test extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         assertFalse(dmd.usesLocalFilePerTable());
         assertFalse(dmd.usesLocalFiles());
+    }
+    
+    public void testOptionalToolMetaData() throws SQLException
+    {
+        Connection conn = obtainConnection();
+        // register the database metadata wrapper
+        goodStatement( conn, "call syscs_util.syscs_register_tool" +
+            "('databaseMetaData', true)");
+        // run the routines
+        assertResults(conn,"values usesLocalFiles()",
+             new String[][]{ { "false" }},false);
+        assertResults(conn,"values usesLocalFilePerTable()",
+             new String[][]{ { "false" }},false);
+        // unregister the database metadata wrapper
+        goodStatement( conn, "call syscs_util.syscs_register_tool" +
+            "('databaseMetaData', false)");
     }
     
     private DatabaseMetaData getDMD() throws SQLException
