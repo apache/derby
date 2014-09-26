@@ -21,9 +21,12 @@
 
 package org.apache.derby.impl.store.access.sort;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -356,7 +359,7 @@ public class ExternalSortFactory implements
 		throws StandardException
 	{
 		// Find the UUID factory.
-		UUIDFactory uuidFactory = Monitor.getMonitor().getUUIDFactory();
+		UUIDFactory uuidFactory = getMonitor().getUUIDFactory();
 
 		// Make a UUID that identifies this sort's format.
 		formatUUID = uuidFactory.recreateUUID(FORMATUUIDSTRING);
@@ -386,5 +389,24 @@ public class ExternalSortFactory implements
 	public void	stop()
 	{
 	}
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
 
 }

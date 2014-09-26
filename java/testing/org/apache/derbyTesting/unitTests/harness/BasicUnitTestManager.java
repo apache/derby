@@ -23,12 +23,15 @@ package org.apache.derbyTesting.unitTests.harness;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.util.Date;
 import java.util.Enumeration;
@@ -84,7 +87,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 			findTests(System.getProperties(), startParams);
 		} catch (SecurityException se) {
 		}
-		findTests(Monitor.getMonitor().getApplicationProperties(), startParams);
+		findTests(getMonitor().getApplicationProperties(), startParams);
 
 		if ( !alreadyRun )
 		{
@@ -98,7 +101,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 			System.out.println("Shutting down due to unit test failure.");
 			output.printlnWithHeader("Shutting down due to unit test failure, see log for more information.");
 
-			Monitor.getMonitor().shutdown();
+			getMonitor().shutdown();
 		}
 	}
 
@@ -130,7 +133,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 				try {
 					Object unitTest =
-						Monitor.bootServiceModule(false, this, unitTestClass,
+						bootServiceModule(false, this, unitTestClass,
 												  startParams);
 					if (unitTest instanceof UnitTest) {
 						registerTest((UnitTest) unitTest, unitTestClass);
@@ -294,22 +297,63 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

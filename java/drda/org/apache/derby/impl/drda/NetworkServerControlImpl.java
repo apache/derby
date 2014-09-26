@@ -821,7 +821,7 @@ public final class NetworkServerControlImpl {
         // This way we know that once we can connect to the network server,
         // the MBeans will be available.
         ManagementService mgmtService = ((ManagementService)
-                Monitor.getSystemModule(Module.JMX));
+                getSystemModule(Module.JMX));
 
         final Object versionMBean = mgmtService.registerMBean(
                            new Version(
@@ -1189,7 +1189,7 @@ public final class NetworkServerControlImpl {
         // get the system's authentication service
         final AuthenticationService auth
             = ((AuthenticationService)
-               Monitor.findService(AuthenticationService.MODULE,
+               findService(AuthenticationService.MODULE,
                                    "authentication"));
 
         // authenticate user
@@ -4170,4 +4170,41 @@ public final class NetworkServerControlImpl {
         }
         return myPVH;
     }
+    
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getSystemModule( final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getSystemModule( factoryInterface );
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

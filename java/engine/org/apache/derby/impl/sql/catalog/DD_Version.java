@@ -40,6 +40,9 @@ import org.apache.derby.iapi.util.IdUtil;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -192,7 +195,7 @@ public	class DD_Version implements	Formatable
 
 		} else {
            
-			if (Monitor.isFullUpgrade(startParams, dictionaryVersion.toString())) {
+			if (isFullUpgrade(startParams, dictionaryVersion.toString())) {
 				performMajorUpgrade = true;
 			} else {
 				softUpgradeRun = true;
@@ -724,7 +727,7 @@ public	class DD_Version implements	Formatable
 	 */
 	private int getJBMSMinorVersionNumber() 
 	{
-		ProductVersionHolder jbmsVersion = Monitor.getMonitor().getEngineVersion();
+		ProductVersionHolder jbmsVersion = DataDictionaryImpl.getMonitor().getEngineVersion();
 
 		return jbmsVersion.getMinorVersion()*100 +jbmsVersion.getMaintVersion() + (jbmsVersion.isBeta() ? 0 : 1) + 2;
 	}
@@ -814,5 +817,30 @@ public	class DD_Version implements	Formatable
 
 		return true;
 	}
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  boolean isFullUpgrade( final Properties startParams, final String oldVersionInfo )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         return Monitor.isFullUpgrade( startParams, oldVersionInfo );
+                     }
+                 }
+                 ).booleanValue();
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
 
 }

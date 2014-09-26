@@ -49,7 +49,7 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 	{
 		BasicDaemon daemon = new BasicDaemon(contextService);
 
-		final Thread daemonThread = Monitor.getMonitor().getDaemonThread(daemon, name, false);
+		final Thread daemonThread = BasicDaemon.getMonitor().getDaemonThread(daemon, name, false);
 		// DERBY-3745.  setContextClassLoader for thread to null to avoid
 		// leaking class loaders.
 		try {

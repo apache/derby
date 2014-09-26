@@ -1153,7 +1153,7 @@ abstract class FileContainer
 	{
 		// Need a TransactionController to get database/service wide properties.
 		AccessFactory af = (AccessFactory)
-			Monitor.getServiceModule(dataFactory, AccessFactory.MODULE);
+			getServiceModule(dataFactory, AccessFactory.MODULE);
 
 		// RESOLVE: sku defectid 2014
 		TransactionController tc = 
@@ -3557,22 +3557,33 @@ abstract class FileContainer
      */
     static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
     }
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
+    }
+
 }

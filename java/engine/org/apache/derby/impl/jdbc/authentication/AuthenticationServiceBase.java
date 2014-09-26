@@ -190,12 +190,12 @@ public abstract class AuthenticationServiceBase
 			// at boot stage.
 			//
 			store = (AccessFactory)
-				Monitor.getServiceModule(this, AccessFactory.MODULE);
+				getServiceModule(this, AccessFactory.MODULE);
 			// register to be notified upon db properties changes
 			// _only_ if we're on a database context of course :)
 
 			PropertyFactory pf = (PropertyFactory)
-				Monitor.getServiceModule(this, org.apache.derby.iapi.reference.Module.PropertyFactory);
+				getServiceModule(this, org.apache.derby.iapi.reference.Module.PropertyFactory);
 			if (pf != null)
 				pf.addPropertySetNotification(this);
 
@@ -335,7 +335,7 @@ public abstract class AuthenticationServiceBase
     protected   String  getServiceName()
     {
         if ( store == null ) { return null; }
-        else { return Monitor.getServiceName( store ); }
+        else { return getServiceName( store ); }
     }
 
 	public String getDatabaseProperty(String key) {
@@ -827,23 +827,16 @@ public abstract class AuthenticationServiceBase
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
     }
 
     /**
@@ -852,23 +845,52 @@ public abstract class AuthenticationServiceBase
      */
     private  static  Context    getContext( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContext( contextID );
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<Context>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
                  {
-                     public Context run()
-                     {
-                         return ContextService.getContext( contextID );
-                     }
+                     return ContextService.getContext( contextID );
                  }
-                 );
-        }
+             }
+             );
+    }
+
+    /**
+     * Privileged service name lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  String getServiceName( final Object serviceModule )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<String>()
+             {
+                 public String run()
+                 {
+                     return Monitor.getServiceName( serviceModule );
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged module lookup. Must be package protected so that user code
+     * can't call this entry point.
+     */
+    static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
     }
 
 }

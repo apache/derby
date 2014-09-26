@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
@@ -283,6 +284,9 @@ public class Monitor {
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public static void startMonitor(Properties bootProperties, PrintWriter logging) {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
         try {
             new org.apache.derby.impl.services.monitor.FileMonitor(bootProperties, logging);
         } catch (AccessControlException e) {
@@ -296,6 +300,9 @@ public class Monitor {
 	*/
 	public static boolean setMonitor(ModuleFactory theMonitor) {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		synchronized (syncMe) {
 			if (active)
 				return false;
@@ -307,6 +314,9 @@ public class Monitor {
 	}
 
 	public static void clearMonitor() {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		// the monitor reference needs to remain valid
 		// as there are some accesses to getMonitor()
 		// after the system has been shutdown.
@@ -319,9 +329,15 @@ public class Monitor {
 		Get the monitor.
 	*/
 	public static ModuleFactory getMonitor() {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		return monitor;
 	}
 	public static ModuleFactory getMonitorLite() {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		synchronized (syncMe) {
 			if (active && monitor != null)
 				return monitor;
@@ -343,6 +359,9 @@ public class Monitor {
 		Return the name of the service that the passed in module lives in.
 	*/
 	public static String getServiceName(Object serviceModule) {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		return monitor.getServiceName(serviceModule);
 	}
 
@@ -363,8 +382,11 @@ public class Monitor {
 		@see ModuleControl#boot
 	*/
 	public static Object startSystemModule(String factoryInterface)
-		throws StandardException {
+        throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = monitor.startModule(false, (Object) null, factoryInterface, (String) null, (Properties) null);
 		
 		if (SanityManager.DEBUG) {
@@ -381,6 +403,9 @@ public class Monitor {
 	*/
 	public static Object findSystemModule(String factoryInterface) throws StandardException
 	{
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = getMonitor().findModule((Object) null,
 									  factoryInterface, (String) null);
 		if (module == null)
@@ -395,6 +420,9 @@ public class Monitor {
      */
     public static Object getSystemModule(String factoryInterface)
     {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
         ModuleFactory monitor = getMonitor();
         if (monitor == null)
             return null;
@@ -426,6 +454,9 @@ public class Monitor {
 		String factoryInterface, Properties properties)
 		throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = monitor.startModule(create, serviceModule, factoryInterface,
 						(String) null, properties);
 
@@ -458,6 +489,9 @@ public class Monitor {
 		String factoryInterface, String identifier, Properties properties)
 		throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = monitor.startModule(create, serviceModule, factoryInterface, identifier, properties);
 		
 		if (SanityManager.DEBUG) {
@@ -477,6 +511,9 @@ public class Monitor {
 	*/
 	public static Object findServiceModule(Object serviceModule, String factoryInterface)
 		throws StandardException {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = getMonitor().findModule(serviceModule, factoryInterface, (String) null);
 		if (module == null)
 			throw Monitor.missingImplementation(factoryInterface);
@@ -484,6 +521,9 @@ public class Monitor {
 	}
 	public static Object getServiceModule(Object serviceModule, String factoryInterface)
 	{
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		Object module = getMonitor().findModule(serviceModule, factoryInterface, (String) null);
 		return module;
 	}
@@ -508,6 +548,9 @@ public class Monitor {
 
 	*/
 	public static Object findService(String factoryInterface, String serviceName) {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		return monitor.findService(factoryInterface, serviceName);
 	}
 
@@ -545,6 +588,9 @@ public class Monitor {
 												 Properties properties) 
 		throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(serviceName != null, "serviceName is null");
 		}
@@ -565,6 +611,9 @@ public class Monitor {
 	public static Object startNonPersistentService(String factoryInterface, String serviceName, Properties properties)
 		throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(factoryInterface != null, "serviceName is null");
 			SanityManager.ASSERT(serviceName != null, "serviceName is null");
@@ -590,6 +639,9 @@ public class Monitor {
 	public static Object createPersistentService(String factoryInterface, String serviceName, Properties properties) 
 		throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(factoryInterface != null, "serviceName is null");
 			SanityManager.ASSERT(serviceName != null, "serviceName is null");
@@ -600,6 +652,9 @@ public class Monitor {
     public static void removePersistentService(String name)
         throws StandardException
     {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
         // For now we only allow dropping in-memory databases.
         // This is mostly due to the fact that the current implementation for
         // the on-disk back end doesn't handle logDevice when dropping.
@@ -642,6 +697,7 @@ public class Monitor {
 	*/
 	public static Object newInstanceFromIdentifier(int identifier) 
 		throws StandardException {
+        
 		return monitor.newInstanceFromIdentifier(identifier);
 	}
 
@@ -711,6 +767,9 @@ public class Monitor {
 	 */
 	public static boolean isFullUpgrade(Properties startParams, String oldVersionInfo) throws StandardException {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+        
 		boolean fullUpgrade = Boolean.valueOf(startParams.getProperty(org.apache.derby.iapi.reference.Attribute.UPGRADE_ATTR)).booleanValue();
 
 		ProductVersionHolder engineVersion = Monitor.getMonitor().getEngineVersion();

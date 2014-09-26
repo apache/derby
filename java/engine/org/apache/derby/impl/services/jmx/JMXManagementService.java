@@ -43,6 +43,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.Version;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.mbeans.ManagementMBean;
@@ -113,7 +114,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         registeredMbeans = new HashMap<ObjectName,StandardMBean>();
         
         systemIdentifier =
-            Monitor.getMonitor().getUUIDFactory().createUUID().toString();
+            getMonitor().getUUIDFactory().createUUID().toString();
         
         findServer();
              
@@ -124,7 +125,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         
         registerMBean(
                 new Version(
-                        Monitor.getMonitor().getEngineVersion(),
+                        getMonitor().getEngineVersion(),
                         SystemPermission.ENGINE),
                 VersionMBean.class,
                 "type=Version,jar=derby.jar");
@@ -429,4 +430,23 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     public String quotePropertyValue(String value) {
         return ObjectName.quote(value);
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

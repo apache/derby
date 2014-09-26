@@ -21,6 +21,10 @@
 
 package org.apache.derby.impl.services.uuid;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -66,7 +70,7 @@ public final class BasicUUIDFactory
 	private long timemillis;
 
 	public BasicUUIDFactory() {
-		Object env = Monitor.getMonitor().getEnvironment();
+		Object env = getMonitor().getEnvironment();
 		if (env != null) {
 			String s = env.toString();
 			if (s != null)
@@ -154,5 +158,24 @@ public final class BasicUUIDFactory
 		timemillis = System.currentTimeMillis();
 		currentValue = INITIAL_VALUE;
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }
 

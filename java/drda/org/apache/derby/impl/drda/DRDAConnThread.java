@@ -29,6 +29,8 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -60,6 +62,7 @@ import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -9286,9 +9289,9 @@ class DRDAConnThread extends Thread {
             // 
             // if monitor is never setup by any ModuleControl, getMonitor
             // returns null and no Derby database has been booted. 
-            if (Monitor.getMonitor() != null) {
+            if (getMonitor() != null) {
                 databaseObj = (org.apache.derby.iapi.db.Database)
-                    Monitor.findService(Property.DATABASE_MODULE, dbName);
+                    findService(Property.DATABASE_MODULE, dbName);
             }
 
             if (databaseObj == null)
@@ -9298,7 +9301,7 @@ class DRDAConnThread extends Thread {
 
                 // now try to find it again
                 databaseObj = (org.apache.derby.iapi.db.Database)
-                    Monitor.findService(Property.DATABASE_MODULE, dbName);
+                    findService(Property.DATABASE_MODULE, dbName);
             }
 
             // If database still could not be found, it means the database
@@ -9502,4 +9505,41 @@ class DRDAConnThread extends Thread {
             }
         }
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

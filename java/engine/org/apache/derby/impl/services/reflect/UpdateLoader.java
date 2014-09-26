@@ -102,7 +102,7 @@ final class UpdateLoader implements LockOwner {
 
         this.normalizeToUpper = normalizeToUpper;
 		this.parent = parent;
-		lf = (LockFactory) Monitor.getServiceModule(parent, Module.LockFactory);
+		lf = (LockFactory) getServiceModule(parent, Module.LockFactory);
 		compat = (lf != null) ? lf.createCompatibilitySpace(this) : null;
 
 		if (verbose) {
@@ -434,24 +434,36 @@ final class UpdateLoader implements LockOwner {
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContextOrNull( contextID );
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<Context>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
                  {
-                     public Context run()
-                     {
-                         return ContextService.getContextOrNull( contextID );
-                     }
+                     return ContextService.getContextOrNull( contextID );
                  }
-                 );
-        }
+             }
+             );
     }
+    
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
+    }
+
 }
 
 

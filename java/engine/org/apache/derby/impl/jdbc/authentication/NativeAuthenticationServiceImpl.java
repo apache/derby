@@ -22,8 +22,10 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import java.util.Properties;
+import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -42,6 +44,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -205,7 +208,7 @@ public final class NativeAuthenticationServiceImpl
         if ( _credentialsDB != null )
         {
             // make sure that it is a well-formed database name
-            if ( Monitor.getMonitor().getCanonicalServiceName( _credentialsDB ) == null )
+            if ( getMonitor().getCanonicalServiceName( _credentialsDB ) == null )
             {
                 throw StandardException.newException( SQLState.BAD_CREDENTIALS_DB_NAME, _credentialsDB );
             }
@@ -339,7 +342,7 @@ public final class NativeAuthenticationServiceImpl
     private boolean authenticatingInThisDatabase( String userVisibleDatabaseName )
         throws StandardException
     {
-        return authenticatingInThisService( Monitor.getMonitor().getCanonicalServiceName( userVisibleDatabaseName ) );
+        return authenticatingInThisService( getMonitor().getCanonicalServiceName( userVisibleDatabaseName ) );
     }
 
     /**
@@ -364,7 +367,7 @@ public final class NativeAuthenticationServiceImpl
     {
         String  canonicalCredentialsDBName = getCanonicalServiceName( _credentialsDB );
 
-        String canonicalDB = Monitor.getMonitor().getCanonicalServiceName( canonicalDatabaseName );
+        String canonicalDB = getMonitor().getCanonicalServiceName( canonicalDatabaseName );
 
         if ( canonicalCredentialsDBName == null ) { return false; }
         else { return canonicalCredentialsDBName.equals( canonicalDatabaseName ); }
@@ -381,7 +384,7 @@ public final class NativeAuthenticationServiceImpl
     private String  getCanonicalServiceName( String rawName )
         throws StandardException
     {
-        return Monitor.getMonitor().getCanonicalServiceName( rawName );
+        return getMonitor().getCanonicalServiceName( rawName );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -493,7 +496,7 @@ public final class NativeAuthenticationServiceImpl
         //
         // we expect to find a data dictionary
         //
-        DataDictionary      dd = (DataDictionary) Monitor.getServiceModule( this, DataDictionary.MODULE );        
+        DataDictionary      dd = (DataDictionary) AuthenticationServiceBase.getServiceModule( this, DataDictionary.MODULE );        
         UserDescriptor      userDescriptor = dd.getUser( userName );
         
         if ( userDescriptor == null )
@@ -566,4 +569,41 @@ public final class NativeAuthenticationServiceImpl
         return true;
     }
     
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  String  getServiceName( final Object serviceModule )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<String>()
+             {
+                 public String run()
+                 {
+                     return Monitor.getServiceName( serviceModule );
+                 }
+             }
+             );
+    }
+
 }

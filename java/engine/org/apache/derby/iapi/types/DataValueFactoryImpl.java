@@ -76,7 +76,7 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
     	 */
     	public void boot(boolean create, Properties properties) throws StandardException {
     		
-    		ModuleFactory monitor = Monitor.getMonitor();
+    		ModuleFactory monitor = getMonitor();
     		//The Locale on monitor has already been set by the boot code in
     		//BasicDatabase so we can simply do a get here.
     		//This Locale will be either the Locale obtained from the territory
@@ -1161,22 +1161,34 @@ public final class DataValueFactoryImpl implements DataValueFactory, ModuleContr
      */
     static  Context    getContext( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContext( contextID );
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<Context>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
                  {
-                     public Context run()
-                     {
-                         return ContextService.getContext( contextID );
-                     }
+                     return ContextService.getContext( contextID );
                  }
-                 );
-        }
+             }
+             );
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

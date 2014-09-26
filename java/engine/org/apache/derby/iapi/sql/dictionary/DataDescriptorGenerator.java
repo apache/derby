@@ -21,12 +21,15 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Timestamp;
 import org.apache.derby.catalog.ReferencedColumns;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -409,7 +412,7 @@ public class DataDescriptorGenerator
 	protected UUIDFactory getUUIDFactory()
 	{
 		if (uuidf == null)
-			uuidf = Monitor.getMonitor().getUUIDFactory();
+			uuidf = getMonitor().getUUIDFactory();
 		return uuidf;
 	}
 
@@ -598,4 +601,23 @@ public class DataDescriptorGenerator
                 grantee,
                 grantable);
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

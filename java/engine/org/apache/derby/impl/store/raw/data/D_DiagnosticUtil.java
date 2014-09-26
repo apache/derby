@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.diag.Diagnosticable;
 import org.apache.derby.iapi.services.diag.DiagnosticUtil;
@@ -82,19 +87,19 @@ public class D_DiagnosticUtil
     {
         Object   store_module = null;
 
-		Object db = Monitor.findService(Property.DATABASE_MODULE, db_name);
+		Object db = findService(Property.DATABASE_MODULE, db_name);
 
         // RESOLVE (mikem) - find a single way to find the current 
         // AccessFactory that works both for ij and unit tests.
         if (db == null)
         {
             // maybe it is a module test - try this hack:
-            store_module = Monitor.findService(AccessFactory.MODULE, db_name);
+            store_module = findService(AccessFactory.MODULE, db_name);
         }
         else
         {
             // Find the AccessFactory
-            store_module = Monitor.findServiceModule(db, AccessFactory.MODULE);
+            store_module = findServiceModule(db, AccessFactory.MODULE);
         }
 
         return(store_module);
@@ -241,7 +246,7 @@ public class D_DiagnosticUtil
 			Object module = getModuleFromDbName(db_name);
 
 			RawStoreFactory store_module = (RawStoreFactory)
-				Monitor.findServiceModule(module, RawStoreFactory.MODULE);
+				findServiceModule(module, RawStoreFactory.MODULE);
 
 			xact = store_module.startInternalTransaction
                 (FileContainer.getContextService().getCurrentContextManager());
@@ -325,7 +330,7 @@ public class D_DiagnosticUtil
 
         // Find the AccessFactory
         store_module = (AccessFactory) 
-            Monitor.getServiceModule(module, AccessFactory.MODULE);
+            getServiceModule(module, AccessFactory.MODULE);
 
         if (store_module != null)
         {
@@ -402,7 +407,7 @@ public class D_DiagnosticUtil
 
         // Find the AccessFactory
         store_module = (AccessFactory) 
-            Monitor.getServiceModule(module, AccessFactory.MODULE);
+            getServiceModule(module, AccessFactory.MODULE);
 
         if (store_module != null)
         {
@@ -435,4 +440,65 @@ public class D_DiagnosticUtil
         return(container_id);
     }
 
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

@@ -22,6 +22,8 @@
 package org.apache.derby.jdbc;
 
 import java.io.PrintWriter;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -37,6 +39,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.impl.jdbc.Util;
 
@@ -856,9 +859,9 @@ public class BasicEmbeddedDataSource40
                     // if monitor is never setup by any ModuleControl,
                     // getMonitor returns null and no Derby database
                     // has been booted.
-                    if (Monitor.getMonitor() != null) {
+                    if (getMonitor() != null) {
                         database = (Database)
-                            Monitor.findService(Property.DATABASE_MODULE,
+                            findService(Property.DATABASE_MODULE,
                                                 dbName);
                     }
 
@@ -874,7 +877,7 @@ public class BasicEmbeddedDataSource40
 
                         // now try to find it again
                         database = (Database)
-                            Monitor.findService(Property.DATABASE_MODULE,
+                            findService(Property.DATABASE_MODULE,
                                                 dbName);
                     }
 
@@ -924,4 +927,47 @@ public class BasicEmbeddedDataSource40
             ( SQLState.NOT_IMPLEMENTED, "getParentLogger" );
     }
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // SECURITY
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

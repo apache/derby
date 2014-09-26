@@ -24,6 +24,7 @@ package org.apache.derby.iapi.jdbc;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import java.io.PrintWriter;
@@ -216,7 +217,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
                      userArg, passwordArg});
             }
 
-            serverThread = Monitor.getMonitor().getDaemonThread( this, "NetworkServerStarter", false);
+            serverThread = getMonitor().getDaemonThread( this, "NetworkServerStarter", false);
             serverThread.start();
         }
         catch( Exception e)
@@ -289,4 +290,22 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 		consoleWriter = null;
 		
     } // end of stop
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
 }

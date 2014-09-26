@@ -39,6 +39,9 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 
 /**
@@ -69,7 +72,7 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 	 */
 	public void boot(boolean create, Properties startParams) throws StandardException 
 	{		
-		LanguageConnectionFactory lcf = (LanguageConnectionFactory)  Monitor.findServiceModule(this, LanguageConnectionFactory.MODULE);
+		LanguageConnectionFactory lcf = (LanguageConnectionFactory)  findServiceModule(this, LanguageConnectionFactory.MODULE);
 		PropertyFactory pf = lcf.getPropertyFactory();
 		if (pf != null)
 			pf.addPropertySetNotification(new LanguageDbPropertySetter());
@@ -140,4 +143,29 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 	** when we make putResultSets available for users'
 	** server-side JDBC methods.
 	*/
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

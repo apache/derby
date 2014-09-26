@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.reference.Property;
@@ -37,6 +38,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.File;
 import java.io.Writer;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import java.util.Properties;
 
@@ -189,7 +193,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
 
 		// See if this needs to be made relative to something ...
 		if (!streamFile.isAbsolute()) {
-			Object monitorEnv = Monitor.getMonitor().getEnvironment();
+			Object monitorEnv = getMonitor().getEnvironment();
 			if (monitorEnv instanceof File)
 				streamFile = new File((File) monitorEnv, fileName);
 		}
@@ -400,5 +404,24 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction<HeaderPrin
         // SECURITY PERMISSION - OP4, OP5
         return PBmakeFileHPW(PBfileName, PBheader);
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }
 

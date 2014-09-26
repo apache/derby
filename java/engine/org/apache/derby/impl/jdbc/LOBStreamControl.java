@@ -93,9 +93,9 @@ final class LOBStreamControl {
 
     private void init(byte [] b, long len)
             throws IOException, StandardException {
-        Object monitor = Monitor.findService(
+        Object monitor = findService(
                 Property.DATABASE_MODULE, conn.getDBName());
-        final DataFactory df = (DataFactory) Monitor.findServiceModule(
+        final DataFactory df = (DataFactory) findServiceModule(
                 monitor, DataFactory.MODULE);
         try {
             AccessController.doPrivileged (new PrivilegedExceptionAction<Object>() {
@@ -623,4 +623,47 @@ final class LOBStreamControl {
     long getUpdateCount() {
         return updateCount;
     }
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

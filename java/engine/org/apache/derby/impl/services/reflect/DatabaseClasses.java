@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectStreamClass;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
@@ -38,6 +39,7 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -168,7 +170,7 @@ abstract class DatabaseClasses
         int lastDot = fullyQualifiedName.lastIndexOf((int)'.');
         String filename = fullyQualifiedName.substring(lastDot+1,fullyQualifiedName.length()).concat(".class");
 
-		Object env = Monitor.getMonitor().getEnvironment();
+		Object env = getMonitor().getEnvironment();
 		File dir = env instanceof File ? (File) env : null;
 
         final File classFile = new File(dir, filename);
@@ -304,4 +306,23 @@ abstract class DatabaseClasses
 	*/
 
 	abstract LoadedGeneratedClass loadGeneratedClassFromData(String fullyQualifiedName, ByteArray classDump); 
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

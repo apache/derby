@@ -134,6 +134,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
   permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
   permission java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "write";
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)

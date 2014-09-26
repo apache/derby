@@ -53,6 +53,9 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -450,7 +453,7 @@ class PropertyConglomerate
 			AccessFactory af = ((TransactionManager)tc).getAccessManager();
 
 			RawStoreFactory rsf = (RawStoreFactory)
-				Monitor.findServiceModule(af, RawStoreFactory.MODULE);
+				findServiceModule(af, RawStoreFactory.MODULE);
 
 			// remove secret key from properties list if possible
 			serviceProperties.remove(Attribute.BOOT_PASSWORD);
@@ -781,6 +784,31 @@ class PropertyConglomerate
 		Object csGroup = cs.getOwner();
 		return lf.isLockHeld(cs, csGroup, cachedLock, ShExQual.EX);
 	}
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }
 
 /**

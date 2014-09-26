@@ -21,11 +21,15 @@
 
 package org.apache.derbyTesting.unitTests.services;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.apache.derbyTesting.unitTests.harness.T_Generic;
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
 import  org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -60,7 +64,7 @@ public class T_UUIDFactory extends T_Generic {
 	*/
 	protected void runTests() throws T_Fail {
 
-		factory = Monitor.getMonitor().getUUIDFactory();
+		factory = getMonitor().getUUIDFactory();
 		if (factory == null) {
 			throw T_Fail.testFailMsg(getModuleToTestProtocolName() + " module not started.");
 		}
@@ -152,4 +156,23 @@ public class T_UUIDFactory extends T_Generic {
 			resultSoFar =  false;
 		}
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

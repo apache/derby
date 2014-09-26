@@ -201,7 +201,6 @@ abstract class BaseMonitor
 		(services.get(0)).shutdown();
 
 		stopContextService();
-		Monitor.clearMonitor();
 	}
 
 	/**
@@ -245,8 +244,7 @@ abstract class BaseMonitor
 
 		// if monitor is already set then the system is already
 		// booted or in the process of booting or shutting down.
-		if (!Monitor.setMonitor(this))
-			return;
+		if ( setMonitor( this ) ) { return; }
 
 		MessageService.setFinder(this);
 
@@ -2088,23 +2086,16 @@ nextModule:
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
     }    
 
     /**
@@ -2113,27 +2104,40 @@ nextModule:
      */
     private  static  void    stopContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            ContextService.stop();
-        }
-        else
-        {
-            AccessController.doPrivileged
-                (
-                 new PrivilegedAction<Object>()
+        AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
                  {
-                     public Object run()
-                     {
-                         ContextService.stop();
-                         return null;
-                     }
+                     ContextService.stop();
+                     Monitor.clearMonitor();
+                     return null;
                  }
-                 );
-        }
+             }
+             );
     }    
 
-	/**
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point. Returns true if the system is
+     * already booted or in the process of shutting down.
+     */
+    private  static  boolean    setMonitor( final BaseMonitor baseMonitor )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Boolean>()
+             {
+                 public Boolean run()
+                 {
+                     return !Monitor.setMonitor( baseMonitor );
+                 }
+             }
+             ).booleanValue();
+    }
+
+    /**
 		Initialize the monitor wrt the current environemnt.
 		Returns false if the monitor cannot be initialized, true otherwise.
 	*/

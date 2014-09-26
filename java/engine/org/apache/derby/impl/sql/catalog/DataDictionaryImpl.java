@@ -24,7 +24,9 @@ package org.apache.derby.impl.sql.catalog;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -75,6 +77,7 @@ import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -517,7 +520,7 @@ public final class	DataDictionaryImpl
 
 		startupParameters = startParams;
 
-		uuidFactory = Monitor.getMonitor().getUUIDFactory();
+		uuidFactory = getMonitor().getUUIDFactory();
 
 		engineType = Monitor.getEngineType( startParams );
 
@@ -534,11 +537,11 @@ public final class	DataDictionaryImpl
 		// REMIND: actually, we're supposed to get the DataValueFactory
 		// out of the connection context...this is a bit of a shortcut.
 		// We get the DataValueFactory early in order to help bootstrap the system catalogs.
-		LanguageConnectionFactory langConnFactory = (LanguageConnectionFactory) Monitor.bootServiceModule(
+		LanguageConnectionFactory langConnFactory = (LanguageConnectionFactory) bootServiceModule(
 			create, this, LanguageConnectionFactory.MODULE, startParams);
 
 		dvf = langConnFactory.getDataValueFactory();
-		exFactory = (ExecutionFactory) Monitor.bootServiceModule(
+		exFactory = (ExecutionFactory) bootServiceModule(
 														create, this,
 														ExecutionFactory.MODULE,
 														startParams);
@@ -662,7 +665,7 @@ public final class	DataDictionaryImpl
 		 * Get the table descriptor cache.
 		 */
 		CacheFactory cf =
-				(CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+				(CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
 		OIDTdCache =
 			cf.newCacheManager(this,
 				"TableDescriptorOIDCache",
@@ -694,7 +697,7 @@ public final class	DataDictionaryImpl
 		cacheCoordinator = new ShExLockable();
 
 		/* Get AccessFactory in order to transaction stuff */
-		af = (AccessFactory)  Monitor.findServiceModule(this, AccessFactory.MODULE);
+		af = (AccessFactory)  findServiceModule(this, AccessFactory.MODULE);
 
 		/* Get the lock factory */
 		lockFactory = af.getLockFactory();
@@ -931,7 +934,7 @@ public final class	DataDictionaryImpl
         if( permissionsCache == null)
         {
             CacheFactory cf =
-              (CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+              (CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
             LanguageConnectionContext lcc = getLCC();
             TransactionController tc = lcc.getTransactionExecute();
             permissionsCacheSize = PropertyUtil.getServiceInt( tc,
@@ -14578,22 +14581,115 @@ public final class	DataDictionaryImpl
      */
     private  static  Context    getContext( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContext( contextID );
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
+                 {
+                     return ContextService.getContext( contextID );
+                 }
+             }
+             );
+    }
+    
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<Context>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public Context run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getContext( contextID );
+                         return Monitor.startSystemModule( factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+    
 }

@@ -149,7 +149,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		throws StandardException
 	{
 
-		ModuleFactory monitor = Monitor.getMonitor();
+		ModuleFactory monitor = getMonitor();
 		if (create)
 		{
 			if (startParams.getProperty(Property.CREATE_WITH_NO_LOG) == null)
@@ -177,7 +177,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		// registered types (DECIMAL) are there before logical undo recovery 
         // might need them.
 		DataValueFactory dvf = (DataValueFactory) 
-            Monitor.bootServiceModule(
+            bootServiceModule(
                 create, 
                 this,
 				org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
@@ -202,15 +202,15 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		bootClassFactory(create, allParams);
         
         dd = (DataDictionary)
-            Monitor.bootServiceModule(create, this,
+            bootServiceModule(create, this,
                     DataDictionary.MODULE, allParams);
 
 		lcf = (LanguageConnectionFactory) 
-            Monitor.bootServiceModule(
+            bootServiceModule(
                 create, this, LanguageConnectionFactory.MODULE, allParams);
 
 		lf = (LanguageFactory) 
-            Monitor.bootServiceModule(
+            bootServiceModule(
                 create, this, LanguageFactory.MODULE, allParams);
 
 		bootResourceAdapter(create, allParams);
@@ -595,7 +595,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			// no property defined in the Transaction set
 			// this could be an upgrade, see if it's stored in the service set
 
-			UUIDFactory	uuidFactory  = Monitor.getMonitor().getUUIDFactory();
+			UUIDFactory	uuidFactory  = getMonitor().getUUIDFactory();
 
 			
 			upgradeID = startParams.getProperty(DataDictionary.DATABASE_ID);
@@ -745,7 +745,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			IdUtil.parseDbClassPath(classpath);
 
 			startParams.put(Property.BOOT_DB_CLASSPATH, classpath);
-			cfDB = (ClassFactory) Monitor.bootServiceModule(create, this,
+			cfDB = (ClassFactory) bootServiceModule(create, this,
 					org.apache.derby.iapi.reference.Module.ClassFactory, startParams);
 	}
 
@@ -763,18 +763,18 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 	protected AuthenticationService bootAuthenticationService(boolean create, Properties props) throws StandardException {
 		return (AuthenticationService)
-				Monitor.bootServiceModule(create, this, AuthenticationService.MODULE, props);
+				bootServiceModule(create, this, AuthenticationService.MODULE, props);
 	}
 
 	protected void bootValidation(boolean create, Properties startParams)
 		throws StandardException {
-		pf = (PropertyFactory) Monitor.bootServiceModule(create, this,
+		pf = (PropertyFactory) bootServiceModule(create, this,
 			org.apache.derby.iapi.reference.Module.PropertyFactory, startParams);
 	}
 
 	protected void bootStore(boolean create, Properties startParams)
 		throws StandardException {
-		af = (AccessFactory) Monitor.bootServiceModule(create, this, AccessFactory.MODULE, startParams);
+		af = (AccessFactory) bootServiceModule(create, this, AccessFactory.MODULE, startParams);
 	}
 
     /**
@@ -808,7 +808,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		try
 		{
 			resourceAdapter = 
-				Monitor.bootServiceModule(create, this,
+				bootServiceModule(create, this,
 										 org.apache.derby.iapi.reference.Module.ResourceAdapter,
 										 allParams);
 		}
@@ -891,7 +891,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
     private StorageFactory  getStorageFactory()
         throws StandardException
     {
-        DataFactory dataFactory = (DataFactory) Monitor.findServiceModule( this, DataFactory.MODULE );
+        DataFactory dataFactory = (DataFactory) findServiceModule( this, DataFactory.MODULE );
 
         return dataFactory.getStorageFactory();
     }
@@ -948,22 +948,88 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

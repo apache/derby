@@ -109,7 +109,7 @@ public final class ConglomerateDescriptor extends UniqueTupleDescriptor
 		this.forConstraint = forConstraint;
 		if (uuid == null)
 		{
-			UUIDFactory uuidFactory = Monitor.getMonitor().getUUIDFactory();
+			UUIDFactory uuidFactory = DataDescriptorGenerator.getMonitor().getUUIDFactory();
 			uuid = uuidFactory.createUUID();
 		}
 		this.uuid = uuid;

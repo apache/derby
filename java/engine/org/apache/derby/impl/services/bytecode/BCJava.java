@@ -42,6 +42,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.classfile.VMDescriptor;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.Hashtable;
 
@@ -160,8 +163,7 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 	 */
 	public void boot(boolean create, Properties properties) throws StandardException {
 
-		CacheFactory cf =
-			(CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+        CacheFactory cf = (CacheFactory) startSystemModule( org.apache.derby.iapi.reference.Module.CacheFactory );
 
 		/*
 		** The initial and maximum cache sizes are based on experiments
@@ -319,4 +321,31 @@ public class BCJava implements JavaFactory, CacheableFactory, ModuleControl {
 		}
 		return BCExpr.vm_void;
 	}
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

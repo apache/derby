@@ -728,7 +728,7 @@ public class BasicDaemon implements DaemonService, Runnable
 		}
 		else
 		{
-			ModuleFactory mf = Monitor.getMonitor();
+			ModuleFactory mf = getMonitor();
             setThreadPriority(mf, Thread.MIN_PRIORITY);
 			Thread.yield();
             setThreadPriority(mf, oldPriority);
@@ -752,4 +752,23 @@ public class BasicDaemon implements DaemonService, Runnable
             });
         }
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

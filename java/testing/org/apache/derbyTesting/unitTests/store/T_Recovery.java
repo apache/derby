@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.*;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -60,6 +61,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.io.*;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.util.Properties;
 
@@ -168,7 +171,7 @@ public class T_Recovery extends T_Generic {
 
 		try {
 
-			uuidfactory = Monitor.getMonitor().getUUIDFactory();
+			uuidfactory = getMonitor().getUUIDFactory();
 			if (uuidfactory == null) {
 				throw T_Fail.testFailMsg("UUIDFactory.MODULE not found");
 			}
@@ -180,9 +183,9 @@ public class T_Recovery extends T_Generic {
 
 			if (testRecovery)
 			{
-				if (!Monitor.startPersistentService(testService, startParams))
+				if (!startPersistentService(testService, startParams))
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
-				factory = (RawStoreFactory) Monitor.findService(getModuleToTestProtocolName(), testService);
+				factory = (RawStoreFactory) findService(getModuleToTestProtocolName(), testService);
 
 			}
 			else					// setup
@@ -202,7 +205,7 @@ public class T_Recovery extends T_Generic {
 				// keep all log files for diagnostics
 				startParams.put(RawStoreFactory.KEEP_TRANSACTION_LOG, "true");
 
-				factory = (RawStoreFactory) Monitor.createPersistentService(getModuleToTestProtocolName(),
+				factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 																  testService,
 																  startParams);
 			}
@@ -4094,22 +4097,102 @@ public class T_Recovery extends T_Generic {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  boolean startPersistentService( final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Boolean>()
                  {
-                     public ContextService run()
+                     public Boolean run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.startPersistentService( serviceName, properties );
+                     }
+                 }
+                 ).booleanValue();
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

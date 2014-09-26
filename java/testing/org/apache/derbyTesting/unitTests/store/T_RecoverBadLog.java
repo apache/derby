@@ -53,6 +53,8 @@ import java.io.RandomAccessFile;
 import java.io.File;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 
 
@@ -260,7 +262,7 @@ public class T_RecoverBadLog extends T_Generic {
 				// remove the service directory to ensure a clean run
 				startParams.put(Property.DELETE_ON_CREATE, Boolean.TRUE.toString());
 
-				factory = (RawStoreFactory) Monitor.createPersistentService(getModuleToTestProtocolName(),
+				factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 															  testService,
 															  startParams);
 				// create a database with nothing
@@ -316,11 +318,11 @@ public class T_RecoverBadLog extends T_Generic {
 					throw T_Fail.exceptionFail(ioe);
 				}
 
-				if (!Monitor.startPersistentService(testService, startParams))
+				if (!startPersistentService(testService, startParams))
 					throw T_Fail.testFailMsg("Monitor didn't know how to restart service: " + testService);
 
 				factory = (RawStoreFactory) Monitor.findService(getModuleToTestProtocolName(), testService);
-				logFactory =(LogToFile) Monitor.findServiceModule(factory, factory.getLogFactoryModule());
+				logFactory =(LogToFile) findServiceModule(factory, factory.getLogFactoryModule());
 				
 			}
 		} catch (StandardException mse) {
@@ -1836,22 +1838,90 @@ public class T_RecoverBadLog extends T_Generic {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  boolean startPersistentService( final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         return Monitor.startPersistentService( serviceName, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -70,6 +71,7 @@ import org.apache.derby.iapi.reference.Property;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.SecureRandom;
 
 import java.util.Date;
@@ -181,14 +183,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
 		DaemonFactory daemonFactory =
-			(DaemonFactory)Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
+			(DaemonFactory)startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
 		rawStoreDaemon = daemonFactory.createNewDaemon("rawStoreDaemon");
 		xactFactory = (TransactionFactory)
-					Monitor.bootServiceModule(
+					bootServiceModule(
 						create, this, getTransactionFactoryModule(), properties);
 
 		dataFactory = (DataFactory)
-					Monitor.bootServiceModule(
+					bootServiceModule(
 					  create, this, getDataFactoryModule(), properties);
 		storageFactory = dataFactory.getStorageFactory();
 
@@ -231,7 +233,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         
 		// log factory is booted by the data factory
-		logFactory =(LogFactory) Monitor.findServiceModule(this, getLogFactoryModule());
+		logFactory =(LogFactory) findServiceModule(this, getLogFactoryModule());
 
 		// if this is a restore from backup, restore the jar files.
 		if(restoreFromBackup !=null)
@@ -328,7 +330,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // Can now start slave replication by booting the
             // SlaveFactory service
             slaveFactory = (SlaveFactory) 
-                Monitor.bootServiceModule(create, this,
+                bootServiceModule(create, this,
                                           getSlaveFactoryModule(),
                                           properties);
             slaveFactory.startSlave(this, logFactory);
@@ -528,7 +530,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                      replicationMode);
 
         MasterFactory masterFactory = (MasterFactory)
-            Monitor.bootServiceModule(true, this, getMasterFactoryModule(),
+            bootServiceModule(true, this, getMasterFactoryModule(),
                                       replicationProps);
         masterFactory.startMaster(this, dataFactory, logFactory,
                 host, port, dbmaster);
@@ -552,7 +554,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         try {
             masterFactory = (MasterFactory) 
-                Monitor.findServiceModule(this, getMasterFactoryModule());
+                findServiceModule(this, getMasterFactoryModule());
         }
         catch (StandardException se) {
             throw StandardException.newException(
@@ -575,7 +577,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         try {
             masterFactory = (MasterFactory) 
-                Monitor.findServiceModule(this, getMasterFactoryModule());
+                findServiceModule(this, getMasterFactoryModule());
         }
         catch (StandardException se) {
             throw StandardException.newException
@@ -874,9 +876,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             
             try 
             {
-                String name = Monitor.getMonitor().getServiceName(this);
+                String name = getServiceName(this);
                 PersistentService ps = 
-                    Monitor.getMonitor().getServiceType(this);
+                    getMonitor().getServiceType(this);
                 String fullName = ps.getCanonicalServiceName(name);
                 Properties prop = 
                     ps.getServiceProperties(fullName, (Properties)null);
@@ -1297,8 +1299,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // for encrypted database, and this takes precedence over the
             // value specified by the user.
 
-            String name = Monitor.getMonitor().getServiceName(this);
-            PersistentService ps = Monitor.getMonitor().getServiceType(this);
+            String name = getServiceName(this);
+            PersistentService ps = getMonitor().getServiceType(this);
             String canonicalName = ps.getCanonicalServiceName(name);
             Properties serviceprops = ps.getServiceProperties(canonicalName,
                                                               (Properties)null);
@@ -1346,7 +1348,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             // properties.
 
             CipherFactoryBuilder cb = (CipherFactoryBuilder)
-                Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+                startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
 
             // create instance of the cipher factory with the
             // specified encryption properties.
@@ -2859,22 +2861,132 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContextOrNull( contextID );
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
+                 {
+                     return ContextService.getContextOrNull( contextID );
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+
+    /**
+     * Privileged service name lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  String getServiceName( final Object serviceModule )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<String>()
+             {
+                 public String run()
+                 {
+                     return Monitor.getServiceName( serviceModule );
+                 }
+             }
+             );
+    }
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<Context>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public Context run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getContextOrNull( contextID );
+                         return Monitor.startSystemModule( factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

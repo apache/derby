@@ -275,7 +275,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return database product name
      */
 	public String getDatabaseProductName() {
-		return Monitor.getMonitor().getEngineVersion().getProductName();
+		return EmbedConnection.getMonitor().getEngineVersion().getProductName();
 	}
 
     /**
@@ -284,7 +284,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return database version
      */
 	public String getDatabaseProductVersion() {
-		ProductVersionHolder myPVH = Monitor.getMonitor().getEngineVersion();
+		ProductVersionHolder myPVH = EmbedConnection.getMonitor().getEngineVersion();
 
 		return myPVH.getVersionBuildString(true);
 	}
@@ -3271,7 +3271,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getDatabaseMajorVersion()
 	{
-		ProductVersionHolder pvh = Monitor.getMonitor().getEngineVersion();
+		ProductVersionHolder pvh = EmbedConnection.getMonitor().getEngineVersion();
 		if (pvh == null)
 		{
 		  return -1;
@@ -3288,7 +3288,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getDatabaseMinorVersion()
 	{
-		ProductVersionHolder pvh = Monitor.getMonitor().getEngineVersion();
+		ProductVersionHolder pvh = EmbedConnection.getMonitor().getEngineVersion();
 		if (pvh == null)
 		{
 		  return -1;

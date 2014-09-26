@@ -62,6 +62,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar"
 //
   permission java.net.SocketPermission "${derbyTesting.serverhost}:*", "accept, connect, resolve"; 
   permission java.net.SocketPermission "localhost:*", "accept, connect, resolve"; 
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 grant codeBase "${derbyTesting.testjar}derbyTesting.jar"

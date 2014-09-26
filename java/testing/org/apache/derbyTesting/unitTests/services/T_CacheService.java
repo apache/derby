@@ -21,6 +21,10 @@
 
 package org.apache.derbyTesting.unitTests.services;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import org.apache.derbyTesting.unitTests.harness.T_Generic;
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
@@ -47,8 +51,8 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 
 		DaemonFactory df;
 		try {
-			cf = (CacheFactory) Monitor.startSystemModule(getModuleToTestProtocolName());
-			df = (DaemonFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
+			cf = (CacheFactory) startSystemModule(getModuleToTestProtocolName());
+			df = (DaemonFactory) startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
 		}
@@ -338,4 +342,30 @@ public class T_CacheService extends T_Generic implements CacheableFactory {
 
 		return entry;
 	}
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

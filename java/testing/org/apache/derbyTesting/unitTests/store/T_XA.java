@@ -42,6 +42,8 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.error.StandardException; 
 
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 import java.util.Properties; 
@@ -113,7 +115,7 @@ public class T_XA extends T_Generic
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
-			store = (AccessFactory) Monitor.createPersistentService(
+			store = (AccessFactory) createPersistentService(
 				getModuleToTestProtocolName(), testService, startParams);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -1189,25 +1191,42 @@ public class T_XA extends T_Generic
      */
     static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
-
 }
 
 class commit_method
@@ -1313,4 +1332,5 @@ class commit_method
                 cm, xid);
         }
     }
+
 }

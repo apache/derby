@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.DatabaseContext;
@@ -76,7 +77,7 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 		    getContextService().notifyAllActiveThreads(this);
             // This may be called multiple times, but is short-circuited
             // in the monitor.
-		    Monitor.getMonitor().shutdown(db);
+		    getMonitor().shutdown(db);
         }
 	}
 
@@ -99,23 +100,34 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
+    }
+
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
     }
 
 }

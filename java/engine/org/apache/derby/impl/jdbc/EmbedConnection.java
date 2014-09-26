@@ -30,6 +30,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.memory.LowMemory;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -55,8 +56,12 @@ import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import java.io.IOException;
 
-import java.security.Permission;
 import java.security.AccessControlException;
+import java.security.AccessController;
+import java.security.Permission;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
 
 /* can't import due to name overlap:
 import java.sql.Connection;
@@ -259,7 +264,7 @@ public class EmbedConnection implements EngineConnection
             boolean shutdown = isTrue(info, Attribute.SHUTDOWN_ATTR);
 
 			// see if database is already booted
-			Database database = (Database) Monitor.findService(Property.DATABASE_MODULE, tr.getDBName());
+			Database database = (Database) findService(Property.DATABASE_MODULE, tr.getDBName());
 
             // encryption, re-encryption and decryption are not allowed on an already booted database.
             // see DERBY-5969.
@@ -617,7 +622,7 @@ public class EmbedConnection implements EngineConnection
                 // may cause a number of errors to be thrown. Try to make the
                 // shutdown/drop as clean as possible.
                 sleep(500L);
-                Monitor.removePersistentService(dbName);
+                removePersistentService(dbName);
                 // Generate the drop database exception here, as this is the
                 // only place it will be thrown.
                 StandardException se = StandardException.newException(
@@ -1341,8 +1346,8 @@ public class EmbedConnection implements EngineConnection
         throws SQLException
     {
         try {
-            String  leftCanonical = Monitor.getMonitor().getCanonicalServiceName( leftDBName );
-            String  rightCanonical = Monitor.getMonitor().getCanonicalServiceName( rightDBName );
+            String  leftCanonical = getMonitor().getCanonicalServiceName( leftDBName );
+            String  rightCanonical = getMonitor().getCanonicalServiceName( rightDBName );
 
             if ( leftCanonical == null ) { return false; }
             else { return leftCanonical.equals( rightCanonical ); }
@@ -2638,7 +2643,7 @@ public class EmbedConnection implements EngineConnection
 		//checkDatabaseCreatePrivileges(user, dbname);
 
 		try {
-			if (Monitor.createPersistentService(Property.DATABASE_MODULE, dbname, info) == null) 
+			if (createPersistentService(Property.DATABASE_MODULE, dbname, info) == null) 
 			{
 				// service already exists, create a warning
 				addWarning(SQLWarningFactory.newSQLWarning(SQLState.DATABASE_EXISTS, dbname));
@@ -2654,7 +2659,7 @@ public class EmbedConnection implements EngineConnection
 		// and they shouldn't be interested in these JDBC attributes.
 		info.clear();
 
-		return (Database) Monitor.findService(Property.DATABASE_MODULE, dbname);
+		return (Database) findService(Property.DATABASE_MODULE, dbname);
 	}
 
     /**
@@ -2800,7 +2805,7 @@ public class EmbedConnection implements EngineConnection
 			}
 			
 			// try to start the service if it doesn't already exist
-			if (!Monitor.startPersistentService(dbname, info)) {
+			if (!startPersistentService(dbname, info)) {
 				// a false indicates the monitor cannot handle a service
 				// of the type indicated by the protocol within the name.
 				// If that's the case then we are the wrong driver
@@ -2813,7 +2818,7 @@ public class EmbedConnection implements EngineConnection
 			// and they shouldn't be interested in these JDBC attributes.
 			info.clear();
 
-			Database database = (Database) Monitor.findService(Property.DATABASE_MODULE, dbname);
+			Database database = (Database) findService(Property.DATABASE_MODULE, dbname);
 			tr.setDatabase(database);
 
 		} catch (StandardException mse) {
@@ -3969,4 +3974,122 @@ public class EmbedConnection implements EngineConnection
         throw Util.notImplemented();
     }
     
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  SECURITY
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  boolean startPersistentService( final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         return Monitor.startPersistentService( serviceName, properties );
+                     }
+                 }
+                 ).booleanValue();
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged shutdown. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  void removePersistentService( final String name )
+        throws StandardException
+    {
+        try {
+            AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         Monitor.removePersistentService( name );
+                         return null;
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

@@ -54,6 +54,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -69,6 +70,10 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.EngineType;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.Dictionary;
 import java.io.Serializable;
@@ -286,26 +291,26 @@ public class GenericLanguageConnectionFactory
 		//booted DVF (DVF got booted by BasicDatabase's boot method. 
 		//BasicDatabase also set the correct Locale in the DVF. There after,
 		//DVF with correct Locale is available to rest of the Derby code.
-		dvf = (DataValueFactory) Monitor.bootServiceModule(create, this, org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
-		javaFactory = (JavaFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
-		uuidFactory = Monitor.getMonitor().getUUIDFactory();
-		classFactory = (ClassFactory) Monitor.getServiceModule(this, org.apache.derby.iapi.reference.Module.ClassFactory);
+		dvf = (DataValueFactory) bootServiceModule(create, this, org.apache.derby.iapi.reference.ClassName.DataValueFactory, startParams);
+		javaFactory = (JavaFactory) startSystemModule(org.apache.derby.iapi.reference.Module.JavaFactory);
+		uuidFactory = getMonitor().getUUIDFactory();
+		classFactory = (ClassFactory) getServiceModule(this, org.apache.derby.iapi.reference.Module.ClassFactory);
 		if (classFactory == null)
- 			classFactory = (ClassFactory) Monitor.findSystemModule(org.apache.derby.iapi.reference.Module.ClassFactory);
+ 			classFactory = (ClassFactory) findSystemModule(org.apache.derby.iapi.reference.Module.ClassFactory);
 
 		//set the property validation module needed to do propertySetCallBack
 		//register and property validation
 		setValidation();
 
-		ef = (ExecutionFactory) Monitor.bootServiceModule(create, this, ExecutionFactory.MODULE, startParams);
-		of = (OptimizerFactory) Monitor.bootServiceModule(create, this, OptimizerFactory.MODULE, startParams);
+		ef = (ExecutionFactory) bootServiceModule(create, this, ExecutionFactory.MODULE, startParams);
+		of = (OptimizerFactory) bootServiceModule(create, this, OptimizerFactory.MODULE, startParams);
 		tcf =
-		   (TypeCompilerFactory) Monitor.startSystemModule(TypeCompilerFactory.MODULE);
+		   (TypeCompilerFactory) startSystemModule(TypeCompilerFactory.MODULE);
 
 		// If the system supports statement caching boot the CacheFactory module.
 		int cacheSize = statementCacheSize(startParams);
 		if (cacheSize > 0) {
-			CacheFactory cacheFactory = (CacheFactory) Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
+			CacheFactory cacheFactory = (CacheFactory) startSystemModule(org.apache.derby.iapi.reference.Module.CacheFactory);
 			singleStatementCache = cacheFactory.newCacheManager(this,
 												"StatementCache",
 												cacheSize/4,
@@ -314,7 +319,7 @@ public class GenericLanguageConnectionFactory
             // Start a management bean for the statement cache to allow
             // monitoring through JMX, if it is available and enabled.
             DataFactory df = (DataFactory)
-                    Monitor.findServiceModule(this, DataFactory.MODULE);
+                    findServiceModule(this, DataFactory.MODULE);
             singleStatementCache.registerMBean(df.getRootDirectory());
 		}
 
@@ -413,7 +418,7 @@ public class GenericLanguageConnectionFactory
 	}
 
 	protected void setValidation() throws StandardException {
-		pf = (PropertyFactory) Monitor.findServiceModule(this,
+		pf = (PropertyFactory) findServiceModule(this,
 			org.apache.derby.iapi.reference.Module.PropertyFactory);
 		pf.addPropertySetNotification(this);
 	}
@@ -435,4 +440,148 @@ public class GenericLanguageConnectionFactory
 	{
 		return nextLCCInstanceNumber++;
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    
+    /**
+     * Privileged lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  findSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
+    }
+
 }

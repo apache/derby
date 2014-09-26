@@ -51,6 +51,8 @@ import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
 import java.io.*;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.util.Properties;
 
@@ -129,7 +131,7 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 		startParams = T_Util.setEncryptionParam(startParams);
 
 		try {
-			factory = (RawStoreFactory) Monitor.createPersistentService(getModuleToTestProtocolName(),
+			factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 								testService, startParams);
 			if (factory == null) {
 				throw T_Fail.testFailMsg(getModuleToTestProtocolName() + " service not started.");
@@ -398,22 +400,40 @@ public class T_StreamFile extends T_MultiThreadedIterations {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

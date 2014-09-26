@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -60,7 +61,9 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 
+import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
 import java.security.AccessController;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
@@ -121,11 +124,11 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		throws StandardException
 	{
 
-		uuidFactory = Monitor.getMonitor().getUUIDFactory();
+		uuidFactory = getMonitor().getUUIDFactory();
 
         /*
         dataValueFactory =  (DataValueFactory)
-            Monitor.findServiceModule(
+            findServiceModule(
                 this,
                 org.apache.derby.iapi.reference.ClassName.DataValueFactory);
         */
@@ -133,7 +136,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
             // happen in the unit tests.  Usually it is booted before store
             // booting is called.
             dataValueFactory = (DataValueFactory) 
-                Monitor.bootServiceModule(
+                bootServiceModule(
                     create, 
                     this,
                     org.apache.derby.iapi.reference.ClassName.DataValueFactory, 
@@ -143,7 +146,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 		contextFactory = getContextService();
 
 		lockFactory = 
-            (LockFactory) Monitor.bootServiceModule(false, this,
+            (LockFactory) bootServiceModule(false, this,
 				org.apache.derby.iapi.reference.Module.LockFactory, properties);
 
 		
@@ -862,10 +865,10 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 
 		// now its ok to look for the log and data factory
 		// log factory is booted by the data factory
-		logFactory = (LogFactory) Monitor.findServiceModule(this, rsf.getLogFactoryModule());
+		logFactory = (LogFactory) findServiceModule(this, rsf.getLogFactoryModule());
 
 		// data factory is booted by the raw store implementation
-		dataFactory = (DataFactory) Monitor.findServiceModule(this, rsf.getDataFactoryModule());
+		dataFactory = (DataFactory) findServiceModule(this, rsf.getDataFactoryModule());
 	}
 
 	/**
@@ -1170,22 +1173,88 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      */
     private static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

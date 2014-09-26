@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -44,6 +46,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedByteCode;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -254,7 +257,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 		/* Get the UUID for this activation */
 		UUIDFactory uuidFactory =
-			Monitor.getMonitor().getUUIDFactory();
+			getMonitor().getUUIDFactory();
 
 		UUIDValue = uuidFactory.createUUID();
 		UUIDString = UUIDValue.toString();
@@ -1901,4 +1904,23 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 							 LanguageConnectionContext lcc)
 			throws StandardException {
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be package private so that user code
+     * can't call this entry point.
+     */
+    static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

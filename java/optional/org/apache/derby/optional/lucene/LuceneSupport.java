@@ -1860,9 +1860,9 @@ public class LuceneSupport implements OptionalTool
         throws SQLException
     {
         try {
-            Object monitor = Monitor.findService
+            Object monitor = findService
                 ( Property.DATABASE_MODULE, ((EmbedConnection) conn).getDBName() ) ;
-            return (DataFactory) Monitor.findServiceModule( monitor, DataFactory.MODULE );
+            return (DataFactory) findServiceModule( monitor, DataFactory.MODULE );
         }
         catch (StandardException se) { throw wrap( se ); }
     }
@@ -1876,4 +1876,47 @@ public class LuceneSupport implements OptionalTool
 		return ConnectionUtil.getCurrentLCC().getLanguageConnectionFactory().getClassFactory();
 	}
 	
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

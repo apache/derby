@@ -68,6 +68,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultSet;
@@ -141,7 +142,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		active = true;
         
         mbean = ((ManagementService)
-           Monitor.getSystemModule(Module.JMX)).registerMBean(
+           getSystemModule(Module.JMX)).registerMBean(
                    new JDBC(this),
                    JDBCMBean.class,
                    "type=JDBC");
@@ -158,7 +159,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		}
         
         ((ManagementService)
-                Monitor.getSystemModule(Module.JMX)).unregisterMBean(
+                getSystemModule(Module.JMX)).unregisterMBean(
                         mbean);
 
 		active = false;
@@ -291,7 +292,7 @@ public class InternalDriver implements ModuleControl, Driver {
 					//final String user = IdUtil.getUserNameFromURLProps(finfo);
 					//checkShutdownPrivileges(user);
 
-					Monitor.getMonitor().shutdown();
+					getMonitor().shutdown();
 
 					throw Util.generateCsSQLException(
                                          SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
@@ -465,11 +466,11 @@ public class InternalDriver implements ModuleControl, Driver {
     }
 
 	public int getMajorVersion() {
-		return Monitor.getMonitor().getEngineVersion().getMajorVersion();
+		return getMonitor().getEngineVersion().getMajorVersion();
 	}
 	
 	public int getMinorVersion() {
-		return Monitor.getMonitor().getEngineVersion().getMinorVersion();
+		return getMonitor().getEngineVersion().getMinorVersion();
 	}
 
 	public boolean jdbcCompliant() {
@@ -632,7 +633,7 @@ public class InternalDriver implements ModuleControl, Driver {
 		//
 		if (this.authenticationService == null) {
 			this.authenticationService = (AuthenticationService)
-				Monitor.findService(AuthenticationService.MODULE,
+				findService(AuthenticationService.MODULE,
 									"authentication"
 								   );
 		}
@@ -904,7 +905,7 @@ public class InternalDriver implements ModuleControl, Driver {
                 optionsNoDB[attrIndex].description = MessageService.getTextMessage(connStringAttributes[i][1]);
             }
 
-            optionsNoDB[0].choices = Monitor.getMonitor().getServiceList(Property.DATABASE_MODULE);
+            optionsNoDB[0].choices = getMonitor().getServiceList(Property.DATABASE_MODULE);
             // since database name is not stored in FormatableProperties, we
             // assign here explicitly
             optionsNoDB[0].value = dbname;
@@ -974,24 +975,72 @@ public class InternalDriver implements ModuleControl, Driver {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
     }
 
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
 
+    
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getSystemModule( final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getSystemModule( factoryInterface );
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged service lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object findService( final String factoryInterface, final String serviceName )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.findService( factoryInterface, serviceName );
+                 }
+             }
+             );
+    }
+    
 }

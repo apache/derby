@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.access.heap;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -50,6 +51,8 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
 import org.apache.derby.catalog.UUID;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 
 // For JavaDoc references (i.e. @see)
@@ -309,7 +312,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
 	{
 		// Find the UUID factory.
 		UUIDFactory uuidFactory = 
-            Monitor.getMonitor().getUUIDFactory();
+            getMonitor().getUUIDFactory();
 		
 		// Make a UUID that identifies this conglomerate's format.
 		formatUUID = uuidFactory.recreateUUID(FORMATUUIDSTRING);
@@ -326,5 +329,24 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
 	public HeapConglomerateFactory()
 	{
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }
 

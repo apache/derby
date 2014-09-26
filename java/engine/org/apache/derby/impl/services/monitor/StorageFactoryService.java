@@ -26,6 +26,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -87,7 +88,7 @@ final class StorageFactoryService implements PersistentService
         this.subSubProtocol = subSubProtocol;
         this.storageFactoryClass = storageFactoryClass;
 
-        Object monitorEnv = Monitor.getMonitor().getEnvironment();
+        Object monitorEnv = getMonitor().getEnvironment();
 		if (monitorEnv instanceof File)
         {
             final File relativeRoot = (File) monitorEnv;
@@ -1046,6 +1047,24 @@ final class StorageFactoryService implements PersistentService
         }
     }
     
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
     final class DirectoryList implements Enumeration, PrivilegedAction<DirectoryList>
     {
         private String[] contents;

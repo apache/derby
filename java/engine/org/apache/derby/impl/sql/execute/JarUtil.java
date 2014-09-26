@@ -144,7 +144,7 @@ public class JarUtil
         try {
             notifyLoader(false);
             dd.invalidateAllSPSPlans();
-            UUID id = Monitor.getMonitor().getUUIDFactory().createUUID();
+            UUID id = BaseActivation.getMonitor().getUUIDFactory().createUUID();
             final String jarExternalName = JarUtil.mkExternalName(
                 id, schemaName, sqlName, fr.getSeparatorChar());
 

@@ -20,12 +20,15 @@
  */
 package org.apache.derby.impl.storeless;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Properties;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.services.context.ContextManager;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.impl.db.BasicDatabase;
@@ -58,7 +61,7 @@ public class StorelessDatabase extends BasicDatabase {
 	
 	protected	UUID	makeDatabaseID(boolean create, Properties startParams)
 	{
-		return Monitor.getMonitor().getUUIDFactory().createUUID();
+		return getMonitor().getUUIDFactory().createUUID();
 	}
 	
 	protected Properties getAllDatabaseProperties()
@@ -77,4 +80,23 @@ public class StorelessDatabase extends BasicDatabase {
 	{
 		return true;
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }

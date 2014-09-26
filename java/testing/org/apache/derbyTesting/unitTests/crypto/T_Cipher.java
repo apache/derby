@@ -32,6 +32,9 @@ import org.apache.derby.iapi.error.StandardException;
 
 import java.security.AccessController;
 import java.security.Key;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedAction;
 
 import java.io.File;
@@ -206,7 +209,7 @@ public class T_Cipher extends T_Generic
         REPORT("encryption provider used : " + provider);
 
         CipherFactoryBuilder cb =  (CipherFactoryBuilder)
-            Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
+            startSystemModule(org.apache.derby.iapi.reference.Module.CipherFactoryBuilder);
 
         factory = cb.createCipherFactory(true, props, false);
 
@@ -618,4 +621,30 @@ public class T_Cipher extends T_Generic
 		    }
 	    });
 	}
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

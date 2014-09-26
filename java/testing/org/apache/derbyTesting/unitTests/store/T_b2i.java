@@ -71,6 +71,8 @@ import org.apache.derby.iapi.types.SQLChar;
 
 import java.security.PrivilegedAction;
 import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 
 
@@ -111,7 +113,7 @@ public class T_b2i extends T_MultiIterations
 
 
 		try {
-			store_module = Monitor.createPersistentService(
+			store_module = createPersistentService(
 				getModuleToTestProtocolName(), testService, startParams);
 			
 			contextService = getContextService();
@@ -1624,7 +1626,7 @@ public class T_b2i extends T_MultiIterations
 
         // flush and empty cache to make sure rereading stuff works.
         RawStoreFactory rawstore = 
-            (RawStoreFactory) Monitor.findServiceModule(
+            (RawStoreFactory) findServiceModule(
                 this.store_module, RawStoreFactory.MODULE);
 
         rawstore.idle();
@@ -5137,22 +5139,65 @@ public class T_b2i extends T_MultiIterations
      */
     private  static  Context    getContextOrNull( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContextOrNull( contextID );
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
+                 {
+                     return ContextService.getContextOrNull( contextID );
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<Context>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public Context run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getContextOrNull( contextID );
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

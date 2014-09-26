@@ -56,6 +56,9 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -154,7 +157,7 @@ public class GenericExecutionFactory
                     throws StandardException {
         if (rssFactory == null) {
             rssFactory = (ResultSetStatisticsFactory)
-                Monitor.bootServiceModule(
+                bootServiceModule(
                                     false,
                                     this,
                                     ResultSetStatisticsFactory.MODULE,
@@ -370,7 +373,7 @@ private XPLAINFactoryIF xplainFactory;
                    throws StandardException {
        if (xplainFactory == null) {
            xplainFactory = (XPLAINFactoryIF)
-               Monitor.bootServiceModule(
+               bootServiceModule(
                                    false,
                                    this,
                                    XPLAINFactoryIF.MODULE,
@@ -378,5 +381,35 @@ private XPLAINFactoryIF xplainFactory;
        }
        return xplainFactory;
    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
 
 }

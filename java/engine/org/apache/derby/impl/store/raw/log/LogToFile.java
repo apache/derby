@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -90,6 +91,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 
 import java.util.Properties;
@@ -2670,7 +2672,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		if (upgradeNeeded)
 		{
-			if (Monitor.isFullUpgrade(startParams,
+			if (isFullUpgrade(startParams,
 				ProductVersionHolder.simpleVersionString(onDiskMajorVersion, onDiskMinorVersion, onDiskBeta))) {
 
 				onDiskMajorVersion = jbmsVersion.getMajorVersion();
@@ -3212,7 +3214,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 												   LOG_BUFFER_SIZE_MIN, 
 												   LOG_BUFFER_SIZE_MAX, 
 												   DEFAULT_LOG_BUFFER_SIZE);
-		jbmsVersion = Monitor.getMonitor().getEngineVersion();
+		jbmsVersion = getMonitor().getEngineVersion();
 
 		
 		String logArchiveMode = 
@@ -3491,14 +3493,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     {
         if( logDevice == null)
         {
-            DataFactory df = (DataFactory) Monitor.findServiceModule( this, DataFactory.MODULE);
+            DataFactory df = (DataFactory) findServiceModule( this, DataFactory.MODULE);
             logStorageFactory = (WritableStorageFactory) df.getStorageFactory();
         }
         else
         {
             try
             {
-                PersistentService ps = Monitor.getMonitor().getServiceType(this);
+                PersistentService ps = getMonitor().getServiceType(this);
                 logStorageFactory = (WritableStorageFactory) ps.getStorageFactoryInstance( false, logDevice, null, null);
             }
             catch( IOException ioe)
@@ -3704,7 +3706,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		// check to see if checkpointInterval and logSwitchInterval has changed
 		AccessFactory af = 
-            (AccessFactory)Monitor.getServiceModule(this, AccessFactory.MODULE);
+            (AccessFactory)getServiceModule(this, AccessFactory.MODULE);
 
 		try
 		{
@@ -4951,7 +4953,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		{
 			logArchived = true;
 			AccessFactory af = 
-            (AccessFactory)Monitor.getServiceModule(this, AccessFactory.MODULE);
+            (AccessFactory)getServiceModule(this, AccessFactory.MODULE);
 
 			if (af != null)
 			{
@@ -4967,7 +4969,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	public void disableLogArchiveMode() throws StandardException
 	{
 		AccessFactory af = 
-            (AccessFactory)Monitor.getServiceModule(this, AccessFactory.MODULE);
+            (AccessFactory)getServiceModule(this, AccessFactory.MODULE);
 		if (af != null)
 		{
 			TransactionController tc = null;
@@ -5962,23 +5964,104 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 
+    /**
+     * Privileged module lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private static  Object getServiceModule( final Object serviceModule, final String factoryInterface )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Object>()
+             {
+                 public Object run()
+                 {
+                     return Monitor.getServiceModule( serviceModule, factoryInterface );
+                 }
+             }
+             );
+    }
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  boolean isFullUpgrade( final Properties startParams, final String oldVersionInfo )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Boolean>()
+                 {
+                     public Boolean run()
+                         throws StandardException
+                     {
+                         return Monitor.isFullUpgrade( startParams, oldVersionInfo );
+                     }
+                 }
+                 ).booleanValue();
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
 }
+
+

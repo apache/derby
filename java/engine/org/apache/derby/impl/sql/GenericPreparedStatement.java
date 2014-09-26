@@ -38,6 +38,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
@@ -182,7 +183,7 @@ public class GenericPreparedStatement
 	GenericPreparedStatement() {
 		/* Get the UUID for this prepared statement */
 		UUIDFactory uuidFactory = 
-			Monitor.getMonitor().getUUIDFactory();
+			getMonitor().getUUIDFactory();
 
 		UUIDValue = uuidFactory.createUUID();
 		UUIDString = UUIDValue.toString();
@@ -1401,23 +1402,35 @@ recompileOutOfDatePlan:
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedAction<ContextService>()
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
                  {
-                     public ContextService run()
-                     {
-                         return ContextService.getFactory();
-                     }
+                     return ContextService.getFactory();
                  }
-                 );
-        }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
     }
 
 }

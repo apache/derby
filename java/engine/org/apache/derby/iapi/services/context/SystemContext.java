@@ -21,8 +21,12 @@
 
 package org.apache.derby.iapi.services.context;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 /**
@@ -73,10 +77,27 @@ final class SystemContext extends ContextImpl
 
 		} finally {
 			// we need this to happen even if we fail to print out a notice
-			Monitor.getMonitor().shutdown();
+			getMonitor().shutdown();
 		}
 
 	}
 
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
 }
 

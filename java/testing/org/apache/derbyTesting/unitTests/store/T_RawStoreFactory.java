@@ -31,6 +31,7 @@ import org.apache.derbyTesting.unitTests.harness.T_Fail;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.locks.*;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -60,6 +61,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import java.io.*;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.util.Properties;
 
@@ -158,7 +161,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		try {
 
-			factory = (RawStoreFactory) Monitor.createPersistentService(getModuleToTestProtocolName(),
+			factory = (RawStoreFactory) createPersistentService(getModuleToTestProtocolName(),
 								getTestService(), startParams);
 
 			if (factory == null) {
@@ -170,7 +173,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 				throw T_Fail.testFailMsg("LockFactory.MODULE not found");
 			}
 
-			uuidfactory = Monitor.getMonitor().getUUIDFactory();
+			uuidfactory = getMonitor().getUUIDFactory();
 
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -7642,22 +7645,59 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
      */
     private  static  ContextService    getContextService()
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getFactory();
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ContextService>()
+             {
+                 public ContextService run()
+                 {
+                     return ContextService.getFactory();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<ContextService>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public ContextService run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getFactory();
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

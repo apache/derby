@@ -282,7 +282,7 @@ public class IndexStatisticsDaemonImpl
                 if (runningThread == null) {
                     //DERBY-5582. Make sure the thread is in the derby group
                     // to avoid potential security manager issues
-                    runningThread = Monitor.getMonitor().getDaemonThread(this, "index-stat-thread", false);
+                    runningThread = BasicDaemon.getMonitor().getDaemonThread(this, "index-stat-thread", false);
                     runningThread.start();
                 }
             }

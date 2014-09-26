@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
@@ -68,6 +69,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
 
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.AccessController;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -436,7 +439,7 @@ public abstract class RAMAccessManager
     {
         // Get a cache factory to create the conglomerate cache.
 		CacheFactory cf = 
-            (CacheFactory) Monitor.startSystemModule(
+            (CacheFactory) startSystemModule(
                  org.apache.derby.iapi.reference.Module.CacheFactory);
 
         // Now create the conglomerate cache.
@@ -642,7 +645,7 @@ public abstract class RAMAccessManager
 
 		try {
 			factory = 
-               (MethodFactory) Monitor.bootServiceModule(
+               (MethodFactory) bootServiceModule(
                     false, this, MethodFactory.MODULE, 
                     impltype, conglomProperties);
 		} catch (StandardException se) {
@@ -866,12 +869,12 @@ public abstract class RAMAccessManager
         rawstore.createDataWarningFile();
 
         //creating readme in log directory
-        LogFactory logFactory =(LogFactory) Monitor.findServiceModule(this, rawstore.getLogFactoryModule());
+        LogFactory logFactory =(LogFactory) findServiceModule(this, rawstore.getLogFactoryModule());
         logFactory.createDataWarningFile();
 
         //creating readme in root database directory
-        DataFactory dataFactory =(DataFactory) Monitor.findServiceModule(this, rawstore.getDataFactoryModule());
-        PersistentService ps = Monitor.getMonitor().getServiceType(rawstore);
+        DataFactory dataFactory =(DataFactory) findServiceModule(this, rawstore.getDataFactoryModule());
+        PersistentService ps = getMonitor().getServiceType(rawstore);
         ps.createDataWarningFile(dataFactory.getStorageFactory());
     }
 	
@@ -1035,7 +1038,7 @@ public abstract class RAMAccessManager
 
         // Access depends on a Raw Store implementations.  Load it.
         //
-        rawstore = (RawStoreFactory) Monitor.bootServiceModule(
+        rawstore = (RawStoreFactory) bootServiceModule(
             create, this, RawStoreFactory.MODULE, serviceProperties);
 
 		// Note: we also boot this module here since we may start Derby
@@ -1044,7 +1047,7 @@ public abstract class RAMAccessManager
 		// /protocol/Database/Storage/Access/Interface/T_AccessFactory.java)
 		// If this module has already been booted by the JDBC layer, this will 
 		// have no effect at all.
-		Monitor.bootServiceModule(
+		bootServiceModule(
             create, this, org.apache.derby.iapi.reference.Module.PropertyFactory, 
             startParams);
 
@@ -1160,7 +1163,7 @@ public abstract class RAMAccessManager
 
         // set up the property validation
         pf = (PropertyFactory) 
-            Monitor.findServiceModule(
+            findServiceModule(
                 this, org.apache.derby.iapi.reference.Module.PropertyFactory);
 
         // set up the transaction properties.  On J9, over NFS, runing on a
@@ -1308,22 +1311,144 @@ public abstract class RAMAccessManager
      */
     private  static  Context    getContext( final String contextID )
     {
-        if ( System.getSecurityManager() == null )
-        {
-            return ContextService.getContext( contextID );
-        }
-        else
-        {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<Context>()
+             {
+                 public Context run()
+                 {
+                     return ContextService.getContext( contextID );
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
             return AccessController.doPrivileged
                 (
-                 new PrivilegedAction<Context>()
+                 new PrivilegedExceptionAction<Object>()
                  {
-                     public Context run()
+                     public Object run()
+                         throws StandardException
                      {
-                         return ContextService.getContext( contextID );
+                         return Monitor.startSystemModule( factoryInterface );
                      }
                  }
                  );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final String identifier, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, identifier, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object findServiceModule( final Object serviceModule, final String factoryInterface)
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.findServiceModule( serviceModule, factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

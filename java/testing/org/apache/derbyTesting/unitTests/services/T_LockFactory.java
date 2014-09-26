@@ -21,6 +21,10 @@
 
 package org.apache.derbyTesting.unitTests.services;
 
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
 import org.apache.derbyTesting.unitTests.harness.T_MultiIterations;
 import org.apache.derbyTesting.unitTests.harness.T_Fail;
 
@@ -67,7 +71,7 @@ public class T_LockFactory extends T_MultiIterations
 	protected  void setupTest() throws T_Fail {
 
 		try {
-			lf = (LockFactory) Monitor.startSystemModule(getModuleToTestProtocolName());
+			lf = (LockFactory) startSystemModule(getModuleToTestProtocolName());
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
 		}
@@ -713,6 +717,32 @@ public class T_LockFactory extends T_MultiIterations
 		if (got != expect)
 			throw T_Fail.testFailMsg("Expected lock count (" + expect + "), got (" + got + ")");
 	}
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
 
 }
 

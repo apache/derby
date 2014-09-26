@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
@@ -257,7 +258,7 @@ public class BaseDataFileFactory
         throws StandardException 
     {
 
-		jbmsVersion = Monitor.getMonitor().getEngineVersion();
+		jbmsVersion = getMonitor().getEngineVersion();
 		
 		jvmVersion = buildJvmVersion();
 		
@@ -267,11 +268,11 @@ public class BaseDataFileFactory
 
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
 
-		UUIDFactory uf = Monitor.getMonitor().getUUIDFactory();
+		UUIDFactory uf = getMonitor().getUUIDFactory();
 
 		identifier = uf.createUUID();
 
-        PersistentService ps = Monitor.getMonitor().getServiceType(this);
+        PersistentService ps = getMonitor().getServiceType(this);
 
         try
         {
@@ -415,7 +416,7 @@ public class BaseDataFileFactory
 
 
 		CacheFactory cf = (CacheFactory) 
-            Monitor.startSystemModule(
+            startSystemModule(
                 org.apache.derby.iapi.reference.Module.CacheFactory);
 
         // Initialize the page cache
@@ -1747,7 +1748,7 @@ public class BaseDataFileFactory
         }
 
 		logFactory = (LogFactory)
-			Monitor.bootServiceModule(
+			bootServiceModule(
                 create, this, 
                 rawStoreFactory.getLogFactoryModule(), startParams);
 	}
@@ -1762,7 +1763,7 @@ public class BaseDataFileFactory
         try
         {
             PersistentService ps = 
-                Monitor.getMonitor().getServiceProvider(type);
+                getMonitor().getServiceProvider(type);
             return ps != null && ps.hasStorageFactory();
         }
         catch (StandardException se)
@@ -2930,4 +2931,78 @@ public class BaseDataFileFactory
 		}
         return null;
     } // end of run
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object  startSystemModule( final String factoryInterface )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.startSystemModule( factoryInterface );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object bootServiceModule
+        (
+         final boolean create, final Object serviceModule,
+         final String factoryInterface, final Properties properties
+         )
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.bootServiceModule( create, serviceModule, factoryInterface, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
+        }
+    }
+
 }

@@ -34,6 +34,8 @@ import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.Properties;
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Dictionary;
 import java.util.Enumeration;
 
@@ -102,7 +104,7 @@ public class PropertyUtil {
 		boolean dbOnly = isDBOnly(set);
 
 		if (!dbOnly) {
-			if (Monitor.getMonitor().getJVMProperty(key) != null) {
+			if (getMonitor().getJVMProperty(key) != null) {
 				return SET_IN_JVM;
 			}
 		}
@@ -177,7 +179,7 @@ public class PropertyUtil {
 	*/
 	public static String getSystemProperty(String key, String defaultValue) {
 
-		ModuleFactory monitor = Monitor.getMonitorLite();
+		ModuleFactory monitor = getMonitorLite();
 
 		String value = monitor.getJVMProperty(key);
 
@@ -241,7 +243,7 @@ public class PropertyUtil {
 			Serializable value;
 
 			if (!dbOnly) {
-				value = Monitor.getMonitor().getJVMProperty(key);
+				value = getMonitor().getJVMProperty(key);
 				if (value != null)
 					return value;
 			}
@@ -264,7 +266,7 @@ public class PropertyUtil {
 			String value;
 
 			if (!dbOnly) {
-				value = Monitor.getMonitor().getJVMProperty(key);
+				value = getMonitor().getJVMProperty(key);
 				if (value != null)
 					return value;
 			}
@@ -319,7 +321,7 @@ public class PropertyUtil {
                 (value != null ? value.trim() : value)).booleanValue();
 
 		if (!dbOnly) {
-			value = Monitor.getMonitor().getJVMProperty(key);
+			value = getMonitor().getJVMProperty(key);
 			if (value != null)
 				return value;
 		}
@@ -634,7 +636,7 @@ public class PropertyUtil {
 	 */
 	private static boolean systemPropertiesExistsBuiltinUser(String username)
 	{
-		ModuleFactory monitor = Monitor.getMonitorLite();
+		ModuleFactory monitor = getMonitorLite();
 
 		try {
 			Properties JVMProperties = System.getProperties();
@@ -682,5 +684,43 @@ public class PropertyUtil {
 
 		return false;
 	}
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitorLite()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitorLite();
+                 }
+             }
+             );
+    }
+
 }
 

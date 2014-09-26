@@ -46,6 +46,8 @@ import org.apache.derby.iapi.types.SQLInteger;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.StringTokenizer;
@@ -134,7 +136,7 @@ public class T_SortController extends T_Generic
 		int failcount = 0;
 
 		try {
-			store = (AccessFactory) Monitor.createPersistentService(getModuleToTestProtocolName(), 
+			store = (AccessFactory) createPersistentService(getModuleToTestProtocolName(), 
 				testService + tail, startParams);
 		} catch (StandardException mse) {
 			throw T_Fail.exceptionFail(mse);
@@ -861,6 +863,31 @@ public class T_SortController extends T_Generic
                      }
                  }
                  );
+        }
+    }
+
+    /**
+     * Privileged startup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  Object createPersistentService( final String factoryInterface, final String serviceName, final Properties properties ) 
+        throws StandardException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object run()
+                         throws StandardException
+                     {
+                         return Monitor.createPersistentService( factoryInterface, serviceName, properties );
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw StandardException.plainWrapException( pae );
         }
     }
 

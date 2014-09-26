@@ -22,8 +22,11 @@
 package org.apache.derby.jdbc;
 
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.util.TimerTask;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -121,7 +124,7 @@ final class XATransactionState extends ContextImpl {
     }
 
     private static TimerFactory getTimerFactory() {
-        return Monitor.getMonitor().getTimerFactory();
+        return getMonitor().getTimerFactory();
     }
 
 	XATransactionState(ContextManager cm, EmbedConnection conn, 
@@ -432,4 +435,23 @@ final class XATransactionState extends ContextImpl {
             creatingResource.returnConnectionToResource(this, xid);
         }
     }
+    
+    /**
+     * Privileged Monitor lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+    private  static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
+    }
+
 }
