@@ -129,7 +129,7 @@ public class Derby6662Test extends BaseJDBCTestCase {
             sb.append('/');
             sb.append("memory:");
         }
-        sb.append("MogTestDb");
+        sb.append("DBMDTestDb");
         return sb;
     }
 }
