@@ -22,10 +22,11 @@
 package org.apache.derbyTesting.functionTests.tests.memorydb;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,7 +40,17 @@ public class Derby6662Test extends BaseJDBCTestCase {
     public Derby6662Test(String name) { super(name); }
     
     public static Test suite() {
-      return TestConfiguration.defaultSuite(Derby6662Test.class);
+        if (!JDBC.vmSupportsJDBC4())  
+        {
+            // optional tools testing requires at least JDBC 4.0, so skip
+            TestSuite suite = new TestSuite("Derby6662Test");
+            suite.addTest(new Derby6662Test("testDatabaseMetaDataCalls"));
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                    new Derby6662Test("testDatabaseMetaDataCalls")));
+            return suite;
+        }
+        else
+            return TestConfiguration.defaultSuite(Derby6662Test.class);
     }
     
     /** Dispose of objects after testing. */
