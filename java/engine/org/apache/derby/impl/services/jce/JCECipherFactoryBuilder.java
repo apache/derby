@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.services.crypto.JCECipherFactoryBuilder
+   Derby - Class org.apache.derby.impl.services.jce.JCECipherFactoryBuilder
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

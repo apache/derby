@@ -33,6 +33,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.impl.jdbc.EmbedConnection;
+import org.apache.derby.impl.services.jce.JCECipherFactoryBuilder;
 
 /**
  * <p>
@@ -136,6 +137,23 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
         Connection  conn = getConnection();
         try {
             ((EmbedConnection) conn).getContextManager();
+            fail( "Should have raised an AccessControlException" );
+        }
+        catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
+    }
+
+    /**
+     * <p>
+     * Verify that you need usederbyinternals permission to create a cipher factory.
+     * See DERBY-6630.
+     * </p>
+     */
+    public  void    test_003_JCECipherFactory()
+        throws Exception
+    {
+        try {
+            JCECipherFactoryBuilder builder = new JCECipherFactoryBuilder();
+            builder.createCipherFactory( true, null, true );
             fail( "Should have raised an AccessControlException" );
         }
         catch (AccessControlException e) { println( "Caught an AccessControlException" ); }

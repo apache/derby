@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.jce;
 
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
 
@@ -60,7 +61,7 @@ import org.apache.derby.io.StorageRandomAccessFile;
 
 	@see CipherFactory
  */
-public final class JCECipherFactory implements CipherFactory
+final class JCECipherFactory implements CipherFactory
 {
     private final static String MESSAGE_DIGEST = "MD5";
 
@@ -116,11 +117,14 @@ public final class JCECipherFactory implements CipherFactory
      *                  For example to reencrypt the database with 
      *                  a new password.
      */
-    public JCECipherFactory(boolean create, 
+    JCECipherFactory(boolean create, 
                             Properties props,
                             boolean newAttributes) 
         throws StandardException
     {
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+
         init(create, props, newAttributes);
     }
     
