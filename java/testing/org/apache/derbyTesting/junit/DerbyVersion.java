@@ -201,6 +201,24 @@ public class DerbyVersion
     public boolean atMajorMinor(int major, int minor) {
         return this.major == major && this.minor == minor;
     }
+    
+    /**
+     * Checks if this version has at max a certain level
+     * 
+     * @param major major level to compare with
+     * @param minor minor level to compare with
+     * @return {@code true} if we're at the major.minor version or higher, 
+     *         {@code false} otherwise.
+     */
+    public boolean atMaxatMajorMinor(int major, int minor) {
+        if (this.major > major){
+            return true;
+        }
+        else if (this.major == major && this.minor > minor)
+            return true;
+        else 
+            return false;
+    }
 
     /**
      * Checks if this version is at the same major and minor level as the other

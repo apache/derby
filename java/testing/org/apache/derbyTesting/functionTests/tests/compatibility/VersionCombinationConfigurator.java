@@ -256,6 +256,13 @@ public class VersionCombinationConfigurator {
                 println(version.toString() + " in exclude list");
                 continue;
             }
+            // After 10.10, the compatibility suite has been rewritten,
+            // so we get missing class files - see DERBY-6739.
+            // Also, all files are build with a higher level and we'd need
+            // Java 1.6 or higher. 
+            // Just don't run against any versions past the 10.10 branch.
+            if (version.atMaxatMajorMinor(10, 10))
+                continue;
 
             qualifiedDists.add(dist);
         }
