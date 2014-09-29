@@ -34,6 +34,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.services.jce.JCECipherFactoryBuilder;
+import org.apache.derby.impl.store.raw.data.BaseDataFileFactory;
 
 /**
  * <p>
@@ -154,6 +155,22 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
         try {
             JCECipherFactoryBuilder builder = new JCECipherFactoryBuilder();
             builder.createCipherFactory( true, null, true );
+            fail( "Should have raised an AccessControlException" );
+        }
+        catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
+    }
+
+    /**
+     * <p>
+     * Verify that you need usederbyinternals permission to boot a BaseDataFileFactory.
+     * See DERBY-6636.
+     * </p>
+     */
+    public  void    test_004_BasDataFileFactory()
+        throws Exception
+    {
+        try {
+            BaseDataFileFactory bdff = new BaseDataFileFactory();
             fail( "Should have raised an AccessControlException" );
         }
         catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
