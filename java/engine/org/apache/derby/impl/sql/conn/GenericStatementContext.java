@@ -502,6 +502,7 @@ final class GenericStatementContext
 			}
 		}
 
+		try {
 		/*
 		** If it isn't a StandardException, then assume
 		** session severity.  It is probably an unexpected
@@ -605,6 +606,13 @@ final class GenericStatementContext
 
 		/* Pop the context */
 		lcc.popStatementContext(this, error);
+		} catch(Exception ex) {
+			//DERBY-6722(GenericStatementContext.cleanupOnError()  
+			//needs protection from later errors during statement 
+			//cleanup
+			ex.initCause(error);
+			throw StandardException.unexpectedUserException(ex);
+		}
 	}
 
 	/**
