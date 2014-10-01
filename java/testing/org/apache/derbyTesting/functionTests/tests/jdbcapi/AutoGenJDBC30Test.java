@@ -215,6 +215,45 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     }
 
     /**
+     * Requests generated keys for a multi-row update statement after a
+     * one-row update into a table with an auto-generated key.
+     * Expected result: ResultSet has one row with a non-NULL key for the
+     * one-row update.
+     * @throws SQLException 
+     */
+    public void testUpdateManyRowsAfterOneRowKey() throws SQLException
+    {
+        // Do a one-row insert into a table with an auto-generated key.
+        Statement s = createStatement();
+        s.execute("insert into t11_AutoGen(c11) values (99)", Statement.RETURN_GENERATED_KEYS);
+        int expected=1;
+        int keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expected, keyval);
+        
+        // Do a one-row update of a table with an auto-generated key.
+        s.execute("update t11_AutoGen set c12=default where c11=99", Statement.RETURN_GENERATED_KEYS);
+        expected=2;
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expected, keyval);
+    	
+        String sql="insert into t11_AutoGen(c11) values (99), (98), (97)";
+        s.execute(sql, Statement.RETURN_GENERATED_KEYS);
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expected, keyval);
+
+        // Do a one-row update of a table with an auto-generated key.
+        s.execute("update t11_AutoGen set c12=default where c11=97", Statement.RETURN_GENERATED_KEYS);
+        expected=6;
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expected, keyval);
+        
+        // Do a multi-row update of a table with an auto-generated key.
+        s.execute("update t11_AutoGen set c12=default where c11=99", Statement.RETURN_GENERATED_KEYS);
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", expected, keyval);
+    }
+
+    /**
      * Requests generated keys for a multi-row insert statement after a
      * one-row insert into a table with an auto-generated key.
      * Old harness Test 7.
@@ -511,31 +550,32 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * Expected result: a NULL ResultSet.
      * @throws SQLException 
      */
-    public void testUpdate() throws SQLException
+    public void testUpdateOneRowKey() throws SQLException
     {
         Statement s = createStatement();
         s.execute("insert into t11_AutoGen(c11) values(999)");
 
-        String sqlStmt="update t11_AutoGen set c11=1";
+        String sqlStmt="update t11_AutoGen set c12=default where c11=999";
         s.execute(sqlStmt, Statement.RETURN_GENERATED_KEYS);
-        assertNull("Expected NULL ResultSet after s.execute()", 
-            s.getGeneratedKeys());
+        int keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", 2, keyval);
 
         s.executeUpdate(sqlStmt, Statement.RETURN_GENERATED_KEYS);
-        assertNull("Expected NULL ResultSet after s.executeUpdate()", 
-            s.getGeneratedKeys());
+        keyval = getKeyValue (s.getGeneratedKeys());
+        assertEquals("Key value after s.executeUpdate()", 3, keyval);
 
         s.close();
 
         PreparedStatement ps = prepareStatement(
             sqlStmt, Statement.RETURN_GENERATED_KEYS);
         ps.execute();
-        assertNull("Expected NULL ResultSet after ps.execute()", 
-            ps.getGeneratedKeys());
+        keyval = getKeyValue (ps.getGeneratedKeys());
+        assertEquals("Key value after ps.execute()", 4, keyval);
 
+        ps = prepareStatement(sqlStmt, Statement.RETURN_GENERATED_KEYS);
         ps.executeUpdate();
-        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
-            ps.getGeneratedKeys());
+        keyval = getKeyValue (ps.getGeneratedKeys());
+        assertEquals("Key value after ps.executeUpdate()", 5, keyval);
 
         ps.close();
     }
@@ -1480,7 +1520,7 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      * @exception SQLException if a database error occurs
      */
     public int getKeyValue (ResultSet r) throws SQLException
-    {
+    {if(r==null) System.out.println("it is null");
         JDBC.assertGeneratedKeyResultSet("AutoGenJDBC30Test.getKeyValue", r);
         
         int i = 0;
