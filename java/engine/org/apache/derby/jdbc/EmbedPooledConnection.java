@@ -37,6 +37,8 @@ import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 
 
 import java.sql.Connection;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -402,7 +404,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	 */
 	public boolean isIsolationLevelSetUsingSQLorJDBC() throws SQLException {
 		if (realConnection != null)
-			return realConnection.getLanguageConnection().isIsolationLevelSetUsingSQLorJDBC();
+			return getLanguageConnectionContext( realConnection ).isIsolationLevelSetUsingSQLorJDBC();
 		else
 			return false;
 	}
@@ -414,7 +416,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		and the end of a global transaction.
 	*/
 	public void resetIsolationLevelFlag() throws SQLException {
-		realConnection.getLanguageConnection().resetIsolationLevelFlagUsedForSQLandJDBC();
+		getLanguageConnectionContext( realConnection ).resetIsolationLevelFlagUsedForSQLandJDBC();
 	}
 
     /** @see BrokeredConnectionControl#isInGlobalTransaction() */
@@ -646,4 +648,21 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
             statementEventListeners.add(listener);
         }
     }
+    
+	/**
+	  *	Gets the LanguageConnectionContext for this connection.
+	  */
+	private static LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
+	{
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return conn.getLanguageConnection();
+                 }
+             }
+             );
+	}
 }

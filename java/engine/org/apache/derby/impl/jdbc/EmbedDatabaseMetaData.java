@@ -42,6 +42,8 @@ import org.apache.derby.iapi.reference.Limits;
 
 import java.util.Properties;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -3814,7 +3816,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	  */
 	private	LanguageConnectionContext	getLanguageConnectionContext()
 	{
-		return getEmbedConnection().getLanguageConnection();
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return getEmbedConnection().getLanguageConnection();
+                 }
+             }
+             );
 	}
 
 	/*

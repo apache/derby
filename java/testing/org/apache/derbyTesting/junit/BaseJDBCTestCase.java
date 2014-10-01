@@ -29,6 +29,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.net.URL;
 import java.sql.*;
@@ -39,6 +41,7 @@ import java.util.List;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.tools.ij;
@@ -1564,13 +1567,14 @@ public abstract class BaseJDBCTestCase
      * @throws SQLException
      */
     public static void checkEstimatedRowCount(Connection conn, double expectedCount) throws SQLException {
-	if (! (conn instanceof EmbedConnection))
-	    return;
+        if (! (conn instanceof EmbedConnection))
+	    { return; }
 	
-	EmbedConnection econn = (EmbedConnection) conn;
-	RunTimeStatistics rts = econn.getLanguageConnection().getRunTimeStatisticsObject();
-	assertNotNull(" RuntimeStatistics is null. Did you call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)?",rts);
-	assertEquals((long) expectedCount, (long) rts.getEstimatedRowCount());
+        EmbedConnection econn = (EmbedConnection) conn;
+        LanguageConnectionContext   lcc = (LanguageConnectionContext) getLanguageConnectionContext( econn );
+        RunTimeStatistics rts = lcc.getRunTimeStatisticsObject();
+        assertNotNull(" RuntimeStatistics is null. Did you call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)?",rts);
+        assertEquals((long) expectedCount, (long) rts.getEstimatedRowCount());
 	}
 
     /**
@@ -1831,6 +1835,29 @@ public abstract class BaseJDBCTestCase
         ps.close();
     }
     
+	/**
+	  * Gets the LanguageConnectionContext for this connection. You might think that
+      * this method could take an EmbedConnection as its argument and return a
+      * LanguageConnectionContext. That, however, makes the compatibility tests blow up.
+      * With those stronger types, the test lookup machinery in junit.framework.TestSuite
+      * can't resolve the signature of this private method. That is because the engine jar is
+      * not on the client-only classpath used by the compatibility tests. Now you know.
+	  */
+	private static Object	getLanguageConnectionContext( Connection conn )
+	{
+        final EmbedConnection   econn = (EmbedConnection) conn;
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return econn.getLanguageConnection();
+                 }
+             }
+             );
+	}
+
 
 } // End class BaseJDBCTestCase
 

@@ -473,7 +473,7 @@ public class EmbedConnection implements EngineConnection
                 isFailoverMasterBoot) {
 
                 if (!usingNoneAuth &&
-                    getLanguageConnection().usesSqlAuthorization()) {
+                    privilegedGetLCC().usesSqlAuthorization()) {
                     // a failure here leaves database booted, but no
                     // operation has taken place and the connection is
                     // rejected.
@@ -498,7 +498,7 @@ public class EmbedConnection implements EngineConnection
 				// restricted to the database owner if authentication
 				// and sqlAuthorization is on.
 				if (!usingNoneAuth &&
-						getLanguageConnection().usesSqlAuthorization()) {
+						privilegedGetLCC().usesSqlAuthorization()) {
 					int operation;
 					if (isTwoPhaseCryptoBoot) {
                         if (isTrue(savedInfo, Attribute.DECRYPT_DATABASE)) {
@@ -590,7 +590,7 @@ public class EmbedConnection implements EngineConnection
 			// now we have the database connection, we can shut down
 			if (shutdown) {
 				if (!usingNoneAuth &&
-						getLanguageConnection().usesSqlAuthorization()) {
+						privilegedGetLCC().usesSqlAuthorization()) {
 					// DERBY-2264: Only allow database owner to shut down if
 					// authentication and sqlAuthorization is on.
 					checkIsDBOwner(OP_SHUTDOWN);
@@ -601,7 +601,7 @@ public class EmbedConnection implements EngineConnection
             // Drop the database at this point, if that is requested.
             if (dropDatabase) {
                 if (!usingNoneAuth &&
-                        getLanguageConnection().usesSqlAuthorization()) {
+                        privilegedGetLCC().usesSqlAuthorization()) {
                     // Only the database owner is allowed to drop the database.
                     // NOTE: Reusing the message for shutdown, as drop database
                     //       includes a shutdown. May want to change this later
@@ -632,9 +632,9 @@ public class EmbedConnection implements EngineConnection
             }
 
 			// Raise a warning in sqlAuthorization mode if authentication is not ON
-			if (usingNoneAuth && getLanguageConnection().usesSqlAuthorization())
+			if (usingNoneAuth && privilegedGetLCC().usesSqlAuthorization())
 				addWarning(SQLWarningFactory.newSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
-            InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
+            InterruptStatus.restoreIntrFlagIfSeen(privilegedGetLCC());
 		}
         catch (OutOfMemoryError noMemory)
 		{
@@ -934,7 +934,7 @@ public class EmbedConnection implements EngineConnection
         // If authorization is turned on, we need to check if this
         // user is database owner.
         if (!usingNoneAuth &&
-            getLanguageConnection().usesSqlAuthorization()) {
+            privilegedGetLCC().usesSqlAuthorization()) {
             checkIsDBOwner(OP_REPLICATION);
         }
         // TODO: If system privileges is turned on, we need to check
@@ -978,7 +978,7 @@ public class EmbedConnection implements EngineConnection
         // If authorization is turned on, we need to check if this
         // user is database owner.
         if (!usingNoneAuth &&
-            getLanguageConnection().usesSqlAuthorization()) {
+            privilegedGetLCC().usesSqlAuthorization()) {
             checkIsDBOwner(OP_REPLICATION);
         }
         // TODO: If system privileges is turned on, we need to check
@@ -1103,7 +1103,7 @@ public class EmbedConnection implements EngineConnection
         // If authorization is turned on, we need to check if this
         // user is database owner.
         if (!usingNoneAuth &&
-            getLanguageConnection().usesSqlAuthorization()) {
+            privilegedGetLCC().usesSqlAuthorization()) {
             checkIsDBOwner(OP_REPLICATION);
         }
         // TODO: If system privileges is turned on, we need to check
@@ -1420,7 +1420,7 @@ public class EmbedConnection implements EngineConnection
 	 */
 	private void checkIsDBOwner(int operation) throws SQLException
 	{
-		final LanguageConnectionContext lcc = getLanguageConnection();
+		final LanguageConnectionContext lcc = privilegedGetLCC();
         final String actualId = lcc.getSessionUserId();
 		final String dbOwnerId = lcc.getDataDictionary().
 			getAuthorizationDatabaseOwner();
@@ -1925,7 +1925,7 @@ public class EmbedConnection implements EngineConnection
 			{
 		    	getTR().commit();
 		    	clearLOBMapping();
-                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
+                InterruptStatus.restoreIntrFlagIfSeen(privilegedGetLCC());
 			}
             catch (Throwable t)
 			{
@@ -1962,7 +1962,7 @@ public class EmbedConnection implements EngineConnection
 			{
 		    	getTR().rollback();
 		    	clearLOBMapping();
-                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
+                InterruptStatus.restoreIntrFlagIfSeen(privilegedGetLCC());
 			} catch (Throwable t) {
 				throw handleException(t);
 			}
@@ -2154,7 +2154,7 @@ public class EmbedConnection implements EngineConnection
 		{
                         setupContextStack();
 			try {
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 lcc.setReadOnly(readOnly);
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException e) {
@@ -2174,7 +2174,7 @@ public class EmbedConnection implements EngineConnection
     public final boolean isReadOnly() throws SQLException
 	{
 		checkIfClosed();
-		return getLanguageConnection().isReadOnly();
+		return privilegedGetLCC().isReadOnly();
 	}
 
     /**
@@ -2250,7 +2250,7 @@ public class EmbedConnection implements EngineConnection
 		{
             setupContextStack();
 			try {
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 lcc.setIsolationLevel(iLevel);
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException e) {
@@ -2270,7 +2270,7 @@ public class EmbedConnection implements EngineConnection
      */
     public final int getTransactionIsolation() throws SQLException {
         checkIfClosed();
-		return TransactionControl.jdbcIsolationLevel( getLanguageConnection().getCurrentIsolationLevel() );
+		return TransactionControl.jdbcIsolationLevel( privilegedGetLCC().getCurrentIsolationLevel() );
 	}
 
     /**
@@ -2361,10 +2361,13 @@ public class EmbedConnection implements EngineConnection
 
 	public final LanguageConnectionContext getLanguageConnection() {
 
+        // Verify that we have permission to execute this method.
+        SecurityUtil.checkDerbyInternalsPrivilege();
+
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(!isClosed() || isAborting(), "connection is closed");
 
-		return getTR().getLcc();
+		return privilegedGetLCC();
 	}
 
     /**
@@ -2525,7 +2528,7 @@ public class EmbedConnection implements EngineConnection
             {
                 getTR().commit();
                 clearLOBMapping();
-                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
+                InterruptStatus.restoreIntrFlagIfSeen(privilegedGetLCC());
             } 
             catch (Throwable t)
             {
@@ -2558,7 +2561,7 @@ public class EmbedConnection implements EngineConnection
             {
                 getTR().commit();
                 clearLOBMapping();
-                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
+                InterruptStatus.restoreIntrFlagIfSeen(privilegedGetLCC());
             } 
             catch (Throwable t)
             {
@@ -2878,7 +2881,7 @@ public class EmbedConnection implements EngineConnection
                 // Restore here, cf. comment in
                 // EmbedDatabaseMetaData#getPreparedQuery:
                 InterruptStatus.
-                    restoreIntrFlagIfSeen(getLanguageConnection());
+                    restoreIntrFlagIfSeen(privilegedGetLCC());
 			    restoreContextStack();
 			}
 			return s;
@@ -2965,7 +2968,7 @@ public class EmbedConnection implements EngineConnection
 	}
 
 	public void setDrdaID(String drdaID) {
-		getLanguageConnection().setDrdaID(drdaID);
+		privilegedGetLCC().setDrdaID(drdaID);
 	}
 
     /** @see EngineConnection#isInGlobalTransaction() */
@@ -2986,7 +2989,7 @@ public class EmbedConnection implements EngineConnection
 		{
 			setupContextStack();
 			try {
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 lcc.resetFromPool();
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t) {
@@ -3028,7 +3031,7 @@ public class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
 				XATransactionController tc = 
                     (XATransactionController)lcc.getTransactionExecute();
 
@@ -3080,7 +3083,7 @@ public class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 lcc.xaCommit(onePhase);
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t)
@@ -3106,7 +3109,7 @@ public class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 lcc.xaRollback();
                 InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t)
@@ -3176,7 +3179,7 @@ public class EmbedConnection implements EngineConnection
 		
 		synchronized(getConnectionSynchronization())
 		{
-			getLanguageConnection().setPrepareIsolationLevel(level);
+			privilegedGetLCC().setPrepareIsolationLevel(level);
 		}
 	}
 
@@ -3185,7 +3188,7 @@ public class EmbedConnection implements EngineConnection
 	 */
 	public int getPrepareIsolation()
 	{
-		return getLanguageConnection().getPrepareIsolationLevel();
+		return privilegedGetLCC().getPrepareIsolationLevel();
 	}
 
 	/**
@@ -3232,7 +3235,7 @@ public class EmbedConnection implements EngineConnection
         if ( connString == null )
         {
             
-            LanguageConnectionContext lcc = getLanguageConnection();
+            LanguageConnectionContext lcc = privilegedGetLCC();
 
             connString = 
               this.getClass().getName() + "@" + this.hashCode() + " " +
@@ -3415,7 +3418,7 @@ public class EmbedConnection implements EngineConnection
 
     /** Cancels the current running statement. */
     public void cancelRunningStatement() {
-        getLanguageConnection().getStatementContext().cancel();
+        privilegedGetLCC().getStatementContext().cancel();
     }
 
     /**
@@ -3426,7 +3429,7 @@ public class EmbedConnection implements EngineConnection
      * @return the current schema name
      */
     public String getCurrentSchemaName() {
-        return getLanguageConnection().getCurrentSchemaName();
+        return privilegedGetLCC().getCurrentSchemaName();
     }
     
     
@@ -3565,7 +3568,7 @@ public class EmbedConnection implements EngineConnection
                 // Need to cast and get the name because JDBC3 spec
                 // doesn't support names for unnamed savepoints but
                 // Derby keeps names for named & unnamed savepoints.
-                getLanguageConnection().internalRollbackToSavepoint(
+                privilegedGetLCC().internalRollbackToSavepoint(
                     ((EmbedSavepoint)savepoint).getInternalName(),
                     true, savepoint);
             } catch (StandardException e) {
@@ -3596,7 +3599,7 @@ public class EmbedConnection implements EngineConnection
                 // Need to cast and get the name because JDBC3 spec
                 // doesn't support names for unnamed savepoints but
                 // Derby keeps name for named & unnamed savepoints.
-                getLanguageConnection().releaseSavePoint(
+                privilegedGetLCC().releaseSavePoint(
                     ((EmbedSavepoint)savepoint).getInternalName(), savepoint);
             } catch (StandardException e) {
                 throw handleException(e);
@@ -3615,7 +3618,7 @@ public class EmbedConnection implements EngineConnection
 
         //Bug 4507 - savepoint not allowed inside trigger
         StatementContext stmtCtxt =
-            getLanguageConnection().getStatementContext();
+            privilegedGetLCC().getStatementContext();
         if (stmtCtxt!= null && stmtCtxt.inTrigger()) {
             throw newSQLException(SQLState.NO_SAVEPOINT_IN_TRIGGER);
         }
@@ -3656,7 +3659,7 @@ public class EmbedConnection implements EngineConnection
 		{
             setupContextStack();
 			try {
-                LanguageConnectionContext lcc = getLanguageConnection();
+                LanguageConnectionContext lcc = privilegedGetLCC();
                 return lcc.getCurrentSchemaName();
 			} finally {
 				restoreContextStack();
@@ -4092,4 +4095,21 @@ public class EmbedConnection implements EngineConnection
         }
     }
 
+    /**
+     * Private, privileged lookup of the lcc..
+     */
+    private LanguageConnectionContext privilegedGetLCC()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return getTR().getLcc();
+                 }
+             }
+             );
+    }
+    
 }

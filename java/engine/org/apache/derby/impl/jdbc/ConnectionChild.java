@@ -22,8 +22,11 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.util.InterruptStatus;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 
 /**
@@ -153,12 +156,30 @@ abstract class ConnectionChild {
         boolean pushStack, EmbedConnection ec) {
 
         if (pushStack) {
-            InterruptStatus.restoreIntrFlagIfSeen(ec.getLanguageConnection());
+            InterruptStatus.restoreIntrFlagIfSeen( getLanguageConnectionContext( ec ) );
         } else {
             // no lcc if connection is closed:
             InterruptStatus.restoreIntrFlagIfSeen();
         }
     }
+    
+	/**
+	  *	Gets the LanguageConnectionContext for this connection.
+	  */
+	static LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
+	{
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return conn.getLanguageConnection();
+                 }
+             }
+             );
+	}
+
 }
 
 

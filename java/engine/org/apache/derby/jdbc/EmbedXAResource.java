@@ -21,6 +21,8 @@
 
 package org.apache.derby.jdbc;
 
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedAction;
 import java.security.AccessController;
 import java.sql.ResultSet;
@@ -46,6 +48,7 @@ import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
+import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Property;
@@ -545,7 +548,7 @@ class EmbedXAResource implements XAResource {
      */
     private long getDefaultXATransactionTimeout() throws XAException {
         try {
-            LanguageConnectionContext lcc = con.getLanguageConnection();
+            LanguageConnectionContext lcc = getLanguageConnectionContext( con );
             TransactionController tc = lcc.getTransactionExecute();
 
             long timeoutMillis = 1000 * (long) PropertyUtil.getServiceInt(
@@ -658,7 +661,7 @@ class EmbedXAResource implements XAResource {
                     con.realConnection.setHoldability(
                             ResultSet.CLOSE_CURSORS_AT_COMMIT);
                     
-                    con.realConnection.getLanguageConnection().
+                    getLanguageConnectionContext( con.realConnection ).
                             getTransactionExecute().
                             createXATransactionFromLocalTransaction(
                                                 xid_im.getFormatId(),
@@ -968,6 +971,48 @@ class EmbedXAResource implements XAResource {
                  }
              }
              );
+    }
+
+	/**
+	  *	Gets the LanguageConnectionContext for this connection.
+	  */
+	private	LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
+	{
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return conn.getLanguageConnection();
+                 }
+             }
+             );
+	}
+
+    /**
+     * Privileged LCC lookup. Must be private so that user code
+     * can't call this entry point.
+     */
+	private	LanguageConnectionContext	getLanguageConnectionContext( final EmbedPooledConnection conn )
+        throws SQLException
+    {
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<LanguageConnectionContext>()
+                 {
+                     public LanguageConnectionContext run()
+                         throws SQLException
+                     {
+                         return conn.getLanguageConnection();
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            throw Util.javaException( pae );
+        }
     }
 
 }

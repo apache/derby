@@ -24,6 +24,8 @@ package org.apache.derby.jdbc;
 
 import java.security.AccessController;
 import java.security.AccessControlException;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.sql.CallableStatement;
@@ -645,9 +647,35 @@ public class InternalDriver implements ModuleControl, Driver {
 		Methods to be overloaded in sub-implementations such as
 		a tracing driver.
 	 */
-    EmbedConnection getNewEmbedConnection(String url, Properties info)
-            throws SQLException {
-        return new EmbedConnection(this, url, info);
+    EmbedConnection getNewEmbedConnection( final String url, final Properties info)
+        throws SQLException
+    {
+        final   InternalDriver  myself = this;
+
+        try {
+            return AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<EmbedConnection>()
+                 {
+                     public EmbedConnection run()
+                         throws SQLException
+                     {
+                         return new EmbedConnection(myself, url, info);
+                     }
+                 }
+                 );
+        } catch (PrivilegedActionException pae)
+        {
+            Throwable   cause = pae.getCause();
+            if ( (cause != null) && (cause instanceof SQLException) )
+            {
+                throw (SQLException) cause;
+            }
+            else
+            {
+                throw Util.javaException( pae );
+            }
+        }
     }
 
 	private ConnectionContext getConnectionContext() {

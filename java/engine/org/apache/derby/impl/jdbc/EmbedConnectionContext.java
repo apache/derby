@@ -29,8 +29,11 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.util.Vector;
 import java.util.Enumeration;
@@ -108,7 +111,7 @@ class EmbedConnectionContext extends ContextImpl
 			throw Util.noCurrentConnection();
 
 		if (!internal) {
-			StatementContext sc = conn.getLanguageConnection().getStatementContext();
+			StatementContext sc = privilegedGetLCC( conn ).getStatementContext();
 			if ((sc == null) || (sc.getSQLAllowed() < org.apache.derby.catalog.types.RoutineAliasInfo.MODIFIES_SQL_DATA))
 				throw Util.noCurrentConnection();
 		}
@@ -153,5 +156,22 @@ class EmbedConnectionContext extends ContextImpl
         // Pass in null as the Statement to own the ResultSet since
         // we don't have one since the dynamic result will be inaccessible.
         return EmbedStatement.processDynamicResult(conn, resultSet, null) != null;
+    }
+    
+    /**
+     * Private, privileged lookup of the lcc..
+     */
+    private LanguageConnectionContext privilegedGetLCC( final EmbedConnection conn )
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<LanguageConnectionContext>()
+             {
+                 public LanguageConnectionContext run()
+                 {
+                     return conn.getLanguageConnection();
+                 }
+             }
+             );
     }
 }

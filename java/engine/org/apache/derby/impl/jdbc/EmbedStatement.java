@@ -33,6 +33,8 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.EngineStatement;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
@@ -123,7 +125,7 @@ public class EmbedStatement extends ConnectionChild
 		this.resultSetConcurrency = resultSetConcurrency;
 		this.resultSetHoldability = resultSetHoldability;
 
-		lcc = getEmbedConnection().getLanguageConnection();
+		lcc = getLanguageConnectionContext( getEmbedConnection() );
 		applicationConnection = getEmbedConnection().getApplicationConnection();
         applicationStatement = this;
 	}

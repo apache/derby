@@ -79,6 +79,9 @@ import java.sql.Ref;
 import java.sql.RowId;
 import java.sql.SQLXML;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
@@ -273,7 +276,7 @@ public class EmbedResultSet extends ConnectionChild
 		if (concurrencyOfThisResultSet == java.sql.ResultSet.CONCUR_UPDATABLE)
 		{
             final int columnCount = resultDescription.getColumnCount();
-            final ExecutionFactory factory = conn.getLanguageConnection().
+            final ExecutionFactory factory = getLanguageConnectionContext( conn ).
             getLanguageConnectionFactory().getExecutionFactory();
             
 			try{
@@ -418,7 +421,7 @@ public class EmbedResultSet extends ConnectionChild
 
 					setupContextStack();
 		    try {
-				LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+				LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
 				final ExecRow newRow;
 		    try {
 
@@ -588,7 +591,7 @@ public class EmbedResultSet extends ConnectionChild
             
 			try	{
                 LanguageConnectionContext lcc =
-                    getEmbedConnection().getLanguageConnection();
+                    getLanguageConnectionContext( getEmbedConnection() );
 
 				try	{
 					theResults.close(); 
@@ -3843,7 +3846,7 @@ public class EmbedResultSet extends ConnectionChild
         synchronized (getConnectionSynchronization()) {
             checksBeforeInsert();
             setupContextStack();
-            LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+            LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
             StatementContext statementContext = null;
             try {
                 /*
@@ -3963,7 +3966,7 @@ public class EmbedResultSet extends ConnectionChild
         checkNotOnInsertRow();
         
         setupContextStack();
-        LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+        LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
         StatementContext statementContext = null;
         try {
             if (currentRowHasBeenUpdated == false) //nothing got updated on this row 
@@ -4066,7 +4069,7 @@ public class EmbedResultSet extends ConnectionChild
 
             setupContextStack();
             
-            LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
+            LanguageConnectionContext lcc = getLanguageConnectionContext( getEmbedConnection() );
             StatementContext statementContext = null;
             
             //now construct the delete where current of sql
@@ -4221,8 +4224,8 @@ public class EmbedResultSet extends ConnectionChild
 					updateRow.setColumn(i, 
 						resultDescription.getColumnDescriptor(i).getType().getNull());
 				}
-                InterruptStatus.restoreIntrFlagIfSeen(
-                    getEmbedConnection().getLanguageConnection());
+                InterruptStatus.restoreIntrFlagIfSeen
+                    ( getLanguageConnectionContext( getEmbedConnection() ) );
 			} catch (Throwable ex) {
 				handleException(ex);
 			} finally {
@@ -4355,7 +4358,7 @@ public class EmbedResultSet extends ConnectionChild
 			try {
 
 				StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
-                LanguageConnectionContext lcc = ec.getLanguageConnection();
+                LanguageConnectionContext lcc = getLanguageConnectionContext( ec );
 
                 if (wasNull = dvd.isNull()) {
                     InterruptStatus.restoreIntrFlagIfSeen();
@@ -4806,7 +4809,7 @@ public class EmbedResultSet extends ConnectionChild
 			setupContextStack();
 
             LanguageConnectionContext lcc =
-                getEmbedConnection().getLanguageConnection();
+                getLanguageConnectionContext( getEmbedConnection() );
 
             try {
 				try {

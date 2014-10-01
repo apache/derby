@@ -21,10 +21,13 @@
 
 package org.apache.derby.impl.jdbc;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
  * This class implements the Savepoint interface from JDBC 3.0.
@@ -65,15 +68,15 @@ final class EmbedSavepoint extends ConnectionChild
    		super(conn);
    		if (name == null) //this is an unnamed savepoint
    		{
-				//Generating a unique internal name for unnamed savepoints
-				savepointName = "i." + conn.getLanguageConnection().getUniqueSavepointName();
-				savepointID = conn.getLanguageConnection().getUniqueSavepointID();
+            //Generating a unique internal name for unnamed savepoints
+            savepointName = "i." + getLanguageConnectionContext( conn ).getUniqueSavepointName();
+            savepointID = getLanguageConnectionContext( conn ).getUniqueSavepointID();
    		} else
    		{
 				savepointName = "e." + name;
 				savepointID = -1;
    		}
-   		conn.getLanguageConnection().languageSetSavePoint(savepointName, this);
+   		getLanguageConnectionContext( conn ).languageSetSavePoint(savepointName, this);
     }
 
 	/**
@@ -115,7 +118,11 @@ final class EmbedSavepoint extends ConnectionChild
     //bug 4468 - verify that savepoint rollback/release is for a savepoint from
     //the current connection
     boolean sameConnection(EmbedConnection con) {
-   		return (getEmbedConnection().getLanguageConnection() == con.getLanguageConnection());
+   		return
+            (
+             getLanguageConnectionContext( getEmbedConnection() ) ==
+             getLanguageConnectionContext( con )
+             );
     }
-}
 
+}

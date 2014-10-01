@@ -166,11 +166,28 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
      * See DERBY-6636.
      * </p>
      */
-    public  void    test_004_BasDataFileFactory()
+    public  void    test_004_BaseDataFileFactory()
         throws Exception
     {
         try {
             BaseDataFileFactory bdff = new BaseDataFileFactory();
+            fail( "Should have raised an AccessControlException" );
+        }
+        catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
+    }
+
+    /**
+     * <p>
+     * Verify that you need usederbyinternals permission to get the LCC from a Connection.
+     * See DERBY-6751.
+     * </p>
+     */
+    public  void    test_005_EmbedConnection_getLCC()
+        throws Exception
+    {
+        try {
+            Connection  conn = getConnection();
+            ((EmbedConnection) conn).getLanguageConnection();
             fail( "Should have raised an AccessControlException" );
         }
         catch (AccessControlException e) { println( "Caught an AccessControlException" ); }
