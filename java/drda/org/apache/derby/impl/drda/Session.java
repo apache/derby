@@ -286,10 +286,15 @@ class Session
         String s = "";
         s += indent +  localLangUtil.getTextMessage("DRDA_RuntimeInfoSessionNumber.I")
             + connNum + "\n";
-        if (database == null)
-            return s;
-        s += database.buildRuntimeInfo(indent,localLangUtil);
-        s += "\n";
+
+        // DERBY-6714: database can be null if the session gets closed
+        // while we construct the runtime info.
+        Database db = database;
+        if (db != null) {
+            s += db.buildRuntimeInfo(indent, localLangUtil);
+            s += "\n";
+        }
+
         return s;
     }
 }

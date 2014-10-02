@@ -407,20 +407,28 @@ class Database
 
     protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil)
     {
-      
+        // DERBY-6714: stmtTable can be null if the session gets closed
+        // while we are constructing the runtime info. Create a local copy
+        // and check for null before accessing it.
+        Hashtable<Object, DRDAStatement> statements = stmtTable;
+
         String s = indent + 
         localLangUtil.getTextMessage("DRDA_RuntimeInfoDatabase.I") +
             dbName + "\n" +  
         localLangUtil.getTextMessage("DRDA_RuntimeInfoUser.I")  +
             userId +  "\n" +
         localLangUtil.getTextMessage("DRDA_RuntimeInfoNumStatements.I") +
-            stmtTable.size() + "\n";
+            (statements == null ? 0 : statements.size()) + "\n";
         s += localLangUtil.getTextMessage("DRDA_RuntimeInfoPreparedStatementHeader.I");
-        for (Enumeration e = stmtTable.elements() ; e.hasMoreElements() ;) 
+
+        if (statements != null) {
+            for (Enumeration e = statements.elements(); e.hasMoreElements(); )
                 {
                     s += ((DRDAStatement) e.nextElement()).toDebugString(indent
                                                                          +"\t") +"\n";
                 }
+        }
+
         return s;
     }
     
