@@ -59,6 +59,49 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+        Statement s = createStatement();
+        try {
+            s.executeUpdate(
+                "create function PADSTRING (data varchar(32000), " +
+                "                           length integer) " +
+                "    returns varchar(32000) " +
+                "    external name " +
+                "    'org.apache.derbyTesting.functionTests." +
+                "util.Formatters.padString' " +
+                "    language java parameter style java");
+
+            s.executeUpdate(
+                "create view LOCK_TABLE as " +
+                "select  " +
+                "    cast(username as char(8)) as username, " +
+                "    cast(t.type as char(8)) as trantype, " +
+                "    cast(l.type as char(8)) as type, " +
+                "    cast(lockcount as char(3)) as cnt, " +
+                "    mode, " +
+                "    cast(tablename as char(12)) as tabname, " +
+                "    cast(lockname as char(10)) as lockname, " +
+                "    state, " +
+                "    status " +
+                "from  " +
+                "    syscs_diag.lock_table l  right outer join " +
+                "    syscs_diag.transaction_table t " +
+                "on l.xid = t.xid " +
+                "where l.tableType <> 'S' and " +
+                "      t.type='UserTransaction'");
+            
+            // Create a procedure to be called before checking on contents
+            // to ensure that the background worker thread has completed 
+            // all the post-commit work.
+            s.execute(
+                "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
+                "LANGUAGE JAVA EXTERNAL NAME " +
+                "'org.apache.derbyTesting.functionTests.util." +
+                "T_Access.waitForPostCommitToFinish' " +
+                "PARAMETER STYLE JAVA");
+            commit();
+        } catch (SQLException sqle) {
+            //ignore
+        }
         getLocksQuery = prepareStatement(lock_table_query);
     }
 
@@ -80,57 +123,13 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
     public static Test suite() {
 
-        Test suite = TestConfiguration.embeddedSuite(UpdateLocksTest.class);
+        Test suite = TestConfiguration.defaultSuite(UpdateLocksTest.class);
 
         Properties p = new Properties();
         p.put("derby.storage.pageSize", "4096");
 
         return new CleanDatabaseTestSetup(
-            new SystemPropertyTestSetup(suite, p, false)) {
-
-            /**
-             * Creates the views and procedures used by the test cases.
-             */
-            protected void decorateSQL(Statement s) throws SQLException {
-                s.executeUpdate(
-                    "create function PADSTRING (data varchar(32000), " +
-                    "                           length integer) " +
-                    "    returns varchar(32000) " +
-                    "    external name " +
-                    "    'org.apache.derbyTesting.functionTests." +
-                    "util.Formatters.padString' " +
-                    "    language java parameter style java");
-
-                s.executeUpdate(
-                    "create view LOCK_TABLE as " +
-                    "select  " +
-                    "    cast(username as char(8)) as username, " +
-                    "    cast(t.type as char(8)) as trantype, " +
-                    "    cast(l.type as char(8)) as type, " +
-                    "    cast(lockcount as char(3)) as cnt, " +
-                    "    mode, " +
-                    "    cast(tablename as char(12)) as tabname, " +
-                    "    cast(lockname as char(10)) as lockname, " +
-                    "    state, " +
-                    "    status " +
-                    "from  " +
-                    "    syscs_diag.lock_table l  right outer join " +
-                    "    syscs_diag.transaction_table t " +
-                    "on l.xid = t.xid " +
-                    "where l.tableType <> 'S' and " +
-                    "      t.type='UserTransaction'");
-                
-                // Create a procedure to be called before checking on contents
-                // to ensure that the background worker thread has completed 
-                // all the post-commit work.
-                s.execute(
-                    "CREATE PROCEDURE WAIT_FOR_POST_COMMIT() " +
-                    "LANGUAGE JAVA EXTERNAL NAME " +
-                    "'org.apache.derbyTesting.functionTests.util." +
-                    "T_Access.waitForPostCommitToFinish' " +
-                    "PARAMETER STYLE JAVA");
-            }
-        };
+            new SystemPropertyTestSetup(suite, p, false)); 
     }
 
 
@@ -155,21 +154,37 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
      * Should be the same as SERIALIZABLE results except no previous key locks.
      */
     public void testRepeatableRead () throws Exception {
-        doRunTests(Connection.TRANSACTION_REPEATABLE_READ);
+        doRunTests(Connection.TRANSACTION_REPEATABLE_READ, false);
     }
 
     public void testReadCommitted() throws Exception {
-        doRunTests(Connection.TRANSACTION_READ_COMMITTED);
+        doRunTests(Connection.TRANSACTION_READ_COMMITTED, false);
     }
 
     public void testSerializable() throws Exception {
-        doRunTests(Connection.TRANSACTION_SERIALIZABLE);
+        doRunTests(Connection.TRANSACTION_SERIALIZABLE, false);
     }
 
     public void testReadUncommitted() throws Exception {
-        doRunTests(Connection.TRANSACTION_READ_UNCOMMITTED);
+        doRunTests(Connection.TRANSACTION_READ_UNCOMMITTED, false);
+    }
+    
+    public void testRepeatableReadJDBC30 () throws Exception {
+        doRunTests(Connection.TRANSACTION_REPEATABLE_READ, true);
     }
 
+    public void testReadCommittedJDBC30() throws Exception {
+        doRunTests(Connection.TRANSACTION_READ_COMMITTED, true);
+    }
+
+    public void testSerializableJDBC30() throws Exception {
+        doRunTests(Connection.TRANSACTION_SERIALIZABLE, true);
+    }
+
+    public void testReadUncommittedJDBC30() throws Exception {
+        doRunTests(Connection.TRANSACTION_READ_UNCOMMITTED, true);
+    }
+    
     private void insertValuesUnpaddedVarchar(Statement s) throws SQLException {
         s.executeUpdate("insert into a values (1, 10, 'one')");
         s.executeUpdate("insert into a values (2, 20, 'two')");
@@ -180,7 +195,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into a values (7, 70, 'seven')");
     }
 
-    private void doRunTests (int isolation) throws Exception {
+    private void doRunTests (int isolation, boolean withhold) 
+            throws Exception {
         setAutoCommit(false);
         getConnection().setTransactionIsolation(
             isolation);
@@ -198,7 +214,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("alter table a add column c varchar(1900)");
         insertValuesUnpaddedVarchar(s);
         commit();
-        updatecursorlocks(getConnection(), isolation, 0, NO_IDX_1);
+        updatecursorlocks(getConnection(), isolation, 0, NO_IDX_1, withhold);
 
         // non cursor, no index run
         // to create tables of page size 4k and still keep the following tbl
@@ -221,11 +237,11 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         updateBtreeCursorLocks1(getConnection(),
                                 isolation,
                                 UNIQUE_INDEX,
-                                true, 0, 0);
+                                true, 0, 0, withhold);
         updateBtreeCursorLocks2(getConnection(),
                                 isolation,
                                 UNIQUE_INDEX,
-                                true, 0, 0);
+                                true, 0, 0, withhold);
 
         // cursor, non-unique index run
         // to create tables of page size 4k and still keep the following tbl
@@ -237,10 +253,10 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
                                 NON_UNIQUE_INDEX,
-                                true, 0, 0);
+                                true, 0, 0, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
                                 NON_UNIQUE_INDEX,
-                                true, 0, 0);
+                                true, 0, 0, withhold);
 
         // non cursor, unique index run
         // to create tables of page size 4k and still keep the following tbl
@@ -287,7 +303,8 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into a values (7, 70, " +
                         "    PADSTRING('seven',1900))");
         commit();
-        updatecursorlocks(getConnection(), isolation, 1900, NO_IDX_2);
+        updatecursorlocks(getConnection(), isolation, 1900, NO_IDX_2,
+                withhold);
 
         // non cursor, no index run
         s.executeUpdate("create table a (a int, b int, c varchar(1900))");
@@ -335,9 +352,9 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("create unique index a_idx on a (a, index_pad)");
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
-                                UNIQUE_INDEX, false, 1900, 600);
+                                UNIQUE_INDEX, false, 1900, 600, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
-                                UNIQUE_INDEX, false, 1900, 600);
+                                UNIQUE_INDEX, false, 1900, 600, withhold);
 
         // cursor, non-unique index run
         s.executeUpdate("create table a (a int, b int, c varchar(1900)," +
@@ -366,9 +383,9 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         s.executeUpdate("create index a_idx on a (a, index_pad)");
         commit();
         updateBtreeCursorLocks1(getConnection(), isolation,
-                                NON_UNIQUE_INDEX, false, 1900, 700);
+                                NON_UNIQUE_INDEX, false, 1900, 700, withhold);
         updateBtreeCursorLocks2(getConnection(), isolation,
-                                NON_UNIQUE_INDEX, false, 1900, 700);
+                                NON_UNIQUE_INDEX, false, 1900, 700, withhold);
 
         // non cursor, unique index run
         s.executeUpdate("create table a (a int, b int, c varchar(1900)," +
@@ -433,10 +450,17 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
 
     private void updatecursorlocks(
-        Connection c, int isolation, int pad, int mode) throws SQLException {
+        Connection c, int isolation, int pad, int mode, boolean withhold)
+                throws SQLException {
 
-        Statement s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                        ResultSet.CONCUR_UPDATABLE);
+        Statement s;
+        if (withhold)
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE,
+                                  ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        else
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = s.executeQuery(
             "select a, b, c from a for update");
 
@@ -3038,11 +3062,18 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         int mode,
         boolean unPadded,
         int pad,
-        int idxPad) throws SQLException {
+        int idxPad,
+        boolean withhold) throws SQLException {
 
         c.setAutoCommit(false);
-        Statement s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                        ResultSet.CONCUR_UPDATABLE);
+        Statement s;
+        if (withhold)
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE,
+                                  ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        else
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE);
 
         ResultSet rs = s.executeQuery(
             "select a, b, c from a for update");
@@ -4806,10 +4837,17 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
         int mode,
         boolean unPadded,
         int pad,
-        int idxPad) throws SQLException {
+        int idxPad, 
+        boolean withhold) throws SQLException {
 
-        Statement s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                        ResultSet.CONCUR_UPDATABLE);
+        Statement s;
+        if (withhold)
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE,
+                                  ResultSet.HOLD_CURSORS_OVER_COMMIT);
+        else
+            s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                  ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = null;
 
         ResultSet ltrs = getLocks();
@@ -4947,6 +4985,19 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
         ltrs = getLocks();
 
+        // With network server/client, locks for the first chunk of 
+        // pre-fetched rows are acquired on execute/executeQuery 
+        // instead of on the first call to next().
+        String[][] expectedValues;
+        if (!usingDerbyNetClient())
+            expectedValues = new String[][]{
+                {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a},
+                {_app, _ut, _r, "1", _U, _A, "(1,9)", _g, _a},
+                {_app, _ut, _r, "1", _X, _A, "(1,9)", _g, _a}};
+        else
+            expectedValues = new String[][]{
+                {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a},
+                {_app, _ut, _r, "1", _X, _A, "(1,9)", _g, _a}};
         JDBC.assertUnorderedResultSet(
             ltrs,
             isolation == Connection.TRANSACTION_SERIALIZABLE ?
@@ -4995,10 +5046,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                 :
                 unPadded ?
                 (mode == UNIQUE_INDEX ?
-                 new String[][]{
-                    {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a},
-                    {_app, _ut, _r, "1", _U, _A, "(1,9)", _g, _a},
-                    {_app, _ut, _r, "1", _X, _A, "(1,9)", _g, _a}}
+                 expectedValues
                  :
                  new String[][]{
                      {_app, _ut, _t, "2", _IX, _A, _tl, _g, _a},
@@ -5903,6 +5951,18 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
         ltrs = getLocks();
 
+        // With network server/client, locks for the first chunk of 
+        // pre-fetched rows are acquired on execute/executeQuery 
+        // instead of on the first call to next().
+        if (usingDerbyNetClient() && (isolation != Connection.TRANSACTION_SERIALIZABLE))
+            expectedValues = new String[][]{
+                {_app, _ut, _t, "3", _IX, _A, _tl, _g, _a},
+                {_app, _ut, _r, "2", _X, _A, "(1,7)", _g, _a}};
+        else
+            expectedValues = new String[][]{
+                {_app, _ut, _t, "3", _IX, _A, _tl, _g, _a},
+                {_app, _ut, _r, "1", _U, _A, "(1,7)", _g, _a},
+                {_app, _ut, _r, "2", _X, _A, "(1,7)", _g, _a}};
         JDBC.assertUnorderedResultSet(
             ltrs,
             (isolation == Connection.TRANSACTION_SERIALIZABLE &&
@@ -5940,10 +6000,7 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
                  (
                      unPadded ?
                      (mode == UNIQUE_INDEX ?
-                      new String[][]{
-                         {_app, _ut, _t, "3", _IX, _A, _tl, _g, _a},
-                         {_app, _ut, _r, "1", _U, _A, "(1,7)", _g, _a},
-                         {_app, _ut, _r, "2", _X, _A, "(1,7)", _g, _a}}
+                      expectedValues
                       :
                       new String[][]{
                           {_app,_ut, _t, "3", _IX, _A, _tl, _g, _a},
