@@ -25,9 +25,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.util.Arrays;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -112,14 +111,14 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         countConglomerates("NEWORDERS", countCongloms, 2);
 
         // This should fail due to foreign key.
-        checkStatementError("23503", st,
-            "insert into neworders values (1, 3, 5, 'SHOULD FAIL')",
-            "NO_O_FK");
+        checkStatementError("23503", st, 
+            "insert into neworders values (1, 3, 5, 'SHOULD FAIL')", 
+            new String[] {"NO_O_FK"});
 
         // This should fail due to primary key (uniqueness violation).
         checkStatementError("23505", st,
             "insert into neworders values (1, 2, 4, 'SHOULD FAIL')",
-            "NEWORDERS_PK");
+            new String[] {"NEWORDERS_PK"});
 
         /* Now drop the primary key from NEWORDERS.  This should
          * drop the implicit uniqueness requirement, as well--i.e.
@@ -139,7 +138,7 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         // This should still fail due to the foreign key.
         checkStatementError("23503", st,
             "insert into neworders values (1, 3, 5, 'SHOULD FAIL')",
-            "NO_O_FK");
+            new String[] {"NO_O_FK"});
 
         /* This should now succeed because we dropped the backing
          * unique index and foreign key constraints are not inherently
@@ -269,14 +268,28 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
 
         // Make sure non-dropped constraints are still enforced.
 
+        // This statement attempts to insert a duplicate in the C column.
+        // This violates both the unique index DROPC_UIX2 and the unique
+        // constraint DROPC_UC1. Additionally, the backing index of the
+        // foreign key DROPC_FK2 is a unique index. It is not deterministic
+        // which index will be checked first, so accept any of the three.
         checkStatementError("23505", st,
-            "insert into dropc_t2 values (1, 2, 4)", "DROPC_UIX2");
+            "insert into dropc_t2 values (1, 2, 4)",
+            new String[] {"DROPC_UIX2", "DROPC_UC1", "DROPC_FK2"});
 
+        // This statement violates the foreign key DROPC_FK1. It also
+        // violates the same unique constraints/indexes as the previous
+        // statement (duplicate value in column C). Foreign key violations
+        // are checked before unique index violations, so expect the error
+        // to be reported as a violation of DROPC_FK1.
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (2, 2, 4)", "DROPC_FK1");
+            "insert into dropc_t2 values (2, 2, 4)", 
+            new String[] {"DROPC_FK1"});
 
+        // This statement violates the foreign key DROPC_FK2.
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (1, 2, 3)", "DROPC_FK2");
+            "insert into dropc_t2 values (1, 2, 3)", 
+            new String[] {"DROPC_FK2"});
 
         /* Drop constraint DROPC_UC1.  Since DROPC_UIX2 requires
          * a physical conglomerate identical to that of DROPC_UC1
@@ -305,14 +318,27 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
 
         // Make sure non-dropped constraints are still enforced.
 
+        // This statement attempts to insert a duplicate into the unique
+        // index DROPC_UIX2 and the unique backing index of the foreign
+        // key constraint DROPC_FK2. It is not deterministic which of the
+        // two indexes will be inserted into first, so accept both in the
+        // error message.
         checkStatementError("23505", st,
-            "insert into dropc_t2 values (1, 2, 4)", "DROPC_UIX2");
+            "insert into dropc_t2 values (1, 2, 4)", 
+            new String[] {"DROPC_UIX2", "DROPC_FK2"});
 
+        // This statement both violates the foreign key DROPC_FK1 and
+        // attempts to insert a duplicate value into the column C. Expect
+        // foreign key constraint violations to be checked before unique
+        // index violations.
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (2, 2, 4)", "DROPC_FK1");
+            "insert into dropc_t2 values (2, 2, 4)", 
+            new String[] {"DROPC_FK1"});
 
+        // This statement violates the foreign key DROPC_FK2.
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (1, 2, 3)", "DROPC_FK2");
+            "insert into dropc_t2 values (1, 2, 3)", 
+            new String[] {"DROPC_FK2"});
 
         /* DROP 2: We don't drop the constraint, but we drop a user
          * index that shares a physical conglomerate with a constraint.
@@ -344,10 +370,12 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         // Make sure non-dropped constraints are still enforced.
 
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (2, 2, 4)", "DROPC_FK1");
+            "insert into dropc_t2 values (2, 2, 4)", 
+            new String[] {"DROPC_FK1"});
 
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (1, 2, 3)", "DROPC_FK2");
+            "insert into dropc_t2 values (1, 2, 3)", 
+            new String[] {"DROPC_FK2"});
 
         /* This should now succeed because there is no longer any
          * requirement for uniqueness.
@@ -420,7 +448,8 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         // Make sure non-dropped constraints are still enforced.
 
         checkStatementError("23503", st,
-            "insert into dropc_t2 values (2, 2)", "DROPC_FK1");
+            "insert into dropc_t2 values (2, 2)", 
+            new String[] {"DROPC_FK1"});
 
         /* DROP 4: If privileges to a table are revoked, a constraint
          * (esp. a foreign key constraint) that references that table
@@ -743,9 +772,16 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
      *     constraint name in its message.  This is intended to
      *     be used for uniqueness and foreign key violations,
      *     esp. SQLSTATE 23503 and 23505.
+     *
+     * @param sqlState the expected SQLState of the error
+     * @param st the statement to use for execution
+     * @param query the SQL text to execute
+     * @param violatedConstraints the constraints or indexes that are
+     *   violated by this statement; expect the error message to mention
+     *   at least one of them
      */
     private void checkStatementError(String sqlState,
-        Statement st, String query, String ixOrConstraint)
+        Statement st, String query, String[] violatedConstraints)
         throws SQLException
     {
         try {
@@ -757,12 +793,24 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
         } catch (SQLException se) {
 
             assertSQLState(sqlState, se);
-            if (se.getMessage().indexOf(ixOrConstraint) == -1)
+
+            boolean foundConstraint = false;
+//            for (String c : violatedConstraints) {
+            for (int i = 0; i < violatedConstraints.length; i++) {
+                String c = violatedConstraints[i];
+                if (se.getMessage().contains(c)) {
+                    foundConstraint = true;
+                    break;
+                }
+            }
+
+            if (!foundConstraint)
             {
                 fail("Error " + sqlState + " should have been caused " +
-                    "by index/constraint '" + ixOrConstraint + "' but " +
-                    "'" + ixOrConstraint + "' did not appear in the " +
-                    "following error message: \"" + se.getMessage() + "\"");
+                    "by one of the following indexes/constraints " +
+                    Arrays.toString(violatedConstraints) +
+                    ", but none of them appeared in the error message.",
+                    se);
             }
 
         }
