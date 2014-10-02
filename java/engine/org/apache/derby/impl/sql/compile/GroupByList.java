@@ -262,24 +262,14 @@ public class GroupByList extends OrderedColumnList
 		GroupByColumn	gbc;
 		int				size = size();
 
-		/* This method is called when flattening a FromTable.  We should
-		 * not be flattening a FromTable if the underlying expression that
-		 * will get returned out, after chopping out the redundant ResultColumns,
-		 * is not a ColumnReference.  (See ASSERT below.)
-		 */
+        /* This method is called when flattening a FromTable. */
 		for (int index = 0; index < size; index++)
 		{
 			ValueNode	retVN;
 			gbc = (GroupByColumn) elementAt(index);
 
-			retVN = gbc.getColumnExpression().remapColumnReferencesToExpressions();
-
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.ASSERT(retVN instanceof ColumnReference,
-					"retVN expected to be instanceof ColumnReference, not " +
-					retVN.getClass().getName());
-			}
+			retVN = 
+                gbc.getColumnExpression().remapColumnReferencesToExpressions();
 
 			gbc.setColumnExpression(retVN);
 		}
