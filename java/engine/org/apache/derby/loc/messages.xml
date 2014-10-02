@@ -144,8 +144,9 @@ Guide.
 
             <msg>
                 <name>01504</name>
-                <text>The new index is a duplicate of an existing index: {0}.</text>
-                <arg>indexName</arg>
+                <text>'{0}' index not created because it is a duplicate of an existing index: '{1}'.</text>
+                <arg>newIndexName</arg>
+                <arg>existingIndexName</arg>
             </msg>
 
             <msg>

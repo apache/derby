@@ -1273,7 +1273,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1372,7 +1372,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1471,7 +1471,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1524,7 +1524,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1595,7 +1595,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1677,7 +1677,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1759,7 +1759,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1813,7 +1813,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1867,7 +1867,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1921,7 +1921,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -1978,7 +1978,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2116,7 +2116,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2215,7 +2215,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2314,7 +2314,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2367,7 +2367,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2438,7 +2438,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2520,7 +2520,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2602,7 +2602,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2656,7 +2656,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2710,7 +2710,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2764,7 +2764,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -2821,7 +2821,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -7767,7 +7767,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -7873,7 +7873,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -7972,7 +7972,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8027,7 +8027,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8098,7 +8098,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8184,7 +8184,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8266,7 +8266,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8321,7 +8321,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8375,7 +8375,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8431,7 +8431,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8490,7 +8490,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8628,7 +8628,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8734,7 +8734,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8833,7 +8833,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8888,7 +8888,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -8959,7 +8959,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9045,7 +9045,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9127,7 +9127,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9182,7 +9182,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9236,7 +9236,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9291,7 +9291,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -9350,7 +9350,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -14510,7 +14510,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -14652,7 +14652,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -14797,7 +14797,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -14856,7 +14856,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -14940,7 +14940,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15041,7 +15041,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15144,7 +15144,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15202,7 +15202,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15260,7 +15260,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15318,7 +15318,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15381,7 +15381,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15520,7 +15520,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15662,7 +15662,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15807,7 +15807,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15866,7 +15866,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -15950,7 +15950,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16051,7 +16051,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16154,7 +16154,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16212,7 +16212,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16270,7 +16270,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16328,7 +16328,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -16391,7 +16391,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -21935,7 +21935,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22035,7 +22035,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22135,7 +22135,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22189,7 +22189,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22261,7 +22261,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22344,7 +22344,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22427,7 +22427,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22490,7 +22490,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22554,7 +22554,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22612,7 +22612,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22675,7 +22675,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22817,7 +22817,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -22917,7 +22917,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23017,7 +23017,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23071,7 +23071,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23143,7 +23143,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23226,7 +23226,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23309,7 +23309,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23372,7 +23372,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23436,7 +23436,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23497,7 +23497,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;
@@ -23565,7 +23565,7 @@ ij(CONNECTION1)> -- RESOLVE: missing row locks
 -- to force the statement to be recompiled
 create index ix1 on a(a);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: A_IDX.
+WARNING 01504: 'IX1' index not created because it is a duplicate of an existing index: 'A_IDX'.
 ij(CONNECTION1)> drop index ix1;
 ERROR 42X65: Index 'IX1' does not exist.
 ij(CONNECTION1)> commit;

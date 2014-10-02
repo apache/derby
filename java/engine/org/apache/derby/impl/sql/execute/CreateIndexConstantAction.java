@@ -545,6 +545,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 					activation.addWarning(
 							StandardException.newWarning(
 								SQLState.LANG_INDEX_DUPLICATE,
+								indexName,
 								cd.getConglomerateName()));
 
 					return;

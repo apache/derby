@@ -45,7 +45,7 @@ ij> CREATE INDEX IX20B ON APP_DESC ( GUID );
 0 rows inserted/updated/deleted
 ij> CREATE INDEX IX20C ON APP_DESC ( PARENT_OID );
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'IX20C' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> CREATE TABLE APP_DESC_DD (
     APP_DESC_OID INTEGER NOT NULL,
     NAME VARCHAR(255) NOT NULL,
@@ -89,7 +89,7 @@ ij> CREATE INDEX IX40D ON PORT_DESC ( REFERENCE_ID, APP_DESC_OID );
 0 rows inserted/updated/deleted
 ij> CREATE INDEX IX40E ON PORT_DESC ( APP_DESC_OID );
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'IX40E' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> CREATE TABLE PORT_DESC_LOD (
     PORT_DESC_OID INTEGER NOT NULL,
     LOCALE VARCHAR(64) NOT NULL,
@@ -347,10 +347,10 @@ ij> CREATE TABLE COMP_INST (
 0 rows inserted/updated/deleted
 ij> CREATE INDEX IX320A ON COMP_INST ( PAGE_INST_OID );
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'IX320A' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> CREATE INDEX IX320B ON COMP_INST ( PORT_INST_OID );
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'IX320B' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> CREATE TABLE COMP_INST_LOD (
     COMP_INST_OID INTEGER NOT NULL,
     LOCALE VARCHAR(64) NOT NULL,
@@ -486,7 +486,7 @@ ij> CREATE INDEX IX410B ON CRED_SLOT ( RESOURCE_NAME );
 0 rows inserted/updated/deleted
 ij> CREATE INDEX IX410C ON CRED_SLOT ( SEGMENT_OID );
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'IX410C' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> CREATE TABLE CRED_SLOT_LOD (
     CRED_SLOT_OID INTEGER NOT NULL,
     LOCALE VARCHAR(64) NOT NULL,

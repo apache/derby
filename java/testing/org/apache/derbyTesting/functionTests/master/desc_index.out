@@ -855,20 +855,20 @@ create table tab2 (c1 int not null primary key, c2 int, c3 int);
 ij> -- not unique index, shouldn't share with primary key's index
 create index i21 on tab2(c1);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'I21' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> -- desc index, shouldn't share with primary key's index
 create index i22 on tab2(c1 desc);
 0 rows inserted/updated/deleted
 ij> -- this should share with primary key's index, and give a warning
 create unique index i23 on tab2(c1);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: xxxxGENERATED-IDxxxx.
+WARNING 01504: 'I23' index not created because it is a duplicate of an existing index: 'xxxxGENERATED-IDxxxx'.
 ij> create index i24 on tab2(c1, c3 desc);
 0 rows inserted/updated/deleted
 ij> -- this should share with i24's conglomerate
 create index i25 on tab2(c1, c3 desc);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: I24.
+WARNING 01504: 'I25' index not created because it is a duplicate of an existing index: 'I24'.
 ij> -- no share
 create index i26 on tab2(c1, c3);
 0 rows inserted/updated/deleted
@@ -882,10 +882,10 @@ create index i28 on tab2 (c1, c2 desc, c3 desc);
 ij> -- share with i27
 create index i29 on tab2 (c1, c2 desc, c3);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: I27.
+WARNING 01504: 'I29' index not created because it is a duplicate of an existing index: 'I27'.
 ij> create index i20 on tab2 (c1, c2 desc, c3);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: I27.
+WARNING 01504: 'I20' index not created because it is a duplicate of an existing index: 'I27'.
 ij> insert into tab2 values (56, 2, 7), (31, 5, 7), (-12, 5, 2);
 3 rows inserted/updated/deleted
 ij> select count(distinct conglomeratenumber) from sys.sysconglomerates
