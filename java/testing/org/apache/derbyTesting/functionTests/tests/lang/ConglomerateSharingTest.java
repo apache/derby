@@ -795,10 +795,9 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
             assertSQLState(sqlState, se);
 
             boolean foundConstraint = false;
-//            for (String c : violatedConstraints) {
             for (int i = 0; i < violatedConstraints.length; i++) {
                 String c = violatedConstraints[i];
-                if (se.getMessage().contains(c)) {
+                if (se.getMessage().indexOf(c)>0) {
                     foundConstraint = true;
                     break;
                 }
