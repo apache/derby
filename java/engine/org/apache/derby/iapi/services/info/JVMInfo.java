@@ -27,6 +27,8 @@ import java.net.MalformedURLException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 
+import org.apache.derby.iapi.util.StringUtil;
+
 // As an exception to the rule we import SanityManager from the shared package
 // here, because the JVMInfo class is included in both derby.jar and
 // derbyclient.jar. Pulling in the class from the shared package allows us to
@@ -181,7 +183,7 @@ public abstract class JVMInfo
                 try {
 
                     // Extract major and minor version out of the spec version.
-                    String[] ver = javaVersion.split("[.]");
+                    String[] ver = StringUtil.split( javaVersion, '.' );
                     int major = ver.length >= 1 ? Integer.parseInt(ver[0]) : 0;
                     int minor = ver.length >= 2 ? Integer.parseInt(ver[1]) : 0;
 
