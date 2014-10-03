@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -1156,6 +1157,24 @@ public abstract class BaseTestCase
         while (System.currentTimeMillis() == currentTime) {
             sleep(1);
         }
+    }
+
+    /** Return true if the JVM is at least at the indicated rev level */
+    public static boolean vmAtLeast( int major, int minor )
+    {
+        String version = (String) AccessController.doPrivileged
+            (new PrivilegedAction()
+                {
+                    public Object run()
+                    {
+                        return System.getProperty( "java.version" );
+                    }
+                }
+            );
+                   
+        JavaVersionHolder jvh =  new JavaVersionHolder( version );
+
+        return jvh.atLeast( major, minor );
     }
 
     /** Makes the current thread sleep up to {@code ms} milliseconds. */
