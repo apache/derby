@@ -448,7 +448,7 @@ create index ixsampletab on sampletab(c1);
 0 rows inserted/updated/deleted
 ij> create index ix2sampletab on test.sampletab(c1);
 0 rows inserted/updated/deleted
-WARNING 01504: The new index is a duplicate of an existing index: IXSAMPLETAB.
+WARNING 01504: 'IX2SAMPLETAB' index not created because it is a duplicate of an existing index: 'IXSAMPLETAB'.
 ij> create view vsampletab as select * from sampletab;
 0 rows inserted/updated/deleted
 ij> create view v2sampletab as select * from test.sampletab;
