@@ -676,15 +676,15 @@ public class MathTrigFunctionsTest extends BaseJDBCTestCase {
 
         // Numbers below verified by using lava.lang.StrictMath.toRadians
         // outside Derby context. First number: argument to ps and psFN, second
-        // number: expected result.
+        // number: expected result. Actual results vary by JVM level. See DERBY-6755.
         double[][] inOut = new double[][] {
             {180.0d, java.lang.StrictMath.PI},
             {PRE_DERBY_3398_SMALLEST_NEG_DERBY_DOUBLE, -3.1375609430176863E306},
             {DOUBLE_MIN_NORMAL, 3.8834864931005E-310},
             {Double.MIN_VALUE, 0.0d},
             {Double.MAX_VALUE, 3.1375664143845866E306},
-            {PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE, 3.88335758568738E-309},
-            {PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE, -3.88335758568738E-309},
+            {PRE_DERBY_3398_SMALLEST_POS_DERBY_DOUBLE, vmAtLeast( 1, 9 ) ? 3.883357585687384E-309 : 3.88335758568738E-309},
+            {PRE_DERBY_3398_LARGEST_NEG_DERBY_DOUBLE, vmAtLeast( 1, 9 ) ? -3.883357585687384E-309 : -3.88335758568738E-309},
         };
 
         for (int i=0; i < inOut.length; i++) {
