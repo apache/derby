@@ -298,9 +298,13 @@ public class SupportFilesSetup extends TestSetup {
 
     public static void deleteFile(final String fileName) 
     {
-        File f = new File(fileName);
-        if (PrivilegedFileOpsForTests.exists(f)) {
-            assertTrue(PrivilegedFileOpsForTests.delete(f));
+        deleteFile( new File(fileName) );
+    }
+
+    public static void deleteFile(final File file ) 
+    {
+        if (PrivilegedFileOpsForTests.exists(file)) {
+            assertTrue(PrivilegedFileOpsForTests.delete(file));
         }
     }
 }

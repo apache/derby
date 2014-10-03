@@ -9316,6 +9316,7 @@ public class MergeStatementTest extends GeneratedColumnsHelper
     {
         Connection  dboConnection = openUserConnection( TEST_DBO );
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
+        SupportFilesSetup.deleteFile( traceFile );
 
         //
         // Schema

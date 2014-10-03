@@ -21,12 +21,16 @@
 
 package org.apache.derby.impl.sql.compile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import org.apache.derby.iapi.db.OptimizerTrace;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -152,12 +156,23 @@ public	class   OptimizerTracer  implements OptionalTool
             {
                 pw = AccessController.doPrivileged
                     (
-                     new PrivilegedAction<PrintWriter>()
+                     new PrivilegedExceptionAction<PrintWriter>()
                      {
-                         public PrintWriter run()
+                         public PrintWriter run() throws SQLException
                          {
                              try {
-                                 return new PrintWriter( configurationParameters[ 0 ] );
+                                 String fileName = configurationParameters[ 0 ];
+                                 File   outputFile = new File( fileName );
+
+                                 if ( outputFile.exists() )
+                                 {
+                                     throw PublicAPI.wrapStandardException
+                                         (
+                                          StandardException.newException( SQLState.DATA_FILE_EXISTS, fileName )
+                                          );
+                                 }
+                                 
+                                 return new PrintWriter( outputFile );
                              } catch (IOException ioe) { throw new IllegalArgumentException( ioe.getMessage(), ioe ); }
                          }  
                      }
@@ -175,7 +190,17 @@ public	class   OptimizerTracer  implements OptionalTool
             if ( needsClosing ) { pw.close(); }
             
         }
-        catch (Exception e) { throw wrap( e ); }
+        catch (Exception e)
+        {
+            if ( e.getMessage() == null )
+            {
+                Throwable   cause = e.getCause();
+                if ( (cause != null) && (cause instanceof SQLException) )
+                { throw (SQLException) cause; }
+            }
+            
+            throw wrap( e );
+        }
         finally
         {
             OptimizerTrace.setOptimizerTracer( null );

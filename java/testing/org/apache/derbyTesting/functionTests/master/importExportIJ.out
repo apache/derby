@@ -805,7 +805,7 @@ ij> --
 --
 CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE
 ( null, 'DERBY_2925_TAB', 'extout/derby-2925.txt', null, null, null);
-ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925.txt) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ERROR XIE0S: The operation was not performed, because the specified output file (extout/derby-2925.txt) already exists. The procedure will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the procedure arguments to specify a file which does not exist, or delete the existing file, then retry the operation.
 ij> --
 -- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY
 --
@@ -820,7 +820,7 @@ ij> --
 --
 CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY
 ('select * from DERBY_2925_TAB', 'extout/derby-2925-query.dat', null , null , null ) ;
-ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925-query.dat) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ERROR XIE0S: The operation was not performed, because the specified output file (extout/derby-2925-query.dat) already exists. The procedure will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the procedure arguments to specify a file which does not exist, or delete the existing file, then retry the operation.
 ij> --
 -- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
 --
@@ -848,7 +848,7 @@ ij> --
 --
 CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
 ('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\' ,'|','UTF-16','extout/derby-2925_lobs.dat');
-ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925_data.dat) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ERROR XIE0S: The operation was not performed, because the specified output file (extout/derby-2925_data.dat) already exists. The procedure will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the procedure arguments to specify a file which does not exist, or delete the existing file, then retry the operation.
 ij> --
 -- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
 -- where lob file exists.

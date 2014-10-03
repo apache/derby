@@ -46,6 +46,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
 
     private static  final   String  TRACE_FILE_NAME = "xott.xml";
     private static  final   String  SAVED_TRACE_NAME = "xmlOptimizer.trace";
+    private static  final   String  FILE_EXISTS = "XIE0S";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -228,6 +229,8 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
         Connection conn = getConnection();
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
 
+        SupportFilesSetup.deleteFile( traceFile );
+
         // turn on xml-based optimizer tracing and run some queries
         goodStatement
             (
@@ -318,6 +321,25 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
 
         // use planCost to examine an outer join
         vetOuterJoin( conn );
+
+        // verify that you can't overwrite an existing file with xml output (DERBY-6635)
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'xml' )"
+             );
+        expectExecutionError
+            (
+             conn,
+             FILE_EXISTS,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', false, '" + traceFile.getPath() + "' )"
+              );
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_register_tool( 'optimizerTracing', false )"
+             );
+
     }
 
     /**
@@ -576,6 +598,7 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
     private void vetOuterJoin( Connection conn ) throws Exception
     {
         File    traceFile = SupportFilesSetup.getReadWrite( TRACE_FILE_NAME );
+        SupportFilesSetup.deleteFile( traceFile );
 
         // turn on xml-based optimizer tracing
         goodStatement
