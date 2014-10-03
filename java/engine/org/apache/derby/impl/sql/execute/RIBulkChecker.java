@@ -324,11 +324,11 @@ public class RIBulkChecker
 
 			result = fkCol.compare(refCol);
 
-			if (result == 1)
+			if (result > 0)
 			{
 				return GREATER_THAN;
 			}
-			else if (result == -1)
+			else if (result < 0)
 			{
 				return LESS_THAN;
 			}
