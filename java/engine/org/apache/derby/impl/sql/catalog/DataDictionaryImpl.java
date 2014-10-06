@@ -5093,14 +5093,12 @@ public final class	DataDictionaryImpl
 			}
 				
 			int tokBeginOffset = tableName.getBeginOffset();
-			int tokEndOffset = tableName.getEndOffset();
 			if (tokBeginOffset == -1)
 			{
 				continue;
 			}
 
 			String colName = ref.getColumnName();
-			int columnLength = ref.getEndOffset() - ref.getBeginOffset() + 1;
 
 			newText.append(triggerDefinition.substring(start, tokBeginOffset-actionOffset));
 			int colPositionInRuntimeResultSet = -1;
@@ -5156,7 +5154,8 @@ public final class	DataDictionaryImpl
 					tableName.getTableName(), 
 					tableName.getTableName().equals(oldReferencingName),
 					colPositionInRuntimeResultSet));
-			start = tokEndOffset- actionOffset + columnLength + 2;
+
+            start = ref.getEndOffset() + 1 - actionOffset;
 		}
 		//By this point, we are finished transforming the trigger action if
 		//it has any references to old/new transition variables.

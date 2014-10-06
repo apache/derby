@@ -2121,4 +2121,28 @@ public class TriggerTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(
                 s.executeQuery("select * from t2"), "2");
     }
+
+    /**
+     * DERBY-6543: If a reference to a transition variable had blanks around
+     * the period sign that separated the transition variable and the column
+     * name, such as {@code NEW . X} instead of {@code NEW.X}, it would fail
+     * with a syntax error.
+     */
+    public void testDerby6543() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table d6543_1(x int)");
+        s.execute("create table d6543_2(x int)");
+
+        // Used to fail with syntax error.
+        s.execute("create trigger d6543_tr after insert on d6543_1 "
+                + "referencing new as new for each row insert into d6543_2 "
+                + "select x from d6543_1 where new . x = x");
+
+        // Verify trigger works.
+        assertUpdateCount(s, 4, "insert into d6543_1 values 1, 2, 2, 3");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d6543_2 order by x"),
+                new String[][] { {"1"}, {"2"}, {"2"}, {"2"}, {"2"}, {"3"} });
+    }
 }
