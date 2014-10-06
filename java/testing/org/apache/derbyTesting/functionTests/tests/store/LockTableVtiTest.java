@@ -69,29 +69,23 @@ public class LockTableVtiTest extends BaseJDBCTestCase {
         // setting to 60, which is the default, for starters
         properties.setProperty("derby.locks.waitTimeout", "60");
 
-        Test suite = TestConfiguration.embeddedSuite (LockTableVtiTest.class);
+        Test suite = TestConfiguration.defaultSuite (LockTableVtiTest.class);
         suite = new DatabasePropertyTestSetup(suite, properties, true);
-        return new CleanDatabaseTestSetup(suite) {
-            /**
-             * Creates the schemas and table used in the test cases.
-             *
-             * @throws SQLException
-             */
-            protected void decorateSQL(Statement s) throws SQLException {
-                Connection conn = getConnection();
-                conn.setAutoCommit(false);
-                s.executeUpdate("create table account " +
-                     "(a int primary key not null, b int)");
-                s.executeUpdate("insert into account values (0,1)");
-                s.executeUpdate("insert into account values (1,1)");
-                s.executeUpdate("insert into account values (2,1)");
-                conn.commit();
-            }
-        };
+        return new CleanDatabaseTestSetup(suite) ;
     }
 
     protected void setUp() throws Exception {
         super.setUp();
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
+        Statement s = createStatement();
+        s.executeUpdate("create table account " +
+             "(a int primary key not null, b int)");
+        s.executeUpdate("insert into account values (0,1)");
+        s.executeUpdate("insert into account values (1,1)");
+        s.executeUpdate("insert into account values (2,1)");
+        s.close();
+        conn.commit();
     }
 
     /**
