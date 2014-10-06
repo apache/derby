@@ -26,8 +26,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
-
-import org.apache.derby.iapi.util.StringUtil;
+import java.util.StringTokenizer;
 
 // As an exception to the rule we import SanityManager from the shared package
 // here, because the JVMInfo class is included in both derby.jar and
@@ -183,7 +182,7 @@ public abstract class JVMInfo
                 try {
 
                     // Extract major and minor version out of the spec version.
-                    String[] ver = StringUtil.split( javaVersion, '.' );
+                    String[] ver = split( javaVersion, '.' );
                     int major = ver.length >= 1 ? Integer.parseInt(ver[0]) : 0;
                     int minor = ver.length >= 2 ? Integer.parseInt(ver[1]) : 0;
 
@@ -312,4 +311,40 @@ public abstract class JVMInfo
         }
         return true;
     }
+
+    /**
+     * Splits a string around matches of the given delimiter character.
+     * Cloned from StringUtil, so that StringUtil isn't pulled into the
+     * wrong jar file.
+     *
+     * Where applicable, this method can be used as a substitute for
+     * <code>String.split(String regex)</code>, which is not available
+     * on a JSR169/Java ME platform.
+     *
+     * @param str the string to be split
+     * @param delim the delimiter
+     * @throws NullPointerException if str is null
+     */
+    static public String[] split(String str, char delim)
+    {
+        if (str == null) {
+            throw new NullPointerException("str can't be null");
+        }
+
+        // Note the javadoc on StringTokenizer:
+        //     StringTokenizer is a legacy class that is retained for
+        //     compatibility reasons although its use is discouraged in
+        //     new code.
+        // In other words, if StringTokenizer is ever removed from the JDK,
+        // we need to have a look at String.split() (or java.util.regex)
+        // if it is supported on a JSR169/Java ME platform by then.
+        StringTokenizer st = new StringTokenizer(str, String.valueOf(delim));
+        int n = st.countTokens();
+        String[] s = new String[n];
+        for (int i = 0; i < n; i++) {
+            s[i] = st.nextToken();
+        }
+        return s;
+    }
+
 }
