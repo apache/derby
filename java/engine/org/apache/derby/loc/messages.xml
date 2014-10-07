@@ -2958,7 +2958,7 @@ Guide.
 
             <msg>
                 <name>42ZB4</name>
-                <text>'{0}'.{1}' does not identify a table function.</text>
+                <text>'{0}'.'{1}' does not identify a table function.</text>
                 <arg>schemaName</arg>
                 <arg>functionName</arg>
             </msg>
