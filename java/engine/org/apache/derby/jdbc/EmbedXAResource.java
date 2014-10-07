@@ -63,6 +63,8 @@ class EmbedXAResource implements XAResource {
     private XAXactId currentXid;    
     /** The value of the transaction timeout on this resource. */
     private int timeoutSeconds;
+
+    private LanguageConnectionContext   lcc;
     
     EmbedXAResource (EmbedPooledConnection con, ResourceAdapter ra) {
         this.con = con;
@@ -997,22 +999,27 @@ class EmbedXAResource implements XAResource {
 	private	LanguageConnectionContext	getLanguageConnectionContext( final EmbedPooledConnection conn )
         throws SQLException
     {
-        try {
-            return AccessController.doPrivileged
-                (
-                 new PrivilegedExceptionAction<LanguageConnectionContext>()
-                 {
-                     public LanguageConnectionContext run()
-                         throws SQLException
-                     {
-                         return conn.getLanguageConnection();
-                     }
-                 }
-                 );
-        } catch (PrivilegedActionException pae)
+        if ( lcc == null )
         {
-            throw Util.javaException( pae );
+            try {
+                lcc = AccessController.doPrivileged
+                    (
+                     new PrivilegedExceptionAction<LanguageConnectionContext>()
+                     {
+                         public LanguageConnectionContext run()
+                             throws SQLException
+                         {
+                             return conn.getLanguageConnection();
+                         }
+                     }
+                     );
+            } catch (PrivilegedActionException pae)
+            {
+                throw Util.javaException( pae );
+            }
         }
+
+        return lcc;
     }
 
 }

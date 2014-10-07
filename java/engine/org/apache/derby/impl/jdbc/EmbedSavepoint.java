@@ -120,8 +120,8 @@ final class EmbedSavepoint extends ConnectionChild
     boolean sameConnection(EmbedConnection con) {
    		return
             (
-             getLanguageConnectionContext( getEmbedConnection() ) ==
-             getLanguageConnectionContext( con )
+             getLCC( getEmbedConnection() ) ==
+             getLCC( con )
              );
     }
 

@@ -42,6 +42,9 @@ abstract class ConnectionChild {
 	*/
 	EmbedConnection localConn;
 
+    /** Cached LanguageConnectionContext */
+    private LanguageConnectionContext   lcc;
+
 	/**	
 		Factory for JDBC objects to be created.
 	*/
@@ -156,7 +159,7 @@ abstract class ConnectionChild {
         boolean pushStack, EmbedConnection ec) {
 
         if (pushStack) {
-            InterruptStatus.restoreIntrFlagIfSeen( getLanguageConnectionContext( ec ) );
+            InterruptStatus.restoreIntrFlagIfSeen( getLCC( ec ) );
         } else {
             // no lcc if connection is closed:
             InterruptStatus.restoreIntrFlagIfSeen();
@@ -164,9 +167,18 @@ abstract class ConnectionChild {
     }
     
 	/**
+	  *	Get and cache the LanguageConnectionContext for this connection.
+	  */
+	LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
+	{
+        if ( lcc == null ) { lcc = getLCC( conn ); }
+
+        return lcc;
+	}
+	/**
 	  *	Gets the LanguageConnectionContext for this connection.
 	  */
-	static LanguageConnectionContext	getLanguageConnectionContext( final EmbedConnection conn )
+	static LanguageConnectionContext	getLCC( final EmbedConnection conn )
 	{
         return AccessController.doPrivileged
             (
