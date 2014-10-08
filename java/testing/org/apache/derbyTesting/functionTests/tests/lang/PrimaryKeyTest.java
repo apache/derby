@@ -25,13 +25,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.Utilities;
 
 public class PrimaryKeyTest extends BaseJDBCTestCase
 {	
@@ -41,12 +38,10 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 	public static Test suite() {
 		return new TestSuite(PrimaryKeyTest.class);
 	}
+
 	protected void setUp() throws Exception {
 		super.setUp();
 		getConnection().setAutoCommit(false);
-	}
-	protected void tearDown() throws Exception {
-		super.tearDown();
 	}
 
 					/************ NEGATIVE TESTS ************/	
@@ -278,5 +273,27 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 		assertUpdateCount(s , 0 , "drop table B5420_5.t5");
 		assertUpdateCount(s , 0 , "drop table B5420_6.t6");
 	}
+
+    public void testDerby5111() throws SQLException {
+        final Statement s = createStatement();
+        s.executeUpdate("create table t1 (t1_id integer not null, " +
+                "t0_id integer not null, value varchar(75) not null)");
+
+        try {
+            s.executeUpdate("create unique index ui1 on t1 (t1_id)");
+            s.executeUpdate("alter table t1 add constraint pk1 " +
+                    "                       primary key (t1_id)");
+            s.executeUpdate("create unique index ui2 on t1 (t0_id, value)");
+
+            s.executeUpdate("insert into t1 values(0, 0, 'Test')");
+
+            // The next statement tries to insert a duplicate.  It used to
+            // throw an NPE before the fix.
+            assertStatementError(
+                    "23505", s, "insert into t1 values(1, 0, 'Test')");
+        } finally {
+            try { s.executeUpdate("drop table t1"); } catch (SQLException e){}
+        }
+    }
 }
 

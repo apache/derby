@@ -37,6 +37,18 @@ public abstract class ArrayUtil
 {
 	///////////////////////////////////////////////////////////////////
 	//
+	// Methods to copy arrays.
+	//
+	///////////////////////////////////////////////////////////////////
+    
+    /** Copy a (possibly null) array of booleans */
+    public  static  String[]   copy( String[] original )
+    {
+        return (original == null) ? null : (String[]) original.clone();
+    }
+
+	///////////////////////////////////////////////////////////////////
+	//
 	// Methods for Arrays of OBJECTS.  Cannot be used for an
 	// array of primitives, see below for something for primitives
 	//

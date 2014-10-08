@@ -23,9 +23,12 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.io.ArrayUtil;
+
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+
 
 
 /**
@@ -103,19 +106,6 @@ public class IndexLister
 	}
 
     /**
-	  *	Returns an array of all the index names on a table.
-	  *
-	  *	@return	an array of index names
-	  *
-	  * @exception StandardException		Thrown on error
-	  */
-    public	String[]		getIndexNames()	throws StandardException
-	{
-		if ( indexNames == null ) { getAllIndexes(); }
-		return	indexNames;
-	}
-
-    /**
 	  *	Returns an array of distinct index row generators on a table,
 	  * erasing entries for duplicate indexes (which share same conglomerate).
 	  *
@@ -155,8 +145,8 @@ public class IndexLister
 	  */
     public	String[]		getDistinctIndexNames()	throws StandardException
 	{
-		if ( indexNames == null ) { getAllIndexes(); }
-		return	indexNames;
+		if ( distinctIndexNames == null ) { getAllIndexes(); }
+		return	ArrayUtil.copy( distinctIndexNames );
 	}
 
 	////////////////////////////////////////////////////////////////////////
