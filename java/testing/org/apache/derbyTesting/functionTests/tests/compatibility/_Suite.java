@@ -125,6 +125,12 @@ public class _Suite
             println(msg);
             return new BaseTestSuite(msg);
         }
+        // DERBY-6610: the compatibility tests don't run with classes;
+        // return an empty suite rather than hit the IllegalStateException
+        // from VersionCombinationConfigurator.getJarDirectoryOf
+        if (!TestConfiguration.loadingFromJars())
+            return new BaseTestSuite("Compatibility tests skipped becasue " +
+                                 "they need to run from jars");
         if (!Derby.hasClient() || !Derby.hasServer()) {
             return new BaseTestSuite("Compatibility tests skipped because " +
                                  "client or server is missing");
