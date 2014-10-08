@@ -590,6 +590,18 @@ public class OLAPTest extends BaseJDBCTestCase {
             s,
             "select * from t4 t_1 join t4 t_2 on " +
             "                     t_1.a = row_number() over () + t_2.a");
+
+        // DERBY-6690: a window function in generated clause was not detected
+        // before
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "create table t (x int generated always as " +
+            "    (row_number() over ()))");
+
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "alter table t2 add column foo int generated always as " +
+            "    (row_number() over ())");
     }
 
 
