@@ -334,6 +334,7 @@ abstract class MethodCallNode extends JavaValueNode
 					if (routineInfo == null)
 						signature[ parm ] = methodParms[ parm ].getJSQLType();
                     
+                    SelectNode.checkNoWindowFunctions(methodParms[parm], "method argument");
 				}
 			}
 		}

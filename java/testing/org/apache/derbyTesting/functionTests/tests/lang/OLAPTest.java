@@ -591,6 +591,12 @@ public class OLAPTest extends BaseJDBCTestCase {
             "select * from t4 t_1 join t4 t_2 on " +
             "                     t_1.a = row_number() over () + t_2.a");
 
+        // DERBY-6691: NPE before
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "call syscs_util.syscs_compress_table(" + 
+            "    'APP', 'T2', row_number() over ())");
+
         // DERBY-6690: a window function in generated clause was not detected
         // before
         assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
