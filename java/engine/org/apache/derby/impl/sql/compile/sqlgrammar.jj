@@ -12606,7 +12606,8 @@ valueSpecification() throws StandardException :
 		return value;
 	}
 |
-	<NULLIF> <LEFT_PAREN> leftExpression = additiveExpression(null, 0) <COMMA> rightExpression = additiveExpression(null, 0) <RIGHT_PAREN>
+    <NULLIF> <LEFT_PAREN> leftExpression = valueExpression()
+        <COMMA> rightExpression = valueExpression() <RIGHT_PAREN>
 	{
 		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
 		// An impl assumption here is that Derby can promote CHAR to any comparable datatypes such as numeric
@@ -12721,7 +12722,7 @@ thenElseExpression() throws StandardException :
 		return value;
 	}
 |
-	expr = additiveExpression(null, 0)
+    expr = valueExpression()
 	{
 		return expr;
 	}
