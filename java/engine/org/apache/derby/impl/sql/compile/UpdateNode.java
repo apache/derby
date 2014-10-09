@@ -518,6 +518,9 @@ public final class UpdateNode extends DMLModStatementNode
 		 */
 		checkTableNameAndScrubResultColumns(resultColumnList);
 
+        // SQL 2011, section 6.10, SR 4b.
+        SelectNode.checkNoWindowFunctions(resultSet, "<update source>");
+		
 		/* Set the new result column list in the result set */
 		resultSet.setResultColumns(resultColumnList);
 

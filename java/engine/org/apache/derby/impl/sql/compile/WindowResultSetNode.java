@@ -80,7 +80,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
         resultColumns = childResult.getResultColumns();
         childResult.setResultColumns(newBottomRCL);
 
-        // Wrao purselved int a project/restrict as per convention.
+        // Wrap ourselves in a project/restrict as per convention.
         addNewPRNode();
 
         // Add the extra result columns required
@@ -90,7 +90,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
     /**
      * Add a new PR node.  Put the new PR under any sort.
      *
-     * @exception standard exception
+     * @throws StandardException standard error policy
      */
     private void addNewPRNode()
         throws StandardException
@@ -231,6 +231,7 @@ public class WindowResultSetNode extends SingleChildResultSetNode
     /**
      * @return true if an equivalent column reference to cand is already
      * present in uniqueColRefs
+     * @throws StandardException standard error policy
      */
     private boolean colRefAlreadySeen(List uniqueColRefs,
                                       ColumnReference cand)
@@ -249,6 +250,8 @@ public class WindowResultSetNode extends SingleChildResultSetNode
     /**
      * Substitute new result columns for window function calls and add the
      * result columns to childResult's list of columns.
+     *
+     * @throws StandardException standard error policy
      */
     private void addNewColumns() throws StandardException {
         /*
@@ -340,10 +343,6 @@ public class WindowResultSetNode extends SingleChildResultSetNode
     }
 
 
-    /**
-     * override
-     * @see QueryTreeNode#generate
-     */
     public void generate(ActivationClassBuilder acb,
                          MethodBuilder mb)
             throws StandardException
