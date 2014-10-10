@@ -628,7 +628,25 @@ public class SubqueryNode extends ValueNode
 		boolean		flattenable;
 		ValueNode	topNode = this;
 
-		resultSet = resultSet.preprocess(numTables, null, (FromList) null);
+        final boolean haveOrderBy; // need to remember for flattening decision
+
+        // Push the order by list down to the ResultSet
+        if (orderByList != null) {
+            haveOrderBy = true;
+            // If we have more than 1 ORDERBY columns, we may be able to
+            // remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+            if (orderByList.size() > 1)
+            {
+                orderByList.removeDupColumns();
+            }
+
+            resultSet.pushOrderByList(orderByList);
+            orderByList = null;
+        } else {
+            haveOrderBy = false;
+        }
+
+        resultSet = resultSet.preprocess(numTables, null, (FromList) null);
 
         if (leftOperand != null)
         {
@@ -690,7 +708,7 @@ public class SubqueryNode extends ValueNode
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
 					  underTopAndNode && !havingSubquery &&
-                      orderByList == null &&
+                      !haveOrderBy &&
                       offset == null &&
                       fetchFirst == null &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
@@ -762,7 +780,7 @@ public class SubqueryNode extends ValueNode
 
 		flattenable = (resultSet instanceof SelectNode) &&
  			          !((SelectNode)resultSet).hasWindows() &&
-                      orderByList == null &&
+                      !haveOrderBy &&
                       offset == null &&
                       fetchFirst == null &&
 					  underTopAndNode && !havingSubquery &&
@@ -858,20 +876,6 @@ public class SubqueryNode extends ValueNode
 				leftOperand = origLeftOperand;
 			}
 		}
-
-		// Push the order by list down to the ResultSet
-		if (orderByList != null) {
-			// If we have more than 1 ORDERBY columns, we may be able to
-			// remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
-			if (orderByList.size() > 1)
-			{
-				orderByList.removeDupColumns();
-			}
-
-			resultSet.pushOrderByList(orderByList);
-			orderByList = null;
-		}
-
 
         resultSet.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
 

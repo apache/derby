@@ -597,6 +597,34 @@ public class OLAPTest extends BaseJDBCTestCase {
                 s,
                 "update t3 set y = y - row_number() over ()");
 
+        // DERBY-6688: subquery using SubqueryNode rather than FromSubquery
+        // had problems with presence of window function in order by.
+
+        JDBC.assertFullResultSet(s.executeQuery("select * from t3"),
+                new String[][]{{"4"},{"5"},{"6"},{"7"},{"8"}});
+
+        // failed prior to DERBY-6688
+        s.executeUpdate(
+            "update t3 set y = y - " +
+            "    (select y from t3 order by row_number() over () " +
+            "     fetch first 1 row only)");
+        JDBC.assertFullResultSet(s.executeQuery("select * from t3"),
+                new String[][]{{"0"},{"1"},{"2"},{"3"},{"4"}});
+
+        // Used to work before
+        JDBC.assertFullResultSet(s.executeQuery(
+            "select * from  " +
+            "    (select y from t3 order by row_number() over () " + 
+            "     fetch first 1 row only) tt"),
+            new String[][]{{"0"}});
+
+        // failed prior to DERBY-6688
+        JDBC.assertFullResultSet(s.executeQuery(
+            "select * from t3 where y = " +
+            "    (select y from t3 order by row_number() over () " + 
+            "     fetch first row only)"),
+            new String[][]{{"0"}});
+
         // DERBY-6691: NPE before
         assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
             s,
