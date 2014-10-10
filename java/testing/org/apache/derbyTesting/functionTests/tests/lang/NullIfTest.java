@@ -305,6 +305,51 @@ public class NullIfTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Verify that NOT elimination produces the correct results.
+     * DERBY-6563.
+     */
+    public void testNotElimination() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d6563(b1 boolean, b2 boolean)");
+        s.execute("insert into d6563 values (true, true), (true, false), "
+                + "(true, null), (false, true), (false, false), "
+                + "(false, null), (null, null), (null, true), (null, false)");
+
+        // Truth table for B1, B2, NULLIF(B1, B2), NOT NULLIF(B1, B2).
+        Object[][] expectedRows = {
+            { Boolean.FALSE, Boolean.FALSE, null,          null          },
+            { Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.FALSE, null,          Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.TRUE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.TRUE,  Boolean.TRUE,  null,          null          },
+            { Boolean.TRUE,  null,          Boolean.TRUE,  Boolean.FALSE },
+            { null,          Boolean.FALSE, null,          null          },
+            { null,          Boolean.TRUE,  null,          null          },
+            { null,          null,          null,          null          },
+        };
+
+        // Verify the truth table. Since NOT elimination is not performed on
+        // expressions in the SELECT list, this passed even before the fix.
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select b1 , b2, nullif(b1, b2), not nullif(b1, b2) "
+                        + "from d6563 order by b1, b2"),
+            expectedRows, false);
+
+        // Only two rows - (false, true) and (false, null) - made
+        // NOT NULLIF(B1, B2) evaluate to TRUE. Verify that it also evaluates
+        // to TRUE for those two rows, and only those two rows, when it is
+        // used as a predicate. The query used to return (true, true).
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select * from d6563 where not nullif(b1, b2) order by b1, b2"),
+            new Object[][] { { Boolean.FALSE, Boolean.TRUE }, { Boolean.FALSE, null } },
+            false);
+    }
+
+    /**
      * Runs the test fixtures in embedded and client.
      * 
      * @return test suite

@@ -21,11 +21,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -378,5 +380,108 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(rs, "6");
         
     }
-    
+
+    /**
+     * Verify that NOT elimination produces the correct results.
+     * DERBY-6563.
+     */
+    public void testNotElimination() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d6563(b1 boolean, b2 boolean, b3 boolean)");
+
+        // Fill the table with all possible combinations of true/false/null.
+        Boolean[] universe = { Boolean.TRUE, Boolean.FALSE, null };
+        PreparedStatement insert = prepareStatement(
+                "insert into d6563 values (?, ?, ?)");
+
+        for (int i = 0; i < universe.length; i++)
+        {
+            Boolean v1 = universe[i];
+
+            insert.setObject(1, v1);
+
+            for (int i2 = 0; i2 < universe.length; i2++)
+            {
+                Boolean v2 = universe[i2];
+
+                insert.setObject(2, v2);
+
+                for (int i3 = 0; i3 < universe.length; i3++)
+                {
+                    Boolean v3 = universe[i3];
+
+                    insert.setObject(3, v3);
+                    insert.executeUpdate();
+                }
+            }
+        }
+
+        // Truth table for
+        // B1, B2, B3, WHEN B1 THEN B2 ELSE B3, NOT (WHEN B1 THEN B2 ELSE B3).
+        Object[][] expectedRows = {
+            { Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.FALSE, Boolean.FALSE, Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.FALSE, Boolean.FALSE, null,          null,          null          },
+            { Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.FALSE, Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.FALSE, Boolean.TRUE,  null,          null,          null          },
+            { Boolean.FALSE, null,          Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.FALSE, null,          Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.FALSE, null,          null,          null,          null          },
+            { Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.TRUE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.TRUE,  Boolean.FALSE, null,          Boolean.FALSE, Boolean.TRUE  },
+            { Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE, Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.TRUE,  Boolean.TRUE,  null,          Boolean.TRUE,  Boolean.FALSE },
+            { Boolean.TRUE,  null,          Boolean.FALSE, null,          null          },
+            { Boolean.TRUE,  null,          Boolean.TRUE,  null,          null          },
+            { Boolean.TRUE,  null,          null,          null,          null          },
+            { null,          Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { null,          Boolean.FALSE, Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { null,          Boolean.FALSE, null,          null,          null          },
+            { null,          Boolean.TRUE,  Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { null,          Boolean.TRUE,  Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { null,          Boolean.TRUE,  null,          null,          null          },
+            { null,          null,          Boolean.FALSE, Boolean.FALSE, Boolean.TRUE  },
+            { null,          null,          Boolean.TRUE,  Boolean.TRUE,  Boolean.FALSE },
+            { null,          null,          null,          null,          null          },
+        };
+
+        // Verify the truth table. Since NOT elimination is not performed on
+        // expressions in the SELECT list, this passed even before the fix.
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "select b1, b2, b3, case when b1 then b2 else b3 end, "
+                        + "not case when b1 then b2 else b3 end "
+                        + "from d6563 order by b1, b2, b3"),
+            expectedRows, false);
+
+        // Now take only those rows where the NOT CASE expression evaluated
+        // to TRUE, and strip off the expression columns at the end.
+        ArrayList rows = new ArrayList();
+
+
+        for (int i = 0; i < expectedRows.length; i++)
+        {
+            Object[] row = expectedRows[i];
+
+            if (row[4] == Boolean.TRUE) {
+                rows.add(Arrays.copyOf(row, 3));
+            }
+        }
+
+        // Assert that those are the only rows returned if the NOT CASE
+        // expression is used as a predicate. This query used to return a
+        // different set of rows before the fix.
+        expectedRows = (Object[][]) rows.toArray(new Object[rows.size()][]);
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d6563 where "
+                        + "not case when b1 then b2 else b3 end "
+                        + "order by b1, b2, b3"),
+                expectedRows, false);
+    }
+
 }
