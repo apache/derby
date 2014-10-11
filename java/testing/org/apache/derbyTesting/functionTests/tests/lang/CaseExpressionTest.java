@@ -469,7 +469,9 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
             Object[] row = expectedRows[i];
 
             if (row[4] == Boolean.TRUE) {
-                rows.add(Arrays.copyOf(row, 3));
+                Object[] tmprow = new Object[3];
+                System.arraycopy(row, 0, tmprow, 0, 3);
+                rows.add(tmprow);
             }
         }
 
