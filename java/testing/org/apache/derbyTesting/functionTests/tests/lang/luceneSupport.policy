@@ -380,6 +380,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // This permission is needed to call DriverManager.deregisterDriver()
   // on Java SE 8 and later.
   permission java.sql.SQLPermission "deregisterDriver";
+
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

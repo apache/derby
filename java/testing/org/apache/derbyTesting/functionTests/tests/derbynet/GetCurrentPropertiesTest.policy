@@ -246,6 +246,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.lang.RuntimePermission "accessUserInformation";
   permission java.lang.RuntimePermission "getFileStoreAttributes";
 
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

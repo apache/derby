@@ -335,6 +335,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // DERBY-6295: Also grant read permission so that detailed error
   // message is shown.
   permission java.io.FilePermission "${java.home}${/}-", "execute, read";
+
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

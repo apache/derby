@@ -368,6 +368,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   
   // For reading fields in the ResultSet graph
   permission java.lang.RuntimePermission "accessDeclaredMembers";
+
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

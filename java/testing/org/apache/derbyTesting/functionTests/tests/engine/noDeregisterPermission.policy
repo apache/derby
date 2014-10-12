@@ -359,6 +359,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // on Java SE 8 and later. Not granted by this policy, so that we can
   // test that Derby handles the lack of the permission gracefully.
   //permission java.sql.SQLPermission "deregisterDriver";
+
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
