@@ -26,6 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -484,6 +485,46 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                         + "not case when b1 then b2 else b3 end "
                         + "order by b1, b2, b3"),
                 expectedRows, false);
+    }
+
+    /**
+     * Test that parameters can be used in CASE expressions.
+     */
+    public void testParameters() throws SQLException {
+        // If all of the result expressions are untyped parameters, the
+        // type cannot be determined, and an error should be raised.
+        assertCompileError("42X87", "values case when true then ? else ? end");
+
+        // If at least one result expression is typed, the parameter should
+        // get its type from it.
+        PreparedStatement ps = prepareStatement(
+                "values case when true then ? else 1 end");
+
+        // DERBY-6567: The result should be nullable, since the parameter
+        // could be set to null. It used to be reported as not nullable.
+        assertEquals(ResultSetMetaData.columnNullable,
+                     ps.getMetaData().isNullable(1));
+
+        ps.setNull(1, Types.INTEGER);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+
+        ps.setInt(1, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+
+        // Parameters in the WHEN clause can be untyped. They will
+        // implicitly get the BOOLEAN type.
+        ps = prepareStatement("values case when ? then 1 else 0 end");
+        assertEquals(Types.BOOLEAN,
+                     ps.getParameterMetaData().getParameterType(1));
+
+        ps.setBoolean(1, true);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+
+        ps.setBoolean(1, false);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
+
+        ps.setNull(1, Types.BOOLEAN);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
     }
 
 }
