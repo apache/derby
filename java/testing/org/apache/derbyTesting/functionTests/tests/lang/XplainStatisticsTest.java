@@ -21,11 +21,14 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -47,7 +50,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.impl.tools.planexporter.AccessDatabase;
-import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
+import org.apache.derby.tools.PlanExporter;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -535,9 +538,11 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     /**
      * 
      * @param s
+     * @param exportPlan whether or not the PlanExporter tool should be used
+     *                   to export the plan of the recorded statements
      * @throws Exception
      */
-    private static void disableXplainStyle(Statement s)
+    private static void disableXplainStyle(Statement s, boolean exportPlan)
     throws Exception
     {
     	s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
@@ -546,31 +551,22 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	 * Added by DERBY-4587 to test the generation of XML files
     	 * from PlanExporter tool.
     	 */
-    	String stmt_id="";
-    	ResultSet rs;
-    	AccessDatabase access;
+        if (exportPlan) {
+            String dbUrl = s.getConnection().getMetaData().getURL();
 
-    	rs = s.executeQuery( 
-    			"select stmt_id from XPLTEST.sysxplain_statements"); 
-    	while (rs.next()) 
-    	{ 
-    		stmt_id = rs.getString(1); 
-    		access = 
-    			new AccessDatabase(s.getConnection(), "XPLTEST", stmt_id);
-    		if(access.initializeDataArray()){ 
-    			access.createXMLFragment();
-    			access.markTheDepth();
+            ResultSet rs = s.executeQuery(
+                    "select stmt_id from XPLTEST.sysxplain_statements");
+            while (rs.next()) {
+                String stmt_id = rs.getString(1);
+                String output = invokePlanExporterTool(
+                    dbUrl, "XPLTEST", stmt_id, "-xml",
+                    SupportFilesSetup.getReadWriteFileName(stmt_id + ".xml"));
 
-    			CreateXMLFile xml_file = new CreateXMLFile(access); 
-    			xml_file.writeTheXMLFile(
-    					access.statement(),
-    					access.time(),
-    					access.getData(), 
-    					SupportFilesSetup.getReadWriteURL(stmt_id + ".xml")
-    					.getPath(),
-    					null);
-    		}
-    	} 
+                // Expect the plan exporter tool to print nothing on success.
+                assertEquals("Unexpected output from PlanExporter", "", output);
+            }
+        }
+
         s.execute("call syscs_util.syscs_set_xplain_schema('')");
     }
 
@@ -598,6 +594,53 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                         "DRDA_ID was null or blank.");
         }
         rs.close();
+    }
+
+    /**
+     * Invoke the PlanExporter tool.
+     *
+     * @param args the command line arguments to pass to the tool
+     * @return the output printed by the tool (typically an empty string
+     * on successful execution)
+     */
+    private static String invokePlanExporterTool(
+            String arg1, String arg2, String arg3, String arg4, String arg5) {
+        final PrintStream out = System.out;
+        final PrintStream err = System.err;
+
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        final PrintStream testOutput = new PrintStream(byteOut);
+
+        // Redirect System.out and System.err so that the output
+        // can be captured.
+//        System.setOut(testOutput);
+//        System.setErr(testOutput);
+        ByteArrayOutputStream serverOutputBOS = new ByteArrayOutputStream();
+        final PrintStream serverOutputOut = new PrintStream( serverOutputBOS);
+        AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                System.setOut(new PrintStream(testOutput));
+                System.setErr(new PrintStream(testOutput));
+                return null;
+            }
+        });
+
+        try {
+            String args[] = {arg1, arg2, arg3, arg4, arg5}; 
+            PlanExporter.main(args);
+        } finally {
+            // Restore the original out streams
+            AccessController.doPrivileged(new PrivilegedAction() {
+                public Object run() {
+                    System.setOut(out);
+                    System.setErr(err);
+                    return null;
+                }
+            });
+        }
+
+        testOutput.flush();
+        return byteOut.toString();
     }
 
     // Can be used internally when diagnosing failed tests.
@@ -805,24 +848,29 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     public void testPlanExporterIllegalFileAccess()
 	throws Exception
     {
-	AccessDatabase access = 
-    		new AccessDatabase(getConnection(), "NoSuchSchema", "nostmt"); 
-    	CreateXMLFile xml_file = new CreateXMLFile(access); 
-	try
-	{
-    		xml_file.writeTheXMLFile("nostmt", "notime", null,
-			"/illegal.xml", null);
-		fail("Expected exception for illegal file access");
-	}
-	catch (java.security.AccessControlException ace)
-	{
-		// Expected this exception to be thrown
-	}
-	catch (Exception e)
-	{
-		e.printStackTrace();
-		fail(e.getMessage());
-	}
+        // Make sure there is a statement with recorded statistics.
+        Statement s = createStatement();
+        enableXplainStyle(s);
+        JDBC.assertDrainResults(s.executeQuery("values 1"));
+        disableXplainStyle(s, true);
+
+        // Get the id of the statement.
+        ResultSet rs = s.executeQuery(
+                "select stmt_id from XPLTEST.sysxplain_statements");
+        assertTrue("no statements", rs.next());
+        String stmt_id = rs.getString("stmt_id");
+        JDBC.assertEmpty(rs);
+
+        // Try to write the plan to a file that the tool does not have
+        // permission to write to.
+        String output = invokePlanExporterTool(
+                getConnection().getMetaData().getURL(), "XPLTEST",
+                stmt_id, "-xml", "/illegal.xml");
+
+        // The plan exporter tool should fail with a permission error.
+        if (!output.contains("java.security.AccessControlException")) {
+            fail("Unexpected output from PlanExporter: " + output);
+        }
     }
 
     /**
@@ -867,21 +915,18 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         rs.close();
 
         // Create the XML file. This used to result in a syntax error.
-        AccessDatabase access =
-                new AccessDatabase(getConnection(), schema, stmtId);
-        assertTrue(access.initializeDataArray());
-        access.createXMLFragment();
-        access.markTheDepth();
-        CreateXMLFile create = new CreateXMLFile(access);
-        create.writeTheXMLFile(
-                access.statement(),
-                access.time(),
-                access.getData(),
-                SupportFilesSetup.getReadWriteURL(stmtId + ".xml").getPath(),
-                null);
+        String output = invokePlanExporterTool(
+                getConnection().getMetaData().getURL(),
+                schema,
+                stmtId,
+                "-xml",
+                SupportFilesSetup.getReadWriteFileName(stmtId + ".xml"));
+
+        // Expect empty output on successful execution of the tool.
+        assertEquals("Unexpected output from PlanExporter", "", output);
 
         // If we have the required libraries for parsing XML files, verify
-        // that the output contains valid data.
+        // that the XML file contains valid data.
         if (XML.classpathMeetsXMLReqs()) {
             assertEquals(query, readStatement(stmtId));
         }
@@ -963,7 +1008,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {  {"Belize"}, {"Costa Rica"}, {"El Salvador"},
                 {"Guatemala"}, {"Honduras"}, {"Nicaragua"} } );
 
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         
         // The statement should have been executed as a PROJECTION
         // wrapped around a TABLESCAN. The TABLESCAN should have had
@@ -1111,7 +1156,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         	"SELECT country from countries "+
 	         "WHERE region = 'Central America'" ));
         clearXplainOnlyMode(s);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
 	// dumpStatements(s);
         // dumpResultSets(s);
@@ -1145,7 +1190,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select sql_text from syscs_diag.transaction_table " +
 	    "where status != 'IDLE'" ));
         clearXplainOnlyMode(s);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
 	//dumpStatements(s);
         //dumpResultSets(s);
@@ -1180,7 +1225,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(s.executeQuery(selectStatement));
 
         clearXplainOnlyMode(s);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 	//dumpStatements(s);
         //dumpResultSets(s);
 
@@ -1238,7 +1283,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainOnlyMode(s);
         JDBC.assertEmpty(ps.executeQuery());
         clearXplainOnlyMode(s);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 	//dumpStatements(s);
         //dumpResultSets(s);
 
@@ -1302,7 +1347,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainOnlyMode(s);
         JDBC.assertEmpty(ps.executeQuery());
         clearXplainOnlyMode(s);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         
         // Verify that statistics were collected.
         JDBC.assertDrainResults(
@@ -1332,7 +1377,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"Europe", "29"}, {"Middle East", "7"},
                 {"North Africa", "5"}, {"North America", "3"},
                 {"Pacific Islands", "3"}, {"South America", "11"} } );
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 	//dumpStatements(s);
         //dumpResultSets(s);
 
@@ -1573,7 +1618,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
             new String[][] {  {"AA1112"}, {"AA1114"}, {"AA1116"} } );
 
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // This query should have been executed as a PROJECTION whose child
         // is a ROWIDSCAN whose child is an INDEXSCAN. The INDEXSCAN should
@@ -1668,7 +1713,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "SELECT region from countries where country = 'Cameroon'";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement),
                 "Africa");
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select op_identifier from xpltest.sysxplain_resultsets"),
             new String[][] {
@@ -1743,7 +1788,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"North Africa", "5"}, {"North America", "3"},
                 {"Pacific Islands", "3"}, {"South America", "11"} } );
 
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // This statement is executed as a PROJECTION with a child GROUPBY
         // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
@@ -1842,7 +1887,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         // Execute the statement and throw away the results. We just want
         // to look at the statistics.
         s.executeQuery(selectStatement).close();
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         JDBC.assertSingleValueResultSet(s.executeQuery(
             "select count(*) from xpltest.sysxplain_sort_props"), "1");
@@ -1906,7 +1951,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select count(distinct region) from countries";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement), "12");
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // The above statement results in the query execution:
         // PROJECTION(AGGREGATION(PROJECTION(TABLESCAN)))
@@ -1968,7 +2013,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "insert into AIRLINES values " +
             "('AA','Amazonian Airways',0.18,0.03,0.5,1.5,20,10,5)";
         int numRows = s.executeUpdate(insertStatement);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         assertEquals("Failed to insert into AIRLINES", 1, numRows);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2061,7 +2106,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         numRows = s.executeUpdate(updateStatement);
         assertEquals("Failed to update AIRLINES", 1, numRows);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
                     " from xpltest.sysxplain_statements"),
@@ -2218,7 +2263,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         numRows = s.executeUpdate(deleteStatement);
         assertEquals("Failed to delete from AIRLINES", 1, numRows);
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
                     " from xpltest.sysxplain_statements"),
@@ -2290,7 +2335,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select region from countries order by country";
         s.executeQuery(selectStatement).close(); // Discard the results
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // The above statement results in the query execution:
         // PROJECTION(SORT(PROJECTION(TABLESCAN)))
@@ -2372,7 +2417,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             " union " +
             "select country from countries where region = 'Africa'";
         s.executeQuery(selectStatement).close(); // Discard the results
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // The above statement results in the query execution:
         // SORT(UNION(PROJECTION(TABLESCAN),PROJECTION(TABLESCAN)))
@@ -2476,7 +2521,11 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String ddlStatement = 
             "create table t1 (a int, b char(10), c timestamp)";
         s.executeUpdate(ddlStatement);
-        disableXplainStyle(s);
+
+        // Don't run the PlanExporter tool on this statement. There is no
+        // result set graph recorded for DDL statements, so the PlanExporter
+        // tool will complain.
+        disableXplainStyle(s, false);
 
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2497,7 +2546,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select max(country_iso_code) from countries";
         s.executeQuery(selectStatement).close();
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // The above query is executed as
         // PROJECTION(AGGREGATION(PROJECTION(LASTINDEXKEYSCAN)))
@@ -2612,7 +2661,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"ABQ",null},{"OKC",null},{"AKL",null},{"HNL",null},
                     {"AKL",null},{"NRT",null}
         });
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // We should get a Nested Loop Outer Join which  reads 10 rows
         // from the left (SEEN_ROWS), constructs 10 EMPTY_RIGHT_ROWS,
@@ -2707,7 +2756,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         for (int i = 0; i < searches.length; i++)
             s.executeQuery(searches[i]).close();
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         ResultSet rs = s.executeQuery(
                 "select s.stmt_text, sp.start_position, sp.stop_position " +
@@ -2780,7 +2829,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = "select x from t";
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
                 new String[][] { {"1"},{"2"},{"4"} });
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
         
         // There should be a CONSTRAINTSCAN result set with a SCAN PROPS
         // which indicates that we visited 1 deleted row while scanning
@@ -2853,7 +2902,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(sql));
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         // Now, see if we find the query among the recorded statements.
         PreparedStatement ps = prepareStatement(
@@ -2904,7 +2953,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         ResultSet rs = s.executeQuery(
                 "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
@@ -2940,7 +2989,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
-        disableXplainStyle(s);
+        disableXplainStyle(s, true);
 
         ResultSet rs = s.executeQuery(
         "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
