@@ -85,7 +85,7 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
 
   // Add permission
-  permission java.io.FilePermissioi "${user.dir}${/}-", "read, write, delete";
+  permission java.io.FilePermission "${user.dir}${/}-", "read, write, delete";
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,  write, delete";
@@ -278,6 +278,12 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.io.FilePermission "${derby.system.home}", "read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
 
+  //Need to read and delete file for user.dir (Derby3980DeadlockTest)
+  permission java.io.FilePermission "${user.dir}", "read"; 
+  permission java.io.FilePermission "${user.dir}${/}*.txt", "read,write,delete";
+  // Access all files under ${user.dir}to write the test directory structure
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+
   // combination of client and server side.
   permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
   permission java.net.SocketPermission "localhost", "accept,connect,resolve,listen";
@@ -325,6 +331,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+
+  permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
