@@ -22,13 +22,7 @@
 package org.apache.derby.tools;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import org.apache.derby.impl.tools.planexporter.AccessDatabase;
 import org.apache.derby.impl.tools.planexporter.CreateHTMLFile;
 import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
@@ -231,33 +225,22 @@ public class PlanExporter {
      * @param stmt statement executed
      * @param time time which the statement was executed
      * @param xsl name of the style sheet
-     * @throws IOException if an error occurs when writing the XML file
+     * @throws Exception
      */
     private static void generateXML(AccessDatabase access,
-            String arg, String stmt, String time, String xsl)
-            throws IOException {
+            String arg, String stmt, String time, String xsl) throws Exception{
         CreateXMLFile xmlFile = new CreateXMLFile(access);
 
-        final String fileName = arg.toUpperCase().endsWith(".XML")
-                                ? arg : (arg + ".xml");
-
-        Writer out;
-        try {
-            out = (Writer) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                public Object run() throws IOException {
-                    return new OutputStreamWriter(
-                            new FileOutputStream(fileName), "UTF-8");
-                }
-            });
-        } catch (PrivilegedActionException pae) {
-            throw (IOException) pae.getCause();
+        if(arg.toUpperCase().endsWith(".XML")){
+            xmlFile.writeTheXMLFile(stmt, time,
+                    access.getData(),
+                    arg, xsl);
         }
-
-        try {
-            xmlFile.writeTheXMLFile(stmt, time, out, xsl);
-        } finally {
-            out.close();
+        else{
+            xmlFile.writeTheXMLFile(stmt, time,
+                    access.getData(),
+                    arg.concat(".xml"),
+                    xsl);
         }
     }
 

@@ -21,14 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,7 +47,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.impl.tools.planexporter.AccessDatabase;
-import org.apache.derby.tools.PlanExporter;
+import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -74,7 +71,7 @@ import org.w3c.dom.NodeList;
  *
  * FIXME -- some general to-do items that I don't want to forget:
  * - should resultSetNumber be its own column in sysxplain_resultsets?
- * - need MORE tests of xplain-only mode
+ * - need tests of xplain-only mode
  * - need a test of external sorting/merging
  * - need to cross-check the result set types, and verify that they're
  *   all tested at least once
@@ -523,26 +520,12 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         s.execute("call syscs_util.syscs_set_statistics_timing(1)");
     }
     
-    private static void enableXplainOnlyMode(Statement s)
-            throws SQLException
-    {
-        s.execute("call syscs_util.syscs_set_xplain_mode(1)");
-    }
-    
-    private static void clearXplainOnlyMode(Statement s)
-            throws SQLException
-    {
-        s.execute("call syscs_util.syscs_set_xplain_mode(0)");
-    }
-    
     /**
      * 
      * @param s
-     * @param exportPlan whether or not the PlanExporter tool should be used
-     *                   to export the plan of the recorded statements
      * @throws Exception
      */
-    private static void disableXplainStyle(Statement s, boolean exportPlan)
+    private static void disableXplainStyle(Statement s)
     throws Exception
     {
     	s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
@@ -551,23 +534,31 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	 * Added by DERBY-4587 to test the generation of XML files
     	 * from PlanExporter tool.
     	 */
-        if (exportPlan) {
-            String dbUrl = s.getConnection().getMetaData().getURL();
+    	String stmt_id="";
+    	ResultSet rs;
+    	AccessDatabase access;
 
-            ResultSet rs = s.executeQuery(
-                    "select stmt_id from XPLTEST.sysxplain_statements");
-            while (rs.next()) {
-                String stmt_id = rs.getString(1);
-                String output = invokePlanExporterTool(
-                    dbUrl, "XPLTEST", stmt_id, "-xml",
-                    SupportFilesSetup.getReadWriteFileName(stmt_id + ".xml"));
+    	rs = s.executeQuery( 
+    			"select stmt_id from XPLTEST.sysxplain_statements"); 
+    	while (rs.next()) 
+    	{ 
+    		stmt_id = rs.getString(1); 
+    		access = 
+    			new AccessDatabase(s.getConnection(), "XPLTEST", stmt_id);
+    		if(access.initializeDataArray()){ 
+    			access.createXMLFragment();
+    			access.markTheDepth();
 
-                // Expect the plan exporter tool to print nothing on success.
-                assertEquals("Unexpected output from PlanExporter", "", output);
-            }
-        }
-
-        s.execute("call syscs_util.syscs_set_xplain_schema('')");
+    			CreateXMLFile xml_file = new CreateXMLFile(access); 
+    			xml_file.writeTheXMLFile(
+    					access.statement(),
+    					access.time(),
+    					access.getData(), 
+    					SupportFilesSetup.getReadWriteURL(stmt_id + ".xml")
+    					.getPath(),
+    					null);
+    		}
+    	} 
     }
 
     private static void verifyXplainUnset(Statement s)
@@ -594,53 +585,6 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                         "DRDA_ID was null or blank.");
         }
         rs.close();
-    }
-
-    /**
-     * Invoke the PlanExporter tool.
-     *
-     * @param args the command line arguments to pass to the tool
-     * @return the output printed by the tool (typically an empty string
-     * on successful execution)
-     */
-    private static String invokePlanExporterTool(
-            String arg1, String arg2, String arg3, String arg4, String arg5) {
-        final PrintStream out = System.out;
-        final PrintStream err = System.err;
-
-        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-        final PrintStream testOutput = new PrintStream(byteOut);
-
-        // Redirect System.out and System.err so that the output
-        // can be captured.
-//        System.setOut(testOutput);
-//        System.setErr(testOutput);
-        ByteArrayOutputStream serverOutputBOS = new ByteArrayOutputStream();
-        final PrintStream serverOutputOut = new PrintStream( serverOutputBOS);
-        AccessController.doPrivileged(new PrivilegedAction() {
-            public Object run() {
-                System.setOut(new PrintStream(testOutput));
-                System.setErr(new PrintStream(testOutput));
-                return null;
-            }
-        });
-
-        try {
-            String args[] = {arg1, arg2, arg3, arg4, arg5}; 
-            PlanExporter.main(args);
-        } finally {
-            // Restore the original out streams
-            AccessController.doPrivileged(new PrivilegedAction() {
-                public Object run() {
-                    System.setOut(out);
-                    System.setErr(err);
-                    return null;
-                }
-            });
-        }
-
-        testOutput.flush();
-        return byteOut.toString();
     }
 
     // Can be used internally when diagnosing failed tests.
@@ -675,32 +619,6 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     rs.getString("scan_rs_id")+","+
                     rs.getString("sort_rs_id")+","+
                     rs.getString("stmt_id")+","+
-                    rs.getString("timing_id"));
-        }
-        rs.close();
-    }
-    
-    private void dumpStatements(Statement s)
-        throws SQLException
-    {
-        ResultSet rs;
-        rs = s.executeQuery("select * from xpltest.sysxplain_statements");
-        while (rs.next())
-        {
-            System.out.println(
-                    rs.getString("stmt_id")+","+
-                    rs.getString("stmt_name")+","+
-                    rs.getString("stmt_type")+","+
-                    rs.getString("stmt_text")+","+
-                    rs.getString("jvm_id")+","+
-                    rs.getString("os_identifier")+","+
-                    rs.getString("xplain_mode")+","+
-                    rs.getString("xplain_time")+","+
-                    rs.getString("xplain_thread_id")+","+
-                    rs.getString("transaction_id")+","+
-                    rs.getString("session_id")+","+
-                    rs.getString("database_name")+","+
-                    rs.getString("drda_id")+","+
                     rs.getString("timing_id"));
         }
         rs.close();
@@ -848,29 +766,24 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     public void testPlanExporterIllegalFileAccess()
 	throws Exception
     {
-        // Make sure there is a statement with recorded statistics.
-        Statement s = createStatement();
-        enableXplainStyle(s);
-        JDBC.assertDrainResults(s.executeQuery("values 1"));
-        disableXplainStyle(s, true);
-
-        // Get the id of the statement.
-        ResultSet rs = s.executeQuery(
-                "select stmt_id from XPLTEST.sysxplain_statements");
-        assertTrue("no statements", rs.next());
-        String stmt_id = rs.getString("stmt_id");
-        JDBC.assertEmpty(rs);
-
-        // Try to write the plan to a file that the tool does not have
-        // permission to write to.
-        String output = invokePlanExporterTool(
-                getConnection().getMetaData().getURL(), "XPLTEST",
-                stmt_id, "-xml", "/illegal.xml");
-
-        // The plan exporter tool should fail with a permission error.
-        if (!output.contains("java.security.AccessControlException")) {
-            fail("Unexpected output from PlanExporter: " + output);
-        }
+	AccessDatabase access = 
+    		new AccessDatabase(getConnection(), "NoSuchSchema", "nostmt"); 
+    	CreateXMLFile xml_file = new CreateXMLFile(access); 
+	try
+	{
+    		xml_file.writeTheXMLFile("nostmt", "notime", null,
+			"/illegal.xml", null);
+		fail("Expected exception for illegal file access");
+	}
+	catch (java.security.AccessControlException ace)
+	{
+		// Expected this exception to be thrown
+	}
+	catch (Exception e)
+	{
+		e.printStackTrace();
+		fail(e.getMessage());
+	}
     }
 
     /**
@@ -915,18 +828,21 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         rs.close();
 
         // Create the XML file. This used to result in a syntax error.
-        String output = invokePlanExporterTool(
-                getConnection().getMetaData().getURL(),
-                schema,
-                stmtId,
-                "-xml",
-                SupportFilesSetup.getReadWriteFileName(stmtId + ".xml"));
-
-        // Expect empty output on successful execution of the tool.
-        assertEquals("Unexpected output from PlanExporter", "", output);
+        AccessDatabase access =
+                new AccessDatabase(getConnection(), schema, stmtId);
+        assertTrue(access.initializeDataArray());
+        access.createXMLFragment();
+        access.markTheDepth();
+        CreateXMLFile create = new CreateXMLFile(access);
+        create.writeTheXMLFile(
+                access.statement(),
+                access.time(),
+                access.getData(),
+                SupportFilesSetup.getReadWriteURL(stmtId + ".xml").getPath(),
+                null);
 
         // If we have the required libraries for parsing XML files, verify
-        // that the XML file contains valid data.
+        // that the output contains valid data.
         if (XML.classpathMeetsXMLReqs()) {
             assertEquals(query, readStatement(stmtId));
         }
@@ -1008,7 +924,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {  {"Belize"}, {"Costa Rica"}, {"El Salvador"},
                 {"Guatemala"}, {"Honduras"}, {"Nicaragua"} } );
 
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         
         // The statement should have been executed as a PROJECTION
         // wrapped around a TABLESCAN. The TABLESCAN should have had
@@ -1129,300 +1045,6 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         }
     }
     
-    private String getStmtIDByName(Statement s, String sName)
-			throws SQLException
-    {
-    	ResultSet rs;
-        String stmt_id = "?";
-        rs = s.executeQuery( 
-    		"select stmt_id from XPLTEST.sysxplain_statements "+
-		"where stmt_name='"+sName+"'"); 
-        if( rs.next() )
-	{
-            stmt_id = rs.getString(1); 
-	    //System.out.println("Found statemnt id " + stmt_id);
-	}
-        rs.close();
-        return stmt_id;
-    }
-    public void testSimpleXplainOnly() throws Exception
-    {
-        Statement s = createStatement();
-
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-	s.setCursorName("1");
-        JDBC.assertEmpty(s.executeQuery(
-        	"SELECT country from countries "+
-	         "WHERE region = 'Central America'" ));
-        clearXplainOnlyMode(s);
-        disableXplainStyle(s, true);
-
-	// dumpStatements(s);
-        // dumpResultSets(s);
-	// There should be 1 statement captured with stmt_id='1'.
-	// It should have a PROJECTION and a TABLESCAN; the TABLESCAN should be
-	// on the COUNTRIES table.
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_statements"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_statements "+
-	    "where stmt_name='1'"), "1");
-	String stmt_id = getStmtIDByName( s, "1" );
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"'"), "2");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and op_identifier='PROJECTION'"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and op_identifier='TABLESCAN'"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select op_details from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and op_identifier='TABLESCAN'"),
-	    "T: COUNTRIES");
-
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-	s.setCursorName("2");
-        JDBC.assertEmpty(s.executeQuery(
-            "select sql_text from syscs_diag.transaction_table " +
-	    "where status != 'IDLE'" ));
-        clearXplainOnlyMode(s);
-        disableXplainStyle(s, true);
-
-	//dumpStatements(s);
-        //dumpResultSets(s);
-
-	// This statement should have three result sets:
-	// - PROJECTION (select sql_text)
-	// - PROJECT-FILTER (where status != IDLE)
-	// - VTI (syscs_diag.transaction_table)
-	//
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_statements"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_statements "+
-	    "where stmt_name='2'"), "1");
-	stmt_id = getStmtIDByName( s, "2" );
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and op_identifier='PROJECTION'"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and "+
-	    "      op_identifier='PROJECT-FILTER'"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets "+
-	    "where stmt_id='"+stmt_id+"' and op_identifier='VTI'"), "1");
-
-        String selectStatement = 
-            "select region, count(country) from app.countries group by region";
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-	s.setCursorName("3");
-        JDBC.assertEmpty(s.executeQuery(selectStatement));
-
-        clearXplainOnlyMode(s);
-        disableXplainStyle(s, true);
-	//dumpStatements(s);
-        //dumpResultSets(s);
-
-        // This statement is executed as a PROJECTION with a child GROUPBY
-        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
-        // has a corresponding SCAN_PROPS row, the GROUPBY has a
-        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
-	// of the actual processing did anything.
-        //
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets"), "4");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select op_identifier from xpltest.sysxplain_resultsets " +
-                    "order by op_identifier"),
-            new String[][] {
-                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where scan_rs_id is not null"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where sort_rs_id is not null"), "1");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select s.stmt_text, rs.op_identifier," +
-                    " srt.no_input_rows, srt.no_output_rows " +
-                    " from xpltest.sysxplain_sort_props srt, " +
-                    " xpltest.sysxplain_resultsets rs, " +
-                    " xpltest.sysxplain_statements s " +
-                    " where rs.stmt_id = s.stmt_id and " +
-                    " rs.sort_rs_id = srt.sort_rs_id"),
-            new String[][] {
-                {selectStatement, "GROUPBY", "0", "0"} } );
-
-        JDBC.assertUnorderedResultSet(s.executeQuery(
-                    "select srt.sort_type, srt.no_input_rows, " +
-                    " srt.no_output_rows, srt.no_merge_runs, " +
-                    " srt.merge_run_details, srt.eliminate_duplicates, " +
-                    " srt.in_sort_order, srt.distinct_aggregate " +
-                    "from xpltest.sysxplain_sort_props srt " +
-                    "join xpltest.sysxplain_resultsets rs " +
-                    "on srt.sort_rs_id = rs.sort_rs_id " +
-                    "where rs.op_identifier='GROUPBY'"),
-                new String[][] {
-                    {"IN","0","0",null, null, null,"N","N"} } );
-    }
-
-    public void testXplainOnlyExecutePrepared() throws Exception
-    {
-        Statement s = createStatement();
-
-        String selectStatement = 
-            "select region, count(country) from app.countries group by region";
-        PreparedStatement ps = prepareStatement( selectStatement );
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-        JDBC.assertEmpty(ps.executeQuery());
-        clearXplainOnlyMode(s);
-        disableXplainStyle(s, true);
-	//dumpStatements(s);
-        //dumpResultSets(s);
-
-        // This statement is executed as a PROJECTION with a child GROUPBY
-        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
-        // has a corresponding SCAN_PROPS row, the GROUPBY has a
-        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
-	// of the actual processing did anything.
-        //
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets"), "4");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select op_identifier from xpltest.sysxplain_resultsets " +
-                    "order by op_identifier"),
-            new String[][] {
-                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where scan_rs_id is not null"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where sort_rs_id is not null"), "1");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select s.stmt_text, rs.op_identifier," +
-                    " srt.no_input_rows, srt.no_output_rows " +
-                    " from xpltest.sysxplain_sort_props srt, " +
-                    " xpltest.sysxplain_resultsets rs, " +
-                    " xpltest.sysxplain_statements s " +
-                    " where rs.stmt_id = s.stmt_id and " +
-                    " rs.sort_rs_id = srt.sort_rs_id"),
-            new String[][] {
-                {selectStatement, "GROUPBY", "0", "0"} } );
-
-        JDBC.assertUnorderedResultSet(s.executeQuery(
-                    "select srt.sort_type, srt.no_input_rows, " +
-                    " srt.no_output_rows, srt.no_merge_runs, " +
-                    " srt.merge_run_details, srt.eliminate_duplicates, " +
-                    " srt.in_sort_order, srt.distinct_aggregate " +
-                    "from xpltest.sysxplain_sort_props srt " +
-                    "join xpltest.sysxplain_resultsets rs " +
-                    "on srt.sort_rs_id = rs.sort_rs_id " +
-                    "where rs.op_identifier='GROUPBY'"),
-                new String[][] {
-                    {"IN","0","0",null, null, null,"N","N"} } );
-
-	
-	// Since now we're not in XplainOnly mode, the prepared statement
-	// returns the expected normal result set.
-
-        JDBC.assertUnorderedResultSet(ps.executeQuery(),
-            new String[][] { 
-                {"Africa", "19"}, {"Asia", "15"},
-                {"Australia and New Zealand", "2"}, {"Caribbean", "10"},
-                {"Central America", "6"}, {"Central Asia", "4"},
-                {"Europe", "29"}, {"Middle East", "7"},
-                {"North Africa", "5"}, {"North America", "3"},
-                {"Pacific Islands", "3"}, {"South America", "11"} } );
-
-	// And then back to empty again:
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-        JDBC.assertEmpty(ps.executeQuery());
-        clearXplainOnlyMode(s);
-        disableXplainStyle(s, true);
-        
-        // Verify that statistics were collected.
-        JDBC.assertDrainResults(
-                s.executeQuery("select * from xpltest.sysxplain_statements"),
-                1);
-    }
-    
-    public void testXplainOnlyPrepared() throws Exception
-    {
-        Statement s = createStatement();
-
-        String selectStatement = 
-            "select region, count(country) from app.countries group by region";
-
-        // Try preparing the statement while we're in xplain-only mode, then
-        // execute it normally.
-
-        enableXplainStyle(s);
-        enableXplainOnlyMode(s);
-        PreparedStatement ps2 = prepareStatement( selectStatement );
-        clearXplainOnlyMode(s);
-        JDBC.assertUnorderedResultSet(ps2.executeQuery(),
-            new String[][] { 
-                {"Africa", "19"}, {"Asia", "15"},
-                {"Australia and New Zealand", "2"}, {"Caribbean", "10"},
-                {"Central America", "6"}, {"Central Asia", "4"},
-                {"Europe", "29"}, {"Middle East", "7"},
-                {"North Africa", "5"}, {"North America", "3"},
-                {"Pacific Islands", "3"}, {"South America", "11"} } );
-        disableXplainStyle(s, true);
-	//dumpStatements(s);
-        //dumpResultSets(s);
-
-        // This statement is executed as a PROJECTION with a child GROUPBY
-        // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
-        // has a corresponding SCAN_PROPS row, the GROUPBY has a
-        // corresponding SORT_PROPS row. But since we're XPLAIN-ONLY, none
-	// of the actual processing did anything.
-        //
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets"), "4");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select op_identifier from xpltest.sysxplain_resultsets " +
-                    "order by op_identifier"),
-            new String[][] {
-                {"GROUPBY"},{"PROJECTION"},{"PROJECTION"},{"TABLESCAN"} } );
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where scan_rs_id is not null"), "1");
-        JDBC.assertSingleValueResultSet(s.executeQuery(
-            "select count(*) from xpltest.sysxplain_resultsets " +
-            "where sort_rs_id is not null"), "1");
-        JDBC.assertFullResultSet(s.executeQuery(
-                    "select s.stmt_text, rs.op_identifier," +
-                    " srt.no_input_rows, srt.no_output_rows " +
-                    " from xpltest.sysxplain_sort_props srt, " +
-                    " xpltest.sysxplain_resultsets rs, " +
-                    " xpltest.sysxplain_statements s " +
-                    " where rs.stmt_id = s.stmt_id and " +
-                    " rs.sort_rs_id = srt.sort_rs_id"),
-            new String[][] {
-                {selectStatement, "GROUPBY", "114", "12"} } );
-
-        JDBC.assertUnorderedResultSet(s.executeQuery(
-                    "select srt.sort_type, srt.no_input_rows, " +
-                    " srt.no_output_rows, srt.no_merge_runs, " +
-                    " srt.merge_run_details, srt.eliminate_duplicates, " +
-                    " srt.in_sort_order, srt.distinct_aggregate " +
-                    "from xpltest.sysxplain_sort_props srt " +
-                    "join xpltest.sysxplain_resultsets rs " +
-                    "on srt.sort_rs_id = rs.sort_rs_id " +
-                    "where rs.op_identifier='GROUPBY'"),
-                new String[][] {
-                    {"IN","114","12",null, null, null,"N","N"} } );
-    }
     
     
     /**
@@ -1618,7 +1240,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
             new String[][] {  {"AA1112"}, {"AA1114"}, {"AA1116"} } );
 
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // This query should have been executed as a PROJECTION whose child
         // is a ROWIDSCAN whose child is an INDEXSCAN. The INDEXSCAN should
@@ -1713,7 +1335,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "SELECT region from countries where country = 'Cameroon'";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement),
                 "Africa");
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select op_identifier from xpltest.sysxplain_resultsets"),
             new String[][] {
@@ -1788,7 +1410,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"North Africa", "5"}, {"North America", "3"},
                 {"Pacific Islands", "3"}, {"South America", "11"} } );
 
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // This statement is executed as a PROJECTION with a child GROUPBY
         // with a child PROJECTION with a child TABLESCAN. The TABLESCAN
@@ -1887,7 +1509,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         // Execute the statement and throw away the results. We just want
         // to look at the statistics.
         s.executeQuery(selectStatement).close();
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         JDBC.assertSingleValueResultSet(s.executeQuery(
             "select count(*) from xpltest.sysxplain_sort_props"), "1");
@@ -1951,7 +1573,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select count(distinct region) from countries";
         JDBC.assertSingleValueResultSet(s.executeQuery(selectStatement), "12");
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // The above statement results in the query execution:
         // PROJECTION(AGGREGATION(PROJECTION(TABLESCAN)))
@@ -2013,7 +1635,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "insert into AIRLINES values " +
             "('AA','Amazonian Airways',0.18,0.03,0.5,1.5,20,10,5)";
         int numRows = s.executeUpdate(insertStatement);
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         assertEquals("Failed to insert into AIRLINES", 1, numRows);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2106,7 +1728,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         numRows = s.executeUpdate(updateStatement);
         assertEquals("Failed to update AIRLINES", 1, numRows);
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
                     " from xpltest.sysxplain_statements"),
@@ -2263,7 +1885,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         numRows = s.executeUpdate(deleteStatement);
         assertEquals("Failed to delete from AIRLINES", 1, numRows);
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
                     " from xpltest.sysxplain_statements"),
@@ -2335,7 +1957,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select region from countries order by country";
         s.executeQuery(selectStatement).close(); // Discard the results
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // The above statement results in the query execution:
         // PROJECTION(SORT(PROJECTION(TABLESCAN)))
@@ -2417,7 +2039,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             " union " +
             "select country from countries where region = 'Africa'";
         s.executeQuery(selectStatement).close(); // Discard the results
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // The above statement results in the query execution:
         // SORT(UNION(PROJECTION(TABLESCAN),PROJECTION(TABLESCAN)))
@@ -2521,11 +2143,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String ddlStatement = 
             "create table t1 (a int, b char(10), c timestamp)";
         s.executeUpdate(ddlStatement);
-
-        // Don't run the PlanExporter tool on this statement. There is no
-        // result set graph recorded for DDL statements, so the PlanExporter
-        // tool will complain.
-        disableXplainStyle(s, false);
+        disableXplainStyle(s);
 
         JDBC.assertUnorderedResultSet(s.executeQuery(
                     "select stmt_type, stmt_text " +
@@ -2546,7 +2164,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = 
             "select max(country_iso_code) from countries";
         s.executeQuery(selectStatement).close();
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // The above query is executed as
         // PROJECTION(AGGREGATION(PROJECTION(LASTINDEXKEYSCAN)))
@@ -2661,7 +2279,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"ABQ",null},{"OKC",null},{"AKL",null},{"HNL",null},
                     {"AKL",null},{"NRT",null}
         });
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // We should get a Nested Loop Outer Join which  reads 10 rows
         // from the left (SEEN_ROWS), constructs 10 EMPTY_RIGHT_ROWS,
@@ -2756,7 +2374,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         enableXplainStyle(s);
         for (int i = 0; i < searches.length; i++)
             s.executeQuery(searches[i]).close();
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         ResultSet rs = s.executeQuery(
                 "select s.stmt_text, sp.start_position, sp.stop_position " +
@@ -2829,7 +2447,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         String selectStatement = "select x from t";
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
                 new String[][] { {"1"},{"2"},{"4"} });
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
         
         // There should be a CONSTRAINTSCAN result set with a SCAN PROPS
         // which indicates that we visited 1 deleted row while scanning
@@ -2902,7 +2520,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(sql));
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         // Now, see if we find the query among the recorded statements.
         PreparedStatement ps = prepareStatement(
@@ -2953,7 +2571,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         ResultSet rs = s.executeQuery(
                 "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
@@ -2989,7 +2607,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
-        disableXplainStyle(s, true);
+        disableXplainStyle(s);
 
         ResultSet rs = s.executeQuery(
         "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
