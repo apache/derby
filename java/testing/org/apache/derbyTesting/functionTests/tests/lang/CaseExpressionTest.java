@@ -514,7 +514,9 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         // Parameters in the WHEN clause can be untyped. They will
         // implicitly get the BOOLEAN type.
         ps = prepareStatement("values case when ? then 1 else 0 end");
-        assertEquals(Types.BOOLEAN,
+        // PreparedStatement.getParameterMetaData() does not exist in JSR169
+        if (JDBC.vmSupportsJDBC3())
+            assertEquals(Types.BOOLEAN,
                      ps.getParameterMetaData().getParameterType(1));
 
         ps.setBoolean(1, true);
