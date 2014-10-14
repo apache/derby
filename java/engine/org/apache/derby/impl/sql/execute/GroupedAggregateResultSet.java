@@ -760,13 +760,13 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 				// A NULL value is always distinct, so we only
 				// have to check for duplicate values for
 				// non-NULL values.
-				if (newValue.getString() != null)
+				if (!newValue.isNull())
 				{
 					if (distinctValues[level][i].contains(
-						    newValue.getString()))
+						    newValue))
 						continue;
 					distinctValues[level][i].add(
-						newValue.getString());
+						newValue);
 				}
 			}
 
@@ -790,35 +790,8 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 					distinctValues[r][a].clear();
 				DataValueDescriptor newValue =
 					aggregates[a].getInputColumnValue(resultRows[r]);
-				distinctValues[r][a].add(newValue.getString());
+				distinctValues[r][a].add(newValue);
 			}
 		}
-	}
-
-        private void dumpAllRows(int cR)
-            throws StandardException
-        {
-            System.out.println("dumpAllRows("+cR+"/"+resultRows.length+"):");
-            for (int r = 0; r < resultRows.length; r++)
-                System.out.println(dumpRow(resultRows[r]));
-        }
-	private String dumpRow(ExecRow r)
-		throws StandardException
-	{
-            if (r == null)
-                return "<NULL ROW>";
-	    StringBuffer buf = new StringBuffer();
-	    int nCols = r.nColumns();
-	    for (int d = 0; d < nCols; d++)
-	    {
-		if (d > 0) buf.append(",");
-                DataValueDescriptor o = r.getColumn(d+1);
-                buf.append(o.getString());
-                if (o instanceof ExecAggregator)
-                    buf.append("[").
-                        append(((ExecAggregator)o).getResult().getString()).
-                        append("]");
-	    }
-	    return buf.toString();
 	}
 }
