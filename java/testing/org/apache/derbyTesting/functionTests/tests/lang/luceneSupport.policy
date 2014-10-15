@@ -382,6 +382,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission java.sql.SQLPermission "deregisterDriver";
 
   permission org.apache.derby.security.SystemPermission "engine", "usederbyinternals";
+  permission java.lang.RuntimePermission "accessDeclaredMembers";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
