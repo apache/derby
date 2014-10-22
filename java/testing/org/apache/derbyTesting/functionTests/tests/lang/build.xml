@@ -101,6 +101,7 @@
       <exclude name="${this.dir}/_Suite.java"/>
       <exclude name="${this.dir}/VarargsRoutines.java"/>
       <exclude name="${this.dir}/OptionalToolExample.java"/>
+      <exclude name="${this.dir}/Test_6496.java"/>
     </javac>
   </target>
   <target name="compilet2" depends="compilet1">
@@ -176,6 +177,7 @@
       <include name="${this.dir}/LobMode.java"/>
       <include name="${this.dir}/VarargsRoutines.java"/>
       <include name="${this.dir}/OptionalToolExample.java"/>
+      <include name="${this.dir}/Test_6496.java"/>
     </javac>
   </target> 
 

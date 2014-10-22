@@ -205,6 +205,7 @@ public class _Suite extends BaseTestCase  {
         if (JDBC.vmSupportsJDBC4())  
         {
             suite.addTest(OptionalToolsTest.suite());
+            suite.addTest(Test_6496.suite());
         }
        
         suite.addTest(BigDataTest.suite());

@@ -23,7 +23,6 @@ package org.apache.derby.catalog;
 
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
 import org.apache.derby.iapi.error.PublicAPI;
@@ -31,6 +30,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.loader.ClassFactoryContext;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
@@ -93,8 +93,8 @@ public  class   Java5SystemProcedures
         throws SQLException
     {
         try {
-			CompilerContext cc = (CompilerContext) ContextService.getContext( CompilerContext.CONTEXT_ID );
-            ClassFactory    classFactory = cc.getClassFactory();
+			ClassFactoryContext cfc = (ClassFactoryContext) ContextService.getContext( ClassFactoryContext.CONTEXT_ID );
+            ClassFactory    classFactory = cfc.getClassFactory();
 
             String              toolClassName = findToolClassName( toolName, optionalArgs );            
             OptionalTool    tool = null;
