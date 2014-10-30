@@ -683,6 +683,27 @@
      />
   </target>
 
+  <!-- Run the RefreshJarDriftTest -->
+  <target name="refreshjardriftcheck">
+    <java   
+       fork="true" 
+       classname="org.apache.derbyBuild.JarDriftTest"
+       failonerror="true"
+       classpath="${out.dir}">
+      <arg value="refresh"/>
+    </java>
+  </target>
+
+  <!-- Run the JarDriftTest -->
+  <target name="jardriftcheck">
+    <java   
+       fork="true" 
+       classname="org.apache.derbyBuild.JarDriftTest"
+       failonerror="true"
+       classpath="${out.dir}"
+     />
+  </target>
+
 <!-- ==================================================================== -->
 <!--                     Build SanityState.java                           -->
 <!-- ==================================================================== -->
@@ -1396,7 +1417,7 @@
 
   <target
       name="buildjars"
-      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyoptionaltoolsjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"
+      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyoptionaltoolsjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar,jardriftcheck"
       description="Build all of the Derby jar files."
   />
 
