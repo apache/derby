@@ -29,6 +29,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.store.raw.ContainerHandle;
+import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -319,6 +321,76 @@ public final class UpdateOperation extends PhysicalPageOperation {
 	{
 		undoMe(xact, undoPage, CLRInstant, in);
 	}
+
+    /**
+     * return RecordHandle of the update row.
+     * <p>
+     * Return the RecordHandle that should be locked when updating the
+     * row in this UpdateOperation.
+     * <p>
+     **/
+	private RecordHandle getRecordHandle()
+	{
+		return new RecordId(getPageId(), recordId);
+	}
+
+    /**************************************************************************
+     * Public Methods of RePreparable Interface:
+     **************************************************************************
+     */
+
+    /**
+     * reclaim locks associated with the changes in this log record.
+     * <p>
+	 * @param locking_policy  The locking policy to use to claim the locks.
+     * 
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    public void reclaimPrepareLocks(
+    Transaction     t,
+    LockingPolicy   locking_policy)
+		throws StandardException
+    {
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.DEBUG_PRINT(
+                "", "UpdateOperation.reclaimPrepareLocks().");
+
+            SanityManager.ASSERT(getRecordHandle() != null);
+        }
+
+        ContainerHandle ch = t.openContainer(
+            getPageId().getContainerId(), locking_policy, 
+            (ContainerHandle.MODE_FORUPDATE          | 
+             ContainerHandle.MODE_OPEN_FOR_LOCK_ONLY | 
+             ContainerHandle.MODE_LOCK_NOWAIT));
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(ch != null);
+        }
+
+        if (ch != null)
+            ch.close();
+
+        // get the row lock on the updated row.
+        boolean lock_granted = 
+            locking_policy.lockRecordForWrite(
+                t, 
+                getRecordHandle(), 
+                false,          // default is not for insert. 
+                false);         // don't wait for the lock, it is bug if a 
+                                // lock has to wait while reclaiming locks 
+                                // during recovery.
+
+        releaseResource(t);
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(lock_granted);
+        }
+    }
 
 
 	public String toString()

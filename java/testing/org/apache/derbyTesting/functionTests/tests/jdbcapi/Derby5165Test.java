@@ -72,7 +72,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
             "Derby5165Test cannot run without XA support");
     }
     
-    public void xtestXAUpdateLockKeptPastDBRestart()
+    public void testXAUpdateLockKeptPastDBRestart()
             throws InterruptedException, SQLException, XAException {
         if (usingDerbyNetClient())
             return;
@@ -214,7 +214,7 @@ public class Derby5165Test extends BaseJDBCTestCase {
         xac.close();
     }
     
-    public void xtestXAUpdateLockKeptPastCrashedDBRestart() throws Exception
+    public void testXAUpdateLockKeptPastCrashedDBRestart() throws Exception
     {
         // call a forked process - this one will do something,
         // then *not* shutdown, but not doing anything else either,
