@@ -81,21 +81,22 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             clientSSLMode_ == BasicClientDataSource40.SSL_PEER_AUTHENTICATION){
         	//DERBY-6764(analyze impact of poodle security alert on Derby 
         	// client - server ssl support)
-        	//If SSLv3 or SSLv2Hello is one of the enabled protocols, then 
-        	// we want to remove it from the list of enabled protocols  
+        	//If SSLv3 and/or SSLv2Hello is one of the enabled protocols,  
+        	// then we want to remove it from the list of enabled protocols  
         	// because of poodle security breach
         	SSLSocket sSocket = (SSLSocket)sf.createSocket(server_, port_);
         	String[] enabledProtocols = sSocket.getEnabledProtocols();
 
-            //If SSLv3 is one of the enabled protocols, then remove it from the
-            // list of enabled protocols because of its security breach.
+            //If SSLv3 and/or SSLv2Hello is one of the enabled protocols, 
+            // then remove it from the list of enabled protocols because of 
+            // its security breach.
             String[] removeTwoProtocols = new String[enabledProtocols.length];
             int removedProtocolsCount  = 0;
             boolean foundProtocolToRemove=false;
             for ( int i = 0; i < enabledProtocols.length; i++ )
             {
                 if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
-                    enabledProtocols[i].toUpperCase().contains("SSLv2Hello")) {
+                    enabledProtocols[i].toUpperCase().contains("SSLV2HELLO")) {
                 	foundProtocolToRemove=true;
                 } else {
                 	removeTwoProtocols[removedProtocolsCount] = 
@@ -105,13 +106,14 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             }
             if(foundProtocolToRemove) {
             	String[] newEnabledProtocolsList = null;
-            	//We found that SSLv3 is one of the enabled protocols for this
-            	// jvm. Following code will remove it from enabled list.
+            	//We found that SSLv3 and or SSLv2Hello is one of the enabled 
+            	// protocols for this jvm. Following code will remove it from 
+            	// enabled list.
             	newEnabledProtocolsList = 
             			new String[(removeTwoProtocols.length)-1];
             	System.arraycopy(removeTwoProtocols, 0, 
             			newEnabledProtocolsList, 0, 
-            			(removeTwoProtocols.length)-1);
+            			removedProtocolsCount);
             	sSocket.setEnabledProtocols(newEnabledProtocolsList);
             }
             return sSocket;

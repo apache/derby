@@ -2715,7 +2715,7 @@ public final class NetworkServerControlImpl {
         for ( int i = 0; i < enabledProtocols.length; i++ )
         {
             if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
-            	enabledProtocols[i].toUpperCase().contains("SSLv2Hello")) {
+            	enabledProtocols[i].toUpperCase().contains("SSLV2HELLO")) {
             	foundProtocolToRemove=true;
             } else {
             	removeTwoProtocols[removedProtocolsCount] = enabledProtocols[i];
@@ -2731,7 +2731,7 @@ public final class NetworkServerControlImpl {
                 new String[(removeTwoProtocols.length)-1];
             System.arraycopy(removeTwoProtocols, 0, 
                 newEnabledProtocolsList, 0, 
-                (removeTwoProtocols.length)-1);
+                removedProtocolsCount);
             return(newEnabledProtocolsList);
         } else 
             return(enabledProtocols);
