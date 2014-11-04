@@ -724,9 +724,17 @@ public final class NetworkServerControlImpl {
         case SSL_BASIC:
             SSLServerSocketFactory ssf =
                 (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
-            return (SSLServerSocket)ssf.createServerSocket(portNumber,
-                                                           0,
-                                                           hostAddress);
+            SSLServerSocket sss1= 
+                    (SSLServerSocket)ssf.createServerSocket(portNumber,
+                    0,
+                    hostAddress);
+            //DERBY-6764(analyze impact of poodle security alert on 
+            // Derby client - server ssl support)
+            String[] removeTwoProtocols = 
+            		removeSSLv3andSSLv2Hello(
+                            sss1.getEnabledProtocols());
+            sss1.setEnabledProtocols(removeTwoProtocols);
+            return sss1;
         case SSL_PEER_AUTHENTICATION:
             SSLServerSocketFactory ssf2 =
                 (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
@@ -734,6 +742,12 @@ public final class NetworkServerControlImpl {
                 (SSLServerSocket)ssf2.createServerSocket(portNumber,
                                                          0,
                                                          hostAddress);
+            //DERBY-6764(analyze impact of poodle security alert on 
+            // Derby client - server ssl support)
+            removeTwoProtocols = 
+            		removeSSLv3andSSLv2Hello(
+                            sss2.getEnabledProtocols());
+            sss2.setEnabledProtocols(removeTwoProtocols);
             sss2.setNeedClientAuth(true);
             return sss2;
         }
@@ -2628,6 +2642,12 @@ public final class NetworkServerControlImpl {
                                         case SSL_BASIC:
                                             SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
                                                 createSocket(hostAddress, portNumber);
+                                            //DERBY-6764(analyze impact of poodle security alert on 
+                                            // Derby client - server ssl support)
+                                            String[] removeTwoProtocols = 
+                                            		removeSSLv3andSSLv2Hello(s1.getEnabledProtocols());
+                                            s1.setEnabledProtocols(
+                                            		removeTwoProtocols);
                                             // Need to handshake now to get proper error reporting.
                                             s1.startHandshake();
                                             return s1;
@@ -2635,6 +2655,12 @@ public final class NetworkServerControlImpl {
                                         case SSL_PEER_AUTHENTICATION:
                                             SSLSocket s2 = (SSLSocket)SSLSocketFactory.getDefault().
                                                 createSocket(hostAddress, portNumber);
+                                            //DERBY-6764(analyze impact of poodle security alert on 
+                                            // Derby client - server ssl support)
+                                            removeTwoProtocols = 
+                                            		removeSSLv3andSSLv2Hello(s2.getEnabledProtocols());
+                                            s2.setEnabledProtocols(
+                                            		removeTwoProtocols);
                                             // Need to handshake now to get proper error reporting.
                                             s2.startHandshake();
                                             return s2;
@@ -2676,7 +2702,41 @@ public final class NetworkServerControlImpl {
         }
     }
 
-    
+    //DERBY-6764(analyze impact of poodle security alert on 
+    // Derby client - server ssl support)
+    //Remove SSLv3 and SSLv2Hello protocols from list of enabled protocols
+    private String[] removeSSLv3andSSLv2Hello(String[] enabledProtocols) {
+        //If SSLv3 and SSLv2Hello are one of the enabled protocols, then 
+        // remove them from the list of enabled protocols because of the 
+        // possible security breach.
+        String[] removeTwoProtocols = new String[enabledProtocols.length];
+        int removedProtocolsCount  = 0;
+        boolean foundProtocolToRemove=false;
+        for ( int i = 0; i < enabledProtocols.length; i++ )
+        {
+            if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
+            	enabledProtocols[i].toUpperCase().contains("SSLv2Hello")) {
+            	foundProtocolToRemove=true;
+            } else {
+            	removeTwoProtocols[removedProtocolsCount] = enabledProtocols[i];
+            	removedProtocolsCount++;
+            }
+        }
+        String[] newEnabledProtocolsList = null;
+        if(foundProtocolToRemove) {
+            //We found SSLv3 and/or SSLv2Hello as one of the enabled 
+            // protocols for this jvm. Following code will remove them from 
+            // enabled list.
+            newEnabledProtocolsList = 
+                new String[(removeTwoProtocols.length)-1];
+            System.arraycopy(removeTwoProtocols, 0, 
+                newEnabledProtocolsList, 0, 
+                (removeTwoProtocols.length)-1);
+            return(newEnabledProtocolsList);
+        } else 
+            return(enabledProtocols);
+    }
+
     private void checkAddressIsLocal(InetAddress inetAddr) throws UnknownHostException,Exception
     {
         if (localAddresses.contains(inetAddr)) {

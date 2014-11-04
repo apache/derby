@@ -22,6 +22,7 @@
 package org.apache.derby.client.net;
 
 import java.io.IOException;
+
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
@@ -32,6 +33,7 @@ import java.security.PrivilegedExceptionAction;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import org.apache.derby.jdbc.BasicClientDataSource40;
 
@@ -75,7 +77,46 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             sf = SocketFactory.getDefault();
             break;
         }
-        return sf.createSocket(server_, port_);
+        if (clientSSLMode_ == BasicClientDataSource40.SSL_BASIC ||
+            clientSSLMode_ == BasicClientDataSource40.SSL_PEER_AUTHENTICATION){
+        	//DERBY-6764(analyze impact of poodle security alert on Derby 
+        	// client - server ssl support)
+        	//If SSLv3 or SSLv2Hello is one of the enabled protocols, then 
+        	// we want to remove it from the list of enabled protocols  
+        	// because of poodle security breach
+        	SSLSocket sSocket = (SSLSocket)sf.createSocket(server_, port_);
+        	String[] enabledProtocols = sSocket.getEnabledProtocols();
+
+            //If SSLv3 is one of the enabled protocols, then remove it from the
+            // list of enabled protocols because of its security breach.
+            String[] removeTwoProtocols = new String[enabledProtocols.length];
+            int removedProtocolsCount  = 0;
+            boolean foundProtocolToRemove=false;
+            for ( int i = 0; i < enabledProtocols.length; i++ )
+            {
+                if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
+                    enabledProtocols[i].toUpperCase().contains("SSLv2Hello")) {
+                	foundProtocolToRemove=true;
+                } else {
+                	removeTwoProtocols[removedProtocolsCount] = 
+                			enabledProtocols[i];
+                	removedProtocolsCount++;
+                }
+            }
+            if(foundProtocolToRemove) {
+            	String[] newEnabledProtocolsList = null;
+            	//We found that SSLv3 is one of the enabled protocols for this
+            	// jvm. Following code will remove it from enabled list.
+            	newEnabledProtocolsList = 
+            			new String[(removeTwoProtocols.length)-1];
+            	System.arraycopy(removeTwoProtocols, 0, 
+            			newEnabledProtocolsList, 0, 
+            			(removeTwoProtocols.length)-1);
+            	sSocket.setEnabledProtocols(newEnabledProtocolsList);
+            }
+            return sSocket;
+        } else
+            return sf.createSocket(server_, port_);
     }
 
 }

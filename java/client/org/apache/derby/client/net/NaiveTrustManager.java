@@ -73,7 +73,7 @@ class NaiveTrustManager
             thisManager = new TrustManager [] {new NaiveTrustManager()};
         }
 
-        SSLContext ctx = SSLContext.getInstance("SSL");
+        SSLContext ctx = SSLContext.getInstance("TLS");
         
         if (ctx.getProvider().getName().equals("SunJSSE") &&
             (System.getProperty("javax.net.ssl.keyStore") != null) &&
