@@ -2709,29 +2709,26 @@ public final class NetworkServerControlImpl {
         //If SSLv3 and SSLv2Hello are one of the enabled protocols, then 
         // remove them from the list of enabled protocols because of the 
         // possible security breach.
-        String[] removeTwoProtocols = new String[enabledProtocols.length];
-        int removedProtocolsCount  = 0;
-        boolean foundProtocolToRemove=false;
+        String[] supportedProtocols = new String[enabledProtocols.length];
+        int supportedProtocolsCount  = 0;
         for ( int i = 0; i < enabledProtocols.length; i++ )
         {
-            if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
-            	enabledProtocols[i].toUpperCase().contains("SSLV2HELLO")) {
-            	foundProtocolToRemove=true;
-            } else {
-            	removeTwoProtocols[removedProtocolsCount] = enabledProtocols[i];
-            	removedProtocolsCount++;
+            if (!(enabledProtocols[i].toUpperCase().contains("SSLV3") ||
+            	enabledProtocols[i].toUpperCase().contains("SSLV2HELLO"))) {
+            	supportedProtocols[supportedProtocolsCount] = enabledProtocols[i];
+            	supportedProtocolsCount++;
             }
         }
-        String[] newEnabledProtocolsList = null;
-        if(foundProtocolToRemove) {
+        if(supportedProtocolsCount < enabledProtocols.length) {
             //We found SSLv3 and/or SSLv2Hello as one of the enabled 
             // protocols for this jvm. Following code will remove them from 
             // enabled list.
+            String[] newEnabledProtocolsList = null;
             newEnabledProtocolsList = 
-                new String[(removeTwoProtocols.length)-1];
-            System.arraycopy(removeTwoProtocols, 0, 
+                new String[supportedProtocolsCount];
+            System.arraycopy(supportedProtocols, 0, 
                 newEnabledProtocolsList, 0, 
-                removedProtocolsCount);
+                supportedProtocolsCount);
             return(newEnabledProtocolsList);
         } else 
             return(enabledProtocols);

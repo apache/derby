@@ -90,30 +90,27 @@ class OpenSocketAction implements PrivilegedExceptionAction<Socket> {
             //If SSLv3 and/or SSLv2Hello is one of the enabled protocols, 
             // then remove it from the list of enabled protocols because of 
             // its security breach.
-            String[] removeTwoProtocols = new String[enabledProtocols.length];
-            int removedProtocolsCount  = 0;
-            boolean foundProtocolToRemove=false;
+            String[] supportedProtocols = new String[enabledProtocols.length];
+            int supportedProtocolsCount  = 0;
             for ( int i = 0; i < enabledProtocols.length; i++ )
             {
-                if (enabledProtocols[i].toUpperCase().contains("SSLV3") ||
-                    enabledProtocols[i].toUpperCase().contains("SSLV2HELLO")) {
-                	foundProtocolToRemove=true;
-                } else {
-                	removeTwoProtocols[removedProtocolsCount] = 
+                if (!(enabledProtocols[i].toUpperCase().contains("SSLV3") ||
+                    enabledProtocols[i].toUpperCase().contains("SSLV2HELLO"))) {
+                	supportedProtocols[supportedProtocolsCount] = 
                 			enabledProtocols[i];
-                	removedProtocolsCount++;
+                	supportedProtocolsCount++;
                 }
             }
-            if(foundProtocolToRemove) {
+            if(supportedProtocolsCount < enabledProtocols.length) {
             	String[] newEnabledProtocolsList = null;
             	//We found that SSLv3 and or SSLv2Hello is one of the enabled 
             	// protocols for this jvm. Following code will remove it from 
             	// enabled list.
             	newEnabledProtocolsList = 
-            			new String[(removeTwoProtocols.length)-1];
-            	System.arraycopy(removeTwoProtocols, 0, 
+            			new String[supportedProtocolsCount];
+            	System.arraycopy(supportedProtocols, 0, 
             			newEnabledProtocolsList, 0, 
-            			removedProtocolsCount);
+            			supportedProtocolsCount);
             	sSocket.setEnabledProtocols(newEnabledProtocolsList);
             }
             return sSocket;
