@@ -48,6 +48,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -117,11 +118,10 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 suite.addTest(new DatabaseClassLoadingTest(orderedTests[i]));
             }
        
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testDatabaseInJar"))); 
+           suite.addTest(new DatabaseClassLoadingTest("testDatabaseInJar"));
 
-           suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testDatabaseInClasspath")));
+           suite.addTest(
+                   new DatabaseClassLoadingTest("testDatabaseInClasspath"));
            
            // No security manager because the test uses getClass().getClassLoader()
            // in an installed jar to ensure that the class loader for
@@ -635,7 +635,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     public void testDatabaseInJar() throws SQLException
     {
         File jarFile = SupportFilesSetup.getReadOnly("dclt.jar");
-        String dbName = "jar:(" + jarFile.getAbsolutePath() + ")dbro";
+        String dbName = "jar:(" + 
+            PrivilegedFileOpsForTests.getAbsolutePath(jarFile) + ")dbro";
+
         
         DataSource ds = JDBCDataSource.getDataSource(dbName);
         

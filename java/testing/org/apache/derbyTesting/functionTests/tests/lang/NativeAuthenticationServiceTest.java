@@ -36,7 +36,6 @@ import org.apache.derbyTesting.junit.ClasspathSetup;
 import org.apache.derbyTesting.junit.DatabaseChangeSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -71,9 +70,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     
     private static  final   boolean DISABLE_AUTHORIZATION = true;
     private static  final   boolean DONT_DISABLE_AUTH = false;
-    
-    private static  final   boolean DISABLE_JAVA_SECURITY = true;
-    private static  final   boolean ENABLE_JAVA_SECURITY = false;
     
     // fruits are legal users. nuts are not
     private static  final   String  DBO = "KIWI";   
@@ -157,7 +153,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private final   boolean _nativeAuthentication;
     private final   boolean _localAuthentication;
     private final   boolean _turnOffAuthenticationAndAuthorization;
-    private final   boolean _disableSecurityManager;
 
     private String  _credentialsDBPhysicalName;
 
@@ -183,8 +178,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
          int            credentialsDBLocation,
          boolean    nativeAuthentication,
          boolean    localAuthentication,
-         boolean    turnOffAuthenticationAndAuthorization,
-         boolean    disableSecurityManager
+         boolean    turnOffAuthenticationAndAuthorization
          )
     {
         super( "testAll" );
@@ -193,7 +187,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         _nativeAuthentication = nativeAuthentication;
         _localAuthentication = localAuthentication;
         _turnOffAuthenticationAndAuthorization = turnOffAuthenticationAndAuthorization;
-        _disableSecurityManager = disableSecurityManager;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -328,14 +321,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         String  authOverrides = _turnOffAuthenticationAndAuthorization ?
             "Authentication/Authorization turned OFF, " :
             "Authentication/Authorization DEFAULT, ";
-        String  securityManager = _disableSecurityManager ?
-            "SecurityManager OFF, " :
-            "SecurityManager ON, ";
         String  embedded = isEmbedded() ?
             "Embedded" :
             "Client/Server";
 
-        return "[ " + dbLocation + authType + local + authOverrides + securityManager + embedded + " ]";
+        return "[ " + dbLocation + authType + local + authOverrides + embedded + " ]";
     }
 
     /** Return true if the test is running embedded */
@@ -367,7 +357,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
-                  ( JAR_ENCRYPTED, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ( JAR_ENCRYPTED, NATIVE, LOCAL, DONT_DISABLE_AUTH )
                   ).decorate( false )
                  );
         }
@@ -401,7 +391,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
-              ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH )
               ).decorate( clientServer )
              );
 
@@ -412,14 +402,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
-              ( FILE, NATIVE, LOCAL, DISABLE_AUTHORIZATION, ENABLE_JAVA_SECURITY )
+              ( FILE, NATIVE, LOCAL, DISABLE_AUTHORIZATION )
               ).decorate( clientServer )
              );
         suite.addTest
             (
              (
               new NativeAuthenticationServiceTest
-              ( FILE, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ( FILE, NATIVE, LOCAL, DONT_DISABLE_AUTH )
               ).decorate( clientServer )
              );
 
@@ -430,14 +420,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             (
              (
               new NativeAuthenticationServiceTest
-              ( FILE, NATIVE, SYSTEM_WIDE, DISABLE_AUTHORIZATION, ENABLE_JAVA_SECURITY )
+              ( FILE, NATIVE, SYSTEM_WIDE, DISABLE_AUTHORIZATION )
               ).decorate( clientServer )
              );
         suite.addTest
             (
              (
               new NativeAuthenticationServiceTest
-              ( FILE, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ( FILE, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH )
               ).decorate( clientServer )
              );
         
@@ -453,14 +443,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
-                  ( JAR, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ( JAR, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
             suite.addTest
                 (
                  (
                   new NativeAuthenticationServiceTest
-                  ( JAR, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ( JAR, NATIVE, LOCAL, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
 
@@ -471,14 +461,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
                 (
                  (
                   new NativeAuthenticationServiceTest
-                  ( CLASSPATH, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
+                  ( CLASSPATH, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
             suite.addTest
                 (
                  (
                   new NativeAuthenticationServiceTest
-                  ( CLASSPATH, NATIVE, LOCAL, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
+                  ( CLASSPATH, NATIVE, LOCAL, DONT_DISABLE_AUTH )
                   ).decorate( clientServer )
                  );
         }   // end if !onWindows()
@@ -498,8 +488,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         String      credentialsDBPhysicalName = TestConfiguration.generateUniqueDatabaseName();
         
         Test        result = this;
-
-        if ( _disableSecurityManager ) { result = SecurityManagerSetup.noSecurityManager( result ); }
 
         //
         // Putting the clientServer decorator on the inside allows the server-side
@@ -876,11 +864,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             // database accessed via jar subprotocol
             vetProtocol( jarDBName( _credentialsDBLocation ) );
         
-            //
-            // We only use the classpath subprotocol if we are not running under a security manager.
-            // We may be able to remove that restriction after DERBY-5615 is fixed.
-            //
-            if ( _disableSecurityManager ) { vetProtocol( classpathDBName() ); }
+            // database accessed via classpath subprotocol
+            vetProtocol( classpathDBName() );
         }
         
         ///////////////////////////////////////////////////////////////////////////////////

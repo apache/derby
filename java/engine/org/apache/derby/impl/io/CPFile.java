@@ -23,10 +23,16 @@ package org.apache.derby.impl.io;
 
 import org.apache.derby.io.StorageFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.sql.SQLException;
 
 /**
  * This class provides a class path based implementation of the StorageFile interface. It is used by the
@@ -90,30 +96,32 @@ class CPFile extends InputStreamFile
      */
     public InputStream getInputStream( ) throws FileNotFoundException
     {
-    	//System.out.println("HERE FOR " + toString());
-    	InputStream is = null;
-    	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-    	if (cl != null)
-    		is = cl.getResourceAsStream(path);
-    	
-       	// don't assume the context class loader is tied
-    	// into the class loader that loaded this class.
-    	if (is == null)
-    	{
-    		cl = getClass().getClassLoader();
-    		// Javadoc indicates implementations can use
-    		// null as a return from Class.getClassLoader()
-    		// to indicate the system/bootstrap classloader.
-    		if (cl != null)
-    			is = cl.getResourceAsStream(path);
-    		else
-    			is = ClassLoader.getSystemResourceAsStream(path);
-    	}
-    	
-    	if (is == null)
-    		throw new FileNotFoundException(toString());
-    	return is;
-    	
+        InputStream is = null;
+        ClassLoader cl = getContextClassLoader(Thread.currentThread());
+        if (cl != null) {
+            is = getResourceAsStream(cl, path);
+        }
+
+        // don't assume the context class loader is tied
+        // into the class loader that loaded this class.
+        if (is == null) {
+            cl = getClass().getClassLoader();
+            // Javadoc indicates implementations can use
+            // null as a return from Class.getClassLoader()
+            // to indicate the system/bootstrap classloader.
+            if (cl != null) {
+                is = getResourceAsStream(cl, path);
+            } else {
+                is = getSystemResourceAsStream(path);
+            }
+        }
+
+        if (is == null) {
+            throw new FileNotFoundException(toString());
+        }
+
+        return is;
+
     } // end of getInputStream
     
 	/**
@@ -123,10 +131,10 @@ class CPFile extends InputStreamFile
      */
     public URL getURL() {
 
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        ClassLoader cl = getContextClassLoader(Thread.currentThread());
         URL myURL;
         if (cl != null) {
-            myURL = cl.getResource(path);
+            myURL = getResource(cl, path);
             if (myURL != null)
                 return myURL;
         }
@@ -138,9 +146,71 @@ class CPFile extends InputStreamFile
         // null as a return from Class.getClassLoader()
         // to indicate the system/bootstrap classloader.
         if (cl != null) {
-            return cl.getResource(path);
+            return getResource(cl, path);
         } else {
-            return ClassLoader.getSystemResource(path);
+            return getSystemResource(path);
         }
+    }
+
+    /** Privileged wrapper for {@code Thread.getContextClassLoader()}. */
+    private static ClassLoader getContextClassLoader(final Thread thread) {
+    	ClassLoader classLoader = (ClassLoader) AccessController.doPrivileged(
+                new PrivilegedAction() {
+              public Object run() {
+                  return thread.getContextClassLoader();
+              }
+          });
+          return classLoader;
+    }
+
+    /** Privileged wrapper for {@code ClassLoader.getResource(String)}. */
+    private static URL getResource(
+            final ClassLoader cl, final String name) {
+    	URL url = (URL) AccessController.doPrivileged(
+                new PrivilegedAction() {
+              public Object run() {
+            	  return cl.getResource(name);
+              }
+          });
+          return url;
+    }
+
+    /** Privileged wrapper for {@code ClassLoader.getSystemResource(String)}. */
+    private static URL getSystemResource(final String name) {
+    	URL url = (URL) AccessController.doPrivileged(
+                new PrivilegedAction() {
+              public Object run() {
+            	  return ClassLoader.getSystemResource(name);
+              }
+          });
+          return url;
+    }
+
+    /**
+     * Privileged wrapper for {@code ClassLoader.getResourceAsStream(String)}.
+     */
+    private static InputStream getResourceAsStream(
+            final ClassLoader cl, final String name) {
+        InputStream is = (InputStream) AccessController.doPrivileged(
+                new PrivilegedAction() {
+              public Object run() {
+            	  return cl.getResourceAsStream(name);
+              }
+          });
+          return is;
+    }
+
+    /**
+     * Privileged wrapper for
+     * {@code ClassLoader.getSystemResourceAsStream(String)}.
+     */
+    private static InputStream getSystemResourceAsStream(final String name) {
+        InputStream is = (InputStream) AccessController.doPrivileged(
+                new PrivilegedAction() {
+              public Object run() {
+            	  return ClassLoader.getSystemResourceAsStream(name);
+              }
+          });
+          return is;
     }
 }
