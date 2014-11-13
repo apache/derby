@@ -1070,7 +1070,7 @@ public class JoinNode extends TableOperatorNode
 				 * to joinClause.preprocess() because we know that no
 				 * flattening will take place. (Bug #1206)
 				 */
-				joinClause.preprocess(
+                joinClause = joinClause.preprocess(
 								numTables,
 								(FromList) getNodeFactory().getNode(
 									C_NodeTypes.FROM_LIST,
