@@ -100,9 +100,13 @@ public class JarDriftTest {
             e.printStackTrace();
         }
         if (failbuild) 
-            throw new Exception("jar drift check failed. \n" +
+            throw new Exception(
+                "\njar drift check failed; see DERBY-6471 for info. \n" +
                 "See error in build output or call ant jardriftcheck. \n" +
-                "If the new class is expected run ant refreshjardriftcheck.\n");
+                "If the new class is expected run ant refreshjardriftcheck.\n"+
+                "NB: Run the refresh for both sane and insane builds. \n" +
+                "    Use the highest supported JVM (currently Java 8) \n " +
+                "    to ensure all classes are built.\n");
     }    
 
     protected void loadJarContents(String jarName)
