@@ -52,7 +52,6 @@ org.apache.derbyTesting.functionTests.harness.shutdown.class
 org.apache.derbyTesting.functionTests.suites.All.class
 org.apache.derbyTesting.functionTests.suites.AllPackages.class
 org.apache.derbyTesting.functionTests.suites.EncryptionSuite.class
-org.apache.derbyTesting.functionTests.suites.TempSuite.class
 org.apache.derbyTesting.functionTests.suites.XMLSuite.class
 org.apache.derbyTesting.functionTests.testData.serializedDataSources.SerializeDataSources.class
 org.apache.derbyTesting.functionTests.tests.compatibility.AbstractCompatibilityTest.class
@@ -103,7 +102,6 @@ org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class
 org.apache.derbyTesting.functionTests.tests.derbynet.dblook_test_net.class
 org.apache.derbyTesting.functionTests.tests.derbynet.dblook_test_net_territory.class
 org.apache.derbyTesting.functionTests.tests.derbynet.executeUpdate.class
-org.apache.derbyTesting.functionTests.tests.engine.Derby6352Test.class
 org.apache.derbyTesting.functionTests.tests.engine.Derby6396Test.class
 org.apache.derbyTesting.functionTests.tests.engine.ErrorStreamTest.class
 org.apache.derbyTesting.functionTests.tests.engine.LockInterruptTest.class
@@ -198,7 +196,6 @@ org.apache.derbyTesting.functionTests.tests.jdbcapi.DaylightSavingTest.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.DboPowersTest.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby2017LayerATest.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby5158Test.class
-org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby5165CrashTest.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby5165Test.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.DriverMgrAuthenticationTest.class
 org.apache.derbyTesting.functionTests.tests.jdbcapi.DriverTest.class
@@ -473,10 +470,8 @@ org.apache.derbyTesting.functionTests.tests.lang.XMLConcurrencyTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLMissingClassesTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLOptimizerTraceTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest.class
-org.apache.derbyTesting.functionTests.tests.lang.XPatherror_repro.class
 org.apache.derbyTesting.functionTests.tests.lang.XplainStatisticsTest.class
 org.apache.derbyTesting.functionTests.tests.lang._Suite.class
-org.apache.derbyTesting.functionTests.tests.lang.bbb.class
 org.apache.derbyTesting.functionTests.tests.lang.concateTests.class
 org.apache.derbyTesting.functionTests.tests.lang.dbManagerLimits.class
 org.apache.derbyTesting.functionTests.tests.lang.dbjarUtil.class
@@ -620,7 +615,6 @@ org.apache.derbyTesting.functionTests.tests.store.Derby4676Test.class
 org.apache.derbyTesting.functionTests.tests.store.Derby4923Test.class
 org.apache.derbyTesting.functionTests.tests.store.Derby5234Test.class
 org.apache.derbyTesting.functionTests.tests.store.Derby5582AutomaticIndexStatisticsTest.class
-org.apache.derbyTesting.functionTests.tests.store.Derby6504Test.class
 org.apache.derbyTesting.functionTests.tests.store.EncryptDatabaseTest.class
 org.apache.derbyTesting.functionTests.tests.store.EncryptionAESTest.class
 org.apache.derbyTesting.functionTests.tests.store.EncryptionKeyAESTest.class
@@ -643,7 +637,6 @@ org.apache.derbyTesting.functionTests.tests.store.LongColumnTest.class
 org.apache.derbyTesting.functionTests.tests.store.MadhareTest.class
 org.apache.derbyTesting.functionTests.tests.store.MaxLogNumber.class
 org.apache.derbyTesting.functionTests.tests.store.MaxLogNumberRecovery.class
-org.apache.derbyTesting.functionTests.tests.store.MiscStoreTests.class
 org.apache.derbyTesting.functionTests.tests.store.OCRecoveryTest.class
 org.apache.derbyTesting.functionTests.tests.store.OSReadOnlyTest.class
 org.apache.derbyTesting.functionTests.tests.store.OfflineBackupTest.class
@@ -659,14 +652,12 @@ org.apache.derbyTesting.functionTests.tests.store.RowLockBasicTest.class
 org.apache.derbyTesting.functionTests.tests.store.ServicePropertiesFileTest.class
 org.apache.derbyTesting.functionTests.tests.store.SpaceTableTest.class
 org.apache.derbyTesting.functionTests.tests.store.StoreBaseTest.class
-org.apache.derbyTesting.functionTests.tests.store.StoreHarnessJavaTest.class
 org.apache.derbyTesting.functionTests.tests.store.StoreScriptsTest.class
 org.apache.derbyTesting.functionTests.tests.store.StreamingColumnTest.class
 org.apache.derbyTesting.functionTests.tests.store.TableLockBasicTest.class
 org.apache.derbyTesting.functionTests.tests.store.TestDiskHashtable.class
 org.apache.derbyTesting.functionTests.tests.store.TestDurabilityProperty.class
 org.apache.derbyTesting.functionTests.tests.store.TurnsReadOnly.class
-org.apache.derbyTesting.functionTests.tests.store.UpdateLocksJDBC30Test.class
 org.apache.derbyTesting.functionTests.tests.store.UpdateLocksTest.class
 org.apache.derbyTesting.functionTests.tests.store._Suite.class
 org.apache.derbyTesting.functionTests.tests.store.backupRestore1.class
@@ -683,7 +674,6 @@ org.apache.derbyTesting.functionTests.tests.storetests.st_reclaim_longcol.class
 org.apache.derbyTesting.functionTests.tests.tools.ConnectWrongSubprotocolTest.class
 org.apache.derbyTesting.functionTests.tests.tools.IJRunScriptTest.class
 org.apache.derbyTesting.functionTests.tests.tools.IjConnNameTest.class
-org.apache.derbyTesting.functionTests.tests.tools.IjConnNameWithWrongDriverTest.class
 org.apache.derbyTesting.functionTests.tests.tools.IjSecurityManagerTest.class
 org.apache.derbyTesting.functionTests.tests.tools.ImportExportBaseTest.class
 org.apache.derbyTesting.functionTests.tests.tools.ImportExportBinaryDataTest.class
