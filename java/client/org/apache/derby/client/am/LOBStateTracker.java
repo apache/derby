@@ -104,7 +104,9 @@ class LOBStateTracker {
      */
     void checkCurrentRow(Cursor cursor)
             throws SqlException {
-        if (this.doRelease) {
+        // If we are on a delete hole, there are no locators to release, and 
+        // trying to release them will cause an error. See DERBY-6228.
+        if (this.doRelease && !cursor.getIsUpdateDeleteHole()) {
             CallableLocatorProcedures procs = cursor.getLocatorProcedures();
             for (int i=0; i < this.columns.length; i++) {
                 // Note the conversion from 1-based to 0-based index when

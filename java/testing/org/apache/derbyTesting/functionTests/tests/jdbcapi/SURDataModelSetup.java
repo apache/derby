@@ -79,13 +79,14 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
         
         /** Populate with data */
         PreparedStatement ps = con.
-            prepareStatement("insert into t1 values (?,?,?,?)");
+            prepareStatement("insert into t1 values (?,?,?,?,?)");
         
         for (int i=0; i<records; i++) {
             ps.setInt(1, i);
             ps.setInt(2, i);
             ps.setInt(3, i*2 + 17);
             ps.setString(4, "Tuple " +i);
+            ps.setString(5, "C-tuple "+i);
             ps.addBatch();
         }
         ps.executeBatch();
@@ -204,8 +205,8 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
          */
         public String getCreateTableStatement() {
             return hasPrimaryKey() 
-                ? "create table t1 (id int primary key, a int, b int, c varchar(5000))"
-                : "create table t1 (id int, a int, b int, c varchar(5000))";
+                ? "create table t1 (id int primary key, a int, b int, c varchar(5000), d clob)"
+                : "create table t1 (id int, a int, b int, c varchar(5000), d clob)";
         }
 
         /**

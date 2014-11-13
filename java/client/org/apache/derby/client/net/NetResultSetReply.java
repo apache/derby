@@ -122,6 +122,10 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
                 }
 
                 peekCP = peekCodePoint();
+                if (peekCP == CodePoint.SQLCARD) {
+                    NetSqlca netSqlca = parseSQLCARD(((ResultSet) resultSetI).rowsetSqlca_);
+                    resultSetI.completeSqlca(netSqlca);
+                }
                 if (peekCP == CodePoint.RDBUPDRM) {
                     parseRDBUPDRM();
                     peekCP = peekCodePoint();

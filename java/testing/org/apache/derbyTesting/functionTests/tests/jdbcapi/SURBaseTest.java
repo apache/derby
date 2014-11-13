@@ -66,8 +66,8 @@ abstract public class SURBaseTest extends BaseJDBCTestCase {
         int b = rs.getInt(3);
         int sum = a + id + 17;
         println("Reading tuple:(" + id + "," + a  + "," + b + ",'" + 
-                rs.getString(4) + "')");
-        assertEquals("Expecting b==id+a+17", b, sum);
+                rs.getString(4) + "', '"+rs.getString(5)+"'");
+        assertEquals("Expecting b==id+a+17", sum, b);
     }
     
     /**

@@ -131,6 +131,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // and getter methods cannot be called.
     // Also, if a cursor is exhausted (+100), the cursor position is invalid.
     public boolean isValidCursorPosition_ = false;
+    private boolean savedIsValidCursorPosition_ = false;
 
     public boolean cursorHold_;
 
@@ -373,7 +374,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         // else
         //   fetch the next rowset from the server
         else {
-
             // These flags will only be used for dynamic cursors where we don't know the row count
             // and can't keep track of the absolute position of the cursor.
             isAfterLast_ = false;
@@ -3769,9 +3769,21 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 checkForUpdatableResultSet("moveToInsertRow");
 
                 resetUpdatedColumnsForInsert();
-
+                
+                // Note that even though we navigate "away" from the current row
+                // we do not clean up the current row (i.e. release locators), so
+                // locators will still be valid when returning to the current row.
+                // See DERBY-6228.
                 isOnInsertRow_ = true;
                 isOnCurrentRow_ = false;
+
+                // It is possible to navigate from a row for which 
+                // isValidCursorPosition_==false to the insert row. By
+                // saving the old value here we can restore it when leaving
+                // the insert row. This is important since attempting to 
+                // release locators for a non-valid cursor position will trigger 
+                // an error on the server. See DERBY-6228.
+                savedIsValidCursorPosition_ = isValidCursorPosition_;
                 isValidCursorPosition_ = true;
             }
         }
@@ -3814,7 +3826,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (currentRowInRowset_ > 0) {
                 updateColumnInfoFromCache();
             }
-            isValidCursorPosition_ = true;
+         // Restore the old value when leaving the insert row. See DERBY-6228.
+            isValidCursorPosition_ = savedIsValidCursorPosition_;
         }
         if (isValidCursorPosition_) {
             // isOnInsertRow must be false here.
@@ -5430,7 +5443,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
     private final int checkRowsetSqlca(int row) throws SqlException {
         int sqlcode = 0;
         if (!isRowsetCursor_ || rowsetSqlca_ == null || rowsetSqlca_[row] == null) {
-            warnings_ = null;    // clear any previous warnings
             return sqlcode;
         }
 
