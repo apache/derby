@@ -753,6 +753,25 @@ public final class NetworkServerControlImpl {
         }
     }
     
+    /*
+     * DERBY-6768(List the enabled protocols in derby.log for network 
+     *  server configuration)
+     * Get the enabled protocols so we can list them in the log file
+     */
+    private String getEnabledProtocols(SSLServerSocket sslServerSocket) {
+    	//Converting the String array of enabled protocols to a String
+    	StringBuffer sbf = new StringBuffer();
+        String[] enabledProtocols = sslServerSocket.getEnabledProtocols();
+        if(enabledProtocols.length > 0){
+               
+                sbf.append(enabledProtocols[0]);
+                for(int i=1; i < enabledProtocols.length; i++){
+                        sbf.append(", ").append(enabledProtocols[i]);
+                }
+               
+        }
+        return sbf.toString();
+    }
 
     /**
      * Start a network server
@@ -822,11 +841,17 @@ public final class NetworkServerControlImpl {
             break;
         case SSL_BASIC:
             consolePropertyMessage("DRDA_SSLReady.I", new String [] 
-                {Integer.toString(portNumber), att_srvclsnm, versionString});
+                    {Integer.toString(portNumber), att_srvclsnm, versionString});
+            consolePropertyMessage("DRDA_EnabledProtocols.I", new String [] 
+                    {getEnabledProtocols((SSLServerSocket) serverSocket), 
+            		att_srvclsnm, versionString});
             break;
         case SSL_PEER_AUTHENTICATION:
             consolePropertyMessage("DRDA_SSLClientAuthReady.I", new String [] 
                 {Integer.toString(portNumber), att_srvclsnm, versionString});
+            consolePropertyMessage("DRDA_EnabledProtocols.I", new String [] 
+                    {getEnabledProtocols((SSLServerSocket) serverSocket), 
+            		att_srvclsnm, versionString});
             break;
         }
 
@@ -1002,7 +1027,6 @@ public final class NetworkServerControlImpl {
             ex.printStackTrace();
         }
     }
-    
     //Print the passed exception on the console and ignore it after that
     private void consolePrintAndIgnore(String msgProp, 
             Exception e, boolean printTimeStamp) {
