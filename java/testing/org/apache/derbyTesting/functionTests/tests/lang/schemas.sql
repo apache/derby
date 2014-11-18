@@ -275,12 +275,12 @@ insert into sampletab values (2,'in schema: APP');
 
 -- verify it
 --
-select schemaname, tablename, descriptor as descr
+select schemaname, tablename, isindex as ind, descriptor as descr
 from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
 where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 	and s.schemaid = c.schemaid
 	and c.tableid = t.tableid
-order by schemaname, tablename;
+order by schemaname, tablename, isindex;
 
 -- select from both the tables
 select * from sampletab;

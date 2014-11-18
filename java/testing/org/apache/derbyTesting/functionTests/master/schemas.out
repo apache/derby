@@ -465,17 +465,17 @@ ij> insert into sampletab values (2,'in schema: APP');
 1 row inserted/updated/deleted
 ij> -- verify it
 --
-select schemaname, tablename, descriptor as descr
+select schemaname, tablename, isindex as ind, descriptor as descr
 from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
 where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 	and s.schemaid = c.schemaid
 	and c.tableid = t.tableid
-order by schemaname, tablename;
-SCHEMANAME                                                                                                                      |TABLENAME                                                                                                                       |DESCR          
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-APP                                                                                                                             |SAMPLETAB                                                                                                                       |NULL           
-TEST                                                                                                                            |SAMPLETAB                                                                                                                       |BTREE (1)      
-TEST                                                                                                                            |SAMPLETAB                                                                                                                       |NULL           
+order by schemaname, tablename, isindex;
+SCHEMANAME                                                                                                                      |TABLENAME                                                                                                                       |IND  |DESCR          
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |SAMPLETAB                                                                                                                       |false|NULL           
+TEST                                                                                                                            |SAMPLETAB                                                                                                                       |false|NULL           
+TEST                                                                                                                            |SAMPLETAB                                                                                                                       |true |BTREE (1)      
 ij> -- select from both the tables
 select * from sampletab;
 C1         |C2                  
