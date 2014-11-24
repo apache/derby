@@ -416,6 +416,7 @@ org.apache.derby.iapi.store.raw.RowLock.class
 org.apache.derby.iapi.store.raw.ScanHandle.class
 org.apache.derby.iapi.store.raw.StreamContainerHandle.class
 org.apache.derby.iapi.store.raw.Transaction.class
+org.apache.derby.iapi.store.raw.UndoHandler.class
 org.apache.derby.iapi.store.raw.Undoable.class
 org.apache.derby.iapi.store.raw.data.DataFactory.class
 org.apache.derby.iapi.store.raw.data.RawContainerHandle.class
@@ -1169,6 +1170,7 @@ org.apache.derby.impl.store.access.CacheableConglomerate.class
 org.apache.derby.impl.store.access.PC_XenaVersion.class
 org.apache.derby.impl.store.access.PropertyConglomerate.class
 org.apache.derby.impl.store.access.RAMAccessManager.class
+org.apache.derby.impl.store.access.RAMAccessUndoHandler.class
 org.apache.derby.impl.store.access.RAMTransaction.class
 org.apache.derby.impl.store.access.RAMTransactionContext.class
 org.apache.derby.impl.store.access.RllRAMAccessManager.class

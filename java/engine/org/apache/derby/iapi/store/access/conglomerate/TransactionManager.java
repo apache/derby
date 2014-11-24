@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.store.access.conglomerate;
 
+import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.SortController;
@@ -169,4 +170,20 @@ public interface TransactionManager extends TransactionController
      **/
     public Transaction getRawStoreXact()
         throws StandardException;
+
+    /**
+     * Return existing Conglomerate after doing lookup by ContainerKey
+     * <p>
+     * Throws exception if it can't find a matching conglomerate for the 
+     * ContainerKey.
+     * 
+     * @return If successful returns 
+     *
+     * @param container_key  container key of target conglomerate.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+	public Conglomerate findExistingConglomerateFromKey(
+    ContainerKey container_key)
+		throws StandardException;
 }

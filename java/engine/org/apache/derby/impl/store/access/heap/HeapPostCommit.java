@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.AccessFactory;
@@ -36,8 +37,10 @@ import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
+import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
@@ -74,9 +77,7 @@ class HeapPostCommit implements Serviceable
      */
 
     private AccessFactory access_factory  = null;
-    private Heap          heap            = null;
-    private long          page_number     = ContainerHandle.INVALID_PAGE_NUMBER;
-
+    private PageKey       page_key        = null;
 
     /**************************************************************************
      * Constructors for This class:
@@ -84,12 +85,10 @@ class HeapPostCommit implements Serviceable
      */
     HeapPostCommit(
     AccessFactory   access_factory,
-    Heap            heap,
-    long            input_page_number)
+    PageKey         page_key)
     {
         this.access_factory = access_factory; 
-        this.heap           = heap; 
-        this.page_number    = input_page_number; 
+        this.page_key       = page_key; 
     }
 
     /**************************************************************************
@@ -98,13 +97,13 @@ class HeapPostCommit implements Serviceable
      */
 
     /**
-     * Reclaim space taken up by committed deleted rows.
+     * Reclaim space taken of committed deleted rows or aborted inserted rows.
      * <p>
      * This routine assumes it has been called by an internal transaction which
      * has performed no work so far, and that it has an exclusive intent table 
-     * lock.  It will attempt obtain exclusive row locks on deleted rows, where
-     * successful those rows can be reclaimed as they must be "committed 
-     * deleted" rows.
+     * lock.  It will attempt obtain exclusive row locks on rows marked 
+     * deleted, where successful those rows can be reclaimed as they must be 
+     * "committed deleted" or "aborted inserted" rows.
      * <p>
      * This routine will latch the page and hold the latch due to interface
      * requirement from Page.purgeAtSlot.
@@ -127,6 +126,7 @@ class HeapPostCommit implements Serviceable
 
         // wait to get the latch on the page 
         Page page = heap_control.getUserPageWait(pageno);
+
         boolean purgingDone = false;
 
         if (page != null)
@@ -213,7 +213,8 @@ class HeapPostCommit implements Serviceable
                         {
                             SanityManager.DEBUG_PRINT(
                                 "HeapPostCommit", 
-                                "Calling Heap removePage().; pagenumber="+pageno+"\n");
+                                "Calling Heap removePage().; pagenumber=" +
+                                pageno + "\n");
                         }
                     }
                 }
@@ -328,6 +329,23 @@ class HeapPostCommit implements Serviceable
 			//If we can not get the lock this reclamation request will 
 			//requeued.
 
+            // if does not exist will throw exception, which the code will 
+            // handle in the same way as it does heap.open failing if trying 
+            // to open a dropped container.
+
+            Conglomerate conglom = 
+                internal_xact.findExistingConglomerateFromKey(
+                    page_key.getContainerId());
+
+            if (SanityManager.DEBUG)
+            {
+                // This code can only handle Heap conglomerates.
+                SanityManager.ASSERT(conglom instanceof Heap,
+                        "Code expecting PageKey/ContainerKey of a Heap");
+            }
+
+            Heap heap = (Heap) conglom;
+
             heapcontroller = (HeapController)
                 heap.open(
                     internal_xact,
@@ -346,19 +364,20 @@ class HeapPostCommit implements Serviceable
             // be reclaimed, once an "X" row lock is obtained on them.
 
             // Process all the rows on the page while holding the latch.
-            purgeCommittedDeletes(heapcontroller, this.page_number);
+            purgeCommittedDeletes(
+                heapcontroller, this.page_key.getPageNumber());
 
         }
         catch (StandardException se)
         {
             // exception might have occured either because the container got 
-            // dropper or the lock was not granted.
+            // dropped or the lock was not granted.
             // It is possible by the time this post commit work gets scheduled 
             // that the container has been dropped and that the open container 
             // call will return null - in this case just return assuming no 
             // work to be done.
 
-			// If this expcetion is because lock could not be obtained, 
+			// If this exception is because lock could not be obtained, 
             // work is requeued.
 			if (se.isLockTimeoutOrDeadlock())
 			{
@@ -388,11 +407,11 @@ class HeapPostCommit implements Serviceable
                 if (requeue_work)
                     SanityManager.DEBUG_PRINT(
                         "HeapPostCommit", 
-                        "requeueing on page num = " + page_number);
+                        "requeueing on page num = " + 
+                            this.page_key.getPageNumber());
             }
         }
 
         return(requeue_work ? Serviceable.REQUEUE : Serviceable.DONE);
     }
 }
-

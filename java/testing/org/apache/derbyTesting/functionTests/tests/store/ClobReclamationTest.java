@@ -145,6 +145,37 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, new String[][] { { "" + expectedFree } });
     }
 
+    private void checkNumFreePagesMax(
+    String  table, 
+    int     expectedFreeMax) throws SQLException {        
+
+        // Check the space table 
+        // Should not have grown.
+
+        PreparedStatement ps = 
+            prepareStatement(
+                  "SELECT NUMFREEPAGES FROM "
+                + " new org.apache.derby.diag.SpaceTable('APP',?) t"
+                + " WHERE CONGLOMERATENAME = ?");
+
+        ps.setString(1, table);
+        ps.setString(2, table);
+        ResultSet rs = ps.executeQuery();
+
+        // get 1 row, it has the num free page count and make sure it is
+        // lower than the passed in maximum.
+        rs.next();
+
+        int numfreerows = rs.getInt(1);
+
+        assertTrue(
+            "Fail -- numfreerows:" + numfreerows + 
+            " > expectedFreeMax: " + expectedFreeMax, 
+            numfreerows < expectedFreeMax); 
+        rs.close();
+        ps.close();
+    }
+
     private static void fiveHundredUpdates(Connection conn,
             String updateString, int key, boolean lockTable) throws SQLException {
         PreparedStatement ps = conn
@@ -199,7 +230,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void xtestReclamationOnRollback() throws SQLException {
+    public void testReclamationOnRollback() throws SQLException {
         setAutoCommit(false);
         String insertString = Formatters.repeatChar("a", 33000);
         PreparedStatement ps = prepareStatement("INSERT INTO CLOBTAB2 VALUES(?,?)");
@@ -243,8 +274,14 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         ps.close();
 
         // until DERBY-4057 fixed expect space to be 2 pages per row plus
-        // 1 head page per container.
-        checkNumAllocatedPages("CLOBTAB3", (numrows * 2) + 1);
+        // 1 head page per container.  DERBY-4057 has been fixed so allocated
+        // pages is showing up as 1 in my runs.  Am a bit worried that because
+        // this is thread and post commit dependent that we may have to play
+        // with the "expected" allocated a little to allow for post commit
+        // on some machines not running fast enough.  For now just setting
+        // to 1 as the head page will remain allocated, all the rest should
+        // be free after post commit reclaim.
+        checkNumAllocatedPages("CLOBTAB3", 1);
 
         // expect most free pages to get used by subsequent inserts.  Only 
         // free pages should be from the last remaining aborted insert of
@@ -252,10 +289,23 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // head page of the chain: (sizeof(clob) / page size) - 1
         // Derby should default to 32k page size for any table with a clob in
         // it.
- 
-        // (clob length / page size ) + 
+
+        // after fix for DERBY-4057 work gets queued immediately after the 
+        // rollback, but also the next insert happens at same time.  On
+        // my machine I am getting 12 pages free which looks like space from
+        // the first abort  gets used for the 3rd insert, space from second
+        // abort gets used for the 4th insert ...  Running full test suite
+        // on my machine got 14 free pages which is still very good considering
+        // before change there were 1000 allocated pages and now there is 1
+        // allocated and 14 free.  There is a timing 
+        // issue with test and maybe a sleep of some sort is necessary after
+        // the rollback.  
+
+        // declaring correct run if only max if free pages from 5 pages worth
+        // of free space remains.
+        // ((clob length / page size ) * 5) + 
         //     1 page for int divide round off - 1 for the head page.
-        checkNumFreePages("CLOBTAB3", (clob_length / 32000) + 1 - 1);
+        checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 5) + 1 - 1);
         commit();
 
         // running inplace compress should reclaim all the remaining aborted
@@ -288,6 +338,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             protected void decorateSQL(Statement s) throws SQLException {
                 if (SanityManager.DEBUG) {
                     SanityManager.DEBUG_SET("DaemonTrace");
+                    SanityManager.DEBUG_SET("verbose_heap_post_commit");
                 }
 
                 Connection conn = s.getConnection();

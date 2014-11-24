@@ -207,11 +207,12 @@ public final class InsertOperation extends LogicalPageOperation
 					undoPage.getPageNumber());
 		}
 
+        RawTransaction rxact = (RawTransaction)xact;
+
 		if ((insertFlag & Page.INSERT_UNDO_WITH_PURGE) != 0)
 		{
 			undoPage.purgeRecord(CLRInstant, slot, undoRecordId);
 
-			RawTransaction rxact = (RawTransaction)xact;
 
 			// If we purged the last row off an overflow page, reclaim that
 			// page - we have to do this post transaction termination because we
@@ -221,14 +222,31 @@ public final class InsertOperation extends LogicalPageOperation
 				undoPage.isOverflowPage() && undoPage.recordCount() == 0)
 			{
 				ReclaimSpace work = 
-					new ReclaimSpace(ReclaimSpace.PAGE, (PageKey)undoPage.getIdentity(),
-									 rxact.getDataFactory(), true /* service ASAP */);
+					new ReclaimSpace(
+                            ReclaimSpace.PAGE, 
+                            (PageKey)undoPage.getIdentity(),
+                            rxact.getDataFactory(), 
+                            true /* service ASAP */);
+
 				rxact.addPostTerminationWork(work);
 			}
 		}
 		else
 		{
 			undoPage.setDeleteStatus(CLRInstant, slot, true);
+
+
+			if (rxact.handlesPostTerminationWork() && 
+                !undoPage.isOverflowPage())
+            {
+                if (undoPage.shouldReclaimSpace(
+                        undoPage.getPageNumber() == 1 ? 1 : 0, slot))
+                {
+                    ((BaseDataFileFactory) rxact.getDataFactory()).insertUndoNotify(
+                        rxact,
+                        undoPage.getPageKey());
+                }
+            }
 		}
 
 		undoPage.setAuxObject(null);

@@ -100,8 +100,7 @@ class HeapScan
         xact_mgr.addPostCommitWork(
             new HeapPostCommit(
                 xact_mgr.getAccessManager(), 
-                (Heap) open_conglom.getConglomerate(),
-                pos.current_page.getPageNumber()));
+                pos.current_page.getPageKey()));
     }
 
     /**************************************************************************

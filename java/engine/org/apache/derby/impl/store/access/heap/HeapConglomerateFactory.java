@@ -32,8 +32,10 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ConglomerateFactory;
+import org.apache.derby.impl.store.access.conglomerate.RowPosition;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
+import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -42,8 +44,10 @@ import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.RecordHandle;
+import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -290,6 +294,43 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
         }
 
         return((Conglomerate) control_row[0]);
+    }
+
+    /**
+     * Interface to be called when an undo of an insert is processed.
+     * <p>
+     * Implementer of this class provides interface to be called by the raw
+     * store when an undo of an insert is processed.  Initial implementation
+     * will be by Access layer to queue space reclaiming events if necessary
+     * when a rows is logically "deleted" as part of undo of the original
+     * insert.  This undo can happen a lot for many applications if they
+     * generate expected and handled duplicate key errors.
+     * <p>
+     * Caller may decide to call or not based on deleted row count of the
+     * page, or if overflow rows/columns are present.
+     *
+     *
+     * @param access_factory    current access_factory of the aborted insert.
+     * @param xact              transaction that is being backed out.
+     * @param page_key          page key of the aborted insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public void insertUndoNotify(
+    AccessFactory       access_factory,
+    Transaction         xact,
+    PageKey             page_key)
+        throws StandardException
+    {
+        // try to reclaim rows when the page is only full of deleted rows,
+        // or in the special case of the first page when all rows except the
+        // "control row" are deleted.  Or if the row we just deleted is
+        // a long row or has a long column.
+        //
+        // This logic is currently embedded in raw store InsertOperation
+        // abort code which triggers the event to notify the 
+        // HeapConglomerateFactory to post the HeapPostCommit work item.
+        xact.addPostAbortWork(new HeapPostCommit(access_factory, page_key));
     }
 
 	/*

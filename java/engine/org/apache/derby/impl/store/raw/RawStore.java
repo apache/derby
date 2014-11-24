@@ -48,6 +48,7 @@ import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.raw.ScanHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
+import org.apache.derby.iapi.store.raw.UndoHandler;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
@@ -406,6 +407,29 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	*/
 	public TransactionFactory getXactFactory() {
         return xactFactory;  
+    }
+
+    /**
+     * Register a handler class for insert undo events.
+     * <p>
+     * Register a class to be called when an undo of an insert is executed.  
+     * When an undo of an event is executed by the raw store 
+     * UndoHandler.insertUndoNotify() will be called, allowing upper level 
+     * callers to execute code as necessary.  The initial need is for the 
+     * access layer to be able to queue post commit reclaim space in the case 
+     * of inserts which are aborted (including the normal case of inserts 
+     * failed for duplicate key violations) (see DERBY-4057)
+     * <p>
+     *
+     * @param undo_handle Class to use to notify callers of an undo of an 
+     *                    insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public void setUndoInsertEventHandler(
+        UndoHandler input_undo_handle) throws StandardException
+    {
+        dataFactory.setUndoInsertEventHandler(input_undo_handle);
     }
 
 	/*

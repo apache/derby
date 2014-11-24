@@ -1,4 +1,5 @@
 /*
+/usr/bin/mksh: p4: not found
 
    Derby - Class org.apache.derby.iapi.store.raw.Page
 
@@ -120,6 +121,18 @@ public interface Page
 	 * @return The page number of this page.
      **/
 	public long getPageNumber();
+
+    /**
+     * Return the page key of this page. 
+     * <p>
+     *
+     * <BR> MT - Latched
+     *
+     * @see ContainerHandle
+     *
+	 * @return The page key of this page.
+     **/
+	public PageKey getPageKey();
 
     /**************************************************************************
      * Public Methods of This class: record handle interface.

@@ -353,6 +353,16 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		return identity.getPageNumber();
 	}
 
+	/** @see Page#getPageIdentity */
+	public final PageKey getPageKey() {
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(isLatched(), "page is not latched.");
+			SanityManager.ASSERT(identity != null, "identity is null.");
+		}
+
+		return identity;
+	}
+
 	public final RecordHandle getRecordHandle(int recordId) {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(isLatched());
@@ -1462,6 +1472,8 @@ abstract class BasePage implements Page, Observer, TypedFormat
      * to ask whether a post commit should be queued to try to reclaim space
      * after the delete commits.  
      * <p>
+     * Also used by access methods after undo of an insert.
+     * <p>
      * Will return true if the number of non-deleted rows on the page is
      * <= "num_non_deleted_rows".  For instance 0 means schedule reclaim
      * only if all rows are deleted, 1 if all rows but one are deleted.  
@@ -1496,15 +1508,27 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
         boolean ret_val = false;
 
-        if (internalNonDeletedRecordCount() <= num_non_deleted_rows)
+        if (!isOverflowPage())
         {
-            ret_val = true;
-        }
-        else 
-        {
-            if (!entireRecordOnPage(slot_just_deleted))
+            // only return true for non-overflow pages.  Overflow pages
+            // will be reclaimed as part of reclaiming the rows on the
+            // head pages.
+
+            if (internalNonDeletedRecordCount() <= num_non_deleted_rows)
             {
+                // all user rows on this page are marked deleted, so 
+                // reclaim this page.
                 ret_val = true;
+            }
+            else 
+            {
+                // always reclaim if there rows span more than one page,
+                // this picks up long rows and blob/clob columns.  This
+                // tells us likely to reclaim 1 or more pages.
+                if (!entireRecordOnPage(slot_just_deleted))
+                {
+                    ret_val = true;
+                }
             }
         }
 

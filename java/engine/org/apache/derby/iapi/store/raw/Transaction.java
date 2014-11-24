@@ -492,6 +492,14 @@ public interface Transaction {
 	public void addPostCommitWork(Serviceable work);
 
 	/**
+		Add to the list of post abort work that may be processed after this
+		transaction aborts.  
+
+		@param work the post commit work that is added
+	*/
+	public void addPostAbortWork(Serviceable work);
+
+	/**
 		Add to the list of post termination work that may be processed after this
 		transaction commits or aborts.
 

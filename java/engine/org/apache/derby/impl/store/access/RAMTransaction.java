@@ -64,12 +64,12 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.access.XATransactionController;
 
-
 import org.apache.derby.iapi.store.raw.ContainerHandle;
+import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-
-
 import org.apache.derby.iapi.store.raw.Loggable;
+import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -401,7 +401,7 @@ public class RAMTransaction
 
 		if (conglomId >= 0)
         {
-            conglom = accessmanager.conglomCacheFind(this, conglomId);
+            conglom = accessmanager.conglomCacheFind(conglomId);
         }
         else
 		{
@@ -2095,6 +2095,27 @@ public class RAMTransaction
      * Public Methods of TransactionManager interface:
      **************************************************************************
      */
+
+    /**
+     * Return existing Conglomerate after doing lookup by ContainerKey
+     * <p>
+     * Throws exception if it can't find a matching conglomerate for the 
+     * ContainerKey.
+     * 
+     * @return If successful returns 
+     *
+     * @param container_key  container key of target conglomerate.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+	public Conglomerate findExistingConglomerateFromKey(
+    ContainerKey container_key)
+		throws StandardException
+    {
+        // in this implementation of the store conglomerate id's and 
+        // container id's are the same.
+        return(findExistingConglomerate(container_key.getContainerId()));
+	}
 
     /**
      * Add to the list of post commit work.

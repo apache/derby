@@ -27,9 +27,11 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -117,4 +119,31 @@ public interface ConglomerateFactory extends MethodFactory
     TransactionManager      xact_mgr,
     ContainerKey            container_key)
 		throws StandardException;
+
+
+    /**
+     * Interface to be called when an undo of an insert is processed.
+     * <p>
+     * Implementer of this class provides interface to be called by the raw
+     * store when an undo of an insert is processed.  Initial implementation
+     * will be by Access layer to queue space reclaiming events if necessary
+     * when a rows is logically "deleted" as part of undo of the original
+     * insert.  This undo can happen a lot for many applications if they
+     * generate expected and handled duplicate key errors.
+     * <p>
+     * Caller may decide to call or not based on deleted row count of the
+     * page, or if overflow rows/columns are present.
+     *
+     *
+     * @param access_factory    current access_factory of the aborted insert.
+     * @param xact              transaction that is being backed out.
+     * @param page_key          page key of the aborted insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public void insertUndoNotify(
+    AccessFactory       access_factory,
+    Transaction         xact,
+    PageKey             page_key)
+        throws StandardException;
 }

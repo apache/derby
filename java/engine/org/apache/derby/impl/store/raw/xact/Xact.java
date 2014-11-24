@@ -221,10 +221,12 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 	private Stack<SavePoint>			savePoints;	// stack of SavePoint objects.
 
-	protected List<Serviceable>   		postCommitWorks; // a list of post commit work
-	protected List<Serviceable>		    postTerminationWorks; // work to be done after
-												  // transaction terminates,
-												  // commit or abort
+	protected List<Serviceable> postCommitWorks; // a list of post commit work
+	protected List<Serviceable> postAbortWorks;  // a list of post abort work
+	protected List<Serviceable> postTerminationWorks; // work to be done after
+												      // transaction terminates,
+												      // commit or abort
+                                                      
 	private boolean			recoveryTransaction;  // this transaction is being
 												  // used by recovery
 
@@ -1023,6 +1025,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		{
 			postCommitWorks.clear();
 		}
+       
 
 		// Now do post termination work - must do this after the rollback is
 		// complete because the rollback itself may generate postTermination
@@ -1274,9 +1277,26 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (recoveryTransaction)
 			return;
 
+
 		if (postCommitWorks == null)
 			postCommitWorks = new ArrayList<Serviceable>(1);
 		postCommitWorks.add(work);
+	}
+
+	/**
+		Add to the list of post abort work that may be processed after this
+		transaction aborts.  
+
+		@param work the post commit work that is added
+	*/
+	public void addPostAbortWork(Serviceable work)
+	{
+		if (recoveryTransaction)
+			return;
+
+		if (postAbortWorks == null)
+			postAbortWorks = new ArrayList<Serviceable>(1);
+		postAbortWorks.add(work);
 	}
 
 	public void addPostTerminationWork(Serviceable work)
@@ -2045,6 +2065,125 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 
 	}
 
+    private void transferPostCommitorAbortWork(List <Serviceable> work_list)
+        throws StandardException
+    {
+
+		// if there are post commit work to be done, transfer them to the
+		// daemon.  The log is flushed, all locks released and the
+		// transaction has ended at this point.
+		if (work_list != null && !work_list.isEmpty())
+		{
+			int pcsize = work_list.size();
+			
+			// do we want to do post commit work with this transaction object?
+			if (doPostCommitWorkInTran())
+			{
+				try
+				{
+					inPostCommitProcessing = true;
+
+					// to avoid confusion, copy the post commit or abort work 
+                    // to an array if this is going to do some work now
+					Serviceable[] work = new Serviceable[pcsize];
+					work = (Serviceable[])work_list.toArray(work);
+
+					// clear this for post commit or abort processing to queue 
+                    // its own post commit works - when it commits, it will 
+                    // send all its post commit request to the daemon instead 
+                    // of dealing with it here.
+					work_list.clear();
+
+					//All the post commit or abort work that is part of the 
+                    //database creation should be done on this thread 
+                    //immediately.
+					boolean doWorkInThisThread = 
+                        xactFactory.inDatabaseCreation();
+
+					for (int i = 0; i < pcsize; i++)
+					{
+
+						//process work that should be done immediately or
+						//when we  are in still in database creattion.
+						//All the other work should be submitted to the post 
+                        //commit thread to be processed asynchronously
+
+						if (doWorkInThisThread || work[i].serviceImmediately())
+						{
+							try
+							{
+								// this may cause other post commit work to be
+								// added.  when that transaction commits, that
+								// work will be transfered to the daemon
+								if (work[i].performWork(xc.getContextManager())
+                                        == Serviceable.DONE)
+                                {
+									work[i] = null;
+                                }
+
+								// if REQUEUE, leave it on for the postcommit
+								// daemon to handle
+							}
+							catch (StandardException se)
+							{
+								// don't try to service this again
+								work[i] = null;
+
+								// try to handle it here.  
+                                // If we fail, then let the error percolate.
+
+								xc.cleanupOnError(se);
+							}
+						}
+
+						// either it need not be serviedASAP or it needs
+						// requeueing, send it off.   Note that this is one case
+						// where a REQUEUE ends up in the high priority queue.
+						// Unfortunately, there is no easy way to tell.  If the
+						// Servicable is well mannered, it can change itself 
+                        // from serviceASAP to not serviceASAP if it returns 
+                        // REQUEUE.
+
+						if (work[i] != null)
+						{
+							boolean needHelp = 
+                                xactFactory.submitPostCommitWork(work[i]);
+
+							work[i] = null;
+							if (needHelp)
+								doWorkInThisThread = true;
+						}
+					}
+				}
+				finally
+				{
+					inPostCommitProcessing = false;
+
+					// if something untoward happends, clear the queue.
+					if (work_list != null)
+						work_list.clear();
+				}
+
+			}
+			else
+			{
+				// this is for non-user transaction or post commit work that is
+				// submitted in PostCommitProcessing.  (i.e., a post commit
+				// work submitting other post commit work)
+				for (int i = 0; i < pcsize; i++)
+				{
+					// SanityManager.DEBUG_PRINT("PostTermination",work_list.elementAt((i)).toString());
+					xactFactory.submitPostCommitWork(
+                        (Serviceable)work_list.get((i)));
+				}
+			}
+
+			work_list.clear();
+
+		}
+
+    }
+
 
 	private final void postTermination() throws StandardException
 	{
@@ -2058,105 +2197,11 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		if (count > 0)
 			postTerminationWorks.clear();
 
+        // transfer post commit work
+        transferPostCommitorAbortWork(postCommitWorks);
 
-		// if there are post commit work to be done, transfer them to the
-		// daemon.  The log is flushed, all locks released and the
-		// transaction has ended at this point.
-		if (postCommitWorks != null && !postCommitWorks.isEmpty())
-		{
-			int pcsize = postCommitWorks.size();
-			
-			// do we want to do post commit work with this transaction object?
-			if (doPostCommitWorkInTran())
-			{
-				try
-				{
-					inPostCommitProcessing = true;
-
-					// to avoid confusion, copy the post commit work to an array if this
-					// is going to do some work now
-					Serviceable[] work = new Serviceable[pcsize];
-					work = (Serviceable[])postCommitWorks.toArray(work);
-
-					// clear this for post commit processing to queue its own post
-					// commit works - when it commits, it will send all its post
-					// commit request to the daemon instead of dealing with it here.
-					postCommitWorks.clear();
-
-					//All the post commit work that is part  of the database creation
-					//should be done on this thread immediately.
-					boolean doWorkInThisThread = xactFactory.inDatabaseCreation();
-
-					for (int i = 0; i < pcsize; i++)
-					{
-
-						//process work that should be done immediately or
-						//when we  are in still in database creattion.
-						//All the other work should be submitted 
-						//to the post commit thread to be processed asynchronously
-						if (doWorkInThisThread || work[i].serviceImmediately())
-						{
-							try
-							{
-								// this may cause other post commit work to be
-								// added.  when that transaction commits, those
-								// work will be transfered to the daemon
-								if (work[i].performWork(xc.getContextManager()) == Serviceable.DONE)
-									work[i] = null;
-
-								// if REQUEUE, leave it on for the postcommit
-								// daemon to handle
-							}
-							catch (StandardException se)
-							{
-								// don't try to service this again
-								work[i] = null;
-
-								// try to handle it here.  If we fail, then let the error percolate.
-								xc.cleanupOnError(se);
-							}
-						}
-
-						// either it need not be serviedASAP or it needs
-						// requeueing, send it off.   Note that this is one case
-						// where a REQUEUE ends up in the high priority queue.
-						// Unfortunately, there is no easy way to tell.  If the
-						// Servicable is well mannered, it can change itself from
-						// serviceASAP to not serviceASAP if it returns REQUEUE.
-						if (work[i] != null)
-						{
-							boolean needHelp = xactFactory.submitPostCommitWork(work[i]);
-							work[i] = null;
-							if (needHelp)
-								doWorkInThisThread = true;
-						}
-					}
-				}
-				finally
-				{
-					inPostCommitProcessing = false;
-
-					// if something untoward happends, clear the queue.
-					if (postCommitWorks != null)
-						postCommitWorks.clear();
-				}
-
-			}
-			else
-			{
-				// this is for non-user transaction or post commit work that is
-				// submitted in PostCommitProcessing.  (i.e., a post commit
-				// work submitting other post commit work)
-				for (int i = 0; i < pcsize; i++)
-				{
-					// SanityManager.DEBUG_PRINT("PostTermination",postCommitWorks.elementAt((i)).toString());
-					xactFactory.submitPostCommitWork((Serviceable)postCommitWorks.get((i)));
-				}
-			}
-
-			postCommitWorks.clear();
-
-		}
+        // transfer post abort work
+        transferPostCommitorAbortWork(postAbortWorks);
 
         // any backup blocking operations (like unlogged ops) in this 
         // transaction are done with post commit/abort work that needs be

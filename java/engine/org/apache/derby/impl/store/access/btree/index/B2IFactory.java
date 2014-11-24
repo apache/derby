@@ -35,6 +35,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ConglomerateFactory;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
@@ -44,7 +45,9 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -305,6 +308,40 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
         // if any error, just return null - meaning can't access the container.
 
         return(btree);
+    }
+
+    /**
+     * Interface to be called when an undo of an insert is processed.
+     * <p>
+     * Implementer of this class provides interface to be called by the raw
+     * store when an undo of an insert is processed.  Initial implementation
+     * will be by Access layer to queue space reclaiming events if necessary
+     * when a rows is logically "deleted" as part of undo of the original
+     * insert.  This undo can happen a lot for many applications if they
+     * generate expected and handled duplicate key errors.
+     * <p>
+     * Caller may decide to call or not based on deleted row count of the
+     * page, or if overflow rows/columns are present.
+     *
+     *
+     * @param access_factory    current access_factory of the aborted insert.
+     * @param xact              transaction that is being backed out.
+     * @param page_key          page key of the aborted insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public void insertUndoNotify(
+    AccessFactory       access_factory,
+    Transaction         xact,
+    PageKey             page_key)
+        throws StandardException
+    {
+        // Currently a no-op, btree's can reclaim space at split time. 
+        // TODO - see if it makes sense to add postAbort action if the 
+        // page has all deleted keys.  Shrinks don't work very well currently
+        // as they require table level locks, so may not help much until that
+        // issue is resolved.  see DERBY-5473
+
     }
 
 	/*

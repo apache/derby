@@ -429,6 +429,25 @@ public interface RawStoreFactory extends Corruptable {
     */
     public LockFactory getLockFactory();
 
+    /**
+        Register a handler class for insert undo events.
+        <P>
+        Register a class to be called when an undo of an insert 
+        is executed.  When an undo of an event is executed by
+        the raw store UndoHandler.insertUndoNotify() will be
+        called, allowing upper level callers to execute code
+        as necessary.  The initial need is for the access layer
+        to be able to queue post commit reclaim space in the
+        case of inserts which are aborted (including the normal
+        case of inserts failed for duplicate key violations)
+        (see DERBY-4057)
+
+        @exception StandardException Standard Derby error policy
+
+    */
+    public void setUndoInsertEventHandler(
+        UndoHandler undo_handle) throws StandardException;
+
 
     /**
         Create a user transaction, almost all work within the raw store is

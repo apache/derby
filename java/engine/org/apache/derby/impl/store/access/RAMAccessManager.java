@@ -464,9 +464,7 @@ public abstract class RAMAccessManager
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    /* package */ Conglomerate conglomCacheFind(
-    TransactionManager  xact_mgr,
-    long                conglomid)
+    /* package */ Conglomerate conglomCacheFind(long conglomid)
         throws StandardException
     {
         Conglomerate conglom       = null;
@@ -1040,6 +1038,11 @@ public abstract class RAMAccessManager
         //
         rawstore = (RawStoreFactory) bootServiceModule(
             create, this, RawStoreFactory.MODULE, serviceProperties);
+
+        // initialize handler with raw store to be called in the event of
+        // aborted inserts.  Store will use the call back to reclaim space
+        // when these events happen.  See DERBY-4057.
+        rawstore.setUndoInsertEventHandler(new RAMAccessUndoHandler(this));
 
 		// Note: we also boot this module here since we may start Derby
 		// system from store access layer, as some of the unit test case,

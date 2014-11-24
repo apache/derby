@@ -35,6 +35,7 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.Transaction;
+import org.apache.derby.iapi.store.raw.UndoHandler;
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.store.access.RowSource;
@@ -404,4 +405,29 @@ public interface DataFactory extends Corruptable {
      * @return true if database encrypted false otherwise
      */
     public boolean databaseEncrypted();
+
+    /**
+        Register a handler class for insert undo events.
+        <P>
+        Register a class to be called when an undo of an insert 
+        is executed.  When an undo of an event is executed by
+        the raw store UndoHandler.insertUndoNotify() will be
+        called, allowing upper level callers to execute code
+        as necessary.  The initial need is for the access layer
+        to be able to queue post commit reclaim space in the
+        case of inserts which are aborted (including the normal
+        case of inserts failed for duplicate key violations)
+        (see DERBY-4057)
+        <p>
+        Currently the handler is only called on abort of inserts on
+        non-overflow pages that meet either of the following 2 
+        requirements:
+        1) the row has either overflow columns (long columns) or
+           the row columns span multiple pages (long rows).
+        2) after the action all user rows on the page are marked deleted.
+
+        @param undo_handler client code supplied undo_handle. 
+
+    */
+    public void setUndoInsertEventHandler(UndoHandler undo_handle);
 }

@@ -56,9 +56,11 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
+import org.apache.derby.iapi.store.raw.UndoHandler;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 
 import org.apache.derby.iapi.store.access.RowSource;
@@ -73,6 +75,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
+
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
@@ -225,6 +228,10 @@ public class BaseDataFileFactory
 
     private File            backupRoot;
     private String[]        bfilelist;
+
+
+    // Class to use to notify upon undo of deletes
+    private UndoHandler undo_handler = null;
 
 	/*
 	** Constructor
@@ -1366,6 +1373,57 @@ public class BaseDataFileFactory
 	/*
 	** Implementation specific methods
 	*/
+
+    /**
+     * Register a handler class for insert undo events.
+     * <p>
+     * Register a class to be called when an undo of an insert is executed.  
+     * When an undo of an event is executed by the raw store 
+     * UndoHandler.insertUndoNotify() will be called, allowing upper level 
+     * callers to execute code as necessary.  The initial need is for the 
+     * access layer to be able to queue post commit reclaim space in the case 
+     * of inserts which are aborted (including the normal case of inserts 
+     * failed for duplicate key violations) (see DERBY-4057)
+     * <p>
+     *
+     * @param undo_handle Class to use to notify callers of an undo of an 
+     *                    insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    public void setUndoInsertEventHandler(
+        UndoHandler input_undo_handle)
+    {
+        undo_handler = input_undo_handle;
+    }
+    
+    /**
+     * Notify through set handler that an undo of an insert has happened.
+     * <p>
+     * When an undo of an event is executed by the raw store 
+     * UndoHandler.insertUndoNotify() will be called, allowing upper level 
+     * callers to execute code as necessary.  The initial need is for the 
+     * access layer to be able to queue post commit reclaim space in the case 
+     * of inserts which are aborted (including the normal case of inserts 
+     * failed for duplicate key violations) (see DERBY-4057)
+     * Longer descrption of routine.
+     * <p>
+     *
+     * @param rxact     raw transaction of the aborted insert.
+     * @param page_key  page key of the aborted insert.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    protected void insertUndoNotify(
+    RawTransaction  rxact,
+    PageKey         page_key)
+        throws StandardException
+    {
+        if (undo_handler != null)
+        {
+            undo_handler.insertUndoNotify(rxact, page_key);
+        }
+    }
 
 	public int getIntParameter(
     String      parameterName, 

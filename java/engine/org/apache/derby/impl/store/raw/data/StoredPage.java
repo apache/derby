@@ -2599,8 +2599,14 @@ public class StoredPage extends CachedPage
                         ", total slotsInUse = " + slotsInUse);
                 }
 
-                SanityManager.ASSERT(recordHeader.getFirstField() == 0,
-                     "Head row piece should start at field 0 but is not");
+                if (recordHeader.getFirstField() != 0)
+                {
+                    SanityManager.THROWASSERT(
+                        "Head row piece should start at field 0 but is not," + 
+                        ", current slot = " + slot + 
+                        ", total slotsInUse = " + slotsInUse + 
+                        "page = " + this);
+                }
             }
 
             int numberFields = recordHeader.getNumberFields();

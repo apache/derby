@@ -420,6 +420,7 @@ public class Heap
             {
                 if (SanityManager.DEBUG)
                     SanityManager.THROWASSERT(
+                        "Expected (column_id == format_ids.length)" +
                         "column_id = " + column_id +
                         "format_ids.length = " + format_ids.length +
                         "format_ids = " + format_ids);
