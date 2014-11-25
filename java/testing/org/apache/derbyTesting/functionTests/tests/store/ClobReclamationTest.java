@@ -240,6 +240,19 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             ps.executeUpdate();
             rollback();
         }
+
+        // sleep 5 seconds to give background space reclamation worker thread 
+        // a chance to reclaim all the aborted insert space.
+        
+        try 
+        {
+            Thread.sleep(5000);
+        }
+        catch (Exception ex)
+        {
+            // just ignore interrupted sleep
+        }
+
         checkNumAllocatedPages("CLOBTAB2",1);
     }
 
@@ -301,11 +314,11 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // issue with test and maybe a sleep of some sort is necessary after
         // the rollback.  
 
-        // declaring correct run if only max if free pages from 5 pages worth
+        // declaring correct run if only max if free pages from 10 pages worth
         // of free space remains.
         // ((clob length / page size ) * 5) + 
         //     1 page for int divide round off - 1 for the head page.
-        checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 5) + 1 - 1);
+        checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 10) + 1 - 1);
         commit();
 
         // running inplace compress should reclaim all the remaining aborted
