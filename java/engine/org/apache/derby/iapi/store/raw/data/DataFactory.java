@@ -426,7 +426,7 @@ public interface DataFactory extends Corruptable {
            the row columns span multiple pages (long rows).
         2) after the action all user rows on the page are marked deleted.
 
-        @param undo_handler client code supplied undo_handle. 
+        @param undo_handle client code supplied undo_handle. 
 
     */
     public void setUndoInsertEventHandler(UndoHandler undo_handle);

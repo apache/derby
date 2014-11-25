@@ -353,7 +353,6 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		return identity.getPageNumber();
 	}
 
-	/** @see Page#getPageIdentity */
 	public final PageKey getPageKey() {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(isLatched(), "page is not latched.");

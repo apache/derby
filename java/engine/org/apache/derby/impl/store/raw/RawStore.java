@@ -421,8 +421,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * failed for duplicate key violations) (see DERBY-4057)
      * <p>
      *
-     * @param undo_handle Class to use to notify callers of an undo of an 
-     *                    insert.
+     * @param input_undo_handle Class to use to notify callers of an undo of 
+     *                          an insert.
      *
      * @exception  StandardException  Standard exception policy.
      **/
