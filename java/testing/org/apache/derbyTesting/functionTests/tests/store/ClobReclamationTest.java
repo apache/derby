@@ -314,11 +314,11 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // issue with test and maybe a sleep of some sort is necessary after
         // the rollback.  
 
-        // declaring correct run if only max if free pages from 10 pages worth
+        // declaring correct run if only max of free pages from 20 rows worth
         // of free space remains.
-        // ((clob length / page size ) * 5) + 
+        // ((clob length / page size ) * 20) + 
         //     1 page for int divide round off - 1 for the head page.
-        checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 10) + 1 - 1);
+        checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 20) + 1 - 1);
         commit();
 
         // running inplace compress should reclaim all the remaining aborted
