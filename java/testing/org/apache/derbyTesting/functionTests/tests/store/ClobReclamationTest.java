@@ -318,8 +318,19 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // of free space remains.
         // ((clob length / page size ) * 20) + 
         //     1 page for int divide round off - 1 for the head page.
+
+        // The above check that there is 1 allocated page shows that we
+        // are reclaiming space.  The number of free pages left is very
+        // machine dependent as it depends on speed of background thread 
+        // reclaiming space and the above user loop doing the inserts 
+        // concurrent with the background threads reclaiming the aborted
+        // inserted space.
+
+        // See DERBY-6775 for better test
+        /*
         checkNumFreePagesMax("CLOBTAB3", ((clob_length / 32000) * 20) + 1 - 1);
         commit();
+        */
 
         // running inplace compress should reclaim all the remaining aborted
         // insert space, previous to fix inplace compress would leave stranded
