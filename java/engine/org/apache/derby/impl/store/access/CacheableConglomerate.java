@@ -33,7 +33,7 @@ the Conglomerate directory to cache Conglomerates.  It is simply a wrapper
 object for the conglomid and Conglomerate object that is read from the
 Conglomerate Conglomerate.   It is a wrapper rather than extending 
 the conglomerate implementations because we want to cache all conglomerate
-implementatations: (ie. Heap, B2I, ...).
+implementations: (ie. Heap, B2I, ...).
 
 References to the Conglomerate objects cached by this wrapper will be handed
 out to callers.  When this this object goes out of cache callers may still
@@ -73,20 +73,26 @@ class CacheableConglomerate implements Cacheable
 		The object will be in the No Identity state,
 		ie. it will have just been created or clearIdentity() was just called. 
 		<BR>
-		The object must copy the information out of key, not just store a reference to key.
-		After this call the expression getIdentity().equals(key) must return true.
+		The object must copy the information out of key, not just store a 
+        reference to key.
+		After this call the expression getIdentity().equals(key) must return 
+        true.
 		<BR>
-		If the class of the object needs to change (e.g. to support a different format)
-		then the object should create a new object, call its initParameter() with the parameters
-		the original object was called with, set its identity and return a reference to it. The cache
+		If the class of the object needs to change (e.g. to support a different
+        format) then the object should create a new object, call its 
+        initParameter() with the parameters the original object was called with,
+        set its identity and return a reference to it. The cache
 		manager will discard the reference to the old object. 
 		<BR>
-		If an exception is thrown the object must be left in the no-identity state.
+		If an exception is thrown the object must be left in the no-identity 
+        state.
 
-		<BR> MT - single thread required - Method must only be called be cache manager
-		and the cache manager will guarantee only one thread can be calling it.
+		<BR> MT - single thread required - Method must only be called by cache 
+        manager and the cache manager will guarantee only one thread can be 
+        calling it.
 
-		@return an object reference if the object can take on the identity, null otherwise.
+		@return an object reference if the object can take on the identity, 
+                null otherwise.
 
 		@exception StandardException Standard Derby Policy
 
@@ -156,8 +162,9 @@ class CacheableConglomerate implements Cacheable
 	/**
 		Put the object into the No Identity state. 
 
-		<BR> MT - single thread required - Method must only be called be cache manager
-		and the cache manager will guarantee only one thread can be calling it.
+		<BR> MT - single thread required - Method must only be called be cache 
+        manager and the cache manager will guarantee only one thread can be 
+        calling it.
 
 	*/
 	public void clearIdentity()
@@ -179,7 +186,8 @@ class CacheableConglomerate implements Cacheable
 
 
 	/**
-		Returns true of the object is dirty. Will only be called when the object is unkept.
+		Returns true if the object is dirty. 
+        Will only be called when the object is unkept.
 
 		<BR> MT - thread safe 
 
@@ -195,16 +203,16 @@ class CacheableConglomerate implements Cacheable
 		and clean() method calls.
 		<BR>
 		If forRemove is true then the 
-		object is being removed due to an explict remove request, in this case
+		object is being removed due to an explicit remove request, in this case
 		the cache manager will have called this method regardless of the
 		state of the isDirty() 
 
 		<BR>
 		If an exception is thrown the object must be left in the clean state.
 
-		<BR> MT - thread safe - Can be called at any time by the cache manager, it is the
-		responsibility of the object implementing Cacheable to ensure any users of the
-		object do not conflict with the clean call.
+		<BR> MT - thread safe - Can be called at any time by the cache manager, 
+        it is the responsibility of the object implementing Cacheable to ensure
+        any users of the object do not conflict with the clean call.
 
 		@exception StandardException Standard Derby error policy.
 
