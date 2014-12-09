@@ -19,6 +19,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
+import java.lang.Integer;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -95,7 +97,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         for (int i = 0; i < NUM_THREADS; i++) {
             threads[i].join();
         }
-        checkNumAllocatedPages("CLOBTAB",expectedNumAllocated);
+        checkNumAllocatedPages("CLOBTAB",expectedNumAllocated, false);
     }
 
     /**
@@ -105,18 +107,82 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * @param expectedAlloc
      * @throws SQLException
      */
-    private void checkNumAllocatedPages(String table, int expectedAlloc) throws SQLException {        
+    private void checkNumAllocatedPages(
+    String  table, 
+    int     expectedAlloc,
+    boolean retry_with_sleeps) 
+        throws SQLException {        
         // Check the space table 
         // Should not have grown.
 
         PreparedStatement ps = prepareStatement("SELECT NUMALLOCATEDPAGES FROM "
                 + " new org.apache.derby.diag.SpaceTable('APP',?) t"
                 + " WHERE CONGLOMERATENAME = ?");
-        ps.setString(1,table);
+        ps.setString(1, table);
         ps.setString(2, table);
-        ResultSet rs = ps.executeQuery();
-        JDBC.assertFullResultSet(rs, new String[][] { { ""
-                + expectedAlloc } });
+
+        // initialize previous_alloc_count such that we will always try 
+        // at least one sleep/retry.
+        int previous_alloc_count = Integer.MAX_VALUE;
+
+        for(;;)
+        {
+            // loop until success, or until sleep/retry does not result
+            // in less allocated pages.
+
+            // get 1 row, it has the num allocated page count.
+            ResultSet rs = ps.executeQuery();
+
+            rs.next();
+
+            int num_allocated_pages = rs.getInt(1);
+            int num_retries = 0;
+
+            // first check if count is the expected value, if so done.
+            if (num_allocated_pages == expectedAlloc)
+            {
+                // expected result is met, success
+                break;
+            }
+            else if (retry_with_sleeps)
+            {
+                if (num_allocated_pages < previous_alloc_count)
+                {
+                    num_retries++;
+
+                    // background thread made progress in last sleep,
+                    // try sleeping again.
+                    try 
+                    {
+                        Thread.sleep(5000);
+                    }
+                    catch (Exception ex)
+                    {
+                        // just ignore interrupted sleep
+                    }
+                }
+                else
+                {
+                    // sleep has not found less alloc rows let the assert fail.
+                    assertTrue(
+                        "Fail with retries -- num_allocated_pages:" + 
+                        num_allocated_pages + 
+                        " == expectedAlloc: " + expectedAlloc +
+                        " num_retries: " + num_retries, 
+                        num_allocated_pages == expectedAlloc); 
+                }
+
+                previous_alloc_count = num_allocated_pages;
+            }
+            else
+            {
+                // no retries allowed, let assert fail.
+                assertTrue(
+                    "Fail -- num_allocated_pages:" + num_allocated_pages + 
+                    " > expectedAlloc: " + expectedAlloc, 
+                    num_allocated_pages == expectedAlloc); 
+            }
+        } 
     }
 
     /**
@@ -253,7 +319,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             // just ignore interrupted sleep
         }
 
-        checkNumAllocatedPages("CLOBTAB2",1);
+        checkNumAllocatedPages("CLOBTAB2",1,true);
     }
 
     /**
@@ -294,7 +360,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // on some machines not running fast enough.  For now just setting
         // to 1 as the head page will remain allocated, all the rest should
         // be free after post commit reclaim.
-        checkNumAllocatedPages("CLOBTAB3", 1);
+        checkNumAllocatedPages("CLOBTAB3", 1, true);
 
         // expect most free pages to get used by subsequent inserts.  Only 
         // free pages should be from the last remaining aborted insert of
@@ -344,7 +410,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         call_compress.executeUpdate();
 
         // all space except for head page should be reclaimed.
-        checkNumAllocatedPages("CLOBTAB3", 1);
+        checkNumAllocatedPages("CLOBTAB3", 1, false);
 
         // should be no free pages after the inplace compress of a table with
         // all deleted rows.
