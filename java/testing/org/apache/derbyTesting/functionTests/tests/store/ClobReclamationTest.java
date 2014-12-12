@@ -125,6 +125,8 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         // at least one sleep/retry.
         int previous_alloc_count = Integer.MAX_VALUE;
 
+        int num_retries = 0;
+
         for(;;)
         {
             // loop until success, or until sleep/retry does not result
@@ -136,7 +138,6 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             rs.next();
 
             int num_allocated_pages = rs.getInt(1);
-            int num_retries = 0;
 
             // first check if count is the expected value, if so done.
             if (num_allocated_pages == expectedAlloc)
@@ -168,6 +169,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                         "Fail with retries -- num_allocated_pages:" + 
                         num_allocated_pages + 
                         " == expectedAlloc: " + expectedAlloc +
+                        " previous_alloc_count: " + previous_alloc_count +
                         " num_retries: " + num_retries, 
                         num_allocated_pages == expectedAlloc); 
                 }
@@ -182,6 +184,8 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                     " > expectedAlloc: " + expectedAlloc, 
                     num_allocated_pages == expectedAlloc); 
             }
+
+            rs.close();
         } 
     }
 
