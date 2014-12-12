@@ -324,30 +324,24 @@ class HeapPostCommit implements Serviceable
             // could not be granted immediately. 
 
 			//Reversed the fix for 4255:
-			//page reclaimation is done asynchronosly by raswstore daemon
+			//page reclaimation is done asynchronosly by rawstore daemon
 			//not good to WAIT FOR LOCKS , as it can freeze the daemon
-			//If we can not get the lock this reclamation request will 
+			//If we can not get the lock this reclamation request will be
 			//requeued.
 
             // if does not exist will throw exception, which the code will 
             // handle in the same way as it does heap.open failing if trying 
             // to open a dropped container.
 
-            Conglomerate conglom = 
-                internal_xact.findExistingConglomerateFromKey(
-                    page_key.getContainerId());
-
-            if (SanityManager.DEBUG)
-            {
-                // This code can only handle Heap conglomerates.
-                SanityManager.ASSERT(conglom instanceof Heap,
-                        "Code expecting PageKey/ContainerKey of a Heap");
-            }
-
-            Heap heap = (Heap) conglom;
+            // DERBY-6774, changed to use openByContainerKey which insures
+            // that background thread will have a lock on the table before
+            // accessing and possibly loading the conglomerate cache.  This
+            // insure it waits for in process alter table calls, before 
+            // loading the conglomerate cache.
 
             heapcontroller = (HeapController)
-                heap.open(
+                Heap.openByContainerKey(
+                    page_key.getContainerId(),
                     internal_xact,
                     internal_xact.getRawStoreXact(),
                     false,
@@ -357,7 +351,7 @@ class HeapPostCommit implements Serviceable
                     internal_xact.getRawStoreXact().newLockingPolicy(
                         LockingPolicy.MODE_RECORD,
                         TransactionController.ISOLATION_REPEATABLE_READ, true),
-                    heap,
+                    null,
                     (DynamicCompiledOpenConglomInfo) null);
 
             // We got a table intent lock, all deleted rows we encounter can

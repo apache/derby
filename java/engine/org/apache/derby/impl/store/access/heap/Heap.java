@@ -60,6 +60,7 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -432,7 +433,6 @@ public class Heap
             // invalidate the cache after an abort of a alter table, but
             // I think there is still a race condition.
 
-            /*
             if (column_id != format_ids.length)
             {
                 if (SanityManager.DEBUG)
@@ -447,7 +447,6 @@ public class Heap
                         new Long(column_id), 
                         new Long(this.format_ids.length)));
             }
-            */
 
             // create a new array, and copy old values to it.
             int[] old_format_ids = format_ids;
@@ -720,6 +719,82 @@ public class Heap
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
                     new Long(id.getContainerId()).toString());
+        }
+
+		HeapController heapcontroller = new HeapController();
+
+        heapcontroller.init(open_conglom);
+
+		return(heapcontroller);
+	}
+
+    /**
+     * Open a heap controller given ContainerKey.
+     * <p>
+     * Static routine to open a container given input of the ContainerKey.
+     * Routine will lock the container first, and then get the Heap from
+     * the conglomerate cache.  This insures that interaction with the
+     * conglomerate cache is safe with respect to concurrent alter table's 
+     * which may or may not commit.  
+     *
+     * Currently only package accessible and only used by HeapPostCommit.
+     * Longer term would be better to change all of the open interfaces
+     * to get lock before accessing conglomerate cache rather than have a 
+     * specific interface for HeapPostCommit.
+     *
+	 * @see Conglomerate#open
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+	static /* package */ ConglomerateController openByContainerKey(
+    ContainerKey                    container_key,
+    TransactionManager              xact_manager,
+    Transaction                     rawtran,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    LockingPolicy                   locking_policy,
+    StaticCompiledOpenConglomInfo   static_info,
+    DynamicCompiledOpenConglomInfo  dynamic_info)
+		throws StandardException
+	{
+        // get lock on conglomerate before accessing the conglomerate cache.
+        // This prevents background competing threads from loading an
+        // inconsistent conglomerate into the cache while competing with 
+        // something like an alter table add column that may or may not
+        // commit.
+
+        if (container_key.getSegmentId() == ContainerHandle.TEMPORARY_SEGMENT)
+        {
+			open_mode |= ContainerHandle.MODE_TEMP_IS_KEPT;
+        }
+
+        // TODO (mikem) - check about open_mode and temp containers.
+        ContainerHandle open_container = 
+             rawtran.openContainer(container_key, locking_policy, open_mode); 
+
+        Heap heap = (Heap)
+            xact_manager.findExistingConglomerateFromKey(container_key);
+
+        OpenConglomerate open_conglom = new OpenHeap();
+
+
+        if (open_conglom.init(
+                (ContainerHandle) open_container,
+                heap,
+                heap.format_ids,
+                heap.collation_ids,
+                xact_manager,
+                rawtran,
+                hold,
+                open_mode,
+                lock_level,
+                locking_policy,
+                dynamic_info) == null)
+        {
+            throw StandardException.newException(
+                    SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                    new Long(container_key.getContainerId()).toString());
         }
 
 		HeapController heapcontroller = new HeapController();
