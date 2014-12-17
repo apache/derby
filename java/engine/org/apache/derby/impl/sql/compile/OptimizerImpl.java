@@ -74,24 +74,24 @@ class OptimizerImpl implements Optimizer
      * Enforcement of ordering dependencies is done through
      * assignedTableMap.
      */
-	private JBitSet		 assignedTableMap;
-	private OptimizableList optimizableList;
-    private OptimizerPlan   overridingPlan;
-    private OptimizerPlan   currentPlan;
-	private OptimizablePredicateList predicateList;
-	private JBitSet					 nonCorrelatedTableMap;
+	private JBitSet                     assignedTableMap;
+	private OptimizableList             optimizableList;
+    private OptimizerPlan               overridingPlan;
+    private OptimizerPlan               currentPlan;
+	private OptimizablePredicateList    predicateList;
+	private JBitSet					    nonCorrelatedTableMap;
 
-	private int[]			 proposedJoinOrder;
-	private int[]					 bestJoinOrder;
-	private int			 joinPosition;
-	private boolean					 desiredJoinOrderFound;
+	private int[]			            proposedJoinOrder;
+	private int[]					    bestJoinOrder;
+	private int			                joinPosition;
+	private boolean					    desiredJoinOrderFound;
 
 	/* This implements a state machine to jump start to a appearingly good join
 	 * order, when the number of tables is high, and the optimization could take
-	 * a long time.  A good start can prune better, and timeout sooner.  Otherwise,
-	 * it may take forever to exhaust or timeout (see beetle 5870).  Basically after
-	 * we jump, we walk the high part, then fall when we reach the peak, finally we
-	 * walk the low part til where we jumped to.
+	 * a long time.  A good start can prune better, and timeout sooner.  
+     * Otherwise, it may take forever to exhaust or timeout (see beetle 5870).  
+     * Basically after we jump, we walk the high part, then fall when we reach 
+     * the peak, finally we walk the low part until where we jumped to.
 	 */
 	private static final int NO_JUMP = 0;
 	private static final int READY_TO_JUMP = 1;
@@ -215,7 +215,9 @@ class OptimizerImpl implements Optimizer
 
 		currentSortAvoidanceCost = getNewCostEstimate(0.0d, 0.0d, 0.0d);
 
-		bestCost = getNewCostEstimate(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+		bestCost = 
+            getNewCostEstimate(
+                Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
 		// Verify that any Properties lists for user overrides are valid
 		optimizableList.verifyProperties(dDictionary);
@@ -232,18 +234,19 @@ class OptimizerImpl implements Optimizer
 
 		bestJoinOrder = new int[numOptimizables];
 		joinPosition = -1;
-		this.optimizableList = optimizableList;
-		this.overridingPlan = overridingPlan;
-		this.predicateList = predicateList;
-		this.dDictionary = dDictionary;
-		this.ruleBasedOptimization = ruleBasedOptimization;
-		this.noTimeout = noTimeout;
-		this.maxMemoryPerTable = maxMemoryPerTable;
-		this.joinStrategies = joinStrategies;
-		this.tableLockThreshold = tableLockThreshold;
-		this.requiredRowOrdering = requiredRowOrdering;
-		this.useStatistics = useStatistics;
-        this.lcc = lcc;
+
+		this.optimizableList         = optimizableList;
+		this.overridingPlan          = overridingPlan;
+		this.predicateList           = predicateList;
+		this.dDictionary             = dDictionary;
+		this.ruleBasedOptimization   = ruleBasedOptimization;
+		this.noTimeout               = noTimeout;
+		this.maxMemoryPerTable       = maxMemoryPerTable;
+		this.joinStrategies          = joinStrategies;
+		this.tableLockThreshold      = tableLockThreshold;
+		this.requiredRowOrdering     = requiredRowOrdering;
+		this.useStatistics           = useStatistics;
+        this.lcc                     = lcc;
 
 		/* initialize variables for tracking permutations */
 		assignedTableMap = new JBitSet(numTablesInQuery);
@@ -271,22 +274,29 @@ class OptimizerImpl implements Optimizer
 		bestJoinOrderUsedPredsFromAbove = false;
 
 		// Optimization started
-		if (tracingIsOn()) { tracer().traceStartQueryBlock( timeOptimizationStarted, hashCode(), optimizableList ); }
+		if (tracingIsOn()) 
+        { 
+            tracer().traceStartQueryBlock( 
+                timeOptimizationStarted, hashCode(), optimizableList ); 
+        }
 
         // make sure that optimizer overrides are bound and left-deep
         if ( overridingPlan != null )
         {
             if ( !overridingPlan.isBound() )
             {
-                throw StandardException.newException( SQLState.LANG_UNRESOLVED_ROW_SOURCE );
+                throw StandardException.newException(
+                        SQLState.LANG_UNRESOLVED_ROW_SOURCE );
             }
             
             int     actualRowSourceCount = optimizableList.size();
             int     overriddenRowSourceCount = overridingPlan.countLeafNodes();
             if ( actualRowSourceCount != overriddenRowSourceCount )
             {
-                throw StandardException.newException
-                    ( SQLState.LANG_BAD_ROW_SOURCE_COUNT, overriddenRowSourceCount, actualRowSourceCount );
+                throw StandardException.newException( 
+                    SQLState.LANG_BAD_ROW_SOURCE_COUNT, 
+                    overriddenRowSourceCount, 
+                    actualRowSourceCount );
             }
         }
 	}
@@ -450,7 +460,10 @@ class OptimizerImpl implements Optimizer
 			currentTime = System.currentTimeMillis();
 			timeExceeded = (currentTime - timeOptimizationStarted) > timeLimit;
 
-			if (tracingIsOn() && timeExceeded) { tracer().traceTimeout( currentTime, bestCost ); }
+			if (tracingIsOn() && timeExceeded) 
+            { 
+                tracer().traceTimeout( currentTime, bestCost ); 
+            }
 		}
 
 		if (bestCost.isUninitialized() && foundABestPlan &&
@@ -885,8 +898,9 @@ class OptimizerImpl implements Optimizer
 				{
 					permuteState = JUMPING;
 
-					/* A simple heuristics is that the row count we got indicates a potentially
-					 * good join order.  We'd like row count to get big as late as possible, so
+					/* A simple heuristics is that the row count we got 
+                     * indicates a potentially good join order.  We'd like row 
+                     * count to get big as late as possible, so
 					 * that less load is carried over.
 					 */
 					double rc[] = new double[numOptimizables];
