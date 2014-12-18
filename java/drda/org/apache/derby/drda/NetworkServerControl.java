@@ -37,7 +37,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 /** 
     NetworkServerControl provides the ability to start a Network Server or 
-    connect to a running Network Server to shutdown, configure or retreive 
+    connect to a running Network Server to shutdown, configure or retrieve 
     diagnostic information.  With the exception of ping, these commands 
     can  only be performed from the  machine on which the server is running.  
     Commands can be performed from  the command line with the following 
@@ -45,16 +45,18 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
     <P>
     <UL>
-    <LI>start [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This starts the network
-    server on the port/host specified or on localhost, port 1527 if no
+    <LI>start [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This starts the Network
+    Server on the port/host specified or on localhost, port 1527 if no
     host/port is specified and no properties are set to override the 
-    defaults. By default Network Server will only listen for 
+    defaults. By default a security manager with a default security policy will 
+    be installed. The default security policy file is called server.policy. 
+    By default the Network Server will only listen for 
     connections from the machine on which it is running. 
     Use -h 0.0.0.0 to listen on all interfaces or -h &lt;hostname> to listen 
     on a specific interface on a  multiple IP machine. 
     For documentation on &lt;sslmode&gt;, consult the Server and Administration Guide.</LI>
 
-    <LI>shutdown [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;] [-user &lt;username&gt;] [-password &lt;password&gt;]: This shutdowns the network server with given user credentials on the host and port specified or on the local host and port 1527(default) if no host or port is specified.  </LI> 
+    <LI>shutdown [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;] [-user &lt;username&gt;] [-password &lt;password&gt;]: This shutdowns the Network Server with given user credentials on the host and port specified or on the local host and port 1527(default) if no host or port is specified.  </LI> 
 
     <LI>ping [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]
     This will test whether the Network Server is up.
@@ -159,8 +161,8 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     </PRE>
     </P>
 
-    <P>This is an example of starting and then shutting down the network 
-       server on port 1621 on machine myhost   
+    <P>This is an example of starting and then shutting down the Network 
+       Server on port 1621 on machine myhost   
     <PRE>
     java org.apache.derby.drda.NetworkServerControl  start -h myhost -p 1621
     java org.apache.derby.drda.NetworkServerControl  shutdown -h myhost -p 1621
@@ -380,8 +382,9 @@ public class NetworkServerControl{
      **/
 
     /** Start a Network Server
-     *  This method will launch a separate thread and start Network Server.
+     *  This method will launch a separate thread and start a Network Server.
      *  This method  may return before the server is ready to accept connections.
+     *  This will also install a security manager with a default security policy.
      *  Use the ping method to verify that the server has started.
      *
      * <P>
@@ -419,7 +422,7 @@ public class NetworkServerControl{
     }
 
     /**
-     * Check if Network Server is started
+     * Check if the Network Server is started
      * Excecutes and returns without error if the server has started
      *
      * @exception Exception throws an exception if an error occurs
