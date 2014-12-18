@@ -381,7 +381,7 @@ public class NetworkServerControl{
      ************************************************************************
      **/
 
-    /** Start a Network Server
+    /** Start a Network Server.
      *  This method will launch a separate thread and start a Network Server.
      *  This method  may return before the server is ready to accept connections.
      *  This will also install a security manager with a default security policy.
@@ -422,7 +422,7 @@ public class NetworkServerControl{
     }
 
     /**
-     * Check if the Network Server is started
+     * Check if the Network Server is started.
      * Excecutes and returns without error if the server has started
      *
      * @exception Exception throws an exception if an error occurs
