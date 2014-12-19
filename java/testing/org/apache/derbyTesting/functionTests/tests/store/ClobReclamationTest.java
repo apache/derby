@@ -152,10 +152,12 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                     num_retries++;
 
                     // background thread made progress in last sleep,
-                    // try sleeping again.
+                    // try sleeping again, wait longer as this machine
+                    // seems to take longer to process the post
+                    // commit work.
                     try 
                     {
-                        Thread.sleep(5000);
+                        Thread.sleep(10000 * num_retries);
                     }
                     catch (Exception ex)
                     {
