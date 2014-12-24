@@ -154,10 +154,17 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                     // background thread made progress in last sleep,
                     // try sleeping again, wait longer as this machine
                     // seems to take longer to process the post
-                    // commit work.
+                    // commit work.  Most environments just need one
+                    // short retry, while enviroments where this does 
+                    // not work need much more time.  Make second retry
+                    // much longer.
                     try 
                     {
-                        Thread.sleep(10000 * num_retries);
+                        if (num_retries <= 1)
+                            Thread.sleep(10000);
+                        else
+                            Thread.sleep(60000 * num_retries);
+
                     }
                     catch (Exception ex)
                     {
@@ -176,7 +183,9 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                         num_allocated_pages == expectedAlloc); 
                 }
 
-                previous_alloc_count = num_allocated_pages;
+                // force at least 2 retries
+                if (num_retries > 1)
+                    previous_alloc_count = num_allocated_pages;
             }
             else
             {
