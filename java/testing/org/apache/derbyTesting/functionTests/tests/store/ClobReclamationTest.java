@@ -191,7 +191,8 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
             {
                 // no retries allowed, let assert fail.
                 assertTrue(
-                    "Fail -- num_allocated_pages:" + num_allocated_pages + 
+                    "Fail, no retries -- num_allocated_pages:" + 
+                    num_allocated_pages + 
                     " > expectedAlloc: " + expectedAlloc, 
                     num_allocated_pages == expectedAlloc); 
             }
