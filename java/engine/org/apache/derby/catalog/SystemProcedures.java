@@ -2489,7 +2489,20 @@ public class SystemProcedures  {
             return IdUtil.getUserAuthorizationId( userName );
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
-  
+
+    /**
+     * Return the database name
+     * @return database name
+     * @throws SQLException
+     */
+    public static String SYSCS_GET_DATABASE_NAME()
+            throws SQLException
+    {
+        //DERBY-6725(Add a system function which returns the name of the database.)
+        LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+        return(lcc.getDbname());
+    }
+
     /**
      * Peek at the current value of a sequence generator without advancing it.
      *

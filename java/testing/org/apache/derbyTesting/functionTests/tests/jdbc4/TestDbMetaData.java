@@ -150,6 +150,9 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
           "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
           FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_NAME",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_DATABASE_NAME", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
           "org.apache.derby.catalog.SystemProcedures." +
           "SYSCS_GET_DATABASE_PROPERTY", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },

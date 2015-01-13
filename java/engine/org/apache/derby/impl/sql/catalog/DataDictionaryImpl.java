@@ -463,6 +463,7 @@ public final class	DataDictionaryImpl
 												"SYSCS_GET_RUNTIMESTATISTICS", 
 												"SYSCS_PEEK_AT_SEQUENCE",
 												"SYSCS_PEEK_AT_IDENTITY",
+												"SYSCS_GET_DATABASE_NAME",
 												};
 	
 	/**
@@ -11444,6 +11445,8 @@ public final class	DataDictionaryImpl
         create_10_10_system_procedures( tc, newlyCreatedRoutines );
         // add 10.11 specific system procedures
         create_10_11_system_procedures( tc, newlyCreatedRoutines );
+        // add 10.12 specific system procedures
+        create_10_12_system_procedures( tc, newlyCreatedRoutines );
     }
 
     /**
@@ -13402,6 +13405,37 @@ public final class	DataDictionaryImpl
                 newlyCreatedRoutines,
                 tc);
         }
+    }
+
+    /**
+     * <p>
+     * Create system procedures that are part of the SYSCS_UTIL schema, added in version 10.12.
+     * </p>
+     *
+     * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
+     **/
+    void create_10_12_system_procedures( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
+        throws StandardException
+    {
+            UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
+            // void SYSCS_UTIL.SYSCS_GET_DATABASE_NAME()
+            {               
+                createSystemProcedureOrFunction(
+                    "SYSCS_GET_DATABASE_NAME",
+                    sysUtilUUID,
+                    (String[]) null,
+                    (TypeDescriptor[]) null,
+                    0,
+                    0,
+                    RoutineAliasInfo.READS_SQL_DATA,
+                    false,
+                    false,
+                    DataTypeDescriptor.getCatalogType( Types.VARCHAR ),
+                    newlyCreatedRoutines,
+                    tc);
+            }
     }
 
 

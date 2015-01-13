@@ -598,9 +598,9 @@ public class RolesTest extends BaseJDBCTestCase
 
         assertSysColPermsRowCount(0, 2, 2);
 
-        assertSysRoutinePermsRowCount(10, // 10 pre-existing grants to PUBLIC
-                                      11,
-                                      11);
+        assertSysRoutinePermsRowCount(11, // 11 pre-existing grants to PUBLIC
+                                      12,
+                                      12);
 
         /*
          * DROP ROLE
@@ -628,12 +628,12 @@ public class RolesTest extends BaseJDBCTestCase
                                   // to admin is de facto to a user
                                   // named admin:
                                   2);
-        assertSysRoutinePermsRowCount(10, 10,
+        assertSysRoutinePermsRowCount(11, 11,
                                       //  nonDbo run: role admin
                                       // has been dropped, so this
                                       // run's grant to admin is de
                                       // facto to a user named admin:
-                                      11);
+                                      12);
 
         doStmt("drop role \"NONE\"",
                sqlAuthorizationRequired, null , roleDboOnly);
@@ -655,7 +655,7 @@ public class RolesTest extends BaseJDBCTestCase
                                     1,
                                     0);
         assertSysColPermsRowCount(0,0,0);
-        assertSysRoutinePermsRowCount(10,10,10);
+        assertSysRoutinePermsRowCount(11,11,11);
 
         // roles foo and bar survive to nonDbo run and beyond:
         assertSysRolesRowCount(0, 5, 5);

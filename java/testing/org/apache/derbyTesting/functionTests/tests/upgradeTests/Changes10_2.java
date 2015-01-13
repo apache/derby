@@ -325,10 +325,10 @@ public class Changes10_2 extends UpgradeChange {
                     "R.GRANTOR = '"
                         + getTestConfiguration().getUserName() + "'" +
                     " ORDER BY 1");
-            
             JDBC.assertFullResultSet(rs, new String[][]
                     {{"SYSCS_COMPRESS_TABLE"},
                     {"SYSCS_DROP_STATISTICS"},
+                    {"SYSCS_GET_DATABASE_NAME"},
                     {"SYSCS_GET_RUNTIMESTATISTICS"},
                     {"SYSCS_INPLACE_COMPRESS_TABLE"},
                     {"SYSCS_MODIFY_PASSWORD"},

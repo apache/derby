@@ -404,7 +404,7 @@ public	class DD_Version implements	Formatable
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_5)
         {
-            // On ugrade from versions before 10.6, create system procedures
+            // On upgrade from versions before 10.6, create system procedures
             // added in 10.6.
             bootingDictionary.create_10_6_system_procedures(tc,
                     newlyCreatedRoutines);
@@ -419,7 +419,7 @@ public	class DD_Version implements	Formatable
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
         {
-            // On ugrade from versions before 10.2, create system procedures
+            // On upgrade from versions before 10.2, create system procedures
             // added in 10.2.
             bootingDictionary.create_10_2_system_procedures(
                 tc,
@@ -447,7 +447,7 @@ public	class DD_Version implements	Formatable
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_2)
         {
-            // On ugrade from versions before 10.3, create system procedures
+            // On upgrade from versions before 10.3, create system procedures
             // added in 10.3.
             bootingDictionary.create_10_3_system_procedures(tc, newlyCreatedRoutines );
         }
@@ -490,7 +490,7 @@ public	class DD_Version implements	Formatable
         
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_8)
         {
-            // On ugrade from versions before 10.9, create system procedures
+            // On upgrade from versions before 10.9, create system procedures
             // added in 10.9.
             bootingDictionary.create_10_9_system_procedures( tc, newlyCreatedRoutines );
             
@@ -508,7 +508,7 @@ public	class DD_Version implements	Formatable
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_9)
         {
-            // On ugrade from versions before 10.10, create system procedures
+            // On upgrade from versions before 10.10, create system procedures
             // added in 10.10.
             bootingDictionary.create_10_10_system_procedures( tc, newlyCreatedRoutines );
         }
@@ -522,12 +522,19 @@ public	class DD_Version implements	Formatable
                 DataDictionary.SYSTRIGGERS_CATALOG_NUM).getCatalogRowFactory(),
                 new int[] { 18 }, tc);
             
-            // On ugrade from versions before 10.11, create system procedures
+            // On upgrade from versions before 10.11, create system procedures
             // added in 10.11.
             bootingDictionary.create_10_11_system_procedures( tc, newlyCreatedRoutines );
 
             // Add a sequence generator for every identity column
             bootingDictionary.createIdentitySequences( tc );
+        }
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_11)
+        {
+            // On upgrade from versions before 10.12, create system procedures
+            // added in 10.12.
+            bootingDictionary.create_10_12_system_procedures( tc, newlyCreatedRoutines );
         }
 
         // Grant PUBLIC access to some system routines

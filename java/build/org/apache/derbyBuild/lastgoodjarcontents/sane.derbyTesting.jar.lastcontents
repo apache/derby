@@ -313,6 +313,7 @@ org.apache.derbyTesting.functionTests.tests.lang.Derby5652.class
 org.apache.derbyTesting.functionTests.tests.lang.Derby5866TriggerOrderTest.class
 org.apache.derbyTesting.functionTests.tests.lang.Derby6131.class
 org.apache.derbyTesting.functionTests.tests.lang.Derby6587Test.class
+org.apache.derbyTesting.functionTests.tests.lang.Derby6725GetDatabaseName.class
 org.apache.derbyTesting.functionTests.tests.lang.DistinctTest.class
 org.apache.derbyTesting.functionTests.tests.lang.DropTableTest.class
 org.apache.derbyTesting.functionTests.tests.lang.DummyAwareVTI.class
