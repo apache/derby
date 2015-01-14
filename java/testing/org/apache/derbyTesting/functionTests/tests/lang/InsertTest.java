@@ -44,7 +44,108 @@ public class InsertTest extends BaseJDBCTestCase {
     public static Test suite() {
         return TestConfiguration.defaultSuite(InsertTest.class);
     }
+    
+    public void testDerby6786Case1() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE K1 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE K2 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE T  (S DECIMAL)");
+        s.execute("INSERT INTO K1 VALUES ('110007', 224)");
+        s.execute("INSERT INTO K2 VALUES ('110007', 361)");
+        //Run just plain select
+        derby6786QueriesToRun(s, "");
+        //Run insert into ... select
+        derby6786QueriesToRun(s, "insert into t ");
+        s.execute("DROP   TABLE K1");
+        s.execute("DROP   TABLE K2");
+        s.execute("DROP   TABLE T");
+    }
 
+    public void testDerby6786InsertIntoSelectCase2() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE K1 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE K2 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE T  (S DECIMAL)");
+        s.execute("INSERT INTO K1 VALUES ('110007', 224)");
+        s.execute("INSERT INTO K2 VALUES ('110007', null)");
+        //Run just plain select
+        derby6786QueriesToRun(s, "");
+        //Run insert into ... select
+        derby6786QueriesToRun(s, "insert into t ");
+        s.execute("DROP   TABLE K1");
+        s.execute("DROP   TABLE K2");
+        s.execute("DROP   TABLE T");
+    }
+
+    //DERBY-6786(NullPointerException in INSERT INTO statement with multiple subselects)
+    //Following test case has zz against its name and hence it won't run. 
+    // This is because some queries in the test can cause NPE. Once 
+    // DERBY-6786 is fixed, following test should be enabled by removing
+    // zz.
+    public void zztestDerby6786InsertIntoSelectCase3() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE K1 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE K2 (K VARCHAR(64), S DECIMAL)");
+        s.execute("CREATE TABLE T  (S DECIMAL)");
+        s.execute("INSERT INTO K1 VALUES ('110007', 224)");
+        s.execute("INSERT INTO K2 VALUES ('110019', null)");
+        //Run just plain select
+        derby6786QueriesToRun(s, "");
+        //Run insert into ... select. Running insert will into can result into
+        // NPE for some of the queries until DERBY-6786 is fixed.
+        derby6786QueriesToRun(s, "insert into t ");
+        s.execute("DROP   TABLE K1");
+        s.execute("DROP   TABLE K2");
+        s.execute("DROP   TABLE T");
+    }
+    
+    private void derby6786QueriesToRun(Statement s, String insertInto) throws SQLException {
+        //following left join works
+        s.execute(insertInto +
+            "select erg.* from ( " +
+            "select d1.s from (select k,s from k1) as d1 " +
+            "left join "+
+            "(select k,s from k2) as d2 on d1.k=d2.k" +
+            ") as erg " +
+            "where s > 10");
+        //DERBY-6786 : following left join can fail if the right table  
+        // does not have a matching row
+        s.execute(insertInto +
+                "select erg.* from ( " +
+                "select d2.s from (select k,s from k1) as d1 " +
+                "left join "+
+                "(select k,s from k2) as d2 on d1.k=d2.k" +
+                ") as erg " +
+                "where s > 10");
+        //DERBY-6786 : following is another example of left join that can fail 
+        // if the right table does not have a matching row
+        s.execute(insertInto +
+                "select erg.* from ( " +
+                "select d2.s from k1 " +
+                "left join "+
+                "(select k,s from k2) as d2 on k1.k=d2.k" +
+                ") as erg " +
+                "where s > 10");
+        //DERBY-6786 : following right join can fail if the left table  
+        // does not have a matching row
+        s.execute(insertInto +
+            "select erg.* from ( " +
+            "select d1.s from (select k,s from k1) as d1 " +
+            "right join "+
+            "(select k,s from k2) as d2 on d1.k=d2.k" +
+            ") as erg " +
+            "where s > 10");
+        //following right join works
+        s.execute(insertInto +
+                "select erg.* from ( " +
+                "select d2.s from (select k,s from k1) as d1 " +
+                "right join "+
+                "(select k,s from k2) as d2 on d1.k=d2.k" +
+                ") as erg " +
+                "where s > 10");
+
+    }
+    
     /**
      * Regression test case for DERBY-4348 where an INSERT INTO .. SELECT FROM
      * statement would result in a LONG VARCHAR column becoming populated with
