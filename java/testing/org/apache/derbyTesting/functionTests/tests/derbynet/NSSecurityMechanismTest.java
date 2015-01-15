@@ -585,7 +585,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                 StringWriter sw = new StringWriter();
                 sqle.printStackTrace(new PrintWriter(sw));
                 if (!sw.toString().contains(
-                    "java.lang.InternalError: unexpected CryptoAPI failure"))
+                    "java.lang.InternalError: Unexpected CryptoAPI failure"))
                     assertSQLState(expectedValue, sqle);
                 else
                     alarm("hit DERBY-6702; for values:" +
