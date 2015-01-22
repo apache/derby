@@ -197,8 +197,6 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         util.DEBUG("4. testPostStartedMasterAndSlave_StopSlave: " +
                    connectionURL);
 
-        waitForConnect(100L, 10, 
-                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
-                slaveServerHost, slaveServerPort);
+        waitForConnect(100L, 10, db, slaveServerHost, slaveServerPort);
     }
 }
