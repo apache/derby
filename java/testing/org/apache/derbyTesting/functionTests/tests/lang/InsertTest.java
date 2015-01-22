@@ -44,6 +44,51 @@ public class InsertTest extends BaseJDBCTestCase {
     public static Test suite() {
         return TestConfiguration.defaultSuite(InsertTest.class);
     }
+
+    //DERBY-6788(Wrong value inserted by INSERT INTO with multiple subselects)
+    //Following test case has zz against its name and hence it won't run. 
+    // This is because one INSERT with JOIN in the test can cause data .  
+    // corruption. Once DERBY-6788 is fixed, following test should be enabled 
+    // by removing zz. This bug might be related to 
+    // DERBY-6786(NullPointerException in INSERT INTO statement with multiple 
+    //  subselects)
+    public void zztestDerby6788() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE M1 (K varchar(64), S decimal)");
+        s.execute("CREATE TABLE M2 (K varchar(64), S decimal)");
+        s.execute("CREATE TABLE V  (S DECIMAL)");
+        s.execute("INSERT INTO M1 VALUES ('Bug', 2015)");
+        s.execute("INSERT INTO M2 VALUES ('Bug', 1957)");
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+            "SELECT res.* FROM (SELECT d2.s FROM m1 "+
+            "LEFT JOIN " +
+            "(SELECT k,s FROM m2) AS d2 ON m1.k=d2.k) AS res"),
+            new String[][]{{"1957"}});
+        //The INSERT below will insert incorrect value into V because of
+        // DERBY-6788. This bug might be related to 
+        // DERBY-6786(NullPointerException in INSERT INTO statement with  
+        //  multiple subselects)
+        s.execute("INSERT INTO V "+
+                "(SELECT res.* FROM (SELECT d2.s FROM m1 " +
+        		"LEFT JOIN " +
+                "(SELECT k,s FROM m2) AS d2 ON m1.k=d2.k) AS res)");
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                "SELECT * FROM V"),
+                new String[][]{{"1957"}});
+        s.execute("INSERT INTO V "+
+                "(SELECT res.* FROM (SELECT d2.s*1 FROM m1 " +
+        		"LEFT JOIN " +
+                "(SELECT k,s FROM m2) AS d2 ON m1.k=d2.k) AS res)");
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                "SELECT * FROM V"),
+                new String[][]{{"1957"},{"1957"}});
+        s.execute("DROP   TABLE M1");
+        s.execute("DROP   TABLE M2");
+        s.execute("DROP   TABLE V");
+    }
     
     public void testDerby6786Case1() throws SQLException {
         Statement s = createStatement();
