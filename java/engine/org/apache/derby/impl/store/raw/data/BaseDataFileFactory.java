@@ -2202,7 +2202,7 @@ public class BaseDataFileFactory
                   return se.getMessage();
               }
   
-              if ( cs == null )
+              if ( cs == null || cs.getLocation() == null )
                   return null;        
       
               URL result = cs.getLocation ();
