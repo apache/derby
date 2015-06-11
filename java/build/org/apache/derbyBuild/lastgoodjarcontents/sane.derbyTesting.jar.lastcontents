@@ -471,6 +471,7 @@ org.apache.derbyTesting.functionTests.tests.lang.XMLConcurrencyTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLMissingClassesTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLOptimizerTraceTest.class
 org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest.class
+org.apache.derbyTesting.functionTests.tests.lang.XMLXXETest.class
 org.apache.derbyTesting.functionTests.tests.lang.XplainStatisticsTest.class
 org.apache.derbyTesting.functionTests.tests.lang._Suite.class
 org.apache.derbyTesting.functionTests.tests.lang.concateTests.class
