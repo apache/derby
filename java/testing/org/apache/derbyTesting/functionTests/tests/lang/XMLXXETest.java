@@ -118,4 +118,33 @@ public final class XMLXXETest extends BaseJDBCTestCase {
         password.delete();
     }
 
+    public void testDerby6807BillionLaughs() throws SQLException
+    {
+        Statement st = createStatement();
+        st.executeUpdate("create table xml_billion_laughs( xml_col xml )");
+
+String xmlBillionLaughs = "insert into xml_billion_laughs( xml_col ) values(" +
+                         " xmlparse(document '" +
+"<!DOCTYPE lolz [" +
+" <!ENTITY lol \"lol\">" +
+" <!ELEMENT lolz (#PCDATA)>" +
+" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">" +
+" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">" +
+" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">" +
+" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">" +
+" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">" +
+" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">" +
+" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">" +
+" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">" +
+" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">" +
+"]>" +
+"<lolz>&lol9;</lolz>' PRESERVE WHITESPACE))";
+
+	assertStatementError( "2200M", st, xmlBillionLaughs );
+
+	// Since we can't even parse the document, we never get to the point
+	// where we might try to serialize it back out.
+        //    "select xmlserialize(xml_col as clob) from xml_billion_laughs");
+    }
+
 }
