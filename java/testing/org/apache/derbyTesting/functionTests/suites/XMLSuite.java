@@ -50,6 +50,7 @@ public final class XMLSuite extends BaseTestCase {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLBindingTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLMissingClassesTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLConcurrencyTest.suite());
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLXXETest.suite());
         
         return suite;
     }
