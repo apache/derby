@@ -99,11 +99,14 @@ public final class XMLXXETest extends BaseJDBCTestCase {
         
         s.execute("CREATE TABLE xml_data(xml_col XML)");
 
-        s.execute("INSERT INTO xml_data(xml_col) VALUES(XMLPARSE(DOCUMENT" 
+        String stmt = "INSERT INTO xml_data(xml_col) VALUES(XMLPARSE(DOCUMENT" 
                 + "'<!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:"
-	        + File.separator    
                 + path +"\" >]><yolo>&xxe;</yolo>'"
-                + "PRESERVE WHITESPACE))");
+                + "PRESERVE WHITESPACE))";
+
+	// System.out.println( stmt );
+
+	s.execute( stmt );
 
 	// XXX: The next result is wrong. The expected behavior is that the
 	// query should be rejected as a security violation. See DERBY-6807
