@@ -33,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.ParameterMetaData;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -4743,7 +4744,7 @@ public final class	DataDictionaryImpl
 	 * @return Transformed trigger action sql
 	 * @throws StandardException
 	 */
-	public String getTriggerActionString(
+	public int[] examineTriggerNodeAndCols(
 			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
@@ -4793,6 +4794,13 @@ public final class	DataDictionaryImpl
 		//not recognized as trigger columns.
 		int[] triggerColsAndTriggerActionCols = new int[numberOfColsInTriggerTable];
 
+		/**
+		 * It identifies all the trigger action columns and is initialized to -1.
+		 */
+		
+		int[] triggerActionColsOnly = new int[numberOfColsInTriggerTable];
+		java.util.Arrays.fill(triggerActionColsOnly, -1);
+
 		if (referencedCols == null) {
 			//This means that even though the trigger is defined at row 
 			//level, it is either an INSERT/DELETE trigger. Or it is an
@@ -4823,6 +4831,12 @@ public final class	DataDictionaryImpl
 				triggerColsAndTriggerActionCols[referencedCols[i]-1] = referencedCols[i];
 			}
 		}
+		if (referencedColsInTriggerAction != null) {
+			for (int i=0; i < referencedColsInTriggerAction.length; i++){
+				if( referencedColsInTriggerAction[i] > 0 )
+				triggerColsAndTriggerActionCols[referencedColsInTriggerAction[i]-1] = referencedColsInTriggerAction[i];
+			}
+		}
 
 		/* we need to sort on position in string, beetle 4324
 		 */
@@ -4850,8 +4864,6 @@ public final class	DataDictionaryImpl
 			//those column positions from the trigger table are not being
 			//referenced in the trigger action through the old/new transition
 			//variables.
-			int[] triggerActionColsOnly = new int[numberOfColsInTriggerTable];
-			java.util.Arrays.fill(triggerActionColsOnly, -1);
 						
 			//By this time, we have collected the positions of the trigger
 			//columns in array triggerColsAndTriggerActionCols. Now we need
@@ -4934,6 +4946,8 @@ public final class	DataDictionaryImpl
 			}
 		}
 					
+	Arrays.sort( triggerColsAndTriggerActionCols );
+
 		//Now that we know what columns we need for trigger columns and
 		//trigger action columns, we can get rid of remaining -1 entries
 		//for the remaining columns from trigger table.
@@ -4952,7 +4966,40 @@ public final class	DataDictionaryImpl
 		//needed for trigger execution.
 		triggerColsAndTriggerActionCols = justTheRequiredColumns(
 				triggerColsAndTriggerActionCols, triggerTableDescriptor);
+		
+		return triggerColsAndTriggerActionCols;
+	}
 
+
+	public String getTriggerActionString(
+			Visitable actionStmt,
+			String oldReferencingName,
+			String newReferencingName,
+			String triggerDefinition,
+			int[] referencedCols,
+			int[] referencedColsInTriggerAction,
+			int actionOffset,
+			TableDescriptor triggerTableDescriptor,
+			int triggerEventMask,
+            boolean createTriggerTime,
+            List<int[]> replacements,
+            int[] cols
+			) throws StandardException
+	{
+		boolean in10_9_orHigherVersion = checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
+	
+        StringBuilder newText = new StringBuilder();
+		int start = 0;
+	
+		//Total Number of columns in the trigger table
+		int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
+		int[] triggerColsAndTriggerActionCols = new int[numberOfColsInTriggerTable];
+	
+		SortedSet<ColumnReference> refs = getTransitionVariables(
+                actionStmt, oldReferencingName, newReferencingName);
+	
+		triggerColsAndTriggerActionCols = cols;
+		
 		//This is where we do the actual transformation of trigger action
 		//sql. An eg of that is
 		//	DELETE FROM t WHERE c = old.c

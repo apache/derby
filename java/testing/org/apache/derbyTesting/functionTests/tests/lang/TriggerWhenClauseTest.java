@@ -617,6 +617,137 @@ public class TriggerWhenClauseTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test for Derby-6783.
+     */
+
+    public void testDerby6783() throws SQLException {
+        Statement s = createStatement();
+
+        s.execute("CREATE TABLE tabDerby6783(id INTEGER, result VARCHAR(10), status CHAR(1))");
+
+        s.execute("CREATE TRIGGER trigger6783 AFTER UPDATE OF status ON tabDerby6783 "
+                + "REFERENCING NEW AS newrow FOR EACH ROW WHEN (newrow.status='d') "
+                + "UPDATE tabDerby6783 SET result='completed' WHERE id=newrow.id");
+        s.execute("insert into tabDerby6783 values (1, null, 'a')");
+        // Fire the trigger.
+        s.execute("UPDATE tabDerby6783 SET status='d'");
+        
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("SELECT result FROM tabDerby6783"), 
+                "completed");
+    }
+
+    /**
+     * Derby6783_1_1 test, this test has two trigger fields and
+     * more than 3 column references in the update statement.
+     */
+
+    public void testDerby6783_1_1() throws SQLException 
+    {
+        Statement s = createStatement();
+
+        s.execute("CREATE TABLE tabDerby6783_1_1(ID INTEGER, GRADE1 char(1), GRADE2 char(1),"
+                    + " MARKS1 integer, MARKS2 integer, TOTAL_MARKS integer)");
+
+        s.execute("CREATE TRIGGER trigger6783_1 AFTER UPDATE OF GRADE1, GRADE2 ON tabDerby6783_1_1"
+                    + " REFERENCING NEW AS newrow OLD AS oldrow"
+                    + " FOR EACH ROW WHEN (oldrow.GRADE1 <> newrow.GRADE1 OR oldrow.GRADE2 <> newrow.GRADE2)"
+                    + " UPDATE tabDerby6783_1_1 SET TOTAL_MARKS = oldrow.MARKS1 + oldrow.MARKS2 where id=newrow.id");
+
+        s.execute("INSERT INTO tabDerby6783_1_1 VALUES (1, 'a', 'b', 30, 50, 0)");
+        // Fire the trigger.
+        s.execute("UPDATE tabDerby6783_1_1 SET GRADE1='b'");
+
+        
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("SELECT TOTAL_MARKS FROM tabDerby6783_1_1"), 
+                "80");   
+    }
+
+    /**
+     * Derby6783_1_2 test, is a less complex version of Derby6783_1_1
+     * It has only one column reference in trigger part and in update part.
+     */
+
+    public void testDerby6783_1_2() throws SQLException 
+    {
+        Statement s = createStatement();
+
+        s.execute("CREATE TABLE tabDerby6783_1_2(ID INTEGER, GRADE1 char(1), GRADE2 char(1),"
+                    + " MARKS1 integer, MARKS2 integer, FINAL_GRADE char(1))");
+
+        s.execute("CREATE TRIGGER trigger6783_1 AFTER UPDATE OF MARKS1 ON tabDerby6783_1_2 "
+                    + " REFERENCING NEW AS newrow OLD AS oldrow"
+                    + " FOR EACH ROW WHEN (oldrow.MARKS1 <> newrow.MARKS1)"
+                    + " UPDATE tabDerby6783_1_2 SET FINAL_GRADE = oldrow.GRADE1 where id=newrow.id");  
+
+        s.execute("INSERT INTO tabDerby6783_1_2 VALUES (1, 'a', 'b', 30, 50, 'c')");
+
+        s.execute("UPDATE tabDerby6783_1_2 SET MARKS1=20");
+
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("SELECT FINAL_GRADE FROM tabDerby6783_1_2"), 
+                "a");  
+    }
+
+    /**
+     * Derby6783_2 test, this test has a single trigger column reference
+     * and two column reference in update statement. Also the when clause
+     * has a different column reference than the trigger reference
+    */
+
+    public void testDerby6783_2() throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE tabDerby6783_2(ACC_NUMBER INT, BALANCE FLOAT, RATE REAL,"
+                    + " INTEREST REAL)");
+
+        s.execute("CREATE TRIGGER trigger_2 AFTER UPDATE OF BALANCE ON tabDerby6783_2 "
+                    + " REFERENCING NEW AS newrow OLD AS oldrow"
+                    + " FOR EACH ROW WHEN (oldrow.RATE < 10.0)"
+                    + " UPDATE tabDerby6783_2 SET INTEREST = oldrow.balance + newrow.BALANCE * RATE");
+
+        s.execute("INSERT INTO tabDerby6783_2 VALUES (123, 12383.4534, 8.98, 2340)");
+
+        s.execute("UPDATE tabDerby6783_2 SET BALANCE=22383.4543");
+
+        s.execute("select INTEREST from tabDerby6783_2");
+
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("SELECT INTEREST FROM tabDerby6783_2"), 
+                "213386.86");         
+    }
+
+    /**
+     * Derby6783_3 test, this test referes to different tables in
+     * when clause and update clause.
+    */
+
+    public void testDerby6783_3() throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE tabDerby6783_3_1(FIELD1 VARCHAR(10),"
+                    + " FIELD2 DOUBLE)");
+
+        s.execute("INSERT INTO tabDerby6783_3_1 VALUES ('helloworld', 5454567)");
+
+        s.execute("CREATE TABLE tabDerby6783_3_2(FIELD3 NUMERIC (7,1))");
+
+        s.execute("INSERT INTO tabDerby6783_3_2 VALUES (3.143)");
+
+        s.execute("CREATE TRIGGER TRIGGER_3 AFTER UPDATE OF FIELD1 ON tabDerby6783_3_1"
+                    + " REFERENCING NEW AS newrow OLD AS oldrow"
+                    + " FOR EACH ROW WHEN (newrow.FIELD2 > 3000)"
+                    + " UPDATE tabDerby6783_3_2 SET FIELD3 = newrow.FIELD2 / 10");
+
+        s.execute("UPDATE tabDerby6783_3_1 set FIELD1='hello'");
+
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("SELECT FIELD3 FROM tabDerby6783_3_2"),
+                "545456.7");
+    }
+
+    /**
      * When SQL authorization is enabled, the trigger action (including the
      * WHEN clause) should execute with definer's rights. Verify that it is
      * so.

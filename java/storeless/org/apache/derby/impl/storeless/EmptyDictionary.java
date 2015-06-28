@@ -508,6 +508,23 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
+	public int[] examineTriggerNodeAndCols(
+			Visitable actionStmt,
+			String oldReferencingName,
+			String newReferencingName,
+			String triggerDefinition,
+			int[] referencedCols,
+			int[] referencedColsInTriggerAction,
+			int actionOffset,
+			TableDescriptor triggerTableDescriptor,
+			int triggerEventMask,
+            boolean createTriggerTime,
+            List<int[]> replacements
+			) throws StandardException
+	{
+		return null;
+	}
+
 	public String getTriggerActionString(
 			Visitable actionStmt,
 			String oldReferencingName,
@@ -519,7 +536,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 			TableDescriptor td,
 			int triggerEventMask,
             boolean createTriggerTime,
-            List<int[]> replacements)
+            List<int[]> replacements,
+            int[] cols)
 	throws StandardException {
 		// Auto-generated method stub
 		return null;

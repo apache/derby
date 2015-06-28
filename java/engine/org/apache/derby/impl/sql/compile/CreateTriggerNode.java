@@ -626,6 +626,37 @@ class CreateTriggerNode extends DDLStatementNode
 			//column positions in the array.
 			referencedColsInTriggerAction = new int[triggerTableDescriptor.getNumberOfColumns()];
 			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
+
+			int[] cols;
+
+			cols = getDataDictionary().examineTriggerNodeAndCols(actionNode,
+					oldTableName,
+					newTableName,
+					originalActionText,
+					referencedColInts,
+					referencedColsInTriggerAction,
+                    actionNode.getBeginOffset(),
+					triggerTableDescriptor,
+					triggerEventMask,
+                    true,
+                    actionTransformations);
+
+    		if (whenClause != null)
+    		{
+        		cols = getDataDictionary().examineTriggerNodeAndCols(whenClause,
+        			oldTableName,
+					newTableName,
+					originalActionText,
+					referencedColInts,
+					referencedColsInTriggerAction,
+                    actionNode.getBeginOffset(),
+					triggerTableDescriptor,
+					triggerEventMask,
+                    true,
+                    actionTransformations);
+    		}
+
+
 			//Now that we have verified that are no invalid column references
 			//for trigger columns, let's go ahead and transform the OLD/NEW
 			//transient table references in the trigger action sql.
@@ -639,7 +670,7 @@ class CreateTriggerNode extends DDLStatementNode
 					triggerTableDescriptor,
 					triggerEventMask,
                     true,
-                    actionTransformations);
+                    actionTransformations, cols);
 
             // If there is a WHEN clause, we need to transform its text too.
             if (whenClause != null) {
@@ -650,7 +681,7 @@ class CreateTriggerNode extends DDLStatementNode
                             referencedColsInTriggerAction,
                             whenClause.getBeginOffset(),
                             triggerTableDescriptor, triggerEventMask, true,
-                            whenClauseTransformations);
+                            whenClauseTransformations, cols);
             }
 
 			//Now that we know what columns we need for REFERENCEd columns in

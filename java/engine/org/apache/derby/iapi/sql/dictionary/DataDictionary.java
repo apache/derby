@@ -1203,6 +1203,21 @@ public interface DataDictionary
 	public TriggerDescriptor getTriggerDescriptor(String name, SchemaDescriptor sd)
 				throws StandardException;
 
+	public int[] examineTriggerNodeAndCols(
+			Visitable actionStmt,
+			String oldReferencingName,
+			String newReferencingName,
+			String triggerDefinition,
+			int[] referencedCols,
+			int[] referencedColsInTriggerAction,
+			int actionOffset,
+			TableDescriptor triggerTableDescriptor,
+			int triggerEventMask,
+            boolean createTriggerTime,
+            List<int[]> replacements
+			) throws StandardException;
+	
+
 	/**
 	 * This method does the job of transforming the trigger action plan text
 	 * as shown below. 
@@ -1337,7 +1352,8 @@ public interface DataDictionary
 			TableDescriptor triggerTableDescriptor,
 			int triggerEventMask,
             boolean createTriggerTime,
-            List<int[]> replacements)
+            List<int[]> replacements,
+           	int[] cols)
 	throws StandardException;
 	
 

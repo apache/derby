@@ -1924,6 +1924,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				trd.getTableDescriptor(),
 				trd.getTriggerEventMask(),
                 true,
+                null,
                 null);
 
             if (isWhenClause) {

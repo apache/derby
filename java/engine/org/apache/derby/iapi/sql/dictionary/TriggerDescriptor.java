@@ -403,6 +403,18 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
                     isWhenClause ? pa.parseSearchCondition(originalSQL)
                                  : pa.parseStatement(originalSQL);
 			lcc.popCompilerContext(newCC);
+            int[] cols;
+            cols = dd.examineTriggerNodeAndCols(stmtnode,
+					oldReferencingName,
+					newReferencingName,
+					originalSQL,
+					referencedCols,
+					referencedColsInTriggerAction,
+                    0,
+					td,
+					-1,
+                    false,
+                    null);
 
             String newText = dd.getTriggerActionString(stmtnode,
 					oldReferencingName,
@@ -414,7 +426,8 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					td,
 					-1,
                     false,
-                    null);
+                    null,
+                    cols);
 
             if (isWhenClause) {
                 // The WHEN clause is not a full SQL statement, just a search
