@@ -39,7 +39,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * <p>
@@ -345,8 +347,7 @@ public  class   XmlVTI  extends StringColumnVTI
             else { return false; }
         } catch (Throwable t)
         {
-            t.printStackTrace( System.out );
-            throw new SQLException( t.getMessage() );
+            throw new SQLException( t.getMessage(), t );
         }
     }
 
@@ -372,6 +373,7 @@ public  class   XmlVTI  extends StringColumnVTI
         DocumentBuilderFactory  factory = DocumentBuilderFactory.newInstance();
         
         _builder = factory.newDocumentBuilder();
+        _builder.setErrorHandler(new XMLErrorHandler());
 
         Document        doc = _builder.parse( _xmlResource );
         Element             root = doc.getDocumentElement();
@@ -467,6 +469,47 @@ public  class   XmlVTI  extends StringColumnVTI
         return text;
     }
 
+
+    /*
+     ** The XMLErrorHandler class is just a generic implementation
+     ** of the ErrorHandler interface.  It allows us to catch
+     ** and process XML parsing errors in a graceful manner.
+     */
+    private class XMLErrorHandler implements ErrorHandler
+    {
+        private void closeInput()
+        {
+            try
+            {
+                if( _xmlResource != null )
+                    _xmlResource.close();
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+        public void error (SAXParseException exception)
+            throws SAXException
+        {
+            closeInput();
+            throw new SAXException (exception);
+        }
+
+        public void fatalError (SAXParseException exception)
+            throws SAXException
+        {
+            closeInput();
+            throw new SAXException (exception);
+        }
+
+        public void warning (SAXParseException exception)
+            throws SAXException
+        {
+            closeInput();
+            throw new SAXException (exception);
+        }
+    }
 
 }
 
