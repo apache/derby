@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.net.URL;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -39,6 +40,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
 
@@ -72,7 +74,16 @@ public final class XMLXXETest extends BaseJDBCTestCase {
         if (!XML.classpathMeetsXMLReqs())
             return suite;
 
-        suite.addTest(TestConfiguration.defaultSuite(XMLXXETest.class));
+	String[] testFiles = new String[] {
+	    "functionTests/tests/lang/xmlOptimizerXXE1Payload.trace",
+	    "functionTests/tests/lang/xmlOptimizerXXE1.trace",
+	    "functionTests/tests/lang/xmlOptimizerXXE2.trace"
+	};
+
+        suite.addTest( new SupportFilesSetup( 
+			TestConfiguration.defaultSuite(XMLXXETest.class),
+			testFiles ) );
+
 
         return SecurityManagerSetup.noSecurityManager(suite);
     }
@@ -150,4 +161,103 @@ String xmlBillionLaughs = "insert into xml_billion_laughs( xml_col ) values(" +
         //    "select xmlserialize(xml_col as clob) from xml_billion_laughs");
     }
 
+    public void testDerby6807FileAccessVTI()
+		throws Exception
+    {
+	String VULNERABLE_XML = "xmlOptimizerXXE1.trace";
+	URL     traceURL = SupportFilesSetup.getReadOnlyURL( VULNERABLE_XML );
+	//URL payloadURL = SupportFilesSetup.getReadOnlyURL(
+	//			"xmlOptimizerXXE1Payload.trace" );
+
+        Statement s = createStatement();
+	s.execute(
+             "create function decorationURLChildOnly\n" +
+             "(\n" +
+             "    urlString varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    childTags varchar( 32672 )...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        conglomerateName varchar( 36 ),\n" +
+             "        joinStrategy varchar( 200 ),\n" +
+             "        estimatedCost double,\n" +
+             "        estimatedRowCount varchar( 200 )\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTIFromURL'\n"
+             );
+	s.execute(
+             "create view decorationURLChildOnly as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    decorationURLChildOnly\n" +
+             "    (\n" +
+             "        '" + traceURL.toString() + "',\n" +
+             "        'decoration',\n" +
+             "        'decConglomerateName', 'decJoinStrategy',\n" +
+	     "        'ceEstimatedCost', 'ceEstimatedRowCount'\n" +
+             "    )\n" +
+             ") v\n"
+             );
+	ResultSet rs = s.executeQuery(
+             "select distinct conglomerateName, joinStrategy," +
+	     "                estimatedCost, estimatedRowCount\n" +
+             "from decorationURLChildOnly\n" +
+             "where conglomerateName like '%_A' and " +
+	     "      estimatedCost is not null\n" +
+             "order by conglomerateName, joinStrategy, " +
+	     "         estimatedCost, estimatedRowCount\n"
+             );
+	assertTrue( rs.next() );
+
+	// This next line will need to change once DERBY-6807 is fixed:
+	assertEquals( "SECRET DATA SHOULD NOT HAVE BEEN EXPOSED",
+			rs.getString( 4 ).trim() );
+
+	assertFalse( rs.next() );
+    }
+
+    public void testDerby6807BillionLaughsVTI()
+		throws Exception
+    {
+	String VULNERABLE_XML = "xmlOptimizerXXE2.trace";
+	URL     traceURL = SupportFilesSetup.getReadOnlyURL( VULNERABLE_XML );
+
+        Statement s = createStatement();
+	s.execute(
+             "create function lolzURL\n" +
+             "(\n" +
+             "    urlString varchar( 32672 ),\n" +
+             "    rowTag varchar( 32672 ),\n" +
+             "    childTags varchar( 32672 )...\n" +
+             ")\n" +
+             "returns table\n" +
+             "(\n" +
+             "        lolz varchar( 32000 )\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set no sql\n" +
+             "external name 'org.apache.derby.vti.XmlVTI.xmlVTIFromURL'\n"
+             );
+	s.execute(
+             "create view lolzURL as\n" +
+             "select * from table\n" +
+             "(\n" +
+             "    lolzURL\n" +
+             "    (\n" +
+             "        '" + traceURL.toString() + "',\n" +
+             "        'lolz'\n" +
+             "    )\n" +
+             ") v\n"
+             );
+	try {
+	        ResultSet rs = s.executeQuery( "select lolz from lolzURL" );
+		assertTrue( rs.next() );
+
+		// This next line will need to change once DERBY-6807 is fixed:
+		fail( "Expected SAXParseException" );
+	} catch ( Throwable e ) {
+		assertTrue( e.getMessage().indexOf( "entity expansions" ) > 0 );
+	}
+    }
 }

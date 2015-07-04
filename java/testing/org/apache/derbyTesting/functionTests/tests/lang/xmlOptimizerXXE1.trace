@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:extin/xmlOptimizerXXE1Payload.trace">]>
+<optimizerTrace>
+    <statement stmtID="1">
+        <stmtText>select s.a from t, s where t.a = s.a</stmtText>
+        <queryBlock qbID="1" qbOptimizerID="1141500277" qbStartTime="Fri Jul 05 06:42:09 PDT 2013">
+            <qbOptimizable qboTableNumber="0">"APP"."T"</qbOptimizable>
+            <joinOrder joComplete="true">
+                <joSlot>"APP"."T"</joSlot>
+                <joSlot>"APP"."S"</joSlot>
+                <decoration decConglomerateName="S_A" decJoinStrategy="HASH" decTableName="APP.S">
+                    <decKey>A</decKey>
+                    <decConglomerateCost name="S_A">
+                        <ceEstimatedCost>20.1395</ceEstimatedCost>
+                        <ceEstimatedRowCount>&xxe;</ceEstimatedRowCount>
+                        <ceSingleScanRowCount>6.0</ceSingleScanRowCount>
+                        <decExtraFirstColumnPreds selCount="0" selSelectivity="1.0"/>
+                        <decExtraFirstStartStopPreds selCount="0" selSelectivity="1.0"/>
+                        <decStartStopPred selCount="0" selSelectivity="1.0"/>
+                        <decExtraQualifiers selCount="0" selSelectivity="1.0"/>
+                        <decExtraNonQualifiers selCount="0" selSelectivity="0.1"/>
+                    </decConglomerateCost>
+                </decoration>
+                <planCost pcComplete="true" pcType="withoutSortAvoidance">
+                    <pcSummary>( "APP"."T_A" # "APP"."S_A" )</pcSummary>
+                    <ceEstimatedCost>40.179</ceEstimatedCost>
+                    <ceEstimatedRowCount>3</ceEstimatedRowCount>
+                    <ceSingleScanRowCount>0.6000000000000001</ceSingleScanRowCount>
+                </planCost>
+            </joinOrder>
+        </queryBlock>
+    </statement>
+</optimizerTrace>
