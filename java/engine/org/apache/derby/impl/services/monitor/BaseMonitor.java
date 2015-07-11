@@ -49,7 +49,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.error.ShutdownException;
+import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;

@@ -26,7 +26,7 @@ import java.security.PrivilegedAction;
 import java.util.HashSet;
 import java.util.Stack;
 
-import org.apache.derby.iapi.error.ShutdownException;
+import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;

@@ -26,7 +26,7 @@ import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.PassThroughException;
-import org.apache.derby.iapi.error.ShutdownException;
+import org.apache.derby.shared.common.error.ShutdownException;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionUtil;

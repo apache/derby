@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.i18n;
 
-import org.apache.derby.iapi.error.ShutdownException;
+import org.apache.derby.shared.common.error.ShutdownException;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.util.Locale;

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.error.ShutdownException
+   Derby - Class org.apache.derby.shared.common.error.ShutdownException
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.error;
+package org.apache.derby.shared.common.error;
 
 /**
 	A ShutdownException is a runtime exception that is used
