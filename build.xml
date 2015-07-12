@@ -1563,6 +1563,9 @@
     	<section name="org/apache/derby/iapi/services/i18n/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+        <section name="org/apache/derby/shared/common/error/">
+          <attribute name="Sealed" value="false"/>
+        </section>
         <!-- See DERBY-4669. -->
         <section name="org/apache/derby/shared/common/sanity/">
           <attribute name="Sealed" value="false"/>
@@ -1803,6 +1806,9 @@
       <attribute name="Bundle-SymbolicName" value="derbyclient"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
+      <section name="org/apache/derby/shared/common/error/">
+        <attribute name="Sealed" value="false"/>
+      </section>
       <!-- See DERBY-4669. -->
       <section name="org/apache/derby/shared/common/sanity/">
         <attribute name="Sealed" value="false"/>
