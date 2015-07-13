@@ -1,4 +1,12 @@
 SimpleApp.class
+org.apache.derby.impl.tools.ij.SimpleCharStream.class
+org.apache.derby.impl.tools.ij.mtGrammar.class
+org.apache.derby.impl.tools.ij.mtGrammarConstants.class
+org.apache.derby.impl.tools.ij.mtGrammarTokenManager.class
+org.apache.derby.impl.tools.ij.mtTestCase.class
+org.apache.derby.impl.tools.ij.mtTestSuite.class
+org.apache.derby.impl.tools.ij.mtTester.class
+org.apache.derby.impl.tools.ij.mtTime.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamDrainer.class
 org.apache.derbyTesting.functionTests.harness.BackgroundStreamSaver.class
 org.apache.derbyTesting.functionTests.harness.CopySuppFiles.class
@@ -353,6 +361,7 @@ org.apache.derbyTesting.functionTests.tests.lang.IntegerArrayVTI.class
 org.apache.derbyTesting.functionTests.tests.lang.JitTest.class
 org.apache.derbyTesting.functionTests.tests.lang.JoinDeadlockTest.class
 org.apache.derbyTesting.functionTests.tests.lang.JoinTest.class
+org.apache.derbyTesting.functionTests.tests.lang.JsonSuite.class
 org.apache.derbyTesting.functionTests.tests.lang.LOBDB2compatibilityTest.class
 org.apache.derbyTesting.functionTests.tests.lang.LangHarnessJavaTest.class
 org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.class
@@ -426,6 +435,7 @@ org.apache.derbyTesting.functionTests.tests.lang.SequenceGeneratorTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SequencePermsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SequenceTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ShutdownDatabaseTest.class
+org.apache.derbyTesting.functionTests.tests.lang.SimpleJsonTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SimpleTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SpillHashTest.class
 org.apache.derbyTesting.functionTests.tests.lang.StalePlansTest.class
@@ -1016,12 +1026,4 @@ org.apache.derbyTesting.unitTests.store.T_b2i.class
 org.apache.derbyTesting.unitTests.store.commit_method.class
 org.apache.derbyTesting.unitTests.util.BitUtil.class
 org.apache.derbyTesting.unitTests.util.MsgTrace.class
-org.apache.derby.impl.tools.ij.SimpleCharStream.class
-org.apache.derby.impl.tools.ij.mtGrammar.class
-org.apache.derby.impl.tools.ij.mtGrammarConstants.class
-org.apache.derby.impl.tools.ij.mtGrammarTokenManager.class
-org.apache.derby.impl.tools.ij.mtTestCase.class
-org.apache.derby.impl.tools.ij.mtTestSuite.class
-org.apache.derby.impl.tools.ij.mtTester.class
-org.apache.derby.impl.tools.ij.mtTime.class
 toursdb.insertMaps.class

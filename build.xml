@@ -2547,6 +2547,7 @@
             <pathelement location="${lucene_core}"/>
             <pathelement location="${lucene_a_co}"/>
             <pathelement location="${lucene_qp}"/>
+            <pathelement location="${json_simple}"/>
       </classpath>
     </junit>
   </target>
@@ -2742,6 +2743,7 @@
             <pathelement location="${lucene_core}"/>
             <pathelement location="${lucene_a_co}"/>
             <pathelement location="${lucene_qp}"/>
+            <pathelement location="${json_simple}"/>
       </classpath>
     </junit>
       

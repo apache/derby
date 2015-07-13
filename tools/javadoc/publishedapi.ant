@@ -81,4 +81,5 @@ org/apache/derby/security/SystemPermission.java
 
 org/apache/derby/optional/api/LuceneIndexDescriptor.java
 org/apache/derby/optional/api/LuceneUtils.java
+org/apache/derby/optional/api/SimpleJsonUtils.java
 

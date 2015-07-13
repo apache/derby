@@ -126,6 +126,10 @@ public class JDBC {
     public  static  final   boolean HAVE_LUCENE_QUERYPARSER =
         haveClass( "org.apache.lucene.queryparser.surround.parser.QueryParser" );
 
+    /** Is the json-simple core jar file on the classpath */
+    public  static  final   boolean HAVE_JSON_SIMPLE =
+        haveClass( "org.json.simple.JSONArray" );
+
     /**
      * Does java.sql.ResultSet implement java.lang.AutoCloseable?
      * Indicates JDBC 4.1.

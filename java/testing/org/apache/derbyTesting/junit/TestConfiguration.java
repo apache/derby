@@ -117,6 +117,7 @@ public final class TestConfiguration {
     private final static String KEY_LOGIN_TIMEOUT = "derby.tests.login.timeout";    
     private final static String KEY_TRACE = "derby.tests.trace";
     public  final static String KEY_OMIT_LUCENE = "derby.tests.omitLucene";
+    public  final static String KEY_OMIT_JSON = "derby.tests.omitJson";
 
     /**
      * derby.tests.stopAfterFirstFail - debugging property to exit after 

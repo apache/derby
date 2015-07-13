@@ -1,0 +1,4 @@
+The Derby build relies on a jar file supplied by the JSON Simple
+project, hosted at https://code.google.com/p/json-simple/.
+The JSON simple jar file is licensed under the Apache 2.0 License.
+No other notice covers that jar file.

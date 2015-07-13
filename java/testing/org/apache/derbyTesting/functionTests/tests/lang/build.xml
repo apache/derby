@@ -85,6 +85,7 @@
         <pathelement path="${lucene_core}"/>
         <pathelement path="${lucene_a_co}"/>
         <pathelement path="${lucene_qp}"/>
+        <pathelement path="${json_simple}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <compilerarg value="-Xlint"/>
