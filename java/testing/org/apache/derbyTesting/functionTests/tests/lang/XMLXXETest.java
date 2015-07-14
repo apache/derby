@@ -211,9 +211,7 @@ String xmlBillionLaughs = "insert into xml_billion_laughs( xml_col ) values(" +
              );
 	assertTrue( rs.next() );
 
-	// This next line will need to change once DERBY-6807 is fixed:
-	assertEquals( "SECRET DATA SHOULD NOT HAVE BEEN EXPOSED",
-			rs.getString( 4 ).trim() );
+	assertEquals( "null", rs.getString( 4 ).trim() );
 
 	assertFalse( rs.next() );
     }

@@ -35,6 +35,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.XMLConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,6 +47,12 @@ import org.xml.sax.SAXParseException;
 /**
  * <p>
  * This is a VTI designed to read XML files which are structured like row sets.
+ * <p>
+ * XML files parsed by this VTI are always processed with external entity
+ * expansion disabled and secure parser processing enabled.
+ * <p>
+ * There are two invocation formats provided by this VTI.
+ * <p>
  * One form of this VTI takes the following arguments. This form is useful when
  * all of the columns in the row can be constructed from data nested INSIDE the row Element.
  * </p>
@@ -372,6 +379,10 @@ public  class   XmlVTI  extends StringColumnVTI
     {
         DocumentBuilderFactory  factory = DocumentBuilderFactory.newInstance();
         
+	    factory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
+	    factory.setFeature(
+            "http://xml.org/sax/features/external-general-entities", false );
+
         _builder = factory.newDocumentBuilder();
         _builder.setErrorHandler(new XMLErrorHandler());
 
