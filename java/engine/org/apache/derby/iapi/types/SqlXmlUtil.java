@@ -198,6 +198,13 @@ public class SqlXmlUtil
             dBF.setValidating(false);
             dBF.setNamespaceAware(true);
 
+            if ( System.getSecurityManager() == null )
+            {
+                dBF.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
+                dBF.setFeature(
+                 "http://xml.org/sax/features/external-general-entities", false );
+            }
+
             // Load document builder that can be used for parsing XML.
             dBuilder = dBF.newDocumentBuilder();
             dBuilder.setErrorHandler(new XMLErrorHandler());

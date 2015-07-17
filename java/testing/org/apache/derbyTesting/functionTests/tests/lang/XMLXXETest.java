@@ -119,15 +119,10 @@ public final class XMLXXETest extends BaseJDBCTestCase {
 
 	s.execute( stmt );
 
-	// XXX: The next result is wrong. The expected behavior is that the
-	// query should be rejected as a security violation. See DERBY-6807
-	// for more details; when that issue is resolved, this test will need
-	// to be changed.
-
         JDBC.assertSingleValueResultSet(
                 s.executeQuery(
 	            "SELECT XMLSERIALIZE(xml_col AS CLOB) FROM xml_data"),
-	            "<yolo>HelloWorld</yolo>");
+	            "<yolo/>");
 
         password.delete();
     }
