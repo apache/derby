@@ -135,8 +135,8 @@ public class NoDBInternalsPermissionTest extends GeneratedColumnsHelper
     public  void    test_002_EmbedConnection()
         throws Exception
     {
-        Connection  conn = getConnection();
         try {
+            Connection  conn = getConnection();
             ((EmbedConnection) conn).getContextManager();
             fail( "Should have raised an AccessControlException" );
         }
