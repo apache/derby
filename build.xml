@@ -1740,6 +1740,9 @@
     	<section name="org/apache/derby/loc/">
     	  <attribute name="Sealed" value="false"/>
     	</section>
+        <section name="org/apache/derby/shared/common/error/">
+          <attribute name="Sealed" value="false"/>
+        </section>
     </manifest> 
 
     <delete file="${derby.jar.dir}/derbynet.jar"/>
