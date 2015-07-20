@@ -74,22 +74,22 @@ NDEC   |NDATEC    |NTIMEC  |NCHARC
 11.105 |2000-07-09|15:39:10|チェックポイントが完了しました:継続時間は 8秒でした                                                                                                     
 ij> -- display in localized format
 LOCALIZEDDISPLAY ON;
-ij> select * from localtab;
-NDEC   |NDATEC                  |NTIMEC            |NCHARC                                                                                                                          
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-12,345 |25 de mayo de 2000      |15:30:15 PST      |イベントアラームが有効です。                                                                                                                  
-32,432 |18 de mayo de 2000      |15:32:10 PST      |DR:DRAUTOは0 (Off)です。                                                                                                            
-54,846 |28 de enero de 2000     |15:32:28 PST      |INFORMIX-OnLineが初期化され、ディスクの初期化が完了しました。                                                                                          
-39,003 |11 de noviembre de 2000 |15:32:29 PST      |チェックポイントが完了しました:継続時間は 0秒でした                                                                                                     
-79,406 |5 de junio de 2000      |15:32:29 PST      |すべてのDB領域のデータスキップは現在オフになっています。                                                                                                   
-94,999 |30 de julio de 2000     |15:32:30 PST      |On-Lineモード                                                                                                                      
-18,849 |22 de octubre de 2000   |15:32:31 PST      |sysmasterデータベースを作成中です...                                                                                                        
-35,444 |29 de febrero de 2000   |15:33:22 PST      |論理ログ 1が完了しました。                                                                                                                  
-84,391 |21 de enero de 2000     |15:33:23 PST      |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 1が完了しました。 論理           
-56,664 |16 de abril de 2000     |15:33:40 PST      |論理ログ 2が完了しました。                                                                                                                  
-90,007 |27 de noviembre de 2000 |15:33:43 PST      |チェックポイントが完了しました:継続時間は 2秒でした                                                                                                     
-30,496 |3 de abril de 2000      |15:34:29 PST      |論理ログ 3が完了しました。                                                                                                                  
-66,295 |15 de octubre de 2000   |15:34:30 PST      |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 3が完了しました。 論理           
-54,332 |1 de septiembre de 2000 |15:35:35 PST      |sysmasterデータベースの作成は完了しました。                                                                                                      
-11,105 |9 de julio de 2000      |15:39:10 PST      |チェックポイントが完了しました:継続時間は 8秒でした                                                                                                     
+ij> select NDEC, NDATEC, NCHARC from localtab;
+NDEC   |NDATEC                  |NCHARC                                                                                                                          
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+12,345 |25 de mayo de 2000      |イベントアラームが有効です。                                                                                                                  
+32,432 |18 de mayo de 2000      |DR:DRAUTOは0 (Off)です。                                                                                                            
+54,846 |28 de enero de 2000     |INFORMIX-OnLineが初期化され、ディスクの初期化が完了しました。                                                                                          
+39,003 |11 de noviembre de 2000 |チェックポイントが完了しました:継続時間は 0秒でした                                                                                                     
+79,406 |5 de junio de 2000      |すべてのDB領域のデータスキップは現在オフになっています。                                                                                                   
+94,999 |30 de julio de 2000     |On-Lineモード                                                                                                                      
+18,849 |22 de octubre de 2000   |sysmasterデータベースを作成中です...                                                                                                        
+35,444 |29 de febrero de 2000   |論理ログ 1が完了しました。                                                                                                                  
+84,391 |21 de enero de 2000     |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 1が完了しました。 論理           
+56,664 |16 de abril de 2000     |論理ログ 2が完了しました。                                                                                                                  
+90,007 |27 de noviembre de 2000 |チェックポイントが完了しました:継続時間は 2秒でした                                                                                                     
+30,496 |3 de abril de 2000      |論理ログ 3が完了しました。                                                                                                                  
+66,295 |15 de octubre de 2000   |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 3が完了しました。 論理           
+54,332 |1 de septiembre de 2000 |sysmasterデータベースの作成は完了しました。                                                                                                      
+11,105 |9 de julio de 2000      |チェックポイントが完了しました:継続時間は 8秒でした                                                                                                     
 ij> 

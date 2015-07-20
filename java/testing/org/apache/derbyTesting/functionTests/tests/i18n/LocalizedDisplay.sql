@@ -41,4 +41,4 @@ select * from localtab;
 
 -- display in localized format
 LOCALIZEDDISPLAY ON;
-select * from localtab;
+select NDEC, NDATEC, NCHARC from localtab;
