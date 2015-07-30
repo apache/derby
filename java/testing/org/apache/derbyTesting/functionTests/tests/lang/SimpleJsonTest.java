@@ -20,14 +20,19 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Arrays;
 
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -48,6 +53,21 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 
     private static  final   String  TAB = "  ";
     private static  final   String  USER_ERROR = "38000";
+
+    private static  final   String  THERMOSTAT_READINGS =
+        "[\n" +
+        " {\n" +
+        "   \"id\": 1,\n" +
+        "   \"temperature\": 70.3,\n" +
+        "   \"fanOn\": true\n" +
+        " },\n" +
+        " {\n" +
+        "   \"id\": 2,\n" +
+        "   \"temperature\": 65.5,\n" +
+        "   \"fanOn\": false\n" +
+        " }\n" +
+        "]";
+
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -71,7 +91,14 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 
         suite.addTest( TestConfiguration.defaultSuite( SimpleJsonTest.class ) );
 
-        return suite;
+        return new SupportFilesSetup
+            (
+             suite,
+             new String[]
+             { 
+                "functionTests/tests/lang/thermostatReadings.dat",
+             }
+            );
 	}
 	
     ///////////////////////////////////////////////////////////////////////////////////
@@ -496,6 +523,94 @@ public class SimpleJsonTest extends BaseJDBCTestCase
              "values( toJSON( 'select * from sys.systables where tablename = ?' ) )"
              );
 
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', false )" );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Test the SimpleJsonVTI.
+     * </p>
+     */
+	public void testVTI_004() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
+
+        // declare a table function for reading a string
+        goodStatement
+            (
+             conn,
+             "create function thermostatReadings( jsonDocument JSONArray )\n" +
+             "returns table\n" +
+             "(\n" +
+             "\"id\" int,\n" +
+             "\"temperature\" float,\n" +
+             "\"fanOn\" boolean\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set contains sql\n" +
+             "external name 'org.apache.derby.optional.api.SimpleJsonVTI.readArray'\n"
+             );
+
+        PreparedStatement   ps;
+        ResultSet           rs;
+
+        // turn a JSON document string into a ResultSet
+        ps = conn.prepareStatement
+            (
+             "select * from table\n" +
+             "( thermostatReadings( readArrayFromString(?) ) ) t order by \"id\""
+             );
+        ps.setString( 1, THERMOSTAT_READINGS );
+        rs = ps.executeQuery();
+        assertResults
+            (
+             rs,
+             new String[][]
+             {
+                 { "1", "70.3", "true" },
+                 { "2", "65.5", "false" }
+             },
+             true
+             );
+        rs.close();
+        ps.close();
+
+        // make a ResultSet out of a file containing JSON text
+        File    inputFile = SupportFilesSetup.getReadOnly( "thermostatReadings.dat" );
+        String[][] fileReadings = new String[][]
+            {
+                { "1", "70.3", "true" },
+                { "2", "65.5", "false" },
+                { "3", "60.5", "false" },
+            };
+        ps = conn.prepareStatement
+            (
+             "select * from table\n" +
+             "( thermostatReadings( readArrayFromFile( ?, 'UTF-8' ) ) ) t order by \"id\""
+             );
+        ps.setString( 1, PrivilegedFileOpsForTests.getAbsolutePath( inputFile ) );
+        rs = ps.executeQuery();
+        assertResults(rs, fileReadings, true );
+        rs.close();
+        ps.close();
+
+        // make a ResultSet out of an URL which points to a file containing JSON text
+        ps = conn.prepareStatement
+            (
+             "select * from table\n" +
+             "( thermostatReadings( readArrayFromURL( ?, 'UTF-8' ) ) ) t order by \"id\""
+             );
+        String  inputFileURL = PrivilegedFileOpsForTests.toURI(inputFile ).toURL().toString();
+        ps.setString( 1, inputFileURL);
+        rs = ps.executeQuery();
+        assertResults(rs, fileReadings, true );
+        rs.close();
+        ps.close();
+
+        goodStatement( conn, "drop function thermostatReadings" );
         goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', false )" );
     }
 

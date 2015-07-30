@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -87,6 +88,27 @@ public class PrivilegedFileOpsForTests {
                 new PrivilegedAction<String>() {
                     public String run() throws SecurityException {
                         return file.getAbsolutePath();
+                    }});
+    }
+
+    /**
+     * Get the URI for a file.
+     *
+     * @param file File to be queried
+     * @return Its URI
+     * @throws SecurityException if the test lacks the required permissions to access the file,
+     *      
+     * @see File#getAbsolutePath
+     */
+    public static URI toURI(final File file)
+            throws SecurityException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        return AccessController.doPrivileged(
+                new PrivilegedAction<URI>() {
+                    public URI run() throws SecurityException {
+                        return file.toURI();
                     }});
     }
 

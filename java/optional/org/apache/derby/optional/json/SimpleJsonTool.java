@@ -38,12 +38,23 @@ import org.apache.derby.optional.api.SimpleJsonUtils;
 
 /**
  * <p>
- * OptionalTool which adds a function for turning a query result
- * into a JSON array. Each cell in the array is a row. Each row
- * has key/value pairs for all columns returned by the query.
- * This tool binds a user-defined type to the simple-json JSONArray
- * class.
+ * OptionalTool which adds support types and functions for
+ * using the JSON.simple toolkit at https://code.google.com/p/json-simple/.
+ * Creates the following schema objects in the current schema:
  * </p>
+ *
+ * <ul>
+ * <li><b>JSONArray</b> - A UDT bound to the JSON.simple JSONArray class.</li>
+ * <li><b>toJSON</b> - A function for packaging up query results as a
+ * JSONArray. Each cell in the array is a row. Each row
+ * has key/value pairs for all columns returned by the query.</li>
+ * <li><b>readArrayFromString</b> - A function which turns a JSON document
+ * string into a JSONArray.</li>
+ * <li><b>readArrayFromFile</b> - A function which reads a file containing a
+ * JSON document and turns it into a JSONArray.</li>
+ * <li><b>readArrayFromURL</b> - A function which reads a JSON document from an
+ * URL address and turns it into a JSONArray.</li>
+ * </ul>
  */
 public	class   SimpleJsonTool  implements OptionalTool
 {
@@ -53,11 +64,67 @@ public	class   SimpleJsonTool  implements OptionalTool
     //
     ////////////////////////////////////////////////////////////////////////
 
+    private FunctionDescriptor[]    _functionDescriptors =
+    {
+        new FunctionDescriptor
+        (
+            "toJSON",
+            "create function toJSON" +
+            "\n(" +
+            "\n\tqueryString varchar( 32672 )," +
+            "\n\tqueryArgs varchar( 32672 ) ..." +
+            "\n)\nreturns JSONArray\n" +
+            "\nlanguage java parameter style derby reads sql data" +
+            "\nexternal name 'org.apache.derby.optional.json.SimpleJsonTool.toJSON'\n"
+        ),
+
+        new FunctionDescriptor
+        (
+            "readArrayFromString",
+            "create function readArrayFromString( document varchar( 32672 ) )\n" +
+            "returns JSONArray\n" +
+            "language java parameter style java contains sql\n" +
+            "external name 'org.apache.derby.optional.api.SimpleJsonUtils.readArrayFromString'\n"
+        ),
+
+        new FunctionDescriptor
+        (
+            "readArrayFromFile",
+            "create function readArrayFromFile\n" +
+            "( fileName varchar( 32672 ), characterSetName varchar( 100 ) )\n" +
+            "returns JSONArray\n" +
+            "language java parameter style java contains sql\n" +
+            "external name 'org.apache.derby.optional.api.SimpleJsonUtils.readArrayFromFile'\n"
+        ),
+
+        new FunctionDescriptor
+        (
+            "readArrayFromURL",
+            "create function readArrayFromURL\n" +
+            "( urlString varchar( 32672 ), characterSetName varchar( 100 ) )\n" +
+            "returns JSONArray\n" +
+            "language java parameter style java contains sql\n" +
+            "external name 'org.apache.derby.optional.api.SimpleJsonUtils.readArrayFromURL'\n"
+        ),
+    };
+
     ////////////////////////////////////////////////////////////////////////
     //
     //	STATE
     //
     ////////////////////////////////////////////////////////////////////////
+
+    public static final class FunctionDescriptor
+    {
+        public final String functionName;
+        public final String creationDDL;
+
+        public FunctionDescriptor( String functionName, String creationDDL )
+        {
+            this.functionName = functionName;
+            this.creationDDL = creationDDL;
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////
     //
@@ -91,7 +158,7 @@ public	class   SimpleJsonTool  implements OptionalTool
         Connection          derbyConn = getDerbyConnection();
 
         createUDT( derbyConn );
-        createFunction( derbyConn );
+        createFunctions( derbyConn );
     }
 
     /**
@@ -110,7 +177,7 @@ public	class   SimpleJsonTool  implements OptionalTool
 
         Connection          derbyConn = getDerbyConnection();
 
-        dropFunction( derbyConn );
+        dropFunctions( derbyConn );
         dropUDT( derbyConn );
     }
 
@@ -192,34 +259,30 @@ public	class   SimpleJsonTool  implements OptionalTool
         executeDDL( derbyConn, createString );
     }
 
-    private void    createFunction
+    private void    createFunctions
         (
          Connection     derbyConn
         )
         throws SQLException
     {
-        String  createString =
-            "create function toJSON" +
-            "\n(" +
-            "\n\tqueryString varchar( 32672 )," +
-            "\n\tqueryArgs varchar( 32672 ) ..." +
-            "\n)\nreturns JSONArray\n" +
-            "\nlanguage java parameter style derby reads sql data" +
-            "\nexternal name 'org.apache.derby.optional.json.SimpleJsonTool.toJSON'";
-
-        executeDDL( derbyConn, createString );
+        for ( FunctionDescriptor desc : _functionDescriptors )
+        {
+            executeDDL( derbyConn, desc.creationDDL );
+        }
     }
 
-    private void    dropFunction
+    private void    dropFunctions
         (
          Connection     derbyConn
         )
         throws SQLException
     {
-        String  createString =
-            "drop function toJSON";
-        
-        executeDDL( derbyConn, createString );
+        for ( FunctionDescriptor desc : _functionDescriptors )
+        {
+            String              dropString = "drop function " + desc.functionName;
+
+            executeDDL( derbyConn, dropString );
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////

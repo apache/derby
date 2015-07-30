@@ -1,0 +1,5 @@
+[
+    { "id": 1, "temperature": 70.3, "fanOn": true },
+    { "id": 2, "temperature": 65.5, "fanOn": false },
+    { "id": 3, "temperature": 60.5, "fanOn": false },
+]

@@ -684,7 +684,8 @@
   </target>
 
   <!-- Run the RefreshJarDriftTest -->
-  <target name="refreshjardriftcheck">
+  <target name="refreshjardriftcheck"
+          description="Fix discrepancies between the actual and expected contents of the Derby jar files.">
     <java   
        fork="true" 
        classname="org.apache.derbyBuild.JarDriftTest"
@@ -695,7 +696,8 @@
   </target>
 
   <!-- Run the JarDriftTest -->
-  <target name="jardriftcheck">
+  <target name="jardriftcheck"
+          description="Report discrepancies between the actual and expected contents of the Derby jar files.">
     <java   
        fork="true" 
        classname="org.apache.derbyBuild.JarDriftTest"

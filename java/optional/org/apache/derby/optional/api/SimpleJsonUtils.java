@@ -21,6 +21,18 @@
 
 package org.apache.derby.optional.api;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -32,6 +44,7 @@ import java.sql.SQLException;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import org.apache.derby.iapi.util.StringUtil;
 
@@ -117,6 +130,111 @@ public abstract class SimpleJsonUtils
         return result;
     }
 
+    /**
+     * Construct a JSONArray from a Reader.
+     */
+    public static JSONArray readArray( Reader reader )
+        throws SQLException
+    {
+        JSONParser  parser = new JSONParser();
+        
+        Object  obj = null;
+        try {
+            obj = parser.parse( reader );
+        }
+        catch( Throwable t) { throw wrap( t ); }
+
+        if ( (obj == null) || !(obj instanceof JSONArray) )
+        {
+            throw new SQLException( "Document is not a JSON array." );
+        }
+
+        return (JSONArray) obj;
+    }
+
+    /**
+     * <p>
+     * SQL FUNCTION to convert a JSON document string into a JSONArray.
+     * This function is registered by the simpleJson optional tool.
+     * </p>
+     */
+    public  static  JSONArray   readArrayFromString( String document )
+        throws SQLException
+    {
+        if ( document == null ) { document = ""; }
+
+        return readArray( new StringReader( document ) );
+    }
+
+    /**
+     * Read a JSONArray from an InputStream.
+     */
+    public static JSONArray readArrayFromStream
+        ( InputStream inputStream, String characterSetName )
+        throws SQLException
+    {
+        try {
+            return readArray( new InputStreamReader( inputStream, characterSetName ) );
+        }
+        catch (UnsupportedEncodingException uee) { throw wrap( uee ); }
+    }
+
+    /**
+     * SQL FUNCTION to read a JSONArray from a File. This function
+     * is registered by the simpleJson optional tool.
+     */
+    public static JSONArray readArrayFromFile
+        ( String fileName, String characterSetName )
+        throws SQLException
+    {
+        FileInputStream fis = null;
+        final String name_of_file = fileName;
+        
+        try {
+            fis = AccessController.doPrivileged(
+             new PrivilegedExceptionAction<FileInputStream>()
+             {
+                 public FileInputStream run() throws IOException
+                 {
+                     return new FileInputStream( name_of_file );
+                 }
+             }
+             );
+        }
+        catch (PrivilegedActionException pae) { throw wrap( pae ); }
+
+        return readArrayFromStream( fis, characterSetName );
+    }
+
+    /**
+     * SQL FUNCTION to read a JSONArray from an URL address.
+     * This function is registered by the simpleJson optional tool.
+     */
+    public static JSONArray readArrayFromURL
+        ( String urlString, String characterSetName )
+        throws SQLException
+    {
+        InputStream inputStream = null;
+        final   String  url_string = urlString;
+        
+        try {
+            inputStream = AccessController.doPrivileged(
+             new PrivilegedExceptionAction<InputStream>()
+             {
+                 public InputStream run() throws IOException, MalformedURLException
+                 {
+                     URL url = new URL( url_string );
+                     return url.openStream();
+                 }
+             }
+             );
+        }
+        catch (PrivilegedActionException pae) { throw wrap( pae ); }
+        
+        return readArrayFromStream( inputStream, characterSetName );
+    }
+
+
     /////////////////////////////////////////////////////////////////
     //
     //  MINIONS
@@ -181,4 +299,21 @@ public abstract class SimpleJsonUtils
     {
         return DriverManager.getConnection( "jdbc:default:connection" );
     }
+    
+    /**
+     * <p>
+     * Wrap an exception in a SQLException.
+     * </p>
+     */
+    static SQLException wrap( Throwable t )
+    {
+        String  message = t.getMessage();
+        if ( (message == null) || (message.length() == 0) )
+        {
+            message = t.toString();
+        }
+        
+        return new SQLException( message, t );
+    }
+    
 }

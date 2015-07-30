@@ -235,6 +235,16 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
 };
 
 //
+// Permissions for the optional tools (derbyoptionaltools.jar)
+//
+grant codeBase "${derbyTesting.codejar}derbyoptionaltools.jar" {
+
+  // Needed by SimpleJsonTest
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+
+};
+
+//
 // Permissions for the tests (derbyTesting.jar)
 // We are liberal here, it's not a goal to make the test harness
 // or tests secure.
