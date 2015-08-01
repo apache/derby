@@ -24,6 +24,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 import junit.framework.Test;
@@ -53,6 +54,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 
     private static  final   String  TAB = "  ";
     private static  final   String  USER_ERROR = "38000";
+    private static  final   String  OUT_OF_RANGE = "22003";
 
     private static  final   String  THERMOSTAT_READINGS =
         "[\n" +
@@ -97,6 +99,7 @@ public class SimpleJsonTest extends BaseJDBCTestCase
              new String[]
              { 
                 "functionTests/tests/lang/thermostatReadings.dat",
+                "functionTests/tests/lang/json.dat",
              }
             );
 	}
@@ -612,6 +615,140 @@ public class SimpleJsonTest extends BaseJDBCTestCase
 
         goodStatement( conn, "drop function thermostatReadings" );
         goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', false )" );
+    }
+
+    /**
+     * <p>
+     * Test the datatypes understood by SimpleJsonVTI.
+     * </p>
+     */
+	public void testVTIdatatypes005() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
+
+        vetDatatype_005
+            (
+             conn,
+             "smallint",
+             new String[][]
+             {
+                 { "abc","true", "127" },
+                 { "def", "false", "1" },
+                 { "ghi", null, "345" },
+                 { "lmn", "true", "-1" },    
+             }
+             );
+        vetDatatype_005
+            (
+             conn,
+             "int",
+             new String[][]
+             {
+                 { "abc","true", "127" },
+                 { "def", "false", "1" },
+                 { "ghi", null, "345" },
+                 { "lmn", "true", "-1" },    
+             }
+             );
+        vetDatatype_005
+            (
+             conn,
+             "bigint",
+             new String[][]
+             {
+                 { "abc","true", "127" },
+                 { "def", "false", "1" },
+                 { "ghi", null, "345" },
+                 { "lmn", "true", "9223372036854775807" },    
+             }
+             );
+        vetDatatype_005
+            (
+             conn,
+             "float",
+             new String[][]
+             {
+                 { "abc","true", "127.0" },
+                 { "def", "false", "1.2" },
+                 { "ghi", null, "345.67" },
+                 { "lmn", "true", "9.223372036854776E18" },    
+             }
+             );
+        vetDatatype_005
+            (
+             conn,
+             "double",
+             new String[][]
+             {
+                 { "abc","true", "127.0" },
+                 { "def", "false", "1.2" },
+                 { "ghi", null, "345.67" },
+                 { "lmn", "true", "9.223372036854776E18" },    
+             }
+             );
+
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', false )" );
+    }
+    private void vetDatatype_005
+        (
+         Connection conn,
+         String datatype,
+         String[][] expectedResults
+         )
+        throws Exception
+    {
+        createFunction_005( conn, datatype );
+
+        PreparedStatement   ps = conn.prepareStatement
+            (
+             "select * from table\n" +
+             "( f_" + datatype + "( readArrayFromFile( ?, 'UTF-8' ) )) t\n"
+             );
+        File    inputFile = SupportFilesSetup.getReadOnly( "json.dat" );
+        ps.setString( 1, PrivilegedFileOpsForTests.getAbsolutePath( inputFile ) );
+
+        ResultSet           rs;
+
+        rs = ps.executeQuery();
+        assertResults(rs, expectedResults, true );
+        rs.close();
+
+        // the first two rows have numeric values which won't raise
+        // truncation exceptions when fetched into tinyint
+        rs = ps.executeQuery();
+        rs.next();
+        assertEquals( (byte) 127, rs.getByte( "NUM_COL" ) );
+        rs.next();
+        assertEquals( (byte) 1, rs.getByte( "NUM_COL" ) );
+        rs.close();
+        
+        ps.close();
+
+        dropFunction_005( conn, datatype );
+    }
+    private void createFunction_005( Connection conn, String datatype )
+        throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             "create function f_" + datatype + "( jsonArray JSONArray )\n" +
+             "returns table\n" +
+             "(\n" +
+             "  str_col varchar( 10 ),\n" +
+             "  bool_col boolean,\n" +
+             "  num_col " + datatype + "\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set contains sql\n" +
+             "external name 'org.apache.derby.optional.api.SimpleJsonVTI.readArray'\n"
+             );
+    }
+    private void dropFunction_005( Connection conn, String datatype )
+        throws Exception
+    {
+        goodStatement( conn, "drop function f_" + datatype );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

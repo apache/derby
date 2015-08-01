@@ -167,7 +167,8 @@ public abstract class SimpleJsonUtils
     }
 
     /**
-     * Read a JSONArray from an InputStream.
+     * Read a JSONArray from an InputStream. Close the stream
+     * after reading the JSONArray.
      */
     public static JSONArray readArrayFromStream
         ( InputStream inputStream, String characterSetName )
@@ -177,6 +178,13 @@ public abstract class SimpleJsonUtils
             return readArray( new InputStreamReader( inputStream, characterSetName ) );
         }
         catch (UnsupportedEncodingException uee) { throw wrap( uee ); }
+        finally
+        {
+            try {
+                inputStream.close();
+            }
+            catch (IOException ioe) { throw wrap( ioe ); }
+        }
     }
 
     /**

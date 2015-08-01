@@ -1,0 +1,7 @@
+[
+    { "STR_COL" : "abc", "BOOL_COL" : true, "NUM_COL" : 127 },
+    { "STR_COL" : "def", "BOOL_COL" : false, "NUM_COL" : 1.2 },
+    { "STR_COL" : "ghi", "BOOL_COL" : null, "NUM_COL" : 3.4567e2 },
+    { "STR_COL" : "lmn", "BOOL_COL" : true, "NUM_COL" : 9223372036854775807 }
+]
+
