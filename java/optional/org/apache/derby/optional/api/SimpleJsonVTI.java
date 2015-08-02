@@ -33,6 +33,8 @@ import org.json.simple.JSONObject;
 
 import org.apache.derby.vti.VTITemplate;
 
+import org.apache.derby.optional.utils.ToolUtilities;
+
 /**
  * <p>
  * This is a table function which turns a JSON array into a relational
@@ -302,7 +304,7 @@ public class SimpleJsonVTI extends VTITemplate
         try {
             return new BigDecimal( stringValue );
         }
-        catch (Throwable t) { throw SimpleJsonUtils.wrap( t ); }
+        catch (Throwable t) { throw ToolUtilities.wrap( t ); }
     }
     
     ////////////////////////////////////////////////////////////////////////

@@ -435,6 +435,7 @@ org.apache.derbyTesting.functionTests.tests.lang.SequenceGeneratorTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SequencePermsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SequenceTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ShutdownDatabaseTest.class
+org.apache.derbyTesting.functionTests.tests.lang.SimpleJsonPermsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SimpleJsonTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SimpleTest.class
 org.apache.derbyTesting.functionTests.tests.lang.SpillHashTest.class

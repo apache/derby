@@ -58,6 +58,8 @@ import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
+import org.apache.derby.optional.utils.ToolUtilities;
+
 /**
  * A VTI that provides the results of Lucene queries and
  * associated Lucene assigned document ids. 
@@ -154,7 +156,7 @@ class LuceneQueryVTI extends StringColumnVTI
 			if ( isKeyID( columnid ) ) { return _searcher.doc( docID ).get( getColumnName( columnid ) ); }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
 	}
 
     /** Handle boolean columns */
@@ -187,7 +189,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
     /** Handle double columns */
@@ -203,7 +205,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
     /** Handle bytecolumns */
@@ -233,7 +235,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
     /** Handle Date columns */
@@ -251,7 +253,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
     /** Handle Time columns */
@@ -269,7 +271,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
     /** Handle Timestamp columns */
@@ -287,7 +289,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     
     /** Handle integer columns */
@@ -308,7 +310,7 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
     private Number getNumberValue( int columnid ) throws IOException
     {
@@ -352,12 +354,12 @@ class LuceneQueryVTI extends StringColumnVTI
             }
 			else { throw invalidColumnPosition( columnid ); }
 		}
-        catch (IOException e)   { throw LuceneSupport.wrap( e ); }
+        catch (IOException e)   { throw ToolUtilities.wrap( e ); }
     }
 
     private SQLException    invalidColumnPosition( int columnid )
     {
-        return LuceneSupport.newSQLException
+        return ToolUtilities.newSQLException
             (
              SQLState.LANG_INVALID_COLUMN_POSITION,
              new Integer( columnid ),
@@ -419,7 +421,7 @@ class LuceneQueryVTI extends StringColumnVTI
 		try {
 			_indexReader.close();
 		}
-        catch (IOException e) { throw LuceneSupport.wrap( e ); }
+        catch (IOException e) { throw ToolUtilities.wrap( e ); }
         finally
         {
             _indexReader = null;
@@ -479,9 +481,9 @@ class LuceneQueryVTI extends StringColumnVTI
 
             searchAndScore( luceneQuery, tsdc );
         }
-        catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
-        catch (ParseException pe) { throw LuceneSupport.wrap( pe ); }
-        catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
+        catch (IOException ioe) { throw ToolUtilities.wrap( ioe ); }
+        catch (ParseException pe) { throw ToolUtilities.wrap( pe ); }
+        catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
     }
 
     /**
@@ -503,7 +505,7 @@ class LuceneQueryVTI extends StringColumnVTI
 
         if ( (indexVersion == null) || !currentVersion.onOrAfter( indexVersion ) )
         {
-            throw LuceneSupport.newSQLException
+            throw ToolUtilities.newSQLException
                 ( SQLState.LUCENE_BAD_VERSION, currentVersion.toString(), indexVersionString );
         }
     }

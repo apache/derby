@@ -50,7 +50,6 @@ import org.apache.derby.database.Database;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.OptionalTool;
-import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -64,6 +63,7 @@ import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.optional.api.LuceneIndexDescriptor;
 import org.apache.derby.optional.api.LuceneUtils;
+import org.apache.derby.optional.utils.ToolUtilities;
 import org.apache.derby.vti.VTITemplate;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -146,10 +146,10 @@ public class LuceneSupport implements OptionalTool
             ConnectionUtil.getCurrentLCC().getDataDictionary().checkVersion
                 ( DataDictionary.DD_VERSION_DERBY_10_11, "luceneSupport" );
         }
-        catch (StandardException se)    { throw sqlException( se ); }
+        catch (StandardException se)    { throw ToolUtilities.sqlException( se ); }
         
         Connection  conn = getDefaultConnection();
-        mustBeDBO( conn );
+        ToolUtilities.mustBeDBO( conn );
 
         //
         // Lucene indexes are not allowed in encrypted databases. They leak
@@ -157,15 +157,15 @@ public class LuceneSupport implements OptionalTool
         //
         if ( getDataFactory( conn ).databaseEncrypted() )
         {
-            throw newSQLException( SQLState.LUCENE_ENCRYPTED_DB );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_ENCRYPTED_DB );
         }
 
         if ( luceneSchemaExists( conn ) )
         {
-            throw newSQLException( SQLState.LUCENE_ALREADY_LOADED );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_ALREADY_LOADED );
         }
 
-        boolean sqlAuthorizationEnabled = sqlAuthorizationEnabled( conn );
+        boolean sqlAuthorizationEnabled = ToolUtilities.sqlAuthorizationEnabled( conn );
         
 		StringBuilder listFunction = new StringBuilder();
 		listFunction.append("create function " + LIST_INDEXES );
@@ -248,11 +248,11 @@ public class LuceneSupport implements OptionalTool
         forbidReadOnlyConnections();
         
         Connection  conn = getDefaultConnection();
-        mustBeDBO( conn );
+        ToolUtilities.mustBeDBO( conn );
 
         if ( !luceneSchemaExists( conn ) )
         {
-            throw newSQLException( SQLState.LUCENE_ALREADY_UNLOADED );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_ALREADY_UNLOADED );
         }
 
         //
@@ -371,11 +371,11 @@ public class LuceneSupport implements OptionalTool
         vetIdentifiers( schema, table, textcol );
 
         // only the dbo or the schema owner can perform this function
-        mustBeOwner( conn, schema );
+        ToolUtilities.mustBeOwner( conn, schema );
 
         if ( !tableFunctionExists( conn, schema, table, textcol ) )
         {
-            throw newSQLException( SQLState.LUCENE_INDEX_DOES_NOT_EXIST );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_INDEX_DOES_NOT_EXIST );
         }
 
         createOrRecreateIndex( conn, schema, table, textcol, indexDescriptorMaker, false );
@@ -458,11 +458,11 @@ public class LuceneSupport implements OptionalTool
         // can't create an index without specifying keys for joining it back to Derby data
         if ( primaryKeys.length == 0 )
         {
-            throw newSQLException( SQLState.LUCENE_NO_PRIMARY_KEY );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_NO_PRIMARY_KEY );
         }
 
         // don't let the user create a table function with duplicate column names
-        vetColumnName( derbyIdentifier( textcol ) );
+        vetColumnName( ToolUtilities.derbyIdentifier( textcol ) );
         for ( VTITemplate.ColumnDescriptor key : primaryKeys )
         {
             vetColumnName(  key.columnName );
@@ -540,7 +540,7 @@ public class LuceneSupport implements OptionalTool
             }
         
             query.append(", ");
-            query.append( delimitID( derbyIdentifier( textcol ) ) );
+            query.append( delimitID( ToolUtilities.derbyIdentifier( textcol ) ) );
             query.append(" from " + makeTableName( schema, table ) );
 
             ps = conn.prepareStatement( query.toString() );
@@ -608,7 +608,7 @@ public class LuceneSupport implements OptionalTool
         {
             if ( fieldName == null )
             {
-                throw newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
+                throw ToolUtilities.newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
             }
         }
         Arrays.sort( fieldNames );
@@ -621,13 +621,13 @@ public class LuceneSupport implements OptionalTool
         {
             if ( fieldName.equals( previousFieldName ) )
             {
-                throw newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
+                throw ToolUtilities.newSQLException( SQLState.LUCENE_DUPLICATE_FIELD_NAME, fieldName );
             }
             previousFieldName = fieldName;
 
             if ( keyNames.contains( fieldName ) )
             {
-                throw newSQLException( SQLState.LUCENE_FIELD_KEY_CONFLICT, fieldName );
+                throw ToolUtilities.newSQLException( SQLState.LUCENE_FIELD_KEY_CONFLICT, fieldName );
             }
         }
     }
@@ -686,31 +686,6 @@ public class LuceneSupport implements OptionalTool
 
     /////////////////////////////////////////////////////////////////////
     //
-    //  ERROR HANDLING
-    //
-    /////////////////////////////////////////////////////////////////////
-
-    /** Make a SQLException from a SQLState and optional args */
-    public  static  SQLException    newSQLException( String sqlState, Object... args )
-    {
-        StandardException   se = StandardException.newException( sqlState, args );
-        return sqlException( se );
-    }
-    
-    /** Turn a StandardException into a SQLException */
-    public  static  SQLException    sqlException( StandardException se )
-    {
-        return PublicAPI.wrapStandardException( se );
-    }
-
-    /** Wrap an external exception */
-    public  static  SQLException    wrap( Throwable t )
-    {
-        return sqlException( StandardException.plainWrapException( t ) );
-    }
-    
-    /////////////////////////////////////////////////////////////////////
-    //
     //  TYPE HANDLING
     //
     /////////////////////////////////////////////////////////////////////
@@ -762,7 +737,7 @@ public class LuceneSupport implements OptionalTool
         case    Types.VARBINARY:        return "varchar " + precisionToLength( precision ) + "  for bit data";
         case    Types.VARCHAR:          return "varchar" + precisionToLength( precision );
  
-        default:                throw newSQLException( SQLState.LUCENE_UNSUPPORTED_TYPE, typeName );
+        default:  throw ToolUtilities.newSQLException( SQLState.LUCENE_UNSUPPORTED_TYPE, typeName );
         }
     }
 
@@ -862,7 +837,8 @@ public class LuceneSupport implements OptionalTool
             break;
             
         default:
-            throw newSQLException( SQLState.LUCENE_UNSUPPORTED_TYPE, keyDescriptor.typeName );
+            throw ToolUtilities.newSQLException
+                ( SQLState.LUCENE_UNSUPPORTED_TYPE, keyDescriptor.typeName );
         }
 
         // Lucene fields do not allow null values
@@ -1049,9 +1025,9 @@ public class LuceneSupport implements OptionalTool
 	private static void vetTextColumn( DatabaseMetaData dbmd, String schema, String table, String textcol )
         throws SQLException
     {
-        schema = derbyIdentifier( schema );
-        table = derbyIdentifier( table );
-        textcol = derbyIdentifier( textcol );
+        schema = ToolUtilities.derbyIdentifier( schema );
+        table = ToolUtilities.derbyIdentifier( table );
+        textcol = ToolUtilities.derbyIdentifier( textcol );
         
         ResultSet   rs = dbmd.getColumns( null, schema, table, textcol );
 
@@ -1068,7 +1044,8 @@ public class LuceneSupport implements OptionalTool
                 }
             }
 
-            throw sqlException( StandardException.newException( SQLState.LUCENE_NOT_A_STRING_TYPE ) );
+            throw ToolUtilities.sqlException
+                ( StandardException.newException( SQLState.LUCENE_NOT_A_STRING_TYPE ) );
         }
         finally
         {
@@ -1097,7 +1074,7 @@ public class LuceneSupport implements OptionalTool
             SCORE.equals( derbyColumnName )
             )
         {
-            throw newSQLException( SQLState.LUCENE_BAD_COLUMN_NAME, derbyColumnName );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_BAD_COLUMN_NAME, derbyColumnName );
         }
     }
 
@@ -1107,8 +1084,8 @@ public class LuceneSupport implements OptionalTool
 	static String   makeTableName( String schema, String table )
         throws SQLException
     {
-        schema = derbyIdentifier( schema );
-        table = derbyIdentifier( table );
+        schema = ToolUtilities.derbyIdentifier( schema );
+        table = ToolUtilities.derbyIdentifier( table );
 
         return IdUtil.mkQualifiedName( schema, table );
     }
@@ -1123,7 +1100,7 @@ public class LuceneSupport implements OptionalTool
         forbidCharacter( schema, table, textcol, "/" );
         forbidCharacter( schema, table, textcol, "\\" );
 		
-        schema = derbyIdentifier( schema );
+        schema = ToolUtilities.derbyIdentifier( schema );
         String  function = makeUnqualifiedTableFunctionName( table, textcol );
 
         return IdUtil.mkQualifiedName( schema, function );
@@ -1133,14 +1110,15 @@ public class LuceneSupport implements OptionalTool
     private static  String  makeUnqualifiedTableFunctionName( String table, String textcol )
         throws SQLException
     {
-        return derbyIdentifier( table ) + SEPARATOR + derbyIdentifier( textcol );
+        return ToolUtilities.derbyIdentifier( table ) + SEPARATOR +
+            ToolUtilities.derbyIdentifier( textcol );
     }
 
     /** Return true if the table function exists */
     private static  boolean tableFunctionExists( Connection conn, String schema, String table, String textcol )
         throws SQLException
     {
-        schema = derbyIdentifier( schema );
+        schema = ToolUtilities.derbyIdentifier( schema );
         String  function = makeUnqualifiedTableFunctionName( table, textcol );
 
         ResultSet   rs = conn.getMetaData().getFunctions( null, schema, function );
@@ -1247,7 +1225,7 @@ public class LuceneSupport implements OptionalTool
     {
         if ( ConnectionUtil.getCurrentLCC().getAuthorizer().isReadOnlyConnection() )
         {
-            throw newSQLException( SQLState.AUTH_WRITE_WITH_READ_ONLY_CONNECTION );
+            throw ToolUtilities.newSQLException( SQLState.AUTH_WRITE_WITH_READ_ONLY_CONNECTION );
         }
     }
 
@@ -1262,86 +1240,6 @@ public class LuceneSupport implements OptionalTool
     {
 		return DriverManager.getConnection( "jdbc:default:connection" );
 	}
-
-    /**
-     * <p>
-     * Raise an exception if SQL authorization is enabled and the current user
-     * isn't the DBO or the owner of the indicated schema or if the indicated schema
-     * doesn't exist.
-     * </p>
-     */
-    private static  void    mustBeOwner( Connection conn, String schema )
-        throws SQLException
-    {
-        if ( !sqlAuthorizationEnabled( conn ) ) { return; }
-
-        String  dbo = getOwner( conn, "SYS" );
-        String  schemaOwner = getOwner( conn, schema );
-        String  currentUser = getCurrentUser( conn );
-
-        if (
-            (schemaOwner != null) &&
-            (
-             schemaOwner.equals( currentUser ) ||
-             dbo.equals( currentUser )
-             )
-            )   { return; }
-        else
-        {
-            throw newSQLException( SQLState.LUCENE_MUST_OWN_SCHEMA );
-        }
-    }
-
-    /**
-     * <p>
-     * Raise an exception if SQL authorization is enabled and the current user
-     * isn't the DBO.
-     * </p>
-     */
-    private static  void    mustBeDBO( Connection conn )
-        throws SQLException
-    {
-        if ( !sqlAuthorizationEnabled( conn ) ) { return; }
-
-        String  dbo = getOwner( conn, "SYS" );
-        String  currentUser = getCurrentUser( conn );
-
-        if ( dbo.equals( currentUser ) )   { return; }
-        else
-        {
-            throw newSQLException( SQLState.DBO_ONLY );
-        }
-    }
-
-    /** Get the current user */
-    private static  String  getCurrentUser( Connection conn )
-        throws SQLException
-    {
-        ResultSet   rs = conn.prepareStatement( "values current_user" ).executeQuery();
-        try {
-            rs.next();
-            return rs.getString( 1 );
-        } finally { rs.close(); }
-    }
-
-    /**
-     * <p>
-     * Get the owner of the indicated schema. Returns null if the schema doesn't exist.
-     * </p>
-     */
-    private static  String  getOwner( Connection conn, String schema )
-        throws SQLException
-    {
-        PreparedStatement   ps = conn.prepareStatement
-            ( "select authorizationID from sys.sysschemas where schemaName = ?" );
-        ps.setString( 1, derbyIdentifier( schema ) );
-
-        ResultSet   rs = ps.executeQuery();
-        try {
-            if ( rs.next() ) { return rs.getString( 1 ); }
-            else { return null; }
-        } finally { rs.close(); }
-    }
 
     /** Return true if the LuceneSupport schema exists already */
     private static  boolean luceneSchemaExists( Connection conn )
@@ -1362,41 +1260,6 @@ public class LuceneSupport implements OptionalTool
         }
     }
 
-    /**
-     * Returns true if SQL authorization is enabled in the connected database.
-     */
-    public  static  boolean sqlAuthorizationEnabled( Connection conn )
-        throws SQLException
-    {
-        try {
-            ResultSet   rs;
-        
-            // first check to see if NATIVE authentication is on
-            rs = conn.prepareStatement( "select count(*) from sys.sysusers" ).executeQuery();
-            rs.next();
-            try {
-                if ( rs.getInt( 1 ) > 0 ) { return true; }
-            }
-            finally { rs.close(); }
-        }
-        catch (SQLException se)
-        {
-            if ( SQLState.DBO_ONLY.equals( se.getSQLState() ) ) { return true; }
-        }
-        
-        ResultSet   rs = conn.prepareStatement
-            (
-             "values syscs_util.syscs_get_database_property( 'derby.database.sqlAuthorization' )"
-             ).executeQuery();
-
-        try {
-            if ( !( rs.next() ) ) { return false; }
-
-            return ( "true".equals( rs.getString( 1 ) ) );
-        }
-        finally { rs.close(); }
-    }
-    
 	/**
 	 * Execute a DDL statement
 	 * 
@@ -1410,16 +1273,6 @@ public class LuceneSupport implements OptionalTool
     	ddl.close();
     }
 	
-    /** Convert a raw string into a properly cased and escaped Derby identifier */
-    static  String  derbyIdentifier( String rawString )
-        throws SQLException
-    {
-        try {
-            return IdUtil.parseSQLIdentifier( rawString );
-        }
-        catch (StandardException se)  { throw sqlException( se ); }
-    }
-
     /** Double quote an identifier in order to preserver casing */
     static String delimitID( String id )
     {
@@ -1432,7 +1285,7 @@ public class LuceneSupport implements OptionalTool
     {
         if ( argumentValue == null )
         {
-            throw newSQLException( SQLState.ARGUMENT_MAY_NOT_BE_NULL, argumentName );
+            throw ToolUtilities.newSQLException( SQLState.ARGUMENT_MAY_NOT_BE_NULL, argumentName );
         }
     }
 
@@ -1447,7 +1300,8 @@ public class LuceneSupport implements OptionalTool
          )
         throws SQLException
     {
-        ResultSet   keysRS = conn.getMetaData().getPrimaryKeys( null, derbyIdentifier( schema ), derbyIdentifier( table ) );
+        ResultSet   keysRS = conn.getMetaData().getPrimaryKeys
+            ( null, ToolUtilities.derbyIdentifier( schema ), ToolUtilities.derbyIdentifier( table ) );
         ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
         try {
             while ( keysRS.next() )
@@ -1495,7 +1349,7 @@ public class LuceneSupport implements OptionalTool
          )
         throws SQLException
     {
-        schema = derbyIdentifier( schema );
+        schema = ToolUtilities.derbyIdentifier( schema );
         String  functionName = makeUnqualifiedTableFunctionName( table, textcol );
         ArrayList<VTITemplate.ColumnDescriptor>    keyArray = new ArrayList<VTITemplate.ColumnDescriptor>();
 
@@ -1558,7 +1412,7 @@ public class LuceneSupport implements OptionalTool
 
             if ( counter > 0 ) { buffer.append( ", " ); }
             counter++;
-            buffer.append( delimitID( derbyIdentifier( key ) ) );
+            buffer.append( delimitID( ToolUtilities.derbyIdentifier( key ) ) );
         }
         buffer.append( "\nfrom " + qualifiedName );
         buffer.append( "\nwhere 1=2" );
@@ -1646,8 +1500,8 @@ public class LuceneSupport implements OptionalTool
         });
 
         if (!result) {
-            throw newSQLException(SQLState.UNABLE_TO_DELETE_FILE,
-                                  file.getPath());
+            throw ToolUtilities.newSQLException
+                ( SQLState.UNABLE_TO_DELETE_FILE, file.getPath() );
         }
 
         return result;
@@ -1659,7 +1513,7 @@ public class LuceneSupport implements OptionalTool
     {
 		if (schema.indexOf( invalidCharacter ) > 0 || table.indexOf( invalidCharacter ) > 0 || textcol.indexOf( invalidCharacter ) > 0)
         {
-            throw newSQLException( SQLState.LUCENE_INVALID_CHARACTER, invalidCharacter );
+            throw ToolUtilities.newSQLException( SQLState.LUCENE_INVALID_CHARACTER, invalidCharacter );
 		}		
     }
 
@@ -1864,7 +1718,7 @@ public class LuceneSupport implements OptionalTool
                 ( Property.DATABASE_MODULE, ((EmbedConnection) conn).getDBName() ) ;
             return (DataFactory) findServiceModule( monitor, DataFactory.MODULE );
         }
-        catch (StandardException se) { throw wrap( se ); }
+        catch (StandardException se) { throw ToolUtilities.wrap( se ); }
     }
 
 	/**

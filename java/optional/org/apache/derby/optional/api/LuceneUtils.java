@@ -37,6 +37,7 @@ import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.optional.utils.ToolUtilities;
 
 /**
  * <p>
@@ -157,10 +158,10 @@ public abstract class LuceneUtils
                 return constructor.newInstance( currentVersion() );
             }
         }
-        catch (IllegalAccessException iae) { throw wrap( iae ); }
-        catch (InstantiationException ie)   { throw wrap( ie ); }
-        catch (InvocationTargetException ite)   { throw wrap( ite ); }
-        catch (NoSuchMethodException nsme)  { throw wrap( nsme ); }
+        catch (IllegalAccessException iae) { throw ToolUtilities.wrap( iae ); }
+        catch (InstantiationException ie)   { throw ToolUtilities.wrap( ie ); }
+        catch (InvocationTargetException ite)   { throw ToolUtilities.wrap( ite ); }
+        catch (NoSuchMethodException nsme)  { throw ToolUtilities.wrap( nsme ); }
     }
 
     /**
@@ -224,18 +225,6 @@ public abstract class LuceneUtils
         String  languageCode = packageName.substring( packageName.lastIndexOf( "." ) + 1, packageName.length() );
 
         return languageCode;
-    }
-
-    /** Wrap an external exception */
-    private  static  SQLException    wrap( Throwable t )
-    {
-        return sqlException( StandardException.plainWrapException( t ) );
-    }
-    
-    /** Turn a StandardException into a SQLException */
-    private  static  SQLException    sqlException( StandardException se )
-    {
-        return PublicAPI.wrapStandardException( se );
     }
 
     /////////////////////////////////////////////////////////////////

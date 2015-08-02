@@ -41,6 +41,8 @@ import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 
+import org.apache.derby.optional.utils.ToolUtilities;
+
 /**
  * <p>
  * Derby implementation of Lucene Directory.
@@ -343,7 +345,7 @@ class DerbyLuceneDir extends Directory
     /** Make an IOException with the given SQLState and args */
     private IOException newIOException( String sqlState, Object... args )
     {
-        return new IOException( LuceneSupport.newSQLException( sqlState, args ).getMessage() );
+        return new IOException( ToolUtilities.newSQLException( sqlState, args ).getMessage() );
     }
 
     /** Raise an exception if this directory is closed */
@@ -383,7 +385,7 @@ class DerbyLuceneDir extends Directory
              {
                  public StorageFile run() throws SQLException
                  {
-                     String         normalizedName = LuceneSupport.derbyIdentifier( fileName );
+                     String         normalizedName = ToolUtilities.derbyIdentifier( fileName );
                      StorageFile    file = parentDir == null ?
                          storageFactory.newStorageFile( normalizedName  ) :
                          storageFactory.newStorageFile( parentDir, normalizedName );
@@ -391,7 +393,8 @@ class DerbyLuceneDir extends Directory
                      if ( !file.exists() ) { file.mkdir(); }
                      if ( !file.exists() )
                      {
-                         throw LuceneSupport.newSQLException( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, normalizedName );
+                         throw ToolUtilities.newSQLException
+                             ( SQLState.SERVICE_DIRECTORY_CREATE_ERROR, normalizedName );
                      }
                      else { return file; }
                  }

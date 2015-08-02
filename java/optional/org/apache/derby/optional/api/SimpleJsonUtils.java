@@ -47,6 +47,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.optional.utils.ToolUtilities;
 
 /**
  * <p>
@@ -142,7 +143,7 @@ public abstract class SimpleJsonUtils
         try {
             obj = parser.parse( reader );
         }
-        catch( Throwable t) { throw wrap( t ); }
+        catch( Throwable t) { throw ToolUtilities.wrap( t ); }
 
         if ( (obj == null) || !(obj instanceof JSONArray) )
         {
@@ -177,13 +178,13 @@ public abstract class SimpleJsonUtils
         try {
             return readArray( new InputStreamReader( inputStream, characterSetName ) );
         }
-        catch (UnsupportedEncodingException uee) { throw wrap( uee ); }
+        catch (UnsupportedEncodingException uee) { throw ToolUtilities.wrap( uee ); }
         finally
         {
             try {
                 inputStream.close();
             }
-            catch (IOException ioe) { throw wrap( ioe ); }
+            catch (IOException ioe) { throw ToolUtilities.wrap( ioe ); }
         }
     }
 
@@ -209,7 +210,7 @@ public abstract class SimpleJsonUtils
              }
              );
         }
-        catch (PrivilegedActionException pae) { throw wrap( pae ); }
+        catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
 
         return readArrayFromStream( fis, characterSetName );
     }
@@ -237,7 +238,7 @@ public abstract class SimpleJsonUtils
              }
              );
         }
-        catch (PrivilegedActionException pae) { throw wrap( pae ); }
+        catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
         
         return readArrayFromStream( inputStream, characterSetName );
     }
@@ -306,22 +307,6 @@ public abstract class SimpleJsonUtils
     private static  Connection  getDerbyConnection() throws SQLException
     {
         return DriverManager.getConnection( "jdbc:default:connection" );
-    }
-    
-    /**
-     * <p>
-     * Wrap an exception in a SQLException.
-     * </p>
-     */
-    static SQLException wrap( Throwable t )
-    {
-        String  message = t.getMessage();
-        if ( (message == null) || (message.length() == 0) )
-        {
-            message = t.toString();
-        }
-        
-        return new SQLException( message, t );
     }
     
 }

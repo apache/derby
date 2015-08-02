@@ -9,3 +9,4 @@ org.apache.derby.optional.lucene.DerbyLuceneDir.class
 org.apache.derby.optional.lucene.LuceneListIndexesVTI.class
 org.apache.derby.optional.lucene.LuceneQueryVTI.class
 org.apache.derby.optional.lucene.LuceneSupport.class
+org.apache.derby.optional.utils.ToolUtilities.class

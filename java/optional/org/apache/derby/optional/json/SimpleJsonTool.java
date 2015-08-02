@@ -35,6 +35,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.optional.api.SimpleJsonUtils;
+import org.apache.derby.optional.utils.ToolUtilities;
 
 /**
  * <p>
@@ -159,6 +160,22 @@ public	class   SimpleJsonTool  implements OptionalTool
 
         createUDT( derbyConn );
         createFunctions( derbyConn );
+        
+        boolean sqlAuthorizationEnabled = ToolUtilities.sqlAuthorizationEnabled( derbyConn );
+        if ( sqlAuthorizationEnabled ) { grantPermissions( derbyConn ); }
+    }
+
+    /**
+     * Grant permissions to use the newly loaded UDT and FUNCTIONs.
+     */
+    private void    grantPermissions( Connection conn )  throws SQLException
+    {
+        executeDDL( conn, "grant usage on type JSONArray to public" );
+
+        for ( FunctionDescriptor desc : _functionDescriptors )
+        {
+            executeDDL( conn, "grant execute on function " + desc.functionName + " to public" );
+        }
     }
 
     /**

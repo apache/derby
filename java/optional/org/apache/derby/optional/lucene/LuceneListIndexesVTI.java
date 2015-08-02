@@ -39,6 +39,8 @@ import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.vti.StringColumnVTI;
 
+import org.apache.derby.optional.utils.ToolUtilities;
+
 /**
  * Provides a table interface to the Lucene indexes in this database.
  * See org.apache.derby.optional.lucene.LuceneSupport.listIndexes.
@@ -146,7 +148,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
         case 6: return getProperty( LuceneSupport.ANALYZER );
         case 7: return getProperty( LuceneSupport.INDEX_DESCRIPTOR_MAKER );
         default:
-            throw LuceneSupport.newSQLException
+            throw ToolUtilities.newSQLException
                 (
                  SQLState.LANG_INVALID_COLUMN_POSITION,
                  new Integer( col ),
@@ -160,7 +162,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
     {
         if ( col != 4 )
         {
-            throw LuceneSupport.newSQLException
+            throw ToolUtilities.newSQLException
                 (
                  SQLState.LANG_INVALID_COLUMN_POSITION,
                  new Integer( col ),
@@ -173,7 +175,7 @@ class LuceneListIndexesVTI extends StringColumnVTI
 
             return new Timestamp( timestampMillis );
         }
-        catch (NumberFormatException nfe) { throw LuceneSupport.wrap( nfe ); }
+        catch (NumberFormatException nfe) { throw ToolUtilities.wrap( nfe ); }
     }
     
     /** Fill in the schema, table, and column names */
@@ -209,8 +211,8 @@ class LuceneListIndexesVTI extends StringColumnVTI
                 StorageFile    indexPropertiesFile = LuceneSupport.getIndexPropertiesFile( connection, schema, table, delimitedColumnName );
                 rowProperties = readIndexProperties( indexPropertiesFile );
             }
-            catch (IOException ioe) { throw LuceneSupport.wrap( ioe ); }
-            catch (PrivilegedActionException pae) { throw LuceneSupport.wrap( pae ); }
+            catch (IOException ioe) { throw ToolUtilities.wrap( ioe ); }
+            catch (PrivilegedActionException pae) { throw ToolUtilities.wrap( pae ); }
         }
 
         return rowProperties;

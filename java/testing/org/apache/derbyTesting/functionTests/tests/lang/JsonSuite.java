@@ -57,6 +57,7 @@ public class JsonSuite extends BaseTestCase
         else
         {
             suite.addTest(SimpleJsonTest.suite());
+            suite.addTest(SimpleJsonPermsTest.suite());
         }
 
         return suite;
