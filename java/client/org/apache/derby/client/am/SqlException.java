@@ -319,7 +319,7 @@ public class SqlException extends Exception implements Diagnosable {
         // When we have support for JDBC 4 SQLException subclasses, this is
         // where we decide which exception to create
         SQLException sqle = exceptionFactory.getSQLException(getMessage(), getSQLState(), 
-            getErrorCode());
+            getErrorCode(), getArgs());
         sqle.initCause(this);
 
         // Set up the nextException chain
@@ -350,6 +350,12 @@ public class SqlException extends Exception implements Diagnosable {
     public String toString() {
         // Match what the embedded driver does in StandardException.toString().
         return "ERROR " + getSQLState() + ": " + getMessage();
+    }
+
+    private Object []getArgs() {
+        if( sqlca_ != null )
+            return ((Sqlca)sqlca_).getArgs(messageNumber_);
+        return null;
     }
 
     @Override

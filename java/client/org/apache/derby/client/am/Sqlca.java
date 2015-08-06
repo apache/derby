@@ -27,6 +27,7 @@ import java.util.Locale;
 import org.apache.derby.client.net.Typdef;
 import org.apache.derby.shared.common.error.ExceptionSeverity;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.error.MessageUtils;
 
 public abstract class Sqlca {
 
@@ -64,12 +65,11 @@ public abstract class Sqlca {
 
     /**
      * Character sequence that separates the different messages in the errmc.
-     * @see org.apache.derby.catalog.SystemProcedures#SQLERRMC_MESSAGE_DELIMITER
+     * @see org.apache.derby.shared.common.error.MessageUtils#SQLERRMC_MESSAGE_DELIMITER
      */
     private static final String sqlErrmcDelimiter__ = "\u0014\u0014\u0014";
 
-    /** Token delimiter for SQLERRMC. */
-    private final static String SQLERRMC_TOKEN_DELIMITER = "\u0014";
+    
 
     // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
     private boolean returnTokensOnlyInMessageText_ = false;
@@ -255,6 +255,13 @@ public abstract class Sqlca {
         return getSqlState();
     }
 
+    public Object [] getArgs(int messageNumber) {
+        if (sqlErrmcMessages_ != null)
+	    return MessageUtils.getArgs(getSqlState(messageNumber),
+                                        sqlErrmcMessages_[messageNumber] );
+        return null;
+    }
+
     // Gets the formatted message, can throw an exception.
     private String getMessage(int messageNumber) throws SqlException {
         // should this be traced to see if we are calling a stored proc?
@@ -412,7 +419,7 @@ public abstract class Sqlca {
     DataTruncation getDataTruncation() {
         // The network server has serialized all the parameters needed by
         // the constructor in the SQLERRMC field.
-        String[] tokens = getSqlErrmc().split(SQLERRMC_TOKEN_DELIMITER);
+        String[] tokens = getSqlErrmc().split(MessageUtils.SQLERRMC_TOKEN_DELIMITER);
         return new DataTruncation(
                 Integer.parseInt(tokens[0]),                // index
                 Boolean.valueOf(tokens[1]).booleanValue(),  // parameter

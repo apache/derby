@@ -32,6 +32,7 @@ import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTimeoutException;
 import java.sql.SQLTransactionRollbackException;
+import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 
 /**
@@ -60,7 +61,7 @@ public class SQLExceptionFactory {
      * @param errCode derby error code
      */
     public SQLException getSQLException (String message, String sqlState, 
-                                                            int errCode) { 
+                                         int errCode, Object []args) { 
         SQLException ex = null;
         if (sqlState == null) {
             ex = new SQLException(message, sqlState, errCode); 
@@ -71,8 +72,8 @@ public class SQLExceptionFactory {
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, errCode);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
-            ex = new SQLIntegrityConstraintViolationException(message, sqlState,
-                    errCode);
+            ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
+                    errCode, args[0], args[1]);
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     errCode);
