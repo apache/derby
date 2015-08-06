@@ -1098,6 +1098,8 @@ org.apache.derby.impl.sql.execute.SetTransactionIsolationConstantAction.class
 org.apache.derby.impl.sql.execute.SetTransactionResultSet.class
 org.apache.derby.impl.sql.execute.SortResultSet.class
 org.apache.derby.impl.sql.execute.StatementTriggerExecutor.class
+org.apache.derby.impl.sql.execute.StdDevPAggregator.class
+org.apache.derby.impl.sql.execute.StdDevSAggregator.class
 org.apache.derby.impl.sql.execute.SumAggregator.class
 org.apache.derby.impl.sql.execute.SystemAggregator.class
 org.apache.derby.impl.sql.execute.TablePrivilegeInfo.class
@@ -1119,6 +1121,8 @@ org.apache.derby.impl.sql.execute.UserDefinedAggregator.class
 org.apache.derby.impl.sql.execute.VTIResultSet.class
 org.apache.derby.impl.sql.execute.ValidateCheckConstraintResultSet.class
 org.apache.derby.impl.sql.execute.ValueRow.class
+org.apache.derby.impl.sql.execute.VarPAggregator.class
+org.apache.derby.impl.sql.execute.VarSAggregator.class
 org.apache.derby.impl.sql.execute.WindowResultSet.class
 org.apache.derby.impl.sql.execute.WriteCursorConstantAction.class
 org.apache.derby.impl.sql.execute.rts.RealAnyResultSetStatistics.class
