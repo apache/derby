@@ -45,11 +45,6 @@ public interface Limits
 	public static final int DB2_MAX_ELEMENTS_IN_ORDER_BY = 1012;
 
 
-
-	// Warning. Changing this value will affect upgrade and the creation of the
-	// SQLCAMESSAGE procedure. See org.apache.derby.impl.sql.catalog.
-	public static final int DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH = 2400;
-
         /* Identifiers (Constraint, Cursor, Function/Procedure, Index,
          * Trigger, Column, Schema, Savepoint, Table and View names)
          * are limited to 128 */ 

@@ -65,6 +65,7 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.shared.common.error.MessageUtils;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.StringUtil;
@@ -6518,31 +6519,21 @@ class DRDAConnThread extends Thread {
             StandardException ferry = StandardException.getArgumentFerry(se);
             if (ferry != null)
             {
-                String messageId = ferry.getMessageId();
-                // arguments are variable part of a message
-                Object[] args = ferry.getArguments();
-                for (int i = 0; args != null &&  i < args.length; i++) {
-                    sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
-                }
-                sqlerrmc += messageId;
+                sqlerrmc += MessageUtils.encodeMessageAndArgumentsAsSqlerrmc(
+                                ferry.getMessageId(),
+                                ferry.getArguments());
                 se = se.getNextException();
             }
             else
             {   
                 // this could happen for instance if an SQLException was thrown
                 // from a stored procedure.
-                StringBuilder sb = new StringBuilder();
-                sb.append(se.getLocalizedMessage());
+                sqlerrmc += MessageUtils.encodeExceptionAsSqlerrmc( se );
                 se = se.getNextException();
-                if (se != null) {
-                    sb.append(SQLERRMC_TOKEN_DELIMITER);
-                    sb.append("SQLSTATE: ").append(se.getSQLState());
-                }
-                sqlerrmc += sb.toString();
             }
             if (se != null)
             {
-                sqlerrmc += SystemProcedures.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";
+                sqlerrmc += MessageUtils.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";
             }
         } while (se != null);
         return sqlerrmc;

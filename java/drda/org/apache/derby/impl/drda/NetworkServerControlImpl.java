@@ -83,6 +83,7 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
 import org.apache.derby.security.SystemPermission;
+import org.apache.derby.shared.common.error.MessageUtils;
 
 /** 
     
@@ -2146,7 +2147,7 @@ public final class NetworkServerControlImpl {
                 ferry != null)
             {
                 locMsg.append(se.getSQLState()+":"+ 
-                    MessageService.getLocalizedMessage(
+                    MessageUtils.getLocalizedMessage(
                     currentSession.langUtil.getLocale(),
                     ferry.getMessageId(), ferry.getArguments()));
             }

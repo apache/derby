@@ -77,6 +77,7 @@ import org.apache.derby.iapi.sql.dictionary.StatementPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
+import org.apache.derby.shared.common.error.MessageUtils;
 
 /**
 	Some system built-in procedures, and help routines.  Now used for network server.
@@ -95,14 +96,6 @@ public class SystemProcedures  {
 	private final static int SQL_ROWVER = 2;
 	private final static String DRIVER_TYPE_OPTION = "DATATYPE";
 	private final static String ODBC_DRIVER_OPTION = "'ODBC'";
-
-    // This token delimiter value is used to separate the tokens for multiple 
-    // error messages.  This is used in DRDAConnThread
-    /**
-     * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
-     * this value separates the tokens for mulitiple error messages 
-     */
-    public static final String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 
 	/**
 	  Method used by Derby Network Server to get localized message (original call
@@ -139,16 +132,16 @@ public class SystemProcedures  {
 		// translated and append to make the final result.
 		for (int index=0; ; numMessages++)
 		{
-			if (sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, index) == -1)
+			if (sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, index) == -1)
 				break;
-			index = sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, index) + 
-                        SQLERRMC_MESSAGE_DELIMITER.length();
+			index = sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, index) + 
+                        MessageUtils.SQLERRMC_MESSAGE_DELIMITER.length();
 		}
 
 		// Putting it here instead of prepareCall it directly is because inter-jar reference tool
 		// cannot detect/resolve this otherwise
 		if (numMessages == 1)
-			MessageService.getLocalizedMessage(sqlcode, errmcLen, sqlerrmc, sqlerrp, errd0, errd1,
+			MessageUtils.getLocalizedMessage(sqlcode, errmcLen, sqlerrmc, sqlerrp, errd0, errd1,
 											errd2, errd3, errd4, errd5, warn, sqlState, file,
 											localeStr, msg, rc);
 		else
@@ -158,7 +151,7 @@ public class SystemProcedures  {
 			String[] errMsg = new String[2];
 			for (int i=0; i<numMessages; i++)
 			{
-				endIdx = sqlerrmc.indexOf(SQLERRMC_MESSAGE_DELIMITER, startIdx);
+				endIdx = sqlerrmc.indexOf(MessageUtils.SQLERRMC_MESSAGE_DELIMITER, startIdx);
 				if (i == numMessages-1)				// last error message
 					sqlError = sqlerrmc.substring(startIdx);
 				else sqlError = sqlerrmc.substring(startIdx, endIdx);
@@ -171,7 +164,7 @@ public class SystemProcedures  {
 					msg[0] += " SQLSTATE: " + sqlState + ": ";
 				}
 
-				MessageService.getLocalizedMessage(sqlcode, (short)sqlError.length(), sqlError,
+				MessageUtils.getLocalizedMessage(sqlcode, (short)sqlError.length(), sqlError,
 											sqlerrp, errd0, errd1, errd2, errd3, errd4, errd5,
 											warn, sqlState, file, localeStr, errMsg, rc);
 
@@ -181,7 +174,7 @@ public class SystemProcedures  {
 						msg[0] = errMsg[0];
 					else msg[0] += errMsg[0];	// append the new message
 				}
-				startIdx = endIdx + SQLERRMC_MESSAGE_DELIMITER.length();
+				startIdx = endIdx + MessageUtils.SQLERRMC_MESSAGE_DELIMITER.length();
 			}
 		}
 	}

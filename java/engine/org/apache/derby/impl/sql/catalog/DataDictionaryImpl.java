@@ -165,6 +165,7 @@ import org.apache.derby.impl.sql.compile.QueryTreeNode;
 import org.apache.derby.impl.sql.compile.TableName;
 import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 import org.apache.derby.impl.sql.execute.JarUtil;
+import org.apache.derby.shared.common.error.MessageUtils;
 
 /**
  * Standard database implementation of the data dictionary
@@ -11549,7 +11550,7 @@ public final class	DataDictionaryImpl
                     TypeDescriptor.INTEGER,
                     TypeDescriptor.SMALLINT,
 				DataTypeDescriptor.getCatalogType(
-						Types.VARCHAR, Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH),
+						Types.VARCHAR, MessageUtils.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH),
 				DataTypeDescriptor.getCatalogType(Types.CHAR, 8),
                 TypeDescriptor.INTEGER,
                 TypeDescriptor.INTEGER,
