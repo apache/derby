@@ -239,7 +239,7 @@ class StaticMethodCallNode extends MethodCallNode
 
             // The field methodName is used by resolveRoutine and
             // is set to the name of the routine (procedureName.getTableName()).
-            resolveRoutine( fromList, subqueryList, aggregates, sd );
+            resolveRoutine( fromList, subqueryList, aggregates, sd, noSchema );
 
             if ( (ad != null) && (ad.getAliasType() == AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR) )
             {
@@ -276,7 +276,7 @@ class StaticMethodCallNode extends MethodCallNode
                 // an in-memory table, set up in DataDictioanryImpl.
                 sd = getSchemaDescriptor("SYSFUN", true);
 
-                resolveRoutine(fromList, subqueryList, aggregates, sd);
+                resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
             }
 
             if (ad == null) {
@@ -301,7 +301,7 @@ class StaticMethodCallNode extends MethodCallNode
 
                     forCallStatement = true; // temporarily: resolve
                                              // as procedure
-                    resolveRoutine(fromList, subqueryList, aggregates, sd);
+                    resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
                     forCallStatement = false; // restore it
 
                     if (ad != null) {
@@ -313,7 +313,7 @@ class StaticMethodCallNode extends MethodCallNode
                     // Maybe a function is being CALLed ?
                     forCallStatement = false; // temporarily: resolve
                                               // as function
-                    resolveRoutine(fromList, subqueryList, aggregates, sd);
+                    resolveRoutine(fromList, subqueryList, aggregates, sd, noSchema);
                     forCallStatement = true; // restore it
 
                     if (ad != null) {
@@ -532,7 +532,8 @@ class StaticMethodCallNode extends MethodCallNode
 	 * be required.
 	 */
     private void resolveRoutine(FromList fromList, SubqueryList subqueryList,
-                                List<AggregateNode> aggregates, SchemaDescriptor sd)
+                                List<AggregateNode> aggregates, SchemaDescriptor sd,
+                                boolean noSchema)
             throws StandardException {
 		if (sd.getUUID() != null) {
 
@@ -698,7 +699,8 @@ class StaticMethodCallNode extends MethodCallNode
 
         if ( (ad == null) && (methodParms.length == 1) )
         {
-            ad = AggregateNode.resolveAggregate( getDataDictionary(), sd, methodName );
+            ad = AggregateNode.resolveAggregate
+                ( getDataDictionary(), sd, methodName, noSchema );
         }
 	}
 

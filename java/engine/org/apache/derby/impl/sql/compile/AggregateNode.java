@@ -23,6 +23,8 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.List;
 import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.AggregateAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -44,6 +46,63 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 class AggregateNode extends UnaryOperatorNode
 {
+    static final class BuiltinAggDescriptor
+    {
+        public  final   String  aggName;
+        public  final   String  aggClassName;
+        public  final   TypeDescriptor  argType;
+        public  final   TypeDescriptor  returnType;
+
+        public BuiltinAggDescriptor
+            (
+             String aggName,
+             String aggClassName,
+             TypeDescriptor argType,
+             TypeDescriptor returnType
+             )
+        {
+            this.aggName = aggName;
+            this.aggClassName = aggClassName;
+            this.argType = argType;
+            this.returnType = returnType;
+        }
+    }
+    
+    //
+    // Builtin aggregates which implement org.apache.derby.agg.Aggregator.
+    //
+    private static  BuiltinAggDescriptor[]  BUILTIN_MODERN_AGGS =
+    {
+        new BuiltinAggDescriptor
+        (
+         "VAR_POP",
+         "org.apache.derby.impl.sql.execute.VarPAggregator",
+         TypeDescriptor.DOUBLE,
+         TypeDescriptor.DOUBLE
+         ),
+        new BuiltinAggDescriptor
+        (
+         "VAR_SAMP",
+         "org.apache.derby.impl.sql.execute.VarSAggregator",
+         TypeDescriptor.DOUBLE,
+         TypeDescriptor.DOUBLE
+         ),
+        new BuiltinAggDescriptor
+        (
+         "STDDEV_POP",
+         "org.apache.derby.impl.sql.execute.StdDevPAggregator",
+         TypeDescriptor.DOUBLE,
+         TypeDescriptor.DOUBLE
+         ),
+        new BuiltinAggDescriptor
+        (
+         "STDDEV_SAMP",
+         "org.apache.derby.impl.sql.execute.StdDevSAggregator",
+         TypeDescriptor.DOUBLE,
+         TypeDescriptor.DOUBLE
+         ),
+    };
+    
 	private boolean					distinct;
 
 	private AggregateDefinition		uad;
@@ -299,12 +358,14 @@ class AggregateNode extends UnaryOperatorNode
         // bind it now.
         if (userAggregateName != null && uad == null)
         {
-
+            String  schemaName = userAggregateName.getSchemaName();
+            boolean noSchema = schemaName == null;
             AliasDescriptor ad = resolveAggregate
                 (
                  dd,
-                 getSchemaDescriptor( userAggregateName.getSchemaName(), true ),
-                 userAggregateName.getTableName()
+                 getSchemaDescriptor( schemaName, true ),
+                 userAggregateName.getTableName(),
+                 noSchema
                  );
 
             if ( ad == null )
@@ -334,7 +395,15 @@ class AggregateNode extends UnaryOperatorNode
 
             if ( isPrivilegeCollectionRequired() )
             {
-                getCompilerContext().addRequiredUsagePriv( ad );
+                //
+                // Don't need a privilege check for modern, builtin (system)
+                // aggregates. They are tricky. They masquerade as user-defined
+                // aggregates because they implement org.apache.derby.agg.Aggregator
+                //
+                if ( !SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME.equals( ad.getSchemaName() ) )
+                {
+                    getCompilerContext().addRequiredUsagePriv( ad );
+                }
             }
         }
 
@@ -455,10 +524,15 @@ class AggregateNode extends UnaryOperatorNode
 	/**
 	 * Resolve a user-defined aggregate.
 	 */
-     static AliasDescriptor resolveAggregate
-        ( DataDictionary dd, SchemaDescriptor sd, String rawName )
+    static AliasDescriptor resolveAggregate
+        ( DataDictionary dd, SchemaDescriptor sd, String rawName, boolean noSchema )
         throws StandardException
     {
+        // first see if this is one of the builtin aggregates which
+        // implements the Aggregator interface
+        AliasDescriptor ad = resolveBuiltinAggregate( dd, rawName, noSchema );
+        if ( ad != null ) { return ad; }
+        
         // if the schema has a null UUID, that means the schema has not
         // been created yet. in that case, it doesn't have any aggregates in it.
         if ( sd.getUUID() == null ) { return null; }
@@ -469,6 +543,45 @@ class AggregateNode extends UnaryOperatorNode
         if ( list.size() > 0 ) { return list.get( 0 ); }
 
         return null;
+    }
+
+    /**
+     * Construct an AliasDescriptor for a modern builtin aggregate.
+     */
+    private static AliasDescriptor resolveBuiltinAggregate
+        ( DataDictionary dd, String rawName, boolean noSchema )
+        throws StandardException
+    {
+        // builtin aggregates may not be schema-qualified
+        if ( !noSchema ) { return null; }
+
+        BuiltinAggDescriptor    bad = null;
+
+        for ( BuiltinAggDescriptor aggDescriptor : BUILTIN_MODERN_AGGS )
+        {
+            if ( aggDescriptor.aggName.equals( rawName ) )
+            {
+                bad = aggDescriptor;
+                break;
+            }
+        }
+        if ( bad == null ) { return null; }
+
+        AliasInfo   aliasInfo = new AggregateAliasInfo( bad.argType, bad.returnType );
+        
+        return new AliasDescriptor
+            (
+             dd,
+             null,
+             rawName,
+             dd.getSystemSchemaDescriptor().getUUID(),
+             bad.aggClassName,
+             AliasInfo.ALIAS_TYPE_AGGREGATE_AS_CHAR,
+             AliasInfo.ALIAS_NAME_SPACE_AGGREGATE_AS_CHAR,
+             false,
+             aliasInfo,
+             null
+             );
     }
     
 	/*

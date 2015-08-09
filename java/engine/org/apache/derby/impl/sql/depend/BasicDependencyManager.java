@@ -912,7 +912,15 @@ public class BasicDependencyManager implements DependencyManager {
 			for (ListIterator<Dependency> depsIT = deps.listIterator();  depsIT.hasNext(); )
 			{
 				Dependency curDY = depsIT.next();
-				if (curDY.getProvider().getObjectID().equals(provKey) &&
+
+                //
+                // no need to try to add a dependency on system objects
+                // like builtin aggregates which implement
+                // org.apache.derby.agg.Aggregator. those objects have no UUID anyway
+                //
+                if ( curDY.getProvider().getObjectID() == null ) { continue; }
+                
+                if (curDY.getProvider().getObjectID().equals(provKey) &&
 					curDY.getDependent().getObjectID().equals(depKey))
 				{
 					return false;

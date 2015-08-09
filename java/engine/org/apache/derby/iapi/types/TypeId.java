@@ -249,7 +249,7 @@ public final class TypeId
             StoredFormatIds.REAL_TYPE_ID,
             StoredFormatIds.REAL_TYPE_ID_IMPL);
 
-        private static final TypeId DOUBLE_ID = create(
+        public static final TypeId DOUBLE_ID = create(
             StoredFormatIds.DOUBLE_TYPE_ID,
             StoredFormatIds.DOUBLE_TYPE_ID_IMPL);
 

@@ -92,6 +92,12 @@ public final class DataTypeDescriptor implements Formatable
     public static final DataTypeDescriptor SMALLINT_NOT_NULL =
         SMALLINT.getNullabilityType(false);
 
+    /**
+     * Runtime INTEGER type that is nullable.
+     */
+    public static final DataTypeDescriptor DOUBLE =
+        new DataTypeDescriptor(TypeId.DOUBLE_ID, true);
+    
     public  static  final   int MIN_VALUE_IDX = 0;
     public  static  final   int MAX_VALUE_IDX = MIN_VALUE_IDX + 1;
     public  static  final   int MAX_MIN_ARRAY_SIZE = MAX_VALUE_IDX + 1;

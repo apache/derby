@@ -49,6 +49,7 @@ public class UDAPermsTest extends GeneratedColumnsHelper
     private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH, FRANK, TONY  };
 
     private static  final   String      MISSING_ROUTINE = "42Y03";
+    private static  final   String      IMPLICIT_CAST_ERROR = "42Y22";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -442,4 +443,202 @@ public class UDAPermsTest extends GeneratedColumnsHelper
         expectCompilationError( tonyConnection, MISSING_ROUTINE, "values toString( 100 )" );
     }
 
+   /**
+     * <p>
+     * Test that anyone can run the modern, builtin system aggregates
+     * which implement org.apache.derby.agg.Aggregator.
+     * </p>
+     */
+    public  void    test_005_builtinAggregators()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  ruthConnection = openUserConnection( RUTH );
+
+        createSchema_005( ruthConnection );
+
+        vetStatsBuiltins_005( dboConnection );
+        vetStatsBuiltins_005( ruthConnection );
+        
+        dropSchema_005( ruthConnection );
+    }
+    private void vetStatsBuiltins_005( Connection conn )
+        throws Exception
+    {
+        vetBuiltinAgg_005
+            (
+             conn,
+             "var_pop",
+             new String[][] { { "8.079999999999991" } },
+             new String[][] { { "8.0" } }
+             );
+        vetBuiltinAgg_005
+            (
+             conn,
+             "var_samp",
+             new String[][] { { "10.099999999999994" } },
+             new String[][] { { "10.0" } }
+             );
+        vetBuiltinAgg_005
+            (
+             conn,
+             "stddev_pop",
+             new String[][] { { "2.8425340807103776" } },
+             new String[][] { { "2.8284271247461903" } }
+             );
+        vetBuiltinAgg_005
+            (
+             conn,
+             "stddev_samp",
+             new String[][] { { "3.1780497164141397" } },
+             new String[][] { { "3.1622776601683795" } }
+             );
+    }
+    private void vetBuiltinAgg_005
+        (
+         Connection conn,
+         String aggName,
+         String[][] expectedInexactResults,
+         String[][] expectedExactResults
+         )
+        throws Exception
+    {
+        vetBuiltinAgg_005( conn, aggName, "doubles", expectedInexactResults );
+        vetBuiltinAgg_005( conn, aggName, "floats", expectedInexactResults );
+        vetBuiltinAgg_005( conn, aggName, "bigints", expectedExactResults );
+        vetBuiltinAgg_005( conn, aggName, "ints", expectedExactResults );
+        vetBuiltinAgg_005( conn, aggName, "smallints", expectedExactResults );
+        vetBuiltinNegative_005( conn, aggName );
+    }
+    private void vetBuiltinAgg_005
+        (
+         Connection conn,
+         String aggName,
+         String tableName,
+         String[][] expectedResults
+         )
+        throws Exception
+    {
+        assertResults
+            (
+             conn,
+             "select " + aggName + "( a ) from ruth." + tableName,
+             expectedResults,
+             false
+             );
+    }
+    private void vetBuiltinNegative_005
+        (
+         Connection conn,
+         String aggName
+         )
+        throws Exception
+    {
+        // varchar can not be implicitly cast to double
+        expectCompilationError( conn, IMPLICIT_CAST_ERROR,
+                                "select " + aggName + "( a ) from ruth.varchars" );
+
+        // cannot schema-qualify a builtin aggregate name
+        expectCompilationError( conn, MISSING_ROUTINE,
+                                "select sys." + aggName + "( a ) from ruth.doubles" );
+    }
+    private void createSchema_005( Connection ruthConnection )
+        throws Exception
+    {
+        goodStatement
+            (
+             ruthConnection,
+             "create table doubles( a double )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into doubles values ( 1.2 ), ( 3.4 ), (5.6), (7.8), (9.0)"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create table floats( a double )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into floats values ( 1.2 ), ( 3.4 ), (5.6), (7.8), (9.0)"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create table bigints( a bigint )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into bigints values ( 1 ), ( 3 ), (5), (7), (9)"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create table ints( a bigint )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into ints values ( 1 ), ( 3 ), (5), (7), (9)"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create table smallints( a bigint )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into smallints values ( 1 ), ( 3 ), (5), (7), (9)"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "create table varchars( a varchar( 10 ) )"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "insert into varchars values ( '1' ), ( '3' ), ( '5' ), ( '7' ), ( '9' )"
+             );
+    }
+    private void dropSchema_005( Connection ruthConnection )
+        throws Exception
+    {
+        // drop schema
+        goodStatement
+            (
+             ruthConnection,
+             "drop table varchars"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "drop table smallints"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "drop table ints"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "drop table bigints"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "drop table floats"
+             );
+        goodStatement
+            (
+             ruthConnection,
+             "drop table doubles"
+             );
+    }
 }

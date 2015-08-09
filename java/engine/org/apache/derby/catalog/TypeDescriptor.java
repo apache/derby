@@ -69,6 +69,11 @@ public interface TypeDescriptor
     TypeDescriptor SMALLINT_NOT_NULL =
         DataTypeDescriptor.SMALLINT_NOT_NULL.getCatalogType();
 
+    /**
+     * Catalog type for nullable DOUBLE
+     */
+    TypeDescriptor DOUBLE = DataTypeDescriptor.DOUBLE.getCatalogType();
+
 
 	///////////////////////////////////////////////////////////////////////
 	//
