@@ -349,8 +349,10 @@ class AggregateNode extends UnaryOperatorNode
 		cf = getClassFactory();
 		classInspector = cf.getClassInspector();
 
+        boolean noSchema = true;
         if ( userAggregateName != null )
         {
+            noSchema = (userAggregateName.getSchemaName() == null );
             userAggregateName.bind();
         }
 
@@ -359,7 +361,6 @@ class AggregateNode extends UnaryOperatorNode
         if (userAggregateName != null && uad == null)
         {
             String  schemaName = userAggregateName.getSchemaName();
-            boolean noSchema = schemaName == null;
             AliasDescriptor ad = resolveAggregate
                 (
                  dd,
@@ -388,6 +389,13 @@ class AggregateNode extends UnaryOperatorNode
         if ( isUserDefinedAggregate() )
         {
             AliasDescriptor ad = ((UserAggregateDefinition) uad).getAliasDescriptor();
+            boolean         isModernBuiltinAggregate =
+                SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME.equals( ad.getSchemaName() );
+
+            if ( distinct && isModernBuiltinAggregate )
+            {
+                throw StandardException.newException( SQLState.LANG_BAD_DISTINCT_AGG );
+            }
 
             // set up dependency on the user-defined aggregate and compile a check for USAGE
             // priv if needed
@@ -400,7 +408,7 @@ class AggregateNode extends UnaryOperatorNode
                 // aggregates. They are tricky. They masquerade as user-defined
                 // aggregates because they implement org.apache.derby.agg.Aggregator
                 //
-                if ( !SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME.equals( ad.getSchemaName() ) )
+                if ( !isModernBuiltinAggregate )
                 {
                     getCompilerContext().addRequiredUsagePriv( ad );
                 }

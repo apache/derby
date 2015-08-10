@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.UDAPermsTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.UDAPermsTestz
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -50,6 +50,8 @@ public class UDAPermsTest extends GeneratedColumnsHelper
 
     private static  final   String      MISSING_ROUTINE = "42Y03";
     private static  final   String      IMPLICIT_CAST_ERROR = "42Y22";
+    private static  final   String      PARSE_ERROR = "42X01";
+    private static  final   String      BAD_DISTINCT = "42XAS";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -541,6 +543,12 @@ public class UDAPermsTest extends GeneratedColumnsHelper
         // cannot schema-qualify a builtin aggregate name
         expectCompilationError( conn, MISSING_ROUTINE,
                                 "select sys." + aggName + "( a ) from ruth.doubles" );
+
+        // cannot use ALL or DISTINCT with a builtin aggregate
+        expectCompilationError( conn, PARSE_ERROR,
+                                "select " + aggName + "( all a ) from ruth.doubles" );
+        expectCompilationError( conn, BAD_DISTINCT,
+                                "select " + aggName + "( distinct a ) from ruth.doubles" );
     }
     private void createSchema_005( Connection ruthConnection )
         throws Exception
