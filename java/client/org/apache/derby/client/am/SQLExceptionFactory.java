@@ -72,7 +72,14 @@ public class SQLExceptionFactory {
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, errCode);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
-            ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
+            if ( sqlState.equals( SQLState.LANG_NULL_INTO_NON_NULL ) )
+                ex = new SQLIntegrityConstraintViolationException(message, sqlState,
+                    errCode);
+            else if ( sqlState.equals( SQLState.LANG_CHECK_CONSTRAINT_VIOLATED ) )
+                ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
+                    errCode, args[1], args[0]);
+            else
+                ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
                     errCode, args[0], args[1]);
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,

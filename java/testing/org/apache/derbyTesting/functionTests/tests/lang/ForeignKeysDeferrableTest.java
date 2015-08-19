@@ -30,6 +30,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 import static org.apache.derbyTesting.junit.TestConfiguration.clientServerSuite;
 import static org.apache.derbyTesting.junit.TestConfiguration.embeddedSuite;
 
@@ -266,11 +267,33 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
         // ...InsertResultSet.normalInsertCore(InsertResultSet.java:1028)
 
         assertStatementError(LANG_FK_VIOLATION, s, DIRECT_INSERT_SQL);
+	
+	// Test the DERBY-6773 support:
+        try {
+            s.execute( DIRECT_INSERT_SQL );
+            fail();
+        }
+        catch ( DerbySQLIntegrityConstraintViolationException dsicve ) {
+            assertSQLState(LANG_FK_VIOLATION, dsicve);
+            assertEquals( "T_D_R", dsicve.getTableName() );
+            assertEquals( "C_D_R", dsicve.getConstraintName() );
+        }
 
         s.executeUpdate("set constraints c_d_r deferred");
         s.executeUpdate(DIRECT_INSERT_SQL);
 
-        assertCommitError(LANG_DEFERRED_FK_CONSTRAINT_T, getConnection());
+        // Use the slightly wordier form of:
+        //assertCommitError(LANG_DEFERRED_FK_CONSTRAINT_T, getConnection());
+        // to exercise the DERBY-6773 support:
+        try {
+            getConnection().commit();
+            fail();
+        }
+        catch ( DerbySQLIntegrityConstraintViolationException dsicve ) {
+            assertSQLState(LANG_DEFERRED_FK_CONSTRAINT_T, dsicve);
+            assertEquals( "\"APP\".\"T_D_R\"", dsicve.getTableName() );
+            assertEquals( "C_D_R", dsicve.getConstraintName() );
+        }
 
         // Now see deferred check succeed by actually adding referenced key
         // *after* the insert of the referencing row. Also check that setting
@@ -294,6 +317,17 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
                              "set constraints c_d_r immediate");
         assertStatementError(LANG_DEFERRED_FK_CONSTRAINT_S, s,
                              "set constraints c_d_r immediate");
+	// Test the DERBY-6773 support:
+        try {
+            s.execute( "set constraints c_d_r immediate" );
+            fail();
+        }
+        catch ( DerbySQLIntegrityConstraintViolationException dsicve ) {
+            assertSQLState(LANG_DEFERRED_FK_CONSTRAINT_S, dsicve);
+            assertEquals( "\"APP\".\"T_D_R\"", dsicve.getTableName() );
+            assertEquals( "C_D_R", dsicve.getConstraintName() );
+        }
+
 
         s.executeUpdate("delete from t_d_r where i=3");
         commit();
@@ -1305,7 +1339,15 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
 
         // Commit. Should fail because the PRIMARY KEY constraint of T5
         // is violated. Was not detected before DERBY-6665.
-        assertCommitError(LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T,
-                          getConnection());
+	// Test the DERBY-6773 support, too.
+        try {
+            getConnection().commit();
+            fail();
+        }
+        catch ( DerbySQLIntegrityConstraintViolationException dsicve ) {
+            assertSQLState(LANG_DEFERRED_DUPLICATE_KEY_CONSTRAINT_T, dsicve);
+            assertEquals( "D6665_T5", dsicve.getTableName() );
+            assertTrue( dsicve.getConstraintName().startsWith( "SQL" ) );
+        }
     }
 }

@@ -31,8 +31,8 @@ public  class  DerbySQLIntegrityConstraintViolationException
 			Object argsTwo)
 	{
 		super( reason, SQLState, vendorCode, cause );
-		tableName = argsOne.toString();
-		constraintName = argsTwo.toString();
+		tableName = argsTwo.toString();
+		constraintName = argsOne.toString();
 	}
 
        public  DerbySQLIntegrityConstraintViolationException(
@@ -43,8 +43,8 @@ public  class  DerbySQLIntegrityConstraintViolationException
 			Object argsTwo)
 	{
 		super( reason, SQLState, vendorCode );
-		tableName = argsOne.toString();
-		constraintName = argsTwo.toString();
+		tableName = argsTwo.toString();
+		constraintName = argsOne.toString();
 	}
 
 	public String getTableName() { return tableName; }

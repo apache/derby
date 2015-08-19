@@ -34,6 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException;
 
 /**
  *Class to create SQLException
@@ -82,8 +83,15 @@ public class SQLExceptionFactory extends ExceptionFactory {
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, severity, ferry);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {
-            ex = new SQLIntegrityConstraintViolationException(message, sqlState,
+            if ( sqlState.equals( SQLState.LANG_NULL_INTO_NON_NULL ) )
+                ex = new SQLIntegrityConstraintViolationException(message, sqlState,
                     severity, ferry);
+            else if ( sqlState.equals( SQLState.LANG_CHECK_CONSTRAINT_VIOLATED ) )
+                ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
+                    severity, ferry, args[1], args[0]);
+            else
+                ex = new DerbySQLIntegrityConstraintViolationException(message, sqlState,
+                    severity, ferry, args[0], args[1]);
         } else if (sqlState.startsWith(SQLState.AUTHORIZATION_SPEC_PREFIX)) {
             ex = new SQLInvalidAuthorizationSpecException(message, sqlState,
                     severity, ferry);
