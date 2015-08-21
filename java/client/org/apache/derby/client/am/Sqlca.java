@@ -63,14 +63,6 @@ public abstract class Sqlca {
     private boolean containsSqlcax_ = true;
     private long rowsetRowCount_;
 
-    /**
-     * Character sequence that separates the different messages in the errmc.
-     * @see org.apache.derby.shared.common.error.MessageUtils#SQLERRMC_MESSAGE_DELIMITER
-     */
-    private static final String sqlErrmcDelimiter__ = "\u0014\u0014\u0014";
-
-    
-
     // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
     private boolean returnTokensOnlyInMessageText_ = false;
 
@@ -172,7 +164,7 @@ public abstract class Sqlca {
         int indx;
         for (indx = 0; indx < sqlErrmcMessages_.length - 1; indx++) {
             buffer.append(sqlErrmcMessages_[indx]);
-            buffer.append(sqlErrmcDelimiter__);
+            buffer.append(MessageUtils.SQLERRMC_MESSAGE_DELIMITER);
             // all but the first message should be preceded by the SQL state
             // and a colon (see DRDAConnThread.buildTokenizedSqlerrmc() on the
             // server)
