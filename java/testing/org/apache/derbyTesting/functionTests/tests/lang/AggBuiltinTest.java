@@ -70,7 +70,17 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
             sum();
             max();
             min();
-
+            
+            // Variance population
+            var_pop();
+            // Variance sample (n - 1)
+            var_samp();
+            
+            // Standard deviation population
+            stddev_pop();
+            // Standard deviation sample (n - 1)
+        	stddev_samp();
+        	
         } finally {
             try {
                 st.close();
@@ -4306,6 +4316,3081 @@ public final class AggBuiltinTest extends BaseJDBCTestCase {
         };
 
         ok();
+
+        // drop tables
+        x("drop table tmp");
+        x("drop table t");
+        x("drop table empty");
+    }
+
+    private void var_pop() throws SQLException {
+        x("create table t (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // empty table
+
+        x("create table empty (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // populate tables
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', x'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (1, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 200, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        e("42802",
+            "insert into t values (0, 100, 2000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'goodbye', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'noone is here', 'jimmie noone "
+            + "was here',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 50, 500000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   150.0e0, 150.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 51.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 100.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-09-09'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:55:55'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:55:55'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'ffff', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 25, 250000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   250.0e0, 500.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'1111111111111111', X'1234', 211.11)");
+
+        //------------------------------------
+        // NEGATIVE TESTS
+        //------------------------------------
+        // Cannot aggregate datatypes that don't support NumberDataValue
+
+        e("42Y22", "select var_pop(c) from t");
+
+        e("42Y22", "select var_pop(v) from t");
+
+        e("42Y22", "select var_pop(lvc) from t");
+
+        e("42Y22", "select var_pop(dt) from t");
+
+        e("42Y22", "select var_pop(t) from t");
+
+        e("42Y22", "select var_pop(ts) from t");
+
+        e("42Y22", "select var_pop(b) from t");
+
+        e("42Y22", "select var_pop(bv) from t");
+
+        e("42Y22", "select var_pop(lbv) from t");
+
+        e("42Y22", "select var_pop(c) from t group by c");
+
+        e("42Y22", "select var_pop(v) from t group by c");
+
+        e("42Y22", "select var_pop(lvc) from t group by c");
+
+        e("42Y22", "select var_pop(dt) from t group by c");
+
+        e("42Y22", "select var_pop(t) from t group by c");
+
+        e("42Y22", "select var_pop(ts) from t group by c");
+
+        e("42Y22", "select var_pop(b) from t group by c");
+
+        e("42Y22", "select var_pop(bv) from t group by c");
+
+        e("42Y22", "select var_pop(lbv) from t group by c");
+
+        // long varchar datatypes too
+
+        x("create table t1 (c1 long varchar)");
+
+        e("42Y22", "select var_pop(c1) from t1");
+
+        x("drop table t1");
+
+        // constants
+
+        e("42Y22", "select var_pop('hello') from t");
+
+        e("42Y22", "select var_pop(X'11') from t");
+
+        e("42Y22", "select var_pop(date('1999-06-06')) from t");
+
+        e("42Y22", "select var_pop(time('12:30:30')) from t");
+
+        e("42Y22", "select var_pop(timestamp('1999-06-06 12:30:30')) from t");
+
+        //-------------------------
+        // NULL AGGREGATION
+        //-------------------------
+        // scalar
+
+        q("select var_pop(i) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_pop(s) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_pop(d) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_pop(l) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_pop(r) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_pop(dc) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // variations
+
+        q("select var_pop(i), var_pop(s), var_pop(r), var_pop(l) from empty");
+
+        expColNames = new String [] {"1", "2", "3", "4"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{null, null, null, null}};
+        ok();
+
+        q("select var_pop(i+1) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // vector
+
+        q("select var_pop(i) from empty group by i");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_pop(s) from empty group by s");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_pop(d) from empty group by d");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_pop(l) from empty group by l");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_pop(r) from empty group by r");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_pop(dc) from empty group by dc");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        //------------------------------
+        // BASIC ACCEPTANCE TESTS
+        //------------------------------
+
+        q("select var_pop(i) from t");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.06632653061224489"}
+        };
+
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(s) from t");
+        c1();
+
+        expRS = new String [][]{{"1291.4540816326535"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(d) from t");
+        c1();
+
+        expRS = new String [][]{{"357.14285714285506"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(l) from t");
+        c1();
+
+        expRS = new String [][]{{"5.006377551020422E10"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(r) from t");
+        c1();
+
+        expRS = new String [][]{{"7206.6326530612205"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(dc) from t");
+        c1();
+
+        expRS = new String [][]{{"1736.7439658163385"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_pop(i) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, NULLS_ELIMINATED});
+
+        q("select var_pop(s) from t group by s");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+        q("select var_pop(d) from t group by d");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select var_pop(l) from t group by l");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select var_pop(r) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        // constants
+
+        q("select var_pop(1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_pop(1.1) from t");
+        c1();
+
+        expRS = new String [][]{{"6.661338147750939E-16"}};
+        ok();
+
+        q("select var_pop(1e1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_pop(1) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select var_pop(1.1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"6.661338147750939E-16"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select var_pop(1e1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        // multicolumn grouping
+
+        q("select var_pop(i), var_pop(l), var_pop(r) from t group by i, dt, b");
+
+        expColNames = new String [] {"1", "2", "3"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.0", "6.09504132231405E10", "9132.231404958678"},
+            {"0.0", "0.0", "0.0"},
+            {"0.0", "0.0", "0.0"},
+            {"0.0", "0.0", "0.0"},
+            {null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        q("select i, dt, var_pop(i), var_pop(r), var_pop(l), l from t "
+            + "group by i, dt, b, l");
+
+        expColNames = new String [] {"I", "DT", "3", "4", "5", "L"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "250000"},
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "500000"},
+            {"0", "1992-01-01", "0.0", "987.6543209876545", "0.0", "1000000"},
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "1000000"},
+            {"0", "1992-09-09", "0.0", "0.0", "0.0", "1000000"},
+            {"1", "1992-01-01", "0.0", "0.0", "0.0", "1000000"},
+            {null, null, null, null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, null, null, NULLS_ELIMINATED});
+
+
+        // group by expression
+
+        q("select var_pop(expr1), var_pop(expr2)"
+            + "from (select i * s, r * 2 from t) t (expr1, expr2) "
+            + "group by expr2, expr1");
+
+        c2();
+
+        expRS = new String [][]
+        {
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {},
+            {}
+        };
+
+        ok();
+
+
+        // distinct and group by
+
+        q("select distinct var_pop(i) from t group by i, dt");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{NULLS_ELIMINATED, NULLS_ELIMINATED});
+
+
+
+        // insert select
+
+        x("create table tmp (x double, y double)");
+
+        x("insert into tmp (x, y) select var_pop(i), var_pop(s) from t");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{"0.06632653061224489", "1291.4540816326535"}};
+        ok();
+
+        x("insert into tmp (x, y) select var_pop(i), var_pop(s) from t "
+            + "group by b");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.06632653061224489", "1291.4540816326535"},
+            {"0.07100591715976332", "1390.532544378697"},
+            {"0.0", "0.0"},
+            {null, null}
+        };
+
+        ok();
+
+        x("drop table tmp");
+
+        // some accuracy tests
+
+        x("create table tmp (x int)");
+
+        x("insert into tmp values (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647)");
+
+        q("values(2147483647)");
+        c1();
+
+        expRS = new String [][]{{"2147483647"}};
+        ok();
+
+        q("select var_pop(x) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_pop(-(x - 1)) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_pop(x) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_pop(-(x - 1)) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("drop table tmp");
+
+        // Now lets try some simple averages to see what type of
+        // accuracy we get
+
+        x("create table tmp(x double precision, y int)");
+
+        PreparedStatement scalar = prepareStatement(
+            "select var_pop(x) from tmp");
+
+        PreparedStatement vector = prepareStatement(
+            "select var_pop(x) from tmp group by y");
+
+        x("insert into tmp values (1,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("insert into tmp values (2,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.25"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.25"}};
+        ok();
+
+        x("insert into tmp values (3,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.666666666666667"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.666666666666667"}};
+        ok();
+
+        x("insert into tmp values (4,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.25"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.25"}};
+        ok();
+
+        x("insert into tmp values (5,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.0"}};
+        ok();
+
+        x("insert into tmp values (6,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.916666666666666"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.916666666666666"}};
+        ok();
+
+        x("insert into tmp values (7,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"4.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"4.0"}};
+        ok();
+
+        x("insert into tmp values (10000,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.092875525E7"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.092875525E7"}};
+        ok();
+
+        scalar.close();
+        vector.close();
+
+        // drop tables
+        x("drop table tmp");
+        x("drop table t");
+        x("drop table empty");
+    }
+
+    private void var_samp() throws SQLException {
+        x("create table t (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // empty table
+
+        x("create table empty (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // populate tables
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', x'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (1, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 200, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        e("42802",
+            "insert into t values (0, 100, 2000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'goodbye', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'noone is here', 'jimmie noone "
+            + "was here',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 50, 500000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   150.0e0, 150.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 51.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 100.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-09-09'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:55:55'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:55:55'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'ffff', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 25, 250000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   250.0e0, 500.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'1111111111111111', X'1234', 211.11)");
+
+        //------------------------------------
+        // NEGATIVE TESTS
+        //------------------------------------
+        // Cannot aggregate datatypes that don't support NumberDataValue
+
+        e("42Y22", "select var_samp(c) from t");
+
+        e("42Y22", "select var_samp(v) from t");
+
+        e("42Y22", "select var_samp(lvc) from t");
+
+        e("42Y22", "select var_samp(dt) from t");
+
+        e("42Y22", "select var_samp(t) from t");
+
+        e("42Y22", "select var_samp(ts) from t");
+
+        e("42Y22", "select var_samp(b) from t");
+
+        e("42Y22", "select var_samp(bv) from t");
+
+        e("42Y22", "select var_samp(lbv) from t");
+
+        e("42Y22", "select var_samp(c) from t group by c");
+
+        e("42Y22", "select var_samp(v) from t group by c");
+
+        e("42Y22", "select var_samp(lvc) from t group by c");
+
+        e("42Y22", "select var_samp(dt) from t group by c");
+
+        e("42Y22", "select var_samp(t) from t group by c");
+
+        e("42Y22", "select var_samp(ts) from t group by c");
+
+        e("42Y22", "select var_samp(b) from t group by c");
+
+        e("42Y22", "select var_samp(bv) from t group by c");
+
+        e("42Y22", "select var_samp(lbv) from t group by c");
+
+        // long varchar datatypes too
+
+        x("create table t1 (c1 long varchar)");
+
+        e("42Y22", "select var_samp(c1) from t1");
+
+        x("drop table t1");
+
+        // constants
+
+        e("42Y22", "select var_samp('hello') from t");
+
+        e("42Y22", "select var_samp(X'11') from t");
+
+        e("42Y22", "select var_samp(date('1999-06-06')) from t");
+
+        e("42Y22", "select var_samp(time('12:30:30')) from t");
+
+        e("42Y22", "select var_samp(timestamp('1999-06-06 12:30:30')) from t");
+
+        //-------------------------
+        // NULL AGGREGATION
+        //-------------------------
+        // scalar
+
+        q("select var_samp(i) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_samp(s) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_samp(d) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_samp(l) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_samp(r) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select var_samp(dc) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // variations
+
+        q("select var_samp(i), var_samp(s), var_samp(r), var_samp(l) from empty");
+
+        expColNames = new String [] {"1", "2", "3", "4"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{null, null, null, null}};
+        ok();
+
+        q("select var_samp(i+1) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // vector
+
+        q("select var_samp(i) from empty group by i");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_samp(s) from empty group by s");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_samp(d) from empty group by d");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_samp(l) from empty group by l");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_samp(r) from empty group by r");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select var_samp(dc) from empty group by dc");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        //------------------------------
+        // BASIC ACCEPTANCE TESTS
+        //------------------------------
+
+        q("select var_samp(i) from t");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.07142857142857142"}
+        };
+
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(s) from t");
+        c1();
+
+        expRS = new String [][]{{"1390.7967032967024"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(d) from t");
+        c1();
+
+        expRS = new String [][]{{"384.61538461538464"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(l) from t");
+        c1();
+
+        expRS = new String [][]{{"5.391483516483519E10"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(r) from t");
+        c1();
+
+        expRS = new String [][]{{"7760.989010989012"}};
+        
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(dc) from t");
+        c1();
+
+        expRS = new String [][]{{"1870.3396554945166"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select var_samp(i) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, NULLS_ELIMINATED});
+
+        q("select var_samp(s) from t group by s");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+        q("select var_samp(d) from t group by d");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select var_samp(l) from t group by l");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select var_samp(r) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        // constants
+
+        q("select var_samp(1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_samp(1.1) from t");
+        c1();
+
+        expRS = new String [][]{{"7.105427357601002E-16"}};
+        ok();
+
+        q("select var_samp(1e1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_samp(1) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select var_samp(1.1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"8.881784197001252E-16"},
+            {null},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select var_samp(1e1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {"0.0"}
+        };
+
+        ok();
+
+        // multicolumn grouping
+
+        q("select var_samp(i), var_samp(l), var_samp(r) from t group by i, dt, b");
+
+        expColNames = new String [] {"1", "2", "3"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.0", "6.704545454545459E10", "10045.454545454548"},
+            {null,null,null},
+            {null,null,null},
+            {null,null,null},
+            {null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        q("select i, dt, var_samp(i), var_samp(r), var_samp(l), l from t "
+            + "group by i, dt, b, l");
+
+        expColNames = new String [] {"I", "DT", "3", "4", "5", "L"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", null, null, null, "250000"},
+            {"0", "1992-01-01", null, null, null, "500000"},
+            {"0", "1992-01-01", "0.0", "1111.1111111111095", "0.0", "1000000"},
+            {"0", "1992-01-01", null, null, null, "1000000"},
+            {"0", "1992-09-09", null, null, null, "1000000"},
+            {"1", "1992-01-01", null, null, null, "1000000"},
+            {null, null, null, null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, null, null, NULLS_ELIMINATED});
+
+
+        // group by expression
+
+        q("select var_samp(expr1), var_samp(expr2)"
+            + "from (select i * s, r * 2 from t) t (expr1, expr2) "
+            + "group by expr2, expr1");
+
+        c2();
+
+        expRS = new String [][]
+        {
+            {null,null},
+            {null,null},
+            {"0.0", "0.0"},
+            {null,null},
+            {null,null},
+            {null,null}
+        };
+
+        ok();
+
+
+        // distinct and group by
+
+        q("select distinct var_samp(i) from t group by i, dt");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{NULLS_ELIMINATED, NULLS_ELIMINATED});
+
+
+
+        // insert select
+
+        x("create table tmp (x double, y double)");
+
+        x("insert into tmp (x, y) select var_samp(i), var_samp(s) from t");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{"0.07142857142857142", "1390.7967032967024"}};
+        ok();
+
+        x("insert into tmp (x, y) select var_samp(i), var_samp(s) from t "
+            + "group by b");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.07142857142857142", "1390.7967032967024"},
+            {"0.07692307692307693", "1506.4102564102566"},
+            {null, null},
+            {null, null}
+        };
+
+        ok();
+
+        x("drop table tmp");
+
+        // some accuracy tests
+
+        x("create table tmp (x int)");
+
+        x("insert into tmp values (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647)");
+
+        q("values(2147483647)");
+        c1();
+
+        expRS = new String [][]{{"2147483647"}};
+        ok();
+
+        q("select var_samp(x) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_samp(-(x - 1)) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_samp(x) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select var_samp(-(x - 1)) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("drop table tmp");
+
+        // Now lets try some simple averages to see what type of
+        // accuracy we get
+
+        x("create table tmp(x double precision, y int)");
+
+        PreparedStatement scalar = prepareStatement(
+            "select var_samp(x) from tmp");
+
+        PreparedStatement vector = prepareStatement(
+            "select var_samp(x) from tmp group by y");
+
+        x("insert into tmp values (1,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{null}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{null}};
+        ok();
+
+        x("insert into tmp values (2,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.5"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.5"}};
+        ok();
+
+        x("insert into tmp values (3,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.0"}};
+        ok();
+
+        x("insert into tmp values (4,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.6666666666666667"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.6666666666666667"}};
+        ok();
+
+        x("insert into tmp values (5,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.5"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.5"}};
+        ok();
+
+        x("insert into tmp values (6,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3.5"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3.5"}};
+        ok();
+
+        x("insert into tmp values (7,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"4.666666666666667"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"4.666666666666667"}};
+        ok();
+
+        x("insert into tmp values (10000,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.2490006E7"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.2490006E7"}};
+        ok();
+
+        scalar.close();
+        vector.close();
+
+        // drop tables
+        x("drop table tmp");
+        x("drop table t");
+        x("drop table empty");
+    }
+
+    private void stddev_pop() throws SQLException {
+        x("create table t (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // empty table
+
+        x("create table empty (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // populate tables
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', x'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (1, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 200, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        e("42802",
+            "insert into t values (0, 100, 2000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'goodbye', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'noone is here', 'jimmie noone "
+            + "was here',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 50, 500000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   150.0e0, 150.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 51.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 100.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-09-09'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:55:55'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:55:55'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'ffff', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 25, 250000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   250.0e0, 500.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'1111111111111111', X'1234', 211.11)");
+
+        //------------------------------------
+        // NEGATIVE TESTS
+        //------------------------------------
+        // Cannot aggregate datatypes that don't support NumberDataValue
+
+        e("42Y22", "select stddev_pop(c) from t");
+
+        e("42Y22", "select stddev_pop(v) from t");
+
+        e("42Y22", "select stddev_pop(lvc) from t");
+
+        e("42Y22", "select stddev_pop(dt) from t");
+
+        e("42Y22", "select stddev_pop(t) from t");
+
+        e("42Y22", "select stddev_pop(ts) from t");
+
+        e("42Y22", "select stddev_pop(b) from t");
+
+        e("42Y22", "select stddev_pop(bv) from t");
+
+        e("42Y22", "select stddev_pop(lbv) from t");
+
+        e("42Y22", "select stddev_pop(c) from t group by c");
+
+        e("42Y22", "select stddev_pop(v) from t group by c");
+
+        e("42Y22", "select stddev_pop(lvc) from t group by c");
+
+        e("42Y22", "select stddev_pop(dt) from t group by c");
+
+        e("42Y22", "select stddev_pop(t) from t group by c");
+
+        e("42Y22", "select stddev_pop(ts) from t group by c");
+
+        e("42Y22", "select stddev_pop(b) from t group by c");
+
+        e("42Y22", "select stddev_pop(bv) from t group by c");
+
+        e("42Y22", "select stddev_pop(lbv) from t group by c");
+
+        // long varchar datatypes too
+
+        x("create table t1 (c1 long varchar)");
+
+        e("42Y22", "select stddev_pop(c1) from t1");
+
+        x("drop table t1");
+
+        // constants
+
+        e("42Y22", "select stddev_pop('hello') from t");
+
+        e("42Y22", "select stddev_pop(X'11') from t");
+
+        e("42Y22", "select stddev_pop(date('1999-06-06')) from t");
+
+        e("42Y22", "select stddev_pop(time('12:30:30')) from t");
+
+        e("42Y22", "select stddev_pop(timestamp('1999-06-06 12:30:30')) from t");
+
+        //-------------------------
+        // NULL AGGREGATION
+        //-------------------------
+        // scalar
+
+        q("select stddev_pop(i) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_pop(s) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_pop(d) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_pop(l) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_pop(r) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_pop(dc) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // variations
+
+        q("select stddev_pop(i), stddev_pop(s), stddev_pop(r), stddev_pop(l) from empty");
+
+        expColNames = new String [] {"1", "2", "3", "4"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{null, null, null, null}};
+        ok();
+
+        q("select stddev_pop(i+1) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // vector
+
+        q("select stddev_pop(i) from empty group by i");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_pop(s) from empty group by s");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_pop(d) from empty group by d");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_pop(l) from empty group by l");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_pop(r) from empty group by r");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_pop(dc) from empty group by dc");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        //------------------------------
+        // BASIC ACCEPTANCE TESTS
+        //------------------------------
+
+        q("select stddev_pop(i) from t");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.25753937681885636"}
+        };
+
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(s) from t");
+        c1();
+
+        expRS = new String [][]{{"35.936806781246624"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(d) from t");
+        c1();
+
+        expRS = new String [][]{{"18.898223650461308"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(l) from t");
+        c1();
+
+        expRS = new String [][]{{"223749.35868110153"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(r) from t");
+        c1();
+
+        expRS = new String [][]{{"84.89188802860507"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(dc) from t");
+        c1();
+
+        expRS = new String [][]{{"41.67426023118273"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_pop(i) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, NULLS_ELIMINATED});
+
+        q("select stddev_pop(s) from t group by s");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_pop(d) from t group by d");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_pop(l) from t group by l");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_pop(r) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        // constants
+
+        q("select stddev_pop(1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_pop(1.1) from t");
+        c1();
+
+        expRS = new String [][]{{"2.5809568279517847E-8"}};
+        ok();
+
+        q("select stddev_pop(1e1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_pop(1) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select stddev_pop(1.1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"2.5809568279517847E-8"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select stddev_pop(1e1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"},
+            {"0.0"}
+        };
+
+        ok();
+
+        // multicolumn grouping
+
+        q("select stddev_pop(i), stddev_pop(l), stddev_pop(r) from t group by i, dt, b");
+
+        expColNames = new String [] {"1", "2", "3"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.0", "246881.3748000049", "95.56270928013018"},
+            {"0.0", "0.0", "0.0"},
+            {"0.0", "0.0", "0.0"},
+            {"0.0", "0.0", "0.0"},
+            {null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        q("select i, dt, stddev_pop(i), stddev_pop(r), stddev_pop(l), l from t "
+            + "group by i, dt, b, l");
+
+        expColNames = new String [] {"I", "DT", "3", "4", "5", "L"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "250000"},
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "500000"},
+            {"0", "1992-01-01", "0.0", "31.426968052735447", "0.0", "1000000"},
+            {"0", "1992-01-01", "0.0", "0.0", "0.0", "1000000"},
+            {"0", "1992-09-09", "0.0", "0.0", "0.0", "1000000"},
+            {"1", "1992-01-01", "0.0", "0.0", "0.0", "1000000"},
+            {null, null, null, null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, null, null, NULLS_ELIMINATED});
+
+
+        // group by expression
+
+        q("select stddev_pop(expr1), stddev_pop(expr2)"
+            + "from (select i * s, r * 2 from t) t (expr1, expr2) "
+            + "group by expr2, expr1");
+
+        c2();
+
+        expRS = new String [][]
+        {
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {"0.0", "0.0"},
+            {},
+            {}
+        };
+
+        ok();
+
+
+        // distinct and group by
+
+        q("select distinct stddev_pop(i) from t group by i, dt");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{NULLS_ELIMINATED, NULLS_ELIMINATED});
+
+
+
+        // insert select
+
+        x("create table tmp (x double, y double)");
+
+        x("insert into tmp (x, y) select stddev_pop(i), stddev_pop(s) from t");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{"0.25753937681885636", "35.936806781246624"}};
+        ok();
+
+        x("insert into tmp (x, y) select stddev_pop(i), stddev_pop(s) from t "
+            + "group by b");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.25753937681885636", "35.936806781246624"},
+            {"0.2664693550105965", "37.289845057048666"},
+            {"0.0", "0.0"},
+            {null, null}
+        };
+
+        ok();
+
+        x("drop table tmp");
+
+        // some accuracy tests
+
+        x("create table tmp (x int)");
+
+        x("insert into tmp values (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647)");
+
+        q("values(2147483647)");
+        c1();
+
+        expRS = new String [][]{{"2147483647"}};
+        ok();
+
+        q("select stddev_pop(x) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_pop(-(x - 1)) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_pop(x) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_pop(-(x - 1)) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("drop table tmp");
+
+        // Now lets try some simple averages to see what type of
+        // accuracy we get
+
+        x("create table tmp(x double precision, y int)");
+
+        PreparedStatement scalar = prepareStatement(
+            "select stddev_pop(x) from tmp");
+
+        PreparedStatement vector = prepareStatement(
+            "select stddev_pop(x) from tmp group by y");
+
+        x("insert into tmp values (1,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("insert into tmp values (2,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.5"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.5"}};
+        ok();
+
+        x("insert into tmp values (3,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.8164965809277263"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.8164965809277263"}};
+        ok();
+
+        x("insert into tmp values (4,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.118033988749895"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.118033988749895"}};
+        ok();
+
+        x("insert into tmp values (5,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.4142135623730951"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.4142135623730951"}};
+        ok();
+
+        x("insert into tmp values (6,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.707825127659933"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.707825127659933"}};
+        ok();
+
+        x("insert into tmp values (7,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.0"}};
+        ok();
+
+        x("insert into tmp values (10000,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3305.8667925371706"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3305.8667925371706"}};
+        ok();
+
+        scalar.close();
+        vector.close();
+
+        // drop tables
+        x("drop table tmp");
+        x("drop table t");
+        x("drop table empty");
+    }
+
+    private void stddev_samp() throws SQLException {
+        x("create table t (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // empty table
+
+        x("create table empty (i int, s smallint, l bigint,"
+            + "             c char(10), v varchar(50), lvc long varchar,"
+            + "             d double precision, r real, "
+            + "             dt date, t time, ts timestamp,"
+            + "             b char(2) for bit data, bv varchar(8) for bit "
+            + "data, lbv long varchar for bit data,"
+            + "             dc decimal(5,2))");
+
+        // populate tables
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t (i) values (null)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', x'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (1, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 200, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        e("42802",
+            "insert into t values (0, 100, 2000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 222.22)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'goodbye', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'noone is here', 'jimmie noone "
+            + "was here',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 50, 500000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   150.0e0, 150.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 51.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 100.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-09-09'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:55:55'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:55:55'),"
+            + "                   X'12af', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 100, 1000000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   200.0e0, 200.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'ffff', X'0000111100001111', X'1234', 111.11)");
+
+        x("insert into t values (0, 25, 250000,"
+            + "                   'duplicate', 'this is duplicated', 'also duplicated',"
+            + "                   250.0e0, 500.0e0, "
+            + "                   date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'),"
+            + "                   X'12af', X'1111111111111111', X'1234', 211.11)");
+
+        //------------------------------------
+        // NEGATIVE TESTS
+        //------------------------------------
+        // Cannot aggregate datatypes that don't support NumberDataValue
+
+        e("42Y22", "select stddev_samp(c) from t");
+
+        e("42Y22", "select stddev_samp(v) from t");
+
+        e("42Y22", "select stddev_samp(lvc) from t");
+
+        e("42Y22", "select stddev_samp(dt) from t");
+
+        e("42Y22", "select stddev_samp(t) from t");
+
+        e("42Y22", "select stddev_samp(ts) from t");
+
+        e("42Y22", "select stddev_samp(b) from t");
+
+        e("42Y22", "select stddev_samp(bv) from t");
+
+        e("42Y22", "select stddev_samp(lbv) from t");
+
+        e("42Y22", "select stddev_samp(c) from t group by c");
+
+        e("42Y22", "select stddev_samp(v) from t group by c");
+
+        e("42Y22", "select stddev_samp(lvc) from t group by c");
+
+        e("42Y22", "select stddev_samp(dt) from t group by c");
+
+        e("42Y22", "select stddev_samp(t) from t group by c");
+
+        e("42Y22", "select stddev_samp(ts) from t group by c");
+
+        e("42Y22", "select stddev_samp(b) from t group by c");
+
+        e("42Y22", "select stddev_samp(bv) from t group by c");
+
+        e("42Y22", "select stddev_samp(lbv) from t group by c");
+
+        // long varchar datatypes too
+
+        x("create table t1 (c1 long varchar)");
+
+        e("42Y22", "select stddev_samp(c1) from t1");
+
+        x("drop table t1");
+
+        // constants
+
+        e("42Y22", "select stddev_samp('hello') from t");
+
+        e("42Y22", "select stddev_samp(X'11') from t");
+
+        e("42Y22", "select stddev_samp(date('1999-06-06')) from t");
+
+        e("42Y22", "select stddev_samp(time('12:30:30')) from t");
+
+        e("42Y22", "select stddev_samp(timestamp('1999-06-06 12:30:30')) from t");
+
+        //-------------------------
+        // NULL AGGREGATION
+        //-------------------------
+        // scalar
+
+        q("select stddev_samp(i) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_samp(s) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_samp(d) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_samp(l) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_samp(r) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        q("select stddev_samp(dc) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // variations
+
+        q("select stddev_samp(i), stddev_samp(s), stddev_samp(r), stddev_samp(l) from empty");
+
+        expColNames = new String [] {"1", "2", "3", "4"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{null, null, null, null}};
+        ok();
+
+        q("select stddev_samp(i+1) from empty");
+        c1();
+
+        expRS = SINGLE_NULL_ROW;
+        ok();
+
+        // vector
+
+        q("select stddev_samp(i) from empty group by i");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_samp(s) from empty group by s");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_samp(d) from empty group by d");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_samp(l) from empty group by l");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_samp(r) from empty group by r");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        q("select stddev_samp(dc) from empty group by dc");
+        c1();
+        JDBC.assertDrainResults(rs, 0);
+
+        //------------------------------
+        // BASIC ACCEPTANCE TESTS
+        //------------------------------
+
+        q("select stddev_samp(i) from t");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.2672612419124244"}
+        };
+
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(s) from t");
+        c1();
+
+        expRS = new String [][]{{"37.29338685741351"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(d) from t");
+        c1();
+
+        expRS = new String [][]{{"19.611613513818405"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(l) from t");
+        c1();
+
+        expRS = new String [][]{{"232195.68291601632"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(r) from t");
+        c1();
+
+        expRS = new String [][]{{"88.09647558778394"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(dc) from t");
+        c1();
+
+        expRS = new String [][]{{"43.24742368620952"}};
+        ok(NULLS_ELIMINATED);
+
+        q("select stddev_samp(i) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, NULLS_ELIMINATED});
+
+        q("select stddev_samp(s) from t group by s");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_samp(d) from t group by d");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_samp(l) from t group by l");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, NULLS_ELIMINATED});
+
+        q("select stddev_samp(r) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        // constants
+
+        q("select stddev_samp(1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_samp(1.1) from t");
+        c1();
+
+        expRS = new String [][]{{"2.6656007498500224E-8"}};
+        ok();
+
+        q("select stddev_samp(1e1) from t");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_samp(1) from t group by i");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null},
+            {"0.0"}
+        };
+
+        ok();
+
+        q("select stddev_samp(1.1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"2.9802322387695312E-8"},
+            {null},
+            {"0.0"}
+        };
+
+       
+        ok();
+
+        q("select stddev_samp(1e1) from t group by r");
+        c1();
+
+        expRS = new String [][]
+        {
+            {null},
+            {null},
+            {"0.0"},
+            {null},
+            {"0.0"}
+        };
+
+        
+        ok();
+
+        // multicolumn grouping
+
+        q("select stddev_samp(i), stddev_samp(l), stddev_samp(r) from t group by i, dt, b");
+
+        expColNames = new String [] {"1", "2", "3"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.0", "258931.3703386567", "100.22701504811239"},
+            {null, null, null},
+            {null, null, null},
+            {null, null, null},
+            {null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, NULLS_ELIMINATED});
+
+
+        q("select i, dt, stddev_samp(i), stddev_samp(r), stddev_samp(l), l from t "
+            + "group by i, dt, b, l");
+
+        expColNames = new String [] {"I", "DT", "3", "4", "5", "L"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", null, null, null, "250000"},
+            {"0", "1992-01-01", null, null, null, "500000"},
+            {"0", "1992-01-01", "0.0", "33.33333333333331", "0.0", "1000000"},
+            {"0", "1992-01-01", null, null, null, "1000000"},
+            {"0", "1992-09-09", null, null, null, "1000000"},
+            {"1", "1992-01-01", null, null, null, "1000000"},
+            {null, null, null, null, null, null}
+        };
+
+        ok(new String[]{null, null, null, null, null, null, NULLS_ELIMINATED});
+
+
+        // group by expression
+
+        q("select stddev_samp(expr1), stddev_samp(expr2)"
+            + "from (select i * s, r * 2 from t) t (expr1, expr2) "
+            + "group by expr2, expr1");
+
+        c2();
+
+        expRS = new String [][]
+        {
+            {null, null},
+            {null, null},
+            {"0.0", "0.0"},
+            {null, null},
+            {null, null},
+            {null, null}
+       };
+
+        ok();
+
+
+        // distinct and group by
+
+        q("select distinct stddev_samp(i) from t group by i, dt");
+        c1();
+
+        expRS = new String [][]
+        {
+            {"0.0"},
+            {null}
+        };
+
+        ok(new String[]{NULLS_ELIMINATED, NULLS_ELIMINATED});
+
+
+
+        // insert select
+
+        x("create table tmp (x double, y double)");
+
+        x("insert into tmp (x, y) select stddev_samp(i), stddev_samp(s) from t");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]{{"0.2672612419124244", "37.29338685741351"}};
+        ok();
+
+        x("insert into tmp (x, y) select stddev_samp(i), stddev_samp(s) from t "
+            + "group by b");
+
+        if (usingEmbedded())
+        {
+            if (sqlWarn == null)
+                sqlWarn = st.getWarnings();
+            if (sqlWarn == null)
+                sqlWarn = getConnection().getWarnings();
+            assertNotNull("Expected warning but found none", sqlWarn);
+            assertSQLState(NULLS_ELIMINATED, sqlWarn);
+            sqlWarn = null;
+        }
+
+        q("select * from tmp");
+
+        expColNames = new String [] {"X", "Y"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"0.2672612419124244", "37.29338685741351"},
+            {"0.2773500981126146", "38.81250129030924"},
+            {null, null},
+            {null, null}
+        };
+
+        ok();
+
+        x("drop table tmp");
+
+        // some accuracy tests
+
+        x("create table tmp (x int)");
+
+        x("insert into tmp values (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647),"
+                + "                     (2147483647)");
+
+        q("values(2147483647)");
+        c1();
+
+        expRS = new String [][]{{"2147483647"}};
+        ok();
+
+        q("select stddev_samp(x) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_samp(-(x - 1)) from tmp");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_samp(x) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        q("select stddev_samp(-(x - 1)) from tmp group by x");
+        c1();
+
+        expRS = new String [][]{{"0.0"}};
+        ok();
+
+        x("drop table tmp");
+
+        // Now lets try some simple averages to see what type of
+        // accuracy we get
+
+        x("create table tmp(x double precision, y int)");
+
+        PreparedStatement scalar = prepareStatement(
+            "select stddev_samp(x) from tmp");
+
+        PreparedStatement vector = prepareStatement(
+            "select stddev_samp(x) from tmp group by y");
+
+        x("insert into tmp values (1,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{null}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{null}};
+        ok();
+
+        x("insert into tmp values (2,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.7071067811865476"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"0.7071067811865476"}};
+        ok();
+
+        x("insert into tmp values (3,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.0"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.0"}};
+        ok();
+
+        x("insert into tmp values (4,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.2909944487358056"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.2909944487358056"}};
+        ok();
+
+        x("insert into tmp values (5,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.5811388300841898"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.5811388300841898"}};
+        ok();
+
+        x("insert into tmp values (6,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.8708286933869707"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"1.8708286933869707"}};
+        ok();
+
+        x("insert into tmp values (7,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.160246899469287"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"2.160246899469287"}};
+        ok();
+
+        x("insert into tmp values (10000,1)");
+
+        rs = scalar.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3534.120258282109"}};
+        ok();
+
+        rs = vector.executeQuery();
+        c1();
+
+        expRS = new String [][]{{"3534.120258282109"}};
+        ok();
+
+        scalar.close();
+        vector.close();
 
         // drop tables
         x("drop table tmp");
