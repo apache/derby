@@ -127,6 +127,9 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6820">DERBY-6820</a></td><td>Improve error handling in XmlVTI</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-6807">DERBY-6807</a></td><td>XXE attack possible by using XmlVTI and the XML datatype</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-6801">DERBY-6801</a></td><td>Implement MessageUtils class so client and server can share message argument encoding/decoding</td>
 </tr>
 <tr>
@@ -275,6 +278,11 @@ This is a feature release. The following new features were added:
 <p>Compared with the previous release (10.11.1.1), Derby release 10.12.0.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
+<a href="#Note for DERBY-6807"><span>Note for DERBY-6807: 
+XML parsing is now performed more securely.
+</span></a>
+</li>
+<li>
 <a href="#Note for DERBY-6648"><span>Note for DERBY-6648: 
 Security policy files must grant a new permission to derby.jar,
 derbynet.jar, and derbyoptionaltools.jar.
@@ -286,6 +294,66 @@ UPDATE statements now accept DEFAULT as a valid value for identity columns.
 </span></a>
 </li>
 </ul>
+<hr>
+<h3>
+<a name="Note for DERBY-6807"></a>Note for DERBY-6807</h3>
+<div>
+
+
+<h4>Summary of Change</h4>
+
+<p>
+XML parsing is now performed more securely.
+</p>
+
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+If no Java Security Manager was in place, Derby applications were vulnerable
+to XML External Entity Expansion attacks (XXE attacks). Such attacks could
+result in disclosure of sensitive information that the application's user
+should not have been allowed to view.
+</p>
+
+<p>
+If a Derby application used the XmlVTI to parse XML documents, that application
+was also vulnerable if not protected by a Security Manager policy.
+</p>
+
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Applications which depended on the ability to have Derby's XML parser expand
+external entities may now be unable to use that functionality unless they
+correctly deploy a Java Security Manager policy authorizing the filesystem
+access performed by the entity expansion.
+</p>
+
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+This change was made to prevent any unauthorized information disclosure by
+the XML parser.
+</p>
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+For detailed information on configuring Derby with a Java Security Manager
+policy, please see <a href="http://db.apache.org/derby/docs/10.11/security/">
+the Derby Security Guide</a>.
+</p>
+
+
+
+</div>
 <hr>
 <h3>
 <a name="Note for DERBY-6648"></a>Note for DERBY-6648</h3>
