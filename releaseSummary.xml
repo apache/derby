@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.10.2.0</previousReleaseID>
+<previousReleaseID>10.11.1.1</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -92,7 +92,7 @@ Derby functionality includes:
 </ul>
 
 <p>
-Java and JDBC versions supported:
+Support for Java SE 6 is being sunsetted. The 10.13 release family will not support that platform. The 10.12 release family supports the following Java and JDBC versions:
 </p>
 <ul>
   <li>Java SE 6 and higher with JDBC 4.0, 4.1, and 4.2.</li>
@@ -108,23 +108,13 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>MERGE statement</b> - MERGE is a single, join-driven statement which INSERTs, UPDATEs, and DELETEs rows. See the section on this statement in the Derby Reference Manual. See also features F312, F313, and F314 of the SQL Standard.</li>
+<li><b>ALTER TABLE and identity columns</b> - The ALTER TABLE command can be used to add identity columns now. See the section on this statement in the Derby Reference Manual.</li>
 
-<li><b>Deferrable constraints</b> - Constraint enforcement can now be deferred, typically to the end of a transaction. See the section on "constraintCharacteristics" in the Derby Reference Manual. See also features F721 and F492 of the SQL Standard.</li>
+<li><b>Cache-monitoring MBean</b> - An MBean has been added for monitoring internal Derby caches. See the description of <i>CacheManagerMBean</i> in the "Introduction to the Derby MBeans" section of the Derby Server and Administration Guide.</li>
 
-<li><b>WHEN clause in CREATE TRIGGER</b> - An optional WHEN clause has been added which determines which rows fire a trigger. See the section on this clause in the Derby Reference Manual. See also feature T211-05 of the SQL Standard.</li>
+<li><b>Optional Tool for Handling JSON Data</b> - An optional tool has been added for packing query results into JSON documents and for unpacking JSON documents into tabular result sets. See the section on the <i>simpleJson</i> optional tool in the Derby Tools and Utilities Guide.</li>
 
-<li><b>Rolling log file</b> - The Derby diagnostic log can now be split across a sequence of files. See the section on the derby.stream.error.style property in the Derby Reference Manual.</li>
-
-<li><b>Experimental Lucene support</b> - Derby text columns can now be indexed and queried via Apache Lucene. See the section on the optional luceneSupport tool in the Derby Tools and Utilities Guide.</li>
-
-<li><b>Simple case expression</b> - The "simple" and "extended" syntax for CASE expressions has been added. See the section on the CASE expression in the Derby Reference Manual. See also features F261-01, F262, and F263 of the SQL Standard.</li>
-
-<li><b>Better concurrency for identity columns</b> - The concurrency of identity columns has been boosted. See the detailed release note for DERBY-6542 below.</li>
-
-<li><b>New ij HoldForConnection command</b> - A new ij command has been added to change the default cursor holdability to "keep cursors open after commit." See the section on the HoldForConnection command in the Derby Tools and Utilities Guide.</li>
-
-<li><b>Standard syntax for altering column nullability</b> - Standard syntax has been added for altering the nullability of columns. See the section on ALTER TABLE in the Derby Reference Manual. See also feature F383 of the SQL Standard.</li>
+<li><b>Statistics aggregates</b> - SQL Standard VAR_POP(), VAR_SAMP(), STDDEV_POP(), and STDDEV_SAMP() aggregates have been added. See the "Aggregates (set functions)" section in the Derby Reference Manual.</li>
 
 </ul>
 
