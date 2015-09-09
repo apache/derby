@@ -751,6 +751,39 @@ public class SimpleJsonTest extends BaseJDBCTestCase
         goodStatement( conn, "drop function f_" + datatype );
     }
 
+    /**
+     * <p>
+     * Test the arrayToClob() function.
+     * </p>
+     */
+	public void testArrayToClob_006() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', true )" );
+        goodStatement( conn, "create table employee( fullName varchar( 100 ) )" );
+        goodStatement( conn, "create table docs( stringDoc varchar( 32672 ) )" );
+        goodStatement( conn, "insert into employee values ( 'Fred Flintstone' ), ( 'Barney Rubble' )" );
+        goodStatement( conn, "insert into docs values( arrayToClob( toJSON( 'select * from employee' ) ) )" );
+
+        assertResults
+            (
+             conn,
+             "select * from docs",
+             new String[][]
+             {
+                 {
+                     "[{\"FULLNAME\":\"Fred Flintstone\"},{\"FULLNAME\":\"Barney Rubble\"}]"
+                 }
+             },
+             true
+             );
+
+        goodStatement( conn, "drop table docs" );
+        goodStatement( conn, "drop table employee" );
+        goodStatement( conn, "call syscs_util.syscs_register_tool( 'simpleJson', false )" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // FUNCTIONS

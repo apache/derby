@@ -46,6 +46,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import org.apache.derby.iapi.types.HarmonySerialClob;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.optional.utils.ToolUtilities;
 
@@ -243,6 +244,14 @@ public abstract class SimpleJsonUtils
         return readArrayFromStream( inputStream, characterSetName );
     }
 
+    /**
+     * SQL FUNCTION to convert a JSONArray into a CLOB.
+     */
+    public static Clob arrayToClob( JSONArray array )
+    {
+        if ( array == null ) { return null; }
+        else { return new HarmonySerialClob( array.toJSONString() ); }
+    }
 
     /////////////////////////////////////////////////////////////////
     //

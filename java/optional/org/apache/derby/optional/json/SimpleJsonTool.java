@@ -107,6 +107,14 @@ public	class   SimpleJsonTool  implements OptionalTool
             "language java parameter style java contains sql\n" +
             "external name 'org.apache.derby.optional.api.SimpleJsonUtils.readArrayFromURL'\n"
         ),
+
+        new FunctionDescriptor
+        (
+            "arrayToClob",
+            "create function arrayToClob( jsonDocument JSONArray ) returns clob\n" +
+            "language java parameter style java no sql\n" +
+            "external name 'org.apache.derby.optional.api.SimpleJsonUtils.arrayToClob'"
+        ),
     };
 
     ////////////////////////////////////////////////////////////////////////
