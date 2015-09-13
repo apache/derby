@@ -2155,6 +2155,7 @@
      <antcall target="appendnotice"><param name="sourcefile" value="jdbcstubs.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="felix.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="lucene.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="simpleJson.txt"/></antcall>
      
       <antcall target="checkinfile">
          <param name="checkinComment" value="Check in NOTICE as part of building a release."/>
