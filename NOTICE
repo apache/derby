@@ -291,3 +291,10 @@ grants independently of ICOT any specific warranty to the user in
 writing, such person, organization or entity, will also be exempted
 from and not be held liable to the user for any such damages as noted
 above as far as the program is concerned.
+
+=========================================================================
+
+The Derby build relies on a jar file supplied by the JSON Simple
+project, hosted at https://code.google.com/p/json-simple/.
+The JSON simple jar file is licensed under the Apache 2.0 License.
+No other notice covers that jar file.
