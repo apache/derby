@@ -59,6 +59,8 @@ None.
 RECENT VOTES
 =================================
 
+The community voted to sunset support for Java SE 7. The vote closed on 2015-09-12.
+The community voted to sunset support for Java SE 6. The vote closed on 2014-09-15.
 Release 10.11.1.1 was approved as a release on 2014-08-25, published on 2014-08-26, and announced on 2014-08-27.
 Release 10.10.2.0 was approved as a release on 2014-04-11, published on 2014-04-15, and announced on 2014-04-17.
 Release 10.10.1.1 was approved as a release on 2013-04-15, published on 2013-04-16, and announced on 2013-04-17.
@@ -75,7 +77,7 @@ OTHER NEWS
 RELEASE STATUS
 ==============
 
-The community is working on a 10.11.2 maintenance release.
+The community is working on a 10.12.1 feature release.
 
 
 

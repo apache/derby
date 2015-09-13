@@ -92,7 +92,7 @@ Derby functionality includes:
 </ul>
 
 <p>
-Support for Java SE 6 is being sunsetted. The 10.13 release family will not support that platform. The 10.12 release family supports the following Java and JDBC versions:
+Support for Java SE 6 and Java SE 7 is being sunsetted. The 10.13 release family will not support those platforms. The 10.12 release family supports the following Java and JDBC versions:
 </p>
 <ul>
   <li>Java SE 6 and higher with JDBC 4.0, 4.1, and 4.2.</li>
