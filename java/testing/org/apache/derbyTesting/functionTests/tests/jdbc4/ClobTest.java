@@ -189,6 +189,24 @@ public class ClobTest
     }
 
     /**
+     * Tests free() after implicit free
+     *
+     * @throws SQLException if an error occurs during free
+     *        
+     */
+    public void testFreeAfterImplicitFree()  throws SQLException
+    {
+        Connection conn = getConnection();
+        clob = BlobClobTestSetup.getSampleClob(conn);
+        conn.commit();
+        // DERBY-5605
+        // free should not throw an exception even though it was 
+        // implicitly freed with the commit.
+        clob.free();
+        
+    }
+
+    /**
      * Tests the implementation for the free() method in the
      * Clob interface.
      *

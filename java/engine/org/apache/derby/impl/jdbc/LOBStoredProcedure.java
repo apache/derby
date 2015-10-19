@@ -56,7 +56,8 @@ public class LOBStoredProcedure {
     public static void CLOBRELEASELOCATOR(int LOCATOR) throws SQLException {
         Clob clob = (Clob)getEmbedConnection().getLOBMapping(LOCATOR);
         if (clob == null) {
-            throw newSQLException(SQLState.LOB_LOCATOR_INVALID);
+            // DERBY-5605. Do not throw exception if already freed.
+            return;
         }
         EmbedClob embedClob = (EmbedClob)clob;
         embedClob.free();
@@ -223,7 +224,8 @@ public class LOBStoredProcedure {
     public static void BLOBRELEASELOCATOR(int LOCATOR) throws SQLException {
         Blob blob = (Blob)getEmbedConnection().getLOBMapping(LOCATOR);
         if (blob == null) {
-            throw newSQLException(SQLState.LOB_LOCATOR_INVALID);
+            // DERBY-5605 - noop if already released. 
+            return;
         }
         EmbedBlob embedBlob = (EmbedBlob)blob;
         embedBlob.free();

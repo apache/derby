@@ -829,6 +829,24 @@ public class BlobTest
 
 
     /**
+     * Tests free() after implicit free
+     *
+     * @throws SQLException if an error occurs during free
+     *        
+     */
+    public void testFreeAfterImplicitFree()  throws SQLException
+    {
+        Connection conn = getConnection();
+        blob = BlobClobTestSetup.getSampleBlob(conn);
+        conn.commit();
+        // DERBY-5605
+        // free should not throw an exception even though it was 
+        // implicitly freed with the commit.
+        blob.free();
+        
+    }
+    
+    /**
      * Insert a row with a large blob into the test table.  Read the row from 
      * the database and assign the blob value to <code>blob</code>.
      * @return The id of the row that was inserted
