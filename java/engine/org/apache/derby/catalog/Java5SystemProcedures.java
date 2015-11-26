@@ -68,6 +68,7 @@ public  class   Java5SystemProcedures
         { "luceneSupport", "org.apache.derby.optional.lucene.LuceneSupport" },
         { "optimizerTracing", "org.apache.derby.impl.sql.compile.OptimizerTracer" },
         { "optimizerTracingViews", "org.apache.derby.impl.sql.compile.OptTraceViewer" },
+        { "rawDBReader", "org.apache.derby.optional.dump.RawDBReader" },
         { "simpleJson", "org.apache.derby.optional.json.SimpleJsonTool" },
     };
 

@@ -2,6 +2,8 @@ org.apache.derby.optional.api.LuceneIndexDescriptor.class
 org.apache.derby.optional.api.LuceneUtils.class
 org.apache.derby.optional.api.SimpleJsonUtils.class
 org.apache.derby.optional.api.SimpleJsonVTI.class
+org.apache.derby.optional.dump.DataFileVTI.class
+org.apache.derby.optional.dump.RawDBReader.class
 org.apache.derby.optional.json.SimpleJsonTool.class
 org.apache.derby.optional.lucene.DerbyIndexInput.class
 org.apache.derby.optional.lucene.DerbyIndexOutput.class

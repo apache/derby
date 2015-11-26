@@ -411,6 +411,7 @@ org.apache.derbyTesting.functionTests.tests.lang.PrimaryKeyTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ProcedureInTriggerTest.class
 org.apache.derbyTesting.functionTests.tests.lang.QueryPlanTest.class
 org.apache.derbyTesting.functionTests.tests.lang.RSMDWrapper.class
+org.apache.derbyTesting.functionTests.tests.lang.RawDBReaderTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ReferentialActionsTest.class
 org.apache.derbyTesting.functionTests.tests.lang.ReleaseCompileLocksTest.class
 org.apache.derbyTesting.functionTests.tests.lang.RenameIndexTest.class
