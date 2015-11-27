@@ -42,7 +42,7 @@ import org.apache.derby.tools.dblook;
 /**
  * <p>
  * OptionalTool to create wrapper functions and views for all of the user heap conglomerates
- * in the seg0 subdirectory of a database.
+ * in the seg0 subdirectory of a corrupt database.
  * </p>
  */
 public	class   RawDBReader  implements OptionalTool
@@ -76,18 +76,19 @@ public	class   RawDBReader  implements OptionalTool
 
     /**
      * <p>
-     * Creates the following:
+     * Creates the following schema objects in a healthy database in order
+     * to siphon data out of a corrupt database:
      * </p>
      *
      * <ul>
      * <li>A control schema containing views on SYSSCHEMAS, SYSCONGLOMERATES, SYSTABLES
-     * and SYSCOLUMNS in the raw database.</li>
-     * <li>A schema for every user schema in the raw database.</li>
-     * <li>Table functions and views on every user table in the raw database..</li>
+     * and SYSCOLUMNS in the corrupt database.</li>
+     * <li>A schema for every user schema in the corrupt database.</li>
+     * <li>Table functions and views on every user table in the corrupt database.</li>
      * </ul>
      *
      * <p>
-     * In addition, the tool creates a script for siphoning data out of the raw
+     * In addition, the tool creates a script for siphoning data out of the corrupt
      * database.
      * </p>
      *
@@ -99,17 +100,19 @@ public	class   RawDBReader  implements OptionalTool
      * <li>recoveryScript (required) - Name of the recovery script file which
      * the tool will write.</li>
      * <li>controlSchema (required) - Name of a schema in which control objects will be
-     * created. These include the views on the raw database's SYSSCHEMAS, SYSCONGLOMERATES,
+     * created. These include the views on the corrupt database's SYSSCHEMAS, SYSCONGLOMERATES,
      * SYSTABLES, and SYSCOLUMNS catalogs. May not be null or an empty string.</li>
      * <li>schemaPrefix (required) - This prefix is prepended
-     * to the names of the local Derby schemas which are created. May not be null or empty.</li>
-     * <li>rawDBLocation (required) - Absolute path to the raw database directory.
+     * to the names of the schemas which are created in the healthy database.
+     * May not be null or empty.</li>
+     * <li>corruptDBLocation (required) - Absolute path to the corrupt database directory.
      * That is the directory which contains service.properties. May not be null or empty.</li>
-     * <li>encryptionAttributes (required) - Encryption attributes. May be null
+     * <li>encryptionAttributes (required) - Encryption attributes which were
+     * used to connect to the corrupt database when it was bootable. May be null
      * if encryption is not being used.</li>
-     * <li>dbo (required) - User name of the owner of the raw database. May be null
+     * <li>dbo (required) - User name of the owner of the corrupt database. May be null
      * if authentication is not being used.</li>
-     * <li>dboPassword (required) - Password for the owner of the raw database. May be null
+     * <li>dboPassword (required) - Password for the owner of the corrupt database. May be null
      * if authentication is not being used.</li>
      * </ul>
      */
@@ -123,22 +126,30 @@ public	class   RawDBReader  implements OptionalTool
         String  recoveryScript = configurationParameters[ idx++ ];
         String  controlSchema = configurationParameters[ idx++ ];
         String  schemaPrefix = configurationParameters[ idx++ ];
-        String  rawDBLocation = configurationParameters[ idx++ ];
+        String  corruptDBLocation = configurationParameters[ idx++ ];
         String  encryptionAttributes = configurationParameters[ idx++ ];
         String  dbo = configurationParameters[ idx++ ];
         String  dboPassword = configurationParameters[ idx++ ];
         
-        if ( nullOrEmpty( recoveryScript) )  { throw badArgs( "Null or empty recovery script argument." ); }
-        if ( nullOrEmpty( controlSchema) )  { throw badArgs( "Null or empty control schema argument." ); }
-        if ( nullOrEmpty( schemaPrefix ) )  { throw badArgs( "Null or empty schema prefix argument." ); }
-        if ( nullOrEmpty( rawDBLocation ) )  { throw badArgs( "Null or empty database location argument." ); }
-        if ( nullOrEmpty( dbo)  )   { throw badArgs( "Null or empty database owner argument." ); }
+        if ( nullOrEmpty( recoveryScript) )
+        { throw badArgs( "Null or empty recovery script argument." ); }
+        if ( nullOrEmpty( controlSchema) )
+        { throw badArgs( "Null or empty control schema argument." ); }
+        if ( nullOrEmpty( schemaPrefix ) )
+        { throw badArgs( "Null or empty schema prefix argument." ); }
+        if ( nullOrEmpty( corruptDBLocation ) )
+        { throw badArgs( "Null or empty database location argument." ); }
+        if ( nullOrEmpty( dbo)  )
+        { throw badArgs( "Null or empty database owner argument." ); }
 
         Connection  conn = getDerbyConnection();
 
-        createControlSchema( conn, controlSchema, rawDBLocation, encryptionAttributes, dbo, dboPassword );
-        createUserSchemas( conn, controlSchema, schemaPrefix, rawDBLocation, encryptionAttributes, dbo, dboPassword );
-        createViews( conn, recoveryScript, controlSchema, schemaPrefix, rawDBLocation, encryptionAttributes, dbo, dboPassword );
+        createControlSchema( conn, controlSchema, corruptDBLocation,
+                             encryptionAttributes, dbo, dboPassword );
+        createUserSchemas( conn, controlSchema, schemaPrefix, corruptDBLocation,
+                           encryptionAttributes, dbo, dboPassword );
+        createViews( conn, recoveryScript, controlSchema, schemaPrefix, corruptDBLocation,
+                     encryptionAttributes, dbo, dboPassword );
     }
 
     /** Returns true if the text is null or empty */
@@ -154,10 +165,11 @@ public	class   RawDBReader  implements OptionalTool
      * </p>
      *
      * <ul>
-     * <li>controlSchema (required) - Name of the schema in which control objects were created
-     * by loadTool(). May not be null or an empty string.</li>
+     * <li>controlSchema (required) - Name of the schema in which loadTool() created control objects
+     * in the healthy database. May not be null or an empty string.</li>
      * <li>schemaPrefix (required) - This is the prefix which was prepended
-     * to the names of the local Derby schemas which loadTool() created. May not be null or empty.</li>
+     * to the names of the schemas which loadTool() created in the healthy
+     * database. May not be null or empty.</li>
      * </ul>
      */
     public  void    unloadTool( String... configurationParameters )
@@ -170,8 +182,10 @@ public	class   RawDBReader  implements OptionalTool
         String  controlSchema = configurationParameters[ idx++ ];
         String  schemaPrefix = configurationParameters[ idx++ ];
 
-        if ( nullOrEmpty( controlSchema) )  { throw badArgs( "Null or empty control schema argument." ); }
-        if ( nullOrEmpty( schemaPrefix ) )  { throw badArgs( "Null or empty schema prefix argument." ); }
+        if ( nullOrEmpty( controlSchema) )
+        { throw badArgs( "Null or empty control schema argument." ); }
+        if ( nullOrEmpty( schemaPrefix ) )
+        { throw badArgs( "Null or empty schema prefix argument." ); }
 
         Connection  conn = getDerbyConnection();
 
@@ -199,7 +213,7 @@ public	class   RawDBReader  implements OptionalTool
         (
          Connection conn,
          String controlSchema,
-         String rawDBLocation,
+         String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
          String dboPassword
@@ -221,7 +235,7 @@ public	class   RawDBReader  implements OptionalTool
              "SYSCONGLOMERATES", 
              "( schemaid char(36), tableid char(36), conglomeratenumber bigint, conglomeratename varchar( 128), isindex boolean, descriptor serializable, isconstant boolean, conglomerateid char( 36 ) )",
              "c20.dat",
-             rawDBLocation,
+             corruptDBLocation,
              encryptionAttributes,
              dbo,
              dboPassword
@@ -233,7 +247,7 @@ public	class   RawDBReader  implements OptionalTool
              "SYSCOLUMNS", 
              "( referenceid char(36), columnname varchar(128), columnnumber int, columndatatype serializable, columndefault serializable, columndefaultid char(36), autoincrementvalue bigint, autoincrementstart bigint, autoincrementinc bigint )",
              "c90.dat",
-             rawDBLocation,
+             corruptDBLocation,
              encryptionAttributes,
              dbo,
              dboPassword
@@ -245,7 +259,7 @@ public	class   RawDBReader  implements OptionalTool
              "SYSSCHEMAS", 
              DataFileVTI.SYSSCHEMAS_SIGNATURE,
              DataFileVTI.SYSSCHEMAS_CONGLOMERATE_NAME,
-             rawDBLocation,
+             corruptDBLocation,
              encryptionAttributes,
              dbo,
              dboPassword
@@ -257,7 +271,7 @@ public	class   RawDBReader  implements OptionalTool
              "SYSTABLES", 
              DataFileVTI.SYSTABLES_SIGNATURE,
              DataFileVTI.SYSTABLES_CONGLOMERATE_NAME,
-             rawDBLocation,
+             corruptDBLocation,
              encryptionAttributes,
              dbo,
              dboPassword
@@ -265,7 +279,7 @@ public	class   RawDBReader  implements OptionalTool
     }
 
     /**
-     * Create a table function and view for a raw database table.
+     * Create a table function and view for a corrupt database table.
      */
     private void    createTable
         (
@@ -274,7 +288,7 @@ public	class   RawDBReader  implements OptionalTool
          String tableName,
          String tableSignature,
          String heapFileName,
-         String rawDBLocation,
+         String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
          String dboPassword
@@ -310,7 +324,7 @@ public	class   RawDBReader  implements OptionalTool
              "(\n" +
              "    " + qualifiedName + "\n" +
              "    (\n" +
-             "        '" + rawDBLocation + "',\n" +
+             "        '" + corruptDBLocation + "',\n" +
              "        '" + heapFileName + "',\n" +
              "        '" + tableSignature + "',\n" +
              "        " + singleQuote( encryptionAttributes ) + ",\n" +
@@ -329,7 +343,7 @@ public	class   RawDBReader  implements OptionalTool
          Connection conn,
          String controlSchema,
          String schemaPrefix,
-         String rawDBLocation,
+         String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
          String dboPassword
@@ -355,14 +369,15 @@ public	class   RawDBReader  implements OptionalTool
         rs.close();
         ps.close();
     }
-    /** Make the name of a local schema from a prefix and a raw name */
-    private String  makeSchemaName( String schemaPrefix, String rawName )
+    /** Make the name of a local schema from a prefix and the name of a corrupt schema */
+    private String  makeSchemaName( String schemaPrefix, String corruptName )
     {
-        return IdUtil.normalToDelimited( schemaPrefix + rawName );
+        return IdUtil.normalToDelimited( schemaPrefix + corruptName );
     }
     
     /**
-     * Create table functions and views on user tables. Write the recovery
+     * Create table functions and views on corrupt user tables. These objects
+     * are created in the healthy database. Write the recovery
      * script.
      */
     private void    createViews
@@ -371,7 +386,7 @@ public	class   RawDBReader  implements OptionalTool
          String recoveryScriptName,
          String controlSchema,
          String schemaPrefix,
-         String rawDBLocation,
+         String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
          String dboPassword
@@ -406,25 +421,25 @@ public	class   RawDBReader  implements OptionalTool
 
         ArrayList<String>   columnNames = new ArrayList<String>();
         ArrayList<TypeDescriptor>   columnTypes = new ArrayList<TypeDescriptor>();
-        String  rawSchemaName = null;
-        String  rawTableName = null;
+        String  corruptSchemaName = null;
+        String  corruptTableName = null;
         String  schemaName = null;
         String  tableName = null;
         long    conglomerateNumber = -1L;
         while ( rs.next() )
         {
             int     col = 1;
-            String  currentRawSchemaName = rs.getString( col++ );
-            String  currentRawTableName = rs.getString( col++ );
+            String  currentCorruptSchemaName = rs.getString( col++ );
+            String  currentCorruptTableName = rs.getString( col++ );
 
-            if ( !currentRawSchemaName.equals( rawSchemaName ) )
+            if ( !currentCorruptSchemaName.equals( corruptSchemaName ) )
             {
                 scriptWriter.println
-                    ( "create schema " + IdUtil.normalToDelimited( currentRawSchemaName ) + ";\n" );
+                    ( "create schema " + IdUtil.normalToDelimited( currentCorruptSchemaName ) + ";\n" );
             }            
                 
-            String  newSchemaName = makeSchemaName( schemaPrefix, currentRawSchemaName );
-            String  newTableName = IdUtil.normalToDelimited( currentRawTableName );
+            String  newSchemaName = makeSchemaName( schemaPrefix, currentCorruptSchemaName );
+            String  newTableName = IdUtil.normalToDelimited( currentCorruptTableName );
 
             if ( schemaName != null )
             {
@@ -435,14 +450,14 @@ public	class   RawDBReader  implements OptionalTool
                          conn,
                          scriptWriter,
                          controlSchema,
-                         rawSchemaName,
-                         rawTableName,
+                         corruptSchemaName,
+                         corruptTableName,
                          schemaName,
                          tableName,
                          conglomerateNumber,
                          columnNames,
                          columnTypes,
-                         rawDBLocation,
+                         corruptDBLocation,
                          encryptionAttributes,
                          dbo,
                          dboPassword
@@ -452,8 +467,8 @@ public	class   RawDBReader  implements OptionalTool
                 }
             }
 
-            rawSchemaName = currentRawSchemaName;
-            rawTableName = currentRawTableName;
+            corruptSchemaName = currentCorruptSchemaName;
+            corruptTableName = currentCorruptTableName;
             schemaName = newSchemaName;
             tableName = newTableName;
             conglomerateNumber = rs.getLong( col++ );
@@ -470,14 +485,14 @@ public	class   RawDBReader  implements OptionalTool
                  conn,
                  scriptWriter,
                  controlSchema,
-                 rawSchemaName,
-                 rawTableName,
+                 corruptSchemaName,
+                 corruptTableName,
                  schemaName,
                  tableName,
                  conglomerateNumber,
                  columnNames,
                  columnTypes,
-                 rawDBLocation,
+                 corruptDBLocation,
                  encryptionAttributes,
                  dbo,
                  dboPassword
@@ -490,7 +505,7 @@ public	class   RawDBReader  implements OptionalTool
         scriptWriter.close();
     }
     /** Use dblook methods to normalize the name of a column */
-    private String  normalizeColumnName( String raw )
+    private String  normalizeColumnName( String unnormalizedName )
     {
         return dblook.addQuotes
             (
@@ -498,30 +513,30 @@ public	class   RawDBReader  implements OptionalTool
              (
               dblook.stripQuotes
               (
-               dblook.addQuotes( raw )
+               dblook.addQuotes( unnormalizedName )
                )
               )
              );
     }
 
     /**
-     * Create the table function and view for a single raw table.
+     * Create the table function and view for a single corrupt table.
      * Add statements to the recovery script for siphoning data out
-     * of the raw database into the current database.
+     * of the corrupt database into the healthy database.
      */
     private void    createView
         (
          Connection conn,
          PrintWriter scriptWriter,
          String controlSchema,
-         String rawSchemaName,
-         String rawTableName,
+         String corruptSchemaName,
+         String corruptTableName,
          String schemaName,
          String tableName,
          long   conglomerateNumber,
          ArrayList<String>  columnNames,
          ArrayList<TypeDescriptor>  columnTypes,
-         String rawDBLocation,
+         String corruptDBLocation,
          String encryptionAttributes,
          String dbo,
          String dboPassword
@@ -531,8 +546,8 @@ public	class   RawDBReader  implements OptionalTool
         String  conglomerateName = "c" + Long.toHexString( conglomerateNumber ) + ".dat";
         String  tableSignature = makeTableSignature( controlSchema, columnNames, columnTypes );
         String  localTableName =
-            IdUtil.normalToDelimited( rawSchemaName ) + "." +
-            IdUtil.normalToDelimited( rawTableName );
+            IdUtil.normalToDelimited( corruptSchemaName ) + "." +
+            IdUtil.normalToDelimited( corruptTableName );
         String  viewName = schemaName + "." + tableName;
         
         scriptWriter.println( "-- siphon data out of " + conglomerateName );
@@ -550,7 +565,7 @@ public	class   RawDBReader  implements OptionalTool
              tableName, 
              tableSignature,
              conglomerateName,
-             rawDBLocation,
+             corruptDBLocation,
              encryptionAttributes,
              dbo,
              dboPassword
@@ -592,7 +607,7 @@ public	class   RawDBReader  implements OptionalTool
     ////////////////////////////////////////////////////////////////////////
 
     /**
-     * Drop the table functions and views on user tables.
+     * Drop the table functions and views on the corrupt user tables.
      */
     private void    dropViews
         (
@@ -627,7 +642,8 @@ public	class   RawDBReader  implements OptionalTool
     }
 
     /**
-     * Drop the table function and view for a raw database catalog.
+     * Drop the table function and view for a catalog in the
+     * corrupt database.
      */
     private void    dropTable
         (
@@ -645,7 +661,7 @@ public	class   RawDBReader  implements OptionalTool
 
     /**
      * Drop the now empty schemas which held the table functions and views
-     * on raw conglomerates.
+     * on conglomerates in the corrupt database.
      */
     private void    dropUserSchemas
         (
@@ -676,7 +692,7 @@ public	class   RawDBReader  implements OptionalTool
 
     /**
      * Drop the schema which holds the table functions and views on the
-     * raw external core conglomerates.
+     * corrupt core conglomerates.
      */
     private void    dropControlSchema
         (
@@ -735,7 +751,8 @@ public	class   RawDBReader  implements OptionalTool
     private SQLException    wrap( Throwable t )
     {
         String  errorMessage = t.getMessage();
-        String  sqlState = org.apache.derby.shared.common.reference.SQLState.JAVA_EXCEPTION.substring( 0, 5 );
+        String  sqlState = org.apache.derby.shared.common.reference.SQLState.JAVA_EXCEPTION
+            .substring( 0, 5 );
 
         return new SQLException( errorMessage, sqlState, t );
     }

@@ -55,6 +55,34 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
     private static  final   String      BOOT_PASSWORD = "fooBarWibble";
     private static  final   String      CORRUPT_DATABASE = "rrtCorruptDatabase";
 
+    private static  final   String      LIST_USER_SCHEMAS =
+        "select schemaname from sys.sysschemas\n" +
+        "where schemaname not like 'SYS%'\n" +
+        "and schemaname != 'APP'\n" +
+        "and schemaname != 'NULLID'\n" +
+        "and schemaname != 'SQLJ'\n" +
+        "order by schemaname\n";
+    private static  final   String      LIST_USER_TABLES =
+        "select tablename from sys.systables\n" +
+        "where tablename not like 'SYS%'\n" +
+        "order by tablename\n";
+    private static  final   String[][]  NO_ROWS = {};
+    private static  final   String[][]  EXPECTED_SCHEMAS =
+    {
+        { "CONTROL11" },
+        { "RAW11_APP" },
+        { "RAW11_SCHEMA1" },
+        { "RAW11_SCHEMA2" },
+    };
+    private static  final   String[][]  EXPECTED_TABLES =
+    {
+        { "T1" },
+        { "T1" },
+        { "T2" },
+        { "T2" },
+    };
+
+        
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -160,6 +188,9 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
 
         Connection  newDBConn = DriverManager.getConnection( MEMORY_DB + ";create=true" );
 
+        // verify that the tool hasn't created any schema objects
+        vetUnloaded( newDBConn );
+        
         // load the tool to recover the corrupt database
         String      dboPassword = tc.getPassword( TEST_DBO );
         goodStatement
@@ -179,10 +210,29 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
              ")\n"
              );
 
+        // verify that the expected schema objects have been created
+        vetLoaded( newDBConn );
+
         runRecoveryScript( newDBConn );
 
         // now verify that we siphoned the data out of the corrupt database
         vetSiphoning( newDBConn );
+
+        // drop the tables holding the data we siphoned out of the corrupt database
+        dropSiphonedData( newDBConn );
+        // unload the tool
+        goodStatement
+            (
+             newDBConn,
+             "call syscs_util.syscs_register_tool\n" +
+             "(\n" +
+             "  'rawDBReader',\n" +
+             "  false,\n" +
+             "  'CONTROL11',\n" +
+             "  'RAW11_'\n" +
+             ")\n"
+             );
+        vetUnloaded( newDBConn );
 
         shutdownInMemoryDB();
     }
@@ -300,6 +350,28 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
              },
              false
              );
+    }
+
+    private void    vetUnloaded( Connection conn ) throws Exception
+    {
+        assertResults( conn, LIST_USER_SCHEMAS, NO_ROWS, false );
+        assertResults( conn, LIST_USER_TABLES, NO_ROWS, false );
+    }
+    
+    private void    vetLoaded( Connection conn ) throws Exception
+    {
+        assertResults( conn, LIST_USER_SCHEMAS, EXPECTED_SCHEMAS, false );
+        assertResults( conn, LIST_USER_TABLES, EXPECTED_TABLES, false );
+    }
+
+    private void    dropSiphonedData( Connection conn ) throws Exception
+    {
+        goodStatement( conn, "drop table schema1.t1" );
+        goodStatement( conn, "drop table schema1.t2" );
+        goodStatement( conn, "drop table schema2.t1" );
+        goodStatement( conn, "drop table schema2.t2" );
+        goodStatement( conn, "drop schema schema1 restrict" );
+        goodStatement( conn, "drop schema schema2 restrict" );
     }
     
     private  boolean deleteFile( File file ) throws Exception
