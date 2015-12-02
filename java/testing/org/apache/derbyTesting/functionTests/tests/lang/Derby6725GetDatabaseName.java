@@ -21,12 +21,14 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import junit.framework.Test;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -58,10 +60,14 @@ public class Derby6725GetDatabaseName extends BaseJDBCTestCase {
     }
     
     private void checkDbName(Connection conn, String expectedDbName) throws SQLException {
+        File    systemDir = new File( "system" );
+        File    dbDir = new File( systemDir, expectedDbName );
+        String  databasePath = PrivilegedFileOpsForTests.getAbsolutePath( dbDir );
+
         PreparedStatement ps = conn.prepareStatement("values syscs_util.SYSCS_GET_DATABASE_NAME()");
         ResultSet rs = ps.executeQuery();
         rs.next();
-        assertEquals( rs.getString( 1 ),  expectedDbName);
+        assertEquals( databasePath, rs.getString( 1 ) );
         rs.close();
         ps.close();
     }

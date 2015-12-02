@@ -47,6 +47,8 @@ import org.apache.derby.iapi.security.Securable;
 import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.monitor.ModuleFactory;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
@@ -2489,11 +2491,13 @@ public class SystemProcedures  {
      * @throws SQLException
      */
     public static String SYSCS_GET_DATABASE_NAME()
-            throws SQLException
+        throws SQLException
     {
         //DERBY-6725(Add a system function which returns the name of the database.)
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-        return(lcc.getDbname());
+        try {
+            return( getMonitor().getCanonicalServiceName( lcc.getDbname() ) );
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
 
     /**
@@ -2526,6 +2530,23 @@ public class SystemProcedures  {
         try {
             return ConnectionUtil.getCurrentLCC().getDataDictionary().peekAtIdentity( schemaName, tableName );
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+
+    /**
+     * Helper routine which looks up the monitor.
+     */
+    private static  ModuleFactory  getMonitor()
+    {
+        return AccessController.doPrivileged
+            (
+             new PrivilegedAction<ModuleFactory>()
+             {
+                 public ModuleFactory run()
+                 {
+                     return Monitor.getMonitor();
+                 }
+             }
+             );
     }
 
 }
