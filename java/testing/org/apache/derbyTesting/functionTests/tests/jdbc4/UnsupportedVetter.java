@@ -355,9 +355,12 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	public	void	testSupportedMethods()
 		throws Exception
 	{
-        getTestConfiguration().setVerbosity( true );
+    getTestConfiguration().setVerbosity( true );
 
-        if ( savedVerbosity ) { println( "Supports JDBC 4.2 = " + JDBC. vmSupportsJDBC42() ); }
+    // do not run on java 9. it introduces classes and methods not found in java 8.
+    if (vmAtLeast(1, 9)) { return; }
+
+    if ( savedVerbosity ) { println( "Supports JDBC 4.2 = " + JDBC. vmSupportsJDBC42() ); }
 
 		HashSet<String>	vanishedMethodList = new HashSet<String>();
 		HashSet<String>	unsupportedList = new HashSet<String>();
@@ -377,9 +380,9 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		printUnsupportedList( unsupportedList );
 		printNotUnderstoodList( notUnderstoodList );
 
-        assertEquals( "vanishedMethodList", 0, vanishedMethodList.size() );
-        assertEquals( "unsupportedList", 0, unsupportedList.size() );
-        assertEquals( "notUnderstoodList", 0, notUnderstoodList.size() );
+    assertEquals( "vanishedMethodList", 0, vanishedMethodList.size() );
+    assertEquals( "unsupportedList", 0, unsupportedList.size() );
+    assertEquals( "notUnderstoodList", 0, notUnderstoodList.size() );
 	}
 
 	//
