@@ -61,13 +61,6 @@ with real information.
   -->
   <compilers>All classes were compiled by the javac from the 1.8.0-b132 JDK, Java HotSpot(TM) 64-Bit Server VM (build 25.0-b70, mixed mode).</compilers>
 
-  <!--
-         Say here whether you built the Java ME support and, if so, which
-         tookit you used.
-         E.g.: Java ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
-  -->
-  <jsr169>Support for JSR 169 has been deprecated.</jsr169>
-
 </buildInfo>
 
 <overview>

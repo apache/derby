@@ -78,13 +78,6 @@ with real information.
   -->
   <compilers>???</compilers>
 
-  <!--
-         Say here whether you built the J2ME support and, if so, which
-         tookit you used.
-         E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
-  -->
-  <jsr169>???</jsr169>
-
 </buildInfo>
 
 <!--

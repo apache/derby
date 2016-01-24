@@ -285,10 +285,6 @@
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
 
-    <!-- 
-            The lowest common denominator compile path for Derby. We expect that
-            the bulk of the Derby product will run on Java SE 6.
-    -->
     <property name="compile.classpath" value="${java18compile.classpath}"/>
 
     <property name="compilerPropsAlreadySet" value="true"/>
