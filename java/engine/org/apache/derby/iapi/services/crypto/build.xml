@@ -35,8 +35,8 @@
 <!-- Targets -->
   <target name="compile_crypto">
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -48,7 +48,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-         <pathelement path="${java16compile.classpath}"/>
+         <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/services/crypto/*.java"/>
       <!-- <compilerarg value="-Xlint:unchecked"/> -->

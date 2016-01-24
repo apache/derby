@@ -50,8 +50,8 @@
 <!-- compile classes  -->
 <target name="compile">
     <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -65,16 +65,16 @@
       excludes="**/*42.java"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint"/>
    </javac>
 </target> 
 
-<target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
+<target name="compile_jdbc42">
     <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"

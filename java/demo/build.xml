@@ -36,8 +36,8 @@
 
   <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -50,13 +50,13 @@
       destdir="${out.dir}"
       includes="Simple*">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -70,14 +70,14 @@
       includes="nserverdemo/**"
       excludes="nserverdemo/Simple*">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp) -->
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -90,13 +90,13 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -109,7 +109,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
@@ -131,8 +131,8 @@
 
   <target name="compile-vtidemo">
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -144,7 +144,7 @@
       srcdir="${derby.demo.src.dir}/vtis/java"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>

@@ -51,8 +51,6 @@ import org.apache.tools.ant.taskdefs.Property;
  * </p>
  *
  * <ul>
- * <li>java16compile.classpath</li>
- * <li>java17compile.classpath</li>
  * <li>java18compile.classpath</li>
  * </ul>
  *
@@ -62,8 +60,6 @@ import org.apache.tools.ant.taskdefs.Property;
  * </p>
  *
  * <ul>
- * <li>j16lib</li>
- * <li>j17lib</li>
  * <li>j18lib</li>
  * </ul>
  *
@@ -91,8 +87,6 @@ public class PropertySetter extends Task
     // declared in ascending order
     private static  final   VMLevel[]    VM_LEVELS =
     {
-        new VMLevel( "16", "1.6" ),
-        new VMLevel( "17", "1.7" ),
         new VMLevel( "18", "1.8" ),
     };
 

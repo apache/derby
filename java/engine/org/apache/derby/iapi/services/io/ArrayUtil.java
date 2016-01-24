@@ -92,6 +92,7 @@ public abstract class ArrayUtil
      * Make the contents of an array available as a read-only list. If the
      * array is null, an empty list will be returned.
      */
+    @SafeVarargs
     public static <T> List<T> asReadOnlyList(T... array) {
         if (array == null) {
             return Collections.emptyList();

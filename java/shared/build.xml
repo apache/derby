@@ -53,8 +53,8 @@
   <echo level="info" message="building generated sanity info"/>
   <target name="compile">
   	<javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -66,14 +66,14 @@
       srcdir="${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${java16compile.classpath}"/>
+          <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
 
   	<javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -86,7 +86,7 @@
       includes="org/apache/derby/shared/**"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${java16compile.classpath}"/>
+          <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <include name="org/apache/derby/shared/**"/>
   	  <exclude name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
@@ -94,8 +94,8 @@
     </javac>
   	
   	<javac
-  	      source="1.6"
-  	      target="1.6"
+  	      source="1.8"
+  	      target="1.8"
   	      bootclasspath="${empty}"
   	      nowarn="on"
   	      debug="${debug}"
@@ -107,7 +107,7 @@
   	      srcdir="${derby.shared.src.dir}"
   	      destdir="${out.dir}">
   	      <classpath>
-  	        <pathelement path="${java16compile.classpath}"/>
+  	        <pathelement path="${java18compile.classpath}"/>
   	      </classpath>
   	    <include name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>
       <compilerarg value="-Xlint:unchecked"/>

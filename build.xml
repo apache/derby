@@ -48,7 +48,7 @@
 
   <target
       name="buildsource"
-      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,optional,build,versioninfo,localeinfo,binscripts"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,felixStubs,engine,storeless,tools,drda,client,optional,build,versioninfo,localeinfo,binscripts"
       description="Compile the product source (does not build the tests)."
   />
   <target
@@ -148,20 +148,8 @@
   <!--  Make sure compiler level is Java 6 level or higher -->
   <target name="checkCompilerLevel">
 
-    <!--
-       Allow compilation of JDBC4 classes at 1.6 level if compiler supports it.
-       If we can find the following class, then we assume that the compiler
-       is at least Java 6 level.
-    -->
-    <available property="compilerAtCorrectLevel" classname="java.sql.Wrapper"/>
-    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 6 or later."/>
-
-    <property name="compilerLevel16" value="1.6"/>
-
-    <javac source="1.6" srcdir="${basedir}" failonerror="false"
-           includeantruntime="false">
-      <include name="${dummy.src}"/>
-    </javac>
+    <available property="compilerAtCorrectLevel" classname="java.sql.SQLType"/>
+    <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 8 or later."/>
 
     <antcall target="checkVMLevel"/>
     
@@ -173,11 +161,8 @@
        be checked before running junit tests requiring a certain JVM version.
   -->
   <target name="checkVMLevel">
-    <!-- The java.lang.ManagementFactory class was new in J2SE 5.0 -->
-    <available classname="java.lang.management.ManagementFactory" property="vmLevelIsAtLeast1.5"/>
-    <available classname="java.sql.Wrapper" property="vmLevelIsAtLeast1.6" value="true"/>
-    <available classname="java.sql.PseudoColumnUsage" property="vmLevelIsAtLeast1.7"/>
     <available classname="java.sql.SQLType" property="vmLevelIsAtLeast1.8" value="true"/>
+    <available classname="java.sql.ShardingKey" property="vmLevelIsAtLeast1.9" value="true"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -286,9 +271,8 @@
     />
 
     <!-- 
-            After setting the JDK properties, we expect that java16compile.classpath,
-            java17compile.classpath, or java18compile.classpath will be set. 
-            If none of these are set, then PropertySetter aborts the build.
+            After setting the JDK properties, we expect that java18compile.classpath will be set. 
+            Otherwise, PropertySetter aborts the build.
     -->
     <setJdkProperties/>
 
@@ -296,25 +280,6 @@
     <property file="${properties.dir}/${build.compiler}.properties"/>
     <!-- Compile-time classpath`< properties files -->
     <property file="${properties.dir}/extrapath.properties"/>
-
-
-    <!-- 
-            If a Java 6 JDK isn't present, then use the Java 7 environment to build the JDBC 4 support
-    -->
-    <condition property="java17compile.classpath" value="${out.jdbc4.dir}:${java18compile.classpath}">
-          <isset property="java18compile.classpath"/>
-    </condition>
-    <property name="java16compile.classpath" value="${java17compile.classpath}"/>
-
-    <!-- 
-            If a Java 7 JDK isn't present, then use the Java 6 environment.
-    -->
-    <property name="java17compile.classpath" value="${java16compile.classpath}"/>
-
-    <!-- 
-            If a Java 8 JDK isn't present, then use the Java 7 environment.
-    -->
-    <property name="java18compile.classpath" value="${java17compile.classpath}"/>
 
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
@@ -324,7 +289,7 @@
             The lowest common denominator compile path for Derby. We expect that
             the bulk of the Derby product will run on Java SE 6.
     -->
-    <property name="compile.classpath" value="${java16compile.classpath}"/>
+    <property name="compile.classpath" value="${java18compile.classpath}"/>
 
     <property name="compilerPropsAlreadySet" value="true"/>
     <antcall target="printCompilerProperties"> <param name="checkEvent" value="After setting properties: "/> </antcall>
@@ -348,12 +313,6 @@
   <target name="printCompilerProperties" if="printCompilerProperties">
 
     <echo message="${checkEvent} compilerPropsAlreadySet = ${compilerPropsAlreadySet}"/>
-    <echo message="${checkEvent} compilerLevel16 = ${compilerLevel16}"/>
-    <echo message="${checkEvent} compile.classpath = ${compile.classpath}"/>
-    <echo message="${checkEvent} j16lib = ${j16lib}"/>
-    <echo message="${checkEvent} java16compile.classpath = ${java16compile.classpath}"/>
-    <echo message="${checkEvent} j17lib = ${j17lib}"/>
-    <echo message="${checkEvent} java17compile.classpath = ${java17compile.classpath}"/>
     <echo message="${checkEvent} j18lib = ${j18lib}"/>
     <echo message="${checkEvent} java18compile.classpath = ${java18compile.classpath}"/>
 
@@ -814,34 +773,6 @@
   </target>
 
 <!-- =================================================================== -->
-<!--                     Build the stub implementation of JDBC4                  -->
-<!-- =================================================================== -->
-  <target name="jdbc4stubs">
-    <mkdir dir="${out.stubs.dir}"/>
-    <mkdir dir="${out.jdbc4.dir}"/>
-
-    <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.jdbc4.src.dir}"
-      destdir="${out.jdbc4.dir}">
-      <classpath>
-        <pathelement path="${java16compile.classpath}"/>
-      </classpath>
-      <compilerarg value="-Xlint:unchecked"/>
-     </javac>
-
-  </target>
-
-<!-- =================================================================== -->
 <!--                     Build the stub FELIX (OSGI) implementation                 -->
 <!-- =================================================================== -->
   <target name="felixStubs">
@@ -849,8 +780,8 @@
     <mkdir dir="${out.felix.dir}"/>
 
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -862,7 +793,7 @@
       srcdir="${derby.felix.src.dir}"
       destdir="${out.felix.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
      </javac>
@@ -971,8 +902,8 @@
     </java>
 
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -1343,7 +1274,7 @@
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
        Footer="${javadoc.Footer}"
        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
-       source="1.6"
+       source="1.8"
      >
       <fileset dir="${derby.testing.src.dir}"
                excludesfile="${javadoc.exclusions}"/>
@@ -2152,7 +2083,6 @@
 
      <antcall target="appendnotice"><param name="sourcefile" value="initialgrant.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="nisttestgrant.txt"/></antcall>
-     <antcall target="appendnotice"><param name="sourcefile" value="jdbcstubs.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="felix.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="lucene.txt"/></antcall>
      <antcall target="appendnotice"><param name="sourcefile" value="simpleJson.txt"/></antcall>
@@ -2601,10 +2531,9 @@
   </target>
 
   <!--
-    Only execute jdbc4 suite if we have a pointer to a 1.6 VM.
     This target is called by junit-jdbc after reading the VM level.
   -->
-  <target name="junit-jdbc4-workhorse" if="vmLevelIsAtLeast1.6" depends="junit-init">
+  <target name="junit-jdbc4-workhorse" depends="junit-init">
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
            showoutput="yes"

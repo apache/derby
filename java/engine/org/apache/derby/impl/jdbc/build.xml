@@ -38,8 +38,8 @@
 
   <target name="compile_jdbc4">
 	    <javac
-	      source="1.6"
-	      target="1.6"
+	      source="1.8"
+	      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -51,7 +51,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/jdbc/**"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*42.java"/>
@@ -63,8 +63,8 @@
 
 <target name="compile_jdbc42" depends="compile_jdbc4"  if="vmLevelIsAtLeast1.8">
     <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
+      source="1.8"
+      target="1.8"
         bootclasspath="${empty}"
         nowarn="on"
         debug="${debug}"

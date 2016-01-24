@@ -38,8 +38,8 @@
 
   <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       debug="${debug}"
       depend="${depend}"
@@ -50,7 +50,7 @@
       srcdir="${derby.demo.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <include name="toursdb/insertMaps.java"/>
       <compilerarg value="-Xlint:unchecked"/>

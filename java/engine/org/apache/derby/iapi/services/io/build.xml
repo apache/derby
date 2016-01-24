@@ -37,12 +37,10 @@
 
 <!-- Targets -->
 
-  <target name="compile" depends="checkVMLevel,compile_iapi_services_io,compile_iapi_services_io_jdk7"/>
-
-  <target name="compile_iapi_services_io">
+  <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
+      source="1.8"
+      target="1.8"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -54,38 +52,12 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java16compile.classpath}"/>
+        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/services/io/*.java"/>
-      <exclude name="${derby.dir}/iapi/services/io/FilePermissionServiceImpl.java"/>
       <!-- <compilerarg value="-Xlint:unchecked"/> -->
     </javac>
   </target>
 
-<target name="compile_iapi_services_io_jdk7" if="vmLevelIsAtLeast1.7">
-    <javac
-      source="1.7"
-      target="1.7"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java17compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/iapi/services/io/FilePermissionServiceImpl.java"/>
-      <compilerarg value="-Xlint:unchecked"/>
-    </javac>
-  </target>
-
-  <target name="checkVMLevel">
-    <available classname="java.sql.PseudoColumnUsage" property="vmLevelIsAtLeast1.7"/>
-  </target>
 </project>
 
