@@ -39,9 +39,8 @@
     <copy file="${derby.build.src.dir}/org/apache/derbyBuild/odbcgen_fragments.properties" tofile="${out.dir}/org/apache/derbyBuild/odbcgen_fragments.properties"/>
 
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -52,7 +51,7 @@
       srcdir="${derby.build.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java18compile.classpath};${java.home}/../lib/tools.jar"/>
+        <pathelement path="${java.home}/../lib/tools.jar"/>
         <pathelement path="${ant.core.lib}"/>
       </classpath>
       <include name="org/apache/derbyBuild/**"/>

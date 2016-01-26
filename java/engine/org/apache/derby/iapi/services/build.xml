@@ -36,9 +36,8 @@
 
   <target name="compile">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -48,9 +47,6 @@
       verbose="${verbose}"
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/iapi/services/**"/>
       <exclude name="${derby.dir}/iapi/crypto/io/**"/>
       <exclude name="${derby.dir}/iapi/services/io/**"/>

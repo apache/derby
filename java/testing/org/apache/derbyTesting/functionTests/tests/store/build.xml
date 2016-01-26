@@ -66,9 +66,8 @@
   </target>
   <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="true"
       depend="${depend}"
@@ -79,7 +78,6 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>

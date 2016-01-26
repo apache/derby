@@ -35,10 +35,9 @@
     <!-- Compile all tests for Derby's management functionality -->
     <target name="compile">
         <javac
-            source="1.6"
-            target="1.6"
+            source="${min.version}"
+            target="${min.version}"
             fork="yes"
-            bootclasspath="${empty}"
             nowarn="on"
             debug="true"
             depend="${depend}"
@@ -49,7 +48,6 @@
             srcdir="${derby.testing.src.dir}"
             destdir="${out.dir}">
             <classpath>
-                <pathelement path="${compile.classpath}"/>
                 <pathelement path="${junit}"/>
             </classpath>
             <include name="${this.dir}/*.java"/>

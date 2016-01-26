@@ -50,9 +50,8 @@
 <!-- compile classes  -->
 <target name="compile">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -64,18 +63,14 @@
       includes="**/*.java"
       excludes="**/*42.java"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint"/>
    </javac>
 </target> 
 
 <target name="compile_jdbc42">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -86,9 +81,6 @@
       srcdir="${derby.client.src.dir}"
       includes="**/*42.java" 
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint"/>
    </javac>
 </target> 

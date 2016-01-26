@@ -35,9 +35,8 @@
 <!-- Targets -->
   <target name="compile_mbeans">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -47,9 +46,6 @@
       verbose="${verbose}"
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <sourcepath>
       </sourcepath>
       <include name="${derby.dir}/mbeans/**"/>

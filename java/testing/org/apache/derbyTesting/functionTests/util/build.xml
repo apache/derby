@@ -43,9 +43,8 @@
 
   <target name="compile">
     <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="true"
       depend="${depend}"
@@ -57,7 +56,6 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${oro}"/>
-        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/> 

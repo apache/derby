@@ -41,9 +41,8 @@
 
   <target name="compile_jdbc4" >
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -53,9 +52,6 @@
       verbose="${verbose}"
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/*42.java"/>
       <compilerarg value="-Xlint:unchecked"/>
@@ -64,9 +60,8 @@
 
   <target name="compile_jdbc42" if="vmLevelIsAtLeast1.8">
       <javac
-          source="1.8"
-          target="1.8"
-          bootclasspath="${empty}"
+          source="${min.version}"
+          target="${min.version}"
           nowarn="on"
           debug="${debug}"
           depend="${depend}"
@@ -76,9 +71,6 @@
           verbose="${verbose}"
           srcdir="${derby.engine.src.dir}"
           destdir="${out.dir}">
-          <classpath>
-              <pathelement path="${java18compile.classpath}"/>
-          </classpath>
           <include name="${derby.dir}/${cur.dir}/*42.java"/>
           <compilerarg value="-Xlint:unchecked"/>
       </javac>

@@ -56,9 +56,8 @@
   <target name="junitcomponents" 
           description="Build Derby JUnit test components">
     <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="true"
       depend="${depend}"
@@ -70,7 +69,6 @@
       includes="${derby.testing.junit.dir}/**/*.java"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <compilerarg value="-Xlint"/>

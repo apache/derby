@@ -38,9 +38,8 @@
 
   <target name="compile">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       debug="${debug}"
       depend="${depend}"
       deprecation="${deprecation}"
@@ -49,9 +48,6 @@
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <include name="toursdb/insertMaps.java"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
@@ -75,7 +71,6 @@
           dir="${derby.demo.src.dir}/toursdb" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
-        <pathelement path="${compile.classpath}"/>
       </classpath>
       <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
     </java>
@@ -90,7 +85,6 @@
           dir="${derby.demo.src.dir}/toursdb" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
-        <pathelement path="${compile.classpath}"/>
       </classpath>
       <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
       <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>

@@ -36,9 +36,8 @@
 
   <target name="compile_tools_iapi">
     <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -48,9 +47,6 @@
       verbose="${verbose}"
       srcdir="${derby.tools.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/iapi/tools/**"/>
       <exclude name="${derby.dir}/iapi/tools/run.java"/>
       <compilerarg value="-Xlint:unchecked"/>
@@ -59,9 +55,8 @@
 
   <target name="compile_tools_iapi_run">
     <javac
-      source="1.6"
-      target="1.6"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -71,9 +66,6 @@
       verbose="${verbose}"
       srcdir="${derby.tools.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/iapi/tools/run.java"/>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>

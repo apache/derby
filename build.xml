@@ -61,7 +61,7 @@
 <!--                       Initialize targets                             -->
 <!-- ==================================================================== -->
 
-  <target name="init" unless="init.done" depends="setInitialProperties">
+  <target name="init" unless="init.done" depends="setCompilerProperties">
 
     <antcall target="install_junit"/>
     <tstamp/>
@@ -262,20 +262,6 @@
   <!-- Set the ant variables which identify the compiler classpaths. -->
   <target name="setCompilerProperties" unless="compilerPropsAlreadySet" depends="prebuild">
 
-    <antcall target="printCompilerProperties"> <param name="checkEvent" value="Before setting properties: "/> </antcall>
-
-    <taskdef
-      name="setJdkProperties"
-      classname="org.apache.derbyPreBuild.PropertySetter"
-      classpath="${out.dir}"
-    />
-
-    <!-- 
-            After setting the JDK properties, we expect that java18compile.classpath will be set. 
-            Otherwise, PropertySetter aborts the build.
-    -->
-    <setJdkProperties/>
-
     <property file="${properties.dir}/defaultcompiler.properties"/>
     <property file="${properties.dir}/${build.compiler}.properties"/>
     <!-- Compile-time classpath`< properties files -->
@@ -284,33 +270,8 @@
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
-
-    <property name="compile.classpath" value="${java18compile.classpath}"/>
 
     <property name="compilerPropsAlreadySet" value="true"/>
-    <antcall target="printCompilerProperties"> <param name="checkEvent" value="After setting properties: "/> </antcall>
-
-
-  </target>
-
-  <!-- Set the initial properties for this build script. This duplicates the property setting block in setCompilerProperties. Once we make setCompilerProperties mandatory, this target should be removed. -->
-  <target name="setInitialProperties" if="dontAutosetProps">
-
-    <property file="${properties.dir}/defaultcompiler.properties"/>
-    <property file="${properties.dir}/${build.compiler}.properties"/>
-    <!-- Compile-time classpath`< properties files -->
-    <property file="${properties.dir}/extrapath.properties"/>
-    <property file="${properties.dir}/compilepath.properties"/>
-    <!-- Release and version info -->
-    <property file="${properties.dir}/release.properties"/>
-
-  </target>
-
-  <target name="printCompilerProperties" if="printCompilerProperties">
-
-    <echo message="${checkEvent} compilerPropsAlreadySet = ${compilerPropsAlreadySet}"/>
-    <echo message="${checkEvent} j18lib = ${j18lib}"/>
-    <echo message="${checkEvent} java18compile.classpath = ${java18compile.classpath}"/>
 
   </target>
 
@@ -776,9 +737,8 @@
     <mkdir dir="${out.felix.dir}"/>
 
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -788,9 +748,6 @@
       verbose="${verbose}"
       srcdir="${derby.felix.src.dir}"
       destdir="${out.felix.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint:unchecked"/>
      </javac>
 
@@ -879,7 +836,6 @@
           failonerror="yes">
       <classpath>
         <pathelement path="${out.dir}"/>
-        <pathelement path="${compile.classpath}"/>
       </classpath>
       <jvmarg value="-DWS=${workspace}"/>
       <jvmarg value="-DclassDir=${out.dir}"/>
@@ -898,9 +854,8 @@
     </java>
 
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -910,9 +865,6 @@
       verbose="${verbose}"
       srcdir="${generated.src.dir}"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
       <include name="${derby.dir}/iapi/services/cache/ClassSizeCatalogImpl.java"/>
     </javac>
 
@@ -1242,7 +1194,7 @@
   <target name="dojjdocs">
 
     <java classname="jjdoc" fork="yes">
-      <classpath path="${javatools.dir}/javacc.jar;${compile.classpath}"/>
+      <classpath path="${javatools.dir}/javacc.jar"/>
       <arg value="-NOONE_TABLE"/>
       <arg value="-output_file=${jjdoctarget}"/>
       <arg value="${jjtodoc}"/>
@@ -1263,14 +1215,13 @@
        access="private"
        breakiterator="yes"
        useexternalfile="yes"
-       bootclasspath="${java18compile.classpath}"
-       classpath="${out.dir};${java18compile.classpath};${jars.javadoc};${junit}"
+       classpath="${out.dir};${jars.javadoc};${junit}"
        destdir="${out.javadoc.dir}/testing"
        windowtitle="Apache Derby V${major}.${minor} Test Javadoc"
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
        Footer="${javadoc.Footer}"
        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,${copyright.year} The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
-       source="1.8"
+       source="${min.version}"
      >
       <fileset dir="${derby.testing.src.dir}"
                excludesfile="${javadoc.exclusions}"/>

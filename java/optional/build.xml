@@ -55,9 +55,8 @@
           description="Build Derby optional tools">
 
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -68,7 +67,6 @@
       srcdir="${derby.optional.src.dir}:${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java18compile.classpath}"/>
         <pathelement path="${lucene_core}"/>
         <pathelement path="${lucene_a_co}"/>
         <pathelement path="${lucene_qp}"/>

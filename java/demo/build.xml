@@ -36,9 +36,8 @@
 
   <target name="compile">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -49,15 +48,11 @@
       srcdir="nserverdemo"
       destdir="${out.dir}"
       includes="Simple*">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -69,16 +64,12 @@
       destdir="${out.dir}"
       includes="nserverdemo/**"
       excludes="nserverdemo/Simple*">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp) -->
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -90,14 +81,12 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -109,7 +98,6 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java18compile.classpath}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
@@ -131,9 +119,8 @@
 
   <target name="compile-vtidemo">
     <javac
-      source="1.8"
-      target="1.8"
-      bootclasspath="${empty}"
+      source="${min.version}"
+      target="${min.version}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -143,9 +130,6 @@
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}/vtis/java"
       destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java18compile.classpath}"/>
-      </classpath>
       <compilerarg value="-Xlint:unchecked"/>
     </javac>
   </target>
