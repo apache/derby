@@ -29,6 +29,8 @@ import java.io.Writer;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.impl.tools.planexporter.AccessDatabase;
 import org.apache.derby.impl.tools.planexporter.CreateHTMLFile;
 import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
@@ -43,6 +45,8 @@ public class PlanExporter {
     private static final int XML=1;
     private static final int HTML=2;
     private static final int XSL=3;
+    
+    private static final LocalizedResource LOC_RES = LocalizedResource.getInstance();
 
     /**
      * @param args
@@ -179,25 +183,11 @@ public class PlanExporter {
                 			printHelp();
                 	}
                 	else{
-                		System.out.println(
-                				"====================================================\n" +
-                				"--- An Error Occured: No Statistics has Captured ---\n" +
-                				"-- Possible reasons:                              --\n" +
-                				"-- 1) The statement executed is a DDL statement.  --\n" +
-                				"-- Statistics will not capture for DDL statements --\n" +
-                				"-- by the Derby.                                  --\n" +
-                				"-- 2) The statement ID entered is incorrect.      --\n" +
-                				"-- 3) Schema specified does not exist.            --\n" +
-                				"====================================================\n"
-                		);
+                		System.out.println(LOC_RES.getTextMessage("PE_NoStatisticsCaptured"));
                 	}
                 }
                 else{
-                	System.out.println(
-            				"====================================================\n" +
-            				"---              An Error Occured:               ---\n" +
-            				"-------   Specified Schema does not exist.   -------\n" +
-            				"======================================================");
+                	System.out.println(LOC_RES.getTextMessage("PE_ErrorSchemaNotExist"));
                 }
             }
             else
@@ -283,28 +273,7 @@ public class PlanExporter {
     }
 
     private static void printHelp(){
-        System.out.println
-        (
-                "================================================\n" +
-                "-------------- PlanExporter Tool ---------------\n" +
-                "--   You can pass 5 arguments (minimum), or   --\n" +
-                "--       7 arguments or 8 arguments or        --\n" +
-                "-----------  9 arguments (maximum)  ------------\n" +
-                "--         separated by a space.              --\n" +
-                "---------------Mandatory Arguments--------------\n" +
-                "1) database URL --------------------------------\n" +
-                "2) database schema -----------------------------\n" +
-                "3) statement ID (36 characters) ----------------\n" +
-                "---------------Optional Arguments---------------\n" +
-                "-----------Choose at least one option-----------\n" +
-                "a) -xml {pathToXML} or -html {pathToHTML} ------\n" +
-                "b) -xml {pathToXML} -html {pathToHTML} ---------\n" +
-                "c) -xsl {pathToXSL} -html {pathToHTML} ---------\n" +
-                "d) -xml {pathToXML} -xsl {pathToXSL} -----------\n" +
-                "      -html {pathToHTML} -----------------------\n" +
-                "e) -adv -xml {pathToXML} -xsl {pathToXSL} ------\n" +
-                "================================================\n"
-        );
+        System.out.println(LOC_RES.getTextMessage("PE_HelpText"));
     }
 
     private static void deleteFile(final String fileName)

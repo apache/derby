@@ -98,6 +98,7 @@ public class MessageVetter {
         // needs quoting.
         LONE_QUOTE_ALLOWED.add("DRDA_Usage8.I");
         LONE_QUOTE_ALLOWED.add("DRDA_Usage11.I");
+        LONE_QUOTE_ALLOWED.add("PE_HelpText");
     }
 
     /** The message file to check. */
