@@ -511,6 +511,22 @@ public class classlister {
 			}
 		}
 
+    //
+    // Exclude classes which are referenced only by the compiler
+    // in order to copy constants into the target class. These were not recorded
+    // in the constant pool by Java compilers at level 7 or earlier.
+    // However, these started turning up under Windows with Java 8
+    // after the base compilation level was changed to Java 8 by the work
+    // on https://issues.apache.org/jira/browse/DERBY-6857. See that issue
+    // for more information.
+    //
+    if (
+        className.startsWith("org.apache.derby.iapi.reference.DRDAConstants") ||
+        className.startsWith("org.apache.derby.shared.common.sanity.SanityState") ||
+        className.startsWith("org.apache.derbyPreBuild.ReleaseProperties")
+        )
+    { return; }
+
 		// already seen class
 		if (foundClasses.get(className) != null)
 			return;
