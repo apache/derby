@@ -22,12 +22,14 @@
 package org.apache.derby.iapi.tools;
 
 import java.io.IOException;
+
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derby.tools.PlanExporter;
+import org.apache.derby.tools.SignatureChecker;
 import org.apache.derby.tools.dblook;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.sysinfo;
-import org.apache.derby.tools.SignatureChecker;
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
   <p>
@@ -59,6 +61,8 @@ public class run {
           NetworkServerControl.main(trimArgs(args));
       } else if (args[0].equals("SignatureChecker")) {
           SignatureChecker.main(trimArgs(args));
+      } else if (args[0].equals("PlanExporter")) {
+    	  PlanExporter.main(trimArgs(args));  
       } else printUsage();
   }
 
