@@ -21,9 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.LineNumberReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -283,24 +283,25 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
 
     private void    runRecoveryScript( Connection conn ) throws Exception
     {
-        File                script = new File( RECOVERY_SCRIPT );
-        LineNumberReader    reader = new LineNumberReader( new FileReader( script ) );
-
-        while ( true )
+        try (BufferedReader reader =
+                new BufferedReader(new FileReader(RECOVERY_SCRIPT)))
         {
-            String  line = reader.readLine();
-            if ( line == null ) { break; }
+            while ( true )
+            {
+                String  line = reader.readLine();
+                if ( line == null ) { break; }
 
-            // skip the initial connection statement
-            // as well as comments and blank lines
-            if ( line.length() == 0 ) { continue; }
-            if ( line.startsWith( "connect" ) ) { continue; }
-            if ( line.startsWith( "--" ) ) { continue; }
+                // skip the initial connection statement
+                // as well as comments and blank lines
+                if ( line.length() == 0 ) { continue; }
+                if ( line.startsWith( "connect" ) ) { continue; }
+                if ( line.startsWith( "--" ) ) { continue; }
 
-            // strip off the trailing semi-colon
-            line = line.substring( 0, line.indexOf( ';' ) );
+                // strip off the trailing semi-colon
+                line = line.substring( 0, line.indexOf( ';' ) );
 
-            goodStatement( conn, line );
+                goodStatement( conn, line );
+            }
         }
     }
 
