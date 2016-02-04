@@ -61,9 +61,7 @@
 <!--                       Initialize targets                             -->
 <!-- ==================================================================== -->
 
-  <target name="init" unless="init.done" depends="setCompilerProperties">
-
-    <antcall target="install_junit"/>
+  <target name="init" unless="init.done" depends="install_junit,setCompilerProperties">
     <tstamp/>
     <mkdir dir="${out.dir}"/>
     <antcall target="make-generated-dirs"/>
