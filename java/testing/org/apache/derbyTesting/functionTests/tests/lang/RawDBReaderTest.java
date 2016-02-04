@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
-import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -53,7 +52,6 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
     private static  final   String      MEMORY_DB = "jdbc:derby:memory:rrt";
     private static  final   String      RECOVERY_SCRIPT = "extinout/recovery.sql";
     private static  final   String      BOOT_PASSWORD = "fooBarWibble";
-    private static  final   String      CORRUPT_DATABASE = "rrtCorruptDatabase";
 
     private static  final   String      LIST_USER_SCHEMAS =
         "select schemaname from sys.sysschemas\n" +
@@ -119,8 +117,7 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        BaseTestSuite baseTest = (BaseTestSuite)TestConfiguration.embeddedSuite(
-            RawDBReaderTest.class );
+        Test baseTest = TestConfiguration.embeddedSuite(RawDBReaderTest.class);
 
         // We don't expect that users of this tool will run with a security
         // manager. The tool is run standalone behind a firewall.

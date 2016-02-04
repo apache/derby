@@ -29,17 +29,11 @@ import java.io.FileInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -58,7 +52,6 @@ import java.util.Properties;
 
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.catalog.TypeDescriptor;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.crypto.CipherFactory;
 import org.apache.derby.iapi.services.crypto.CipherProvider;
@@ -897,7 +890,9 @@ public  class   DataFileVTI extends VTITemplate
             
             File    serviceProperties = new File( _dbDirectory, "service.properties" );
             Properties  properties = unpackEncryptionProperties( encryptionProperties );
-            properties.load( new FileInputStream( serviceProperties ) );
+            try (FileInputStream in = new FileInputStream(serviceProperties)) {
+                properties.load(in);
+            }
 
             CipherFactory    cipherFactory =
                 new JCECipherFactoryBuilder()
