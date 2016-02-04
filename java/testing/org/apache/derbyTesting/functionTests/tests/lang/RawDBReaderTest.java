@@ -147,13 +147,13 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        
+
         if ( _dbDir != null )
         {
             // delete the corrupt database so that later tests,
             // which require sql authorization, won't bomb because
             // they can't open the encrypted database
-            assertTrue( deleteFile( _dbDir ) );
+            assertDirectoryDeleted(_dbDir);
             _dbDir = null;
         }
     }
@@ -374,17 +374,4 @@ public class RawDBReaderTest extends GeneratedColumnsHelper
         goodStatement( conn, "drop schema schema1 restrict" );
         goodStatement( conn, "drop schema schema2 restrict" );
     }
-    
-    private  boolean deleteFile( File file ) throws Exception
-    {
-        boolean retval = true;
-        
-        if ( file.isDirectory() )
-        {
-            for ( File child : file.listFiles() ) { retval = retval && deleteFile( child ); }
-        }
-
-        return retval && file.delete();
-    }
-
 }
