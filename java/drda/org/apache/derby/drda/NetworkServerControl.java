@@ -27,7 +27,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.CodeSource;
-import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedAction;
 import java.security.ProtectionDomain;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
@@ -323,14 +323,13 @@ public class NetworkServerControl{
             if (command == NetworkServerControlImpl.COMMAND_START &&
                     JVMInfo.JDK_ID >= JVMInfo.J2SE_17) {
                 try {
-                    AccessController.doPrivileged(
-                        new PrivilegedExceptionAction<Void>() {
-                            public Void run() throws Exception {
-                                System.setProperty(
-                                    Property.SERVER_STARTED_FROM_CMD_LINE,
-                                    "true");
-                                return null;
-                            }});
+                    AccessController.doPrivileged((PrivilegedAction<Void>) () ->
+                    {
+                        System.setProperty(
+                                Property.SERVER_STARTED_FROM_CMD_LINE,
+                                "true");
+                        return null;
+                    });
                 } catch (Exception e) {
                     server.consoleExceptionPrintTrace(e);
                     System.exit(1);

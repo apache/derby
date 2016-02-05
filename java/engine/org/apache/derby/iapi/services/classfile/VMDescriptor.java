@@ -68,6 +68,9 @@ public interface VMDescriptor {
 	int CONSTANT_Double = 6;
 	int CONSTANT_NameAndType = 12;
 	int CONSTANT_Utf8 = 1;
+    int CONSTANT_MethodHandle = 15;
+    int CONSTANT_MethodType = 16;
+    int CONSTANT_InvokeDynamic = 18;
 
 
 	/** Magic number for class file format - page 84 */

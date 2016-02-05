@@ -469,12 +469,12 @@ public class ClassInvestigator extends ClassHolder {
 		throws IOException {
 
 		ConstantPoolEntry item;
-		int tag;		
-		tag = in.readUnsignedByte();
+        final int tag = in.getU1();
 
 		switch (tag) {
 		case VMDescriptor.CONSTANT_Class:
 		case VMDescriptor.CONSTANT_String:
+        case VMDescriptor.CONSTANT_MethodType:
 			item = new CONSTANT_Index_info(tag, in.getU2(), 0);
 			break;
 
@@ -482,6 +482,7 @@ public class ClassInvestigator extends ClassHolder {
 		case VMDescriptor.CONSTANT_Fieldref:
 		case VMDescriptor.CONSTANT_Methodref:
 		case VMDescriptor.CONSTANT_InterfaceMethodref:
+        case VMDescriptor.CONSTANT_InvokeDynamic:
 			item = new CONSTANT_Index_info(tag, in.getU2(), in.getU2());
 			break;
 
@@ -504,8 +505,13 @@ public class ClassInvestigator extends ClassHolder {
 		case VMDescriptor.CONSTANT_Utf8:
 			item = new CONSTANT_Utf8_info(in.readUTF());
 			break;
+
+        case VMDescriptor.CONSTANT_MethodHandle:
+            item = new CONSTANT_Index_info(tag, in.getU1(), in.getU2());
+            break;
+
 		default:
-			throw new ClassFormatError();
+            throw new ClassFormatError("Unknown tag: " + tag);
 		}
 
 		return item;

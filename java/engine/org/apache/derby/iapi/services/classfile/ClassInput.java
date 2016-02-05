@@ -36,6 +36,10 @@ class ClassInput extends DataInputStream {
 		super(in);
 	}
 
+    int getU1() throws IOException {
+        return readUnsignedByte();
+    }
+
 	int getU2() throws IOException {
 		return readUnsignedShort();
 	}
