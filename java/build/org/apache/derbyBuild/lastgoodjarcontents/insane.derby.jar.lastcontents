@@ -159,8 +159,6 @@ org.apache.derby.iapi.services.io.DerbyIOException.class
 org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream.class
 org.apache.derby.iapi.services.io.ErrorInfo.class
 org.apache.derby.iapi.services.io.ErrorObjectInput.class
-org.apache.derby.iapi.services.io.FilePermissionService.class
-org.apache.derby.iapi.services.io.FilePermissionServiceImpl.class
 org.apache.derby.iapi.services.io.FileUtil.class
 org.apache.derby.iapi.services.io.FormatIdInputStream.class
 org.apache.derby.iapi.services.io.FormatIdOutputStream.class

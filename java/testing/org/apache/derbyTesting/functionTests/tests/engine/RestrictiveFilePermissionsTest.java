@@ -37,9 +37,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -496,13 +495,13 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
     // Members used by limitAccessToOwner
     private static final Set<PosixFilePermission> UNWANTED_PERMISSIONS =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            Collections.unmodifiableSet(EnumSet.of(
                     PosixFilePermission.GROUP_EXECUTE,
                     PosixFilePermission.GROUP_READ,
                     PosixFilePermission.GROUP_WRITE,
                     PosixFilePermission.OTHERS_EXECUTE,
                     PosixFilePermission.OTHERS_READ,
-                    PosixFilePermission.OTHERS_WRITE)));
+                    PosixFilePermission.OTHERS_WRITE));
 
     /**
      * Check that the file has access only for the owner. Will throw (JUnit

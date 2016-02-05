@@ -33,8 +33,17 @@ import org.apache.derby.io.StorageFile;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
+import java.util.EnumSet;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 /**
@@ -459,28 +468,6 @@ public abstract class FileUtil {
         return result;
     }
 
-
-    // Members used by limitAccessToOwner
-    private final static FilePermissionService filePermissionService =
-            loadFilePermissionService();
-
-    private static FilePermissionService loadFilePermissionService() {
-        try {
-            Class cl = Class.forName(
-                    FilePermissionService.class.getName() + "Impl");
-            return (FilePermissionService) cl.newInstance();
-        } catch (ClassNotFoundException ex) {
-        } catch (InstantiationException ex) {
-        } catch (IllegalAccessException ex) {
-        } catch (LinkageError e) {
-        }
-
-        // Could not create an instance. This most likely means we are
-        // not on Java 7 or higher. Just return null, and let
-        // limitAccessToOwner() choose another strategy on older platforms.
-        return null;
-    }
-
     /**
      * <p>
      * Use when creating new files. If running on Unix,
@@ -503,9 +490,8 @@ public abstract class FileUtil {
      * </p>
      *
      * <p>
-     * On Windows, with NTFS with ACLs, if running with Java 7 or higher, we
-     * limit access also for Windows using the new {@code
-     * java.nio.file.attribute} package.
+     * On Windows, with NTFS with ACLs, we limit access also for Windows
+     * using the new {@code java.nio.file.attribute} package.
      * </p>
      *
      * <p>
@@ -530,16 +516,14 @@ public abstract class FileUtil {
             Property.STORAGE_USE_DEFAULT_FILE_PERMISSIONS);
 
         if (value != null) {
-            if (Boolean.valueOf(value.trim()).booleanValue()) {
+            if (Boolean.parseBoolean(value.trim())) {
                 return;
             }
         } else {
             // The property has not been specified. Only proceed if we are
-            // running with the network server started from the command line
-            // *and* at Java 7 or above
-            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_17 &&
-                    (PropertyUtil.getSystemBoolean(
-                        Property.SERVER_STARTED_FROM_CMD_LINE, false)) ) {
+            // running with the network server started from the command line.
+            if (PropertyUtil.getSystemBoolean(
+                        Property.SERVER_STARTED_FROM_CMD_LINE, false)) {
                 // proceed
             } else {
                 return;
@@ -609,15 +593,55 @@ public abstract class FileUtil {
     private static boolean limitAccessToOwnerViaFileAttributeView(File file)
             throws IOException {
 
-        // See if we are running on JDK 7 so we can deny access
-        // using the new java.nio.file.attribute package.
+        Path fileP = file.toPath();
 
-        if (filePermissionService == null) {
-            // nope
-            return false;
+        PosixFileAttributeView posixView = Files.getFileAttributeView(
+                fileP, PosixFileAttributeView.class);
+        if (posixView != null) {
+
+            // This is a POSIX file system. Usually,
+            // FileUtil.limitAccessToOwnerViaFile() will successfully set
+            // the permissions on such file systems using the java.io.File
+            // class, so we don't get here. If, however, that approach failed,
+            // we try again here using a PosixFileAttributeView. That's likely
+            // to fail too, but at least now we will get an IOException that
+            // explains why it failed.
+
+            EnumSet<PosixFilePermission> perms = EnumSet.of(
+                    PosixFilePermission.OWNER_READ,
+                    PosixFilePermission.OWNER_WRITE);
+
+            if (file.isDirectory()) {
+                perms.add(PosixFilePermission.OWNER_EXECUTE);
+            }
+
+            posixView.setPermissions(perms);
+
+            return true;
         }
 
-        // We have Java 7, so call.
-        return filePermissionService.limitAccessToOwner(file);
+        AclFileAttributeView aclView = Files.getFileAttributeView(
+                fileP, AclFileAttributeView.class);
+        if (aclView != null) {
+
+            // Since we have an AclFileAttributeView which is not a
+            // PosixFileAttributeView, we probably have an NTFS file
+            // system.
+
+            // Remove existing ACEs, build a new one which simply
+            // gives all possible permissions to current owner.
+            AclEntry ace = AclEntry.newBuilder()
+                    .setPrincipal(Files.getOwner(fileP))
+                    .setType(AclEntryType.ALLOW)
+                    .setPermissions(EnumSet.allOf(AclEntryPermission.class))
+                    .build();
+
+            aclView.setAcl(Collections.singletonList(ace));
+
+            return true;
+        }
+
+        // We don't know how to set permissions on this file system.
+        return false;
     }
 }

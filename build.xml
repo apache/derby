@@ -1318,17 +1318,8 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <!-- Classes that will only be compiled with JDK 7 and higher are
-         commented out. Determine here whether they should be included. -->
-    <condition property="derbyjar.jdk7.prefix" value="" else="#">
-        <isset property="vmLevelIsAtLeast1.7"/>
-    </condition>
-
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
-      <filterchain>
-          <replacestring from="#jdk7#" to="${derbyjar.jdk7.prefix}"/>
-      </filterchain>
     </concat>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
