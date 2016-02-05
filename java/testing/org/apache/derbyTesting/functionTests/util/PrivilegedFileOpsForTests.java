@@ -308,6 +308,16 @@ public class PrivilegedFileOpsForTests {
         }
     }
 
+    /**
+     * In a priv block, get an array with all the files in a directory.
+     * @param dir the directory to scan
+     * @return an array of all the files in the directory
+     * @see java.io.File#listFiles()
+     */
+    public static File[] listFiles(File dir) {
+        return AccessController.doPrivileged(
+                (PrivilegedAction<File[]>) () -> dir.listFiles());
+    }
     
     /**
      * In a priv block, do a recursive copy from source to target.  

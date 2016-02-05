@@ -21,11 +21,15 @@
 package org.apache.derbyTesting.functionTests.tests.engine;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.UserPrincipal;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.sql.CallableStatement;
@@ -33,16 +37,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
-import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
@@ -80,14 +82,6 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
 
     public static Test suite() throws Exception {
-        // We can not test file permissions before Java 1.7
-        if (JVMInfo.JDK_ID < JVMInfo.J2SE_17) {
-            println("warning: testing of strict permissions in " +
-                    "RestrictiveFilePermissionsTest can not take place, " +
-                    "need Java 7");
-            return new BaseTestSuite();
-        }
-
         File f = new File("system/testPermissions");
         assertTrue(f.mkdirs());
 
@@ -501,51 +495,18 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
     final public static int UNKNOWN = 2;
 
     // Members used by limitAccessToOwner
-    private static boolean initialized = false;
+    private static final Set<PosixFilePermission> UNWANTED_PERMISSIONS =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                    PosixFilePermission.GROUP_EXECUTE,
+                    PosixFilePermission.GROUP_READ,
+                    PosixFilePermission.GROUP_WRITE,
+                    PosixFilePermission.OTHERS_EXECUTE,
+                    PosixFilePermission.OTHERS_READ,
+                    PosixFilePermission.OTHERS_WRITE)));
 
-    // Reflection helper objects for calling into Java >= 7
-    private static Class<?> filesClz;
-    private static Class<?> pathClz;
-    private static Class<?> pathsClz;
-    private static Class<?> aclEntryClz;
-    private static Class<?> aclFileAttributeViewClz;
-    private static Class<?> posixFileAttributeViewClz;
-    private static Class<?> posixFileAttributesClz;
-    private static Class<?> posixFilePermissionClz;
-    private static Class<?> userPrincipalClz;
-    private static Class<?> linkOptionArrayClz;
-    private static Class<?> linkOptionClz;
-    private static Class<?> stringArrayClz;
-
-    private static Method get;
-    private static Method getFileAttributeView;
-    private static Method getOwner;
-    private static Method getAcl;
-    private static Method principal;
-    private static Method getName;
-    private static Method permissionsAcl;
-    private static Method permissionsPosix;
-    private static Method readAttributes;
-
-    private static Field GROUP_EXECUTE;
-    private static Field GROUP_READ;
-    private static Field GROUP_WRITE;
-    private static Field OTHERS_EXECUTE;
-    private static Field OTHERS_READ;
-    private static Field OTHERS_WRITE;
-    private static Set<Object> unwantedPermissions;
     /**
      * Check that the file has access only for the owner. Will throw (JUnit
      * failure) if permissions are not strict.
-     * <p/>
-     * We need Java 7 to ascertain whether we managed to restrict file
-     * permissions: The Java 6 {@code java.io.File} API only lets us check if
-     * this process has access.
-     * <p/>
-     * In this sense this testing code is asymmetric to the implementation in
-     * Derby: Java 6 can be used to restrict accesses in Java 6 on Unix, but
-     * we have no way in Java of checking the results in a portable way. So, if
-     * we do not have at least Java 7, this method will be a no-op.
      *
      * @param file (or directory) for which we want to check permissions
      * @param expectedOutcome NEGATIVE or POSITIVE
@@ -580,247 +541,68 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
         if (doContents) {
             // visit immediately contained file in this directory also
             checkAccessToOwner(file, false, expectedOutcome);
-
-            AccessController.doPrivileged(
-                    new PrivilegedExceptionAction<Void>() {
-                public Void run() throws Exception {
-                    File [] files = file.listFiles();
-                    for (int i = 0; i < files.length; i++){
-                        checkAccessToOwner(
-                            files[i], false, expectedOutcome);
-                    }
-                    return null;
-                }});
+            for (File f : PrivilegedFileOpsForTests.listFiles(file)) {
+                checkAccessToOwner(f, false, expectedOutcome);
+            }
         }
 
         return AccessController.
-            doPrivileged(new PrivilegedExceptionAction<Boolean>() {
+            doPrivileged((PrivilegedExceptionAction<Boolean>) () -> {
+                // Only used with expectedOutcome == UNKNOWN, otherwise
+                // we throw:
+                boolean someThingBeyondOwnerFound = false;
 
-                public Boolean run() throws Exception {
-                    // lazy initialization
-                    if (!initialized) {
-                        initialized = true;
+                Path fileP = Paths.get(file.getPath());
 
-                        // If found, we have >= Java 7.
-                        filesClz = Class.forName(
-                            "java.nio.file.Files");
-                        pathClz = Class.forName(
-                            "java.nio.file.Path");
-                        pathsClz = Class.forName(
-                            "java.nio.file.Paths");
-                        aclEntryClz = Class.forName(
-                            "java.nio.file.attribute.AclEntry");
-                        aclFileAttributeViewClz = Class.forName(
-                            "java.nio.file.attribute." +
-                            "AclFileAttributeView");
-                        posixFileAttributeViewClz = Class.forName(
-                            "java.nio.file.attribute." +
-                            "PosixFileAttributeView");
-                        posixFileAttributesClz = Class.forName(
-                            "java.nio.file.attribute." +
-                            "PosixFileAttributes");
-                        posixFilePermissionClz = Class.forName(
-                            "java.nio.file.attribute." +
-                            "PosixFilePermission");
-                        userPrincipalClz = Class.forName(
-                            "java.nio.file.attribute.UserPrincipal");
-                        linkOptionArrayClz = Class.forName(
-                            "[Ljava.nio.file.LinkOption;");
-                        linkOptionClz = Class.forName(
-                            "java.nio.file.LinkOption");
-                        stringArrayClz = Class.forName(
-                            "[Ljava.lang.String;");
+                // ACLs supported on this platform? Check the current
+                // file system:
+                AclFileAttributeView aclView = Files.getFileAttributeView(
+                        fileP, AclFileAttributeView.class);
 
-                        get = pathsClz.
-                            getMethod("get",
-                                      new Class[]{String.class,
-                                                  stringArrayClz});
+                PosixFileAttributeView posixView = Files.getFileAttributeView(
+                        fileP, PosixFileAttributeView.class);
 
-                        getFileAttributeView = filesClz.
-                            getMethod("getFileAttributeView",
-                                      new Class[]{pathClz,
-                                                  Class.class,
-                                                  linkOptionArrayClz});
-                        getOwner = filesClz.
-                            getMethod(
-                                "getOwner",
-                                new Class[]{pathClz,
-                                            linkOptionArrayClz});
-                        getAcl = aclFileAttributeViewClz.
-                            getMethod("getAcl", new Class[]{});
-                        principal = aclEntryClz.
-                            getMethod("principal", new Class[]{});
-                        getName = userPrincipalClz.
-                            getMethod("getName", new Class[]{});
-                        permissionsAcl = aclEntryClz.
-                            getMethod("permissions", new Class[]{});
-                        permissionsPosix = posixFileAttributesClz.
-                            getMethod("permissions", new Class[]{});
-                        readAttributes = posixFileAttributeViewClz.
-                            getMethod("readAttributes", new Class[]{});
-
-                        GROUP_EXECUTE =
-                            posixFilePermissionClz.getField("GROUP_EXECUTE");
-                        GROUP_READ =
-                            posixFilePermissionClz.getField("GROUP_READ");
-                        GROUP_WRITE =
-                            posixFilePermissionClz.getField("GROUP_WRITE");
-                        OTHERS_EXECUTE =
-                            posixFilePermissionClz.getField("OTHERS_EXECUTE");
-                        OTHERS_READ =
-                            posixFilePermissionClz.getField("OTHERS_READ");
-                        OTHERS_WRITE =
-                            posixFilePermissionClz.getField("OTHERS_WRITE");
-                        unwantedPermissions = new HashSet<Object>();
-                        unwantedPermissions.add(GROUP_EXECUTE.get(null));
-                        unwantedPermissions.add(GROUP_READ.get(null));
-                        unwantedPermissions.add(GROUP_WRITE.get(null));
-                        unwantedPermissions.add(OTHERS_EXECUTE.get(null));
-                        unwantedPermissions.add(OTHERS_READ.get(null));
-                        unwantedPermissions.add(OTHERS_WRITE.get(null));
-                    }
-
-                    // Only used with expectedOutcome == UNKNOWN, otherwise
-                    // we throw:
-                    boolean someThingBeyondOwnerFound = false;
-
-                    // We have Java 7. We need to call reflectively, since
-                    // the source level isn't yet at Java 7.
-                    try {
-                        Object fileP = get.invoke(
-                            null, new Object[]{file.getPath(),
-                                               new String[]{}});
-
-                        // ACLs supported on this platform? Check the current
-                        // file system:
-                        Object aclView = getFileAttributeView.invoke(
-                            null,
-                            new Object[]{
-                                fileP,
-                                aclFileAttributeViewClz,
-                                Array.newInstance(linkOptionClz, 0)});
-
-                        Object posixView = getFileAttributeView.invoke(
-                            null,
-                            new Object[]{
-                                fileP,
-                                posixFileAttributeViewClz,
-                                Array.newInstance(linkOptionClz, 0)});
-
-                        if (aclView != null && posixView == null) {
-                            // Windows
-                            Object owner = getOwner.invoke(
-                                null,
-                                new Object[]{
-                                    fileP,
-                                    Array.newInstance(linkOptionClz, 0)});
-
-                            List oldAcl =
-                                (List)getAcl.invoke(aclView, (Object[])null);
-
-                            for (Iterator i = oldAcl.iterator(); i.hasNext();) {
-                                Object ace = i.next();
-                                Object princ =
-                                    principal.invoke(ace, (Object[])null);
-                                String princName =
-                                    (String)getName.invoke(
-                                        princ, (Object[])null);
-
-                                if (posixView != null) {
-                                    if (princName.equals("OWNER@")) {
-                                        // OK, permission for owner
-
-                                    } else if (
-                                        princName.equals("GROUP@") ||
-                                        princName.equals("EVERYONE@")) {
-
-                                        Set s = (Set)permissionsAcl.invoke(
-                                            ace,
-                                            (Object[])null);
-
-                                        if (expectedOutcome == POSITIVE) {
-                                            assertTrue(
-                                                "Non-empty set of  " +
-                                                "permissions for uid: " +
-                                                princName + " for file " + file,
-                                                s.isEmpty());
-                                        } else {
-                                            someThingBeyondOwnerFound =
-                                                !s.isEmpty();
-                                        }
-                                    }
-                                } else {
-                                    // NTFS, hopefully
-                                    if (princ.equals(owner)) {
-                                        // OK
-                                    } else {
-                                        if (expectedOutcome == POSITIVE) {
-                                            fail(
-                                                "unexpected uid " + princName +
-                                                " can access file " + file);
-                                        } else {
-                                            someThingBeyondOwnerFound = true;
-                                        }
-                                    }
-
-                                }
+                if (posixView != null) {
+                    // Unixen
+                    for (PosixFilePermission perm :
+                            posixView.readAttributes().permissions()) {
+                        if (UNWANTED_PERMISSIONS.contains(perm)) {
+                            if (expectedOutcome == POSITIVE) {
+                                fail("unwanted permission " + perm +
+                                     " for file " + file);
                             }
-                        } else if (posixView != null) {
-                            // Unixen
-                            Object posixFileAttributes =
-                                readAttributes.invoke(posixView,
-                                                      new Object[]{});
-                            Set permissionsSet =
-                                (Set)permissionsPosix.invoke(
-                                    posixFileAttributes, new Object[]{});
-
-                            for (Iterator i = permissionsSet.iterator();
-                                 i.hasNext();) {
-                                Object perm = i.next();
-
-                                if (unwantedPermissions.contains(perm)) {
-                                    if (expectedOutcome == POSITIVE) {
-                                        fail("unwanted permission " + perm +
-                                             " for file " + file);
-                                    }
-                                    someThingBeyondOwnerFound = true;
-                                    break;
-                                }
+                            someThingBeyondOwnerFound = true;
+                            break;
+                        }
+                    }
+                } else if (aclView != null) {
+                    // Windows
+                    UserPrincipal owner = Files.getOwner(fileP);
+                    for (AclEntry ace : aclView.getAcl()) {
+                        UserPrincipal princ = ace.principal();
+                        // NTFS, hopefully
+                        if (!princ.equals(owner)) {
+                            if (expectedOutcome == POSITIVE) {
+                                fail("unexpected uid " + princ.getName() +
+                                        " can access file " + file);
                             }
-                        } else {
-                            fail();
+                            someThingBeyondOwnerFound = true;
+                            break;
                         }
-
-                        if (expectedOutcome == NEGATIVE &&
-                                !someThingBeyondOwnerFound) {
-                            fail(
-                                "unexpected restrictive access: " + file);
-                        }
-
-                    } catch (IllegalAccessException e) {
-                        // coding error
-                        if (SanityManager.DEBUG) {
-                            SanityManager.THROWASSERT(e);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        // coding error
-                        if (SanityManager.DEBUG) {
-                            SanityManager.THROWASSERT(e);
-                        }
-                    } catch (InvocationTargetException e) {
-                        throw e;
                     }
+                } else {
+                    fail();
+                }
 
-                    if (expectedOutcome != UNKNOWN) {
-                        println("checked perms on: " + file);
-                    }
+                if (expectedOutcome == NEGATIVE && !someThingBeyondOwnerFound) {
+                    fail("unexpected restrictive access: " + file);
+                }
 
-                    if (expectedOutcome == UNKNOWN &&
-                            someThingBeyondOwnerFound) {
-                        return Boolean.TRUE;
-                    } else {
-                        return Boolean.FALSE;
-                    }
-                }});
+                if (expectedOutcome != UNKNOWN) {
+                    println("checked perms on: " + file);
+                }
+
+                return expectedOutcome == UNKNOWN && someThingBeyondOwnerFound;
+        });
     }
 }
