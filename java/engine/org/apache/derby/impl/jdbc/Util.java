@@ -22,8 +22,6 @@
 package org.apache.derby.impl.jdbc;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
@@ -35,7 +33,6 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -310,39 +307,6 @@ public abstract class Util  {
         return generateCsSQLException(
                 SQLState.TYPE_MISMATCH, typeName(targetSQLType));
 	}
-
-    /** Create the correct BatchUpdateException depending on whether this is Java 8 or lower */
-    static  SQLException    newBatchUpdateException
-        ( String message, String sqlState, int errorCode, long[] updateCounts, Throwable cause )
-    {
-        if ( JVMInfo.JDK_ID >= JVMInfo.J2SE_18 )
-        {
-            try {
-                Constructor constructor = BatchUpdateException.class.getConstructor
-                    (
-                     new Class[] { String.class, String.class, Integer.TYPE, updateCounts.getClass(), Throwable.class }
-                     );
-
-                return (BatchUpdateException) constructor.newInstance
-                    ( new Object[] { message, sqlState, new Integer( errorCode ), updateCounts, cause } );
-            }
-            catch (Exception e)
-            {
-                // unanticipated problem. log it and return the Java 7 version of the exception
-                logError( "\nERROR " +  e.getMessage() + "\n", e );
-            }
-        }
-
-        // use this constructor if we're not on Java 8 or if an error occurred
-        // while using the Java 8 constructor
-        BatchUpdateException batch = new BatchUpdateException
-            ( message, sqlState, errorCode, squashLongs( updateCounts ) );
-        
-        if ( cause instanceof SQLException ) { batch.setNextException( (SQLException) cause ); }
-        batch.initCause( cause );
-
-        return batch;
-    }
 
     /** Squash an array of longs into an array of ints */
     public static  int[]   squashLongs( long[] longs )

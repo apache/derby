@@ -330,14 +330,10 @@ public class XMLOptimizerTraceTest  extends GeneratedColumnsHelper
              conn,
              "call syscs_util.syscs_register_tool( 'optimizerTracing', true, 'xml' )"
              );
-        // IBM 1.6 is wrapping the exception in a 38000. See DERBY-6760.
-        String expectedError = FILE_EXISTS;
-        if (JVMInfo.isIBMJVM() && JVMInfo.JDK_ID==JVMInfo.J2SE_16)
-            expectedError = "38000";
         expectExecutionError
             (
              conn,
-             expectedError,
+             FILE_EXISTS,
              "call syscs_util.syscs_register_tool( 'optimizerTracing', false, '" + traceFile.getPath() + "' )"
               );
         goodStatement

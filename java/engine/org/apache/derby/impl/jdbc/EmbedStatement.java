@@ -33,11 +33,11 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.EngineStatement;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Vector;
 import org.apache.derby.iapi.util.InterruptStatus;
 
@@ -1102,14 +1102,15 @@ public class EmbedStatement extends ConnectionChild
 				restoreContextStack();
 			}
 
-			long[] successfulUpdateCount = new long[ i ];
-            System.arraycopy(returnUpdateCountForBatch, 0, successfulUpdateCount, 0, i);
+            long[] successfulUpdateCount =
+                    Arrays.copyOf(returnUpdateCountForBatch, i);
 
-			SQLException batch = Util.newBatchUpdateException
-                ( sqle.getMessage(), sqle.getSQLState(),sqle.getErrorCode(), successfulUpdateCount, sqle );
-
-			throw batch;
-      }
+            throw new BatchUpdateException(sqle.getMessage(),
+                                           sqle.getSQLState(),
+                                           sqle.getErrorCode(),
+                                           successfulUpdateCount,
+                                           sqle );
+        }
 	}
 
 	/**

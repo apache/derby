@@ -228,30 +228,21 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
     }
     
     public void testjavaVersion(){
-  	   assertTrue( JVMInfo.JDK_ID == JVMInfo.J2SE_16 ||
-  		       JVMInfo.JDK_ID == JVMInfo.J2SE_17 ||
-  		       JVMInfo.JDK_ID == JVMInfo.J2SE_18 );  
-     }
+        assertEquals(JVMInfo.J2SE_18, JVMInfo.JDK_ID);
+    }
      
-     // Still testing this here although we don't actually put
-     // out this line with sysinfo anymore.
-     public void testderbyVMLevel(){
-     	switch (JVMInfo.JDK_ID) {
-         	case JVMInfo.J2SE_16: 
-         		assertEquals("Java SE 6 - JDBC 4.0",JVMInfo.derbyVMLevel());
-         		break;
-         	case JVMInfo.J2SE_17: 
-         		assertEquals("Java SE 7 - JDBC 4.1",JVMInfo.derbyVMLevel());
-         		break;
-         	case JVMInfo.J2SE_18: 
-         		assertEquals("Java SE 8 - JDBC 4.2",JVMInfo.derbyVMLevel());
-         		break;
-         	default: 
- 			 assertEquals("?-?",JVMInfo.derbyVMLevel());
- 			 break;
- 		}
-     	
-     }
+    // Still testing this here although we don't actually put
+    // out this line with sysinfo anymore.
+    public void testderbyVMLevel() {
+        switch (JVMInfo.JDK_ID) {
+            case JVMInfo.J2SE_18:
+                assertEquals("Java SE 8 - JDBC 4.2", JVMInfo.derbyVMLevel());
+                break;
+            default:
+                assertEquals("?-?", JVMInfo.derbyVMLevel());
+                break;
+        }
+    }
      
      public void testisSunJVM(){
     	 if(JVMInfo.isSunJVM()==true){

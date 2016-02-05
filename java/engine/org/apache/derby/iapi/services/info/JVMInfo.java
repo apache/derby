@@ -47,16 +47,14 @@ public abstract class JVMInfo
         <LI> 4 - not used, was for JDK 1.4.0 or 1.4.1
         <LI> 5 - not used, was for JDK 1.4.2
         <LI> 6 - not used, was for JDK 1.5
-		<LI> 7 - J2SE_16 - JDK 1.6
-        <LI> 8 - J2SE_17 - JDK 1.7
+        <LI> 7 - not used, was for JDK 1.6
+        <LI> 8 - not used, was for JDK 1.7
         <LI> 9 - J2SE_18 - JDK 1.8
 		</UL>
 	*/
 	public static final int JDK_ID;
 
-	public static final int J2SE_16 = 7; // Java SE 6, not J2SE
-    public static final int J2SE_17 = 8; // Java SE 7
-    public static final int J2SE_18 = 9;
+    public static final int J2SE_18 = 9;   // Java SE 8
 
     public static int jdbcMajorVersion()
     { 
@@ -67,8 +65,6 @@ public abstract class JVMInfo
     {
         switch (JDK_ID)
         { 
-        case J2SE_16: return 0; 
-        case J2SE_17: return 1; 
         case J2SE_18: 
         default: return 2; 
         }
@@ -87,36 +83,25 @@ public abstract class JVMInfo
 		// 
 		// Otherwise, see if we recognize what is set in java.version.
 		// If we don't recognize that, or if the property is not set, assume
-        // version 1.6, which is the lowest level we support.
+        // version 1.8, which is the lowest level we support.
 		//
-		String javaVersion;
-
+        String javaVersion = "1.8";
 		try {
             javaVersion =
-                System.getProperty("java.specification.version", "1.6");
-
+                System.getProperty("java.specification.version", javaVersion);
 		} catch (SecurityException se) {
 			// some vms do not know about this property so they
 			// throw a security exception when access is restricted.
-            javaVersion = "1.6";
 		}
 
-        if (javaVersion.equals("1.6"))
-        {
-            id = J2SE_16;
-        }
-        else if (javaVersion.equals("1.7"))
-        {
-            id = J2SE_17;
-        }
-        else if (javaVersion.equals("1.8")) {
+        if (javaVersion.equals("1.8")) {
             id = J2SE_18;
         }
         else
         {
             // Assume our lowest support unless the java spec
             // is greater than our highest level.
-            id = J2SE_16;
+            id = J2SE_18;
 
             try {
 
@@ -149,8 +134,6 @@ public abstract class JVMInfo
 		String jdbcVersion = jdbcMajorVersion() + "." + jdbcMinorVersion();
 		switch (JDK_ID)
 		{
-        case J2SE_16: return "Java SE 6 - JDBC " + jdbcVersion;
-        case J2SE_17: return "Java SE 7 - JDBC " + jdbcVersion;
         case J2SE_18: return "Java SE 8 - JDBC " + jdbcVersion;
 		default: return "?-?";
 		}
