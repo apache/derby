@@ -23,22 +23,17 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.net.URL;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.sql.Types;
+import java.util.Locale;
 
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -84,8 +79,11 @@ public final class XMLXXETest extends BaseJDBCTestCase {
 			TestConfiguration.defaultSuite(XMLXXETest.class),
 			testFiles ) );
 
-
-        return SecurityManagerSetup.noSecurityManager(suite);
+        // Need to run in US locale because the test checks error messages
+        // which may be different in different locales (DERBY-6869).
+        return new LocaleTestSetup(
+                SecurityManagerSetup.noSecurityManager(suite),
+                Locale.US);
     }
  
     /**
@@ -250,7 +248,9 @@ String xmlBillionLaughs = "insert into xml_billion_laughs( xml_col ) values(" +
 		// This next line will need to change once DERBY-6807 is fixed:
 		fail( "Expected SAXParseException" );
 	} catch ( Throwable e ) {
-		assertTrue( e.getMessage().indexOf( "entity expansions" ) > 0 );
+        if (!e.getMessage().contains("entity expansions")) {
+            fail("Expected SAXParseException", e);
+        }
 	}
     }
 }
