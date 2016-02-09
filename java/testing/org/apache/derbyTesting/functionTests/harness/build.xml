@@ -78,7 +78,6 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${oro}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>

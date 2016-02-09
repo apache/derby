@@ -262,7 +262,7 @@
                 <package-root>${project.dir}/java/tools</package-root>
                 <package-root>${project.dir}/generated/java</package-root>
                 <package-root>${project.dir}/java/optional</package-root>
-                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix:${project.dir}/tools/java/lucene-analyzers-common.jar:${project.dir}/tools/java/lucene-core.jar:${project.dir}/tools/java/lucene-queryparser.jar</classpath>
+                <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix:${project.dir}/tools/java/lucene-analyzers-common.jar:${project.dir}/tools/java/lucene-core.jar:${project.dir}/tools/java/lucene-queryparser.jar</classpath>
                 <built-to>${project.dir}/jars/sane/derby.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyTesting.jar</built-to>
                 <built-to>${project.dir}/jars/sane/derbyclient.jar</built-to>

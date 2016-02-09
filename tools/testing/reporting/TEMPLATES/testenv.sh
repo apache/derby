@@ -24,7 +24,6 @@ export ROOT=${derby_source}
 
 JARDIR=$ROOT/jars/insane # Change if you use sane
 DBTOOLDIR=$ROOT/tools/java
-ORO=$DBTOOLDIR/jakarta-oro-2.0.8.jar
 JUNIT=$DBTOOLDIR/junit.jar
 
 DERBY=$JARDIR/derby.jar
@@ -49,7 +48,7 @@ $JARDIR/derbyLocale_pt_BR.jar:\
 $JARDIR/derbyLocale_zh_CN.jar:\
 $JARDIR/derbyLocale_zh_TW.jar
  
-export CLASSPATH=$DERBY:$DERBYCLIENT:$DERBYTOOLS:$DERBYNET:$DB2JCC:$DERBYTESTING:$DERBYRUN:$ORO:$JUNIT:$LOCALES
+export CLASSPATH=$DERBY:$DERBYCLIENT:$DERBYTOOLS:$DERBYNET:$DB2JCC:$DERBYTESTING:$DERBYRUN:$JUNIT:$LOCALES
 
 # At least needed on SunOs/x86:
 export LC_CTYPE=en_US

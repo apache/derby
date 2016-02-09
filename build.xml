@@ -2706,7 +2706,6 @@
       <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
    	  <pathelement path="${derby.junit.classpath}"/>
       <pathelement location="${javatools.dir}/junit.jar"/>
-      <pathelement location="${javatools.dir}/jakarta-oro-2.0.8.jar"/>
     </path>
     <echo message="Classpath used for derbyall: ${toString:derbyall.classpath}"/>
     <mkdir dir="junit_${derby.junit.timestamp}/derbyall"/>
