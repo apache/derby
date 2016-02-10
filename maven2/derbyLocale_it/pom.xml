@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_it</artifactId>
   <name>Apache Derby messages: Italian</name>
   <description>Localized (Italian) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_fr</artifactId>
   <name>Apache Derby messages: French</name>
   <description>Localized (French) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

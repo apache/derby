@@ -31,6 +31,7 @@
   <artifactId>derbyoptionaltools</artifactId>
   <name>Apache Derby Optional Tools</name>
   <description>Contains optional tools for use with Derby.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <build>
     <plugins>

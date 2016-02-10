@@ -31,6 +31,7 @@
   <artifactId>derbytools</artifactId>
   <name>Apache Derby Tools</name>
   <description>Contains Apache Derby tools like ij, sysinfo, and dblook.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <build>
     <plugins>

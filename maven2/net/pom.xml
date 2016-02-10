@@ -31,6 +31,7 @@
   <artifactId>derbynet</artifactId>
   <name>Apache Derby Network Server</name>
   <description>Contains the Apache Derby network server, which allows remote clients to connect to Derby databases over a network connection using the Derby client JDBC driver.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

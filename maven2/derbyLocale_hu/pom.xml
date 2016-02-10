@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_hu</artifactId>
   <name>Apache Derby messages: Hungarian</name>
   <description>Localized (Hungarian) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

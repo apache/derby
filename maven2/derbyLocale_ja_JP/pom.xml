@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_ja_JP</artifactId>
   <name>Apache Derby messages: Japanese</name>
   <description>Localized (Japanese) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

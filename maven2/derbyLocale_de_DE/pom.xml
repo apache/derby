@@ -31,7 +31,7 @@
   <artifactId>derbyLocale_de_DE</artifactId>
   <name>Apache Derby messages: German</name>
   <description>Localized (German) messages for Apache Derby</description>
-
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

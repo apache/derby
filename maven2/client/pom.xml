@@ -31,6 +31,7 @@
   <artifactId>derbyclient</artifactId>
   <name>Apache Derby Client JDBC Driver</name>
   <description>The Derby client JDBC driver, used to connect to a Derby server over a network connection.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <build>
     <plugins>

@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_ru</artifactId>
   <name>Apache Derby messages: Russian</name>
   <description>Localized (Russian) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

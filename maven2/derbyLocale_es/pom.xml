@@ -31,6 +31,7 @@
   <artifactId>derbyLocale_es</artifactId>
   <name>Apache Derby messages: Spanish</name>
   <description>Localized (Spanish) messages for Apache Derby</description>
+  <url>http://db.apache.org/derby/</url>
 
   <dependencies>
     <dependency>

@@ -31,6 +31,7 @@
   <artifactId>derby</artifactId>
   <name>Apache Derby Database Engine and Embedded JDBC Driver</name>
   <description>Contains the core Apache Derby database engine, which also includes the embedded JDBC driver.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <build>
     <plugins>

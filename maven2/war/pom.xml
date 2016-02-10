@@ -33,6 +33,7 @@
   <name>Apache Derby Network Server admin demonstration servlet</name>
   <description>A demonstration network servlet (WAR) showcasing Derby Network
       Server administration. Not for production use.</description>
+  <url>http://db.apache.org/derby/</url>
 
   <build>
     <plugins>
