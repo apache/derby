@@ -290,7 +290,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 				return MessageFormat.format(res.getString(key), objectArr);
 			} catch (Exception e) {
 					String tmpFormat = key;
-					for (int i=0; i<objectArr.length; i++)
+					for (int i=0; objectArr != null && i<objectArr.length; i++)
 						tmpFormat = tmpFormat + ", <{" + (i) + "}>";
 					return MessageFormat.format(tmpFormat, objectArr);
 			}
