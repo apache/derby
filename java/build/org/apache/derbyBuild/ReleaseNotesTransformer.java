@@ -91,15 +91,15 @@ public class ReleaseNotesTransformer extends Task
         "\n" +
         "<form action=\"[location]\" method=\"get\" id=\"SelectMirror\">\n" +
         "Other mirrors: <select name=\"Preferred\">\n" +
-        "<!--[if-any http] [for http]-->\n" +
+        "[if-any http] [for http]\n" +
         "<option value=\"[http]\">[http]</option>\n" +
-        "<!--[end] [end]-->\n" +
-        "<!--[if-any ftp] [for ftp]-->\n" +
+        "[end] [end]\n" +
+        "[if-any ftp] [for ftp]\n" +
         "<option value=\"[ftp]\">[ftp]</option>\n" +
-        "<!--[end] [end]-->\n" +
-        "<!--[if-any backup] [for backup]-->\n" +
+        "[end] [end]\n" +
+        "[if-any backup] [for backup]\n" +
         "<option value=\"[backup]\">[backup] (backup)</option>\n" +
-        "<!--[end] [end]-->\n" +
+        "[end] [end]\n" +
         "</select>\n" +
         "<input type=\"submit\" value=\"Change\" />     \n" +
         "</form>\n" +
