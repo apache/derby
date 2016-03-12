@@ -1721,6 +1721,109 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     /**
+     * Tests for DERBY-1773, involving both explicit and implicit
+     * FOR UPDATE clauses, as well as various styles of specifying
+     * correlation names.
+     */
+    public void testUpdateRowWithTableAndColumnAlias_d1773()
+        throws SQLException
+    {
+        createTableT1();
+        Statement stmt = createStatement(
+            ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+        try {
+            // The presence of the alias for the columns should
+            // cause the statement to be rejected.
+            // 42Y90: FOR UPDATE is not permitted in this type of statement.
+            ResultSet rs = stmt.executeQuery(
+                "SELECT * from t1 as abcde(a1,a2) for update of c1");
+            fail("FAIL - executeQuery should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42Y90", e);
+        }
+
+        try {
+            // The presence of the alias for the columns should
+            // cause the statement to be rejected.
+            ResultSet rs = stmt.executeQuery(
+                "SELECT * from t1 as abcde(a1,a2) for update");
+            fail("FAIL - executeQuery should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42Y90", e);
+        }
+
+        // Without FOR UPDATE, not caught til execution time:
+        ResultSet rs = stmt.executeQuery(
+				"select * from t1 as a(a1,a2)");
+        rs.next();
+        try {
+            // Update should be rejected by correlation name
+            // on column 'updateString' not allowed because
+            // the ResultSet is not an updatable ResultSet.
+            rs.updateString(2, "bbbb");
+            fail("FAIL - updateString should have failed");
+        } catch (SQLException e) {
+            assertSQLState("XJ083", e);
+        }
+        rs.close();
+
+        rs = stmt.executeQuery(
+			"SELECT c1 as a1, c2 as a2 from t1 as abcde");
+        rs.next();
+        try {
+            // Update should be rejected by correlation name
+            // on column
+            //  Column 'A2' is not in the FOR UPDATE list of cursor 'SQLCUR0'.
+            rs.updateString(2, "bbbb");
+            fail("FAIL - updateString should have failed");
+        } catch (SQLException e) {
+            assertSQLState(usingDerbyNetClient() ? "XJ124" : "42X31", e);
+        }
+        rs.close();
+
+	// This update should probably work, but currently it is rejected.
+	// The idea is that only C1 should be read-only; c2 should be updatable
+	// 
+        rs = stmt.executeQuery(
+		"SELECT c1 as a1, c2 from t1 as abcde for update of c2");
+        rs.next();
+        // Update should be allowed on c2, not on c1.
+        rs.updateString(2, "bbbb");
+        try {
+            rs.updateString(1, "aaaa");
+            //  Column 'A1' is not in the FOR UPDATE list of cursor 'SQLCUR0'.
+            fail("FAIL - updateString should have failed");
+        } catch (SQLException e) {
+            assertSQLState(usingDerbyNetClient() ? "XJ124" : "42X31", e);
+        }
+        rs.close();
+
+	// Same as previous, but "for update" vs "for update of C2"
+        rs = stmt.executeQuery(
+		"SELECT c1 as a1, c2 from t1 as abcde for update");
+        rs.next();
+        // Update should be allowed on c2, not on c1.
+        rs.updateString(2, "bbbb");
+        try {
+            rs.updateString(1, "aaaa");
+            //  Column 'A1' is not in the FOR UPDATE list of cursor 'SQLCUR0'.
+            fail("FAIL - updateString should have failed");
+        } catch (SQLException e) {
+            assertSQLState(usingDerbyNetClient() ? "XJ124" : "42X31", e);
+        }
+        rs.close();
+
+        // No update should have occurred.
+        JDBC.assertFullResultSet(
+			stmt.executeQuery("SELECT * FROM t1"),
+            new String[][]{{"1", "aa"}, {"2", "bb"}, {"3", "cc"}},
+            true);
+
+        stmt.close();
+    }
+
+    /**
      * Positive test - 2 updatable resultsets going against the same table
      */
     public void testTwoResultSetsDeletingSameRow() throws SQLException {

@@ -523,6 +523,21 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 		return retRC;
 	}
 
+ 	/**
+	 * Return true if some columns in this list are updatable.
+	 *
+	 * @return	true if any column in list is updatable, else false
+	 */
+	boolean columnsAreUpdatable()
+	{
+		for (ResultColumn rc : this)
+		{
+			if (rc.isUpdatable())
+				return true;
+		}
+		return false;
+	}
+		
 	/**
 	 * For order by column bind, get a ResultColumn that matches the specified 
 	 * columnName.
@@ -2692,10 +2707,14 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
 	{
         for (ResultColumn rc : this)
 		{
-			//determine if the column is a base column and not a derived column
-            if (rc.getSourceTableName() != null) {
-                rc.markUpdatableByCursor();
-            }
+			// Determine whether the column is a base column and
+			// not a derived column, and, additionally,
+			// verify that the column was not aliased.
+			// 
+			if (rc.getSourceTableName() != null &&
+				rc.getExpression() != null &&
+				rc.getExpression().getColumnName().equals(rc.getName()))
+				rc.markUpdatableByCursor();
 		}
 	}
 	

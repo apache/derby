@@ -2286,6 +2286,13 @@ class SelectNode extends ResultSetNode
 			return false;
 		}
 
+		if (! targetTable.columnsAreUpdatable())
+		{
+			if (SanityManager.DEBUG)
+				SanityManager.DEBUG("DumpUpdateCheck",
+				  "cursor select has no updatable result columns");
+			return false;
+		}
 
  		/* Get the TableDescriptor and verify that it is not for a
  		 * view or a system table.  

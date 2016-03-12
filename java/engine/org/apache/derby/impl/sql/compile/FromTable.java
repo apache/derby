@@ -1438,6 +1438,19 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		getResultColumns().markUpdatableByCursor(updateColumns);
 	}
 
+ 	/**
+	 * Return true if some columns in this table are updatable.
+	 *
+	 * This method is used in deciding whether updateRow() or
+	 * insertRow() are allowable.
+	 *
+	 * @return true if some columns in this table are updatable.
+	 */
+	boolean columnsAreUpdatable()
+	{
+		return getResultColumns().columnsAreUpdatable();
+	}
+
 	/**
 	 * Flatten this FromTable into the outer query block. The steps in
 	 * flattening are:

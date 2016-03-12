@@ -359,6 +359,25 @@ class ResultColumn extends ValueNode
         }
 	}
 	
+ 	/**
+	 * Returns true if this column is updatable.
+	 *
+	 * This method is used for determining if updateRow and insertRow
+	 * are allowed for this cursor (DERBY-1773). Since the updateRow
+	 * and insertRow implementations dynamically build SQL statements
+	 * on the fly, the critical issue here is whether we have a
+	 * column that has been aliased, because if it has been
+	 * aliased, the dynamic SQL generation logic won't be able to
+	 * compute the proper true base column name when it needs to.
+	 *
+	 * @return true if this result column is updatable.
+	 */
+	boolean isUpdatable()
+	{
+		return _derivedColumnName == null ||
+			_underlyingName.equals(_derivedColumnName);
+	}
+
 	/**
 	 * Returns the underlying source column name, if this ResultColumn
 	 * is a simple direct reference to a table column, or NULL otherwise.
