@@ -459,11 +459,6 @@ public class DbTasks {
 					errorPrint(e);
 					throw e;
 				}
-				insertFirst
-						.setString(
-								5,
-								"This column is used only to by pass the space problem. If the problem still exists, then we are going to "
-										+ "have a serious issue here.*****************************************************************************************************");
 				int result = insertFirst.executeUpdate();
 				if (result != 0) {
 					insert_count = insert_count + 1;

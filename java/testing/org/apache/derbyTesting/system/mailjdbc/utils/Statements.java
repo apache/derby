@@ -23,7 +23,7 @@ package org.apache.derbyTesting.system.mailjdbc.utils;
 public class Statements {
 	public static String readStr = "select * from REFRESH.INBOX";
 
-	public static String insertStr = "insert into REFRESH.INBOX(from_name,to_name,date,Message,size_problem) values (?,?,?,?,?)";
+	public static String insertStr = "insert into REFRESH.INBOX(from_name,to_name,date,Message) values (?,?,?,?)";
 	
 	public static String insertStrAttach = "insert into REFRESH.ATTACH (id,attachment) values (?,?)";
 

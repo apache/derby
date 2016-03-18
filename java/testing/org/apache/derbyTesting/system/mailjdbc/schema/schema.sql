@@ -24,7 +24,6 @@ CREATE TABLE inbox (id bigint generated always as identity (start with 1,increme
 					folder_id Integer,
 					to_delete smallint default 0,
 					exp_date timestamp,
-					size_problem varchar(32672),
 					CONSTRAINT inbox__pk PRIMARY KEY (id));
 					
 CREATE TABLE attach (id bigint not null,
