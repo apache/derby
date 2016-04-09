@@ -1413,10 +1413,10 @@ org.apache.derby.mbeans.VersionMBean.class
 org.apache.derby.osgi.EmbeddedActivator.class
 org.apache.derby.security.DatabasePermission.class
 org.apache.derby.security.SystemPermission.class
+org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
 org.apache.derby.shared.common.error.ExceptionSeverity.class
 org.apache.derby.shared.common.error.MessageUtils.class
 org.apache.derby.shared.common.error.ShutdownException.class
-org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
 org.apache.derby.shared.common.reference.JDBC40Translation.class
 org.apache.derby.shared.common.reference.MessageId.class
 org.apache.derby.shared.common.reference.SQLState.class

@@ -86,6 +86,8 @@ public class ColumnDefinitionNode extends TableElementNode
 	//MODIFY_AUTOINCREMENT_INC_VALUE - this column definition is for
 	//alter table command to change the increment value of the column
 	public static final int MODIFY_AUTOINCREMENT_INC_VALUE = 2;
+	//alter table command to change the ALWAYS vs DEFAULT nature of an autoinc column
+	public static final int MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT = 3;
 	
 	/**
      * Constructor for a ColumnDefinitionNode
@@ -668,7 +670,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	}
 
 
-	private static DefaultInfoImpl createDefaultInfoOfAutoInc(){
+	protected static DefaultInfoImpl createDefaultInfoOfAutoInc(){
 		return new DefaultInfoImpl(true,
 					   null, 
 					   null);

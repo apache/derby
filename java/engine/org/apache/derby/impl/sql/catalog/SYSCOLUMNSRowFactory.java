@@ -222,9 +222,18 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 6th column is DEFAULTID (UUID - char(36)) */
 		row.setColumn(SYSCOLUMNS_COLUMNDEFAULTID, new SQLChar(defaultID));
 
-		if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
-				autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
-		{//user is adding an autoinc column or is changing the increment value of autoinc column
+		if (
+            (autoinc_create_or_modify_Start_Increment ==
+             ColumnDefinitionNode.CREATE_AUTOINCREMENT) ||
+            (autoinc_create_or_modify_Start_Increment ==
+             ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE) ||
+            (autoinc_create_or_modify_Start_Increment ==
+             ColumnDefinitionNode.MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT)
+            )
+		{
+            //user is adding an autoinc column
+            // or is changing the increment value of autoinc column
+            // or is changing an autoinc column between ALWAYS and DEFAULT.
 			// This code also gets run when ALTER TABLE DROP COLUMN
 			// is used to drop a column other than the autoinc
 			// column, and the autoinc column gets removed from

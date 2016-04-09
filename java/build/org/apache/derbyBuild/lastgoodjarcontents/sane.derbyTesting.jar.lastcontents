@@ -715,6 +715,7 @@ org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_1.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_10.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_11.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_12.class
+org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_13.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_2.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_3.class
 org.apache.derbyTesting.functionTests.tests.upgradeTests.Changes10_4.class

@@ -1078,6 +1078,7 @@ public interface SQLState {
 	String LANG_AI_CANNOT_ADD_AI_TO_NULLABLE						   = "42Z27";
 	// String LANG_BUILT_IN_ALIAS_NAME						   = "42Z28";
 	// RUNTIMESTATISTICS
+	String LANG_AI_CANNOT_ALTER_IDENTITYNESS						   = "42Z29";
 	String LANG_TIME_SPENT_THIS										   = "42Z30.U";
 	String LANG_TIME_SPENT_THIS_AND_BELOW							   = "42Z31.U";
 	String LANG_TOTAL_TIME_BREAKDOWN								   = "42Z32.U";

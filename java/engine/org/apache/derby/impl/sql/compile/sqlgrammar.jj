@@ -13658,6 +13658,7 @@ columnAlterClause(String columnName) throws StandardException :
 	long				autoIncrementIncrement = 1;
 	long				autoIncrementRestartWith = 1;
 	DataTypeDescriptor	typeDescriptor = null;
+	int                 alterKind;
 }
 {
 	LOOKAHEAD( {getToken(2).kind == DATA} )
@@ -13668,6 +13669,19 @@ columnAlterClause(String columnName) throws StandardException :
                                  columnName,
                                  null,
                                  typeDescriptor,
+                                 null,
+                                 getContextManager());
+	}
+|
+	LOOKAHEAD( {getToken(2).kind == GENERATED} )
+	<SET> <GENERATED> alterKind = alterGeneratedColumn()
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_11, "ALTER TABLE ALTER COLUMN SET GENERATED");
+        return
+            new ModifyColumnNode(alterKind,
+                                 columnName,
+                                 null,
+                                 null,
                                  null,
                                  getContextManager());
 	}
@@ -13759,6 +13773,28 @@ columnAlterClause(String columnName) throws StandardException :
             getContextManager());
 	}
 }
+
+/*
+ * Various variants of the ALTER TABLE ALTER COLUMN SET GENERATED statement.
+ *
+ * By the time we get here, we've parsed
+ *    ALTER TABLE ALTER COLUMN SET GENERATED
+ */
+int
+alterGeneratedColumn() throws StandardException :
+{}
+{
+	<BY> <_DEFAULT>
+    {
+        return ModifyColumnNode.K_MODIFY_COLUMN_GENERATED_BY_DEFAULT;
+	}
+|
+	<ALWAYS>
+    {
+        return ModifyColumnNode.K_MODIFY_COLUMN_GENERATED_ALWAYS;
+	}
+}
+
 
 StatementNode
 dropTableConstraintDefinitionCore(TableName tableName, TableElementList tableElementList, int[] changeType, int[] behavior) throws StandardException :

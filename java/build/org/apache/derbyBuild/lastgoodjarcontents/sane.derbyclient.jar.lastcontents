@@ -139,7 +139,6 @@ org.apache.derby.client.net.Typdef.class
 org.apache.derby.client.net.Utf8CcsidManager.class
 org.apache.derby.iapi.error.ExceptionSeverity.class
 org.apache.derby.iapi.reference.Attribute.class
-org.apache.derby.iapi.reference.DRDAConstants.class
 org.apache.derby.iapi.reference.JDBC40Translation.class
 org.apache.derby.iapi.services.info.JVMInfo.class
 org.apache.derby.iapi.services.info.ProductGenusNames.class
@@ -164,11 +163,11 @@ org.apache.derby.jdbc.ClientDriver40.class
 org.apache.derby.jdbc.ClientXADataSource.class
 org.apache.derby.jdbc.ClientXADataSource40.class
 org.apache.derby.jdbc.ClientXADataSourceInterface.class
+org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
 org.apache.derby.shared.common.error.ExceptionSeverity.class
 org.apache.derby.shared.common.error.ExceptionUtil.class
-org.apache.derby.shared.common.error.ShutdownException.class
 org.apache.derby.shared.common.error.MessageUtils.class
-org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
+org.apache.derby.shared.common.error.ShutdownException.class
 org.apache.derby.shared.common.i18n.MessageUtil.class
 org.apache.derby.shared.common.reference.Attribute.class
 org.apache.derby.shared.common.reference.JDBC40Translation.class

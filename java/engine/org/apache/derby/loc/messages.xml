@@ -2974,6 +2974,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Z29</name>
+                <text>Column '{0}' is not an identity column, so its generation state cannot be changed. </text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Z50</name>
                 <text>Internal Error: Unable to generate code for {0}.</text>
                 <arg>queryTreeNodeIdentifier</arg>
