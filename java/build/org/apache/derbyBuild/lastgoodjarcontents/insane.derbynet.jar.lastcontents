@@ -45,7 +45,7 @@ org.apache.derby.impl.drda.memCheck.class
 org.apache.derby.impl.tools.sysinfo.Main.class
 org.apache.derby.impl.tools.sysinfo.ZipInfoProperties.class
 org.apache.derby.mbeans.drda.NetworkServerMBean.class
-org.apache.derby.shared.common.reference.MessageId.class
 org.apache.derby.shared.common.error.MessageUtils.class
 org.apache.derby.shared.common.error.ShutdownException.class
+org.apache.derby.shared.common.reference.MessageId.class
 org.apache.derby.tools.sysinfo.class

@@ -164,11 +164,11 @@ org.apache.derby.jdbc.ClientDriver40.class
 org.apache.derby.jdbc.ClientXADataSource.class
 org.apache.derby.jdbc.ClientXADataSource40.class
 org.apache.derby.jdbc.ClientXADataSourceInterface.class
+org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
 org.apache.derby.shared.common.error.ExceptionSeverity.class
 org.apache.derby.shared.common.error.ExceptionUtil.class
-org.apache.derby.shared.common.error.ShutdownException.class
 org.apache.derby.shared.common.error.MessageUtils.class
-org.apache.derby.shared.common.error.DerbySQLIntegrityConstraintViolationException.class
+org.apache.derby.shared.common.error.ShutdownException.class
 org.apache.derby.shared.common.i18n.MessageUtil.class
 org.apache.derby.shared.common.reference.Attribute.class
 org.apache.derby.shared.common.reference.JDBC40Translation.class

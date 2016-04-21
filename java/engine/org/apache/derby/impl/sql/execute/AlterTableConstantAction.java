@@ -532,6 +532,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				{
                     dropColumnFromTable(columnInfo[ix].name);
 				}
+				else if (
+                         (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_GENERATED_ALWAYS) ||
+                         (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_GENERATED_BY_DEFAULT)
+                         )
+				{
+                    modifyIdentityState(ix);
+				}
 				else if (SanityManager.DEBUG)
 				{
 					SanityManager.THROWASSERT(
@@ -2243,6 +2250,48 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         }
 	}
 	
+	/**
+	 * Change an identity from ALWAYS to BY DEFAULT (or vice versa)
+	 * 
+	 * @param       ix 		the index of the column specfication in the ALTER 
+	 *						statement-- currently we allow only one.
+	 * @exception	StandardException, thrown on error.
+	 */
+    private void modifyIdentityState(int ix)
+			throws StandardException						 
+	{
+		ColumnDescriptor oldColumnDescriptor = td.getColumnDescriptor(columnInfo[ix].name);
+		int columnPosition = oldColumnDescriptor.getPosition();
+        boolean wasGeneratedAlways = oldColumnDescriptor.isAutoincAlways();
+        boolean willBeGeneratedAlways =
+          (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_GENERATED_ALWAYS);
+
+        // nothing to do if the identity column already behaves the right way
+        if (wasGeneratedAlways == willBeGeneratedAlways) { return; }
+
+        UUID defaultUUID = willBeGeneratedAlways ? null : dd.getUUIDFactory().createUUID();
+
+        /* Get a ColumnDescriptor reflecting the new default */
+		ColumnDescriptor newColumnDescriptor = new ColumnDescriptor
+          (
+           columnInfo[ix].name,
+           columnPosition,
+           oldColumnDescriptor.getType(),
+           columnInfo[ix].defaultValue,
+           columnInfo[ix].defaultInfo,
+           td,
+           defaultUUID,
+           oldColumnDescriptor.getAutoincStart(),
+           oldColumnDescriptor.getAutoincInc(),
+           ColumnDefinitionNode.MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT
+           );
+
+		// Update the ColumnDescriptor with new default info
+		dd.dropColumnDescriptor(td.getUUID(), columnInfo[ix].name, tc);
+		dd.addDescriptor(newColumnDescriptor, td,
+						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
+    }
+  
     /**
      * routine to process compress table or ALTER TABLE <t> DROP COLUMN <c>;
      * <p>

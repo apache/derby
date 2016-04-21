@@ -54,6 +54,8 @@ class ModifyColumnNode extends ColumnDefinitionNode
     final static int K_MODIFY_COLUMN_CONSTRAINT = 2;
     final static int K_MODIFY_COLUMN_CONSTRAINT_NOT_NULL = 3;
     final static int K_DROP_COLUMN = 4;
+    final static int K_MODIFY_COLUMN_GENERATED_ALWAYS = 5;
+    final static int K_MODIFY_COLUMN_GENERATED_BY_DEFAULT = 6;
 
     /**
      * This class is used to hold logically different objects for
@@ -317,6 +319,12 @@ class ModifyColumnNode extends ColumnDefinitionNode
             case K_DROP_COLUMN:
                 return ColumnInfo.DROP;
 
+            case K_MODIFY_COLUMN_GENERATED_ALWAYS:
+                return ColumnInfo.MODIFY_COLUMN_GENERATED_ALWAYS;
+
+            case K_MODIFY_COLUMN_GENERATED_BY_DEFAULT:
+                return ColumnInfo.MODIFY_COLUMN_GENERATED_BY_DEFAULT;
+
             default:
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT("Unexpected type = " + kind);
@@ -417,6 +425,28 @@ class ModifyColumnNode extends ColumnDefinitionNode
                                int tableType) throws StandardException
 	{
 		ColumnDescriptor cd;
+
+		// only autoincrement columns can have their generation property changed
+        if (
+            (kind == K_MODIFY_COLUMN_GENERATED_ALWAYS) ||
+            (kind == K_MODIFY_COLUMN_GENERATED_BY_DEFAULT)
+            )
+		{
+			cd = getLocalColumnDescriptor(name, td);
+			if (!cd.isAutoincrement())
+			{
+				throw StandardException.newException(SQLState.LANG_AI_CANNOT_ALTER_IDENTITYNESS,
+						getColumnName());
+			}
+
+            if (kind == K_MODIFY_COLUMN_GENERATED_BY_DEFAULT)
+            {
+                defaultInfo = createDefaultInfoOfAutoInc();
+            }
+
+            // nothing more to do here
+            return;
+		}
 
 		// a column that has an autoincrement default can't be made nullable
         if (kind == K_MODIFY_COLUMN_CONSTRAINT)
