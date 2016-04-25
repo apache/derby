@@ -24,7 +24,6 @@ package org.apache.derby.impl.sql.compile;
 import java.util.ArrayList;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 class ColumnOrdering {
 
@@ -110,8 +109,8 @@ class ColumnOrdering {
 	 */
 	void addColumn(int tableNumber, int columnNumber)
 	{
-        tables.add(ReuseFactory.getInteger(tableNumber));
-        columns.add(ReuseFactory.getInteger(columnNumber));
+        tables.add(tableNumber);
+        columns.add(columnNumber);
 	}
 
 	/**
@@ -157,7 +156,7 @@ class ColumnOrdering {
 
 	/** Is the given table number in this ColumnOrdering? */
 	boolean hasTable(int tableNumber) {
-        return tables.contains(ReuseFactory.getInteger(tableNumber));
+        return tables.contains(tableNumber);
 	}
 
 	/** Is there any table other than the given one in this ColumnOrdering? */

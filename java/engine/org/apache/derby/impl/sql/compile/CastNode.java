@@ -41,7 +41,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.NumberDataType;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
@@ -614,7 +613,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                        TypeId.getBuiltInTypeId(Types.TINYINT),
-                       ReuseFactory.getByte((byte) longValue),
+                       (byte) longValue,
                        getContextManager());
 
 			case Types.SMALLINT:
@@ -625,8 +624,7 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
-                   ReuseFactory.getShort(
-                       (short) longValue),
+                   (short) longValue,
                    getContextManager());
 
 			case Types.INTEGER:
@@ -637,14 +635,13 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
-                   ReuseFactory.getInteger(
-                       (int) longValue),
+                   (int) longValue,
                    getContextManager());
 
 			case Types.BIGINT:
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
-                   ReuseFactory.getLong(longValue),
+                   longValue,
                    getContextManager());
 
 			case Types.REAL:

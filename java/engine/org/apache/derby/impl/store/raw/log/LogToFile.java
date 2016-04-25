@@ -69,7 +69,6 @@ import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
@@ -5836,10 +5835,10 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		switch (action) {
 		case 0:
 			// SECURITY PERMISSION - MP1
-			return ReuseFactory.getBoolean(activeFile.exists());
+			return activeFile.exists();
 		case 1:
 			// SECURITY PERMISSION - OP5
-           return ReuseFactory.getBoolean(activeFile.delete());
+           return activeFile.delete();
 		case 2:
 			// SECURITY PERMISSION - MP1 and/or OP4
 			// dependening on the value of activePerms
@@ -5853,7 +5852,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             return result;
 		case 3:
 			// SECURITY PERMISSION - OP4
-			return ReuseFactory.getBoolean(activeFile.canWrite());
+			return activeFile.canWrite();
 		case 4:
 			// SECURITY PERMISSION - OP4
             boolean created = activeFile.mkdirs();
@@ -5862,22 +5861,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 activeFile.limitAccessToOwner();
             }
 
-            return ReuseFactory.getBoolean(created);
+            return created;
 		case 5:
 			// SECURITY PERMISSION - MP1
 			return activeFile.list();
 		case 6:
 			// SECURITY PERMISSION - OP4 (Have to check these codes ??)
-			return ReuseFactory.getBoolean(FileUtil.copyFile(logStorageFactory, activeFile, toFile));
+			return FileUtil.copyFile(logStorageFactory, activeFile, toFile);
 		case 7:
 			// SECURITY PERMISSION - OP4
-            if( ! activeFile.exists())
-                return ReuseFactory.getBoolean( true);
-			return ReuseFactory.getBoolean(activeFile.deleteAll());
+            return !activeFile.exists() || activeFile.deleteAll();
         case 8:
             return toFile.list();
         case 9:
-            return ReuseFactory.getBoolean(FileUtil.copyFile( logStorageFactory, toFile, activeFile));
+            return FileUtil.copyFile(logStorageFactory, toFile, activeFile);
         case 10:
         	return(new OutputStreamWriter(activeFile.getOutputStream(),"UTF8"));
 

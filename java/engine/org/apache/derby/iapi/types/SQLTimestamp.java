@@ -27,13 +27,11 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.db.DatabaseContext;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.context.ContextService;
  
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -1056,8 +1054,7 @@ public final class SQLTimestamp extends DataType
             break;
 
         default:
-            throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
-                                                  ReuseFactory.getInteger( intervalType),
+            throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARGUMENT, intervalType,
                                                   "TIMESTAMPADD");
         }
         return tsResult;
@@ -1238,8 +1235,7 @@ public final class SQLTimestamp extends DataType
             break;
 
         default:
-            throw StandardException.newException( SQLState.LANG_INVALID_FUNCTION_ARGUMENT,
-                                                  ReuseFactory.getInteger( intervalType),
+            throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARGUMENT, intervalType,
                                                   "TIMESTAMPDIFF");
         }
         resultHolder.setValue(ldiff);

@@ -78,7 +78,6 @@ import org.apache.derby.iapi.types.DateTimeDataValue;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 
@@ -1691,7 +1690,7 @@ public class SQLParser
     {
         return new NumericConstantNode(
             TypeId.getBuiltInTypeId(Types.INTEGER),
-            ReuseFactory.getInteger(intervalType),
+            intervalType,
             getContextManager());
     }
     
@@ -4598,8 +4597,8 @@ xmlDocOrContent() throws StandardException :
 	{
 		throw StandardException.newException(
 			SQLState.LANG_XML_KEYWORD_MISSING, "DOCUMENT",
-			ReuseFactory.getInteger(getToken(1).beginLine),
-			ReuseFactory.getInteger(getToken(1).beginColumn));
+			getToken(1).beginLine,
+			getToken(1).beginColumn);
 	}
 |
 	LOOKAHEAD({ getToken(1).kind == CONTENT }) <CONTENT>
@@ -6565,7 +6564,7 @@ characterValueFunction() throws StandardException :
                             (value == null) ?
                                 new NumericConstantNode(
                                     TypeId.getBuiltInTypeId(Types.INTEGER),
-                                    ReuseFactory.getInteger(1),
+                                    1,
                                     getContextManager() ) :
                                 value,
                             TernaryOperatorNode.K_LOCATE,
@@ -6599,7 +6598,7 @@ trimFunction() throws StandardException :
 ValueNode
 ansiTrim() throws StandardException  :
 {
-    Integer trimSpec = ReuseFactory.getInteger(StringDataValue.BOTH);
+    Integer trimSpec = StringDataValue.BOTH;
     ValueNode trimChar = null;
     ValueNode trimSource = null;
 }
@@ -6644,17 +6643,17 @@ ansiTrimSpec() :
 {
 	<TRAILING>
 	{
-		return ReuseFactory.getInteger(StringDataValue.TRAILING);
+		return StringDataValue.TRAILING;
 	}
 |
 	<LEADING>
 	{
-		return ReuseFactory.getInteger(StringDataValue.LEADING);
+		return StringDataValue.LEADING;
 	}
 |
 	<BOTH>
 	{
-		return ReuseFactory.getInteger(StringDataValue.BOTH);
+		return StringDataValue.BOTH;
 	}
 }
 
@@ -6666,12 +6665,12 @@ trimType() :
 {
 	<RTRIM>
 	{
-		return ReuseFactory.getInteger(StringDataValue.TRAILING);
+		return StringDataValue.TRAILING;
 	}
 |
 	<LTRIM>
 	{
-		return ReuseFactory.getInteger(StringDataValue.LEADING);
+		return StringDataValue.LEADING;
 	}
 }
 
@@ -6919,7 +6918,7 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
                 if( isJDBCEscape)
                     return new LengthOperatorNode(
 								getTrimOperatorNode(
-									ReuseFactory.getInteger(StringDataValue.TRAILING),
+									StringDataValue.TRAILING,
 									null,
 									value,
 									localCM),
@@ -7074,8 +7073,8 @@ boolean
 	{
 		throw StandardException.newException(
 			SQLState.LANG_XML_KEYWORD_MISSING, "PRESERVE WHITESPACE",
-			ReuseFactory.getInteger(getToken(1).beginLine),
-			ReuseFactory.getInteger(getToken(1).beginColumn));
+			getToken(1).beginLine,
+			getToken(1).beginColumn);
 	}
 |
 	<STRIP> <WHITESPACE>
@@ -7140,8 +7139,8 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 	{
 		throw StandardException.newException(
 			SQLState.LANG_XML_KEYWORD_MISSING, "AS",
-			ReuseFactory.getInteger(getToken(1).beginLine),
-			ReuseFactory.getInteger(getToken(1).beginColumn));
+			getToken(1).beginLine,
+			getToken(1).beginColumn);
 	}
 |
 	<AS> targetType = dataTypeDDL()
@@ -7539,7 +7538,7 @@ dateTimeScalarFunction() throws StandardException :
         field = datetimeField() <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
        return new ExtractOperatorNode(
-								ReuseFactory.getInteger(field),
+								field,
 								value,
 								getContextManager());
 	}
@@ -10673,7 +10672,8 @@ void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routi
 		{
 			if (!isProcedure)
 				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "RESULT SETS");
-			clauseValue = ReuseFactory.getInteger(drs); clausePosition = CreateAliasNode.DYNAMIC_RESULT_SET_COUNT;
+			clauseValue = drs;
+			clausePosition = CreateAliasNode.DYNAMIC_RESULT_SET_COUNT;
 		}
 	|
 		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = CreateAliasNode.LANGUAGE; }
@@ -10700,21 +10700,22 @@ void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routi
             {   checkVersion(DataDictionary.DD_VERSION_DERBY_10_7,
                             "EXTERNAL SECURITY");
                 checkSqlStandardAccess("EXTERNAL SECURITY");
-                clauseValue = new Boolean(routineSecurityClause());
+                clauseValue = routineSecurityClause();
                 clausePosition = CreateAliasNode.ROUTINE_SECURITY_DEFINER;
             }
         )
 	|
 		<PARAMETER> <STYLE> clauseValue = parameterStyle( isTableFunction ) { clausePosition = CreateAliasNode.PARAMETER_STYLE; }
 
-	|	<NO> <SQL>				{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.NO_SQL); clausePosition = CreateAliasNode.SQL_CONTROL; }
-	|	<CONTAINS> <SQL>		{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.CONTAINS_SQL); clausePosition = CreateAliasNode.SQL_CONTROL; }
-	|	<READS> <SQL> <DATA>	{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.READS_SQL_DATA); clausePosition = CreateAliasNode.SQL_CONTROL; }
+	|	<NO> <SQL>				{ clauseValue = RoutineAliasInfo.NO_SQL; clausePosition = CreateAliasNode.SQL_CONTROL; }
+	|	<CONTAINS> <SQL>		{ clauseValue = RoutineAliasInfo.CONTAINS_SQL; clausePosition = CreateAliasNode.SQL_CONTROL; }
+	|	<READS> <SQL> <DATA>	{ clauseValue = RoutineAliasInfo.READS_SQL_DATA; clausePosition = CreateAliasNode.SQL_CONTROL; }
 	|	<MODIFIES> <SQL> <DATA>
 		{
 			if (!isProcedure)
 				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "MODIFIES SQL DATA");
-			clauseValue = ReuseFactory.getShort(RoutineAliasInfo.MODIFIES_SQL_DATA); clausePosition = CreateAliasNode.SQL_CONTROL;
+			clauseValue = RoutineAliasInfo.MODIFIES_SQL_DATA;
+			clausePosition = CreateAliasNode.SQL_CONTROL;
 		}
 
 	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = CreateAliasNode.NULL_ON_NULL_INPUT; }
@@ -10779,7 +10780,7 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 	      if ( isTableFunction )
 	      { throw StandardException.newException( SQLState.LANG_MUST_BE_DJRS ); }
 
-	      return ReuseFactory.getShort(RoutineAliasInfo.PS_JAVA);
+	      return RoutineAliasInfo.PS_JAVA;
 	  }
 |
 	  <DERBY_JDBC_RESULT_SET>
@@ -10787,7 +10788,7 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 	      if ( !isTableFunction )
 	      { throw StandardException.newException( SQLState.LANG_NO_DJRS ); }
 
-	      return ReuseFactory.getShort(RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET);
+	      return RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET;
 	  }
 |
 	  <DERBY>
@@ -10797,7 +10798,7 @@ Short parameterStyle( boolean isTableFunction ) throws StandardException :
 	      if ( isTableFunction )
 	      { throw StandardException.newException( SQLState.LANG_MUST_BE_DJRS ); }
 
-	      return ReuseFactory.getShort( RoutineAliasInfo.PS_DERBY );
+	      return RoutineAliasInfo.PS_DERBY;
 	  }
 }
 
@@ -10869,7 +10870,7 @@ inoutParameter() :
         | <OUT> { mode = ParameterMetaData.parameterModeOut; }
         | <INOUT> { mode = ParameterMetaData.parameterModeInOut; }
 	]
-	{ return ReuseFactory.getInteger(mode); }
+	{ return mode; }
 }
 
 /**
@@ -10973,7 +10974,7 @@ functionParameterDefinition
 	{
 		names.add(parameterName);
 		types.add(typeDescriptor.getCatalogType());
-        inOut.add(ReuseFactory.getInteger(ParameterMetaData.parameterModeIn));
+        inOut.add(ParameterMetaData.parameterModeIn);
 	}
 }
 
@@ -12806,7 +12807,7 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 	{
         return new ConstraintDefinitionNode(
                         constraintName,
-						ReuseFactory.getInteger(constraintType),
+						constraintType,
 						uniqueColumnList,
 						null,
 						null,
@@ -13165,7 +13166,7 @@ columnConstraint(TableName constraintName,
 
         return new ConstraintDefinitionNode(
                         constraintName,
-						ReuseFactory.getInteger(constraintType),
+						constraintType,
 						uniqueColumnList,
 						properties,
 						null,
@@ -14187,17 +14188,17 @@ usableObjects() throws StandardException :
 {
     <DERBY> <AGGREGATE>
     {
-        return ReuseFactory.getInteger( PrivilegeNode.AGGREGATE_PRIVILEGES);
+        return PrivilegeNode.AGGREGATE_PRIVILEGES;
     }
 |
     <SEQUENCE>
     {
-        return ReuseFactory.getInteger( PrivilegeNode.SEQUENCE_PRIVILEGES);
+        return PrivilegeNode.SEQUENCE_PRIVILEGES;
     }
 |
     <TYPE>
     {
-        return ReuseFactory.getInteger( PrivilegeNode.UDT_PRIVILEGES);
+        return PrivilegeNode.UDT_PRIVILEGES;
     }
 }// end of routineGrantStatement
 

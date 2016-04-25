@@ -33,7 +33,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.iapi.util.ReuseFactory;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
@@ -406,12 +405,11 @@ public class EncryptOrDecryptData implements PrivilegedAction<Boolean> {
         switch(actionCode)
         {
         case STORAGE_FILE_EXISTS_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.exists());
+            return actionStorageFile.exists();
         case STORAGE_FILE_DELETE_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.delete());
+            return actionStorageFile.delete();
         case STORAGE_FILE_RENAME_ACTION:
-            return ReuseFactory.getBoolean(
-                       actionStorageFile.renameTo(actionDestStorageFile));
+            return actionStorageFile.renameTo(actionDestStorageFile);
         }
 
         return null;

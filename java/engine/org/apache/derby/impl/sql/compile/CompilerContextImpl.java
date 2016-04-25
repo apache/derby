@@ -67,7 +67,6 @@ import org.apache.derby.iapi.store.access.SortCostController;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.transaction.TransactionControl;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  *
@@ -429,7 +428,7 @@ public class CompilerContextImpl extends ContextImpl
 	public StoreCostController getStoreCostController(long conglomerateNumber)
 			throws StandardException
 	{
-        Long conglomNum = ReuseFactory.getLong(conglomerateNumber);
+        Long conglomNum = conglomerateNumber;
 
         // Try to find the given conglomerate number among the already
         // opened conglomerates.
@@ -700,7 +699,7 @@ public class CompilerContextImpl extends ContextImpl
 	 */
 	public void pushCurrentPrivType( int privType)
 	{
-		privTypeStack.add(ReuseFactory.getInteger(currPrivType));
+		privTypeStack.add(currPrivType);
 		currPrivType = privType;
 	}
 
@@ -838,7 +837,7 @@ public class CompilerContextImpl extends ContextImpl
 			return;
 
  		if (requiredRoutinePrivileges.get(routine.getUUID()) == null)
- 			requiredRoutinePrivileges.put(routine.getUUID(), ReuseFactory.getInteger(1));
+			requiredRoutinePrivileges.put(routine.getUUID(), 1);
 	}
 
 	/**

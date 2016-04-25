@@ -58,12 +58,10 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
 
 import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
@@ -72,7 +70,6 @@ import org.apache.derby.iapi.reference.Property;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.security.SecureRandom;
 
 import java.util.Date;
@@ -81,7 +78,6 @@ import java.io.Serializable;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -2720,16 +2716,16 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             return new OutputStreamWriter( actionStorageFile.getOutputStream( actionAppend));
 
         case REGULAR_FILE_EXISTS_ACTION:
-            return ReuseFactory.getBoolean(actionRegularFile.exists());
+            return actionRegularFile.exists();
 
         case STORAGE_FILE_EXISTS_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.exists());
+            return actionStorageFile.exists();
 
         case REGULAR_FILE_DELETE_ACTION:
-            return ReuseFactory.getBoolean(actionRegularFile.delete());
+            return actionRegularFile.delete();
 
         case STORAGE_FILE_DELETE_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.delete());
+            return actionStorageFile.delete();
 
         case REGULAR_FILE_MKDIRS_ACTION:
             // SECURITY PERMISSION - OP4
@@ -2737,42 +2733,36 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
             FileUtil.limitAccessToOwner(actionRegularFile);
 
-            return ReuseFactory.getBoolean(created);
+            return created;
 
         case REGULAR_FILE_IS_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1
-            return ReuseFactory.getBoolean(actionRegularFile.isDirectory());
+            return actionRegularFile.isDirectory();
 
         case REGULAR_FILE_REMOVE_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1, OP5
-            return ReuseFactory.getBoolean(FileUtil.removeDirectory(actionRegularFile));
+            return FileUtil.removeDirectory(actionRegularFile);
 
         case REGULAR_FILE_RENAME_TO_ACTION:
             // SECURITY PERMISSION - OP4
-            return ReuseFactory.getBoolean(actionRegularFile.renameTo(actionRegularFile2));
+            return actionRegularFile.renameTo(actionRegularFile2);
 
         case COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION:
             // SECURITY PERMISSION - MP1, OP4
-            return ReuseFactory.getBoolean(FileUtil.copyDirectory(storageFactory,
-                                                                  actionStorageFile,
-                                                                  actionRegularFile,
-                                                                  actionBuffer,
-                                                                  actionFilter,
-                                                                  actionCopySubDirs));
+            return FileUtil.copyDirectory(
+                    storageFactory, actionStorageFile, actionRegularFile,
+                    actionBuffer, actionFilter, actionCopySubDirs);
 
         case COPY_REGULAR_DIRECTORY_TO_STORAGE_ACTION:
             // SECURITY PERMISSION - MP1, OP4
-            return ReuseFactory.getBoolean(FileUtil.copyDirectory((WritableStorageFactory)storageFactory,
-                                                                  actionRegularFile,
-                                                                  actionStorageFile,
-                                                                  actionBuffer,
-                                                                  actionFilter));
+            return FileUtil.copyDirectory(
+                    (WritableStorageFactory) storageFactory, actionRegularFile,
+                    actionStorageFile, actionBuffer, actionFilter);
 
         case COPY_REGULAR_FILE_TO_STORAGE_ACTION:
             // SECURITY PERMISSION - MP1, OP4
-            return ReuseFactory.getBoolean(FileUtil.copyFile((WritableStorageFactory) storageFactory,
-                                                             actionRegularFile,
-                                                             actionStorageFile));
+            return FileUtil.copyFile((WritableStorageFactory) storageFactory,
+                    actionRegularFile, actionStorageFile);
 
         case REGULAR_FILE_LIST_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1
@@ -2784,18 +2774,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         case COPY_STORAGE_FILE_TO_REGULAR_ACTION:
             // SECURITY PERMISSION - MP1, OP4
-            return ReuseFactory.getBoolean(FileUtil.copyFile(
-                                           (WritableStorageFactory) storageFactory,
-                                           actionStorageFile,
-                                           actionRegularFile));
+            return FileUtil.copyFile((WritableStorageFactory) storageFactory,
+                    actionStorageFile, actionRegularFile);
 
             
         case COPY_STORAGE_FILE_TO_STORAGE_ACTION:
             // SECURITY PERMISSION - MP1, OP4
-            return ReuseFactory.getBoolean(FileUtil.copyFile(
-                                           (WritableStorageFactory) storageFactory,
-                                           actionStorageFile,
-                                           actionToStorageFile));
+            return FileUtil.copyFile((WritableStorageFactory) storageFactory,
+                    actionStorageFile, actionToStorageFile);
 
         case REGULAR_FILE_GET_CANONICALPATH_ACTION:
             // SECURITY PERMISSION - MP1

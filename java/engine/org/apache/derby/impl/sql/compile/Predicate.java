@@ -33,7 +33,6 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  * A Predicate represents a top level predicate.
@@ -551,7 +550,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	boolean transitiveSearchClauseAdded(RelationalOperator ro)
 	{
         return searchClauses != null &&
-            searchClauses.contains(ReuseFactory.getInteger(ro.getOperator()));
+            searchClauses.contains(ro.getOperator());
 	}
 
 	/**
@@ -570,7 +569,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		/* I have to remember that this ro has been added to this predicate as a
 		 * transitive search clause.
 		 */
-        searchClauses.add(ReuseFactory.getInteger(ro.getOperator()));
+        searchClauses.add(ro.getOperator());
 	}
 
 	/**

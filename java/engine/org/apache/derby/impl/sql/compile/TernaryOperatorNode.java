@@ -38,7 +38,6 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  * A TernaryOperatorNode represents a built-in ternary operators.
@@ -892,8 +891,7 @@ class TernaryOperatorNode extends OperatorNode
             if( jdbcType != Types.TINYINT && jdbcType != Types.SMALLINT &&
                 jdbcType != Types.INTEGER && jdbcType != Types.BIGINT)
                 throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
-                                                     rightOperand.getTypeId().getSQLTypeName(),
-                                                     ReuseFactory.getInteger( 2),
+                                                     rightOperand.getTypeId().getSQLTypeName(), 2,
                                                      operator);
         }
         bindDateTimeArg( receiver, 3);
@@ -924,8 +922,7 @@ class TernaryOperatorNode extends OperatorNode
         {
             if( ! arg.getTypeId().isDateTimeTimeStampTypeId())
                 throw StandardException.newException(SQLState.LANG_INVALID_FUNCTION_ARG_TYPE,
-                                                     arg.getTypeId().getSQLTypeName(),
-                                                     ReuseFactory.getInteger( argNumber),
+                                                     arg.getTypeId().getSQLTypeName(), argNumber,
                                                      operator);
         }
     } // end of bindDateTimeArg

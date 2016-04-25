@@ -27,10 +27,6 @@ import java.io.EOFException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.io.LimitObjectInput;
-import org.apache.derby.iapi.services.io.ErrorObjectInput;
-import org.apache.derby.iapi.util.ReuseFactory;
-
 import java.io.UTFDataFormatException;
 
 /**
@@ -52,7 +48,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	 *
 	 */
 	public ArrayInputStream() {
-		this(ReuseFactory.getZeroLenByteArray());
+		this(ArrayUtil.EMPTY_BYTE_ARRAY);
 	}
 
 	private ErrorObjectInput oi;

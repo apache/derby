@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -38,27 +37,18 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.RowSource;
-import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 
-import org.apache.derby.io.StorageFactory;
-import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 
-import org.apache.derby.impl.store.raw.data.DecryptInputStream;
-import org.apache.derby.impl.store.raw.data.StoredFieldHeader;
-import org.apache.derby.impl.store.raw.data.StoredRecordHeader;
-
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.util.Properties;
 import java.io.InputStream;
@@ -1182,13 +1172,13 @@ class StreamFileContainer implements TypedFormat, PrivilegedExceptionAction<Obje
         switch(actionCode)
         {
         case STORAGE_FILE_EXISTS_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.exists());
+            return actionStorageFile.exists();
         case STORAGE_FILE_DELETE_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.delete());
+            return actionStorageFile.delete();
         case STORAGE_FILE_MKDIRS_ACTION:
             boolean created = actionStorageFile.mkdirs();
             actionStorageFile.limitAccessToOwner();
-            return ReuseFactory.getBoolean(created);
+            return created;
         case STORAGE_FILE_GET_OUTPUT_STREAM_ACTION:
             return actionStorageFile.getOutputStream();
         case STORAGE_FILE_GET_INPUT_STREAM_ACTION:

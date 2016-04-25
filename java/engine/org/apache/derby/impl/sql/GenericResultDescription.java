@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 
@@ -29,9 +28,7 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.io.ObjectOutput;
@@ -317,7 +314,7 @@ public final class GenericResultDescription
                         SQLToUpperCase(
                             getColumnDescriptor(i).getName());
                     
-                    final Integer value = ReuseFactory.getInteger(i);
+                    final Integer value = i;
                     
                     map.put(key, value);
                 }

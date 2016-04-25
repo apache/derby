@@ -81,7 +81,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -962,10 +961,9 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			boolean significantChange = false;
 
 			int resultSetNumber = resultSet.resultSetNumber();
-			Integer rsn = ReuseFactory.getInteger(resultSetNumber);
 
 			/* Check each result set only once per execution */
-			if (rowCountsCheckedThisExecution.add(rsn))
+			if (rowCountsCheckedThisExecution.add(resultSetNumber))
 			{
                 long n1 = getPreparedStatement()
                         .getInitialRowCount(resultSetNumber, currentRowCount);

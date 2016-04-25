@@ -21,9 +21,7 @@
 
 package org.apache.derby.iapi.services.io;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -100,7 +98,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 */
 	public FormatableBitSet()
 	{
-		value = ReuseFactory.getZeroLenByteArray();
+		value = ArrayUtil.EMPTY_BYTE_ARRAY;
 	}
 
 	/**

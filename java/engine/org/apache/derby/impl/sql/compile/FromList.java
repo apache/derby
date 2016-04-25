@@ -35,7 +35,6 @@ import org.apache.derby.iapi.sql.compile.Optimizer;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.util.StringUtil;
 
 
@@ -867,8 +866,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 					ft.isFlattenableJoinNode())
 				{
 					//save the table number of the node to be flattened
-                    flattenedTableNumbers.add(
-                            ReuseFactory.getInteger(ft.getTableNumber()));
+                    flattenedTableNumbers.add(ft.getTableNumber());
 
 					/* Remove the node from the list and insert its
 					 * FromList here.

@@ -42,7 +42,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.StoreCostController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 class HashJoinStrategy extends BaseJoinStrategy {
     HashJoinStrategy() {
@@ -646,7 +645,7 @@ class HashJoinStrategy extends BaseJoinStrategy {
 			// Is there an equijoin condition on this column?
 			if (predList.hasOptimizableEquijoin(innerTable, columns[colCtr]))
 			{
-                hashKeys.add(ReuseFactory.getInteger(colCtr));
+                hashKeys.add(colCtr);
 			}
 		}
 

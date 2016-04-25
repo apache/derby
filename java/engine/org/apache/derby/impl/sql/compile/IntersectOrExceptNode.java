@@ -38,7 +38,6 @@ import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
  * A IntersectOrExceptNode represents an INTERSECT or EXCEPT DML statement.
@@ -205,8 +204,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 new OrderByColumn(
                     new NumericConstantNode(
                         TypeId.getBuiltInTypeId(Types.INTEGER),
-                        ReuseFactory.getInteger(
-                            intermediateOrderByColumns[i] + 1),
+                        intermediateOrderByColumns[i] + 1,
                         cm),
                     cm);
 

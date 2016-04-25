@@ -63,7 +63,6 @@ import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.impl.sql.compile.CursorNode;
 import org.apache.derby.impl.sql.compile.StatementNode;
 
@@ -1345,7 +1344,7 @@ recompileOutOfDatePlan:
             // set it if it is not already set.
             Long initialCount = rowCounts.get(rsNum);
             if (initialCount == null) {
-                rowCounts.set(rsNum, ReuseFactory.getLong(rowCount));
+                rowCounts.set(rsNum, rowCount);
                 return rowCount;
             } else {
                 return initialCount.longValue();

@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.util.InterruptDetectedException;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -833,15 +832,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      */
     private void copyFile(final StorageFile from, final File to)
             throws StandardException {
-        Boolean success = AccessController.doPrivileged(
-                new PrivilegedAction<Boolean>() {
-                    public Boolean run() {
-                        return ReuseFactory.getBoolean(FileUtil.copyFile(
-                                dataFactory.getStorageFactory(), from, to));
-                    }
-                });
-
-        if (!success.booleanValue()) {
+        PrivilegedAction<Boolean> pa = () ->
+                FileUtil.copyFile(dataFactory.getStorageFactory(), from, to);
+        boolean success = AccessController.doPrivileged(pa);
+        if (!success) {
             throw StandardException.newException(
                     SQLState.RAWSTORE_ERROR_COPYING_FILE,
                     from, to);
@@ -854,15 +848,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction<Ob
      * @throws StandardException if the file could not be removed
      */
     private void removeFile(final File file) throws StandardException {
-        Boolean success = AccessController.doPrivileged(
-            new PrivilegedAction<Boolean>() {
-                public Boolean run() {
-                    return ReuseFactory.getBoolean(
-                            !file.exists() || file.delete());
-                }
-        });
-
-        if (!success.booleanValue()) {
+        PrivilegedAction<Boolean> pa = () -> !file.exists() || file.delete();
+        boolean success = AccessController.doPrivileged(pa);
+        if (!success) {
             throw StandardException.newException(
                     SQLState.UNABLE_TO_DELETE_FILE, file);
         }

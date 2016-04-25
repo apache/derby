@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -68,8 +67,6 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Loggable;
-import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.iapi.store.raw.PageKey;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -1736,7 +1733,7 @@ public class RAMTransaction
         {
             sort.drop(this);
             sorts.set((int) sortid, null);
-            freeSortIds.add(ReuseFactory.getInteger((int) sortid));
+            freeSortIds.add((int) sortid);
         }
     }
 

@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import org.apache.derby.catalog.UUID;
@@ -54,7 +53,6 @@ import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.vti.DeferModification;
 
 
@@ -821,7 +819,7 @@ class DeleteNode extends DMLModStatementNode
         FromTable fromTable = new FromBaseTable(
                 tableName,
                 null,
-                ReuseFactory.getInteger(FromBaseTable.DELETE),
+                FromBaseTable.DELETE,
                 null,
                 getContextManager());
 

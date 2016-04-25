@@ -36,6 +36,13 @@ import java.util.List;
  */
 public abstract class ArrayUtil
 {
+    /**
+     * An instance of an empty byte array. Since empty arrays are immutable,
+     * this instance can safely be shared. Code that needs an empty byte
+     * array can use this static instance instead of allocating a new one.
+     */
+    public final static byte[] EMPTY_BYTE_ARRAY = {};
+
 	///////////////////////////////////////////////////////////////////
 	//
 	// Methods to copy arrays.

@@ -504,7 +504,6 @@ org.apache.derby.iapi.util.InterruptStatus.class
 org.apache.derby.iapi.util.JBitSet.class
 org.apache.derby.iapi.util.Matchable.class
 org.apache.derby.iapi.util.PropertyUtil.class
-org.apache.derby.iapi.util.ReuseFactory.class
 org.apache.derby.iapi.util.StringUtil.class
 org.apache.derby.iapi.util.UTF8Util.class
 org.apache.derby.impl.db.BasicDatabase.class

@@ -78,7 +78,6 @@ import org.apache.derby.iapi.util.ByteArray;
 
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import java.util.Date;
@@ -2923,7 +2922,7 @@ public class BaseDataFileFactory
                     }
                 }
             }
-            return ReuseFactory.getLong( maxnum);
+            return maxnum;
 		} // end of case FIND_MAX_CONTAINER_ID_ACTION
 
         case DELETE_IF_EXISTS_ACTION:

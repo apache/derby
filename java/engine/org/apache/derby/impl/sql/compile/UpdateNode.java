@@ -55,7 +55,6 @@ import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.vti.DeferModification;
 
@@ -535,8 +534,7 @@ public final class UpdateNode extends DMLModGeneratedColumnsStatementNode
         else
         {
            rowLocationNode = new NumericConstantNode(
-                   TypeId.getBuiltInTypeId(Types.INTEGER),
-                   ReuseFactory.getInteger( 0),
+                   TypeId.getBuiltInTypeId(Types.INTEGER), 0,
                    getContextManager());
         }
             

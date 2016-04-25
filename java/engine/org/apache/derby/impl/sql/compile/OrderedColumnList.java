@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.HashSet;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.impl.sql.execute.IndexColumnOrder;
 
 /**
@@ -69,7 +68,7 @@ public abstract class OrderedColumnList<E extends OrderedColumn>
 			// order items (store) are 0-based.
 			int position = oc.getColumnPosition() - 1;
 
-			if (hashColumns.add(ReuseFactory.getInteger(position)))
+			if (hashColumns.add(position))
 			{
 				ordering[i] = new IndexColumnOrder(position,
 												oc.isAscending(),
