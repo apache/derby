@@ -86,7 +86,7 @@ public class Sed
         deleteLines.addElement("^.*at java.*\\<init\\>\\(.*\\(Compiled Code\\)\\)$");
         deleteLines.addElement("^(.*at .*)\\(Interpreted Code\\)$");
         deleteLines.addElement("^(.*at .*)\\(Unknown Source\\)$");
-        deleteLines.addElement("^(.*at .*)\\(Native Method\\)$");
+        deleteLines.addElement("^(.*at .*)\\(.*Native Method\\)$");
         deleteLines.addElement("^\\tat $"); // rare case of incomplete stack trace line
         deleteLines.addElement("optimizer estimated cost");
         deleteLines.addElement("optimizer estimated row count");

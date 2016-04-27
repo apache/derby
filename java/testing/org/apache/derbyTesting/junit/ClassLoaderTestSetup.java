@@ -24,7 +24,6 @@ import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import junit.framework.Test;
-import org.apache.derbyTesting.functionTests.tests.upgradeTests.UpgradeClassLoader;
 
 /**
  * A decorator that changes the context class loader for the current
@@ -45,13 +44,12 @@ public class ClassLoaderTestSetup extends BaseJDBCTestSetup {
         super(test);
     }
 
-    private static ClassLoader makeClassLoader(final ClassLoader old) {
+    private static ClassLoader makeClassLoader() {
         return AccessController.doPrivileged(
             new PrivilegedAction<URLClassLoader>() {
                 @Override
                 public URLClassLoader run() {
-                        URL[] jars = ((URLClassLoader)old).getURLs();
-                        return new URLClassLoader(jars, null);
+                    return new URLClassLoader(new URL[0]);
                 }
             });
     }
@@ -61,7 +59,7 @@ public class ClassLoaderTestSetup extends BaseJDBCTestSetup {
         super.setUp();
         TestConfiguration.getCurrent().shutdownEngine();
         oldLoader = getThreadLoader();
-        setThreadLoader(makeClassLoader(oldLoader));
+        setThreadLoader(makeClassLoader());
     }
 
     @Override

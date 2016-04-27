@@ -38,11 +38,17 @@ public class JavaVersionHolder
     public JavaVersionHolder(String javaVersion)
         throws java.lang.NumberFormatException
     {
-		// check for jdk12 or higher
-		int i = javaVersion.indexOf('.');
-		int j = javaVersion.indexOf('.', i+1);
-		majorVersion = javaVersion.substring(0, i);
-		try
+	// handle early access versions of JDK 9
+	if (javaVersion.startsWith( "9" ))
+	{
+	    javaVersion = "1.9.0";
+	}
+
+	// check for jdk12 or higher
+	int i = javaVersion.indexOf('.');
+	int j = javaVersion.indexOf('.', i+1);
+	majorVersion = javaVersion.substring(0, i);
+	try
 	    {
 		    Integer imajor = new Integer(majorVersion);
 		    major = imajor.intValue();
