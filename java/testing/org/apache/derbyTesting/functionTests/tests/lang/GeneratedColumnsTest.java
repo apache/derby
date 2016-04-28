@@ -5905,6 +5905,132 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
     }
 
+    public void test_6880_return_keys()
+            throws SQLException
+    {
+        Connection  conn = getConnection();
+        Statement s = createStatement();
+
+        s.execute("create table pipeline(" +
+                  "  id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY " +
+                  "     (START WITH 1, INCREMENT BY 1) primary key, " +
+                  "  name varchar(15) )");
+        s.execute("create table pipeline_command ( " +
+                  "  id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY " +
+                  "     (START WITH 1, INCREMENT BY 1) primary key, " +
+                  "  pipeline_id integer references pipeline(id)," +
+                  "  pguid varchar(40)," +
+                  "  command varchar(512)," +
+                  "  arguments varchar(512)," +
+                  "  status varchar(15) )");
+
+        s.execute("insert into pipeline (name) values 'minipipe'");
+        s.execute("insert into pipeline (name) values 'MegaPipe'");
+        s.execute("insert into pipeline (name) values 'piping hot'");
+
+        s.execute("insert into pipeline_command (pipeline_id, status) " +
+                  "  values (1, 'flowing')");
+        s.execute("insert into pipeline_command (pipeline_id, status) " +
+                  "  values (2, 'gushing')");
+        s.execute("insert into pipeline_command (pipeline_id, status) " +
+                  "  values (3, 'steaming')");
+
+        s.execute("create table emp_bonus(empno char(6),bonus decimal(9,2))");
+	for( int e = 1; e <= 30; e++ )
+            s.execute("insert into emp_bonus( empno, bonus ) values (" +
+	              "'" + e + "', " + ( e * 10 ) + ")");
+
+        PreparedStatement ustmt = conn.prepareStatement(
+                  "update pipeline_command set status = 'WAIT RESULT'" +
+                  "       where id = ?",
+                  Statement.RETURN_GENERATED_KEYS);
+
+	ustmt.setInt( 1, 2 );
+
+	// DERBY-6880: Throws an error : 
+	//     ERROR 22018: Invalid character string format for type long.
+	// With the UpdateResultSet code from DERBY-6742 backed out, Derby
+	// processes the query and returns a getGeneratedKeys result set with
+	// a value of 0 for the only column in the only row.
+	//
+	ustmt.executeUpdate();
+	JDBC.assertFullResultSet( ustmt.getGeneratedKeys(),
+                new String[][] {{"0"}});
+        ustmt.close();
+
+	// On other systems, this variation causes getGeneratedKeys
+	// to return a result set containing the ID = 2 value. Derby processes
+	// the query, and returns a getGeneratedKeys result set with a value
+	// of 0 for the only column in the only row.
+	//
+        ustmt = conn.prepareStatement(
+                  "update pipeline_command set status = 'SECOND RESULT'" +
+                  "       where id = ?",
+                  new String[]{"ID"});
+	ustmt.setInt( 1, 2 );
+	ustmt.executeUpdate();
+	JDBC.assertFullResultSet( ustmt.getGeneratedKeys(),
+                new String[][] {{"0"}});
+        ustmt.close();
+
+	// Note that the case of the column names is significant, even though
+	// non-delimited column names are typically case-insensitive
+	//
+	try {
+            ustmt = conn.prepareStatement(
+                  "update pipeline_command set status = 'SECOND RESULT'" +
+                  "       where id = ?",
+                  new String[]{"id"});
+	    ustmt.setInt( 1, 2 );
+	    ustmt.executeUpdate();
+	} catch (SQLException se ) {
+	    assertSQLState( "X0X0F", se );
+	}
+        ustmt.close();
+
+	// Try specifying a non-generated column in the column list parameter.
+	// Derby considers this to be a (runtime) error.
+	//
+	try {
+            ustmt = conn.prepareStatement(
+                  "update pipeline_command set status = 'THIRD RESULT'" +
+                  "       where id = ?",
+                  new String[]{"STATUS"});
+	    ustmt.setInt( 1, 2 );
+	    ustmt.executeUpdate();
+	} catch (SQLException se ) {
+	    assertSQLState( "X0X0F", se );
+	}
+        ustmt.close();
+
+	// Another attempt at specifying a non-generated column list. Derby
+	// considers this to be an error, but other systems (DB2, at least)
+	// allow the empno column to be classified as a auto-generated key
+	// for the purposes of this query, apparently.
+	//
+	try {
+            ustmt = conn.prepareStatement(
+                  "update emp_bonus set bonus=bonus+300.0",
+                  new String[]{"empno"});
+	    ustmt.executeUpdate();
+	} catch (SQLException se ) {
+	    assertSQLState( "X0X0F", se );
+	}
+        ustmt.close();
+
+	try {
+            ustmt = conn.prepareStatement(
+                  "update emp_bonus set bonus=bonus+300.0",
+                  new String[]{"EMPNO"});
+	    ustmt.executeUpdate();
+	} catch (SQLException se ) {
+	    assertSQLState( "X0X0F", se );
+	}
+        ustmt.close();
+
+        s.close();
+    }
+
     /**
      * Verify that generated columns can be used even if the schema in which
      * the generated column was added does not exist. Regression test case
