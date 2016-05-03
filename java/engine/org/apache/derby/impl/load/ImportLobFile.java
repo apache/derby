@@ -128,10 +128,10 @@ class ImportLobFile
      * @param length  length of the the data.
      * @exception  IOException  on any I/O error.     
      */
-    public String getString(int offset, int length) throws IOException {
+    public String getString(long offset, int length) throws IOException {
         lobInputStream.seek(offset);
         lobLimitIn.clearLimit();
-        lobLimitIn.setLimit((int) length);
+        lobLimitIn.setLimit(length);
         
         // wrap a reader on top of the stream, so that calls 
         // to read the clob data from the file can read the 

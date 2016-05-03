@@ -50,6 +50,7 @@ public class _Suite extends BaseJDBCTestCase {
         suite.addTest(LobLimitsLiteTest.suite());
         suite.addTest(LobLimitsTest.suite());
         suite.addTest(LobLimitsClientTest.suite());
+        suite.addTest(Derby6884Test.suite());
         return suite;
     }
 }

@@ -501,6 +501,7 @@ org.apache.derbyTesting.functionTests.tests.largedata.BlobImplT.class
 org.apache.derbyTesting.functionTests.tests.largedata.ClobImplT.class
 org.apache.derbyTesting.functionTests.tests.largedata.Derby5624Test.class
 org.apache.derbyTesting.functionTests.tests.largedata.Derby6317Test.class
+org.apache.derbyTesting.functionTests.tests.largedata.Derby6884Test.class
 org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsClientTest.class
 org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsLiteTest.class
 org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsTest.class

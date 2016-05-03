@@ -108,7 +108,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
   // variables realted to reading lob data from files.
   private ImportLobFile[] lobFileHandles; // lob file handle object 
   private String lobFileName; // current file name
-  private int lobOffset; // offset of the current large object
+  private long lobOffset; // offset of the current large object
   private int lobLength; //length of the current large object
 
 
@@ -1037,7 +1037,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
         lobLength = Integer.parseInt(lobLocationStr.substring(
                                      lengthIndex + 1, 
                                      lobLocationStr.length() -1));
-        lobOffset = Integer.parseInt(lobLocationStr.substring(
+        lobOffset = Long.parseLong(lobLocationStr.substring(
                                      offsetIndex+1, 
                                      lengthIndex));
         lobFileName = lobLocationStr.substring(0 , offsetIndex);
