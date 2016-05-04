@@ -40,13 +40,13 @@ public class T_Key  {
 	private boolean   raiseException;
 
 	public static T_Key		simpleInt(int value) {
-		return new T_Key(new Integer(value), 0, true, false);
+		return new T_Key(value, 0, true, false);
 	}
 	public static T_Key		dontFindInt(int value) {
-		return new T_Key(new Integer(value), 0, false, false);
+		return new T_Key(value, 0, false, false);
 	}
 	public static T_Key		exceptionInt(int value) {
-		return new T_Key(new Integer(value), 0, true, true);
+		return new T_Key(value, 0, true, true);
 	}
 	
 	/**
@@ -59,9 +59,9 @@ public class T_Key  {
 		T_Key tkey = new T_Key();
 
 		if (rand < 0.48)
-			tkey.value = new Integer((int) (100.0 * rand));
+			tkey.value = (int) (100.0 * rand);
 		else if (rand < 0.96)
-			tkey.value = new Integer((int) (100.0 * rand));
+			tkey.value = (int) (100.0 * rand);
 		else
 			tkey.value = Boolean.FALSE;
 

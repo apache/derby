@@ -1214,7 +1214,7 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              }
              );
     }
-    private static Integer i( int intValue ) { return new Integer( intValue ); }
+    private static Integer i( int intValue ) { return intValue; }
 
     public static IntegerArrayVTI integerListSpecialColNames()
     {

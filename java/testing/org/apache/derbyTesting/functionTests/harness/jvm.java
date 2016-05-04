@@ -270,9 +270,9 @@ public abstract class jvm {
 		int j = javaVersion.indexOf('.', i+1);
 		majorVersion = javaVersion.substring(0, i);
 		minorVersion = javaVersion.substring(i+1, j);
-		Integer minor = new Integer(minorVersion);
+		Integer minor = Integer.valueOf(minorVersion);
 		iminor = minor.intValue();
-		Integer major = new Integer(majorVersion);
+		Integer major = Integer.valueOf(majorVersion);
 		imajor = major.intValue();
 		
 		String jvmName = System.getProperty("jvm");

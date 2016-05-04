@@ -419,11 +419,11 @@ public class TestUtil {
 			if (argType  == INT_ARG_TYPE)
 			{
 				args = new Integer[] 
-				{ new Integer(Integer.parseInt(value)) };	
+				{ Integer.valueOf(value) };	
 			}
 			else if (argType  == BOOLEAN_ARG_TYPE)
 			{
-				args = new Boolean[] { new Boolean(value) };	
+				args = new Boolean[] { Boolean.valueOf(value) };	
 			}
 			else if (argType == STRING_ARG_TYPE)
 			{

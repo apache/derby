@@ -83,7 +83,7 @@ public class ClobMemTest extends BaseJDBCTestCase {
                 println("Skipping lengthless insert because method is not available");
                 return;
             }
-            m.invoke(ps, new Object[] {new Integer(2), reader});
+            m.invoke(ps, new Object[] {2, reader});
         }
         else
             ps.setCharacterStream(2, reader, LONG_CLOB_LENGTH);

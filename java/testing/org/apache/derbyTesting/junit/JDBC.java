@@ -1024,7 +1024,7 @@ public class JDBC {
 	            Assert.assertEquals
                     ("Types do not match for parameter " + (i+1),
                      expectedTypes[i],
-                     ((Integer) getParameterType.invoke( pmd, new Object[] { new Integer( i + 1 ) } )).intValue()
+                     ((Integer) getParameterType.invoke( pmd, new Object[] { i + 1 } )).intValue()
                      );
 	        }
 	    }

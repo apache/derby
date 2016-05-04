@@ -106,10 +106,10 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,1);
 			expectedTypes=new int[] {Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")},
-										{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")},
-										{new Integer(3),new Integer(3),new Double(3.1),new String("ghi")},
-										{new Integer(-1),new Integer(-1),new Double(-1.0),new String("jkl")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
+										{-1,-1,-1.0,new String("def")},
+										{3,3,3.1,new String("ghi")},
+										{-1,-1,-1.0,new String("jkl")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps =prepareStatement("select * from t1 where c11 = -? and c12 = +? and c13 = ?");
 			ps.setInt(1,-1);
@@ -117,14 +117,14 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setDouble(3,1.1);
 			expectedTypes= new int[]{Types.INTEGER, Types.SMALLINT,Types.DOUBLE};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")}};
+			expectedRows = new Object[][]{{1,1,1.1,new String("abc")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			
 			ps.setShort(1,(short) 1);
 			ps.setInt(2,-1);		
 			ps.setInt(3,-1);
-			expectedRows = new Object[][]{{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")},
-										{new Integer(-1),new Integer(-1),new Double(-1.0),new String("jkl")}};
+			expectedRows = new Object[][]{{-1,-1,-1.0,new String("def")},
+										{-1,-1,-1.0,new String("jkl")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps.close();
 			}
@@ -140,8 +140,8 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,1);
 			int[] expectedTypes= new int[]{Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")},
-										{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
+										{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps.close();
 			s.execute("Drop function ABS_FUNCT" );
@@ -158,8 +158,8 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,1);
 			int[] expectedTypes= new int[]{Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")},
-					{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
+					{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			
 			ps = prepareStatement("select * from t1 where -? = max_cni(-?,+?)");
@@ -192,7 +192,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,1);
 			int[] expectedTypes= new int[]{Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps.close();
 		}
@@ -208,8 +208,8 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(4,4);
 			int[] expectedTypes= new int[]{Types.INTEGER,Types.INTEGER, Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")},
-										{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")},
+										{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 						
 			ps = prepareStatement("select * from t1 where -? not in (select c21+? from t2)");
@@ -229,7 +229,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(1,0);
 			int[] expectedTypes=new int[]{Types.SMALLINT};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer(1),new Integer(1),new Double(1.1),new String("abc")}};
+			Object[][] expectedRows = new Object[][]{{1,1,1.1,new String("abc")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 
 			ps = prepareStatement("select * from t1 where -? = c11 + ?");
@@ -237,7 +237,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,-1);
 			expectedTypes = new int[]{Types.INTEGER,Types.INTEGER};
 			JDBC.assertParameterTypes(ps,expectedTypes);
-			expectedRows = new Object[][]{{new Integer(-1),new Integer(-1),new Double(-1.0),new String("def")}};
+			expectedRows = new Object[][]{{-1,-1,-1.0,new String("def")}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 
 			ps = prepareStatement("select * from t1 where c11 + ? = -?");
@@ -303,7 +303,7 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			ps.setInt(2,22);
 			int[] expectedTypes = new int[]{Types.INTEGER,Types.SMALLINT};
 			JDBC.assertParameterTypes(ps, expectedTypes);
-			Object[][] expectedRows = new Object[][]{{new Integer("1")},{new Integer("-22")}};
+			Object[][] expectedRows = new Object[][]{{1},{-22}};
 			JDBC.assertFullResultSet(ps.executeQuery(), expectedRows, false);
 			ps.close();
 		}

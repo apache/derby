@@ -42,7 +42,7 @@ public class BackgroundStreamDrainer implements Runnable
         this.startTime = System.currentTimeMillis();;
         if (timemin != null)
         {
-            Integer i = new Integer(timemin);
+            Integer i = Integer.valueOf(timemin);
             timeout = i.intValue();
         }
         else

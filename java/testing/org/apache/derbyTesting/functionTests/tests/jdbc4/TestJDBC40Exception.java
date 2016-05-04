@@ -121,7 +121,7 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
         // DERBY-3075
         if (usingDerbyNetClient()) {
         	DataSource ds = JDBCDataSource.getDataSource();
-        	JDBCDataSource.setBeanProperty(ds, "portNumber", new Integer(0));
+        	JDBCDataSource.setBeanProperty(ds, "portNumber", 0);
         	try {
         		ds.getConnection();
         	} catch (SQLNonTransientConnectionException cone) {

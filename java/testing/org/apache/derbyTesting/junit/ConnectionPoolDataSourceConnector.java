@@ -71,7 +71,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
         // Note that this does not automatically test the pooling itself, but it
         // should test basic JDBC operations on the logical wrapper classes.
         try {
-            J2EEDataSource.setBeanProperty(ds, "maxStatements", new Integer(2));
+            J2EEDataSource.setBeanProperty(ds, "maxStatements", 2);
         } catch (AssertionFailedError afe) {
             // Ignore this, it will fail later if it is an actual error.
             // An assertion error will be thrown every time until statement

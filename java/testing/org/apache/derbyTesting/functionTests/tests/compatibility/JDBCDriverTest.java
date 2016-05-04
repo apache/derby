@@ -136,23 +136,23 @@ public class JDBCDriverTest
     {
         // 10.0 columns
 
-        new Long( 1L ),
+        1L,
         new DummyBlob( SAMPLE_BYTES ),
         SAMPLE_STRING,
         SAMPLE_BYTES,
         new DummyClob( SAMPLE_STRING ),
         new java.sql.Date( 1L ),
         new BigDecimal( 1.0 ),
-        new Double( 1.0 ),
-        new Double( 1.0 ),
-        new Float( (float) 1.0 ),
-        new Double( 1.0 ),
-        new Integer( 1 ),
+        1.0,
+        1.0,
+        (float) 1.0,
+        1.0,
+        1,
         SAMPLE_STRING,
         SAMPLE_BYTES,
         new BigDecimal( 1.0 ),
-        new Float( (float) 1.0 ),
-        new Short( (short) 1 ),
+        (float) 1.0,
+        (short) 1,
         new Time( 1L ),
         new Timestamp( 1L ),
         SAMPLE_STRING,
@@ -329,7 +329,7 @@ public class JDBCDriverTest
         }
         else
         {
-            objectValue = expectedValue ? new Integer( 1 ) : new Integer( 0 );
+            objectValue = expectedValue ? 1 : 0;
         }
         String stringValue = objectValue.toString();
 
@@ -1069,7 +1069,7 @@ public class JDBCDriverTest
     }
     private    void    putCoercionIndex( int index )
     {
-        _coercionIndex.put( new Integer( COERCIONS[ index ].getJdbcType() ), new Integer( index ) );
+        _coercionIndex.put( COERCIONS[ index ].getJdbcType(), index );
     }
 
     //
@@ -1079,7 +1079,7 @@ public class JDBCDriverTest
     {
         if ( _coercionIndex.isEmpty() ) { buildCoercionMap(); }
 
-        return ((Integer) _coercionIndex.get( new Integer( jdbcType ) )).intValue();
+        return ((Integer) _coercionIndex.get( jdbcType )).intValue();
     }
 
     /////////////////////////////////////////////////////////////

@@ -1827,9 +1827,9 @@ public class GroupByTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(
 				rs,
 				new Object[][]{
-						{new Double(3), new Integer(4)},
-						{new Double(4), new Integer(2)},
-						{new Double(7), new Integer(1)}},
+						{3.0, 4},
+						{4.0, 2},
+						{7.0, 1}},
 				false);
 
 		rs = s.executeQuery(
@@ -1839,9 +1839,9 @@ public class GroupByTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(
 				rs,
 				new Object[][]{
-						{new Double(7), new Integer(1)},
-						{new Double(4), new Integer(2)},
-						{new Double(3), new Integer(4)}},
+						{7.0, 1},
+						{4.0, 2},
+						{3.0, 4}},
 				false);
 	}
     

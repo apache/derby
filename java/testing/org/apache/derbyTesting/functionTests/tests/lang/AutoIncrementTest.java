@@ -252,7 +252,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		//-- table with one generated column spec should succeed
 		ResultSet rs;
 		Statement s = createStatement();
-		Integer i=new Integer(1);
+		Integer i= 1;
 
 		while (i.intValue()< 11)
 		{
@@ -265,7 +265,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 			mysql="insert into ai_single4 (i) values ("+i.toString()+")";
 			s.executeUpdate(mysql);
 			int j=i.intValue()+1;
-			i=new Integer(j);
+			i= j;
 		}
 		rs = s.executeQuery("select a.i, a0, a1, a2, a3 from ai_single1 a join ai_single2 b on a.i = b.i join ai_single3 c on a.i = c.i join ai_single4 d on a.i = d.i order by a.i");
 		String[][]expectedRows=new String[][]{{"1","-1","1","0","-100"},{"2","-2","2","1","-90"},

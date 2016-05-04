@@ -94,7 +94,7 @@ public class T_QualifierTest
         int key_val = expect_key;
         for (int i = 0; i < expect_numrows; i++)
         {
-            set.add(new Long(key_val));
+          set.add((long)key_val);
 			if (order == ORDER_DESC)
 				key_val--;
 			else
@@ -273,7 +273,7 @@ public class T_QualifierTest
             }
             else
             {
-                if (!set.remove(new Long(key)))
+                if (!set.remove(key))
                 {
                     return(
                         fail("(t_scanNext) wrong key, expected (" + 
@@ -460,7 +460,7 @@ public class T_QualifierTest
             }
             else
             {
-                if (!set.remove(new Long(key)))
+                if (!set.remove(key))
                 {
                     return(
                         fail("(t_scanFetchNext) wrong key, expected (" + 
@@ -651,7 +651,7 @@ public class T_QualifierTest
                 }
                 else
                 {
-                    if (!set.remove(new Long(key)))
+                    if (!set.remove(key))
                     {
                         return(fail(
                             "(t_scanFetchNextGroup-forward) wrong key, expected (" + 
@@ -868,7 +868,7 @@ public class T_QualifierTest
             }
             else
             {
-                if (!set.remove(new Long(key)))
+                if (!set.remove(key))
                 {
                     return(
                         fail("(t_scanFetchNext) wrong key, expected (" + 
@@ -1035,7 +1035,7 @@ public class T_QualifierTest
                 row = (DataValueDescriptor[] ) obj;
                 key = ((SQLLongint)(row[2])).getLong();
 
-                if (!set.remove(new Long(key)))
+                if (!set.remove(key))
                 {
                     return(
                         fail("(t_scanFetchHashtable-obj) wrong key, expected (" + 
@@ -1054,7 +1054,7 @@ public class T_QualifierTest
 
                     key = ((SQLLongint)(row[2])).getLong();
 
-                    if (!set.remove(new Long(key)))
+                    if (!set.remove(key))
                     {
                         return(fail(
                             "(t_scanFetchHashtable-vector) wrong key, expected (" + 

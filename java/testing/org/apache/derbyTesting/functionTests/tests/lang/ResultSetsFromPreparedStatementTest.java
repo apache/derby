@@ -55,26 +55,26 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
 {
     // ---------------------------------------------------------------
     // Data model (taken from lang/refActions1.sql)
-    public static final Integer i1 = new Integer(1);
-    public static final Integer i2 = new Integer(2);
-    public static final Integer i3 = new Integer(3);
-    public static final Integer i4 = new Integer(4);
-    public static final Integer i5 = new Integer(5);
-    public static final Integer i6 = new Integer(6);
-    public static final Integer i7 = new Integer(7);
-    public static final Integer i8 = new Integer(8);
-    public static final Integer i9 = new Integer(9);
-    public static final Integer i10 = new Integer(10);
-    public static final Integer i11 = new Integer(11);
-    public static final Integer i12 = new Integer(12);
-    public static final Integer i13 = new Integer(13);
-    public static final Integer i14 = new Integer(14);
-    public static final Integer i15 = new Integer(15);
-    public static final Integer i16 = new Integer(16);
-    public static final Integer i17 = new Integer(17);
-    public static final Integer i18 = new Integer(18);
-    public static final Integer i19 = new Integer(19);
-    public static final Integer i20 = new Integer(20);
+    public static final Integer i1 = 1;
+    public static final Integer i2 = 2;
+    public static final Integer i3 = 3;
+    public static final Integer i4 = 4;
+    public static final Integer i5 = 5;
+    public static final Integer i6 = 6;
+    public static final Integer i7 = 7;
+    public static final Integer i8 = 8;
+    public static final Integer i9 = 9;
+    public static final Integer i10 = 10;
+    public static final Integer i11 = 11;
+    public static final Integer i12 = 12;
+    public static final Integer i13 = 13;
+    public static final Integer i14 = 14;
+    public static final Integer i15 = 15;
+    public static final Integer i16 = 16;
+    public static final Integer i17 = 17;
+    public static final Integer i18 = 18;
+    public static final Integer i19 = 19;
+    public static final Integer i20 = 20;
 
     public static final String k55 = "K55";
     public static final String k52 = "K52";
@@ -598,7 +598,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             ("values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY"+
              "('some.property.name')");
         for (int i = 0; i < 20; ++i) {
-            final Integer I = new Integer(i);
+            final Integer I = i;
             cs.setObject(2, I);
             cs.execute();
             ResultSet rs = ps.executeQuery();
@@ -815,7 +815,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         };
 
         for (int i = 0; i < expected.length; ++i) {
-            tst.setString(1, new Integer(i).toString()+"_");
+            tst.setString(1, Integer.toString(i) +"_");
             ResultSet rs = tst.executeQuery();
             assertResultSet("?="+i+"_", expected[i], rs);
 
@@ -893,7 +893,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             {{ null }}
         };
         for (int i = 0; i < expected.length; ++i) {
-            tst.setString(1,new Integer(i) +"_");
+            tst.setString(1,Integer.toString(i) +"_");
             ResultSet rs = tst.executeQuery();
             JDBC.assertUnorderedResultSet(rs, expected[i], false);
 
@@ -1028,7 +1028,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                                                        PreparedStatement del)
             throws SQLException
     {
-        final Integer i0 = new Integer(0);
+        final Integer i0 = 0;
         Object[][][][] expected = new Object[][][][] {
             {
                 {{ i1, k51 },{ i2, k52 }},

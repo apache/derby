@@ -2774,7 +2774,7 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         // Try the direct way first, by looking for 'sun.arch.data.model'
         String dataModel = getSystemProperty("sun.arch.data.model");
         try {
-            if (new Integer(dataModel).intValue() == 64)
+            if (Integer.parseInt(dataModel) == 64)
                 return true;
             else 
                 return false;

@@ -557,11 +557,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 		switch( jdbcType )
 		{
 		    case JDBC_BOOLEAN:
-				retval = new Boolean( rs.getBoolean( columnName ) );
+				retval = rs.getBoolean( columnName );
 				break;
 				
 		    case Types.BIGINT:
-				retval = new Long( rs.getLong( columnName ) );
+				retval = rs.getLong( columnName );
 				break;
 				
 		    case Types.BLOB:
@@ -594,19 +594,19 @@ public	class	DerbyJUnitTest	extends	TestCase
 				break;
 				
 		    case Types.DOUBLE:
-				retval = new Double( rs.getDouble( columnName ) );
+				retval = rs.getDouble( columnName );
 				break;
 				
 		    case Types.REAL:
-				retval = new Float( rs.getFloat( columnName ) );
+				retval = rs.getFloat( columnName );
 				break;
 				
 		    case Types.INTEGER:
-				retval = new Integer( rs.getInt( columnName ) );
+				retval = rs.getInt( columnName );
 				break;
 				
 		    case Types.SMALLINT:
-				retval = new Short( rs.getShort( columnName ) );
+				retval = rs.getShort( columnName );
 				break;
 				
 		    case Types.TIME:
@@ -647,13 +647,13 @@ public	class	DerbyJUnitTest	extends	TestCase
 		{
 			retval = rs.getObject( param );
 		}
-		else if ( value instanceof Boolean ) { retval = new Boolean( rs.getBoolean( param ) ); }
-		else if ( value instanceof Byte ) { retval = new Byte( rs.getByte( param ) ); }
-		else if ( value instanceof Short ) { retval = new Short( rs.getShort( param ) ); }
-		else if ( value instanceof Integer ) { retval = new Integer( rs.getInt( param ) ); }
-		else if ( value instanceof Long ) { retval = new Long( rs.getLong( param ) ); }
-		else if ( value instanceof Float ) { retval = new Float( rs.getFloat( param ) ); }
-		else if ( value instanceof Double ) { retval = new Double( rs.getDouble( param ) ); }
+		else if ( value instanceof Boolean ) { retval = rs.getBoolean( param ); }
+		else if ( value instanceof Byte ) { retval = rs.getByte( param ); }
+		else if ( value instanceof Short ) { retval = rs.getShort( param ); }
+		else if ( value instanceof Integer ) { retval = rs.getInt( param ); }
+		else if ( value instanceof Long ) { retval = rs.getLong( param ); }
+		else if ( value instanceof Float ) { retval = rs.getFloat( param ); }
+		else if ( value instanceof Double ) { retval = rs.getDouble( param ); }
 		else if ( value instanceof String ) { retval = rs.getString( param ); }
 		else if ( value instanceof BigDecimal ) { retval = rs.getBigDecimal( param ); }
 		else { retval = rs.getObject( param ); }
@@ -678,11 +678,11 @@ public	class	DerbyJUnitTest	extends	TestCase
 		switch( jdbcType )
 		{
 		    case JDBC_BOOLEAN:
-				retval = new Boolean( cs.getBoolean( arg ) );
+				retval = cs.getBoolean( arg );
 				break;
 				
 		    case Types.BIGINT:
-				retval = new Long( cs.getLong( arg ) );
+				retval = cs.getLong( arg );
 				break;
 				
 		    case Types.BLOB:
@@ -715,19 +715,19 @@ public	class	DerbyJUnitTest	extends	TestCase
 				break;
 				
 		    case Types.DOUBLE:
-				retval = new Double( cs.getDouble( arg ) );
+				retval = cs.getDouble( arg );
 				break;
 				
 		    case Types.REAL:
-				retval = new Float( cs.getFloat( arg ) );
+				retval = cs.getFloat( arg );
 				break;
 				
 		    case Types.INTEGER:
-				retval = new Integer( cs.getInt( arg ) );
+				retval = cs.getInt( arg );
 				break;
 				
 		    case Types.SMALLINT:
-				retval = new Short( cs.getShort( arg ) );
+				retval = cs.getShort( arg );
 				break;
 				
 		    case Types.TIME:

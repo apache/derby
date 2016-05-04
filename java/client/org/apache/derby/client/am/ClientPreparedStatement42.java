@@ -90,7 +90,7 @@ public class  ClientPreparedStatement42 extends ClientPreparedStatement
         {
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry
-                    ( this, "setObject", new Integer( parameterIndex ), x, targetSqlType, new Integer( scaleOrLength ) );
+                    ( this, "setObject", parameterIndex, x, targetSqlType, scaleOrLength );
             }
             
             checkStatus();

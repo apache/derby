@@ -104,7 +104,7 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
 
     private static  ColumnDesc[]    _columnDescs =
     {
-        new ColumnDesc( JDBCType.BIGINT, "bigint", new Long( 0L ), new Long( 1L ), null ),
+        new ColumnDesc( JDBCType.BIGINT, "bigint", 0L, 1L, null ),
         new ColumnDesc( JDBCType.BLOB, "blob", makeBlob( "01234" ), makeBlob( "56789" ), null ),
         new ColumnDesc( JDBCType.BOOLEAN, "boolean", Boolean.FALSE, Boolean.TRUE, null ),
         new ColumnDesc( JDBCType.CHAR, "char( 5 )", "01234", "56789", null ),
@@ -112,14 +112,14 @@ public class PreparedStatementTest42 extends BaseJDBCTestCase
         new ColumnDesc( JDBCType.CLOB, "clob", makeClob( "01234" ), makeClob( "56789" ), null ),
         new ColumnDesc( JDBCType.DATE, "date", new Date( 0L ), new Date( 1L ), null ),
         new ColumnDesc( JDBCType.DECIMAL, "decimal", new BigDecimal( 0 ), new BigDecimal( 1 ), null ),
-        new ColumnDesc( JDBCType.DOUBLE, "double", new Double( 0.0 ), new Double( 1.0 ), null ),
-        new ColumnDesc( JDBCType.FLOAT, "float", new Double( 0.0 ), new Double( 1.0 ), null ),
-        new ColumnDesc( JDBCType.INTEGER, "int", new Integer( 0 ), new Integer( 1 ), null ),
+        new ColumnDesc( JDBCType.DOUBLE, "double", 0.0, 1.0, null ),
+        new ColumnDesc( JDBCType.FLOAT, "float", 0.0, 1.0, null ),
+        new ColumnDesc( JDBCType.INTEGER, "int", 0, 1, null ),
         new ColumnDesc( JDBCType.LONGVARCHAR, "long varchar", "01234", "56789", null ),
         new ColumnDesc( JDBCType.LONGVARBINARY, "long varchar for bit data", makeBinary( "01234" ), makeBinary( "56789" ), null ),
         new ColumnDesc( JDBCType.NUMERIC, "numeric", new BigDecimal( 0 ), new BigDecimal( 1 ), null ),
-        new ColumnDesc( JDBCType.REAL, "real", new Float( 0.0F ), new Float( 1F ), null ),
-        new ColumnDesc( JDBCType.SMALLINT, "smallint", new Integer( 0 ), new Integer( 1 ), null ),
+        new ColumnDesc( JDBCType.REAL, "real", 0.0F, 1F, null ),
+        new ColumnDesc( JDBCType.SMALLINT, "smallint", 0, 1, null ),
         new ColumnDesc( JDBCType.TIME, "time", new Time( 0L ), new Time( 1L ), null ),
         new ColumnDesc( JDBCType.TIMESTAMP, "timestamp", new Timestamp( 0L ), new Timestamp( 1L ), null ),
         new ColumnDesc( JDBCType.JAVA_OBJECT, "Price", makePrice( 0L ), makePrice( 1L ), null ),

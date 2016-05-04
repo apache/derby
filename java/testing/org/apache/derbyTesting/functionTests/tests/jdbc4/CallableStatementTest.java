@@ -801,21 +801,21 @@ public class CallableStatementTest  extends Wrapper41Test
         float   floatValue = 1.0F;
         String lobValue = "abc";
 
-        bigintarg[0] = _nullOutArgs ? null : new Long( intValue );
+        bigintarg[0] = _nullOutArgs ? null : (long) intValue;
         blobarg[0] = _nullOutArgs ? null : new HarmonySerialBlob( BINARY_VALUE );
         booleanarg[0] = _nullOutArgs ? null : Boolean.TRUE;
         chararg[0] = _nullOutArgs ? null : stringValue;
         charforbitdataarg[0] = _nullOutArgs ? null : BINARY_VALUE;
         clobarg[0] = _nullOutArgs ? null : new HarmonySerialClob( lobValue );
         datearg[0]= _nullOutArgs ? null : new Date( 761990400000L );
-        doublearg[0] = _nullOutArgs ? null : new  Double( floatValue );
-        floatarg[0] = _nullOutArgs ? null : new Double( floatValue );
-        intarg[0] = _nullOutArgs ? null : new Integer( intValue );
+        doublearg[0] = _nullOutArgs ? null : (double) floatValue;
+        floatarg[0] = _nullOutArgs ? null : (double) floatValue;
+        intarg[0] = _nullOutArgs ? null : (int) intValue;
         longvarchararg[0] = _nullOutArgs ? null : stringValue;
         longvarcharforbitdataarg[0] =  _nullOutArgs ? null : BINARY_VALUE;
         numericarg[0] = _nullOutArgs ? null : new BigDecimal( "1.0" );
-        realarg[0] = _nullOutArgs ? null : new Float( floatValue );
-        smallintarg[0] = _nullOutArgs ? null : new Integer( intValue );
+        realarg[0] = _nullOutArgs ? null : (float) floatValue;
+        smallintarg[0] = _nullOutArgs ? null : (int) intValue;
         timearg[0] = _nullOutArgs ? null : new Time(TIME_VALUE);
         timestamparg[0] = _nullOutArgs ? null : new Timestamp(TIMESTAMP_VALUE);
         varchararg[0] = _nullOutArgs ? null : stringValue;

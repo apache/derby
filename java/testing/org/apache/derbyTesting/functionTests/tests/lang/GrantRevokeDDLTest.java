@@ -10208,9 +10208,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             { "values exists(select 1 from user1.t4191)",  new String[][] {{"false"}} },
             { "values exists(select * from user1.t4191)",  new String[][] {{"false"}} },
             { "select count(*) from (select 1 from user1.t4191) s", new String[][] {{"0"}} },
-            { "insert into user1.t4191_table3 select 1, 2 from user1.t4191", new Integer(0) },
-            { "update user1.t4191_table3 set c31 = 1 where exists (select * from user1.t4191)", new Integer(0) },
-            { "delete from user1.t4191_table3 where exists (select * from user1.t4191)", new Integer(0) },
+            { "insert into user1.t4191_table3 select 1, 2 from user1.t4191", 0 },
+            { "update user1.t4191_table3 set c31 = 1 where exists (select * from user1.t4191)", 0 },
+            { "delete from user1.t4191_table3 where exists (select * from user1.t4191)", 0 },
         };
 
         for (int i = 0; i < requireMinimumSelectPrivilege.length; i++) {

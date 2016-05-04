@@ -149,7 +149,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       		//parameter 3 is output only
       		cs.registerOutParameter(3,Types.INTEGER);
       		// parameter 4 is input and output
-      		Object x = new Integer(1);
+      		Object x = 1;
       		cs.setObject(4,x, Types.INTEGER);
       		cs.registerOutParameter(4,Types.INTEGER);
 
@@ -604,7 +604,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                	cs.setInt(1,1);
         	cs.setInt(2,1);
 		// parameter 3 is input and output
-                Object x = new Integer(1);
+                Object x = 1;
                 cs.setObject(3,x, Types.INTEGER);
                 cs.registerOutParameter(3,Types.INTEGER);
                	//parameter 4 is output only

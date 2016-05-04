@@ -113,9 +113,9 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 
 					for (int j = 0; j < 5; j++) {
 						pstmt.setInt(1 + k, i + (4 - j));
-						pstmt.setString(2 + k, new Integer(i).toString());
+						pstmt.setString(2 + k, Integer.toString(i));
 						pstmt.setInt(3 + k, i + j);
-						pstmt.setString(4 + k, new Integer(i).toString());
+						pstmt.setString(4 + k, Integer.toString(i));
 						pstmt.setInt(5 + k, i);
 						pstmt.setString(6 + k, largeString);
 

@@ -361,14 +361,14 @@ public class SURQueryMixTest extends SURBaseTest
                 String rowString = getRowString(rs);
                 assertEquals("Navigating with rs.previous(). The row is " +
                              "different compared to the value when navigating " +
-                             "forward.", rows.get(new Integer(i)), rowString);
+                             "forward.", rows.get(i), rowString);
                 
                 
-                if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
+                if (checkRowUpdated && updatedRows.contains(i)) {
                     assertTrue("Expected rs.rowUpdated() to return true on " + 
                                "updated row " + rowString, rs.rowUpdated());
                 } 
-                if (checkRowDeleted && deletedRows.contains(new Integer(i))) {
+                if (checkRowDeleted && deletedRows.contains(i)) {
                     assertTrue("Expected rs.rowDeleted() to return true on " + 
                                "deleted row " + rowString, rs.rowDeleted());
                 } 
@@ -382,13 +382,13 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.absolute(). The row is " +
                          "different compared to the value" +
                          " when navigating forward.", 
-                         rows.get(new Integer(i)),
+                         rows.get(i),
                          rowString);
-            if (checkRowUpdated && updatedRows.contains(new Integer(i))) {
+            if (checkRowUpdated && updatedRows.contains(i)) {
                 assertTrue("Expected rs.rowUpdated() to return true on " +
                            "updated row " + rowString, rs.rowUpdated());
             }
-            if (checkRowDeleted && deletedRows.contains(new Integer(i))) {
+            if (checkRowDeleted && deletedRows.contains(i)) {
                 assertTrue("Expected rs.rowDeleted() to return true on " +
                            "deleted row " + rowString, rs.rowDeleted());
             }
@@ -419,7 +419,7 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.relative(+). " +
                          "A tuple was different compared to the value" +
                          " when navigating forward.", 
-                         rows.get(new Integer(relativePos)),
+                         rows.get(relativePos),
                          getRowString(rs));
             
             assertTrue("Unexpected return from relative()", 
@@ -431,7 +431,7 @@ public class SURQueryMixTest extends SURBaseTest
             assertEquals("Navigating with rs.relative(-). " + 
                          "A tuple was different compared to the value" +
                          " when navigating forward.", 
-                         rows.get(new Integer(1)),
+                         rows.get(1),
                          getRowString(rs));
             
         }

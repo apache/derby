@@ -3329,17 +3329,17 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 2);
 
         // DERBY-1500: setObject() should work for Byte and Short too.
-        setXXX_setObject(s, psi, psq, type, new Byte((byte) 98),
+        setXXX_setObject(s, psi, psq, type, (byte) 98,
                 "java.lang.Byte", 1);
-        setXXX_setObject(s, psi, psq, type, new Short((short) 98),
+        setXXX_setObject(s, psi, psq, type, (short) 98,
                 "java.lang.Short", 2);
 
-        setXXX_setObject(s, psi, psq, type, new Integer(98),
+        setXXX_setObject(s, psi, psq, type, 98,
                 "java.lang.Integer", 3);
-        setXXX_setObject(s, psi, psq, type, new Long(98), "java.lang.Long", 4);
-        setXXX_setObject(s, psi, psq, type, new Float(98.0f),
+        setXXX_setObject(s, psi, psq, type, 98, "java.lang.Long", 4);
+        setXXX_setObject(s, psi, psq, type, 98.0f,
                 "java.lang.Float", 5);
-        setXXX_setObject(s, psi, psq, type, new Double(98.0d),
+        setXXX_setObject(s, psi, psq, type, 98.0d,
                 "java.lang.Double", 6);
 
         {
@@ -4827,8 +4827,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           bdMinLongValue.subtract(BigDecimal.ONE), "22003");
 
         // REAL overflow checking
+        Float maxF = Float.MAX_VALUE;
         assertUpdateState(rs, "F04",
-                          _X, (new Float(Float.MAX_VALUE)).doubleValue() * 10,
+                          _X, maxF.doubleValue() * 10,
                           XXX_DOUBLE, "22003");
         assertUpdateState(rs, "F04",
                           _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
@@ -4836,7 +4837,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           bdMaxFloatValue.multiply(BigDecimal.TEN), "22003");
 
         assertUpdateState(rs, "F04",
-                          _X, -(new Float(Float.MAX_VALUE)).doubleValue() * 10,
+                          _X, -(maxF).doubleValue() * 10,
                           XXX_DOUBLE, "22003");
         assertUpdateState(rs, "F04",
                           _X, Float.POSITIVE_INFINITY, XXX_FLOAT, "22003");

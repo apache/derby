@@ -74,13 +74,13 @@ public class ManyMethods implements Serializable
 		privateValue = value;
 		publicValue = value;
 		publicint = value;
-		publicInteger = new Integer(value);
+		publicInteger = value;
 		publicshort = (short) value;
-		publicShort = new Short((short) value);
+		publicShort = (short) value;
 		publicbyte = (byte) value;
-		publicByte = new Byte((byte) value);
+		publicByte = (byte) value;
 		publiclong = (long) value;
-		publicLong = new Long((long) value);
+		publicLong = (long) value;
 		publicboolean = booleanMethod();
 		publicBoolean = BooleanMethod();
 		publicfloat = floatMethod();
@@ -228,7 +228,7 @@ public class ManyMethods implements Serializable
 
 	public Byte ByteMethod()
 	{
-		return new Byte((byte) 1);
+		return (byte) 1;
 	}
 
 	public char charMethod()
@@ -238,7 +238,7 @@ public class ManyMethods implements Serializable
 
 	public Character CharacterMethod()
 	{
-		return new Character('a');
+		return 'a';
 	}
 
 	public double doubleMethod()
@@ -248,7 +248,7 @@ public class ManyMethods implements Serializable
 
 	public Double DoubleMethod()
 	{
-		return new Double(1.5);
+		return 1.5;
 	}
 
 	public BigDecimal BigDecimalMethod()
@@ -263,7 +263,7 @@ public class ManyMethods implements Serializable
 
 	public Float FloatMethod()
 	{
-		return new Float(2.5F);
+		return 2.5F;
 	}
 
 	public int intMethod()
@@ -273,7 +273,7 @@ public class ManyMethods implements Serializable
 
 	public Integer IntegerMethod()
 	{
-		return new Integer(2);
+		return 2;
 	}
 
 	public long longMethod()
@@ -283,7 +283,7 @@ public class ManyMethods implements Serializable
 
 	public Long LongMethod()
 	{
-		return new Long(3L);
+		return 3L;
 	}
 
 	public short shortMethod()
@@ -293,7 +293,7 @@ public class ManyMethods implements Serializable
 
 	public Short ShortMethod()
 	{
-		return new Short((short) 4);
+		return (short) 4;
 	}
 
 	public boolean booleanMethod()
@@ -303,7 +303,7 @@ public class ManyMethods implements Serializable
 
 	public Boolean BooleanMethod()
 	{
-		return new Boolean(true);
+		return true;
 	}
 
 	public String StringMethod()
@@ -455,17 +455,17 @@ public class ManyMethods implements Serializable
 
 	public static Byte staticByteMethod()
 	{
-		return new Byte((byte) 1);
+		return (byte) 1;
 	}
 
 	public static Character staticCharacterMethod()
 	{
-		return new Character('a');
+		return 'a';
 	}
 
 	public static Double staticDoubleMethod()
 	{
-		return new Double(1.5);
+		return 1.5;
 	}
 
 	public static BigDecimal staticBigDecimalMethod()
@@ -475,27 +475,27 @@ public class ManyMethods implements Serializable
 
 	public static Float staticFloatMethod()
 	{
-		return new Float(2.5F);
+		return 2.5F;
 	}
 
 	public static Long staticLongMethod()
 	{
-		return new Long(3L);
+		return 3L;
 	}
 
 	public static Short staticShortMethod()
 	{
-		return new Short((short) 4);
+		return (short) 4;
 	}
 
 	public static Integer staticIntegerMethod()
 	{
-		return new Integer(2);
+		return 2;
 	}
 
 	public static Boolean staticBooleanMethod()
 	{
-		return new Boolean(true);
+		return true;
 	}
 
 	public static String staticStringMethod()

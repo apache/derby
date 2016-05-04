@@ -311,7 +311,7 @@ public final class SpawnedProcess {
         Integer exitCode = null;
         while (exitCode == null) {
             try {
-                exitCode = new Integer(javaProcess.exitValue());
+                exitCode = javaProcess.exitValue();
             } catch (IllegalThreadStateException itse) {
                 // This exception means the process is running.
                 if (System.currentTimeMillis() - start > timeout) {

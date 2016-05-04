@@ -525,11 +525,11 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	}
 	
 	public void testInvalidArgTypes() throws SQLException {
-        expectException( tsDiffPS[ HOUR_INTERVAL], ts( "2005-05-21 15:26:00"), new Double( 2.0), "XCL12",
+        expectException( tsDiffPS[ HOUR_INTERVAL], ts( "2005-05-21 15:26:00"), 2.0, "XCL12",
                 "TIMESTAMPDIFF with double ts2");
-        expectException( tsDiffPS[ HOUR_INTERVAL], new Double( 2.0), ts( "2005-05-11 15:26:00"), "XCL12",
+        expectException( tsDiffPS[ HOUR_INTERVAL], 2.0, ts( "2005-05-11 15:26:00"), "XCL12",
                 "TIMESTAMPDIFF with double ts1");
-        expectException( tsAddPS[ MINUTE_INTERVAL], new Integer(1), new Integer(-1), "XCL12",
+        expectException( tsAddPS[ MINUTE_INTERVAL], 1, -1, "XCL12",
                 "TIMESTAMPADD with int ts");
         expectException( tsAddPS[ MINUTE_INTERVAL], ts( "2005-05-11 15:26:00"), ts( "2005-05-11 15:26:00"), "XCL12",
                 "TIMESTAMPADD with timestamp count");		

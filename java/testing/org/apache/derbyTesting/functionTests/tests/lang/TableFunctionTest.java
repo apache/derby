@@ -253,42 +253,42 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   Integer FUNCTION_RETURNS_TABLE = DatabaseMetaData.functionReturnsTable;
 
 
-    private static  final   Integer JDBC_TYPE_OTHER = new Integer( Types.OTHER );
-    private static  final   Integer JDBC_TYPE_INT = new Integer( Types.INTEGER );
-    private static  final   Integer JDBC_TYPE_VARCHAR = new Integer( Types.VARCHAR );
-    private static  final   Integer JDBC_TYPE_BIGINT = new Integer( Types.BIGINT );
-    private static  final   Integer JDBC_TYPE_BLOB = new Integer( Types.BLOB );
-    private static  final   Integer JDBC_TYPE_CHAR = new Integer( Types.CHAR );
-    private static  final   Integer JDBC_TYPE_CLOB = new Integer( Types.CLOB );
-    private static  final   Integer JDBC_TYPE_DATE = new Integer( Types.DATE );
-    private static  final   Integer JDBC_TYPE_DECIMAL = new Integer( Types.DECIMAL );
-    private static  final   Integer JDBC_TYPE_DOUBLE = new Integer( Types.DOUBLE );
-    private static  final   Integer JDBC_TYPE_REAL = new Integer( Types.REAL );
-    private static  final   Integer JDBC_TYPE_NUMERIC = new Integer( Types.NUMERIC );
-    private static  final   Integer JDBC_TYPE_SMALLINT = new Integer( Types.SMALLINT );
-    private static  final   Integer JDBC_TYPE_TIME = new Integer( Types.TIME );
-    private static  final   Integer JDBC_TYPE_TIMESTAMP = new Integer( Types.TIMESTAMP );
-    private static  final   Integer JDBC_TYPE_BINARY = new Integer( Types.BINARY );
-    private static  final   Integer JDBC_TYPE_LONGVARBINARY = new Integer( Types.LONGVARBINARY );
-    private static  final   Integer JDBC_TYPE_LONGVARCHAR = new Integer( Types.LONGVARCHAR );
-    private static  final   Integer JDBC_TYPE_VARBINARY = new Integer( Types.VARBINARY );
-    private static  final   Integer JDBC_TYPE_BOOLEAN = new Integer( Types.BOOLEAN );
+    private static  final   Integer JDBC_TYPE_OTHER =  Types.OTHER ;
+    private static  final   Integer JDBC_TYPE_INT =  Types.INTEGER ;
+    private static  final   Integer JDBC_TYPE_VARCHAR =  Types.VARCHAR ;
+    private static  final   Integer JDBC_TYPE_BIGINT =  Types.BIGINT ;
+    private static  final   Integer JDBC_TYPE_BLOB =  Types.BLOB ;
+    private static  final   Integer JDBC_TYPE_CHAR =  Types.CHAR ;
+    private static  final   Integer JDBC_TYPE_CLOB =  Types.CLOB ;
+    private static  final   Integer JDBC_TYPE_DATE =  Types.DATE ;
+    private static  final   Integer JDBC_TYPE_DECIMAL =  Types.DECIMAL ;
+    private static  final   Integer JDBC_TYPE_DOUBLE =  Types.DOUBLE ;
+    private static  final   Integer JDBC_TYPE_REAL =  Types.REAL ;
+    private static  final   Integer JDBC_TYPE_NUMERIC =  Types.NUMERIC ;
+    private static  final   Integer JDBC_TYPE_SMALLINT =  Types.SMALLINT ;
+    private static  final   Integer JDBC_TYPE_TIME =  Types.TIME ;
+    private static  final   Integer JDBC_TYPE_TIMESTAMP =  Types.TIMESTAMP ;
+    private static  final   Integer JDBC_TYPE_BINARY =  Types.BINARY ;
+    private static  final   Integer JDBC_TYPE_LONGVARBINARY =  Types.LONGVARBINARY ;
+    private static  final   Integer JDBC_TYPE_LONGVARCHAR =  Types.LONGVARCHAR ;
+    private static  final   Integer JDBC_TYPE_VARBINARY =  Types.VARBINARY ;
+    private static  final   Integer JDBC_TYPE_BOOLEAN =  Types.BOOLEAN ;
 
-    private static  final   Integer PRECISION_NONE = new Integer( 0 );
-    private static  final   Integer PRECISION_INTEGER = new Integer( 10 );
-    private static  final   Integer PRECISION_BIGINT = new Integer( 19 );
-    private static  final   Integer PRECISION_MAX = new Integer( 2147483647 );
+    private static  final   Integer PRECISION_NONE =  0 ;
+    private static  final   Integer PRECISION_INTEGER =  10 ;
+    private static  final   Integer PRECISION_BIGINT =  19 ;
+    private static  final   Integer PRECISION_MAX =  2147483647 ;
 
-    private static  final   Integer LENGTH_UNDEFINED = new Integer( -1 );
-    private static  final   Integer LENGTH_INTEGER = new Integer( 4 );
-    private static  final   Integer LENGTH_BIGINT = new Integer( 40 );
-    private static  final   Integer LENGTH_MAX = new Integer( 2147483647 );
+    private static  final   Integer LENGTH_UNDEFINED =  -1 ;
+    private static  final   Integer LENGTH_INTEGER =  4 ;
+    private static  final   Integer LENGTH_BIGINT =  40 ;
+    private static  final   Integer LENGTH_MAX =  2147483647 ;
 
     private static  final   Integer  SCALE_UNDEFINED = null;
-    private static  final   Integer  SCALE_INTEGER = new Integer( 0 );
+    private static  final   Integer  SCALE_INTEGER =  0 ;
 
     private static  final   Integer  RADIX_UNDEFINED = null;
-    private static  final   Integer  RADIX_INTEGER = new Integer( 10 );
+    private static  final   Integer  RADIX_INTEGER =  10 ;
 
     private static  final   Object  NO_CATALOG = null;
     private static  final   String  RETURN_VALUE_NAME = "";
@@ -297,18 +297,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   Object  UNDEFINED_CHAR_OCTET_LENGTH = null;
     private static  final   String  IS_NULLABLE = "YES";
     
-    private static  final   Integer ROW_ORDER_RETURN_VALUE = new Integer( -1 );
-    private static  final   Integer ROW_ORDER_1 = new Integer( 0 );
-    private static  final   Integer ROW_ORDER_2 = new Integer( 1 );
+    private static  final   Integer ROW_ORDER_RETURN_VALUE =  -1 ;
+    private static  final   Integer ROW_ORDER_1 =  0 ;
+    private static  final   Integer ROW_ORDER_2 =  1 ;
     
-    private static  final   Integer POSITION_RETURN_VALUE = new Integer( 0 );
-    private static  final   Integer POSITION_ARG_1 = new Integer( 1 );
-    private static  final   Integer POSITION_ARG_2 = new Integer( 2 );
+    private static  final   Integer POSITION_RETURN_VALUE =  0 ;
+    private static  final   Integer POSITION_ARG_1 =  1 ;
+    private static  final   Integer POSITION_ARG_2 =  2 ;
 
-    private static  final   Integer ARG_COUNT_0 = new Integer( 0 );
-    private static  final   Integer ARG_COUNT_1 = new Integer( 1 );
-    private static  final   Integer ARG_COUNT_2 = new Integer( 2 );
-    private static  final   Integer ARG_COUNT_3 = new Integer( 3 );
+    private static  final   Integer ARG_COUNT_0 =  0 ;
+    private static  final   Integer ARG_COUNT_1 =  1 ;
+    private static  final   Integer ARG_COUNT_2 =  2 ;
+    private static  final   Integer ARG_COUNT_3 =  3 ;
 
     private static final JDBC.GeneratedId GENERIC_NAME = new JDBC.GeneratedId();
 
@@ -334,7 +334,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 1 ),           // ORDINAL_POSITION
+            1 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_0,
@@ -348,14 +348,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
-            new Integer( 10 ),               // PRECISION
-            new Integer( 20 ),              // LENGTH
+             10 ,               // PRECISION
+             20 ,              // LENGTH
             SCALE_UNDEFINED,
             RADIX_UNDEFINED,
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 20 ),          // CHAR_OCTET_LENGTH
-            new Integer( 2 ),           // ORDINAL_POSITION
+             20 ,          // CHAR_OCTET_LENGTH
+             2 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_0,
@@ -399,13 +399,13 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_COLUMN_IN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
-            new Integer( 10 ),               // PRECISION
-            new Integer( 20 ),              // LENGTH
+             10 ,               // PRECISION
+             20 ,              // LENGTH
             SCALE_UNDEFINED,
             RADIX_UNDEFINED,
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 20 ),          // CHAR_OCTET_LENGTH
+             20 ,          // CHAR_OCTET_LENGTH
             POSITION_ARG_2,
             IS_NULLABLE,
             GENERIC_NAME,
@@ -428,11 +428,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 1 ),           // ORDINAL_POSITION
+             1 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 2 )
+             2 
         },
         {
             NO_CATALOG,
@@ -449,11 +449,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 2 ),           // ORDINAL_POSITION
+             2 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 3 )
+             3 
         },
         {
             NO_CATALOG,
@@ -463,18 +463,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_CHAR,
             "CHAR",
-            new Integer( 10 ) ,     // PRECISION
-            new Integer( 20 ),         // LENGTH
+             10  ,     // PRECISION
+             20 ,         // LENGTH
             SCALE_UNDEFINED,
             RADIX_UNDEFINED,
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 20 ),    // CHAR_OCTET_LENGTH
-            new Integer( 3 ),           // ORDINAL_POSITION
+             20 ,    // CHAR_OCTET_LENGTH
+             3 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 4 )
+             4 
         },
         {
             NO_CATALOG,
@@ -484,18 +484,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_BINARY,
             "CHAR () FOR BIT DATA",
-            new Integer( 10 ) ,     // PRECISION
-            new Integer( 10 ),         // LENGTH
+             10  ,     // PRECISION
+             10 ,         // LENGTH
             SCALE_UNDEFINED,
             RADIX_UNDEFINED,
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 10 ),    // CHAR_OCTET_LENGTH
-            new Integer( 4 ),           // ORDINAL_POSITION
+             10 ,    // CHAR_OCTET_LENGTH
+             4 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 5 )
+             5 
         },
         {
             NO_CATALOG,
@@ -512,11 +512,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 5 ),           // ORDINAL_POSITION
+             5 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 6 )
+             6 
         },
         {
             NO_CATALOG,
@@ -526,18 +526,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DATE,
             "DATE",
-            new Integer( 10 ) ,     // PRECISION
-            new Integer( 6 ),         // LENGTH
-            new Integer( 0 ),       // SCALE
-            new Integer( 10 ),    // RADIX
+             10  ,     // PRECISION
+             6 ,         // LENGTH
+             0 ,       // SCALE
+             10 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 6 ),           // ORDINAL_POSITION
+             6 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 7 )
+             7 
         },
         {
             NO_CATALOG,
@@ -547,18 +547,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DECIMAL,
             "DECIMAL",
-            new Integer( 5 ) ,     // PRECISION
-            new Integer( 14 ),         // LENGTH
-            new Integer( 0 ),       // SCALE
-            new Integer( 10 ),    // RADIX
+             5  ,     // PRECISION
+             14 ,         // LENGTH
+             0 ,       // SCALE
+             10 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 7 ),           // ORDINAL_POSITION
+             7 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 8 )
+             8 
         },
         {
             NO_CATALOG,
@@ -568,18 +568,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
-            new Integer( 52 ) ,     // PRECISION
-            new Integer( 8 ),         // LENGTH
+             52  ,     // PRECISION
+             8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
-            new Integer( 2 ),    // RADIX
+             2 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 8 ),           // ORDINAL_POSITION
+             8 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 9 )
+             9 
         },
         {
             NO_CATALOG,
@@ -589,18 +589,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
-            new Integer( 52 ) ,     // PRECISION
-            new Integer( 8 ),         // LENGTH
+             52  ,     // PRECISION
+             8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
-            new Integer( 2 ),    // RADIX
+             2 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 9 ),           // ORDINAL_POSITION
+             9 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 10 )
+             10 
         },
         {
             NO_CATALOG,
@@ -610,18 +610,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_REAL,
             "REAL",
-            new Integer( 23 ) ,     // PRECISION
-            new Integer( 4 ),         // LENGTH
+             23  ,     // PRECISION
+             4 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
-            new Integer( 2 ),    // RADIX
+             2 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 10 ),           // ORDINAL_POSITION
+             10 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 11 )
+             11 
         },
         {
             NO_CATALOG,
@@ -631,18 +631,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_DOUBLE,
             "DOUBLE",
-            new Integer( 52 ) ,     // PRECISION
-            new Integer( 8 ),         // LENGTH
+             52  ,     // PRECISION
+             8 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
-            new Integer( 2 ),    // RADIX
+             2 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 11 ),           // ORDINAL_POSITION
+             11 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 12 )
+             12 
         },
         {
             NO_CATALOG,
@@ -659,11 +659,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 12 ),           // ORDINAL_POSITION
+             12 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 13 )
+             13 
         },
         {
             NO_CATALOG,
@@ -673,18 +673,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_LONGVARCHAR,
             "LONG VARCHAR",
-            new Integer( 32700 ),     // PRECISION
-            new Integer( 65400 ),         // LENGTH
+             32700 ,     // PRECISION
+             65400 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
             RADIX_UNDEFINED,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 13 ),           // ORDINAL_POSITION
+             13 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 14 )
+             14 
         },
         {
             NO_CATALOG,
@@ -694,18 +694,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_LONGVARBINARY,
             "LONG VARCHAR FOR BIT DATA",
-            new Integer( 32700 ),     // PRECISION
-            new Integer( 32700 ),         // LENGTH
+             32700 ,     // PRECISION
+             32700 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
             RADIX_UNDEFINED,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 14 ),           // ORDINAL_POSITION
+             14 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 15 )
+             15 
         },
         {
             NO_CATALOG,
@@ -715,18 +715,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_NUMERIC,
             "NUMERIC",
-            new Integer( 5 ),     // PRECISION
-            new Integer( 14 ),         // LENGTH
-            new Integer( 0 ),       // SCALE
-            new Integer( 10 ),    // RADIX
+             5 ,     // PRECISION
+             14 ,         // LENGTH
+             0 ,       // SCALE
+             10 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 15 ),           // ORDINAL_POSITION
+             15 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 16 )
+             16 
         },
         {
             NO_CATALOG,
@@ -736,18 +736,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_REAL,
             "REAL",
-            new Integer( 23 ),     // PRECISION
-            new Integer( 4 ),         // LENGTH
+             23 ,     // PRECISION
+             4 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
-            new Integer( 2 ),    // RADIX
+             2 ,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 16 ),           // ORDINAL_POSITION
+             16 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 17 )
+             17 
         },
         {
             NO_CATALOG,
@@ -757,18 +757,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_SMALLINT,
             "SMALLINT",
-            new Integer( 5 ),     // PRECISION
-            new Integer( 2 ),         // LENGTH
+             5 ,     // PRECISION
+             2 ,         // LENGTH
             SCALE_INTEGER,       // SCALE
             RADIX_INTEGER,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 17 ),           // ORDINAL_POSITION
+             17 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 18 )
+             18 
         },
         {
             NO_CATALOG,
@@ -778,18 +778,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_TIME,
             "TIME",
-            new Integer( 8 ),     // PRECISION
-            new Integer( 6 ),         // LENGTH
+             8 ,     // PRECISION
+             6 ,         // LENGTH
             SCALE_INTEGER,       // SCALE
             RADIX_INTEGER,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 18 ),           // ORDINAL_POSITION
+             18 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 19 )
+             19 
         },
         {
             NO_CATALOG,
@@ -799,18 +799,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_TIMESTAMP,
             "TIMESTAMP",
-            new Integer( 29 ),     // PRECISION
-            new Integer( 16 ),         // LENGTH
-            new Integer( 9 ),       // SCALE
+             29 ,     // PRECISION
+             16 ,         // LENGTH
+             9 ,       // SCALE
             RADIX_INTEGER,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,
-            new Integer( 19 ),           // ORDINAL_POSITION
+             19 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 20 )
+             20 
         },
         {
             NO_CATALOG,
@@ -820,18 +820,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARCHAR,
             "VARCHAR",
-            new Integer( 10 ),     // PRECISION
-            new Integer( 20 ),         // LENGTH
+             10 ,     // PRECISION
+             20 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
             RADIX_UNDEFINED,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 20 ),    // CHAR_OCTET_LENGTH
-            new Integer( 20 ),           // ORDINAL_POSITION
+             20 ,    // CHAR_OCTET_LENGTH
+             20 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 21 )
+             21 
         },
         {
             NO_CATALOG,
@@ -841,18 +841,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_VARBINARY,
             "VARCHAR () FOR BIT DATA",
-            new Integer( 10 ),     // PRECISION
-            new Integer( 10 ),         // LENGTH
+             10 ,     // PRECISION
+             10 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
             RADIX_UNDEFINED,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
-            new Integer( 10 ),    // CHAR_OCTET_LENGTH
-            new Integer( 21 ),           // ORDINAL_POSITION
+             10 ,    // CHAR_OCTET_LENGTH
+             21 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 22 )
+             22 
         },
         {
             NO_CATALOG,
@@ -862,18 +862,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_BOOLEAN,
             "BOOLEAN",
-            new Integer( 1 ),     // PRECISION
-            new Integer( 1 ),         // LENGTH
+             1 ,     // PRECISION
+             1 ,         // LENGTH
             SCALE_UNDEFINED,       // SCALE
             RADIX_UNDEFINED,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,
             UNDEFINED_CHAR_OCTET_LENGTH,    // CHAR_OCTET_LENGTH
-            new Integer( 22 ),           // ORDINAL_POSITION
+             22 ,           // ORDINAL_POSITION
             IS_NULLABLE,
             GENERIC_NAME,
             ARG_COUNT_2,
-            new Integer( 23 )
+             23 
         },
     };
 
@@ -2760,41 +2760,41 @@ public class TableFunctionTest extends BaseJDBCTestCase
                 switch( actualJdbcType )
                 {
                 case Types.BOOLEAN:
-                    actualValue = new Boolean( rs.getBoolean( column ) ).toString();
-                    actualValueByName = new Boolean( rs.getBoolean( columnName ) ).toString();
+                    actualValue = Boolean.toString( rs.getBoolean( column ) );
+                    actualValueByName = Boolean.toString( rs.getBoolean( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
 
                 case Types.BIGINT:
-                    actualValue = new Long( rs.getLong( column ) ).toString();
-                    actualValueByName = new Long( rs.getLong( columnName ) ).toString();
+                    actualValue = Long.toString( rs.getLong( column ) );
+                    actualValueByName = Long.toString( rs.getLong( columnName ) ).toString();
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
                 case Types.INTEGER:
-                    actualValue = new Integer( rs.getInt( column ) ).toString();
-                    actualValueByName = new Integer( rs.getInt( columnName ) ).toString();
+                    actualValue = Integer.toString( rs.getInt( column ) );
+                    actualValueByName = Integer.toString( rs.getInt( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
                 case Types.SMALLINT:
-                    actualValue = new Short( rs.getShort( column ) ).toString();
-                    actualValueByName = new Short( rs.getShort( columnName ) ).toString();
+                    actualValue = Short.toString( rs.getShort( column ) );
+                    actualValueByName = Short.toString( rs.getShort( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
                 case Types.TINYINT:
-                    actualValue = new Byte( rs.getByte( column ) ).toString();
-                    actualValueByName = new Byte( rs.getByte( columnName ) ).toString();
+                    actualValue = Byte.toString( rs.getByte( column ) );
+                    actualValueByName = Byte.toString( rs.getByte( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
  
                 case Types.DOUBLE:
-                    actualValue = new Double( rs.getDouble( column ) ).toString();
-                    actualValueByName = new Double( rs.getDouble( columnName ) ).toString();
+                    actualValue = Double.toString( rs.getDouble( column ) );
+                    actualValueByName = Double.toString( rs.getDouble( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
                 case Types.REAL:
                 case Types.FLOAT:
-                    actualValue = new Float( rs.getFloat( column ) ).toString();
-                    actualValueByName = new Float( rs.getFloat( columnName ) ).toString();
+                    actualValue = Float.toString( rs.getFloat( column ) );
+                    actualValueByName = Float.toString( rs.getFloat( columnName ) );
                     if ( rs.wasNull() ) { actualValue = actualValueByName = null; }
                     break;
 

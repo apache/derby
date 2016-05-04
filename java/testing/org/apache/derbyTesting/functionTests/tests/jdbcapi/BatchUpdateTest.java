@@ -483,7 +483,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             "insert into assoc values (?, 'hello')");
         for ( i = 10; i < 60; i++)
         {
-            ps.setString(1, new Integer(i).toString());
+            ps.setString(1, Integer.toString(i));
             ps.executeUpdate();     
         }
         ps.close();

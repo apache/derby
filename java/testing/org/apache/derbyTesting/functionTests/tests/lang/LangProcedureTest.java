@@ -1674,8 +1674,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         assertEquals("wrong value for p_out", "6", ptsi.getObject(3).toString());
 
         // with setObject . Beetle 5439
-        ptsi.setObject(1, new Integer(6));
-        ptsi.setObject(2, new Integer(3));
+        ptsi.setObject(1, 6);
+        ptsi.setObject(2, 3);
 
         ptsi.execute();
         assertEquals("wrong value for p_inout", "9", ptsi.getObject(2)

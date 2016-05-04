@@ -372,7 +372,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         int firstAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         final Properties derbyProperties = new Properties();
         derbyProperties.put("derby.drda.portNumber", 
-                new Integer(firstAlternatePort).toString());
+                Integer.toString(firstAlternatePort));
 
         final String derbyHome = getSystemProperty("derby.system.home");
         boolean b = AccessController.doPrivileged
@@ -402,7 +402,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         final int secondAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         // Now set system properties.
         setSystemProperty("derby.drda.portNumber", 
-            new Integer(secondAlternatePort).toString());
+            Integer.toString(secondAlternatePort));
         actionResult = startServer(secondAlternatePort, false);
         checkWhetherNeedToShutdown( new int[] {basePort, firstAlternatePort, secondAlternatePort},
             actionResult);

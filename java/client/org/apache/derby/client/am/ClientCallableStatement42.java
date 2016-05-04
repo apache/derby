@@ -151,7 +151,7 @@ public class ClientCallableStatement42 extends ClientCallableStatement
     {
         synchronized (connection_) {
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry( this, "setObject", new Integer( parameterIndex ), x, sqlType, new Integer( scaleOrLength ) );
+                agent_.logWriter_.traceEntry( this, "setObject", parameterIndex, x, sqlType, scaleOrLength );
             }
             
             checkStatus();

@@ -82,7 +82,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
                 println("Skipping lengthless insert because method is not available");
                 return;                
             }
-            m.invoke(ps, new Object[] {new Integer(2),stream});
+            m.invoke(ps, new Object[] {2,stream});
         }
         else
             ps.setBinaryStream(2, stream,blobLen);

@@ -292,23 +292,23 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "select (cast (c1 as char(2))), count(*) from test " +
                 " group by (cast (c1 as char(2)))",
                 new Object[][] {
-                        {"1 ", new Integer(2)}, 
-                        {"2 ", new Integer(3)}});
+                        {"1 ", 2}, 
+                        {"2 ", 3}});
         
         // coalesce
         verifyQueryResults(
                 "coalesce",
                 "select (coalesce(vc1,vc2)), count(*) from coal " +
                 " group by (coalesce(vc1,vc2))",
-                new Object[][] {{"1", new Integer(2)}, {"2", new Integer(1)}});
+                new Object[][] {{"1", 2}, {"2", 1}});
         // concat
         verifyQueryResults(
                 "concat",
                 "select c||v, count(*) from alltypes group by c||v",
                 new Object[][] {
-                        {"duplicate noone is here", new Integer(1)},
-                        {"duplicate this is duplicated", new Integer(13)},
-                        {"goodbye   this is duplicated", new Integer(1)}});
+                        {"duplicate noone is here", 1},
+                        {"duplicate this is duplicated", 13},
+                        {"goodbye   this is duplicated", 1}});
         // conditional.
         verifyQueryResults(
                 "cond",
@@ -341,8 +341,8 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "concat+substr",
                 "select substr(c||v, 1, 4), count(*) from alltypes group by substr(c||v, 1, 4)",
                 new Object[][] {
-                        {"dupl", new Integer(14)},
-                        {"good", new Integer(1)}});
+                        {"dupl", 14},
+                        {"good", 1}});
 
         // DERBY-2008 
         // substr (2-args)
@@ -409,22 +409,22 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         verifyQueryResults(
                 "nullif-Q2",
                 "select nullif(c1,c2) from t3 group by nullif(c1,c2)",
-                new Object[][] { { new Integer(5) }, 
+                new Object[][] { { 5 }, 
                                  { null } });
 
         verifyQueryResults(
                 "nullif-Q3",
                 "select nullif(c1,10) from t3 group by nullif(c1,10)",
-                new Object[][] { { new Integer(1) },
-                                 { new Integer(2) },
-                                 { new Integer(3) },
-                                 { new Integer(5) },
+                new Object[][] { { 1 },
+                                 { 2 },
+                                 { 3 },
+                                 { 5 },
                                  { null } });
 
         verifyQueryResults(
                 "nullif-Q4",
                 "select nullif(1,c1) from t3 group by nullif(1,c1)",
-                new Object[][] { { new Integer(1) }, 
+                new Object[][] { { 1 }, 
                                  { null } });
     }
     
@@ -549,7 +549,7 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         Object[] arr = new Object[expected.length];
         for (int i = 0; i < expected.length; i++)
         {
-            arr[i] = new Integer(expected[i]);
+            arr[i] = expected[i];
         }
         return arr;
     }

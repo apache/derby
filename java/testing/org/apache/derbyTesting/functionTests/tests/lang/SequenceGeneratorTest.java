@@ -179,7 +179,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         T_SequenceUpdater updater;
 
         updater = new T_SequenceUpdater
-            ( new Long(  Integer.MIN_VALUE ), true, 1L, (long) Integer.MAX_VALUE, (long) Integer.MIN_VALUE, (long) Integer.MIN_VALUE );
+          ( (long)Integer.MIN_VALUE, true, 1L, (long) Integer.MAX_VALUE, (long) Integer.MIN_VALUE, (long) Integer.MIN_VALUE );
 
         assertEquals( -2147483648L, updater.getValueOnDisk().longValue() );
 
@@ -292,9 +292,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         if ( _fullDebug) { println( "stepSize = " + stepSize + " and firstValue = " + firstValue + " and canCycle = " + canCycle ); }
         
         SGVetter vetter = new SGVetter
-            ( new Long(  firstValue ), canCycle, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
+            ( firstValue, canCycle, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
         T_SequenceUpdater updater = new T_SequenceUpdater
-            ( new Long(  firstValue ), canCycle, stepSize, maxValue, minValue, restartValue );
+            ( firstValue, canCycle, stepSize, maxValue, minValue, restartValue );
 
         if ( _fullDebug) { println( "" ); }
         for ( long i = 0; i < bumps; i++ ) { vetBump( vetter, updater ); }
@@ -393,9 +393,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         }
 
         SGVetter vetter = new SGVetter
-            ( new Long(  firstValue ), false, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
+            ( firstValue, false, stepSize, maxValue, minValue, restartValue, ALLOCATION_COUNT );           
         T_SequenceUpdater updater = new T_SequenceUpdater
-            ( new Long(  firstValue ), false, stepSize, maxValue, minValue, restartValue );
+            ( firstValue, false, stepSize, maxValue, minValue, restartValue );
 
         // make sure we can survive trying to bust the cycle more than once
         long extraBumps = bumps + 2;
@@ -484,7 +484,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         long stepSize = (Long.MAX_VALUE / ALLOCATION_COUNT) * 3;
 
         updater = new T_SequenceUpdater
-            ( new Long(  Long.MIN_VALUE ), true, stepSize, (long) Long.MAX_VALUE, (long) Long.MIN_VALUE, (long) Long.MIN_VALUE );
+            ( Long.MIN_VALUE, true, stepSize, (long) Long.MAX_VALUE, (long) Long.MIN_VALUE, (long) Long.MIN_VALUE );
 
         long nextValue = updater.getCurrentValueAndAdvance();
         long currentValueOnDisk = updater.getValueOnDisk().longValue();
@@ -502,7 +502,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     private void vetBigStep( long maxValue, long minValue )
         throws Exception
     {
-        Long firstValue = new Long( minValue );
+        Long firstValue = minValue;
         long restartValue = minValue;
         long stepSize = maxValue - 1;
         boolean canCycle = true;

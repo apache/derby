@@ -1113,7 +1113,7 @@ public class RunList
 	if (runwithibmjvm != null) 
 	{ 
 	    if (runwithibmjvm.equals("")) { needIBMjvm = null; }
-	    else { needIBMjvm = new Boolean(runwithibmjvm); }
+	    else { needIBMjvm = Boolean.valueOf(runwithibmjvm); }
 	}
 	if (runwithibmjvm == null) { needIBMjvm = null; }
 	if (needIBMjvm != null)

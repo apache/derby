@@ -38,7 +38,7 @@ public class userDefMethods
         ResultSet rs = s.executeQuery("SELECT c1 from new org.apache.derby.catalog.TriggerOldTransitionRows() AS EQ");
         Vector<Long> keys = new Vector<Long>();
         while(rs.next()){
-            keys.addElement(new Long(rs.getLong(1)));
+            keys.addElement(rs.getLong(1));
         }
         rs.close();
 

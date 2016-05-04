@@ -738,7 +738,7 @@ public class RolesTest extends BaseJDBCTestCase
             // This is currently only implemented in the client driver.
             if (usingDerbyNetClient()) {
                 J2EEDataSource.setBeanProperty(
-                    cpDs, "maxStatements",new Integer(7));
+                    cpDs, "maxStatements",7);
                 doTestCurrentRoleIsReset(cpDs.getPooledConnection(user, passwd),
                                          user);
             }

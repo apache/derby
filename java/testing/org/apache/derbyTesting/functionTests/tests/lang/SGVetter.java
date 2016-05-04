@@ -121,14 +121,14 @@ public class SGVetter
 
         advance();
 
-        return new Long( retval.longValue() );
+        return retval.longValue();
     }
 
     /** Get the upper bound */
     public Long getUpperBound()
     {
         if ( _upperBound == null ) { return null; }
-        else { return new Long( _upperBound.longValue() ); }
+        else { return _upperBound.longValue(); }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

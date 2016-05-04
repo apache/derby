@@ -163,9 +163,9 @@ public class InPredicateTest extends BaseJDBCTestCase {
 
         Object[][] expectedRows = {
             {
-                new Integer(2147483645),
-                new Float(2.14748365E9f),
-                new Float(2.14748365E9f),
+                2147483645,
+                2.14748365E9f,
+                2.14748365E9f,
             }
         };
 

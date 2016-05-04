@@ -822,7 +822,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     // functions for converting between primitive and wrapper types
     public  static  Boolean booleanpToBoolean( boolean val )
     {
-        return new Boolean( val );
+        return val;
     }
     public  static  boolean booleanToBooleanp( Boolean val ) throws Exception
     {
@@ -832,7 +832,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Integer intToInteger( int val )
     {
-        return new Integer( val );
+        return val;
     }
     public  static  int     integerToInt( Integer val ) throws Exception
     {
@@ -842,7 +842,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Long    longpToLong( long val )
     {
-        return new Long( val );
+        return val ;
     }
     public  static  long     longToLongp( Long val ) throws Exception
     {
@@ -852,7 +852,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Integer    shortpToInteger( short val )
     {
-        return new Integer( val );
+      return (int) val;
     }
     public  static  short     integerToShortp( Integer val ) throws Exception
     {
@@ -862,7 +862,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Float floatpToFloat( float val )
     {
-        return new Float( val );
+        return val;
     }
     public  static  float     floatToFloatp( Float val ) throws Exception
     {
@@ -872,7 +872,7 @@ public class RoutineTest extends BaseJDBCTestCase {
     
     public  static  Double doublepToDouble( double val )
     {
-        return new Double( val );
+        return val;
     }
     public  static  double     doubleToDoublep( Double val ) throws Exception
     {

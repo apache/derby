@@ -918,7 +918,7 @@ public class StatementPoolingTest
                 ConnectionPoolDataSource cpDs =
                         J2EEDataSource.getConnectionPoolDataSource();
                 J2EEDataSource.setBeanProperty(
-                        cpDs, "maxStatements", new Integer(cacheSize));
+                        cpDs, "maxStatements", cacheSize);
                 J2EEDataSource.setBeanProperty(
                         cpDs, "createDatabase", "create");
                 pooledConnection = cpDs.getPooledConnection();

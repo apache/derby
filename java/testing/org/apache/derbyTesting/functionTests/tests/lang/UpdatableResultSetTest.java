@@ -2925,28 +2925,28 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     println(displayString + " Short object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Short(rs1.getShort(updateXXXName)));
+                                rs1.getShort(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Short(rs1.getShort(updateXXXName)));
+                                rs1.getShort(updateXXXName));
                 } else if (updateXXXName == 2) { 
                     //updateObject using Integer object
                     println(displayString + " Integer object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Integer(rs1.getInt(updateXXXName)));
+                                rs1.getInt(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Integer(rs1.getInt(updateXXXName)));
+                                rs1.getInt(updateXXXName));
                 } else if (updateXXXName ==  3) { 
                     //updateObject using Long object
                     println(displayString + " Long object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Long(rs1.getLong(updateXXXName)));
+                                rs1.getLong(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Long(rs1.getLong(updateXXXName)));
+                                rs1.getLong(updateXXXName));
                 } else if (updateXXXName == 4) { 
                     //updateObject using BigDecimal object
                     if(!JDBC.vmSupportsJSR169()) {
@@ -2964,19 +2964,19 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     println(displayString + " Float object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Float(rs1.getFloat(updateXXXName)));
+                                rs1.getFloat(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Float(rs1.getFloat(updateXXXName)));
+                                rs1.getFloat(updateXXXName));
                 } else if (updateXXXName == 6) { 
                     //updateObject using Double object
                     println(displayString + " Double object as parameters");
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Double(rs1.getDouble(updateXXXName)));
+                                rs1.getDouble(updateXXXName));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Double(rs1.getDouble(updateXXXName)));
+                                rs1.getDouble(updateXXXName));
                 } else if (updateXXXName == 7) { 
                     //updateObject using String object
                     println(displayString + " String object as parameters");
@@ -3068,10 +3068,10 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     //since Derby don't support boolean datatype
                     if (indexOrName == 1) //test by passing column position
                         rs.updateObject(sqlType, 
-                                new Boolean(rs1.getBoolean(1)));
+                                rs1.getBoolean(1));
                     else //test by passing column name
                         rs.updateObject(ColumnNames[sqlType-1], 
-                                new Boolean(rs1.getBoolean(1)));
+                                rs1.getBoolean(1));
                 } else if (updateXXXName == 19) { 
                     //update column with updateNull methods
                     println(displayString + " null as parameters");
@@ -4599,8 +4599,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         } else if (sqlType == 6) {
             // verify update made to DOUBLE column with updateXXX methods
             Double d1, d2;
-            d1 = new Double(rs.getDouble(sqlType));
-            d2 = new Double(rs1.getDouble(updateXXXName));
+            d1 = rs.getDouble(sqlType);
+            d2 = rs1.getDouble(updateXXXName);
             // can have precision problems with updateFloat
             if (updateXXXName == 5) {
                 assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 

@@ -228,7 +228,7 @@ abstract class AbstractCompatibilityTest
                 break;
 
             case Types.BIGINT:
-                retval = new Long( rs.getLong( columnName ) );
+                retval = rs.getLong( columnName );
                 break;
 
             case Types.BLOB:
@@ -261,19 +261,19 @@ abstract class AbstractCompatibilityTest
                 break;
 
             case Types.DOUBLE:
-                retval = new Double( rs.getDouble( columnName ) );
+                retval = rs.getDouble( columnName );
                 break;
 
             case Types.REAL:
-                retval = new Float( rs.getFloat( columnName ) );
+                retval = rs.getFloat( columnName );
                 break;
 
             case Types.INTEGER:
-                retval = new Integer( rs.getInt( columnName ) );
+                retval = rs.getInt( columnName );
                 break;
 
             case Types.SMALLINT:
-                retval = new Short( rs.getShort( columnName ) );
+                retval = rs.getShort( columnName );
                 break;
 
             case Types.TIME:

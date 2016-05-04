@@ -166,7 +166,7 @@ public class RSMDWrapper extends StringColumnVTI
         if ( _currentRow >= _rowCount ) { return false; }
 
         _currentRow++;
-        _currentRowNumber = new Integer( _currentRow );
+        _currentRowNumber = _currentRow;
         
         return true;
     }

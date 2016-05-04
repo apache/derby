@@ -44,15 +44,15 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
     /** All rows in the cei table. */
     private static final Object[][] CEI_ROWS = {
-        { new Integer(0), "Alarms", "AlarmDisk999" },
-        { new Integer(1), "Alarms", "AlarmFS-usr" },
-        { new Integer(2), "Alarms", "AlarmPower" },
-        { new Integer(3), "Alert", "AlertBattery" },
-        { new Integer(4), "Alert", "AlertUPS" },
-        { new Integer(5), "Warning", "WarnIntrusion" },
-        { new Integer(6), "Warning", "WarnUnlockDoor" },
-        { new Integer(7), "Warning", "Warn%Unlock%Door" },
-        { new Integer(8), "Warning", "W_Unlock_Door" },
+        { 0, "Alarms", "AlarmDisk999" },
+        { 1, "Alarms", "AlarmFS-usr" },
+        { 2, "Alarms", "AlarmPower" },
+        { 3, "Alert", "AlertBattery" },
+        { 4, "Alert", "AlertUPS" },
+        { 5, "Warning", "WarnIntrusion" },
+        { 6, "Warning", "WarnUnlockDoor" },
+        { 7, "Warning", "Warn%Unlock%Door" },
+        { 8, "Warning", "W_Unlock_Door" },
     };
 
     public DynamicLikeOptimizationTest(String name) {
@@ -320,7 +320,7 @@ public class DynamicLikeOptimizationTest extends BaseJDBCTestCase {
                                          String[][][] rows)
             throws SQLException {
         Object[] args = {
-            null, new Integer(1), "", "%", "%f", "%g", "asd%", "_%", "%_",
+            null, 1, "", "%", "%f", "%g", "asd%", "_%", "%_",
             "_asdf", "_asdf %", "%asdf"
         };
         assertEquals(args.length, rows.length);

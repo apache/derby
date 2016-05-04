@@ -213,7 +213,7 @@ public class BasicUnitTestManager implements UnitTestManager, ModuleControl
 
 		if (performanceReportOn){
 			endTime = new Date();
-			emitAMessage("Test '" + thisTestName + "' took " + new Long(endTime.getTime() - startTime.getTime()) + " milliseconds.");
+			emitAMessage("Test '" + thisTestName + "' took " + (endTime.getTime() - startTime.getTime()) + " milliseconds.");
 		}
 
 		return result;

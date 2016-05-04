@@ -50,18 +50,18 @@ public class JavaVersionHolder
 	majorVersion = javaVersion.substring(0, i);
 	try
 	    {
-		    Integer imajor = new Integer(majorVersion);
+          Integer imajor = Integer.valueOf(majorVersion);
 		    major = imajor.intValue();
 		    if (j != -1)
 		    {
 		        minorVersion = javaVersion.substring(i+1, j);
-		        Integer iminor = new Integer(minorVersion);
+		        Integer iminor = Integer.valueOf(minorVersion);
 		        minor = iminor.intValue();
 		    }
 		    else
 		    {
 		        minorVersion = javaVersion.substring(i+1);
-		        Integer iminor = new Integer(minorVersion);
+		        Integer iminor = Integer.valueOf(minorVersion);
 		        minor = iminor.intValue();
 		    }
 		}
@@ -88,9 +88,9 @@ public class JavaVersionHolder
 		        //System.out.println("minorVersion: " + minorVersion);
 		        try
 	            {
-		            Integer imajor = new Integer(majorVersion);
+                    Integer imajor = Integer.valueOf(majorVersion);
 		            major = imajor.intValue();
-		            Integer iminor = new Integer(minorVersion);
+		            Integer iminor = Integer.valueOf(minorVersion);
 		            minor = iminor.intValue();
 		        }
 		        catch (NumberFormatException nfe2)

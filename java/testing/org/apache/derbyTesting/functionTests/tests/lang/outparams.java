@@ -1016,38 +1016,38 @@ public class outparams
 			case Types.BIT:
 			case Types.BOOLEAN:
 				strbuf.append("setObject("+arg+", true)");
-				cs.setObject(arg, new Boolean(true));
+				cs.setObject(arg, true);
 				break;
 
 			case Types.TINYINT:
 				strbuf.append("setObject("+arg+", 6)");
-				cs.setObject(arg, new Integer((byte)6));
+				cs.setObject(arg, 6);
 				break;
 
 			case Types.SMALLINT:
 				strbuf.append("setObject("+arg+", 66)");
-				cs.setObject(arg, new Integer((short)66));
+				cs.setObject(arg, 66);
 				break;
 
 			case Types.INTEGER:
 				strbuf.append("setObject("+arg+", 666)");
-				cs.setObject(arg, new Integer(666));
+				cs.setObject(arg, 666);
 				break;
 
 			case Types.BIGINT:
 				strbuf.append("setObject("+arg+", 666)");
-				cs.setObject(arg, new Long(666));
+				cs.setObject(arg, 666L);
 				break;
 
 			case Types.FLOAT:
 			case Types.REAL:
 				strbuf.append("setObject("+arg+", 666)");
-				cs.setObject(arg, new Float(666));
+				cs.setObject(arg, 666f);
 				break;
 
 			case Types.DOUBLE:
 				strbuf.append("setObject("+arg+", 666)");
-				cs.setObject(arg, new Double(666));
+				cs.setObject(arg, 666.0);
 				break;
 
 			case Types.DECIMAL:
@@ -1364,7 +1364,7 @@ public class outparams
 			}
 		}
 
-		retval[0] = (setToNull.booleanValue()) ? null : new Integer((short)66);
+		retval[0] = (setToNull.booleanValue()) ? null : 66;
 	}
 
 	public static void testNullBug4317(String passedInNull) throws Throwable
@@ -1380,7 +1380,7 @@ public class outparams
 	}
 	public static void takesByte(Byte[] outparam, int type)
 	{
-		outparam[0] = new Byte((byte)(outparam[0] == null ? 33 : outparam[0].byteValue()*2));
+		outparam[0] = ((byte)(outparam[0] == null ? 33 : outparam[0].byteValue()*2));
 	}
 
 	public static void takesShortPrimitive(short[] outparam, int type)
@@ -1389,7 +1389,7 @@ public class outparams
 	}
 	public static void takesShort(Short[] outparam, int type)
 	{
-		outparam[0] = new Short((byte)(outparam[0] == null ? 33 : outparam[0].shortValue()*2));
+      outparam[0] = (short) ((byte)(outparam[0] == null ? 33 : outparam[0].shortValue()*2));
 	}
 
 	public static void takesIntegerPrimitive(int[] outparam, int type)
@@ -1398,7 +1398,7 @@ public class outparams
 	}
 	public static void takesInteger(Integer[] outparam, int type)
 	{
-		outparam[0] = new Integer(outparam[0] == null ? 33 : outparam[0].intValue()*2);
+		outparam[0] = outparam[0] == null ? 33 : outparam[0].intValue()*2;
 	}
 
 	public static void takesLongPrimitive(long[] outparam, int type)
@@ -1407,7 +1407,7 @@ public class outparams
 	}
 	public static void takesLong(Long[] outparam, int type)
 	{
-		outparam[0] = new Long(outparam[0] == null ? 33 : outparam[0].longValue()*2);
+      outparam[0] = (long)(outparam[0] == null ? 33 : outparam[0].longValue()*2);
 	}
 
 	public static void takesDoublePrimitive(double[] outparam, int type)
@@ -1416,7 +1416,7 @@ public class outparams
 	}
 	public static void takesDouble(Double[] outparam, int type)
 	{
-		outparam[0] = new Double(outparam[0] == null ? 33 : outparam[0].doubleValue()*2);
+      outparam[0] = (double) (outparam[0] == null ? 33 : outparam[0].doubleValue()*2);
 	}
 
 	public static void takesFloatPrimitive(float[] outparam, int type)
@@ -1425,7 +1425,7 @@ public class outparams
 	}
 	public static void takesFloat(Float[] outparam, int type)
 	{
-		outparam[0] = new Float(outparam[0] == null ? 33 : outparam[0].floatValue()*2);
+      outparam[0] = (float) (outparam[0] == null ? 33 : outparam[0].floatValue()*2);
 	}
 
 	public static void takesBooleanPrimitive(boolean[] outparam, int type)
@@ -1434,7 +1434,7 @@ public class outparams
 	}
 	public static void takesBoolean(Boolean[] outparam, int type)
 	{
-		outparam[0] = new Boolean(true);
+		outparam[0] = true;
 	}
 
 	public static void takesByteArray(byte[][] outparam, int type)
@@ -1485,7 +1485,7 @@ public class outparams
 	}
 	public static Byte returnsByte(int type)
 	{
-		return new Byte((byte)66);
+		return (byte)66;
 	}
 
 	public static short returnsShortP(int type)
@@ -1494,7 +1494,7 @@ public class outparams
 	}
 	public static Short returnsShort(int type)
 	{
-		return new Short((short)666);
+		return (short)666;
 	}
 
 	public static int returnsIntegerP(int type)
@@ -1503,7 +1503,7 @@ public class outparams
 	}
 	public static Integer returnsInteger(int type)
 	{
-		return new Integer(666);
+		return 666;
 	}
 
 	public static long returnsLongP(int type)
@@ -1512,7 +1512,7 @@ public class outparams
 	}
 	public static Long returnsLong(int type)
 	{
-		return new Long(666);
+		return 666L;
 	}
 
 	public static float returnsFloatP(int type)
@@ -1521,7 +1521,7 @@ public class outparams
 	}
 	public static Float returnsFloat(int type)
 	{
-		return new Float(666);
+		return 666f;
 	}
 
 	public static double returnsDoubleP(int type)
@@ -1530,7 +1530,7 @@ public class outparams
 	}
 	public static Double returnsDouble(int type)
 	{
-		return new Double(666);
+		return 666.0;
 	}
 
 	public static byte[] returnsByteArray(int type)

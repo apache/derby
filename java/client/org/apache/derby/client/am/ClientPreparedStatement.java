@@ -686,7 +686,8 @@ public class ClientPreparedStatement extends ClientStatement
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] =
                     Types.DOUBLE;
-                setInput(parameterIndex, new Double(x));
+                Double d = x;
+                setInput(parameterIndex, d);
             }
         }
         catch ( SqlException se )
@@ -2246,7 +2247,7 @@ public class ClientPreparedStatement extends ClientStatement
         if (batchSize > 65534)
             throw ClientDriver.getFactory().newBatchUpdateException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.TOO_MANY_COMMANDS_FOR_BATCH), 
-                new Object[] { new Integer( 65534 ) }, updateCounts, null );
+                new Object[] { 65534 }, updateCounts, null );
 
         // Initialize all the updateCounts to indicate failure
         // This is done to account for "chain-breaking" errors where we cannot

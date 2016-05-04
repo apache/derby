@@ -596,7 +596,7 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		if (in == null)
 			inout[0] = null;
 		else
-			inout[0] = new Boolean(inout[0].booleanValue() && in.booleanValue());
+			inout[0] = inout[0].booleanValue() && in.booleanValue();
 
 	}
 
@@ -618,9 +618,9 @@ public abstract class ProcedureTest extends SimpleProcedureTest implements Resul
 		if (in == null)
 			;//inout[0] = null;
 		else if (inout[0] == null)
-			inout[0] = new Integer(3 * in.intValue());
+			inout[0] = 3 * in.intValue();
 		else
-			inout[0] = new Integer(inout[0].intValue() + in.intValue());
+			inout[0] = inout[0].intValue() + in.intValue();
 	}
 	public static void pTINYINT(byte in, byte[] inout, byte[] out) throws SQLException {
 

@@ -855,7 +855,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param i INOUT parameter that gets set to 10 by the procedure
      */
     public static void proc_2516(Integer[] i) {
-        i[0] = new Integer(10);
+        i[0] = 10;
     }
 
     /**
@@ -1292,7 +1292,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     {
         return new AllTypesTuple
             (
-             new Long( 1L ),
+             1L,
              new HarmonySerialBlob( new byte[] { (byte) 1, (byte) 1, (byte) 1 } ),
              Boolean.TRUE,
              "firstt",
@@ -1300,12 +1300,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new HarmonySerialClob( "firstt" ),
              new Date( 1L ),
              new BigDecimal( "1" ),
-             new Double( 1.0 ),
-             new Integer( 1 ),
+             1.0,
+             1 ,
              new String( "firstt" ),
              new byte[] { (byte) 1, (byte) 1, (byte) 1 },
-             new Float( 1.0F ),
-             new Integer( 1 ),
+             1.0F,
+             1,
              new Time( 1L ),
              new Timestamp( 1L ),
              new Price( "USD", new BigDecimal( "1" ), new Timestamp( 1 ) ),
@@ -1317,7 +1317,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     {
         return new AllTypesTuple
             (
-             new Long( 2L ),
+             2L,
              new HarmonySerialBlob( new byte[] { (byte) 2, (byte) 2, (byte) 2 } ),
              Boolean.FALSE,
              "second",
@@ -1325,12 +1325,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new HarmonySerialClob( "second" ),
              new Date( 2L ),
              new BigDecimal( "2" ),
-             new Double( 2.0 ),
-             new Integer( 2 ),
+             2.0,
+             2,
              new String( "second" ),
              new byte[] { (byte) 2, (byte) 2, (byte) 2 },
-             new Float( 2.0F ),
-             new Integer( 2 ),
+             2.0F,
+             2,
              new Time( 2L ),
              new Timestamp( 2L ),
              new Price( "USD", new BigDecimal( "2" ), new Timestamp( 2 ) ),

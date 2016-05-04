@@ -1156,8 +1156,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         String NullMapValue = "XJ081";
         String MapMapValue = "0A000";
         Object[] expectedValues = {
-            new Integer(ResultSet.HOLD_CURSORS_OVER_COMMIT), "XJ010",
-            new Integer(2), new Boolean(true), new Boolean(false), 
+            ResultSet.HOLD_CURSORS_OVER_COMMIT, "XJ010",
+            2, true, false, 
             EmptyMapValue, NullMapValue, MapMapValue};
 
         assertConnectionOK(expectedValues, "DriverManager ", dmc);
@@ -1288,10 +1288,10 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         xar.start(xid, XAResource.TMNOFLAGS);
         Connection xacc = xac.getConnection();
         xacc.close();
-        expectedValues[0] = new Integer(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        expectedValues[0] = ResultSet.CLOSE_CURSORS_AT_COMMIT;
         if (usingEmbedded())
             expectedValues[1] = "XJ058";
-        expectedValues[3] = new Boolean(false);
+        expectedValues[3] = false;
         assertConnectionOK(
             expectedValues, "Global XADataSource", xac.getConnection());
         //Check if got connection closed event but not connection error event
@@ -1307,8 +1307,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         xar.end(xid, XAResource.TMSUCCESS);
 
-        expectedValues[0] = new Integer(ResultSet.HOLD_CURSORS_OVER_COMMIT);
-        expectedValues[3] = new Boolean(true);
+        expectedValues[0] = ResultSet.HOLD_CURSORS_OVER_COMMIT;
+        expectedValues[3] = true;
         assertConnectionOK(expectedValues, 
             "Switch to local XADataSource", xac.getConnection());
         //Check if got connection closed event but not connection error event
@@ -1325,8 +1325,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         Connection backtoGlobal = xac.getConnection();
 
         xar.start(xid, XAResource.TMJOIN);
-        expectedValues[0] = new Integer(ResultSet.CLOSE_CURSORS_AT_COMMIT);
-        expectedValues[3] = new Boolean(false);
+        expectedValues[0] = ResultSet.CLOSE_CURSORS_AT_COMMIT;
+        expectedValues[3] = false;
         assertConnectionOK(expectedValues, 
             "Switch to global XADataSource", backtoGlobal);
         //Check if got connection closed event but not connection error event
@@ -2050,7 +2050,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // This is currently only implemented in the client driver.
         if (usingDerbyNetClient()) {
             J2EEDataSource.setBeanProperty(
-                    cpDs, "maxStatements",new Integer(7));
+                    cpDs, "maxStatements",7);
             doTestSchemaIsReset(cpDs.getPooledConnection(userSchema, "secret"),
                     userSchema);
         }
@@ -2341,7 +2341,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 PrivilegedFileOpsForTests.getAbsolutePath(traceFile));
         J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
         J2EEDataSource.setBeanProperty( ds, "traceLevel",
-                new Integer(BasicClientDataSource40.TRACE_ALL));
+                BasicClientDataSource40.TRACE_ALL);
 
         // Obtain connection.
         PooledConnection physicalCon = null;
@@ -4556,8 +4556,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             EmptyMapValue="0A000"; NullMapValue="0A000"; MapMapValue="0A000";
         }
         Object[] expectedValues = { 
-            new Integer(ResultSet.HOLD_CURSORS_OVER_COMMIT), "OK",
-            new Integer(2), new Boolean(false), new Boolean(false), 
+            ResultSet.HOLD_CURSORS_OVER_COMMIT, "OK",
+            2, false, false, 
             EmptyMapValue, NullMapValue, MapMapValue};
 
         new J2EEDataSourceTest("J2EEDataSourceTest").assertConnectionOK(

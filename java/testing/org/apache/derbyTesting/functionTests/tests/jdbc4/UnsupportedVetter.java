@@ -810,27 +810,27 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
             return Boolean.FALSE;
         }
         if (type == Character.TYPE) {
-            return new Character((char) 0);
+            return (char) 0;
         }
         if (type == Byte.TYPE) {
-            return new Byte((byte) 0);
+            return (byte) 0;
         }
         if (type == Short.TYPE) {
-            return new Short((short) 0);
+            return (short) 0;
         }
         if (type == Integer.TYPE) {
             // use 1 instead of 0. 0 = java.sql.Types.NULL and this causes
             // various type-aware methods to raise SQLFeatureNotSupportedException
-            return new Integer(1);
+            return 1;
         }
         if (type == Long.TYPE) {
-            return new Long(0L);
+            return 0L;
         }
         if (type == Float.TYPE) {
-            return new Float(0f);
+            return 0f;
         }
         if (type == Double.TYPE) {
-            return new Double(0d);
+            return 0d;
         }
         fail("Don't know how to handle type " + type);
         return null;            // unreachable statement

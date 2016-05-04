@@ -662,7 +662,7 @@ public class FormatableBitSetTest extends BaseTestCase {
 
     // count one-bits in a byte with Integer.bitCount()
     private static int bitsInByte(byte b) throws Exception {
-        Integer arg = new Integer(b & 0xff);
+        Integer arg = b & 0xff;
         Integer ret = (Integer) bitCount.invoke(null, new Object[] { arg });
         return ret.intValue();
     }

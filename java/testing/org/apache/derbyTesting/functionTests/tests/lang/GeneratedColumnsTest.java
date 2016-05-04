@@ -6211,7 +6211,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         _minusCounter++;
 
         if ( a == null ) { return null; }
-        else { return new Integer( -a.intValue() ); }
+        else { return -a.intValue(); }
     }
     
     public static   int readMinusCounter()

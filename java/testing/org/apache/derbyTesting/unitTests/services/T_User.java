@@ -70,7 +70,7 @@ class T_User implements Runnable {
 	private void T001() throws StandardException, T_Fail {
 
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
-		Integer g0 = new Integer(1);	// create an object for a lock group
+		Integer g0 = 1;	// create an object for a lock group
 
 		// check we have no locks held
 		checkLockCount(cs, 0);
@@ -113,7 +113,7 @@ class T_User implements Runnable {
 	private void T002() throws StandardException, T_Fail {
 
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
-		Integer g0 = new Integer(1);	// create an object for a lock group
+		Integer g0 = 1;	// create an object for a lock group
 
 		// check we have no locks held
 		checkLockCount(cs, 0);
@@ -138,7 +138,7 @@ class T_User implements Runnable {
 	private void T003() throws StandardException, T_Fail {
 
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
-		Integer g0 = new Integer(1);	// create an object for a lock group
+		Integer g0 = 1;	// create an object for a lock group
 
 		// check we have no locks held
 		checkLockCount(cs, 0);
@@ -157,7 +157,7 @@ class T_User implements Runnable {
 	private void T004() throws StandardException, T_Fail {
 
 		CompatibilitySpace cs = lf.createCompatibilitySpace(null);
-		Integer g0 = new Integer(1);	// create an object for a lock group
+		Integer g0 = 1;	// create an object for a lock group
 
 		// check we have no locks held
 		checkLockCount(cs, 0);

@@ -1164,8 +1164,8 @@ public class RunTest
 		canonpath = sp.getProperty("canonpath");
 
 		testOutName = sp.getProperty("testoutname");
-		useOutput = new Boolean(sp.getProperty("useoutput","true")).booleanValue();
-		outcopy = new Boolean(sp.getProperty("outcopy","false")).booleanValue();
+		useOutput = Boolean.valueOf(sp.getProperty("useoutput","true")).booleanValue();
+		outcopy = Boolean.valueOf(sp.getProperty("outcopy","false")).booleanValue();
 		mtestdir = sp.getProperty("mtestdir"); // used by multi tests
 		if (mtestdir == null)
 		    mtestdir = "";
@@ -1758,7 +1758,7 @@ clp.list(System.out);
    		// Also check for supportfiles
     		String suppFiles = ap.getProperty("supportfiles");
 			boolean copySupportFiles = ((suppFiles != null) && (suppFiles.length()>0));
-			boolean createExtDirs= new Boolean(ap.getProperty("useextdirs","false")).booleanValue();
+			boolean createExtDirs= Boolean.valueOf(ap.getProperty("useextdirs","false")).booleanValue();
     		if (copySupportFiles || createExtDirs)
     		{
 				File copyOutDir = null;

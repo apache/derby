@@ -2325,7 +2325,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DERBY-4946: Boolean isn't supported if DB is soft-upgraded from
         // pre-10.7 version
         if (!booleanSupported) {
-            supportedTypes.remove(new Integer(Types.BOOLEAN));
+            supportedTypes.remove(Types.BOOLEAN);
         }
 
         // Rows are returned from getTypeInfo in order of
@@ -2341,7 +2341,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             // DATA_TYPE (column 2)
             int type = rs.getInt("DATA_TYPE");
             assertFalse(rs.wasNull());
-            if (!supportedTypes.get(offset).equals(new Integer(type)))
+            if (!supportedTypes.get(offset).equals(type))
             {
                 fail("Unexpected type " + typeName);
             }
@@ -5275,7 +5275,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return an Integer
      */
     private static Integer i(int i) {
-        return new Integer(i);
+        return i;
     }
 
     /**

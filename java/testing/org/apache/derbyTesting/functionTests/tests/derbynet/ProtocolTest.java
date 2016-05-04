@@ -433,7 +433,7 @@ public class ProtocolTest
                 return convertHex(str, ln(tkn));
             }
         }
-        return (new Double(tkn.nval).intValue() * mult);
+        return Double.valueOf(tkn.nval).intValue() * mult;
     }
 
     /**

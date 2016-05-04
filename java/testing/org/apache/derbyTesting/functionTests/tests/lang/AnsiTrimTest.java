@@ -105,7 +105,7 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
         String expr;
         positiveTest(
                 "SELECT count(*) FROM tt  " +
-                "WHERE id = 1 AND (trim (leading substr(v,1,1) from v)) = 'bcaca'", new Integer(1));
+                "WHERE id = 1 AND (trim (leading substr(v,1,1) from v)) = 'bcaca'", 1);
 
         positiveTest(
                 "select trim (both (case when length(v) = 6 then 'a' else 'b' end) from v) from tt",

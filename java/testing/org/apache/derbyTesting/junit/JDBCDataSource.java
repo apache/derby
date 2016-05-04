@@ -118,7 +118,7 @@ public class JDBCDataSource {
         
         if (!config.getJDBCClient().isEmbedded()) {
             beanProperties.put("serverName", config.getHostName());
-            beanProperties.put("portNumber", new Integer(config.getPort()));
+            beanProperties.put("portNumber", config.getPort());
         }
         
         beanProperties.put("databaseName", config.getDefaultDatabaseName());

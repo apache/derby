@@ -448,11 +448,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     {
         if (usingDerbyNetClient())
         {
-            assertSecurityMechanismOK("sarah",null, new Short(
-                SECMEC_USRIDONL),"SECMEC_USRIDONL:", expectedValues[1]);
+            assertSecurityMechanismOK("sarah",null, SECMEC_USRIDONL,"SECMEC_USRIDONL:", expectedValues[1]);
         }
-        assertSecurityMechanismOK("john","sarah", new Short(
-            SECMEC_USRIDPWD),"SECMEC_USRIDPWD:", expectedValues[2]);
+        assertSecurityMechanismOK("john","sarah", SECMEC_USRIDPWD,"SECMEC_USRIDPWD:", expectedValues[2]);
 
         if (usingDerbyNetClient())
         {
@@ -466,10 +464,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // successful when client is running in a JVM where the JCE does
             // not support the DH (32 byte prime).
             // The test methods are implemented to work either way.
-            assertSecurityMechanismOK("john","sarah",new Short(
-                SECMEC_EUSRIDPWD),"SECMEC_EUSRIDPWD:", expectedValues[3]);
-            assertSecurityMechanismOK("john","sarah",new Short(
-                SECMEC_USRSSBPWD),"SECMEC_USRSSBPWD:", expectedValues[4]);
+            assertSecurityMechanismOK("john","sarah",SECMEC_EUSRIDPWD,"SECMEC_EUSRIDPWD:", expectedValues[3]);
+            assertSecurityMechanismOK("john","sarah",SECMEC_USRSSBPWD,"SECMEC_USRSSBPWD:", expectedValues[4]);
         }
     }
 
@@ -489,7 +485,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             conn = ds.getConnection(user, password);
             conn.close();
             // EUSRIDPWD is supported with some jvm( version)s, not with others
-            if (!(secmec.equals(new Short(SECMEC_EUSRIDPWD))))
+            if (!(secmec.equals(SECMEC_EUSRIDPWD)))
             {
                 if (!expectedValue.equals("OK"))
                 {
@@ -513,7 +509,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // Exceptions expected in certain cases depending on JCE used for 
             // running the test. So, instead of '08004' (connection refused),
             // or "OK", we may see 'not supported' (XJ112).
-            else if (secmec.equals(new Short(SECMEC_EUSRIDPWD))) 
+            else if (secmec.equals(SECMEC_EUSRIDPWD)) 
             {
                 if (!(sqle.getSQLState().equals("XJ112")))
                     assertSQLState(expectedValue, sqle);
@@ -827,8 +823,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                             getExpectedValueFromAll(expectedValues, k, j, i));
                     // case - specify security mechanism on datasource
                     assertSecurityMechanismOK(
-                        USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j], new Short 
-                            (SECMEC_ATTRIBUTE[i]), "TEST_DS (" + urlAttributes
+                        USER_ATTRIBUTE[k],PWD_ATTRIBUTE[j], SECMEC_ATTRIBUTE[i], "TEST_DS (" + urlAttributes
                             + ",securityMechanism="+SECMEC_ATTRIBUTE[i]+")", 
                             getExpectedValueFromAll(expectedValues, k, j, i));
                 }
@@ -1046,7 +1041,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // datasource set security mechanism to use encrypted userid and
             // password.
             assertSecMecWithConnPoolingOK(
-                "peter","neelima",new Short(SECMEC_EUSRIDPWD));
+                "peter","neelima",SECMEC_EUSRIDPWD);
             if (!expectedValue.equals("OK"))
                 fail("expected SQLException if DERBY-1080 did not regress");
         }
@@ -1088,7 +1083,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         // USRSSBPWD security mechanism.
         println("Turning ON Derby BUILTIN authentication");
         Connection conn = getDataSourceConnectionWithSecMec(
-            "neelima", "lee", new Short(SECMEC_USRSSBPWD));
+            "neelima", "lee", SECMEC_USRSSBPWD);
 
         // Turn on BUILTIN authentication
         CallableStatement cs = conn.prepareCall(
@@ -1135,19 +1130,19 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             "user=neelima;password=lee;securityMechanism=" +
             SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T1):", expectedValues[2]);
         assertSecurityMechanismOK(
-            "neelima","lee",new Short(SECMEC_USRSSBPWD),
+            "neelima","lee",SECMEC_USRSSBPWD,
             "TEST_DS - USRSSBPWD + BUILTIN (T2):", expectedValues[2]);
         // Attempting to connect with some invalid user
         assertConnectionUsingDriverManager(getJDBCUrl(
             "user=invalid;password=user;securityMechanism=" +
             SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T3):",expectedValues[3]);
         assertSecurityMechanismOK(
-            "invalid","user",new Short(SECMEC_USRSSBPWD),
+            "invalid","user",SECMEC_USRSSBPWD,
             "TEST_DS - USRSSBPWD + BUILTIN (T4):", expectedValues[3]);
 
         // Prepare to turn OFF Derby BUILTIN authentication
         conn = getDataSourceConnectionWithSecMec("neelima", "lee",
-            new Short(SECMEC_USRSSBPWD));
+            SECMEC_USRSSBPWD);
 
         // Turn off BUILTIN authentication
         cs = conn.prepareCall(
@@ -1221,11 +1216,11 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         if (!hostName.equals("localhost"))
         {
             attrs.put("serverName", hostName);
-            attrs.put("portNumber", new Integer(port));
+            attrs.put("portNumber", port);
         }
         else
         {
-            attrs.put("portNumber", new Integer(port));
+            attrs.put("portNumber", port);
         }
         return attrs;
     }

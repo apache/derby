@@ -74,8 +74,8 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             int threshold = rand.threshold();
             
             HashMap<String, Number> inputData = new HashMap<String, Number>();
-            inputData.put("d", new Short(d));
-            inputData.put("threshold", new Integer(threshold));
+            inputData.put("d", d);
+            inputData.put("threshold", threshold);
             
             ops.stockLevel(this, inputData,
                     w, d, threshold);
@@ -102,8 +102,8 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             int c = rand.NURand1023();
             
             HashMap<String, Number> inputData = new HashMap<String, Number>();
-            inputData.put("d", new Short(d));
-            inputData.put("c", new Integer(c));
+            inputData.put("d", d);
+            inputData.put("c", c);
 
             ops.orderStatus(this, inputData, w, d, c);
             // Ensures the Display object read it.
@@ -119,7 +119,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             String customerLast = rand.randomCLast();
             
             HashMap<String, Object> inputData = new HashMap<String, Object>();
-            inputData.put("d", new Short(d));
+            inputData.put("d", d);
             inputData.put("customerLast", customerLast);
 
             ops.orderStatus(this, inputData, w, d, customerLast);

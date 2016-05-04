@@ -107,9 +107,9 @@ public class PrepareStatementTest extends BaseJDBCTestCase
 
         // Rows to be inserted in table t1 for this test
         final Integer[][] t1_rows = {
-            {new Integer(99), new Integer(5), new Integer(9)},
-            {new Integer(2), new Integer(6), new Integer(10)},
-            {new Integer(7), new Integer(5), new Integer(8)}
+            {99, 5, 9},
+            {2, 6, 10},
+            {7, 5, 8}
         };
 
         // executeUpdate() with parameters
@@ -199,14 +199,14 @@ public class PrepareStatementTest extends BaseJDBCTestCase
 
         // Values to be inserted
         Object[][] t2_rows = {
-            {new Integer(1), new Integer(2), new Long(3), new Float(4.0),
-             new Double(5.0), new Double(6.0), new BigDecimal("77.77"),
+            {1, 2, 3L, 4.0F,
+             5.0, 6.0, new BigDecimal("77.77"),
              new BigDecimal("8.100"), "column9string       ",
              "column10vcstring", "column11lvcstring", bapad, ba, ba,
              Date.valueOf("2002-04-12"), Time.valueOf("11:44:30"),
              Timestamp.valueOf("2002-04-12 11:44:30.000000000")},
-            {new Integer(1), new Integer(2), new Long(3), new Float(4.0),
-             new Double(5.0), new Double(6.0), new BigDecimal("77.77"),
+            {1, 2, 3L, 4.0F,
+             5.0, 6.0, new BigDecimal("77.77"),
              new BigDecimal("8.100"), "column11string      ",
              "column10vcstring", "column11lvcstring", bapad, ba, ba,
              Date.valueOf("2002-04-12"), Time.valueOf("11:44:30"),
@@ -222,7 +222,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
             + "?, ? ,? , ?)");
         pSt.setShort(1, ((Integer )t2_rows[0][0]).shortValue());
         pSt.setInt(2, ((Integer )t2_rows[0][1]).intValue());
-        pSt.setLong(3, ((Long )t2_rows[0][2]).longValue());
+        pSt.setLong(3, ((Long)t2_rows[0][2]).longValue());
         pSt.setFloat(4, ((Float )t2_rows[0][3]).floatValue());
         pSt.setDouble(5, ((Double )t2_rows[0][4]).doubleValue());
         pSt.setDouble(6, ((Double )t2_rows[0][5]).doubleValue());
@@ -314,10 +314,10 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         assertUpdateCount(pSt, 2);
         pSt.close();
         pSt = prepareStatement("select * from d2558 where i = ?");
-        pSt.setObject(1,new Integer(3),java.sql.Types.INTEGER,0);
+        pSt.setObject(1,3,java.sql.Types.INTEGER,0);
         try {
             // There's only 1 parameter marker, so this should fail:
-            pSt.setObject(2,new Integer(4), java.sql.Types.INTEGER,0);
+            pSt.setObject(2,4, java.sql.Types.INTEGER,0);
             rs = pSt.executeQuery();
             rs.close();
             fail("Exception expected above!");

@@ -1714,19 +1714,19 @@ public class TriggerTest extends BaseJDBCTestCase {
         switch (jdbcType)
         {
         case Types.SMALLINT:
-            return new Integer((short) r.nextInt());
+          return (short) r.nextInt();
         case Types.INTEGER:
-            return new Integer(r.nextInt());
+            return r.nextInt();
             
         case Types.BIGINT:
-            return new Long(r.nextLong());
+            return r.nextLong();
             
         case Types.FLOAT:
         case Types.REAL:
-            return new Float(r.nextFloat());
+            return r.nextFloat();
             
         case Types.DOUBLE:
-            return new Double(r.nextDouble());
+            return r.nextDouble();
 
         case Types.DATE:
             long d = r.nextLong();

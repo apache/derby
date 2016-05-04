@@ -1281,7 +1281,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         return ps.executeQuery();
     }
 
-    public static Number makeNumber( int arg ) { return new Integer( arg ); }
+    public static Number makeNumber( int arg ) { return arg; }
 
     public  static  Integer getIntValue( HashMap<String,Integer> map, String key )
     {

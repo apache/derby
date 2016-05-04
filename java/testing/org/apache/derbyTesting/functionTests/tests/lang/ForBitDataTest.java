@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.forbitdata
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ForBitDataTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

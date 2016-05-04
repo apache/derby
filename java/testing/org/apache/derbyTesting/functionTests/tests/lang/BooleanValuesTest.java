@@ -1778,22 +1778,22 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
 
         ps.setInt( 1, 5 );
         ps.setString( 2, "setObject( Byte )" );
-        ps.setObject( 3, new Byte( (byte) value ) );
+        ps.setObject( 3, (byte) value );
         ps.execute();
 
         ps.setInt( 1, 6 );
         ps.setString( 2, "setObject( Short )" );
-        ps.setObject( 3, new Short( (short) value ) );
+        ps.setObject( 3, (short) value );
         ps.execute();
 
         ps.setInt( 1, 7 );
         ps.setString( 2, "setObject( Integer )" );
-        ps.setObject( 3, new Integer( value ) );
+        ps.setObject( 3, value );
         ps.execute();
 
         ps.setInt( 1, 8 );
         ps.setString( 2, "setObject( Long )" );
-        ps.setObject( 3, new Long( (long) value ) );
+        ps.setObject( 3, (long) value );
         ps.execute();
 
         String stringValue = Boolean.toString( (value != 0) );

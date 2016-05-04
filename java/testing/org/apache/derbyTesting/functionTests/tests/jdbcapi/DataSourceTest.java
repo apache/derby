@@ -183,8 +183,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         //Connection dmc = getConnection();
         
         Object[] expectedValues = {
-            new Integer(ResultSet.HOLD_CURSORS_OVER_COMMIT), "XJ010",
-            new Integer(2), new Boolean(true), new Boolean(false)};
+            ResultSet.HOLD_CURSORS_OVER_COMMIT, "XJ010",
+            2, true, false};
 
         if (usingEmbedded())
             assertTenConnectionsUnique();

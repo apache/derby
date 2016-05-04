@@ -1835,7 +1835,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		" y char(100))");
     s.execute("create table assocout(x char(10))");
     ps = prepareStatement("insert into assoc values (?, 'hello')");
-    ps.setString(1, new Integer(10).toString());
+    ps.setString(1, "10");
     ps.executeUpdate();     
     
     //DERBY-2955
