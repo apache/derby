@@ -2325,7 +2325,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DERBY-4946: Boolean isn't supported if DB is soft-upgraded from
         // pre-10.7 version
         if (!booleanSupported) {
-            supportedTypes.remove(Types.BOOLEAN);
+            supportedTypes.remove(new Integer(Types.BOOLEAN));
         }
 
         // Rows are returned from getTypeInfo in order of
