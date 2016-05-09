@@ -247,8 +247,8 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
-                    new Long(scan_position.current_rh.getPageNumber()),
-                    new Long(scan_position.current_rh.getId()));
+                    scan_position.current_rh.getPageNumber(),
+                    scan_position.current_rh.getId());
         }
 
         if (open_conglom.isUseUpdateLocks())
@@ -1509,8 +1509,8 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
-                    new Long(scan_position.current_rh.getPageNumber()),
-                    new Long(scan_position.current_rh.getId()));
+                    scan_position.current_rh.getPageNumber(),
+                    scan_position.current_rh.getId());
         }
 
         // RESOLVE (mikem) - should this call apply the qualifiers again?
@@ -1543,8 +1543,8 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
-                    new Long(scan_position.current_rh.getPageNumber()),
-                    new Long(scan_position.current_rh.getId()));
+                    scan_position.current_rh.getPageNumber(),
+                    scan_position.current_rh.getId());
         }
 
         return;

@@ -121,7 +121,7 @@ class CreateSequenceConstantAction extends DDLConstantAction {
                 dd.getUUIDFactory().createUUID(),
                 _sequenceName,
                 _dataType,
-                new Long( _initialValue ),   // current value
+                _initialValue,   // current value
                 _initialValue,
                 _minValue,
                 _maxValue,

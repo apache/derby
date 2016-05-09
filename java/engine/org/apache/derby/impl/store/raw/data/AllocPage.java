@@ -574,8 +574,8 @@ public class AllocPage extends StoredPage
             {
 				throw StandardException.newException(
                         SQLState.DATA_CHANGING_CONTAINER_INFO, 
-                        new Long(oldN), 
-                        new Long(N));
+                        oldN, 
+                        N);
             }
 		}
 

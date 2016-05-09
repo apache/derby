@@ -164,7 +164,7 @@ public final class SQLDouble extends NumberDataType
 		if (isNull())
 			return null;
 		else
-			return new Double(value);
+			return value;
 	}
 
 

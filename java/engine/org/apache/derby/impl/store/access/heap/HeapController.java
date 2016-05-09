@@ -236,8 +236,8 @@ public class HeapController
             {
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
-                        new Long(invalidColumn), 
-                        new Long(heap.format_ids.length)));
+                        invalidColumn, 
+                        heap.format_ids.length));
             }
         }
 
@@ -365,7 +365,7 @@ public class HeapController
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(heap.getId().getContainerId()));
+                    heap.getId().getContainerId());
         }
 
         this.init(open_conglom);
@@ -413,8 +413,8 @@ public class HeapController
                     {
                         throw(StandardException.newException(
                                 SQLState.HEAP_TEMPLATE_MISMATCH,
-                                new Long(invalidColumn), 
-                                new Long(heap.format_ids.length)));
+                                invalidColumn, 
+                                heap.format_ids.length));
                     }
                 }
 

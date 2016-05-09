@@ -1360,7 +1360,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             {
                 throw StandardException.newException(
                             SQLState.BTREE_IS_CLOSED,
-                            new Long(err_containerid));
+                            err_containerid);
             } 
         }
 
@@ -1419,7 +1419,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         {
             throw StandardException.newException(
                         SQLState.BTREE_IS_CLOSED,
-                        new Long(err_containerid));
+                        err_containerid);
         }
 
         container.getContainerProperties(prop);

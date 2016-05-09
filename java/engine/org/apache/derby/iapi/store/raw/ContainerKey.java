@@ -176,8 +176,7 @@ public final class ContainerKey implements Matchable, Lockable
 		if ((flag & VirtualLockTable.TABLE_AND_ROWLOCK) == 0)
 			return false;
 
-		attributes.put(VirtualLockTable.CONTAINERID, 
-					   new Long(getContainerId()));
+		attributes.put(VirtualLockTable.CONTAINERID,getContainerId());
 		attributes.put(VirtualLockTable.LOCKNAME, "Tablelock");
 		attributes.put(VirtualLockTable.LOCKTYPE, "TABLE");
 

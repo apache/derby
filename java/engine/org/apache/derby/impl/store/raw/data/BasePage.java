@@ -331,7 +331,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
         {
 			throw StandardException.newException(
                 SQLState.DATA_CANNOT_MAKE_RECORD_HANDLE, 
-                new Long(recordHandleConstant));
+                recordHandleConstant);
         }
 
 		return new RecordId(pkey, recordHandleConstant);

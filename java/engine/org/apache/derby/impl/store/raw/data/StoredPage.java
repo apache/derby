@@ -917,8 +917,8 @@ public class StoredPage extends CachedPage
                 throw StandardException.newException(
                     SQLState.FILE_BAD_CHECKSUM,
                     id, 
-                    new Long(checksum.getValue()), 
-                    new Long(onDiskChecksum), 
+                    checksum.getValue(), 
+                    onDiskChecksum, 
                     pagedataToHexDump(pageData));
             }
             else

@@ -210,12 +210,12 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
              
              stmtTimings = new XPLAINStatementTimingsDescriptor(
                  stmtTimingsUUID,                    // the Timing UUID
-                 new Long(rss.getParseTimeInMillis()),         // the Parse Time
-                 new Long(rss.getBindTimeInMillis()),          // the Bind Time
-                 new Long(rss.getOptimizeTimeInMillis()),      // the Optimize Time
-                 new Long(rss.getGenerateTimeInMillis()),      // the Generate Time
-                 new Long(rss.getCompileTimeInMillis()),       // the Compile Time
-                 new Long(exeTime),                            // the Execute Time, TODO resolve why getExecutionTime() returns 0
+                 rss.getParseTimeInMillis(),         // the Parse Time
+                 rss.getBindTimeInMillis(),          // the Bind Time
+                 rss.getOptimizeTimeInMillis(),      // the Optimize Time
+                 rss.getGenerateTimeInMillis(),      // the Generate Time
+                 rss.getCompileTimeInMillis(),       // the Compile Time
+                 exeTime,                            // the Execute Time, TODO resolve why getExecutionTime() returns 0
                  rss.getBeginCompilationTimestamp(), // the Begin Compilation TS
                  rss.getEndCompilationTimestamp(),   // the End   Compilation TS
                  rss.getBeginExecutionTimestamp(),   // the Begin Execution   TS

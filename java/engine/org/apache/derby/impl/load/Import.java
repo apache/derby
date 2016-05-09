@@ -80,7 +80,7 @@ public class Import extends ImportAbstract{
 												   columnDelimiter, codeset);
             this.lobsInExtFile = lobsInExtFile;
 
-            _importers.put( new Integer( importCounter ), this );
+            _importers.put( importCounter, this );
             
 			doImport();
 
@@ -217,7 +217,7 @@ public class Import extends ImportAbstract{
          boolean lobsInExtFile)
         throws SQLException 
     {
-        Integer     importCounter = new Integer( bumpImportCounter() );
+        Integer     importCounter = bumpImportCounter();
         
         try {
             if (connection == null)
@@ -359,7 +359,7 @@ public class Import extends ImportAbstract{
         if ( importer != null ) { lineNumber = importer.getCurrentLineNumber(); }
         
         StandardException se = StandardException.newException
-            ( SQLState.UNEXPECTED_IMPORT_ERROR, new Integer( lineNumber ), inputFile, t.getMessage() );
+            ( SQLState.UNEXPECTED_IMPORT_ERROR, lineNumber, inputFile, t.getMessage() );
         se.initCause(t);
 
         return PublicAPI.wrapStandardException(se);

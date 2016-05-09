@@ -155,13 +155,13 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 				schemaID = conglomerate.getSchemaID().toString();	
 			}
 			tabID = conglomerate.getTableID().toString();
-			conglomNumber = new Long( conglomerate.getConglomerateNumber() );
+			conglomNumber = conglomerate.getConglomerateNumber();
 			conglomName = conglomerate.getConglomerateName();
 			conglomUUIDString = conglomerate.getUUID().toString();
 
-			supportsIndex = new Boolean( conglomerate.isIndex() );
+			supportsIndex = conglomerate.isIndex();
 			indexRowGenerator = conglomerate.getIndexDescriptor();
-			supportsConstraint = new Boolean( conglomerate.isConstraint() );
+			supportsConstraint = conglomerate.isConstraint();
 		}
 
 		/* RESOLVE - It would be nice to require less knowledge about sysconglomerates

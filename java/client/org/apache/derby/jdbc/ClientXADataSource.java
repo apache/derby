@@ -21,6 +21,9 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.ShardingKeyBuilder;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLException;
 import javax.sql.XAConnection;
 
@@ -66,4 +69,11 @@ public class ClientXADataSource
     public XAConnection getXAConnection(String user, String password) throws SQLException {
         return getXAConnectionMinion(user, password);
     }    
+
+    /** Added by Java 9 */
+    public ShardingKeyBuilder createShardingKeyBuilder()
+        throws SQLException
+    {
+        throw new java.sql.SQLFeatureNotSupportedException();
+    }
 }

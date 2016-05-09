@@ -200,7 +200,7 @@ public final class SQLTinyint
 	{
 		return (isNull()) ?
 					null:
-					new Integer(value);
+					value;
 	}
 
 	// this is for DataType's error generator

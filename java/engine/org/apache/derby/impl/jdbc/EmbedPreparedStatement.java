@@ -1614,7 +1614,7 @@ public class EmbedPreparedStatement extends EmbedStatement
 		checkStatus();
 
 		if (scale < 0)
-			throw newSQLException(SQLState.BAD_SCALE_VALUE, new Integer(scale));
+			throw newSQLException(SQLState.BAD_SCALE_VALUE, scale);
 		
 		try {
 

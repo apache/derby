@@ -872,7 +872,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             throw StandardException.newException(
                 SQLState.BTREE_SCAN_NOT_POSITIONED, 
-                new Integer(this.scan_state));
+                this.scan_state);
         }
 
         // positionKey is always valid
@@ -889,8 +889,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             throw StandardException.newException(
                     SQLState.BTREE_SCAN_INTERNAL_ERROR, 
-                    new Boolean(pos.current_rh == null), 
-                    new Boolean(pos.current_positionKey == null));
+                    (pos.current_rh == null), 
+                    (pos.current_positionKey == null));
         }
 
         // If current_rh is non-null, we know the exact physical position of
@@ -1120,9 +1120,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             {
                 throw StandardException.newException(
                         SQLState.AM_RECORD_NOT_FOUND,
-                        new Long(err_containerid),
-                        new Long(scan_position.current_rh.getPageNumber()),
-                        new Long(scan_position.current_rh.getId()));
+                        err_containerid,
+                        scan_position.current_rh.getPageNumber(),
+                        scan_position.current_rh.getId());
             }
 
 
@@ -1162,9 +1162,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                     {
                         throw StandardException.newException(
                                 SQLState.AM_RECORD_NOT_FOUND,
-                                new Long(err_containerid),
-                                new Long(scan_position.current_rh.getPageNumber()),
-                                new Long(scan_position.current_rh.getId()));
+                                err_containerid,
+                                scan_position.current_rh.getPageNumber(),
+                                scan_position.current_rh.getId());
                     }
                 }
             }
@@ -1356,9 +1356,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
                 throw StandardException.newException(
                         SQLState.AM_RECORD_NOT_FOUND,
-                        new Long(err_containerid),
-                        new Long(scan_position.current_rh.getPageNumber()),
-                        new Long(scan_position.current_rh.getId()));
+                        err_containerid,
+                        scan_position.current_rh.getPageNumber(),
+                        scan_position.current_rh.getId());
             }
 
             if (SanityManager.DEBUG)

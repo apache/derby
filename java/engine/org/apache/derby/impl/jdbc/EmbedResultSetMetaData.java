@@ -335,7 +335,7 @@ public class EmbedResultSetMetaData implements ResultSetMetaData {
 	  if (column < 1 ||
 		        column > getColumnCount() )
 			    throw Util.generateCsSQLException(
-                      SQLState.COLUMN_NOT_FOUND, new Integer(column));
+                      SQLState.COLUMN_NOT_FOUND, column);
 	}
 
 	private DataTypeDescriptor getColumnTypeDescriptor(int column) throws SQLException 

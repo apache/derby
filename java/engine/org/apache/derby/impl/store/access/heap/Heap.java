@@ -444,8 +444,8 @@ public class Heap
 
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
-                        new Long(column_id), 
-                        new Long(this.format_ids.length)));
+                        column_id, 
+                        this.format_ids.length));
             }
 
             // create a new array, and copy old values to it.
@@ -718,7 +718,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(id.getContainerId()).toString());
+                    Long.toString(id.getContainerId()));
         }
 
 		HeapController heapcontroller = new HeapController();
@@ -794,7 +794,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(container_key.getContainerId()).toString());
+                    Long.toString(container_key.getContainerId()));
         }
 
 		HeapController heapcontroller = new HeapController();
@@ -865,7 +865,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(id.getContainerId()));
+                    id.getContainerId());
         }
 
 		HeapScan heapscan = new HeapScan();
@@ -914,7 +914,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                        new Long(id.getContainerId()));
+                        id.getContainerId());
             }
 
             // perform all the "real" work in a non-readonly nested user 
@@ -949,7 +949,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                        new Long(id.getContainerId()).toString());
+                        Long.toString(id.getContainerId()));
             }
 
             heapcontroller = new HeapController();
@@ -1042,7 +1042,7 @@ public class Heap
             {
                 throw StandardException.newException(
                         SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                        new Long(id.getContainerId()));
+                        id.getContainerId());
             }
 
             heapcontroller = new HeapController();
@@ -1097,7 +1097,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(id.getContainerId()));
+                    id.getContainerId());
         }
 
 		HeapCompressScan heap_compress_scan = new HeapCompressScan();
@@ -1154,7 +1154,7 @@ public class Heap
         {
             throw StandardException.newException(
                     SQLState.HEAP_CONTAINER_NOT_FOUND, 
-                    new Long(id.getContainerId()));
+                    id.getContainerId());
         }
 
 

@@ -532,7 +532,7 @@ class CastNode extends ValueNode
 				try 
 				{
 					// #3756 - Truncate decimal portion for casts to integer
-					return getCastFromIntegralType((new Double(cleanCharValue)).longValue(),
+                  return getCastFromIntegralType((long) Double.parseDouble(cleanCharValue),
 												   destJDBCTypeId);
 				}
 				catch (NumberFormatException nfe)
@@ -558,7 +558,7 @@ class CastNode extends ValueNode
 				Double doubleValue;
 				try
 				{
-					doubleValue = new Double(cleanCharValue);
+					doubleValue = Double.parseDouble(cleanCharValue);
 				}
 				catch (NumberFormatException nfe)
 				{
@@ -651,13 +651,13 @@ class CastNode extends ValueNode
 				}
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
-                   new Float((float) longValue),
+                   (float) longValue,
                    getContextManager());
 
 			case Types.DOUBLE:
                return new NumericConstantNode(
                    TypeId.getBuiltInTypeId(destJDBCTypeId),
-                   new Double((double) longValue),
+                   (double) longValue,
                    getContextManager());
 		}
 

@@ -110,11 +110,11 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
 
         if (pos < 1 || pos > len)
         {
-            throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {new Long(pos)} );
+            throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (length < 0)
         {
-            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {new Integer(length)} );
+            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
 
         if (length > len - pos + 1) {
@@ -215,11 +215,11 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
             throws SQLException {
         if (pos < 1 || length < 0 || pos > (len - length + 1))
         {
-            throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {new Long(pos)} );
+            throw makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (offset < 0 || length < 0 || offset > (theBytes.length - length))
         {
-            throw makeSQLException( SQLState.BLOB_INVALID_OFFSET, new Object[] {new Integer(offset)} );
+            throw makeSQLException( SQLState.BLOB_INVALID_OFFSET, new Object[] {offset} );
         }
         System.arraycopy(theBytes, offset, buf, (int) pos - 1, length);
         return length;
@@ -228,7 +228,7 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
     public void truncate(long length) throws SQLException {
         if (length > this.len)
         {
-            throw makeSQLException( SQLState.BLOB_LENGTH_TOO_LONG, new Object[] {new Long(len)} );
+            throw makeSQLException( SQLState.BLOB_LENGTH_TOO_LONG, new Object[] {len} );
         }
         buf = getBytes(1, (int) length);
         len = length;
@@ -242,15 +242,15 @@ public class HarmonySerialBlob implements Blob, Serializable, Cloneable {
             throws SQLException {
         if (len < 0)
         {
-            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {new Long(len)} );
+            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {len} );
         }
         if (length < 0)
         {
-            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {new Long(length)} );
+            throw makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
         if (pos < 1 || pos + length > len)
         {
-            throw makeSQLException( SQLState.POS_AND_LENGTH_GREATER_THAN_LOB, new Object[] {new Long(pos), new Long(length)} );
+            throw makeSQLException( SQLState.POS_AND_LENGTH_GREATER_THAN_LOB, new Object[] {pos, length} );
         }
         return new ByteArrayInputStream(buf, (int) (pos - 1), (int) length);
     }

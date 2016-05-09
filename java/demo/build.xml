@@ -49,6 +49,7 @@
       destdir="${out.dir}"
       includes="Simple*">
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <javac
       source="${min.version}"
@@ -65,6 +66,7 @@
       includes="nserverdemo/**"
       excludes="nserverdemo/Simple*">
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp) -->
     <javac
@@ -83,6 +85,7 @@
         <pathelement location="${javasrc.dir}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <javac
       source="${min.version}"
@@ -100,6 +103,7 @@
         <pathelement location="${javasrc.dir}"/>
       </classpath>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <ant target="compile" dir="toursdb"/>
   </target>
@@ -131,6 +135,7 @@
       srcdir="${derby.demo.src.dir}/vtis/java"
       destdir="${out.dir}">
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 

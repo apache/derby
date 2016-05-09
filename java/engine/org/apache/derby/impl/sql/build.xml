@@ -102,6 +102,7 @@
       destdir="${out.dir}">
       <include name="${derby.dir}/${cur.dir}/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
 
     <copy file="${derby.engine.src.dir}/${derby.dir}/${cur.dir}/catalog/metadata_net.properties" tofile="${out.dir}/org/apache/derby/impl/sql/catalog/metadata_net.properties"/>

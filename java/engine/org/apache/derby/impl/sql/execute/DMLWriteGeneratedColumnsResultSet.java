@@ -127,7 +127,7 @@ abstract public class DMLWriteGeneratedColumnsResultSet extends DMLWriteResultSe
                         schemaName,
                         tableName,
                         columnNames[i]),
-                        new Long(aiCache[i].getLong()));
+                        aiCache[i].getLong());
             }
             InternalTriggerExecutionContext itec =
                 (InternalTriggerExecutionContext)lcc.getTriggerExecutionContext();
@@ -188,7 +188,7 @@ abstract public class DMLWriteGeneratedColumnsResultSet extends DMLWriteResultSe
             {
                 throw StandardException.newException(
                     SQLState.LANG_INVALID_AUTOGEN_COLUMN_POSITION,
-                    new Integer(columnIndexes[i]), tabDesc.getName());
+                    columnIndexes[i], tabDesc.getName());
             }
        }
     }

@@ -135,7 +135,7 @@ class ColumnInfo {
 			{
 				String columnIndex  = (st.nextToken()).trim();
 				vtiColumnNames.add(vtiColumnPrefix + columnIndex);
-				int cIndex = (new Integer(columnIndex )).intValue();
+				int cIndex = Integer.parseInt(columnIndex );
 				if(cIndex > expectedNumberOfCols )
 					expectedNumberOfCols= cIndex ;
 			}
@@ -194,7 +194,7 @@ class ColumnInfo {
 				insertColumnNames.add(columnName);
 				String sqlType = typeName + getTypeOption(typeName , columnSize , columnSize , decimalDigits);
 				columnTypes.add(sqlType);
-                jdbcColumnTypes.add(new Integer(dataType));
+                jdbcColumnTypes.add((int) dataType);
 				noOfColumns++;
 
                 if ( dataType == java.sql.Types.JAVA_OBJECT )
@@ -492,10 +492,8 @@ class ColumnInfo {
             int colTypeOffset = colTypeInfo.indexOf(":");
 
             // column names format is "COLUMN" + columnNumner
-            int colIndex = (new Integer(colTypeInfo.substring(6, 
-                                        colTypeOffset))).intValue();
-            int colType = (new Integer(colTypeInfo.substring(
-                                          colTypeOffset+1))).intValue();
+            int colIndex = Integer.parseInt(colTypeInfo.substring(6, colTypeOffset));
+            int colType = Integer.parseInt(colTypeInfo.substring(colTypeOffset+1));
 
             // column numbers start with 1. Check if user by mistake has 
             // specified a column number that is large than than the 

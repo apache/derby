@@ -164,8 +164,8 @@ abstract class PageBasicOperation implements Loggable, RePreparable
 		else
 			throw StandardException.newException(
                     SQLState.DATA_MISSING_LOG, pageId, 
-                    new Long(pversion), 
-                    new Long(pageVersion));
+                    pversion, 
+                    pageVersion);
 	}
 
 	/** Release latched page and any other resources acquired during a previous

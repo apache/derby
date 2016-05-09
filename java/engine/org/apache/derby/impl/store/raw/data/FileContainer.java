@@ -683,7 +683,7 @@ abstract class FileContainer
 		// derby.storage.reusableRecordId
 		if (prop.getProperty(RawStoreFactory.PAGE_REUSABLE_RECORD_ID) != null)
 		{
-			Boolean bool = new Boolean(isReusableRecordId());
+			Boolean bool = isReusableRecordId();
 			prop.put(RawStoreFactory.PAGE_REUSABLE_RECORD_ID,
 					 bool.toString());
 		}
@@ -795,7 +795,7 @@ abstract class FileContainer
         {
 			throw StandardException.newException(
                 SQLState.DATA_UNKNOWN_CONTAINER_FORMAT, getIdentity(), 
-                new Long(fid));
+                fid);
         }
 
 		int status = inStream.readInt();
@@ -838,8 +838,8 @@ abstract class FileContainer
 				(StandardException.newException(
                     SQLState.FILE_BAD_CHECKSUM, 
                     pk, 
-                    new Long(checksum.getValue()), 
-                    new Long(onDiskChecksum), 
+                    checksum.getValue(), 
+                    onDiskChecksum, 
                     org.apache.derby.iapi.util.StringUtil.hexDump(a)));
 		}
 
@@ -1105,7 +1105,7 @@ abstract class FileContainer
 				// RESOLVE: do something about this when we have > 1 container format
 				throw StandardException.newException(
                     SQLState.DATA_UNKNOWN_CONTAINER_FORMAT, 
-                    getIdentity(), new Long(fid));
+                    getIdentity(), fid);
 			}
 
 			status = inStream.readInt();
@@ -1230,7 +1230,7 @@ abstract class FileContainer
 				createArgs.getProperty(RawStoreFactory.PAGE_REUSABLE_RECORD_ID);
 			if (reusableRecordIdParameter != null)
 			{	
-				Boolean reusableRecordId = new Boolean(reusableRecordIdParameter);
+                Boolean reusableRecordId = Boolean.parseBoolean(reusableRecordIdParameter);
 				setReusableRecordIdState(reusableRecordId.booleanValue());
 			}
 

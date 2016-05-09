@@ -252,7 +252,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory
 
         col = row.getColumn(SYSSEQUENCES_CURRENT_VALUE);
         if ( col.isNull() ) { currentValue = null; }
-        else { currentValue = new Long( col.getLong() ) ; }
+        else { currentValue = col.getLong(); }
 
         col = row.getColumn(SYSSEQUENCES_START_VALUE);
         startValue = col.getLong();

@@ -132,7 +132,7 @@ public final class SQLLongint
 		if (isNull())
 			return null;
 		else
-			return new Long(value);
+			return value;
 	}
 
 	public int	getLength()

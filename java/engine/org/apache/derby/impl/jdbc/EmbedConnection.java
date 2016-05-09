@@ -2243,7 +2243,7 @@ public class EmbedConnection implements EngineConnection
 			iLevel = TransactionControl.SERIALIZABLE_ISOLATION_LEVEL;
 			break;
 		default:
-			throw newSQLException(SQLState.UNIMPLEMENTED_ISOLATION_LEVEL, new Integer(level));
+			throw newSQLException(SQLState.UNIMPLEMENTED_ISOLATION_LEVEL, level);
 		}
 
 		synchronized(getConnectionSynchronization())
@@ -3299,7 +3299,7 @@ public class EmbedConnection implements EngineConnection
 	*/
 	public int addLOBMapping(Object LOBReference) {
 		int loc = getIncLOBKey();
-		getlobHMObj().put(new Integer(loc), LOBReference);
+		getlobHMObj().put(loc, LOBReference);
 		return loc;
 	}
 
@@ -3309,7 +3309,7 @@ public class EmbedConnection implements EngineConnection
 	*            removed from the table.
 	*/
 	public void removeLOBMapping(int key) {
-		getlobHMObj().remove(new Integer(key));
+		getlobHMObj().remove(key);
 	}
 
 	/**
@@ -3318,7 +3318,7 @@ public class EmbedConnection implements EngineConnection
 	* @return the LOB Object corresponding to this locator.
 	*/
 	public Object getLOBMapping(int key) {
-		return getlobHMObj().get(new Integer(key));
+		return getlobHMObj().get(key);
 	}
 
 	/**

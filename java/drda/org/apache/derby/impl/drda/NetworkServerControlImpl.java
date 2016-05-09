@@ -1339,7 +1339,7 @@ public final class NetworkServerControlImpl {
             } catch (IOException ioe) {
                 consolePropertyMessage("DRDA_NoIO.S",
                         new String [] {hostArg, 
-                        (new Integer(portNumber)).toString(), 
+                        Integer.toString(portNumber), 
                         ioe.getMessage()}); 
             }
     }

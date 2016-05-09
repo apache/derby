@@ -1132,7 +1132,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							long eof = theLog.length();
 
 							Monitor.logTextMessage(MessageId.LOG_INCOMPLETE_LOG_RECORD,
-								logFile, new Long(endPosition), new Long(eof));
+								logFile, endPosition, eof);
 
 							/* Write zeros from incomplete log record to end of file */
 							long nWrites = (eof - endPosition)/logBufferSize;
@@ -2046,7 +2046,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             {
 				throw StandardException.newException(
                         SQLState.LOG_EXCEED_MAX_LOG_FILE_NUMBER, 
-                        new Long(maxLogFileNumber)); 
+                        maxLogFileNumber); 
             }
 
 			StorageRandomAccessFile newLog = null;	// the new log file
@@ -3860,10 +3860,10 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     {
 						throw StandardException.newException(
                                 SQLState.LOG_EXCEED_MAX_LOG_FILE_SIZE, 
-                                new Long(logFileNumber), 
-                                new Long(endPosition), 
-                                new Long(length), 
-                                new Long(LogCounter.MAX_LOGFILE_SIZE));
+                                logFileNumber, 
+                                endPosition, 
+                                length, 
+                                LogCounter.MAX_LOGFILE_SIZE);
                     }
 				}
 

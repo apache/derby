@@ -52,6 +52,7 @@
       <include name="${derby.dir}/impl/jdbc/**"/>
 	  <exclude name="${derby.dir}/impl/jdbc/*42.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
    </javac>
     <copy file="metadata.properties" tofile="${out.dir}/org/apache/derby/impl/jdbc/metadata.properties"/>
   </target>
@@ -72,6 +73,7 @@
         destdir="${out.dir}">
         <include name="${derby.dir}/impl/jdbc/*42.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
 </target>
 

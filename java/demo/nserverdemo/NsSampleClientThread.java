@@ -79,7 +79,7 @@ class NsSampleWork {
 
 
 	public static int counter=0;
-	static Integer lock = new Integer(0);
+	static Integer lock = 0;
 	 /**
 	  * dbUrl is the database url to connect to
 	  */

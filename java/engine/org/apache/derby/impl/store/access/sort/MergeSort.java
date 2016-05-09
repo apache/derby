@@ -237,7 +237,7 @@ class MergeSort implements Sort
 		{
 			// Dump the rows in the sort buffer to a merge run.
 			long containerId = createMergeRun(tran, sortBuffer);
-			mergeRuns.addElement(new Long(containerId));
+			mergeRuns.addElement(containerId);
 
 			// If there are more merge runs than we can sort
 			// at once with our sort buffer, we have to reduce
@@ -296,7 +296,7 @@ class MergeSort implements Sort
 		{
 			// Dump the rows in the sort buffer to a merge run.
 			long containerId = createMergeRun(tran, sortBuffer);
-			mergeRuns.addElement(new Long(containerId));
+			mergeRuns.addElement(containerId);
 
 			// If there are more merge runs than we can sort
 			// at once with our sort buffer, we have to reduce
@@ -732,7 +732,7 @@ class MergeSort implements Sort
 			long id = rawTran.addAndLoadStreamContainer(segmentId,
 				properties, msRowSource);
 
-			mergeRuns.addElement(new Long(id));
+			mergeRuns.addElement(id);
 
 			// Drop the conglomerates in the merge subset
 			e = subset.elements();

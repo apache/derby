@@ -187,16 +187,16 @@ public class RealMaterializedResultSetStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
-           new Long(this.constructorTime),
-           new Long(this.openTime),
-           new Long(this.nextTime),
-           new Long(this.closeTime),
-           new Long(this.getNodeTime()),
+           this.constructorTime,
+           this.openTime,
+           this.nextTime,
+           this.closeTime,
+           this.getNodeTime(),
            XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
            null,                          // the projection time
            null,                          // the restriction time
-           new Long(this.createTCTime),
-           new Long(this.fetchTCTime)
+           this.createTCTime,
+           this.fetchTCTime
         );
     }
 }

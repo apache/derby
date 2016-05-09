@@ -106,6 +106,7 @@
       destdir="${out.dir}">
       <include name="${derby.dir}/impl/tools/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
    </target>
 

@@ -461,7 +461,7 @@ public class RollingFileStream extends OutputStream {
         Boolean value = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 
             public Boolean run() {
-                return new Boolean(file.exists());
+                return file.exists();
             }
 
         });
@@ -495,7 +495,7 @@ public class RollingFileStream extends OutputStream {
         Boolean value = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
 
             public Boolean run() {
-                return new Boolean(file1.renameTo(file2));
+                return file1.renameTo(file2);
             }
         });
 
@@ -512,7 +512,7 @@ public class RollingFileStream extends OutputStream {
         Long value = AccessController.doPrivileged(new PrivilegedAction<Long>() {
 
             public Long run() {
-                return new Long(file.length());
+                return file.length();
             }
         });
 

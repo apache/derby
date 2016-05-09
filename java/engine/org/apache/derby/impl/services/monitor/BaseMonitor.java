@@ -692,7 +692,7 @@ abstract class BaseMonitor
 			t = le;
 		}
 		throw StandardException.newException(SQLState.REGISTERED_CLASS_INSTANCE_ERROR,
-			t, new Integer(identifier), "XX" /*ci.getClassName()*/);
+			t, identifier, "XX" /*ci.getClassName()*/);
 	}
 
 	/**

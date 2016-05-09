@@ -194,42 +194,33 @@ public class ODBCMetadataGenerator {
 
 		changeMap = new HashMap<String, Byte>();
 
-		changeMap.put("getProcedures",
-			new Byte(COL_RENAME_CHANGE));
+		changeMap.put("getProcedures", COL_RENAME_CHANGE);
 
 		changeMap.put("getProcedureColumns",
-			new Byte((byte)(COL_RENAME_CHANGE
+			(byte)(COL_RENAME_CHANGE
 				| TYPE_VALUE_CHANGE
-				| ADD_COLUMN_CHANGE)));
+				| ADD_COLUMN_CHANGE));
 
-		changeMap.put("getColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getColumns", TYPE_VALUE_CHANGE);
 
-		changeMap.put("getVersionColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getVersionColumns",TYPE_VALUE_CHANGE);
 
-		changeMap.put("getBestRowIdentifierPrimaryKeyColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getBestRowIdentifierPrimaryKeyColumns", TYPE_VALUE_CHANGE);
 
-		changeMap.put("getBestRowIdentifierUniqueKeyColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getBestRowIdentifierUniqueKeyColumns", TYPE_VALUE_CHANGE);
 
-		changeMap.put("getBestRowIdentifierUniqueIndexColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getBestRowIdentifierUniqueIndexColumns", TYPE_VALUE_CHANGE);
 
-		changeMap.put("getBestRowIdentifierAllColumns",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getBestRowIdentifierAllColumns", TYPE_VALUE_CHANGE);
 
 		changeMap.put("getTypeInfo",
-			new Byte((byte)(COL_RENAME_CHANGE
+			(byte)(COL_RENAME_CHANGE
 				| TYPE_VALUE_CHANGE
-				| ADD_COLUMN_CHANGE)));
+				| ADD_COLUMN_CHANGE));
 
-		changeMap.put("getIndexInfo",
-			new Byte(TYPE_VALUE_CHANGE));
+		changeMap.put("getIndexInfo", TYPE_VALUE_CHANGE);
 
-		changeMap.put("getCrossReference",
-			new Byte(WHERE_CLAUSE_CHANGE));
+		changeMap.put("getCrossReference", WHERE_CLAUSE_CHANGE);
 
 		return;
 

@@ -189,14 +189,14 @@ final class MergeInserter implements SortController
 			long conglomid = sort.createMergeRun(tran, sortBuffer);
 			if (mergeRuns == null)
 				mergeRuns = new Vector<Long>();
-			mergeRuns.addElement(new Long(conglomid));
+			mergeRuns.addElement(conglomid);
 
             stat_numMergeRuns++;
             // calculate size of this merge run
             // buffer was too full for last row
             runSize = stat_numRowsInput - totalRunSize - 1;
             totalRunSize += runSize;
-            stat_mergeRunsSize.addElement(new Integer(runSize));
+            stat_mergeRunsSize.addElement(runSize);
 
 			// Re-insert the row into the sort buffer.
 			// This is guaranteed to work since the sort
@@ -226,7 +226,7 @@ final class MergeInserter implements SortController
         if (stat_sortType == "external")
         {
             stat_numMergeRuns++;
-            stat_mergeRunsSize.addElement(new Integer(stat_numRowsInput - totalRunSize));
+            stat_mergeRunsSize.addElement(stat_numRowsInput - totalRunSize);
         }
 
         // close the SortController in the transaction.

@@ -66,10 +66,10 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 public abstract class RawTransaction extends Observable implements Transaction {
 
-	public static final Integer		COMMIT =             new Integer(0);
-	public static final Integer		ABORT =              new Integer(1);
-	public static final Integer     SAVEPOINT_ROLLBACK = new Integer(2);
-	public static final Integer		LOCK_ESCALATE      = new Integer(3);
+	public static final Integer		COMMIT =             0;
+	public static final Integer		ABORT =              1;
+	public static final Integer     SAVEPOINT_ROLLBACK = 2;
+	public static final Integer		LOCK_ESCALATE      = 3;
 
 	protected StandardException		observerException;
 

@@ -1422,8 +1422,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 					SanityManager.ASSERT(fkInfo.type == FKInfo.FOREIGN_KEY, 
 						"error, expected to only check foreign keys on insert");
 				}
-				Long fkConglom = indexConversionTable.get(
-										new Long(fkInfo.fkConglomNumbers[0]));
+				Long fkConglom = indexConversionTable.get(fkInfo.fkConglomNumbers[0]);
 				bulkValidateForeignKeysCore(
                         tc, cm, fkInfo, fkConglom.longValue(),
 						fkInfo.refConglomNumber, fkInfo.fkConstraintNames[0],
@@ -1907,8 +1906,7 @@ class InsertResultSet extends DMLWriteGeneratedColumnsResultSet implements Targe
 			// Drop the old conglomerate
 			tc.dropConglomerate(constants.indexCIDS[index]);
 
-			indexConversionTable.put(new Long(constants.indexCIDS[index]),
-									new Long(newIndexCongloms[index]));
+			indexConversionTable.put(constants.indexCIDS[index], newIndexCongloms[index]);
 		}
 	}
 

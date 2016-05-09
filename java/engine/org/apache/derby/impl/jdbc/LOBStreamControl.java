@@ -135,14 +135,14 @@ final class LOBStreamControl {
             else {
                 //invalid postion
                 throw StandardException.newException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
+                        SQLState.BLOB_POSITION_TOO_LARGE, pos);
             }
         }
         else {
             if (pos > dataBytes.length) {
                 //invalid postion
                 throw StandardException.newException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
+                        SQLState.BLOB_POSITION_TOO_LARGE, pos);
             }
             else {
                 if (pos + len < dataBytes.length) {
@@ -163,30 +163,30 @@ final class LOBStreamControl {
             throws IOException, StandardException {
         if (pos < 0)
             throw StandardException.newException(
-                    SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(pos + 1));
+                SQLState.BLOB_NONPOSITIVE_LENGTH, (pos + 1));
         if (pos > Integer.MAX_VALUE)
             throw StandardException.newException(
-                    SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
+                    SQLState.BLOB_POSITION_TOO_LARGE, (pos + 1));
 
         if (isBytes) {
             if (dataBytes == null) {
                 if (pos != 0)
                     throw StandardException.newException(
-                            SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
+                            SQLState.BLOB_POSITION_TOO_LARGE, (pos + 1));
             } else if (dataBytes.length < pos)
                 throw StandardException.newException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
+                        SQLState.BLOB_POSITION_TOO_LARGE, (pos + 1));
         } else {
             if (pos > tmpFile.length())
                 throw StandardException.newException(
-                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
+                        SQLState.BLOB_POSITION_TOO_LARGE, (pos + 1));
         }
     }
 
     private void isValidOffset(int off, int length) throws StandardException {
         if (off < 0 || off > length)
             throw StandardException.newException(
-                    SQLState.BLOB_INVALID_OFFSET, new Integer(off));
+                    SQLState.BLOB_INVALID_OFFSET, off);
     }
 
     /**
@@ -388,7 +388,7 @@ final class LOBStreamControl {
                     // We reached EOF before all the requested bytes are read.
                     throw new EOFException(MessageService.getTextMessage(
                             MessageId.STREAM_PREMATURE_EOF,
-                            new Long(length), new Long(sz)));
+                            length, sz));
                 } else {
                     // End of data, but no length checking.
                     break;
@@ -484,7 +484,7 @@ final class LOBStreamControl {
         if (charLength != Long.MAX_VALUE && charCount != charLength) {
             throw new EOFException(MessageService.getTextMessage(
                     MessageId.STREAM_PREMATURE_EOF,
-                    new Long(charLength), new Long(charCount)));
+                    charLength, charCount));
         }
         return charCount;
     }

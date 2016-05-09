@@ -160,7 +160,7 @@ public class Export extends ExportAbstract{
         return (AccessController.doPrivileged(
                 new PrivilegedAction<Boolean>() {
                     public Boolean run() {
-                        return new Boolean(file.exists());
+                        return file.exists();
                     }
             })).booleanValue();
     }

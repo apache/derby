@@ -310,7 +310,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
      */
     private static boolean shouldBuildAllTrajectories()
     {
-        Boolean bool = new Boolean( getSystemProperty( ALL_TRAJECTORIES_PROPERTY ) );
+        Boolean bool = Boolean.valueOf(getSystemProperty( ALL_TRAJECTORIES_PROPERTY ));
 
         return bool.booleanValue();
     }

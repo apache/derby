@@ -131,10 +131,10 @@ abstract class RealBasicNoPutResultSetStatistics
 	{
 		return	subIndent +
             MessageService.getTextMessage(SQLState.RTS_OPT_EST_RC,
-                new Double(optimizerEstimatedRowCount)) + "\n" +
+                optimizerEstimatedRowCount) + "\n" +
 				subIndent +
             MessageService.getTextMessage(SQLState.RTS_OPT_EST_COST,
-                 new Double(optimizerEstimatedCost));
+                 optimizerEstimatedCost);
 	}
 
 	/**
@@ -218,20 +218,20 @@ abstract class RealBasicNoPutResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // the affected rows
            null,                              // the deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeen),
+           this.rowsSeen,
            null,                              // the seen rows right
-           new Integer(this.rowsFiltered),
-           new Integer(this.rowsSeen - this.rowsFiltered),
+           this.rowsFiltered,
+           this.rowsSeen - this.rowsFiltered,
            null,                              // the empty right rows
            null,                           // index key optimization
            (UUID)scanID,
@@ -243,11 +243,11 @@ abstract class RealBasicNoPutResultSetStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
-           new Long(this.constructorTime),
-           new Long(this.openTime),
-           new Long(this.nextTime),
-           new Long(this.closeTime),
-           new Long(this.getNodeTime()),
+           this.constructorTime,
+           this.openTime,
+           this.nextTime,
+           this.closeTime,
+           this.getNodeTime(),
            XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
            null,                          // the projection time
            null,                          // the restriction time

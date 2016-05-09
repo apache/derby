@@ -362,8 +362,8 @@ class LuceneQueryVTI extends StringColumnVTI
         return ToolUtilities.newSQLException
             (
              SQLState.LANG_INVALID_COLUMN_POSITION,
-             new Integer( columnid ),
-             new Integer( getColumnCount() )
+             columnid,
+             getColumnCount()
              );
     }
 

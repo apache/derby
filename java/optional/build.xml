@@ -74,6 +74,7 @@
       </classpath>
       <include name="${derby.dir}/${cur.dir}/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
 
   </target>

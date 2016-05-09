@@ -104,11 +104,11 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (length < 0)
         {
-            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {new Integer(length)} );
+            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
         if (pos < 1 || pos > len || pos + length > len + 1)
         {
-            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {new Long(pos)} );
+            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         try {
             return new String(buf, (int) (pos - 1), length);
@@ -179,7 +179,7 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (pos < 1)
         {
-            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {new Long(pos)} );
+            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_BAD_POSITION, new Object[] {pos} );
         }
         if (length < 0)
         {
@@ -205,11 +205,11 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
         checkValidation();
         if (length < 0)
         {
-            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {new Long(length)} );
+            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_NONPOSITIVE_LENGTH, new Object[] {length} );
         }
         if (length > len)
         {
-            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_LENGTH_TOO_LONG, new Object[] {new Long(length)} );
+            throw HarmonySerialBlob.makeSQLException( SQLState.BLOB_LENGTH_TOO_LONG, new Object[] {length} );
         }
         char[] truncatedBuffer = new char[(int) length];
         System.arraycopy(buf, 0, truncatedBuffer, 0, (int) length);

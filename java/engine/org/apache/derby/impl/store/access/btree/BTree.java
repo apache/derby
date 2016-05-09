@@ -477,7 +477,7 @@ public abstract class BTree extends GenericConglomerate
         result_string = 
             properties.getProperty(
                 PROPERTY_UNIQUE_WITH_DUPLICATE_NULLS, "false");
-        uniqueWithDuplicateNulls = new Boolean (result_string).booleanValue();
+        uniqueWithDuplicateNulls = Boolean.parseBoolean(result_string);
 
 
         if (SanityManager.DEBUG)

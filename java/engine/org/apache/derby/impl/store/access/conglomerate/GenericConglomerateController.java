@@ -248,8 +248,8 @@ public abstract class GenericConglomerateController
             {
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
-                        new Long(invalidColumn), 
-                        new Long(open_conglom.getFormatIds().length)));
+                        invalidColumn, 
+                        open_conglom.getFormatIds().length));
             }
         }
 
@@ -353,8 +353,8 @@ public abstract class GenericConglomerateController
             {
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
-                        new Long(invalidColumn), 
-                        new Long(open_conglom.getFormatIds().length)));
+                        invalidColumn, 
+                        open_conglom.getFormatIds().length));
             }
         }
 
@@ -457,8 +457,8 @@ public abstract class GenericConglomerateController
             {
                 throw(StandardException.newException(
                         SQLState.HEAP_TEMPLATE_MISMATCH,
-                        new Long(invalidColumn), 
-                        new Long(open_conglom.getFormatIds().length)));
+                        invalidColumn, 
+                        open_conglom.getFormatIds().length));
             }
         }
 

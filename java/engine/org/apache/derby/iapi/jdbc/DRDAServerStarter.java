@@ -213,7 +213,7 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
                     new Object[]{userArg, passwordArg});
             } else {
 				server = serverConstructor.newInstance(new Object[]
-					{listenAddress, new Integer(portNumber),
+					{listenAddress, portNumber,
                      userArg, passwordArg});
             }
 

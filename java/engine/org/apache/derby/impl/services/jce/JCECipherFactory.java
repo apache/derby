@@ -299,7 +299,7 @@ final class JCECipherFactory implements CipherFactory
 		int length = secretKey.length;
 
 		if (length < CipherFactory.MIN_BOOTPASS_LENGTH)
-			throw StandardException.newException(SQLState.ILLEGAL_BP_LENGTH, new Integer(MIN_BOOTPASS_LENGTH));
+			throw StandardException.newException(SQLState.ILLEGAL_BP_LENGTH, MIN_BOOTPASS_LENGTH);
 
 		try
 		{
@@ -799,7 +799,7 @@ final class JCECipherFactory implements CipherFactory
 		byte[] newBPAscii = StringUtil.getAsciiBytes(newBP);
 		if (newBPAscii == null || newBPAscii.length < CipherFactory.MIN_BOOTPASS_LENGTH)
 			throw StandardException.newException(SQLState.ILLEGAL_BP_LENGTH,
-                new Integer(CipherFactory.MIN_BOOTPASS_LENGTH));
+                CipherFactory.MIN_BOOTPASS_LENGTH);
 
 		// verify old key
 

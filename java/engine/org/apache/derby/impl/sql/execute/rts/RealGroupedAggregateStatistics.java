@@ -205,19 +205,19 @@ public class RealGroupedAggregateStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // the affected rows
            null,                              // the deferred rows
-           new Integer(this.rowsInput),
-           new Integer(this.rowsSeen),
+           this.rowsInput,
+           this.rowsSeen,
            null,                              // the seen rows right
-           new Integer(this.rowsFiltered),
+           this.rowsFiltered,
            null,                              // the rows returned
            null,                              // the empty right rows
            null,                           // index key optimization

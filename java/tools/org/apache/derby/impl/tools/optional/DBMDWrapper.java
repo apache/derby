@@ -810,8 +810,8 @@ public  class   DBMDWrapper implements OptionalTool
     private Object  getDummyValue( Class type )
     {
         if ( String.class == type ) { return ""; }
-        else if ( Integer.TYPE == type ) { return new Integer( 1 ); }
-        else if ( Short.TYPE == type ) { return new Short( (short) 1 ); }
+        else if ( Integer.TYPE == type ) { return 1; }
+        else if ( Short.TYPE == type ) { return (short) 1; }
         else if ( Boolean.TYPE == type ) { return Boolean.TRUE; }
         else { return null; }
     }

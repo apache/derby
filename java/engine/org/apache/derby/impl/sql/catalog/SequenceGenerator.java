@@ -238,9 +238,9 @@ public class SequenceGenerator
     {
         Long    startValue;
 
-        if ( restart ) { startValue = new Long( _RESTART_VALUE ); }
+        if ( restart ) { startValue = _RESTART_VALUE; }
         else if ( _isExhausted ) { startValue = null; }
-        else { startValue = new Long( _currentValue ); }
+        else { startValue = _currentValue; }
 
         return new SequenceGenerator
             (
@@ -328,7 +328,7 @@ public class SequenceGenerator
     {
         Long currentValue = null;
 
-        if ( !_isExhausted ) { currentValue = new Long( _currentValue ); }
+        if ( !_isExhausted ) { currentValue = _currentValue; }
         
         return currentValue;
     }

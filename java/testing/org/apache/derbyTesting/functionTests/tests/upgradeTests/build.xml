@@ -83,6 +83,7 @@
       </classpath>
       <include name="${this.dir}/*.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 

@@ -302,42 +302,42 @@ public class XPLAINUtil {
          String vp_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_PAGES_VISITED));
          if(vp_property!=null){
-             descriptor.setNo_visited_pages(new Integer(vp_property));
+             descriptor.setNo_visited_pages(Integer.parseInt(vp_property));
          }
          
          // extract the number of visited rows 
          String vr_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_ROWS_VISITED));
          if(vr_property!=null){
-             descriptor.setNo_visited_rows(new Integer(vr_property));
+             descriptor.setNo_visited_rows(Integer.parseInt(vr_property));
          }
          
          // extract the number of qualified rows 
          String qr_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_ROWS_QUALIFIED));
          if(qr_property!=null){
-             descriptor.setNo_qualified_rows(new Integer(qr_property));
+             descriptor.setNo_qualified_rows(Integer.parseInt(qr_property));
          }
          
          // extract the number of fetched columns 
          String fc_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_COLUMNS_FETCHED));
          if(fc_property!=null){
-             descriptor.setNo_fetched_columns(new Integer(fc_property));
+             descriptor.setNo_fetched_columns(Integer.parseInt(fc_property));
          }
          
          // extract the number of deleted visited rows 
          String dvr_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_NUM_DELETED_ROWS_VISITED));
          if(dvr_property!=null){
-             descriptor.setNo_visited_deleted_rows(new Integer(dvr_property));
+             descriptor.setNo_visited_deleted_rows(Integer.parseInt(dvr_property));
          }
          
          // extract the btree height 
          String bth_property = scanProps.getProperty(
             MessageService.getTextMessage(SQLState.STORE_RTS_TREE_HEIGHT));
          if(bth_property!=null){
-             descriptor.setBtree_height(new Integer(bth_property));
+             descriptor.setBtree_height(Integer.parseInt(bth_property));
          }
          
          // extract the fetched bit set 
@@ -384,13 +384,13 @@ public class XPLAINUtil {
          String ir_property = sortProps.getProperty(
                  MessageService.getTextMessage(SQLState.STORE_RTS_NUM_ROWS_INPUT));
          if(ir_property!=null){
-              descriptor.setNo_input_rows(new Integer(ir_property));
+             descriptor.setNo_input_rows(Integer.parseInt(ir_property));
          }
 
           String or_property = sortProps.getProperty(
                   MessageService.getTextMessage(SQLState.STORE_RTS_NUM_ROWS_OUTPUT));
           if(or_property!=null){
-               descriptor.setNo_output_rows(new Integer(or_property));
+              descriptor.setNo_output_rows(Integer.parseInt(or_property));
           }
               
           if (sort_type == SORT_EXTERNAL){
@@ -398,7 +398,7 @@ public class XPLAINUtil {
               MessageService.getTextMessage(SQLState.STORE_RTS_NUM_MERGE_RUNS));
               
               if(nomr_property!=null){
-                 descriptor.setNo_merge_runs(new Integer(nomr_property));
+                  descriptor.setNo_merge_runs(Integer.parseInt(nomr_property));
               }
              
               String nomrd_property = sortProps.getProperty(
@@ -421,7 +421,7 @@ public class XPLAINUtil {
       */
      public static Long getAVGNextTime(long dividend, long divisor){
          if(divisor==0) return null;
-         if(dividend==0) return new Long(0);
-         return new Long(dividend/divisor);
+         if(dividend==0) return (long) 0;
+         return dividend/divisor;
      }
 }

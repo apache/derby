@@ -4330,7 +4330,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
                 // seenIndex, so mark occurence 2..n  for cloning.
                 cloneMap[index] = true;
             } else {
-                seenMap.put(new Integer(vcId), new Integer(index));
+                seenMap.put(vcId, index);
             }
         }
     }

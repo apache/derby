@@ -1014,7 +1014,7 @@ final class StorageFactoryService implements PersistentService
         return (AccessController.doPrivileged(
                 new PrivilegedAction<Boolean>() {
                     public Boolean run() {
-                        return new Boolean(file.exists());
+                        return file.exists();
                     }
             })).booleanValue();
     }

@@ -403,7 +403,7 @@ public class JarUtil
                             else
                                 generationId =  fr.replace(jarExternalName,
                                         currentGenerationId, contents);
-                            return new Long(generationId);
+                            return generationId;
                         }
                     })).longValue();
         } catch (PrivilegedActionException e) {

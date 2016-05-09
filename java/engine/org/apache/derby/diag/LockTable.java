@@ -295,7 +295,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 				return null; // can't deal with this for now
 
 			Long value = (Long)attributes.get(VirtualLockTable.CONTAINERID);
-			conglomId = new Long(tc.findConglomid(value.longValue()));
+			conglomId = tc.findConglomid(value.longValue());
 			attributes.put(VirtualLockTable.CONGLOMID, conglomId);
 		}
 

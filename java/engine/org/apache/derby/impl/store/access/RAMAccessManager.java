@@ -392,7 +392,7 @@ public abstract class RAMAccessManager
             // just in case language passes in a bad factory id.
 			throw StandardException.newException(
                 SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST, 
-                new Long(conglom_id));
+                conglom_id);
         }
     }
 
@@ -468,7 +468,7 @@ public abstract class RAMAccessManager
         throws StandardException
     {
         Conglomerate conglom       = null;
-        Long         conglomid_obj = new Long(conglomid);
+        Long         conglomid_obj = conglomid;
 
         CacheableConglomerate cache_entry =
             (CacheableConglomerate) conglom_cache.find(conglomid_obj);
@@ -513,7 +513,7 @@ public abstract class RAMAccessManager
     {
         // Insert the new entry.
         CacheableConglomerate conglom_entry = (CacheableConglomerate)
-            conglom_cache.create(new Long(conglomid), conglom);
+            conglom_cache.create(conglomid, conglom);
         conglom_cache.release(conglom_entry);
     }
 
@@ -529,7 +529,7 @@ public abstract class RAMAccessManager
         throws StandardException
     {
         CacheableConglomerate conglom_entry = (CacheableConglomerate)
-            conglom_cache.findCached(new Long(conglomid));
+            conglom_cache.findCached(conglomid);
 
         if (conglom_entry != null) {
             conglom_cache.remove(conglom_entry);

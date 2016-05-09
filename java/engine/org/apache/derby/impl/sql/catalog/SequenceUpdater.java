@@ -407,13 +407,13 @@ public abstract class SequenceUpdater implements Cacheable
                 return;
                 
             case SequenceGenerator.RET_MARK_EXHAUSTED:
-                updateCurrentValueOnDisk( new Long( currentValue ), null );
+                updateCurrentValueOnDisk( currentValue, null );
                 returnValue.setValue( currentValue );
                 return;
                 
             case SequenceGenerator.RET_ALLOCATE_NEW_VALUES:
                 
-                if ( updateCurrentValueOnDisk( new Long( currentValue ), new Long( lastAllocatedValue ) ) )
+                if ( updateCurrentValueOnDisk( currentValue, lastAllocatedValue ) )
                 {
                     _sequenceGenerator.allocateNewRange( currentValue, numberOfValuesAllocated );
                 }

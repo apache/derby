@@ -260,7 +260,7 @@ public class HeapConglomerateFactory implements ConglomerateFactory, ModuleContr
             {
                 throw StandardException.newException(
                     SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
-                    new Long(container_key.getContainerId()));
+                    container_key.getContainerId());
             }
 
             // row in slot 0 of heap page 1 which is just a single column with

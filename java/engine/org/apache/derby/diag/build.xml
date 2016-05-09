@@ -50,6 +50,7 @@
       destdir="${out.dir}">
       <include name="${derby.dir}/diag/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 

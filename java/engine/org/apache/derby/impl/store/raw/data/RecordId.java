@@ -285,7 +285,7 @@ public final class RecordId implements RecordHandle {
 			return false;
 
 		attributes.put(VirtualLockTable.CONTAINERID, 
-					   new Long(pageId.getContainerId().getContainerId()));
+					   pageId.getContainerId().getContainerId());
 
 		attributes.put(VirtualLockTable.LOCKNAME,
 					   "(" + pageId.getPageNumber() + "," + recordId + ")");

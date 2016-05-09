@@ -329,7 +329,7 @@ public class RealHashTableStatistics
               null,                          // the scan qualifiers
               this.nextQualifiers,     // the next qualifiers
               hashkey_columns,               // the hash key column numbers
-              new Integer(this.hashtableSize) // the hash table size
+              this.hashtableSize // the hash table size
             );
         
         // fill additional information from scan properties

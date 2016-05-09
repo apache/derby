@@ -163,20 +163,20 @@ public class RealRowResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                              // the number of index updates 
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // the affected rows
            null,                              // the deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeen),
+           this.rowsSeen,
            null,                              // the seen rows right
-           new Integer(this.rowsFiltered),
-           new Integer(this.rowsReturned),
+           this.rowsFiltered,
+           this.rowsReturned,
            null,                              // the empty right rows
            null,                           // index key optimization
            (UUID)scanID,

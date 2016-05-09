@@ -78,7 +78,7 @@ class EncryptedLOBFile extends LOBFile {
         if (len < 0)
             throw new IndexOutOfBoundsException (
                     MessageService.getTextMessage (
-                        SQLState.BLOB_NONPOSITIVE_LENGTH, new Integer (len)));
+                        SQLState.BLOB_NONPOSITIVE_LENGTH, len));
         //starting position of the 1st block
         long startPos = pos - pos % blockSize;
         //end position of last block

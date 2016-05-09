@@ -355,8 +355,7 @@ public class EmbedResultSet extends ConnectionChild
 		
 		if (columnIndex < 1 ||
 		    columnIndex > resultDescription.getColumnCount())
-			throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
-                         new Integer(columnIndex));
+			throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnIndex);
 
 		return resultDescription.getColumnDescriptor(columnIndex).getType().getJDBCTypeId();
 	}
@@ -2300,8 +2299,7 @@ public class EmbedResultSet extends ConnectionChild
 	public void setFetchSize(int rows) throws SQLException {
 		checkIfClosed("setFetchSize");
 		if (rows < 0) {
-			throw Util.generateCsSQLException(SQLState.INVALID_FETCH_SIZE,
-					new Integer(rows));
+			throw Util.generateCsSQLException(SQLState.INVALID_FETCH_SIZE, rows);
 		} else if (rows > 0) // if it is zero ignore the call
 		{
 			fetchSize = rows;
@@ -2459,7 +2457,7 @@ public class EmbedResultSet extends ConnectionChild
       ResultDescription rd = theResults.getResultDescription();
       if (columnIndex < 1 || columnIndex > rd.getColumnCount())
         throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION,
-					new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
+					columnIndex, String.valueOf(rd.getColumnCount()));
 
       //2)Make sure the column corresponds to a column in the base table and it is not a derived column
       if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
@@ -3300,7 +3298,7 @@ public class EmbedResultSet extends ConnectionChild
 		int colType = getColumnType(columnIndex);
 		if ((colType == Types.DECIMAL) || (colType == Types.NUMERIC)) {
 			if (scale < 0)
-				throw newSQLException(SQLState.BAD_SCALE_VALUE, new Integer(scale));
+				throw newSQLException(SQLState.BAD_SCALE_VALUE, scale);
 
 			try {
 				DataValueDescriptor value = updateRow.getColumn(columnIndex);
@@ -4698,8 +4696,7 @@ public class EmbedResultSet extends ConnectionChild
 	  closeCurrentStream();
 
 	  if (columnIndex < 1 || columnIndex > resultDescription.getColumnCount()) {
-		  throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
-								new Integer(columnIndex));
+		  throw newSQLException(SQLState.COLUMN_NOT_FOUND, columnIndex);
 	  }
 	  if (isOnInsertRow || currentRowHasBeenUpdated && columnGotUpdated[columnIndex -1]) {
 		  return updateRow.getColumn(columnIndex);

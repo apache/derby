@@ -49,6 +49,7 @@
       destdir="${out.dir}">
       <include name="${derby.dir}/iapi/types/*.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 

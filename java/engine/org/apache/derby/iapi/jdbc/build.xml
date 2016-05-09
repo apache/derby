@@ -55,6 +55,7 @@
       <include name="${derby.dir}/${cur.dir}/*.java"/>
 	  <exclude name="${derby.dir}/${cur.dir}/*42.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target> 
 
@@ -73,6 +74,7 @@
           destdir="${out.dir}">
           <include name="${derby.dir}/${cur.dir}/*42.java"/>
           <compilerarg value="-Xlint:unchecked"/>
+          <compilerarg value="-Xlint:deprecation"/>
       </javac>
   </target> 
 

@@ -318,14 +318,14 @@ public class RealProjectRestrictStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
-           new Long(this.constructorTime),
-           new Long(this.openTime),
-           new Long(this.nextTime),
-           new Long(this.closeTime),
-           new Long(this.getNodeTime()),
+           this.constructorTime,
+           this.openTime,
+           this.nextTime,
+           this.closeTime,
+           this.getNodeTime(),
            XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
-           new Long(this.projectionTime),
-           new Long(this.restrictionTime),
+           this.projectionTime,
+           this.restrictionTime,
            null,                          // the temp_cong_create_time
            null                           // the temo_cong_fetch_time
         );

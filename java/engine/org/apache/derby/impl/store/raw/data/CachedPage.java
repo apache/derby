@@ -697,7 +697,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 					StandardException se = 
 						StandardException.newException(
 								   SQLState.FILE_READ_PAGE_EXCEPTION, 
-								   ioe, newIdentity, new Integer(pagesize));
+								   ioe, newIdentity, pagesize);
 
 						
 				    if (dataFactory.getLogFactory().inRFR())

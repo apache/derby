@@ -531,8 +531,8 @@ recompileOutOfDatePlan:
 			throw StandardException.newException
                 (
                  SQLState.LANG_INVALID_PARAM_POSITION, 
-                 new Integer( idx+1 ),
-                 new Integer( paramTypeDescriptors.length )
+                 idx+1,
+                 paramTypeDescriptors.length
                  );
 		}
 

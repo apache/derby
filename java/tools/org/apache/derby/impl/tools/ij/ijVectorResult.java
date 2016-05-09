@@ -46,13 +46,6 @@ class ijVectorResult extends ijResultImpl {
 		vec.add(value);
 	}
 
-	/**
-	 * Initialize a new vector containing only one integer value.
-	 */
-	ijVectorResult(int value, SQLWarning w) {
-		this(new Integer(value), w);
-	}
-
 
 	public boolean isVector() { return true; }
 

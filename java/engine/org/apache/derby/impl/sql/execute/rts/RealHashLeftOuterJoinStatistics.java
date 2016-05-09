@@ -116,21 +116,21 @@ public class RealHashLeftOuterJoinStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                           // index updates
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // affected rows
            null,                              // deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeenLeft),
-           new Integer(this.rowsSeenRight),
-           new Integer(this.rowsFiltered),
-           new Integer(this.rowsReturned),
-           new Integer(this.emptyRightRowsReturned),
+           this.rowsSeenLeft,
+           this.rowsSeenRight,
+           this.rowsFiltered,
+           this.rowsReturned,
+           this.emptyRightRowsReturned,
            null,                           // index key optimization
            (UUID)scanID,
            (UUID)sortID,

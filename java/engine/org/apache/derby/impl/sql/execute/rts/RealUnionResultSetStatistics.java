@@ -211,20 +211,20 @@ public class RealUnionResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                           // index updates
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // affected rows
            null,                              // deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeenLeft),
-           new Integer(this.rowsSeenRight),
-           new Integer(this.rowsFiltered),
-           new Integer(this.rowsReturned),
+           this.rowsSeenLeft,
+           this.rowsSeenRight,
+           this.rowsFiltered,
+           this.rowsReturned,
            null,                           // the empty right rows
            null,                           // index key optimization
            (UUID)scanID,

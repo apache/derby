@@ -173,7 +173,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 			tabID = column.getReferencingUUID().toString();
 			colName = column.getColumnName();
-			colID = new Integer(column.getPosition() );
+			colID = column.getPosition();
 			autoincStart = column.getAutoincStart();
 			autoincInc   = column.getAutoincInc();
 			autoincValue   = column.getAutoincValue();

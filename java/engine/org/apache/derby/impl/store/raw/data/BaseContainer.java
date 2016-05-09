@@ -209,8 +209,8 @@ abstract class BaseContainer implements Lockable {
         {
 			throw StandardException.newException(
                     SQLState.DATA_ALLOC_NTT_CANT_OPEN, 
-                    new Long(getSegmentId()), 
-                    new Long(getContainerId()));
+                    getSegmentId(), 
+                    getContainerId());
         }
 
 		CompatibilitySpace cs = ntt.getCompatibilitySpace();
@@ -299,8 +299,8 @@ abstract class BaseContainer implements Lockable {
         {
 			throw StandardException.newException(
                     SQLState.DATA_ALLOC_NTT_CANT_OPEN, 
-                    new Long(getSegmentId()), 
-                    new Long(getContainerId()));
+                    getSegmentId(), 
+                    getContainerId());
         }
 
 		// Latch this container, the commit will release the latch

@@ -188,7 +188,7 @@ public class SimpleNetworkClientSample
 		// port on which Network Server is listening
 		methodParams = new Class[] {int.class};
 		Method portnumber = nsDataSource.getMethod("setPortNumber", methodParams);
-		args = new Object[] {new Integer(1527)};
+		args = new Object[] {1527};
 		portnumber.invoke(ds, args);
 
 		return ds;

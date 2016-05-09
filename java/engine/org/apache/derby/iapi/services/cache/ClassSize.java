@@ -308,7 +308,7 @@ public class ClassSize
         // Try the direct way first, by looking for 'sun.arch.data.model'
         String dataModel = getSystemProperty("sun.arch.data.model");
         try {
-            return (new Integer(dataModel).intValue() / 8);
+            return Integer.parseInt(dataModel) / 8;
         } catch (NumberFormatException ignoreNFE) {}
 
         // Try 'os.arch'

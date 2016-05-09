@@ -589,7 +589,7 @@ class xaHelper implements xaAbstractHelper
 			"set" + Character.toUpperCase(property.charAt(0)) + property.substring(1);
 		try {
 			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, INT_P);
-			m.invoke(ds, new Object[] {new Integer(value)});
+			m.invoke(ds, new Object[] {value});
 		}
 		catch (Exception e)
 		{
@@ -621,7 +621,7 @@ private static void setDataSourceProperty(Object ds, String property, boolean va
 
 		try {
 			java.lang.reflect.Method m = ds.getClass().getMethod(methodName, BOOLEAN_P);
-			m.invoke(ds, new Object[] {new Boolean(value)});
+			m.invoke(ds, new Object[] {value});
 			return;
 		} catch (Exception nsme) {
 			throw new SQLException(property + " ???");

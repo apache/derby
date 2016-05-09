@@ -383,7 +383,7 @@ public class RAMTransaction
         {
 			throw StandardException.newException(
                 SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST, 
-                new Long(conglomId));
+                conglomId);
         }
         else
         {
@@ -403,7 +403,7 @@ public class RAMTransaction
         else
 		{
 			if (tempCongloms != null)
-				conglom = (Conglomerate) tempCongloms.get(new Long(conglomId));
+				conglom = (Conglomerate) tempCongloms.get(conglomId);
 		}
 
         return(conglom);
@@ -589,7 +589,7 @@ public class RAMTransaction
 		if (conglom == null)
         {
 			throw StandardException.newException(
-                SQLState.AM_NO_SUCH_CONGLOMERATE_DROP, new Long(conglomId));
+                SQLState.AM_NO_SUCH_CONGLOMERATE_DROP, conglomId);
         }
 
         // Get exclusive lock on the table being altered.
@@ -811,7 +811,7 @@ public class RAMTransaction
 			conglomId = nextTempConglomId--;
 			if (tempCongloms == null)
 				tempCongloms = new HashMap<Long,Conglomerate>();
-			tempCongloms.put(new Long(conglomId), conglom);
+			tempCongloms.put(conglomId, conglom);
 		}
 		else
 		{
@@ -994,7 +994,7 @@ public class RAMTransaction
 		if (conglomId < 0)
 		{
 			if (tempCongloms != null)
-				tempCongloms.remove(new Long(conglomId));
+				tempCongloms.remove(conglomId);
 		}
 		else
         {
@@ -1822,7 +1822,7 @@ public class RAMTransaction
 			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
-                    SQLState.AM_NO_SUCH_SORT, new Long(id));
+                    SQLState.AM_NO_SUCH_SORT, id);
 		}
 
 		// Open it.
@@ -1891,7 +1891,7 @@ public class RAMTransaction
 			|| (sort = ((Sort) sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
-                    SQLState.AM_NO_SUCH_SORT, new Long(id));
+                    SQLState.AM_NO_SUCH_SORT, id);
 		}
 
 		// Open a scan on it.
@@ -1918,7 +1918,7 @@ public class RAMTransaction
 			|| (sort = (sorts.get((int) id))) == null)
 		{
 			throw StandardException.newException(
-                    SQLState.AM_NO_SUCH_SORT, new Long(id));
+                    SQLState.AM_NO_SUCH_SORT, id);
 		}
 
 		// Open a scan row source on it.

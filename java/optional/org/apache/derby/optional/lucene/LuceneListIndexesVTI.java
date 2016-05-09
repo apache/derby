@@ -151,8 +151,8 @@ class LuceneListIndexesVTI extends StringColumnVTI
             throw ToolUtilities.newSQLException
                 (
                  SQLState.LANG_INVALID_COLUMN_POSITION,
-                 new Integer( col ),
-                 new Integer( getColumnCount() )
+                 col,
+                 getColumnCount()
                  );
         }
 	}
@@ -165,8 +165,8 @@ class LuceneListIndexesVTI extends StringColumnVTI
             throw ToolUtilities.newSQLException
                 (
                  SQLState.LANG_INVALID_COLUMN_POSITION,
-                 new Integer( col ),
-                 new Integer( getColumnCount() )
+                 col,
+                 getColumnCount()
                  );
         }
 

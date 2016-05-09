@@ -101,7 +101,7 @@ public class ShExLockable implements Lockable
         if((flag & VirtualLockTable.SHEXLOCK) == 0)
             return false;
         // No containerId, but need something in there so it can print
-		attributes.put(VirtualLockTable.CONTAINERID, new Long(-1) ); 
+		attributes.put(VirtualLockTable.CONTAINERID, -1); 
 
 		attributes.put(VirtualLockTable.LOCKNAME, this.toString() );
 

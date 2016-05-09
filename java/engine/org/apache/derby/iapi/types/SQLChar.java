@@ -466,7 +466,7 @@ public class SQLChar
 
         try 
         {
-            return new Float(getString().trim()).floatValue();
+            return Float.parseFloat(getString().trim());
         } 
         catch (NumberFormatException nfe) 
         {
@@ -492,7 +492,7 @@ public class SQLChar
 
         try 
         {
-            return new Double(getString().trim()).doubleValue();
+            return Double.parseDouble(getString().trim());
         } 
         catch (NumberFormatException nfe) 
         {
@@ -2396,7 +2396,7 @@ readingLoop:
             throw StandardException.newException(
                     SQLState.LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION, 
                     getString(), mySearchFrom,
-                    new Integer(startVal));
+                    startVal);
         }
         
         if( mySearchFor.length() == 0 )

@@ -58,6 +58,7 @@
       <include name="${derby.dir}/drda/*.java"/>
       <exclude name="${derby.dir}/drda/NetServlet.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 
@@ -79,6 +80,7 @@
       </classpath>
       <include name="${derby.dir}/drda/NetServlet.java"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
   </target>
 

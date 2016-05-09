@@ -178,7 +178,7 @@ abstract class RealNoRowsResultSetStatistics
            null,                                   // the open time
            null,                                   // the next time
            null,                                   // the close time
-           new Long(this.executeTime),             // the execute time
+           this.executeTime,             // the execute time
            null,                                   // the avg next time/row
            null,                                   // the projection time
            null,                                   // the restriction time

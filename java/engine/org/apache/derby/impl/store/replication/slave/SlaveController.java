@@ -138,7 +138,7 @@ public class SlaveController
             //value will be used.
             int slavePort = -1;
             if (port != null) {
-                slavePort = (new Integer(port)).intValue();
+                slavePort = Integer.parseInt(port);
             }
             slaveAddr = new SlaveAddress(
                     properties.getProperty(Attribute.REPLICATION_SLAVE_HOST), 
@@ -585,15 +585,10 @@ public class SlaveController
                         throw StandardException.newException
                             (SQLState.REPLICATION_LOG_OUT_OF_SYNCH,
                              dbname,
-                             new Long(LogCounter.
-                                      getLogFileNumber(logScan.getInstant())),
-                             new Long(LogCounter.
-                                      getLogFilePosition(logScan.
-                                                         getInstant())),
-                             new Long(LogCounter.
-                                      getLogFileNumber(localInstant)),
-                             new Long(LogCounter.
-                                      getLogFilePosition(localInstant)));
+                             LogCounter.getLogFileNumber(logScan.getInstant()),
+                             LogCounter.getLogFilePosition(logScan.getInstant()),
+                             LogCounter.getLogFileNumber(localInstant),
+                             LogCounter.getLogFilePosition(localInstant));
                     }
                     highestLogInstant = localInstant;
                 }

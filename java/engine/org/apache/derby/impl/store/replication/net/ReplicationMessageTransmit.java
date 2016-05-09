@@ -258,15 +258,13 @@ public class ReplicationMessageTransmit {
         // Check that master and slave have the same serialVersionUID
         ReplicationMessage initiatorMsg = 
             new ReplicationMessage(ReplicationMessage.TYPE_INITIATE_VERSION, 
-                                   new Long(ReplicationMessage.
-                                            serialVersionUID));
+                                   ReplicationMessage.serialVersionUID);
         verifyMessageType(sendMessageWaitForReply(initiatorMsg),
                           ReplicationMessage.TYPE_ACK);
 
         // Check that master and slave log files are in synch
         initiatorMsg =
-            new ReplicationMessage(ReplicationMessage.TYPE_INITIATE_INSTANT,
-                                   new Long(synchOnInstant));
+            new ReplicationMessage(ReplicationMessage.TYPE_INITIATE_INSTANT, synchOnInstant);
         verifyMessageType(sendMessageWaitForReply(initiatorMsg),
                           ReplicationMessage.TYPE_ACK);
     }

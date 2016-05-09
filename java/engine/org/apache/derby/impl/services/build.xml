@@ -49,6 +49,7 @@
       destdir="${out.dir}">
       <include name="${derby.dir}/impl/services/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
  </target> 
 

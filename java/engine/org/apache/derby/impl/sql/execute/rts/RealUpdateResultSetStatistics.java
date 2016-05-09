@@ -178,13 +178,13 @@ public class RealUpdateResultSetStatistics
            getRSXplainType(),
            getRSXplainDetails(),
            null,                              // the number of opens
-           new Integer(this.indexesUpdated),
+           this.indexesUpdated,
            null,                           // lock mode
            this.tableLock?"T":"R",
            (UUID)parentID,
            null,                             // estimated row count
            null,                             // estimated cost
-           new Integer(this.rowCount),
+           this.rowCount,
            XPLAINUtil.getYesNoCharFromBoolean(this.deferred),
            null,                              // the input rows
            null,                              // the seen rows left

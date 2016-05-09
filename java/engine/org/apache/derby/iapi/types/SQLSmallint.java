@@ -158,7 +158,7 @@ public final class SQLSmallint
 		if (isNull())
 			return null;
 		else
-			return new Integer(value);
+          return (int) value;
 	}
 
 	// this is for DataType's error generator

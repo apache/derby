@@ -815,11 +815,11 @@ class FromVTI extends FromTable implements VTIEnvironment
 					}
 					else if (paramClass.equals(Float.TYPE))
 					{
-						paramObjects[index] = new Float((float) 0);
+						paramObjects[index] = (float) 0;
 					}
 					else if (paramClass.equals(Double.TYPE))
 					{
-						paramObjects[index] = new Double((double) 0);
+						paramObjects[index] = (double) 0;
 					}
 					else if (paramClass.equals(Boolean.TYPE))
 					{

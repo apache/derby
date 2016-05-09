@@ -376,10 +376,10 @@ public class Scan implements StreamLogScan {
 					throw logFactory.markCorrupt(
                         StandardException.newException(
                             SQLState.LOG_RECORD_CORRUPTED, 
-                            new Long(checkLength),
-                            new Long(recordLength),
-                            new Long(inst),
-                            new Long(currentLogFileNumber)));
+                            checkLength,
+                            recordLength,
+                            inst,
+                            currentLogFileNumber));
 				}
 			}
 			else
@@ -955,10 +955,10 @@ public class Scan implements StreamLogScan {
 						throw logFactory.markCorrupt
 						(StandardException.newException(
 							SQLState.LOG_RECORD_CORRUPTED, 
-                            new Long(checkLength),
-                            new Long(recordLength),
-                            new Long(currentInstant),
-                            new Long(currentLogFileNumber)));
+                            checkLength,
+                            recordLength,
+                            currentInstant,
+                            currentLogFileNumber));
 
 					}
 					

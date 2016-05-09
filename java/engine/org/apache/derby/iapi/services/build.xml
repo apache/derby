@@ -51,6 +51,7 @@
       <exclude name="${derby.dir}/iapi/crypto/io/**"/>
       <exclude name="${derby.dir}/iapi/services/io/**"/>
       <compilerarg value="-Xlint:unchecked"/>
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <ant dir="${derby.engine.dir}/iapi/services/io"/>
     <ant dir="${derby.engine.dir}/iapi/services/crypto" target="compile_crypto"/>

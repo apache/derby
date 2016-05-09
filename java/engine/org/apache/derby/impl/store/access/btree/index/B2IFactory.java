@@ -280,7 +280,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
 
                 throw StandardException.newException(
                     SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST, 
-                    new Long(container_key.getContainerId()));
+                    container_key.getContainerId());
             }
 
             // The conglomerate is located in the control row on the root page.

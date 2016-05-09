@@ -365,7 +365,7 @@ class IndexChanger
 
                 Object[] args = new Object[2];
                 args[0] = ourIndexRow.getRowArray()[ourIndexRow.getRowArray().length - 1];
-                args[1] = new Long(indexCID);
+                args[1] = indexCID;
 
                 Monitor.getStream().println(MessageService.getTextMessage(
                     SQLState.LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE, 

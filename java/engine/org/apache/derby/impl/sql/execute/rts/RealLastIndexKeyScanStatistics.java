@@ -253,20 +253,20 @@ public class RealLastIndexKeyScanStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                           // the number of index updates 
            lockMode,
            lockGran,
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // the affected rows
            null,                              // the deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeen),            // the seen rows
+           this.rowsSeen,            // the seen rows
            null,                              // the seen rows right
-           new Integer(this.rowsFiltered),        // the filtered rows
-           new Integer(this.rowsSeen-this.rowsFiltered),// the returned rows
+           this.rowsFiltered,        // the filtered rows
+           this.rowsSeen-this.rowsFiltered,// the returned rows
            null,                              // the empty right rows
            null,                           // index key optimization
            (UUID)scanID,

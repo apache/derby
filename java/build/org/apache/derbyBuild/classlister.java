@@ -769,9 +769,9 @@ public class classlister {
 
 			Hashtable<String, String> currentsChildren =
                     masterClassList.get(key);
-	scoreboard.put(key, new Integer(indentLevel));
+	scoreboard.put(key, indentLevel);
 			unrollHashtable(key, currentsChildren, scoreboard, (indentLevel+1));
-			scoreboard.put(key, new Integer(indentLevel));
+			scoreboard.put(key, indentLevel);
 			
 		}
 	}

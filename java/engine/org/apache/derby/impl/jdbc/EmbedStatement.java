@@ -434,7 +434,7 @@ public class EmbedStatement extends ConnectionChild
 
 		if (max < 0)
 		{
-			throw newSQLException(SQLState.INVALID_MAXFIELD_SIZE, new Integer(max));
+			throw newSQLException(SQLState.INVALID_MAXFIELD_SIZE, max);
 		}
         this.MaxFieldSize = max;
 	}
@@ -495,7 +495,7 @@ public class EmbedStatement extends ConnectionChild
 		checkStatus();
 		if (max < 0L)
 		{
-			throw newSQLException(SQLState.INVALID_MAX_ROWS_VALUE, new Long(max));
+			throw newSQLException(SQLState.INVALID_MAX_ROWS_VALUE, max);
 		}
 		this.maxRows = max;
 	}
@@ -537,8 +537,7 @@ public class EmbedStatement extends ConnectionChild
 	public final void setQueryTimeout(int seconds) throws SQLException {
 		checkStatus();
         if (seconds < 0) {
-            throw newSQLException(SQLState.INVALID_QUERYTIMEOUT_VALUE,
-                                  new Integer(seconds));
+            throw newSQLException(SQLState.INVALID_QUERYTIMEOUT_VALUE, seconds);
         }
         timeoutMillis = (long) seconds * 1000;
 	}
@@ -904,8 +903,7 @@ public class EmbedStatement extends ConnectionChild
                 {
                     fetchDirection = direction;
                 }else
-                    throw newSQLException(SQLState.INVALID_FETCH_DIRECTION, 
-                                   new Integer(direction));
+                    throw newSQLException(SQLState.INVALID_FETCH_DIRECTION, direction);
 	}
 
     /**
@@ -940,7 +938,7 @@ public class EmbedStatement extends ConnectionChild
         if (rows < 0  || (this.getMaxRows() != 0 && 
                              rows > this.getMaxRows()))
         {
-	        throw newSQLException(SQLState.INVALID_ST_FETCH_SIZE, new Integer(rows));
+	        throw newSQLException(SQLState.INVALID_ST_FETCH_SIZE, rows);
         }else if ( rows > 0 ) // ignore the call if the value is zero
             fetchSize = rows;
 	}

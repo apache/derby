@@ -165,7 +165,7 @@ public class RealInsertVTIResultSetStatistics
            (UUID)parentID,
            null,                             // estimated row count
            null,                             // estimated cost
-           new Integer(this.rowCount),
+           this.rowCount,
            XPLAINUtil.getYesNoCharFromBoolean(this.deferred),
            null,                              // the input rows
            null,                              // the seen rows left

@@ -270,7 +270,7 @@ public class OpenBTree
             if (this.container == null)
             {
                 throw(StandardException.newException(
-                        SQLState.BTREE_IS_CLOSED, new Long(err_containerid)));
+                        SQLState.BTREE_IS_CLOSED, err_containerid));
             }
 
             if (SanityManager.DEBUG)
@@ -396,7 +396,7 @@ public class OpenBTree
         {
             throw StandardException.newException(
                     SQLState.BTREE_CONTAINER_NOT_FOUND,
-                    new Long(err_containerid));
+                    err_containerid);
         }
 
 		// Remember the conglomerate so its properties can be found.

@@ -115,7 +115,7 @@ public final class SQLInteger
 		if (isNull())
 			return null;
 		else
-			return new Integer(value);
+			return value;
 	}
 
 	public int	getLength()

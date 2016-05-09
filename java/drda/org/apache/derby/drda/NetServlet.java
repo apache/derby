@@ -428,9 +428,9 @@ public class NetServlet extends HttpServlet {
             try {
                 Properties p = server.getCurrentProperties();
                 String val = p.getProperty(Property.DRDA_PROP_MAXTHREADS);
-                maxThreads= (new Integer(val)).intValue();
+                maxThreads= Integer.parseInt(val);
                 val = p.getProperty(Property.DRDA_PROP_TIMESLICE);
-                timeSlice= (new Integer(val)).intValue();
+                timeSlice= Integer.parseInt(val);
             } catch (Exception e) {
                 printErrorForm(langUtil, e, returnMessage, out);
                 return;
@@ -458,8 +458,8 @@ public class NetServlet extends HttpServlet {
             
             out.println(formHeader);
             printAsContentHeader(netParamMessage, out);
-            out.println( "<h4>"+langUtil.getTextMessage("SRV_MaxThreads", new Integer(maxThreads).toString()) +"</h4>");
-            out.println( "<h4>"+langUtil.getTextMessage("SRV_TimeSlice", new Integer(timeSlice).toString()) +"</h4>");
+            out.println( "<h4>"+langUtil.getTextMessage("SRV_MaxThreads", Integer.toString(maxThreads) +"</h4>"));
+            out.println( "<h4>"+langUtil.getTextMessage("SRV_TimeSlice", Integer.toString(timeSlice) +"</h4>"));
             out.println( "<h4> </h4>");
             out.println( "<h4> <label for='newmaxthreads'>"+maxName+"</label> </h4>");
             out.println( "<INPUT type=text name=newmaxthreads size=10 maxlength=10 " +
@@ -587,7 +587,7 @@ public class NetServlet extends HttpServlet {
             }while (!connectWorked && t < MAX_CONNECT_TRYS);
             if (t >= MAX_CONNECT_TRYS)
                 throw new Exception(localUtil.getTextMessage("SRV_MaxTrys",
-                    new Integer(MAX_CONNECT_TRYS).toString()));
+                     Integer.toString(MAX_CONNECT_TRYS)));
             // turn logging on if required
             if (logStatus)
                 server.logConnections(true);
@@ -920,7 +920,7 @@ public class NetServlet extends HttpServlet {
         if (val == null || val.equals(""))
             return NOT_GIVEN;
         try {
-            retval = (new Integer(val)).intValue();
+            retval = Integer.parseInt(val);
         } catch (Exception e) {
             printErrorForm(localUtil,localUtil.getTextMessage("SRV_InvalidVal",
                 val, localUtil.getTextMessage(fieldKey)), returnMessage, out);

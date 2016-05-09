@@ -229,7 +229,7 @@ public class ClassSizeCrawler
         this.interfaceList = interfaceList;
         this.classSizes = classSizes;
         this.interfaceCount = interfaceCount;
-        verbose = new Boolean( System.getProperty( "verbose", "false")).booleanValue();
+        verbose = Boolean.parseBoolean( System.getProperty( "verbose", "false"));
     }
 
     private void crawl( File curDir, StringBuffer className)

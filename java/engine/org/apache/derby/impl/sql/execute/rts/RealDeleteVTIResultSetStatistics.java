@@ -150,7 +150,7 @@ public class RealDeleteVTIResultSetStatistics
            (UUID)parentID,
            null,                             // estimated row count
            null,                             // estimated cost
-           new Integer(this.rowCount),
+           this.rowCount,
            null,                              // the deferred rows.
            null,                              // the input rows
            null,                              // the seen rows left

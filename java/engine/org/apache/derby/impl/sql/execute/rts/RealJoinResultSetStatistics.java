@@ -113,20 +113,20 @@ public abstract class RealJoinResultSetStatistics
            (UUID)rsID,
            getRSXplainType(),
            getRSXplainDetails(),
-           new Integer(this.numOpens),
+           this.numOpens,
            null,                           // index updates
            null,                           // lock mode
            null,                           // lock granularity
            (UUID)parentID,
-           new Double(this.optimizerEstimatedRowCount),
-           new Double(this.optimizerEstimatedCost),
+           this.optimizerEstimatedRowCount,
+           this.optimizerEstimatedCost,
            null,                              // affected rows
            null,                              // deferred rows
            null,                              // the input rows
-           new Integer(this.rowsSeenLeft),
-           new Integer(this.rowsSeenRight),
-           new Integer(this.rowsFiltered),
-           new Integer(this.rowsReturned),
+           this.rowsSeenLeft,
+           this.rowsSeenRight,
+           this.rowsFiltered,
+           this.rowsReturned,
            null,                              // the empty right rows
            null,                           // index key optimization
            (UUID)scanID,
@@ -138,11 +138,11 @@ public abstract class RealJoinResultSetStatistics
     {
         return new XPLAINResultSetTimingsDescriptor(
            (UUID)timingID,
-           new Long(this.constructorTime),
-           new Long(this.openTime),
-           new Long(this.nextTime),
-           new Long(this.closeTime),
-           new Long(this.getNodeTime()),
+           this.constructorTime,
+           this.openTime,
+           this.nextTime,
+           this.closeTime,
+           this.getNodeTime(),
            XPLAINUtil.getAVGNextTime(
                (long)this.nextTime, (this.rowsSeenLeft+this.rowsSeenRight)),
            null,                          // the projection time

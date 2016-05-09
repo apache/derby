@@ -162,7 +162,7 @@ public final class SQLBoolean
 		if (isNull())
 			return null;
 		else
-			return new Boolean(value);
+			return value;
 	}
 
 	public int	getLength()

@@ -350,7 +350,7 @@ getError(Hashtable<String,Integer> errorList) :
 		if (errorList == null)
 		{
 		}
-		errorList.put(s, new Integer(0));
+		errorList.put(s, 0);
 	}
 }
 

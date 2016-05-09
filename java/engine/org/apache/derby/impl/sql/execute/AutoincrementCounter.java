@@ -174,7 +174,7 @@ public class AutoincrementCounter
 	{
 		if (initialized == false)
 			return null;
-		return new Long(counter);
+		return counter;
 	}
 	
 	/**

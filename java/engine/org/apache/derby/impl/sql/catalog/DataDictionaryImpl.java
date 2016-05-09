@@ -6885,7 +6885,7 @@ public final class	DataDictionaryImpl
 												outRow,
 												(TupleDescriptor) null,
 												this );
-			Long hashKey = new Long(cd.getConglomerateNumber());
+			Long hashKey = cd.getConglomerateNumber();
 			ht.put(hashKey, cd);
 		}
 
@@ -14588,7 +14588,7 @@ public final class	DataDictionaryImpl
              getUUIDFactory().createUUID(),
              TableDescriptor.makeSequenceName( td.getUUID() ),
              dtd,
-             new Long( currentValue ),
+             currentValue,
              initialValue,
              minValue,
              maxValue,
