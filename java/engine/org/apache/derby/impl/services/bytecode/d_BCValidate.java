@@ -22,11 +22,12 @@
 package org.apache.derby.impl.services.bytecode;
 
 import java.lang.reflect.*;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import java.util.Hashtable;
-import org.apache.derby.iapi.services.loader.*;
-import org.apache.derby.iapi.services.context.*;
+import java.util.Objects;
 
 /**
  * Validate BC calls.
@@ -92,15 +93,23 @@ class d_BCValidate
 				// and members from classes loaded by the same class loader. Thus
 				// we try to fall into these categories to avoid having to grant
 				// permissions to derby jars for the function tests.
-				
-				ClassLoader declareLoader = declaring.getClassLoader();
+
 				ClassLoader myLoader = d_BCValidate.class.getClassLoader();
-				
-				boolean sameClassLoader = false;
-				if (declareLoader == myLoader)
-					sameClassLoader = true;
-				else if (declareLoader != null)
-					sameClassLoader = declareLoader.equals(myLoader);
+                boolean sameClassLoader;
+                try {
+                    ClassLoader declareLoader = AccessController.doPrivileged(
+                            (PrivilegedAction<ClassLoader>)
+                                    () -> declaring.getClassLoader());
+                    sameClassLoader = Objects.equals(myLoader, declareLoader);
+                } catch (SecurityException se) {
+                    // getClassLoader is not a mandatory permission for
+                    // derby.jar, so expect that it might fail. If it fails,
+                    // however, we know that it is not the same as myLoader,
+                    // since no permissions are needed for calling
+                    // getClassLoader() on a class that lives in the caller's
+                    // class loader.
+                    sameClassLoader = false;
+                }
 				
 				String actualReturnType;
 
