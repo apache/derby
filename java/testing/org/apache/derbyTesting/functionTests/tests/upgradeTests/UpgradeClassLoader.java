@@ -181,10 +181,12 @@ public class UpgradeClassLoader
 
             }
         }
-        
-        // Specify null for parent class loader to avoid mixing up 
-        // jars specified in the system classpath
-        ClassLoader oldVersionLoader = new URLClassLoader(url, null);
+
+        // Create a class loader which loads Derby classes from the specified
+        // URL, and JDBC classes and other system classes from the platform
+        // class loader.
+        ClassLoader oldVersionLoader =
+            new URLClassLoader(url, java.sql.Connection.class.getClassLoader());
 
         // DERBY-5316: We need to unload the JDBC driver when done with it,
         // but that can only be done if the DriverUnloader class lives in a

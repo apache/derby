@@ -166,7 +166,13 @@ public class SysinfoLocaleTest extends BaseTestCase {
         } else {
             urls = new URL[] { sysinfoURL };
         }
-        URLClassLoader loader = new URLClassLoader(urls, null);
+
+        // Create a new class loader that loads the Derby classes afresh.
+        // Its parent (platformLoader) is a class loader that is able to
+        // load the JDBC classes and other core classes needed by the Derby
+        // classes.
+        ClassLoader platformLoader = java.sql.Connection.class.getClassLoader();
+        URLClassLoader loader = new URLClassLoader(urls, platformLoader);
 
         Class<?> copy = Class.forName(className, true, loader);
         Method main = copy.getMethod("main", new Class[] { String[].class });
