@@ -2158,10 +2158,10 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			PreparedStatement ps;
 			boolean done;
 	
-			// scope value is bad, return an empty result
+			// scope value is bad, exception is thrown.
 			if (scope < 0 || scope > 2) {
-				ps = getPreparedQuery("getBestRowIdentifierEmpty");
-				return ps.executeQuery();
+				throw newSQLException(SQLState.LANG_INVALID_ROWID_SCOPE,scope);
+				
 			}
 	
 			// see if there is a primary key, use it.

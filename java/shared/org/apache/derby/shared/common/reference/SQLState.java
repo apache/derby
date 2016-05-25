@@ -963,6 +963,7 @@ public interface SQLState {
     String LANG_NO_DCL_IN_MERGE                                         = "42XAQ";
     String LANG_SYSTEM_SEQUENCE                                         = "42XAR";
     String LANG_BAD_DISTINCT_AGG                                         = "42XAS";
+    String LANG_INVALID_ROWID_SCOPE                                      = "42XAT";
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
     // String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE             = "42Y02";

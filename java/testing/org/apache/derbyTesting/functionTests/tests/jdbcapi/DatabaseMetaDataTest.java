@@ -3556,15 +3556,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = getBestRowIdentifier(null,schema,"BRIT16",
         		DatabaseMetaData.bestRowSession,true);
         verifyBRIResults(rs, expRSI);
-        // result: no rows (invalid scope -1)
-        rs = getBestRowIdentifier(null,schema,"BRIT16",-1,true);
-        JDBC.assertEmpty(rs[0]);
-        JDBC.assertEmpty(rs[1]);
+        // result: exception (invalid scope -1)
+        try {
+            rs = getBestRowIdentifier(null,schema,"BRIT16",-1,true);
+        } catch (SQLException sqle) {
+            assertSQLState( "42XAT", sqle);
+        }
         
-        // result: no rows (invalid scope 3)
-        rs = getBestRowIdentifier(null,schema,"BRIT16",3,true);
-        JDBC.assertEmpty(rs[0]);
-        JDBC.assertEmpty(rs[1]);
+        // result: exception (invalid scope 3)
+        try {
+            rs = getBestRowIdentifier(null,schema,"BRIT16",3,true);
+        } catch (SQLException sqle) {
+            assertSQLState( "42XAT", sqle);
+        }
         
         rs = getBestRowIdentifier(null, schema,"BRIT17",
         		DatabaseMetaData.bestRowTemporary,true);

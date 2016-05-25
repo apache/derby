@@ -2352,6 +2352,12 @@ Guide.
                 <text>DISTINCT and ALL are not allowed with the VAR_POP, VAR_SAMP, STDDEV_POP, and STDDEV_SAMP aggregates.</text>
             </msg>
 
+		<msg>
+		<name>42XAT</name>
+		<text>Invalid row identifier scope: '{0}' </text>
+		<arg>scope</arg>
+	    </msg>
+
 	        <msg>
                 <name>42XBA</name>
                 <text>The schema, table or column does not exist or the column is not a string type.</text>
