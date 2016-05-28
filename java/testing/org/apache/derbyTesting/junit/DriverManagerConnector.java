@@ -237,7 +237,8 @@ public class DriverManagerConnector implements Connector {
     private void loadJDBCDriver() throws SQLException {
         String driverClass = config.getJDBCClient().getJDBCDriverName();
         try {
-            Class.forName(driverClass).newInstance();
+            Class<?> clazz = Class.forName(driverClass);
+            clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {
             throw new SQLException("Failed to load JDBC driver '" + driverClass
                     + "': " + cnfe.getMessage());
@@ -245,6 +246,12 @@ public class DriverManagerConnector implements Connector {
             throw new SQLException("Failed to load JDBC driver '" + driverClass
                     + "': " + iae.getMessage());
         } catch (InstantiationException ie) {
+            throw new SQLException("Failed to load JDBC driver '" + driverClass
+                    + "': " + ie.getMessage());
+        } catch (NoSuchMethodException ie) {
+            throw new SQLException("Failed to load JDBC driver '" + driverClass
+                    + "': " + ie.getMessage());
+        } catch (java.lang.reflect.InvocationTargetException ie) {
             throw new SQLException("Failed to load JDBC driver '" + driverClass
                     + "': " + ie.getMessage());
         }

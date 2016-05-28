@@ -33,7 +33,7 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
-class RefTypeCompiler extends BaseTypeCompiler
+public class RefTypeCompiler extends BaseTypeCompiler
 {
 	/** @see TypeCompiler#getCorrespondingPrimitiveTypeName */
 	public String getCorrespondingPrimitiveTypeName()

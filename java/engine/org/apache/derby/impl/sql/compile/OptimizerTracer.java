@@ -115,11 +115,14 @@ public	class   OptimizerTracer  implements OptionalTool
                 ClassFactoryContext cfc = (ClassFactoryContext) getContext( ClassFactoryContext.CONTEXT_ID );
                 ClassFactory    classFactory = cfc.getClassFactory();
 
-                tracer = (OptTrace) classFactory.loadApplicationClass( customOptTraceName ).newInstance();
+                Class<?> clazz = classFactory.loadApplicationClass( customOptTraceName );
+                tracer = (OptTrace) clazz.getConstructor().newInstance();
             }
             catch (InstantiationException cnfe) { throw cantInstantiate( customOptTraceName ); }
             catch (ClassNotFoundException cnfe) { throw cantInstantiate( customOptTraceName ); }
             catch (IllegalAccessException cnfe) { throw cantInstantiate( customOptTraceName ); }
+            catch (NoSuchMethodException cnfe) { throw cantInstantiate( customOptTraceName ); }
+            catch (java.lang.reflect.InvocationTargetException cnfe) { throw cantInstantiate( customOptTraceName ); }
             catch (Throwable t) { throw wrap( t ); }
         }
         else { throw wrap( MessageService.getTextMessage( SQLState.LANG_BAD_OPTIONAL_TOOL_ARGS ) ); }

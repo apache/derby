@@ -34,5 +34,8 @@ public interface InstanceGetter {
 
 	*/
 	public Object getNewInstance()
-		throws InstantiationException, IllegalAccessException, InvocationTargetException;
+		throws InstantiationException,
+               IllegalAccessException,
+               InvocationTargetException,
+               NoSuchMethodException;
 }

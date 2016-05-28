@@ -115,10 +115,12 @@ public  class   Java5SystemProcedures
             }
 
             try {
-                tool = (OptionalTool) toolClass.newInstance();
+                tool = (OptionalTool) toolClass.getConstructor().newInstance();
             }
             catch (InstantiationException ie) { throw wrap( ie ); }
             catch (IllegalAccessException iae) { throw wrap( iae ); }
+            catch (NoSuchMethodException ie) { throw wrap( ie ); }
+            catch (java.lang.reflect.InvocationTargetException iae) { throw wrap( iae ); }
 
             // Strip the custom tool class name from the optional args as necessary
             if ( CUSTOM_TOOL_CLASS_NAME.equals( toolName ) )

@@ -21,6 +21,7 @@ package org.apache.derbyTesting.system.oe.client;
 
 import java.io.PrintStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -533,7 +534,7 @@ public class Submitter {
         BigDecimal c = BigDecimal.valueOf((long) count * 100L);
         BigDecimal t = BigDecimal.valueOf((long) total);
         
-        BigDecimal p = c.divide(t, 2, BigDecimal.ROUND_DOWN);
+        BigDecimal p = c.divide(t, 2, RoundingMode.DOWN);
         
         return p.toString().concat("%");
     }

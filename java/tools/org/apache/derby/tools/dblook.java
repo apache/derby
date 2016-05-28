@@ -325,7 +325,7 @@ public final class dblook {
 		try {
             Class<?> klass = Class.forName(derbyDriver);
             if (Driver.class.isAssignableFrom(klass)) {
-                klass.newInstance();
+                klass.getConstructor().newInstance();
             } else {
                 Logs.debug(
                         "TL_notInstanceOf",

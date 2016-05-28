@@ -65,11 +65,15 @@ public class ClassInfo implements InstanceGetter {
 
 	*/
 	public Object getNewInstance()
-		throws InstantiationException, IllegalAccessException, InvocationTargetException  {
+		throws InstantiationException,
+               IllegalAccessException,
+               InvocationTargetException,
+               NoSuchMethodException
+  {
 
 		if (!useConstructor) {
 
-			return clazz.newInstance();
+            return clazz.getConstructor().newInstance();
 		}
 
 		if (noArgConstructor == null) {

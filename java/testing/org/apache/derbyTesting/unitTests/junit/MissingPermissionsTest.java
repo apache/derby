@@ -403,7 +403,7 @@ public class MissingPermissionsTest extends BaseJDBCTestCase {
             final int exitCode = spawned.complete(120000L); // 2 minutes
 
             assertTrue(spawned.getFailMessage("subprocess run failed: "),
-                    exitCode == 0);
+                    exitCode == 1);
 
             final String expectedMessageOnConsole =
                     "WARNING: could not do ThreadGroup#setDaemon on Derby " +

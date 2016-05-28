@@ -103,7 +103,10 @@ class DecryptionManager
   {
     try {
       if (java.security.Security.getProvider ("IBMJCE") == null) // IBMJCE is not installed, install it.
-        java.security.Security.addProvider ((java.security.Provider) Class.forName("IBMJCE").newInstance());
+      {
+          Class<?> clazz = Class.forName("IBMJCE");
+          java.security.Security.addProvider ((java.security.Provider) clazz.getConstructor().newInstance());
+      }
       paramSpec_ = new DHParameterSpec (modulus__, base__, exponential_length__);
       keyPairGenerator_ = KeyPairGenerator.getInstance ("DH", "IBMJCE");
       keyPairGenerator_.initialize ((AlgorithmParameterSpec)paramSpec_);
@@ -121,6 +124,14 @@ class DecryptionManager
     }
     catch (java.lang.InstantiationException e) {
       throw new SQLException ("java.lang.InstantiationException is caught" +
+                              " when initializing EncryptionManager '" + e.getMessage() + "'");
+    }
+    catch (java.lang.NoSuchMethodException e) {
+      throw new SQLException ("java.lang.NoSuchMethodException is caught" +
+                              " when initializing EncryptionManager '" + e.getMessage() + "'");
+    }
+    catch (java.lang.reflect.InvocationTargetException e) {
+      throw new SQLException ("java.lang.reflect.InvocationTargetException is caught" +
                               " when initializing EncryptionManager '" + e.getMessage() + "'");
     }
     catch (java.security.NoSuchProviderException e) {

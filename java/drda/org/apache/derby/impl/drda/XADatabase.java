@@ -64,17 +64,14 @@ class XADatabase extends Database {
     synchronized void makeConnection(Properties p) throws SQLException
     {
         if (xaDataSource == null) {
+            Class<?> clazz;
             try {
                 if (JVMInfo.hasJNDI()) {
-                    xaDataSource =
-                        (EmbeddedXADataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.EmbeddedXADataSource").
-                        newInstance();
+                    clazz = Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource");
+                    xaDataSource = (EmbeddedXADataSourceInterface) clazz.getConstructor().newInstance();
                 } else {
-                    xaDataSource =
-                        (EmbeddedXADataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.BasicEmbeddedXADataSource40").
-                        newInstance();
+                    clazz = Class.forName("org.apache.derby.jdbc.BasicEmbeddedXADataSource40");
+                    xaDataSource = (EmbeddedXADataSourceInterface) clazz.getConstructor().newInstance();
                 }
             } catch (Exception e) {
                 SQLException ne = new SQLException(

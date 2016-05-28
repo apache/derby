@@ -26,6 +26,7 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.DataTruncation;
@@ -533,7 +534,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         rs.next();
         // Check that the correct scale was set
         BigDecimal expected
-            = bdFromString.setScale(scale, BigDecimal.ROUND_DOWN);
+            = bdFromString.setScale(scale, RoundingMode.DOWN);
         BigDecimal actual = (BigDecimal)rs.getObject(1);
         assertEquals("Actual value: " + actual
                      + "does not match expected value: " + expected,

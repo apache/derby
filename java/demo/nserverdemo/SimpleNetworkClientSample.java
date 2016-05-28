@@ -162,7 +162,7 @@ public class SimpleNetworkClientSample
 									  password) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
 	{
 		Class<?> nsDataSource = Class.forName(jdbcDataSource);
-		DataSource ds = (DataSource) nsDataSource.newInstance();
+		DataSource ds = (DataSource) nsDataSource.getConstructor().newInstance();
 
 		// can also include Derby URL attributes along with the database name
 		Class[] methodParams = new Class[] {String.class};

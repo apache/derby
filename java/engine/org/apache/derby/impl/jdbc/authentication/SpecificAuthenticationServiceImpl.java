@@ -116,13 +116,13 @@ public class SpecificAuthenticationServiceImpl
 		Throwable t;
 		try {
 
-			Class sasClass = Class.forName(specificAuthenticationScheme);
+			Class<?> sasClass = Class.forName(specificAuthenticationScheme);
 			if (!UserAuthenticator.class.isAssignableFrom(sasClass)) {
 				throw StandardException.newException(SQLState.AUTHENTICATION_NOT_IMPLEMENTED,
 					specificAuthenticationScheme, "org.apache.derby.authentication.UserAuthenticator");
 			}
 
-			UserAuthenticator aScheme = (UserAuthenticator) sasClass.newInstance();
+			UserAuthenticator aScheme = (UserAuthenticator) sasClass.getConstructor().newInstance();
 
 			// Set ourselves as being ready and loading the proper
 			// authentication scheme for this service
@@ -137,6 +137,10 @@ public class SpecificAuthenticationServiceImpl
 			t = ie;
 		} catch (IllegalAccessException iae) {
 			t = iae;
+		} catch (NoSuchMethodException nsme) {
+			t = nsme;
+		} catch (java.lang.reflect.InvocationTargetException ite) {
+			t = ite;
 		}
         
         String  detail = t.getClass().getName() + ": " + t.getMessage();

@@ -41,7 +41,7 @@ class MaxMinAggregateDefinition
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-    MaxMinAggregateDefinition() { super(); }
+    public MaxMinAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype.  Accept NumberDataValues

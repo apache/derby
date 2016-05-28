@@ -225,12 +225,13 @@ public class ReplicationRun_Local_Encrypted_1 extends ReplicationRun
         util.DEBUG("_connectToSlave");
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);

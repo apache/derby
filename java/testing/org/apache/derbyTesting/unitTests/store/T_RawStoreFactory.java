@@ -208,14 +208,22 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 	protected T_MultiThreadedIterations newTestObject() {
 		try
 		{
-			Class thisClass = this.getClass();
-			return (T_MultiThreadedIterations)(thisClass.newInstance());
+			Class<?> thisClass = this.getClass();
+			return (T_MultiThreadedIterations)(thisClass.getConstructor().newInstance());
 		}
 		catch (InstantiationException ie)
 		{
 			return new T_RawStoreFactory();
 		}	
 		catch (IllegalAccessException iae)
+		{
+			return new T_RawStoreFactory();
+		}
+		catch (NoSuchMethodException iae)
+		{
+			return new T_RawStoreFactory();
+		}
+		catch (java.lang.reflect.InvocationTargetException iae)
 		{
 			return new T_RawStoreFactory();
 		}

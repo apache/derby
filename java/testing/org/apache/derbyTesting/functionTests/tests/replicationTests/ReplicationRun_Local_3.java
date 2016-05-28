@@ -63,12 +63,13 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         util.DEBUG("BEGIN _failOver"); 
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds =  (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds =  (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);
@@ -96,12 +97,13 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         util.DEBUG("_startSlaveTrueAndCreateTrue");
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);
@@ -124,12 +126,13 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         util.DEBUG("_stopMaster");
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);

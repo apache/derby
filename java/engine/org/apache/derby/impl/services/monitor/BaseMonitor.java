@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -618,11 +619,12 @@ abstract class BaseMonitor
 
 			Throwable t;
 			try {
-				Class clazz = Class.forName(className);
+				Class<?> clazz = Class.forName(className);
+                final Constructor<?> constructor = clazz.getDeclaredConstructor();
 
 				// See if it is a FormatableInstanceGetter
 				if (FormatableInstanceGetter.class.isAssignableFrom(clazz)) {
-					FormatableInstanceGetter tfig = (FormatableInstanceGetter) clazz.newInstance();
+                    FormatableInstanceGetter tfig = (FormatableInstanceGetter) constructor.newInstance();
 					tfig.setFormatId(fmtId);
 					return iga[off] = tfig;
 				}
@@ -635,6 +637,10 @@ abstract class BaseMonitor
 				t = iae;
 			} catch (InstantiationException ie) {
 				t = ie;
+			} catch (NoSuchMethodException nsme) {
+				t = nsme;
+			} catch (InvocationTargetException ite) {
+				t = ite;
 			} catch (LinkageError le) {
 				t = le;
 			}
@@ -685,9 +691,12 @@ abstract class BaseMonitor
  		catch (IllegalAccessException iae) {
 			t = iae;
 		}
+ 		catch (NoSuchMethodException iae) {
+			t = iae;
+		}
 		catch (InvocationTargetException ite) {
 			t = ite;
-		}
+        }
 		catch (LinkageError le) {
 			t = le;
 		}
@@ -777,7 +786,8 @@ abstract class BaseMonitor
     private Object newInstance(Class<?> classObject) {
 
 		try {
-            final Object module = classObject.newInstance();
+            final Constructor<?> constructor = classObject.getDeclaredConstructor();
+            final Object module = constructor.newInstance();
 
             // Get and report any warnings generated during initialization
             try {
@@ -804,6 +814,12 @@ abstract class BaseMonitor
 		}
  		catch (IllegalAccessException e) {
 			report(classObject.getName() + " " + e.toString());
+		}
+ 		catch (NoSuchMethodException e) {
+			report(classObject.getName() + " " + e.toString());
+		}
+ 		catch (InvocationTargetException e) {
+            report(classObject.getName() + " " + e.getCause().toString());
 		}
 		catch (LinkageError le) {
 			report(classObject.getName() + " " + le.toString());

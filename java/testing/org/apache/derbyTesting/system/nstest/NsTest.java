@@ -416,18 +416,21 @@ public class NsTest extends Thread
 
 		// Load the driver and get a connection to the database
 		String jdbcUrl = "";
+        Class<?> clazz;
 		try {
 			if (driver_type.equalsIgnoreCase("Embedded")) {
 				// logger.println("Driver embedd : " + driver_type);
 				logger.println("Loading the embedded driver...");
-				Class.forName(embedDriver).newInstance();
+				clazz = Class.forName(embedDriver);
+                clazz.getConstructor().newInstance();
 				jdbcUrl = embedDbURL + ";" + dataEncypt + ";" + bootPwd;
 				embeddedMode = true;
 			} else {
 				logger.println("Driver type : " + driver_type);
 				logger.println("Loading the Derby Client driver..."
 						+ driver);
-				Class.forName(driver).newInstance();
+				clazz = Class.forName(driver);
+                clazz.getConstructor().newInstance();
 				logger.println("Client Driver loaded");
 				jdbcUrl = clientDbURL + ";" + dataEncypt + ";" + bootPwd;
 			}

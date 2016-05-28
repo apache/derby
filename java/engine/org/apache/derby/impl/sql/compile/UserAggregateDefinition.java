@@ -71,7 +71,7 @@ class UserAggregateDefinition implements AggregateDefinition
 	/**
 	 * Conjure out of thin air.
 	 */
-    UserAggregateDefinition( AliasDescriptor alias )
+    public UserAggregateDefinition( AliasDescriptor alias )
     {
         _alias = alias;
     }

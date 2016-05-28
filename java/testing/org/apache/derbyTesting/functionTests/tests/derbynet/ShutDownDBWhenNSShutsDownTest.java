@@ -126,9 +126,13 @@ public class ShutDownDBWhenNSShutsDownTest extends BaseJDBCTestCase {
 
         // shut down the engine
         TestConfiguration.getCurrent().shutdownEngine();
-        
+
+        Class<?> clazz;
         if (loadEmbeddedDriver)
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+        {
+            clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            clazz.getConstructor().newInstance();
+        }
 
         // see if it is still possible to connect to the server (before
         // DERBY-1326, this would hang)

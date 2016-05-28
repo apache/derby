@@ -293,7 +293,8 @@ public class TestUtil {
                   AccessController.doPrivileged
                       (new PrivilegedExceptionAction<Void>() {
                               public Void run() throws Exception {
-                                  Class.forName(driverName).newInstance();
+                                  Class<?> clazz = Class.forName(driverName);
+                                  clazz.getConstructor().newInstance();
                                   return null;
                               }
                           }
@@ -400,7 +401,8 @@ public class TestUtil {
 		}
 		
 		try {
-		ds  = Class.forName(classname).newInstance();
+            Class<?> clazz = Class.forName(classname);
+            ds = clazz.getConstructor().newInstance();
 
 		// for remote server testing, check whether the hostName is set for the test
 		// if so, and serverName is not yet set explicitly for the datasource, set it now
@@ -790,7 +792,8 @@ public class TestUtil {
                         break;
                 } 
                 // q: do we need a privileged action here, like in loadDriver?
-                Class.forName(driverName).newInstance();
+                Class<?> clazz = Class.forName(driverName);
+                clazz.getConstructor().newInstance();
 				
                 String url = getJdbcUrlPrefix() + databaseName;
                 if (connAttrs != null) url += ";" + connAttrs;
@@ -820,6 +823,14 @@ public class TestUtil {
     		return null;
     	} catch (IllegalAccessException ille) {
     		System.out.println("FAILure: Not allowed to use class");
+    		ille.printStackTrace();
+    		return null;
+    	} catch (NoSuchMethodException ille) {
+    		System.out.println("FAILure: No such constructor");
+    		ille.printStackTrace();
+    		return null;
+    	} catch (java.lang.reflect.InvocationTargetException ille) {
+    		System.out.println("FAILure: Cannot execute constructor");
     		ille.printStackTrace();
     		return null;
     	}

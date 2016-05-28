@@ -30,7 +30,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
-class UserDefinedTypeCompiler extends BaseTypeCompiler
+public class UserDefinedTypeCompiler extends BaseTypeCompiler
 {
 	/* TypeCompiler methods */
 

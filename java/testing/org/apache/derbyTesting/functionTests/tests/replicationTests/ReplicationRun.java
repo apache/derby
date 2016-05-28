@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derby.drda.NetworkServerControl;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2778,7 +2779,7 @@ test.postStoppedSlaveServer.return=true
             String dbPath,
             int _noTuplesToInsert)
         throws SQLException, ClassNotFoundException, IllegalAccessException,
-            InstantiationException
+               InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         util.DEBUG("_testInsertUpdateDeleteOnMaster: " + serverHost + ":" +
                    serverPort + "/" + dbPath + " " + _noTuplesToInsert);
@@ -2808,7 +2809,7 @@ test.postStoppedSlaveServer.return=true
             String dbPath,
             int _noTuplesInserted)
         throws SQLException, ClassNotFoundException, IllegalAccessException,
-               InstantiationException
+               InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         util.DEBUG("_verifyDatabase: "+serverHost+":"+serverPort+"/"+dbPath);
         ClientDataSourceInterface ds = configureDataSource(
@@ -3037,18 +3038,17 @@ test.postStoppedSlaveServer.return=true
          int        serverPort,
          String     connectionAttributes
          ) throws ClassNotFoundException, IllegalAccessException,
-             InstantiationException
+                  InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.ClientDataSource").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.BasicClientDataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName( dbName );

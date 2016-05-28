@@ -73,9 +73,9 @@ public class CorruptDiskStorageFactory extends CorruptBaseStorageFactory
 		
 		WritableStorageFactory storageFactory = null;
 		try{
-			Class storageFactoryClass = Class.forName(dirStorageFactoryClass);
+			Class<?> storageFactoryClass = Class.forName(dirStorageFactoryClass);
 			storageFactory = 
-                (WritableStorageFactory) storageFactoryClass.newInstance();
+                (WritableStorageFactory) storageFactoryClass.getConstructor().newInstance();
 		}catch(Exception e)
 		{
 			System.out.println(

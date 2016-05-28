@@ -195,7 +195,7 @@ public class ClassSizeCrawler
             out.print( "package org.apache.derby.iapi.services.cache;\n" +
                        "class ClassSizeCatalogImpl extends ClassSizeCatalog\n" +
                        "{\n" +
-                       "    ClassSizeCatalogImpl()\n" +
+                       "    public ClassSizeCatalogImpl()\n" +
                        "    {\n");
             for( Enumeration e = classSizes.keys();
                  e.hasMoreElements();)

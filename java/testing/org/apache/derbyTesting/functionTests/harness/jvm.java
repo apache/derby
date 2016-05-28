@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.harness;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -209,12 +210,17 @@ public abstract class jvm {
         pass in class name for JVM.  If we can't find it, try
 	also org.apache.derbyTesting.functionTests.harness.<jvmName>
      */
-    public static jvm getJvm(String jvmName) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-	jvm result = null;
+    public static jvm getJvm(String jvmName) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException
+    {
+	    jvm result = null;
+        Class<?> clazz;
         try {
-		result = (jvm)Class.forName(jvmName).newInstance();
-        } catch (ClassNotFoundException e) {
-		result = (jvm)Class.forName("org.apache.derbyTesting.functionTests.harness."+jvmName).newInstance();
+            clazz = Class.forName(jvmName);
+            result = (jvm) clazz.getConstructor().newInstance();
+        } catch (ClassNotFoundException e)
+        {
+            clazz = Class.forName("org.apache.derbyTesting.functionTests.harness."+jvmName);
+            result = (jvm) clazz.getConstructor().newInstance();
         }
         return result;
     }

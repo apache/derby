@@ -156,7 +156,8 @@ public class JDBCDataSource {
             if (contextLoader != null)
             {
                 try {
-                    ds = (javax.sql.DataSource) Class.forName(classname, true, contextLoader).newInstance();
+                    Class<?> clazz = Class.forName(classname, true, contextLoader);
+                    ds = (javax.sql.DataSource) clazz.getConstructor().newInstance();
                 } catch (Exception e) {
                     // context loader may not be correctly hooked up
                     // with parent, try without it.
@@ -165,7 +166,8 @@ public class JDBCDataSource {
             
             if (ds == null)
             {
-                ds = (javax.sql.DataSource) Class.forName(classname).newInstance();
+                Class<?> clazz = Class.forName(classname);
+                ds = (javax.sql.DataSource) clazz.getConstructor().newInstance();
             }
             
             for (Iterator i = beanProperties.keySet().iterator();

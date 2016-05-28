@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
@@ -78,7 +79,7 @@ final class StorageFactoryService implements PersistentService
     private String home; // the path of the database home directory. Can be null
     private String canonicalHome; // will be null if home is null
     private final String subSubProtocol;
-    private final Class storageFactoryClass;
+    private final Class<?> storageFactoryClass;
     private StorageFactory rootStorageFactory;
     private char separatorChar;
 
@@ -185,7 +186,8 @@ final class StorageFactoryService implements PersistentService
             return AccessController.doPrivileged(
                 new PrivilegedExceptionAction<StorageFactory>()
                 {
-                    public StorageFactory run() throws InstantiationException, IllegalAccessException, IOException
+                  public StorageFactory run() throws InstantiationException,
+                      IllegalAccessException, IOException, NoSuchMethodException, InvocationTargetException
                     {
                         return privGetStorageFactoryInstance( useHome, databaseName, tempDirName, uniqueName);
                     }
@@ -203,9 +205,13 @@ final class StorageFactoryService implements PersistentService
                                                           String databaseName,
                                                           String tempDirName,
                                                           String uniqueName)
-         throws InstantiationException, IllegalAccessException, IOException
+      throws InstantiationException,
+             IllegalAccessException,
+             IOException,
+             NoSuchMethodException,
+             InvocationTargetException
     {
-        StorageFactory storageFactory = (StorageFactory) storageFactoryClass.newInstance();
+        StorageFactory storageFactory = (StorageFactory) storageFactoryClass.getConstructor().newInstance();
         String dbn;
         if( databaseName != null
             && subSubProtocol != null
@@ -270,7 +276,8 @@ final class StorageFactoryService implements PersistentService
                 {
                     public Object run()
                         throws IOException, StandardException,
-                        InstantiationException, IllegalAccessException
+                        InstantiationException, IllegalAccessException,
+                        NoSuchMethodException, InvocationTargetException
                     {
                         if( recreateFrom != null) // restore from a file
                         {
@@ -683,7 +690,10 @@ final class StorageFactoryService implements PersistentService
                                 new PrivilegedExceptionAction<Object>()
                                 {
                                     public Object run()
-                                        throws IOException, StandardException, InstantiationException, IllegalAccessException
+                                        throws IOException, StandardException,
+                                      InstantiationException, IllegalAccessException,
+                                      NoSuchMethodException, InvocationTargetException
+                                      
                                     {
                                         StorageFactory storageFactory
                                           = privGetStorageFactoryInstance( true, serviceName, null, null);
@@ -730,7 +740,9 @@ final class StorageFactoryService implements PersistentService
                             new PrivilegedExceptionAction<Object>()
                             {
                                 public Object run()
-                                    throws IOException, StandardException, InstantiationException, IllegalAccessException
+                                    throws IOException, StandardException,
+                                    InstantiationException, IllegalAccessException,
+                                    NoSuchMethodException, InvocationTargetException
                                 {
                                     WritableStorageFactory storageFactory =
                                       (WritableStorageFactory) privGetStorageFactoryInstance( true,
@@ -787,7 +799,9 @@ final class StorageFactoryService implements PersistentService
                 new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
-                        throws StandardException, IOException, InstantiationException, IllegalAccessException
+                        throws StandardException, IOException,
+                        InstantiationException, IllegalAccessException,
+                        NoSuchMethodException, InvocationTargetException
                     {
                         StorageFactory storageFactory = privGetStorageFactoryInstance( true, name, null, null);
                         try
@@ -892,7 +906,9 @@ final class StorageFactoryService implements PersistentService
                 new PrivilegedExceptionAction<Object>()
                 {
                     public Object run()
-                        throws StandardException, IOException, InstantiationException, IllegalAccessException
+                        throws StandardException, IOException,
+                        InstantiationException, IllegalAccessException,
+                        NoSuchMethodException, InvocationTargetException
                     {
                         StorageFactory storageFactory = privGetStorageFactoryInstance( true, serviceName, null, null);
                         try
@@ -954,7 +970,9 @@ final class StorageFactoryService implements PersistentService
                 new PrivilegedExceptionAction<String>()
                 {
                     public String run()
-                        throws StandardException, IOException, InstantiationException, IllegalAccessException
+                        throws StandardException, IOException,
+                        InstantiationException, IllegalAccessException,
+                        NoSuchMethodException, InvocationTargetException
                     {
                         StorageFactory storageFactory = privGetStorageFactoryInstance( true, nm, null, null);
                         try

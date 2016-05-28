@@ -88,7 +88,8 @@ public class Runner {
             System.exit(1);
         }
 
-        Class.forName(driver).newInstance();
+        Class<?> clazz = Class.forName(driver);
+        clazz.getConstructor().newInstance();
 
         if (init) {
             DBFiller filler = getDBFiller();

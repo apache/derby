@@ -28,7 +28,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 
-class TimestampTypeCompiler extends BaseTypeCompiler
+public class TimestampTypeCompiler extends BaseTypeCompiler
 {
 	/* TypeCompiler methods */	
 	/**

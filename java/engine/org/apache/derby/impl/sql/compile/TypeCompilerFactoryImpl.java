@@ -247,7 +247,8 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                         try
                         {
                                 typeCompilerClass = Class.forName(className);
-                                anInstance  = (TypeCompiler) typeCompilerClass.newInstance();
+                                anInstance  = (TypeCompiler)
+                                    typeCompilerClass.getConstructor().newInstance();
                                 ((BaseTypeCompiler) anInstance).setTypeId(typeId);
                         }
                         catch (ClassNotFoundException cnfe)
@@ -261,6 +262,14 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                         catch (InstantiationException ie)
                         {
                                 exc = ie;
+                        }
+                        catch (NoSuchMethodException nsme)
+                        {
+                                exc = nsme;
+                        }
+                        catch (java.lang.reflect.InvocationTargetException ite)
+                        {
+                                exc = ite;
                         }
 
                         if (SanityManager.DEBUG)

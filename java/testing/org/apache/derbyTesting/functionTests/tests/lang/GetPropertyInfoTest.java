@@ -51,7 +51,8 @@ public class GetPropertyInfoTest
 		try
 		{
 			Properties info = new Properties();
-			Class.forName(driver).newInstance();
+            Class<?> clazz = Class.forName(driver);
+			clazz.getConstructor().newInstance();
 			Driver cDriver = DriverManager.getDriver(protocol);
 			boolean canConnect = false;
 

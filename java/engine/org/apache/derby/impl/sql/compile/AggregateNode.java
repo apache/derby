@@ -638,7 +638,7 @@ class AggregateNode extends UnaryOperatorNode
             Object instance = null;
             try
             {
-                instance = theClass.newInstance();
+                instance = theClass.getConstructor().newInstance();
             }
             catch (Throwable t)
             {

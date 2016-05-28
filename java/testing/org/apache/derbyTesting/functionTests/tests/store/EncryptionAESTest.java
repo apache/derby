@@ -429,13 +429,18 @@ extends BaseJDBCTestCase {
         String driver =
             getTestConfiguration().getJDBCClient().getJDBCDriverName();
         try {
-            Class.forName(driver).newInstance();
+            Class<?> clazz = Class.forName(driver);
+            clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {
             fail("\nUnable to load the JDBC driver " + driver);
         } catch (InstantiationException ie) {
             fail("\nUnable to instantiate the JDBC driver " + driver);
         } catch (IllegalAccessException iae) {
             fail("\nNot allowed to access the JDBC driver " + driver);
+        } catch (NoSuchMethodException iae) {
+            fail("\nNo such constructor for the JDBC driver " + driver);
+        } catch (java.lang.reflect.InvocationTargetException iae) {
+            fail("\nCannot invoke the constructor for the the JDBC driver " + driver);
         }
         Connection conn = DriverManager.getConnection(url);
         return conn;

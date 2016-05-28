@@ -544,7 +544,8 @@ public  class   DataFileVTI extends VTITemplate
          )
         throws Exception
     {
-        UserAuthenticator   authenticator = (UserAuthenticator) Class.forName( customProvider ).newInstance();
+        Class<?> clazz = Class.forName( customProvider );
+        UserAuthenticator   authenticator = (UserAuthenticator) clazz.getConstructor().newInstance();
 
         return authenticator.authenticateUser( user, password, databaseDirectoryName, new Properties() );
     }

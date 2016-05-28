@@ -53,14 +53,13 @@ public class ClientConnectionPoolDataSourceTest
     public void testMaxStatementsProperty() throws Exception {
         ClientConnectionPoolDataSourceInterface cDs;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            cDs = (ClientConnectionPoolDataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.ClientConnectionPoolDataSource")
-                    .newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientConnectionPoolDataSource");
+            cDs = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            cDs = (ClientConnectionPoolDataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40")
-                    .newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40");
+            cDs = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         }
         // Check the default value.
         assertEquals("Unexpected default value", 0, cDs.getMaxStatements());

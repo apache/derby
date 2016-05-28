@@ -540,7 +540,8 @@ public class DriverTest extends BaseJDBCTestCase {
         String driverClass =
             TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
         try {
-            Class.forName(driverClass).newInstance();
+            Class<?> clazz = Class.forName(driverClass);
+            clazz.getConstructor().newInstance();
         } catch (Exception e) {
             fail ("could not instantiate driver");
         }

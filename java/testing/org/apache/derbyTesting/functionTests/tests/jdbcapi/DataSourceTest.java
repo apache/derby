@@ -251,14 +251,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
         
         ClientDataSourceInterface ds = null;
 
+        Class<?> clazz;
+
         if (JDBC.vmSupportsJNDI()) {
             // Use reflection to avoid class not found in non-JNDI context
-            ds = (ClientDataSourceInterface)Class.forName(
-                    "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface)clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-                    "org.apache.derby.jdbc.BasicClientDataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setPortNumber(TestConfiguration.getCurrent().getPort());
@@ -303,8 +304,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
         JDBCClient dsclient = getTestConfiguration().getJDBCClient();
         String dsName = dsclient.getDataSourceClassName();
         DataSource ds = null;
+        Class<?> clazz;
         try {
-            ds = (javax.sql.DataSource) Class.forName(dsName).newInstance();
+            clazz = Class.forName(dsName);
+            ds = (javax.sql.DataSource) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             fail("unable to complete test because unable to create new instance of datasource");
         }
@@ -423,13 +426,14 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // DataSource - retrieveMessageTextProperty
         ClientDataSourceInterface ds = null;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
             // Use reflection to avoid class not found in non-JNDI context
-            ds = (ClientDataSourceInterface)Class.forName(
-              "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-              "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface)clazz.getConstructor().newInstance();
         }
 
         ds.setPortNumber(TestConfiguration.getCurrent().getPort());

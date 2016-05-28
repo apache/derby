@@ -32,7 +32,7 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
-class BooleanTypeCompiler extends BaseTypeCompiler
+public class BooleanTypeCompiler extends BaseTypeCompiler
 {
 	/**
 	 * Tell whether this type (boolean) can be converted to the given type.

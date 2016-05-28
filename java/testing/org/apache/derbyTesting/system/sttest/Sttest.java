@@ -128,7 +128,8 @@ public class Sttest extends Thread {
 		// get any properties user may have set in Sttest.properties file
 		// these will override any of those set above
 		userProperties();
-		Class.forName(driver).newInstance();
+		Class<?> clazz = Class.forName(driver);
+        clazz.getConstructor().newInstance();
 		if (Setup.doit(dbURL) == false)
 			System.exit(1);
 		status = new StStatus();

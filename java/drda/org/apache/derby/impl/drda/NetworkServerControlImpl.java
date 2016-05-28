@@ -1091,7 +1091,8 @@ public final class NetworkServerControlImpl {
                     }
 
                     // start the server.
-                    cloudscapeDriver = (Driver) Class.forName(CLOUDSCAPE_DRIVER).newInstance();
+                    Class<?> clazz = Class.forName(CLOUDSCAPE_DRIVER);
+                    cloudscapeDriver = (Driver) clazz.getConstructor().newInstance();
 
                 }
                 catch (Exception e) {

@@ -142,7 +142,8 @@ public class BootAllTest  extends BaseJDBCTestCase {
         } catch (SQLException e) {
        }
 
-        Class.forName(driverName).newInstance();
+        Class<?> clazz = Class.forName(driverName);
+        clazz.getConstructor().newInstance();
 
         Driver driver = DriverManager.getDriver(url);
 

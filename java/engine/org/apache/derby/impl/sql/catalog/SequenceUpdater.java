@@ -568,13 +568,15 @@ public abstract class SequenceUpdater implements Cacheable
                     SQLState.LANG_NOT_A_SEQUENCE_PREALLOCATOR, propertyName);
             }
 
-            return (SequencePreallocator) klass.newInstance();
+            return (SequencePreallocator) klass.getConstructor().newInstance();
         }
         catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
         catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }
         catch (InstantiationException e) { throw missingAllocator( propertyName, className, e ); }
         catch (IllegalAccessException e) { throw missingAllocator( propertyName, className, e ); }
         catch (NumberFormatException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (NoSuchMethodException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (java.lang.reflect.InvocationTargetException e) { throw missingAllocator( propertyName, className, e ); }
     }
     private StandardException   missingAllocator( String propertyName, String className, Exception e )
     {

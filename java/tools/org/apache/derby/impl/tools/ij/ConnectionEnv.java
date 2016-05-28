@@ -23,6 +23,7 @@ package org.apache.derby.impl.tools.ij;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -59,7 +60,7 @@ class ConnectionEnv {
 		separate from the constructor so that connection
 		failure does not prevent object creation.
 	 */
-	void init(LocalizedOutput out) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    void init(LocalizedOutput out) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		Connection c = util.startJBMS(null,null);
 

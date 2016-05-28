@@ -81,7 +81,8 @@ public class dbcleanup {
     		PrintStream stdout = System.out;
     		PrintStream stderr = System.err;
 
-		Class.forName(driver).newInstance();
+            Class<?> clazz = Class.forName(driver);
+            clazz.getConstructor().newInstance();
 
 		if (dbIsNew) {
 		try {

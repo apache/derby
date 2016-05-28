@@ -56,7 +56,8 @@ public class ConcurrentImplicitCreateSchema
         CreateTable(int id, int schemaId, 
                     ConcurrentImplicitCreateSchema test) 
             throws SQLException, IllegalAccessException, 
-                   ClassNotFoundException, InstantiationException
+                   ClassNotFoundException, InstantiationException, NoSuchMethodException,
+                   java.lang.reflect.InvocationTargetException
         {
             this.myId = id;
             this.schemaId = schemaId;

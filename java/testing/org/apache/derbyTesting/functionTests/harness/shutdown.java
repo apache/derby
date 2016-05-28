@@ -83,7 +83,8 @@ public class shutdown
         PrintStream stdout = System.out;
     	PrintStream stderr = System.err;
 
-		Class.forName(driver).newInstance();
+        Class<?> clazz = Class.forName(driver);
+		clazz.getConstructor().newInstance();
 
 		try 
 		{

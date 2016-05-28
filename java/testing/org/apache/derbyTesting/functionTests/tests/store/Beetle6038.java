@@ -37,7 +37,8 @@ public class Beetle6038  {
 		throws Exception
 	{
 		String driver = "org.apache.derby.jdbc.EmbeddedDriver";
-		Class.forName(driver).newInstance();
+        Class<?> clazz = Class.forName(driver);
+        clazz.getConstructor().newInstance();
 		String dburl = "jdbc:derby:Beetle6038Db;create=true;dataEncryption=true;bootPassword=Thursday;encryptionAlgorithm=DES/CBC/NoPadding";
 
 		Connection conn = DriverManager.getConnection(dburl);

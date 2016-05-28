@@ -196,13 +196,13 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                     slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb;
                 ClientDataSourceInterface ds;
 
+                Class<?> clazz;
                 if (JDBC.vmSupportsJNDI()) {
-                    ds = (ClientDataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.ClientDataSource").newInstance();
+                    clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+                    ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
                 } else {
-                    ds = (ClientDataSourceInterface)Class.forName(
-                        "org.apache.derby.jdbc.BasicClientDataSource40").
-                            newInstance();
+                    clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+                    ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
                 }
 
                 ds.setDatabaseName(connectionURL);

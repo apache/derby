@@ -41,8 +41,8 @@ final class ConnectorSetup extends ChangeConfigurationSetup {
             new TestConfiguration(old);
         
         try {
-            newConfig.connector = (Connector)
-             Class.forName(connectorClass).newInstance();
+            Class<?> clazz = Class.forName(connectorClass);
+            newConfig.connector = (Connector) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }

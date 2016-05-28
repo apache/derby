@@ -77,6 +77,8 @@ public abstract class LoadedGeneratedClass
 			t = iae;
 		} catch (java.lang.reflect.InvocationTargetException ite) {
 			t = ite;
+		} catch (NoSuchMethodException le) {
+			t = le;
 		} catch (LinkageError le) {
 			t = le;
 		}

@@ -90,16 +90,18 @@ public final class UserDefinedAggregator  implements ExecAggregator
         catch (ClassNotFoundException cnfe) { logAggregatorInstantiationError( aggregateName, cnfe ); }
 	}
     /** Initialization logic shared by setup() and newAggregator() */
-    private void    setup( Class udaClass, DataTypeDescriptor resultType )
+    private void    setup( Class<?> udaClass, DataTypeDescriptor resultType )
     {
         String  aggregateName = udaClass.getName();
         
         try {
-            _aggregator = (Aggregator) udaClass.newInstance();
+            _aggregator = (Aggregator) udaClass.getConstructor().newInstance();
             _aggregator.init();
         }
         catch (InstantiationException ie) { logAggregatorInstantiationError( aggregateName, ie ); }
         catch (IllegalAccessException iae) { logAggregatorInstantiationError( aggregateName, iae ); }
+        catch (NoSuchMethodException nsme) { logAggregatorInstantiationError( aggregateName, nsme ); }
+        catch (java.lang.reflect.InvocationTargetException ite) { logAggregatorInstantiationError( aggregateName, ite ); }
 
         _resultType = resultType;
     }

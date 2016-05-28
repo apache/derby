@@ -1398,8 +1398,8 @@ public final class TestConfiguration {
             // configuration we are copying from.
             
             try {
-                connector = (Connector) Class.forName(
-                  oldConnector.getClass().getName()).newInstance();
+                Class<?> clazz = Class.forName(oldConnector.getClass().getName());
+                connector = (Connector) clazz.getConstructor().newInstance();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
             }            
@@ -1407,8 +1407,8 @@ public final class TestConfiguration {
         else if (JDBC.vmSupportsJDBC3())
         {
             try {
-                connector = (Connector) Class.forName(
-                  "org.apache.derbyTesting.junit.DriverManagerConnector").newInstance();
+                Class<?> clazz = Class.forName("org.apache.derbyTesting.junit.DriverManagerConnector");
+                connector = (Connector) clazz.getConstructor().newInstance();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
             }

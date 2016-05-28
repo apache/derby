@@ -35,7 +35,7 @@ class CountAggregateDefinition
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-    CountAggregateDefinition() { super(); }
+    public CountAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype. We can run

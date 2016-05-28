@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.tools.planexporter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -79,7 +80,7 @@ public class AccessDatabase {
      */
     public AccessDatabase(String dburl, String aSchema, String aQuery)
             throws InstantiationException, IllegalAccessException,
-            ClassNotFoundException, SQLException
+                   ClassNotFoundException, SQLException, NoSuchMethodException, InvocationTargetException
     {
         this(createConnection(dburl), aSchema, aQuery);
     }
@@ -114,14 +115,15 @@ public class AccessDatabase {
      */
     private static Connection createConnection(String dbURL)
             throws InstantiationException, IllegalAccessException,
-            ClassNotFoundException, SQLException
+                   ClassNotFoundException, SQLException, NoSuchMethodException,
+                   InvocationTargetException
     {
 
-        if(dbURL.indexOf("://") != -1)
-            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
-
-        else
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+        Class<?> clazz = (dbURL.indexOf("://") != -1) ?
+          Class.forName("org.apache.derby.jdbc.ClientDriver")
+          :
+          Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        clazz.getConstructor().newInstance();
 
         //Get a connection
         return DriverManager.getConnection(dbURL);

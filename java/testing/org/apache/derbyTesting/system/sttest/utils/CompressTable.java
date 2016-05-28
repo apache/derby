@@ -46,8 +46,9 @@ public class CompressTable {
 	InterruptedException, Exception, Throwable {
 		Connection conn = null;
 		Date d = null;
-		
-		Class.forName(driver).newInstance();
+
+        Class<?> clazz = Class.forName(driver);
+        clazz.getConstructor().newInstance();
 		
 		try {
 			conn = mystartJBMS();

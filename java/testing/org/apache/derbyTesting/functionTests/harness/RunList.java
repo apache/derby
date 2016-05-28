@@ -1221,7 +1221,7 @@ public class RunList
 	    try	
 	    {
 		c = Class.forName("com.ibm.db2.jcc.DB2Driver");
-		o = c.newInstance();
+		o = c.getConstructor().newInstance();
 		m = c.getMethod("getMajorVersion", null);
 		i = (Integer)m.invoke(o, null);
 		jccMajor = i.intValue();

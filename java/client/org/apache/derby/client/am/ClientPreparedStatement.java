@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.sql.Array;
 import java.sql.BatchUpdateException;
@@ -1558,7 +1559,7 @@ public class ClientPreparedStatement extends ClientStatement
         try {
             if (targetJdbcType == Types.DECIMAL ||
                 targetJdbcType == Types.NUMERIC) {
-                x = ((BigDecimal) x).setScale(scale, BigDecimal.ROUND_DOWN);
+                x = ((BigDecimal) x).setScale(scale, RoundingMode.DOWN);
             }
         } catch (ArithmeticException ae) {
             // Any problems with scale should have already been caught by

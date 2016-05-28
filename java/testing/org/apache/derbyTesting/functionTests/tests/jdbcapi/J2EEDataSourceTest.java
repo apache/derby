@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -655,7 +656,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         if (usingEmbedded())
         {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+            Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            clazz.getConstructor().newInstance();
         }else
         {
         	getTestConfiguration().startNetworkServer();
@@ -2710,21 +2712,22 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     public void testClientDSConnectionAttributes()
             throws SQLException, ClassNotFoundException,
-            IllegalAccessException, InstantiationException {
+                   IllegalAccessException, InstantiationException,
+                   NoSuchMethodException, InvocationTargetException
+    {
         if (usingEmbedded())
             return;
 
         // now with ConnectionPoolDataSource
         ClientConnectionPoolDataSourceInterface cpds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientConnectionPoolDataSource").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientConnectionPoolDataSource");
+            cpds = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40");
+            cpds = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
@@ -2760,13 +2763,11 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         ClientXADataSourceInterface xads;
         
         if (JDBC.vmSupportsJNDI()) {
-            xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.ClientXADataSource").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
+            xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.BasicClientXADataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientXADataSource40");
+            xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         xads.setPortNumber(TestConfiguration.getCurrent().getPort());
@@ -2812,7 +2813,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         
         JDBCClient dsclient = getTestConfiguration().getJDBCClient();
         String dsName = dsclient.getDataSourceClassName();
-        DataSource ds = (DataSource) Class.forName(dsName).newInstance();
+        Class<?> clazz = Class.forName(dsName);
+        DataSource ds = (DataSource) clazz.getConstructor().newInstance();
 
         // DataSource - attributesAsPassword=true");
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
@@ -2875,8 +2877,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // now with ConnectionPoolDataSource
         String cpdsName = dsclient.getConnectionPoolDataSourceClassName();
-        ConnectionPoolDataSource cpds =
-              (ConnectionPoolDataSource) Class.forName(cpdsName).newInstance();
+        clazz = Class.forName(cpdsName);
+        ConnectionPoolDataSource cpds =(ConnectionPoolDataSource) clazz.getConstructor().newInstance();
 
         // ConnectionPoolDataSource - EMPTY
         dsCPConnectionRequests(new String[] {
@@ -2920,8 +2922,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
 //        EmbeddedXADataSource xads = new EmbeddedXADataSource();
         String xadsName = dsclient.getXADataSourceClassName();
+        clazz = Class.forName(xadsName);
         XADataSource xads =
-                (XADataSource) Class.forName(xadsName).newInstance();
+            (XADataSource) clazz.getConstructor().newInstance();
 
         // XADataSource - EMPTY
         dsXAConnectionRequests(new String[] {
@@ -3045,21 +3048,20 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      */
     public void testClientMessageTextConnectionAttribute()
             throws SQLException, ClassNotFoundException, IllegalAccessException,
-            InstantiationException
+                   InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         String retrieveMessageTextProperty = "retrieveMessageText";
         // with ConnectionPoolDataSource
         // ConnectionPoolDataSource - retrieveMessageTextProperty
         ClientConnectionPoolDataSourceInterface cpds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientConnectionPoolDataSource").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientConnectionPoolDataSource");
+            cpds = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            cpds = (ClientConnectionPoolDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientConnectionPoolDataSource40");
+            cpds = (ClientConnectionPoolDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
@@ -3080,13 +3082,11 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
         ClientXADataSourceInterface xads;
         if (JDBC.vmSupportsJNDI()) {
-            xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.ClientXADataSource").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
+            xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            xads = (ClientXADataSourceInterface)Class.forName(
-                "org.apache.derby.jdbc.BasicClientXADataSource40").
-                    newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientXADataSource40");
+            xads = (ClientXADataSourceInterface) clazz.getConstructor().newInstance();
         }
         //XADataSource - retrieveMessageTextProperty
         xads.setPortNumber(TestConfiguration.getCurrent().getPort());

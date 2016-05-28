@@ -56,7 +56,8 @@ public class UrlLocaleTest extends BaseJDBCTestCase {
         // Reregister driver for any subsequent tests
         String driverClass =
                 TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
-        Class.forName(driverClass).newInstance();
+        Class<?> clazz = Class.forName(driverClass);
+        clazz.getConstructor().newInstance();
     }
     
     /**

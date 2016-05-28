@@ -144,7 +144,8 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             println("Loading JDBC driver " + driverClass);
             // load the driver
             try {
-                Class.forName(driverClass).newInstance();
+                Class<?> clazz = Class.forName(driverClass);
+                clazz.getConstructor().newInstance();
             } catch (ClassNotFoundException cnfe) {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', ClassNotFoundException: " 
@@ -154,6 +155,14 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
                         + driverClass + "', IllegalAccessException: " 
                         + iae.getMessage());
             } catch (InstantiationException ie) {
+                throw new SQLException("Failed to load JDBC driver '" 
+                        + driverClass + "', InstantiationException: " 
+                        + ie.getMessage());
+            } catch (NoSuchMethodException ie) {
+                throw new SQLException("Failed to load JDBC driver '" 
+                        + driverClass + "', InstantiationException: " 
+                        + ie.getMessage());
+            } catch (java.lang.reflect.InvocationTargetException ie) {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', InstantiationException: " 
                         + ie.getMessage());

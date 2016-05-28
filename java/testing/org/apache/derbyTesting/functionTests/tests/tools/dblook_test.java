@@ -143,7 +143,8 @@ public class dblook_test {
 				"old test db before creating a new one...");
 		}
 
-		Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+        Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+        clazz.getConstructor().newInstance();
 		jdbcProtocol = "jdbc:derby:";
 		createDBFromDDL(testDBName, scriptName);
 

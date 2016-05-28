@@ -131,7 +131,8 @@ public class DbTasks {
 	public static Connection getConnection(String usr, String passwd){
 		try {
 			// Returns the Connection object
-			Class.forName(System.getProperty("driver")).newInstance();
+            Class<?> clazz = Class.forName(System.getProperty("driver"));
+            clazz.getConstructor().newInstance();
 
 			Connection con = DriverManager.getConnection(System
 					.getProperty("database"), usr, passwd);

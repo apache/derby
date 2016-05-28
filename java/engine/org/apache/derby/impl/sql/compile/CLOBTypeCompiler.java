@@ -35,7 +35,7 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
-class CLOBTypeCompiler extends BaseTypeCompiler
+public class CLOBTypeCompiler extends BaseTypeCompiler
 {
         /**
          * Tell whether this type (LOB) can be converted to the given type.

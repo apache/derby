@@ -58,7 +58,7 @@ class xaHelper implements xaAbstractHelper
 	private boolean isNetClient;
 	private String framework;
 
-  xaHelper()
+  public xaHelper()
   {
   }
 	  
@@ -426,7 +426,8 @@ class xaHelper implements xaAbstractHelper
 	{
 
 		try {
-			currentDataSource = (DataSource) (Class.forName("org.apache.derby.jdbc.EmbeddedDataSource").newInstance());
+            Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDataSource");
+			currentDataSource = (DataSource) (clazz.getConstructor().newInstance());
 		} catch (Exception e) {
 			throw new SQLException(e.toString());
 		}
@@ -459,7 +460,8 @@ class xaHelper implements xaAbstractHelper
 		 throws SQLException
 	{
 		try {
-			currentCPDataSource = (ConnectionPoolDataSource) (Class.forName("org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource").newInstance());
+          Class<?> clazz = Class.forName("org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource");
+          currentCPDataSource = (ConnectionPoolDataSource) (clazz.getConstructor().newInstance());
 		} catch (Exception e) {
 			throw new SQLException(e.toString());
 		}
@@ -516,18 +518,19 @@ class xaHelper implements xaAbstractHelper
 		// if we new it directly, then it will the tools.jar file to bloat.
 		try
 		{
-		    
+            Class<?> clazz;
             if (isJCC)
-               return (XADataSource) 
-                (Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
+            {
+                clazz = Class.forName("com.ibm.db2.jcc.DB2XADataSource");
+                return (XADataSource) clazz.getConstructor().newInstance();
+            }
             else if (isNetClient){
                 if (ij.JNDI()) {
                     //running under jdk1.6 or higher
                     // try instantiating EmbeddedXADataSource40
                     try {
-                        return (XADataSource)(Class.forName(
-                                "org.apache.derby.jdbc.ClientXADataSource40").
-                                newInstance());
+                        clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource40");
+                        return (XADataSource) clazz.getConstructor().newInstance();
                     }
                     catch (ClassNotFoundException e) {
                         //probably it was not compiled with jdbc4.0
@@ -536,22 +539,21 @@ class xaHelper implements xaAbstractHelper
                     catch (UnsupportedClassVersionError ue) {
                         // ClientXADataSource
                     }
-                    return (XADataSource) (Class.forName(
-                            "org.apache.derby.jdbc.ClientXADataSource"
-                            ).newInstance());
+                    
+                    clazz = Class.forName("org.apache.derby.jdbc.ClientXADataSource");
+                                                         
+                    return (XADataSource) clazz.getConstructor().newInstance();
                 } else {
-                    return (XADataSource)(Class.forName(
-                        "org.apache.derby.jdbc.BasicClientXADataSource40").
-                            newInstance());
+                    clazz = Class.forName("org.apache.derby.jdbc.BasicClientXADataSource40");
+                    return (XADataSource) clazz.getConstructor().newInstance();
                 }
             } else {
                 if (ij.JNDI()) {
                     //running under jdk1.6 or higher
                     // try instantiating EmbeddedXADataSource40
                     try {
-                        return (XADataSource)(Class.forName(
-                            "org.apache.derby.jdbc.EmbeddedXADataSource40").
-                                newInstance());
+                        clazz = Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource40");
+                        return (XADataSource) clazz.getConstructor().newInstance();
                     } catch (ClassNotFoundException e) {
                         //probably it was not compiled with jdbc4.0
                         //support go ahead with EmbeddedXADataSource
@@ -560,21 +562,21 @@ class xaHelper implements xaAbstractHelper
                         // EmbeddedXADataSource
                     }
 
-                    return (XADataSource)(Class.forName(
-                        "org.apache.derby.jdbc.EmbeddedXADataSource").
-                            newInstance());
+                    clazz = Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource");
+                    return (XADataSource) clazz.getConstructor().newInstance();
                 } else {
-                    return (XADataSource)(Class.forName(
-                        "org.apache.derby.jdbc.BasicEmbeddedXADataSource40").
-                            newInstance());
+                    clazz = Class.forName("org.apache.derby.jdbc.BasicEmbeddedXADataSource40");
+                    return (XADataSource) clazz.getConstructor().newInstance();
                 }
             }
         }
         catch(ClassNotFoundException cnfe) {
 			throw new ijException(LocalizedResource.getMessage("IJ_XAClass"));
 		}
-		catch (InstantiationException e) { }
-		catch (IllegalAccessException e) { }
+		catch (InstantiationException e) {}
+		catch (IllegalAccessException e) {}
+		catch (NoSuchMethodException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
 
 		throw new ijException(LocalizedResource.getMessage("IJ_XANoI"));
 	}

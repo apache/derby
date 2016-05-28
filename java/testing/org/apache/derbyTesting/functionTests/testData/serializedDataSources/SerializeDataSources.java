@@ -114,7 +114,7 @@ public class SerializeDataSources {
                 "_0_0", "_1_0");
         int dsCount = 0;
         for (String dsClassName : dataSourceClasses) {
-            Class dsClass;
+            Class<?> dsClass;
             // Try to load the class.
             try {
                 dsClass = Class.forName(dsClassName);
@@ -124,7 +124,7 @@ public class SerializeDataSources {
                 continue;
             }
             // Create new instance.
-            DataSource ds = (DataSource)dsClass.newInstance();
+            DataSource ds = (DataSource)dsClass.getConstructor().newInstance();
             // Generate file name.
             File serialized = new File(dsClass.getSimpleName() + "-" +
                     modifiedVersionString + ".ser");

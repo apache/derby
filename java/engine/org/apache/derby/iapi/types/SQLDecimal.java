@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.cache.ClassSize;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -127,8 +128,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		value = val;
 		if ((value != null) && (scale >= 0))
 		{
-			value = value.setScale(scale, 
-							BigDecimal.ROUND_DOWN);
+			value = value.setScale(scale, RoundingMode.DOWN);
 		}
 	}
 
@@ -854,14 +854,20 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		** (for the whole result set column, eg.); otherwise dynamically
 		** calculates the scale according to actual values.  Beetle 3901
 		*/
-		result.setBigDecimal(dividendBigDecimal.divide(
-									divisorBigDecimal,
-									scale > -1 ? scale :
-									Math.max((dividendBigDecimal.scale() + 
-											SQLDecimal.getWholeDigits(divisorBigDecimal) +
-											1), 
-										NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE),
-									BigDecimal.ROUND_DOWN));
+		result.setBigDecimal
+          (
+           dividendBigDecimal.divide
+           (
+            divisorBigDecimal,
+            scale > -1 ?
+            scale :
+            Math.max
+            (
+             (dividendBigDecimal.scale() + SQLDecimal.getWholeDigits(divisorBigDecimal) + 1), 
+             NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE
+            ),
+            RoundingMode.DOWN)
+           );
 		
 		return result;
 	}
@@ -985,7 +991,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, 
 									("DECIMAL/NUMERIC("+desiredPrecision+","+desiredScale+")"));
 		}
-		value = value.setScale(desiredScale, BigDecimal.ROUND_DOWN);
+		value = value.setScale(desiredScale, RoundingMode.DOWN);
 		rawData = null;
 	}
 

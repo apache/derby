@@ -266,7 +266,8 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
             println("Loading JDBC driver " + driverClass);
             // load the driver
             try {
-                Class.forName(driverClass).newInstance();
+                Class<?> clazz = Class.forName(driverClass);
+                clazz.getConstructor().newInstance();
             } catch (ClassNotFoundException cnfe) {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', ClassNotFoundException: " 
@@ -278,6 +279,14 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
             } catch (InstantiationException ie) {
                 throw new SQLException("Failed to load JDBC driver '" 
                         + driverClass + "', InstantiationException: " 
+                        + ie.getMessage());
+            } catch (NoSuchMethodException ie) {
+                throw new SQLException("Missing constructor for JDBC driver '" 
+                        + driverClass + "', NoSuchMethodException: " 
+                        + ie.getMessage());
+            } catch (java.lang.reflect.InvocationTargetException ie) {
+                throw new SQLException("Could not invoke the constructor for JDBC driver '" 
+                        + driverClass + "', InvocationTargetException: " 
                         + ie.getMessage());
             }
         }

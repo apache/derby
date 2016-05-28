@@ -101,7 +101,8 @@ public class ClientDataSourceFactory implements ObjectFactory {
             if (className != null &&
                     className.startsWith("org.apache.derby.jdbc.Client")) {
                 // Create the proper data source object shell.
-                ds = Class.forName(className).newInstance();
+                Class<?> clazz = Class.forName(className);
+                ds = clazz.getConstructor().newInstance();
 
                 // Fill in the data source object shell with values from the
                 // jndi reference.

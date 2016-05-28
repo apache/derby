@@ -100,7 +100,7 @@ public class ReferenceableDataSource extends BasicEmbeddedDataSource40
             if (className != null &&
                     className.startsWith("org.apache.derby.jdbc.Embedded")) {
                 // Create the proper data source object shell.
-                ds = Class.forName(className).newInstance();
+                ds = Class.forName(className).getConstructor().newInstance();
 
                 // Fill in the data source object shell with values from the
                 // jndi reference.

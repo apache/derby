@@ -33,7 +33,7 @@ import org.apache.derby.iapi.types.TypeId;
  * This class implements TypeCompiler for the XML type.
  */
 
-class XMLTypeCompiler extends BaseTypeCompiler
+public class XMLTypeCompiler extends BaseTypeCompiler
 {
     /**
      * Tell whether this type (XML) can be converted to the given type.

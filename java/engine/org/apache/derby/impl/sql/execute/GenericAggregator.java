@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -303,8 +305,9 @@ class GenericAggregator
 		{
 			try
 			{
-				Class aggregatorClass = cf.loadApplicationClass(aggInfo.getAggregatorClassName());
-				Object agg = aggregatorClass.newInstance();
+				Class<?> aggregatorClass = cf.loadApplicationClass(aggInfo.getAggregatorClassName());
+                Constructor<?> constructor = aggregatorClass.getConstructor();
+				Object agg = constructor.newInstance();
 				aggregatorInstance = (ExecAggregator)agg;
 				cachedAggregator = aggregatorInstance;
 

@@ -220,7 +220,8 @@ public class DataSourceReferenceTest
                                         String className)
         throws Exception {
         // Instantiate a new data source object and get all its properties.
-        Object dsObj = Class.forName(className).newInstance();
+        Class<?> clazz = Class.forName(className);
+        Object dsObj = clazz.getConstructor().newInstance();
         String[] properties = getPropertyBeanList(dsObj);
         // Validate property set (existence and naming).
         assertDataSourceProperties(dsDesc, properties);
@@ -290,12 +291,14 @@ public class DataSourceReferenceTest
             throws Exception {
         println("Testing recreated empty data source.");
         // Create an empty data source.
-        Object ds = Class.forName(className).newInstance();
+        Class<?> clazz = Class.forName(className);
+        Object ds = clazz.getConstructor().newInstance();
         Referenceable refDs = (Referenceable)ds;
         Reference dsAsReference = refDs.getReference();
         String factoryClassName = dsAsReference.getFactoryClassName();
+        clazz = Class.forName(factoryClassName);
         ObjectFactory factory =
-            (ObjectFactory)Class.forName(factoryClassName).newInstance();
+            (ObjectFactory) clazz.getConstructor().newInstance();
         Object recreatedDs =
             factory.getObjectInstance(dsAsReference, null, null, null);
         // Empty, recreated data source should not be the same as the one we
@@ -333,7 +336,8 @@ public class DataSourceReferenceTest
                                                 String className)
             throws Exception {
         println("Testing recreated populated data source.");
-        Object ds = Class.forName(className).newInstance();
+        Class<?> clazz = Class.forName(className);
+        Object ds = clazz.getConstructor().newInstance();
         // Populate the data source.
         Iterator propIter = dsDesc.getPropertyIterator();
         while (propIter.hasNext()) {
@@ -361,8 +365,9 @@ public class DataSourceReferenceTest
         Referenceable refDs = (Referenceable)ds;
         Reference dsAsReference = refDs.getReference();
         String factoryClassName = dsAsReference.getFactoryClassName();
+        clazz = Class.forName(factoryClassName);
         ObjectFactory factory =
-            (ObjectFactory)Class.forName(factoryClassName).newInstance();
+            (ObjectFactory) clazz.getConstructor().newInstance();
         Object recreatedDs =
             factory.getObjectInstance(dsAsReference, null, null, null);
         // Recreated should not be same instance as original.

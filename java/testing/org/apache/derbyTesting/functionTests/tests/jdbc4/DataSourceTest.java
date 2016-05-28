@@ -282,10 +282,12 @@ public class DataSourceTest extends BaseJDBCTestCase {
     	//As per the JDBC definition, an exception and hence an event is raised
     	//for isValid only if the param value is illegal
     	assertFalse(aes12.didConnectionErrorEventHappen());
-        aes12.resetState();        	
+        aes12.resetState();
+        Class<?> clazz;
         if (usingEmbedded())
         {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            clazz.getConstructor().newInstance();
         }else
         {
         	getTestConfiguration().startNetworkServer();

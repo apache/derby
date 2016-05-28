@@ -179,12 +179,13 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         util.DEBUG("_connectToSlave");
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);
@@ -207,12 +208,13 @@ public class ReplicationRun_Local_3_p4 extends ReplicationRun
         util.DEBUG("_internal_stopSlave");
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
-            ds = (ClientDataSourceInterface)Class.forName(
-               "org.apache.derby.jdbc.BasicClientDataSource40").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.BasicClientDataSource40");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         }
 
         ds.setDatabaseName(dbPath);

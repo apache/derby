@@ -470,13 +470,17 @@ public class ClientDriver implements Driver {
         final String factoryName =
                 "org.apache.derby.client.net.ClientJDBCObjectFactoryImpl40";
         try {
-            return (ClientJDBCObjectFactory)
-            Class.forName(factoryName).newInstance();
+            Class<?> clazz = Class.forName(factoryName);
+            return (ClientJDBCObjectFactory) clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {
             return createDefaultFactoryImpl();
         } catch (InstantiationException ie) {
             return createDefaultFactoryImpl();
         } catch (IllegalAccessException iae) {
+            return createDefaultFactoryImpl();
+        } catch (NoSuchMethodException iae) {
+            return createDefaultFactoryImpl();
+        } catch (java.lang.reflect.InvocationTargetException iae) {
             return createDefaultFactoryImpl();
         }
     }
@@ -497,13 +501,17 @@ public class ClientDriver implements Driver {
         final String factoryName =
                 "org.apache.derby.client.net.ClientJDBCObjectFactoryImpl42";
         try {
-            return (ClientJDBCObjectFactory)
-            Class.forName(factoryName).newInstance();
+            Class<?> clazz = Class.forName(factoryName);
+            return (ClientJDBCObjectFactory) clazz.getConstructor().newInstance();
         } catch (ClassNotFoundException cnfe) {
             return createJDBC40FactoryImpl();
         } catch (InstantiationException ie) {
             return createJDBC40FactoryImpl();
         } catch (IllegalAccessException iae) {
+            return createJDBC40FactoryImpl();
+        } catch (NoSuchMethodException iae) {
+            return createJDBC40FactoryImpl();
+        } catch (java.lang.reflect.InvocationTargetException iae) {
             return createJDBC40FactoryImpl();
         }
     }

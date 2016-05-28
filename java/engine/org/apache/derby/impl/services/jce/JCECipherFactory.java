@@ -540,15 +540,15 @@ final class JCECipherFactory implements CipherFactory
 				// provider package should be set by property
 				if (Security.getProvider(cryptoProviderShort) == null)
 				{
-                    Class cryptoClass = Class.forName(cryptoProvider);
+                    Class<?> cryptoClass = Class.forName(cryptoProvider);
                     if (!Provider.class.isAssignableFrom(cryptoClass)) {
                         throw StandardException.newException(
                                 SQLState.ENCRYPTION_NOT_A_PROVIDER,
                                 cryptoProvider);
                     }
 
-                    final Provider provider =
-                            (Provider) cryptoClass.newInstance();
+                    java.lang.reflect.Constructor<?> constructor = cryptoClass.getConstructor();
+                    final Provider provider = (Provider) constructor.newInstance();
 
 					// add provider through privileged block.
                     AccessController.doPrivileged(new PrivilegedAction<Void>() {
@@ -627,6 +627,14 @@ final class JCECipherFactory implements CipherFactory
         {
             t = iae;
         }
+        catch (NoSuchMethodException nsme)
+        {
+            t = nsme;
+        }
+		catch (java.lang.reflect.InvocationTargetException ite)
+		{
+			t = ite;
+		}
 		catch (NoSuchAlgorithmException nsae)
 		{
 			t = nsae;

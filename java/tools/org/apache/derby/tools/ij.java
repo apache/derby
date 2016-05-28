@@ -138,7 +138,8 @@ public class ij {
   }
 
   public static java.sql.Connection startJBMS()
-	  throws java.sql.SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException
+    throws java.sql.SQLException, IllegalAccessException, ClassNotFoundException, InstantiationException,
+           NoSuchMethodException, java.lang.reflect.InvocationTargetException
   {			
 		return org.apache.derby.impl.tools.ij.util.startJBMS();
   }

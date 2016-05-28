@@ -43,7 +43,7 @@ class SumAvgAggregateDefinition
 	 * Niladic constructor.  Does nothing.  For ease
 	 * Of use, only.
 	 */
-    SumAvgAggregateDefinition() { super(); }
+    public SumAvgAggregateDefinition() { super(); }
 
 	/**
 	 * Determines the result datatype.  Accept NumberDataValues

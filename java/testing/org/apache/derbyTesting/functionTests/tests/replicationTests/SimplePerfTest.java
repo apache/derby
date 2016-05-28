@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -83,7 +84,8 @@ public class SimplePerfTest extends BaseJDBCTestCase
      */
     public void testInserts()
     throws SQLException, IOException, InterruptedException,
-        ClassNotFoundException, IllegalAccessException, InstantiationException
+           ClassNotFoundException, IllegalAccessException, InstantiationException,
+           NoSuchMethodException, InvocationTargetException
     {        
         String vc = "";
         for ( int i=0;i<20000;i++ )
@@ -128,7 +130,7 @@ public class SimplePerfTest extends BaseJDBCTestCase
     public void verifyTestInserts()
         throws SQLException, IOException, InterruptedException,
             ClassNotFoundException, IllegalAccessException,
-            InstantiationException
+               InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         Connection conn = clientConnection(masterHostName, masterPortNo, dbPath);
         
@@ -141,13 +143,14 @@ public class SimplePerfTest extends BaseJDBCTestCase
     }
     private Connection clientConnection(String hostName, int portNo, String dbPath)
             throws SQLException, ClassNotFoundException, IllegalAccessException,
-            InstantiationException
+                   InstantiationException, NoSuchMethodException, InvocationTargetException
     {
         ClientDataSourceInterface ds;
 
+        Class<?> clazz;
         if (JDBC.vmSupportsJNDI()) {
-            ds = (ClientDataSourceInterface)Class.forName(
-                    "org.apache.derby.jdbc.ClientDataSource").newInstance();
+            clazz = Class.forName("org.apache.derby.jdbc.ClientDataSource");
+            ds = (ClientDataSourceInterface) clazz.getConstructor().newInstance();
         } else {
             ds = new BasicClientDataSource40();
         }

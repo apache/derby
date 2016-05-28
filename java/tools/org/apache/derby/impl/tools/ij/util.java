@@ -351,7 +351,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 			
 		    Class<?> dc = Class.forName(dsName);
             if (DataSource.class.isAssignableFrom(dc)) {
-                ds = (DataSource) dc.newInstance();
+                ds = (DataSource) dc.getConstructor().newInstance();
             } else {
                 throw new ijException(LocalizedResource.getMessage(
                     "TL_notInstanceOf", dsName, DataSource.class.getName()));
@@ -395,7 +395,8 @@ public final class util implements java.security.PrivilegedAction<String> {
 	 */
     static public Connection startJBMS(String defaultDriver, String defaultURL,
 				       Properties connInfo) 
-	throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException
+      throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException,
+        NoSuchMethodException, InvocationTargetException
     {
 	Connection con = null;
         String driverName;
@@ -500,7 +501,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 		@exception InstantiationException on failure to load driver.
 		@exception IllegalAccessException on failure to load driver.
 	 */
-    static public Connection startJBMS() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+    static public Connection startJBMS() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		return startJBMS(null,null);
 	}
 	
@@ -519,7 +520,7 @@ public final class util implements java.security.PrivilegedAction<String> {
 	 */
     static public Connection startJBMS(String defaultDriver, String defaultURL) 
 			throws SQLException, ClassNotFoundException, InstantiationException,
-				   IllegalAccessException {
+                   IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		return startJBMS(defaultDriver,defaultURL,null);
 		
 	}
@@ -736,7 +737,7 @@ AppUI.out.println("SIZE="+l);
 			create an instance.
 		@exception IllegalAccessException if driver class constructor not visible.
 	 */
-	public static void loadDriverIfKnown(String jdbcProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	public static void loadDriverIfKnown(String jdbcProtocol) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		for (int i=0; i < protocolDrivers.length; i++) {
 			if (jdbcProtocol.startsWith(protocolDrivers[i][0])) {
 				loadDriver(protocolDrivers[i][1]);
@@ -755,11 +756,12 @@ AppUI.out.println("SIZE="+l);
 		@exception IllegalAccessException if driver class constructor not visible.
 	 */
     static void loadDriver(String driverClass)
-            throws ClassNotFoundException, InstantiationException,
-                   IllegalAccessException {
+        throws
+            ClassNotFoundException, InstantiationException,
+            IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Class<?> klass = Class.forName(driverClass);
         if (Driver.class.isAssignableFrom(klass)) {
-            klass.newInstance();
+            klass.getConstructor().newInstance();
         } else {
             throw new ijException(LocalizedResource.getMessage(
                     "TL_notInstanceOf", driverClass, Driver.class.getName()));

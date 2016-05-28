@@ -36,11 +36,13 @@ abstract class ClassSizeCatalog extends Hashtable<String, int[]> {
         // try to compile it. This may fail because ClassSizeCatalogImpl.java
         // is not created until everything else has been compiled. Bury
         // ClassSizeCatalogImpl in a string.
+        String className = ClassSizeCatalog.class.getName() + "Impl";
         try {
-            INSTANCE = (ClassSizeCatalog)
-                Class.forName(ClassSizeCatalog.class.getName() + "Impl")
-                    .newInstance();
+            Class<?> clazz = Class.forName(className);
+            INSTANCE = (ClassSizeCatalog) clazz.getConstructor().newInstance();
         } catch (Exception e) {
+            System.out.println("Got error while instantiating " + className + ": " + e.getMessage());
+            e.printStackTrace();
             throw new ExceptionInInitializerError(e);
         }
     }

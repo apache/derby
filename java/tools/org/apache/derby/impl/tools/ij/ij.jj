@@ -154,7 +154,8 @@ class ij {
        if (ij.JDBC20X() && ij.JTA())
 		{
 			try {
-				xahelper = (xaAbstractHelper) Class.forName("org.apache.derby.impl.tools.ij.xaHelper").newInstance();
+                Class<?> clazz = Class.forName("org.apache.derby.impl.tools.ij.xaHelper");
+				xahelper = (xaAbstractHelper) clazz.getConstructor().newInstance();
 				xahelper.setFramework(framework_property);
 			} catch (Exception e) {
 			}
@@ -297,6 +298,10 @@ class ij {
 	    } catch (IllegalAccessException e) {
 			throw ijException.classNotFoundForProtocol(value);
 	    } catch (InstantiationException e) {
+			throw ijException.classNotFoundForProtocol(value);
+	    } catch (NoSuchMethodException e) {
+			throw ijException.classNotFoundForProtocol(value);
+	    } catch (java.lang.reflect.InvocationTargetException e) {
 			throw ijException.classNotFoundForProtocol(value);
 	    }
 		if (name == null)
@@ -1680,6 +1685,10 @@ throws SQLException
 	    } catch (IllegalAccessException e) {
 			throw ijException.classNotFound(sVal);
 	    } catch (InstantiationException e) {
+			throw ijException.classNotFound(sVal);
+	    } catch (NoSuchMethodException e) {
+			throw ijException.classNotFound(sVal);
+	    } catch (java.lang.reflect.InvocationTargetException e) {
 			throw ijException.classNotFound(sVal);
 	    }
 		return null;

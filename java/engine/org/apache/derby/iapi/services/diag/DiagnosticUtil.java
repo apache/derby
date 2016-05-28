@@ -41,6 +41,8 @@ the D_* helper class:
 
 **/
 
+import java.lang.reflect.Constructor;
+
 public class DiagnosticUtil
 {
     /* Constructors for This class: */
@@ -80,7 +82,7 @@ public class DiagnosticUtil
 					className.substring(0, lastDot) + 
 					"D_" + className.substring(lastDot);
 
-				Class diagClass;
+				Class<?> diagClass;
 				
 				try {
 					diagClass = Class.forName(diagClassName);
@@ -95,7 +97,8 @@ public class DiagnosticUtil
 				}
 
 
-				Diagnosticable diag_obj = (Diagnosticable) diagClass.newInstance();
+                Constructor<?> constructor = diagClass.getConstructor();
+				Diagnosticable diag_obj = (Diagnosticable) diagClass.getConstructor().newInstance();
 
 				diag_obj.init(ref);
 

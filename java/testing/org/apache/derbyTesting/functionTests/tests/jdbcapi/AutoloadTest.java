@@ -374,7 +374,8 @@ public class AutoloadTest extends BaseJDBCTestCase
 
             //Derby should be able to get a connection if AutoloaderDriver is
             //not in DriverManager. Make a connection to test it. Derby-2905
-            Class.forName(driverClass).newInstance();
+            Class<?> clazz = Class.forName(driverClass);
+            clazz.getConstructor().newInstance();
             url = getTestConfiguration().getJDBCUrl();
             user = getTestConfiguration().getUserName();
             password = getTestConfiguration().getUserPassword();
@@ -527,7 +528,8 @@ public class AutoloadTest extends BaseJDBCTestCase
             testUnsuccessfulConnect();
         }
 
-        Class.forName(driverClass).newInstance();
+        Class<?> clazz = Class.forName(driverClass);
+        clazz.getConstructor().newInstance();
         testSuccessfulConnect();
         testUnsuccessfulConnect();
     }

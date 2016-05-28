@@ -34,7 +34,7 @@ import org.apache.derby.iapi.types.TypeId;
  *
  */
 
-class BitTypeCompiler extends BaseTypeCompiler
+public class BitTypeCompiler extends BaseTypeCompiler
 {
         /**
          * Tell whether this type (bit) can be converted to the given type.
