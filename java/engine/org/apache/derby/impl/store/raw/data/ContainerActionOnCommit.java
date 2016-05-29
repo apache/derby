@@ -21,9 +21,8 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import org.apache.derby.iapi.services.monitor.DerbyObserver;
 import org.apache.derby.iapi.store.raw.ContainerKey;
-
-import java.util.Observer;
 
 /**
 	An Observer that can be attached to a transaction to
@@ -31,7 +30,7 @@ import java.util.Observer;
 	commits or rollsback in some way.
 */
 
-abstract class ContainerActionOnCommit implements Observer {
+abstract class ContainerActionOnCommit implements DerbyObserver {
 
 	protected ContainerKey identity;
 

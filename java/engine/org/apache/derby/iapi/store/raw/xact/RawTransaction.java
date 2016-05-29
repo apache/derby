@@ -24,6 +24,7 @@ package org.apache.derby.iapi.store.raw.xact;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 
 import org.apache.derby.iapi.services.locks.LockFactory;
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
 
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.Compensation;
@@ -38,8 +39,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-
-import java.util.Observable;
 
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
@@ -64,7 +63,8 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	@see java.util.Observer
 */
 
-public abstract class RawTransaction extends Observable implements Transaction {
+public abstract class RawTransaction extends DerbyObservable implements Transaction
+{
 
 	public static final Integer		COMMIT =             0;
 	public static final Integer		ABORT =              1;

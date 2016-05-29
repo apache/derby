@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
+
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerLock;
 import org.apache.derby.iapi.store.raw.Page;
@@ -40,8 +42,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-import java.util.Observable;
-
 /**
 	Flush all pages for a table on a commit
 */
@@ -53,7 +53,7 @@ public class SyncOnCommit extends ContainerHandleActionOnCommit {
 		super(identity);
 	}
 
-	public void update(Observable obj, Object arg) {
+	public void update(DerbyObservable obj, Object arg) {
 
 		if (SanityManager.DEBUG) {
 			if (arg == null)

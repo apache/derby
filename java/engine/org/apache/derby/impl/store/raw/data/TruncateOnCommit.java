@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
+
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerLock;
 import org.apache.derby.iapi.store.raw.Page;
@@ -39,8 +41,6 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
-
-import java.util.Observable;
 
 /**
 	Truncate a temp table on a commit, abort or rollback to savepoint
@@ -64,7 +64,7 @@ public class TruncateOnCommit extends ContainerHandleActionOnCommit {
 		}
 	}
 
-	public void update(Observable obj, Object arg) {
+	public void update(DerbyObservable obj, Object arg) {
 		if (SanityManager.DEBUG) {
 			if (arg == null)
 				SanityManager.THROWASSERT("still on observer list " + this);

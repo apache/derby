@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerLock;
@@ -40,8 +41,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.store.raw.ContainerKey;
-
-import java.util.Observable;
 
 /**
 	Drop a table on a commit or abort
@@ -71,7 +70,7 @@ public class DropOnCommit extends ContainerActionOnCommit {
 
 		@see java.util.Observer#update
 	*/
-	public void update(Observable obj, Object arg) {
+	public void update(DerbyObservable obj, Object arg) {
 
 		if (SanityManager.DEBUG) {
 			if (arg == null)

@@ -22,6 +22,8 @@
 package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.services.locks.Lockable;
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
+import org.apache.derby.iapi.services.monitor.DerbyObserver;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
@@ -34,8 +36,6 @@ import org.apache.derby.impl.store.raw.data.DropOnCommit;
 
 import org.apache.derby.catalog.UUID;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Properties;
 
 /**
@@ -47,7 +47,7 @@ import java.util.Properties;
 */
 
 final class StreamFileContainerHandle 
-    implements  StreamContainerHandle, Observer 
+    implements  StreamContainerHandle, DerbyObserver 
 {
 
 	/*
@@ -213,7 +213,7 @@ final class StreamFileContainerHandle
 
 		@see Observer#update
 	*/
-	public void update(Observable obj, Object arg) 
+	public void update(DerbyObservable obj, Object arg) 
     {
 		if (SanityManager.DEBUG) {
 			if (arg == null)

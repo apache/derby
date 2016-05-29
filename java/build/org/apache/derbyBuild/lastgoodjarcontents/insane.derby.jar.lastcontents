@@ -202,6 +202,8 @@ org.apache.derby.iapi.services.locks.ShExLockable.class
 org.apache.derby.iapi.services.locks.ShExQual.class
 org.apache.derby.iapi.services.locks.VirtualLockTable.class
 org.apache.derby.iapi.services.memory.LowMemory.class
+org.apache.derby.iapi.services.monitor.DerbyObservable.class
+org.apache.derby.iapi.services.monitor.DerbyObserver.class
 org.apache.derby.iapi.services.monitor.ModuleControl.class
 org.apache.derby.iapi.services.monitor.ModuleFactory.class
 org.apache.derby.iapi.services.monitor.ModuleSupportable.class

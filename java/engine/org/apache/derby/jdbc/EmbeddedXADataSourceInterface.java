@@ -21,12 +21,24 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.ShardingKeyBuilder;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 
 /**
  * Common interface of Derby embedded XA data sources.
  */
-public interface EmbeddedXADataSourceInterface extends EmbeddedDataSourceInterface, javax.sql.XADataSource {
-    ResourceAdapter getResourceAdapter();
+public interface EmbeddedXADataSourceInterface extends EmbeddedDataSourceInterface, javax.sql.XADataSource
+{
+    public ResourceAdapter getResourceAdapter();
+
+    /** Added by Java 9 */
+    public default ShardingKeyBuilder createShardingKeyBuilder()
+        throws SQLException
+    {
+        throw new java.sql.SQLFeatureNotSupportedException();
+    }
 }

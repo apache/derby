@@ -25,6 +25,8 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.locks.Lockable;
 import org.apache.derby.iapi.services.locks.VirtualLockTable;
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
+import org.apache.derby.iapi.services.monitor.DerbyObserver;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.SpaceInfo;
@@ -45,15 +47,13 @@ import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.catalog.UUID;
 
 import java.util.Hashtable;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Properties;
 
 /**
 	A handle to an open container, implememts RawContainerHandle.
 	<P>
-	This class is an Observer to observe RawTransactions
-	and is also a Observable to
+	This class is a DerbyObserver to observe RawTransactions
+	and is also a DerbyObservable to
 	handle the list of pages accessed thorough this handle.
 	<BR>
 	This class implements Lockable (defined to be ContainerHandle) and is
@@ -62,8 +62,8 @@ import java.util.Properties;
 	<BR> MT - Mutable - Immutable identity - Thread Aware
 */
 
-public class BaseContainerHandle extends Observable 
-    implements RawContainerHandle, Observer 
+public class BaseContainerHandle extends DerbyObservable 
+    implements RawContainerHandle, DerbyObserver 
 {
 
 	/*
@@ -687,7 +687,7 @@ public class BaseContainerHandle extends Observable
 
 
 	/*
-	**	Methods of Observer
+	**	Methods of DerbyObserver
 	*/
 
 	/**
@@ -695,7 +695,7 @@ public class BaseContainerHandle extends Observable
 
 		@see Observer#update
 	*/
-	public void update(Observable obj, Object arg) 
+	public void update(DerbyObservable obj, Object arg) 
     {
 		if (SanityManager.DEBUG) 
         {

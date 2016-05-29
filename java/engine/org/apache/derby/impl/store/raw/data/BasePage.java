@@ -30,6 +30,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.TypedFormat;
+import org.apache.derby.iapi.services.monitor.DerbyObservable;
+import org.apache.derby.iapi.services.monitor.DerbyObserver;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -51,8 +53,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ObjectInput;
 
-import java.util.Observer;
-import java.util.Observable;
 
 
 /**
@@ -76,7 +76,7 @@ import java.util.Observable;
  **/
 
 
-abstract class BasePage implements Page, Observer, TypedFormat
+abstract class BasePage implements Page, DerbyObserver, TypedFormat
 {
 
 	/**
@@ -1638,7 +1638,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		@see Observer#update
 	*/
 
-	public void update(Observable obj, Object arg) {
+	public void update(DerbyObservable obj, Object arg) {
 
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(isLatched());
