@@ -41,7 +41,8 @@ public abstract class ExceptionFactory {
         String impl = "org.apache.derby.impl.jdbc.SQLExceptionFactory";
         ExceptionFactory factory = null;
         try {
-            factory = (ExceptionFactory) Class.forName(impl).newInstance();
+            Class<?> clazz = Class.forName(impl);
+            factory = (ExceptionFactory) clazz.getConstructor().newInstance();
         } catch (Exception e) {
             throw new ExceptionInInitializerError(e);
         }
