@@ -693,7 +693,7 @@ public class BaseContainerHandle extends DerbyObservable
 	/**
 		Called when the transaction is about to complete.
 
-		@see Observer#update
+		@see DerbyObserver#update
 	*/
 	public void update(DerbyObservable obj, Object arg) 
     {

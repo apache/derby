@@ -1635,7 +1635,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		<BR>
 		MT - latched
 
-		@see Observer#update
+		@see DerbyObserver#update
 	*/
 
 	public void update(DerbyObservable obj, Object arg) {

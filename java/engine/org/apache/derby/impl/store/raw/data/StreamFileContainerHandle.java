@@ -211,7 +211,7 @@ final class StreamFileContainerHandle
 	/**
 		Called when the transaction is about to complete.
 
-		@see Observer#update
+		@see DerbyObserver#update
 	*/
 	public void update(DerbyObservable obj, Object arg) 
     {

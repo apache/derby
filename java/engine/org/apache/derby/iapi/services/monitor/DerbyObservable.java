@@ -61,7 +61,7 @@ public class DerbyObservable
      *
      * @param observer The object which wants to be notified when this object changes
      *
-     * @throw IllegalArgumentException If the argument is bad (e.g., null)
+     * @throws IllegalArgumentException If the argument is bad (e.g., null)
      */
     public void addObserver(DerbyObserver observer)
     {
