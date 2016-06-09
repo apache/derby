@@ -39,6 +39,7 @@ import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -9531,6 +9532,33 @@ public class MergeStatementTest extends GeneratedColumnsHelper
             dropTable("t1");
             dropTable("t2");
         }
+    }
+
+    public void test_062_Derby6550() throws SQLException {
+        Statement s = createStatement();
+        
+        s.execute("create table t(a bigint generated always as identity " +
+                  "    ( start with 9223372036854775806 ),b int)");
+        s.execute("create function integerList()\n" +
+                "returns table(a int,b int,c int,d int)\n" +
+                "language java\n" +
+                "parameter style derby_jdbc_result_set\n" +
+                "no sql\n" +
+                "external name 'org.apache.derbyTesting.functionTests.tests.lang.MergeStatementTest.integerList_023'\n");
+
+        // this fails because bulk-insert isn't used and we go past the
+        // end of the identity column's range
+        assertStatementError("2200H", s,
+            "insert into t( b ) values ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 )" );
+
+        // inserting into an empty table from a table function uses bulk-insert
+        //
+        // this should fail just like the previous statement, but it succeeds
+        assertStatementError("2200H", s,
+            "insert into t( b ) select b from table( integerList() ) il");
+
+        JDBC.assertEmpty( s.executeQuery("select * from t") );
+
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
