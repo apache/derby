@@ -736,6 +736,42 @@ public class CollationTest2 extends BaseJDBCTestCase
         commit();
     }
 
+    private void addSomeMoreCustomers( int counter ) throws SQLException
+    { addSomeMoreCustomers( counter, true, true ); }
+
+    private void addSomeMoreCustomers( int counter, boolean useD1, boolean useD2 ) throws SQLException
+    {
+        PreparedStatement ps;
+	if( useD1 && useD2 )
+            ps = prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
+	else if( useD2 )
+            ps = prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?)");
+	else
+            ps = prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
+
+	int colNo = 1;
+        for (int i = 0; i < NAMES.length; i++)
+        {
+	    if( useD1 )
+                ps.setString(colNo++, "Another " + counter + NAMES[i]);
+	    if( useD2 )
+                ps.setString(colNo++, "Another " + counter + NAMES[i]);
+            ps.setString(colNo++, "Another " + counter + NAMES[i]);
+            ps.setInt( colNo++,   NAMES.length + counter + i);
+            ps.setInt( colNo++,   NAMES.length + counter + i);
+            ps.setString(colNo++, "Another " + counter + NAMES[i]);
+            ps.setString(colNo++, "Another " + counter + NAMES[i]);
+            ps.executeUpdate();
+	    colNo = 1;
+        }
+    }
+    private void dropExtraCustomers( int counter ) throws SQLException
+    {
+        PreparedStatement ps = prepareStatement("DELETE FROM CUSTOMER WHERE ID >= ?");
+        ps.setInt( 1, counter );
+        ps.executeUpdate();
+    }
+
     private void setUpLikeTable() throws SQLException 
     {
         Statement s = createStatement();
@@ -1432,6 +1468,8 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runQueries(db_index, null, null);
 
+        addSomeMoreCustomers( 100 );
+
         dropTable();
         commit();
     }
@@ -1447,21 +1485,24 @@ public class CollationTest2 extends BaseJDBCTestCase
      * T11: alter table drop column with indexes
      **/
     private void runAlterTableDropColumn(
-    Connection  conn,
     int         db_index)
         throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         setUpTable();
 
         s.execute("ALTER TABLE CUSTOMER DROP COLUMN D1");
         runQueries(db_index, null, null);
+        addSomeMoreCustomers( 100, false, true );
+	dropExtraCustomers( 100 );
 
         s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
         s.execute("ALTER TABLE CUSTOMER DROP COLUMN D2");
         runQueries(db_index, null, null);
-        conn.rollback();
+        addSomeMoreCustomers( 100, false, false );
+
+        rollback();
 
         dropTable();
         commit();
@@ -1492,6 +1533,8 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
         runQueries(db_index, null, null);
+
+        addSomeMoreCustomers( 100 );
 
         dropTable();
 
@@ -1924,12 +1967,11 @@ public class CollationTest2 extends BaseJDBCTestCase
         runLikeTests(db_index);
 
         runDerby5530TruncateNoIndex();
+
         runDerby5530TruncateIndex();
 
-        /*
-        TODO -MIKEM, this test does not work yet.
-        runAlterTableDropColumn(conn, db_index);
-        */
+        dropTable();
+        runAlterTableDropColumn(db_index);
 
         commit();
     }

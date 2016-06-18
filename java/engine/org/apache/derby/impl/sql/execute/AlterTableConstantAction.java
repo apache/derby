@@ -2922,11 +2922,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			IndexRowGenerator[] newIRGs = new IndexRowGenerator[numIndexes];
 			long[] newIndexConglomNumbers = new long[numIndexes];
+			collation = new int[numIndexes][]; 
 
 			for (int i = 0, j = 0; i < numIndexes; i++, j++)
 			{
 				while (compressIRGs[j] == null)
 					j++;
+
+				// Setup collation id array to be passed in on call to create index.
+				collation[i] = 
+					compressIRGs[j].getColumnCollationIds(
+						td.getColumnDescriptorList());
 
 				int[] baseColumnPositions = compressIRGs[j].baseColumnPositions();
 				newIRGs[i] = compressIRGs[j];
@@ -2960,21 +2966,34 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					size--;
 					int[] newBCP = new int[size];
 					boolean[] newIsAscending = new boolean[size];
+					int[] newCollation = new int[collation[i].length - 1];
 					for (int k = 0, step = 0; k < size; k++)
 					{
 						if (step == 0 && baseColumnPositions[k + step] == 0)
 							step++;
 						newBCP[k] = baseColumnPositions[k + step];
 						newIsAscending[k] = isAscending[k + step];
+						newCollation[k] = collation[i][k + step];
 					}
 					IndexDescriptor id = compressIRGs[j].getIndexDescriptor();
 					id.setBaseColumnPositions(newBCP);
 					id.setIsAscending(newIsAscending);
 					id.setNumberOfOrderedColumns(id.numberOfOrderedColumns() - 1);
+					collation[i] = newCollation;
 				}
 			}
 			compressIRGs = newIRGs;
 			indexConglomerateNumbers = newIndexConglomNumbers;
+		}
+		else
+		{
+			collation = new int[numIndexes][]; 
+			for (int i = 0; i < numIndexes; i++)
+			{
+				collation[i] = 
+					compressIRGs[i].getColumnCollationIds(
+						td.getColumnDescriptorList());
+			}
 		}
 
 		/* Now we are done with updating each index descriptor entry directly
@@ -3103,7 +3122,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		throws StandardException
     {
 		ordering        = new ColumnOrdering[numIndexes][];
-        collation       = new int[numIndexes][]; 
 		needToDropSort  = new boolean[numIndexes];
 		sortIds         = new long[numIndexes];
 
@@ -3119,11 +3137,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             // template to the sorter.)
 			compressIRGs[index].getIndexRow(
                 sourceRow, rl, indexRows[index], (FormatableBitSet) null);
-
-            // Setup collation id array to be passed in on call to create index.
-            collation[index] = 
-                compressIRGs[index].getColumnCollationIds(
-                    td.getColumnDescriptorList());
 
 			/* For non-unique indexes, we order by all columns + the RID.
 			 * For unique indexes, we just order by the columns.
