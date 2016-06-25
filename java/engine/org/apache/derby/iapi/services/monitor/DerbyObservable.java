@@ -21,7 +21,7 @@
 
 package org.apache.derby.iapi.services.monitor;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ public class DerbyObservable
     //////////////////////////////////////////////////////////////////////
   
     private boolean _hasChanged = false;
-    private Vector<DerbyObserver> _observers;
+    private ArrayList<DerbyObserver> _observers;
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -48,7 +48,7 @@ public class DerbyObservable
     //////////////////////////////////////////////////////////////////////
   
     /** No-arg constructor */
-    public DerbyObservable() { _observers = new Vector<DerbyObserver>(); }
+    public DerbyObservable() { _observers = new ArrayList<DerbyObserver>(); }
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -63,11 +63,11 @@ public class DerbyObservable
      *
      * @throws IllegalArgumentException If the argument is bad (e.g., null)
      */
-    public void addObserver(DerbyObserver observer)
+    public synchronized void addObserver(DerbyObserver observer)
     {
       if (observer == null) { throw new IllegalArgumentException("Null arguments not allowed."); }
 
-      if (!_observers.contains(observer)) { _observers.addElement(observer); }
+      if (!_observers.contains(observer)) { _observers.add(observer); }
     }
 
     /**
@@ -75,14 +75,14 @@ public class DerbyObservable
      *
      * @return The number of watchers
      */
-    public int countObservers() { return _observers.size(); }
+    public synchronized int countObservers() { return _observers.size(); }
 
     /**
      * Remove a specific observer from the list of watchers. Null is ignored.
      *
      * @param observer The observer to remove.
      */
-    public void deleteObserver(DerbyObserver observer) { _observers.removeElement(observer); }
+    public synchronized void deleteObserver(DerbyObserver observer) { _observers.remove(observer); }
 
     /**
      * This method is equivalent to notifyObservers(null);
@@ -129,6 +129,6 @@ public class DerbyObservable
      * then the notifyObservers() will wake up the observers which are
      * watching this object.
      */
-    protected void setChanged() { _hasChanged = true; }
+    protected synchronized void setChanged() { _hasChanged = true; }
   
 }
