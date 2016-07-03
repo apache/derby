@@ -25,6 +25,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 
 /**
@@ -43,6 +44,7 @@ public class Changes10_13 extends UpgradeChange
     private static final String UPGRADE_REQUIRED = "XCL47";
     private static final String CANNOT_ALTER_NON_IDENTITY_COLUMN = "42Z29";
     private static final String CANNOT_MODIFY_ALWAYS_IDENTITY_COLUMN = "42Z23";
+    private static final String NO_SUCH_METHOD_ALIAS="42Y03";
 
     //////////////////////////////////////////////////////////////////
     //
@@ -226,4 +228,81 @@ public class Changes10_13 extends UpgradeChange
                 break;
         };
     }
+	/**
+	 * Test newly added system procedure to import table with header lines.
+	 * DERBY-6892. 
+	 */
+     public void testDerby6892SkipHeaderLines() throws SQLException {
+        Statement s = createStatement();
+
+        switch (getPhase()) {
+		case PH_CREATE:
+			//table to export
+			s.execute("create table ex_pet(petName varchar(50), kindOfAnimal varchar(50) , age int)");
+
+			//table to import
+			s.execute("create table imp_pet(petName varchar(50), kindOfAnimal varchar(50) , age int)");
+		
+			s.execute("insert into ex_pet values('Rover', 'Dog' , 4)");
+
+			s.execute("insert into ex_pet values('Spot', 'Cat' , 2)");
+	
+			s.execute("insert into ex_pet values('Squawky','Parrot',37)");
+			
+
+			SupportFilesSetup.deleteFile("pet.dat");
+			s.execute("call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_PET', 'pet.dat' , null, null, null) ");
+			
+				
+			
+			//Show that SYSCS_IMPORT_TABLE_BULK 
+			//does not exist
+			assertCompileError
+                  	(
+                   	NO_SUCH_METHOD_ALIAS,
+                   	"call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'IMP_PET' , 'pet.dat' , null, null, null, 0 , 1) ");
+			break;
+            
+
+		case PH_SOFT_UPGRADE:		
+           		//Show that SYSCS_IMPORT_TABLE_BULK
+			//does not support with soft upgrade
+			assertCompileError
+                  	(
+                   	NO_SUCH_METHOD_ALIAS,
+                   	"call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'IMP_PET', 'pet.dat' , null, null, null, 0 , 1) "
+                   	);
+                	break;
+                
+                case PH_POST_SOFT_UPGRADE:
+                	//Show that SYSCS_IMPORT_TABLE_BULK
+			//does not exist
+			assertCompileError
+                  	(
+                   	NO_SUCH_METHOD_ALIAS,
+                   	"call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'IMP_PET', 'pet.dat' , null, null, null, 0 , 1) "
+                   	);
+                	break;
+
+
+	       case PH_HARD_UPGRADE:
+
+			s.execute("delete from imp_pet");
+			//Show that SYSCS_IMPORT_TABLE 
+			//accept CSV file with header lines
+			s.execute("call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'IMP_PET', 'pet.dat', null, null, null, 0, 1)");
+
+		
+			JDBC.assertFullResultSet(
+                	s.executeQuery("select * from IMP_PET"),
+                        new String[][]
+                        {
+                              { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+			break;
+        };
+    }
+
 }

@@ -1623,6 +1623,46 @@ public class SystemProcedures  {
 		conn.commit();
 	}
 	
+
+
+
+
+
+/*import  data from a given file to a table skipping header lines.
+     * <p>
+     * Will be called by system procedure as
+	 * SYSCS_IMPORT_TABLE_BULK(IN SCHEMANAME  VARCHAR(128), 
+	 * IN TABLENAME    VARCHAR(128),  IN FILENAME VARCHAR(32672) , 
+	 * IN COLUMNDELIMITER CHAR(1),  IN CHARACTERDELIMITER CHAR(1) ,  
+	 * IN CODESET VARCHAR(128), IN  REPLACE SMALLINT
+	 * IN SKIP SMALLINT)
+     * @exception SQLException if a database error occurs
+     **/
+	public static void SYSCS_IMPORT_TABLE_BULK(
+	String  schemaName,
+    	String  tableName,
+	String  fileName,
+	String  columnDelimiter,
+	String  characterDelimiter,
+	String  codeset,
+	short   replace,
+	short skip)
+        throws SQLException
+    {
+		Connection conn = getDefaultConn();
+		try{
+			Import.importTable(conn, schemaName , tableName , fileName ,
+                               columnDelimiter , characterDelimiter, codeset, 
+                               replace, false, skip);
+		}catch(SQLException se)
+		{
+			rollBackAndThrowSQLException(conn, se);
+		}
+		//import finished successfull, commit it.
+		conn.commit();
+     }
+
+
     /**
      * issue a rollback when SQLException se occurs. If SQLException ouccurs when rollback,
      * the new SQLException will be added into the chain of se. 

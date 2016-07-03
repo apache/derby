@@ -56,7 +56,7 @@ public class Import extends ImportAbstract{
     private static  Hashtable<Integer,Import>   _importers = new Hashtable<Integer,Import>();
 
     private String inputFileName;
-
+    private static short skip; //The number of header lines to be skipped
 	/**
      * Constructor to Invoke Import from a select statement
 	 * @param inputFileName	 The URL of the ASCII file from which import will happen
@@ -103,6 +103,11 @@ public class Import extends ImportAbstract{
 	/**
 	 * SYSCS_IMPORT_TABLE  system Procedure from ij or from a Java application
 	 * invokes  this method to perform import to a table from a file.
+	 *
+	 * The extraArgs parameter is variadic, and is used when this method is
+	 * called from SYSCS_IMPORT_TABLE_BULK, in which case extraArgs[0]
+	 * specifies the number of header lines to skip.
+	 *
 	 * @param connection	 The Derby database connection URL for the database containing the table
 	 * @param schemaName	The name of the schema where table to import exists 
 	 * @param tableName     Name of the Table the data has to be imported to.
@@ -121,7 +126,7 @@ public class Import extends ImportAbstract{
                                    String tableName, String inputFileName,  
                                    String columnDelimiter, 
                                    String characterDelimiter,String codeset, 
-                                   short replace, boolean lobsInExtFile)
+                                   short replace, boolean lobsInExtFile, short... extraArgs)
 		throws SQLException {
 
 
@@ -137,7 +142,11 @@ public class Import extends ImportAbstract{
             }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
-		
+        if(extraArgs.length>0)
+            skip=extraArgs[0];
+        else 
+            skip=0;
+
 		performImport(connection,  schemaName,  null, //No columnList 
 					  null , //No column indexes
 					  tableName, inputFileName, columnDelimiter, 
@@ -336,7 +345,7 @@ public class Import extends ImportAbstract{
 	 * @exception	Exception on error
 	 */
 	ImportReadData getImportReadData() throws Exception {
-		return new ImportReadData(inputFileName, controlFileReader);
+		return new ImportReadData(inputFileName, controlFileReader, skip);
 	}
 
     /*

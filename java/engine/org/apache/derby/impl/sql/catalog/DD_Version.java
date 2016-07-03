@@ -539,6 +539,13 @@ public	class DD_Version implements	Formatable
             bootingDictionary.create_10_12_system_procedures( tc, newlyCreatedRoutines );
         }
 
+	if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_12)
+        {
+            // On upgrade from versions before 10.13, create system procedures
+            // added in 10.13.
+	    bootingDictionary.create_10_13_system_procedures( tc, newlyCreatedRoutines );
+        }
+
         // Grant PUBLIC access to some system routines
         bootingDictionary.grantPublicAccessToSystemRoutines(newlyCreatedRoutines, tc, aid);
 	}

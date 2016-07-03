@@ -36,7 +36,8 @@ import java.sql.SQLException;
 final class ImportReadData implements java.security.PrivilegedExceptionAction<Object> {
   //Read data from this file
   private String inputFileName;
-
+  //The number of header lines to be skipped.
+  private short skipLines;
   private int[] columnWidths;
   private int rowWidth;
   private char[] tempString;
@@ -143,8 +144,9 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
   }
   //inputFileName: File to read data from
   //controlFileReader: File used to interpret data in the inputFileName
-  ImportReadData(String inputFileName, ControlInfo controlFileReader)
+  ImportReadData(String inputFileName, ControlInfo controlFileReader,short skipLines)
   throws Exception {
+    this.skipLines=skipLines;
     this.inputFileName = inputFileName;
     this.controlFileReader = controlFileReader;
 
@@ -649,7 +651,10 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
        //do uppercase because the ui shows the values as True and False
        if (hasColumnDefinition){
           ignoreFirstRow();
-	   }
+       }
+       for(int i =0;i<skipLines;i++){
+          ignoreFirstRow();
+       }
     }
     if (formatCode == DEFAULT_FORMAT_CODE)
        readVal=readNextDelimitedRow(returnStringArray);

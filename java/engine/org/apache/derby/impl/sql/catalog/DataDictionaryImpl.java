@@ -11495,6 +11495,8 @@ public final class	DataDictionaryImpl
         create_10_11_system_procedures( tc, newlyCreatedRoutines );
         // add 10.12 specific system procedures
         create_10_12_system_procedures( tc, newlyCreatedRoutines );
+        // add 10.13 specific system procedures
+        create_10_13_system_procedures( tc, newlyCreatedRoutines );
     }
 
     /**
@@ -13485,6 +13487,66 @@ public final class	DataDictionaryImpl
                     tc);
             }
     }
+
+    
+    /**
+     * <p>
+     * Create system procedures that are part of the SYSCS_UTIL schema, added in version 10.13.
+     * </p>
+     *
+     * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
+     **/
+    void create_10_13_system_procedures( TransactionController   tc, HashSet<String> newlyCreatedRoutines )
+        throws StandardException
+    {
+            UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+            TypeDescriptor varchar32672Type = DataTypeDescriptor.getCatalogType( Types.VARCHAR, 32672 );
+
+           /*  SYSCS_IMPORT_TABLE_BULK(IN SCHEMANAME VARCHAR(128), 
+		 *  IN TABLENAME VARCHAR(128),  IN FILENAME VARCHAR(32672), 
+		 *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
+		 *  IN CODESET VARCHAR(128) , IN  REPLACE SMALLINT
+		 *  IN SKIP SMALLINT )
+		 */
+        {
+            // procedure argument names
+            String[] arg_names = {"schemaName", "tableName", "fileName",
+								  " columnDelimiter", "characterDelimiter", 
+								  "codeset", "replace", "skip"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
+				Types.CHAR, 1),
+				DataTypeDescriptor.getCatalogType(
+				Types.CHAR, 1),
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                TypeDescriptor.SMALLINT,
+		TypeDescriptor.SMALLINT
+            };
+
+
+            createSystemProcedureOrFunction(
+   			   "SYSCS_IMPORT_TABLE_BULK",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+				RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+
+    }
+
 
 
 	/*
