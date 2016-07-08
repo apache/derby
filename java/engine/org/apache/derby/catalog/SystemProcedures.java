@@ -1758,6 +1758,56 @@ public class SystemProcedures  {
 	}
 
 
+
+/**
+      * Import data from a given file into the specified table columns skipping header lines from the 
+	 * specified columns in the file.
+     * <p>
+     * Will be called as 
+	 * SYSCS_IMPORT_DATA_BULK (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128),
+	 *                    IN INSERTCOLUMNLIST VARCHAR(32672), IN COLUMNINDEXES VARCHAR(32672),
+	 *                    IN FILENAME VARCHAR(32672), IN COLUMNDELIMITER CHAR(1), 
+	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
+	 *                    IN REPLACE SMALLINT, IN SKIP SMALLINT)
+	 *
+     * @exception SQLException if a database error occurs
+     **/
+	public static void SYSCS_IMPORT_DATA_BULK(
+    String  schemaName,
+    String  tableName,
+	String  insertColumnList,
+	String  columnIndexes,
+	String  fileName,
+	String  columnDelimiter,
+	String  characterDelimiter,
+	String  codeset,
+	short   replace,
+	short skip)
+        throws SQLException
+    {
+		Connection conn = getDefaultConn();
+		try{
+			Import.importData(conn, schemaName , tableName ,
+								  insertColumnList, columnIndexes, fileName,
+								  columnDelimiter, characterDelimiter, 
+								  codeset, replace, false, skip);
+		}catch(SQLException se)
+		{
+		    rollBackAndThrowSQLException(conn, se);
+		}
+
+		//import finished successfull, commit it.
+		conn.commit();
+	}
+
+
+
+
+
+
+
+
+
     /**
      * Import data from a given file into the specified table columns 
      * from the  specified columns in the file. Data for large object 

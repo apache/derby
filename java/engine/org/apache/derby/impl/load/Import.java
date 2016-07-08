@@ -182,7 +182,7 @@ public class Import extends ImportAbstract{
                                   String columnDelimiter, 
                                   String characterDelimiter,
                                   String codeset, short replace, 
-                                  boolean lobsInExtFile)
+                                  boolean lobsInExtFile, short... extraArgs)
 		throws SQLException 
 	{
         /** Make sure that the current user has permission to perform this operation */
@@ -197,7 +197,10 @@ public class Import extends ImportAbstract{
             }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
-
+	if(extraArgs.length>0)
+            skip=extraArgs[0];
+        else 
+            skip=0;
 			performImport(connection,  schemaName,  insertColumnList,columnIndexes, 
 						  tableName, inputFileName, columnDelimiter, 
 						  characterDelimiter, codeset, replace, lobsInExtFile);

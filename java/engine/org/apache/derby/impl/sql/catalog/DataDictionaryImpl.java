@@ -13545,6 +13545,56 @@ public final class	DataDictionaryImpl
                 tc);
         }
 
+
+	/*  SYSCS_IMPORT_DATA_BULK(IN SCHEMANAME VARCHAR(128), 
+		 *  IN TABLENAME VARCHAR(128), IN INSERTCOLUMNLIST VARCHAR(32672), 
+		 *  IN COLUMNINDEXES VARCHAR(32672), IN IN FILENAME VARCHAR(32672), 
+		 *  IN COLUMNDELIMITER CHAR(1), IN CHARACTERDELIMITER  CHAR(1),  
+		 *  IN CODESET VARCHAR(128) , IN  REPLACE SMALLINT
+		 *  IN SKIP SMALLINT)
+		 */
+        {
+            // procedure argument names
+            String[] arg_names = {"schemaName", "tableName", "insertColumnList","columnIndexes",
+								  "fileName", " columnDelimiter", "characterDelimiter", 
+								  "codeset", "replace", "skip"};
+
+            // procedure argument types
+			
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    varchar32672Type,
+                    varchar32672Type,
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
+				Types.CHAR, 1),
+				DataTypeDescriptor.getCatalogType(
+				Types.CHAR, 1),
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                TypeDescriptor.SMALLINT,
+		TypeDescriptor.SMALLINT
+            };
+
+
+            createSystemProcedureOrFunction(
+   			   "SYSCS_IMPORT_DATA_BULK",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+				RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+
+	
+
     }
 
 
