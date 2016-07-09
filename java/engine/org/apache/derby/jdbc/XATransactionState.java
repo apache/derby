@@ -107,16 +107,18 @@ final class XATransactionState extends ContextImpl {
             this.xaState = xaState;
         }
         
-        public boolean cancel() {
+        public synchronized boolean cancel() {
             // nullify reference to reduce memory footprint of canceled tasks
             xaState = null;
             return super.cancel();
         }
 
         /** Runs the cancel task of the global transaction */
-        public void run() {
+        public synchronized void run() {
             try {
-                xaState.cancel(MessageId.CONN_XA_TRANSACTION_TIMED_OUT);
+                if (null != xaState) {
+                    xaState.cancel(MessageId.CONN_XA_TRANSACTION_TIMED_OUT);
+                }
             } catch (Throwable th) {
                 Monitor.logThrowable(th);
             }
@@ -403,13 +405,20 @@ final class XATransactionState extends ContextImpl {
      *
      * @see CancelXATransactionTask
      */
-    synchronized void cancel(String messageId) throws XAException {
-        // Check performTimeoutRollback just to be sure that
-        // the cancellation task was not started
-        // just before the xa_commit/rollback
-        // obtained this object's monitor.
-        if (performTimeoutRollback) {
-
+    void cancel(String messageId) throws XAException {
+        // Note that the synchronization has changed for this method.   See
+        //  DERBY-6879.
+        //
+        boolean needsRollback = false;
+        
+        // This method now synchronizes on this instanace to ensure that the state
+        //  is consistent when accessed and modified.  See DERBY-6879
+        synchronized (this) {
+            // Check performTimeoutRollback just to be sure that
+            // the cancellation task was not started
+            // just before the xa_commit/rollback
+            // obtained this object's monitor.
+            needsRollback = this.performTimeoutRollback;
             // Log the message about the transaction cancelled
             if (messageId != null)
                 Monitor.logTextMessage(messageId, xid.toString());
@@ -421,21 +430,29 @@ final class XATransactionState extends ContextImpl {
                 EmbedXAResource assocRes = associatedResource;
                 end(assocRes, XAResource.TMFAIL, true);
             }
-
-            // Rollback the global transaction
+        }
+        if (needsRollback) {
+            // While the rollback is performed on the connection, 
+            //  this XATransactionState is ont synchronized to work around 
+            //  the issue reported in DERBY-6879
             try {
+                // Rollback the global transaction
                 conn.xa_rollback();
             } catch (SQLException sqle) {
                 XAException ex = new XAException(XAException.XAER_RMERR);
                 ex.initCause(sqle);
                 throw ex;
             }
+        }
 
+        // This method now synchronizes on this instanace again to ensure that the state
+        //  is consistent when accessed and modified.  See DERBY-6879
+        synchronized (this) {
             // Do the cleanup on the resource
             creatingResource.returnConnectionToResource(this, xid);
         }
     }
-    
+   
     /**
      * Privileged Monitor lookup. Must be private so that user code
      * can't call this entry point.

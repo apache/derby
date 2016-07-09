@@ -34,18 +34,26 @@ import javax.sql.XADataSource;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
+import static junit.framework.Assert.fail;
 import junit.framework.Test;
+import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derbyTesting.functionTests.util.DeadlockWatchdog;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import static org.apache.derbyTesting.junit.BaseJDBCTestCase.assertSQLState;
 import org.apache.derbyTesting.junit.BaseTestSuite;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
 import org.apache.derbyTesting.junit.XATestUtil;
 
 public class XATest extends BaseJDBCTestCase {
+    //create own policy file
+    private static final String POLICY_FILE_NAME =
+            "org/apache/derbyTesting/functionTests/tests/jdbcapi/XATest.policy";
 
     public static final String LOCKTIMEOUT="40XL1";
     
@@ -1224,6 +1232,70 @@ public class XATest extends BaseJDBCTestCase {
         
     }
     
+    /**
+     * DERBY-6879 Check that a XA transaction timeout while a cleanupOnError is
+     * being performed does not cause a Java level deadlock.
+     *
+     * The strategy is to cause a XA statement to wait for a period that is
+     * longer than the XA transaction timeout which will allow the timeout to
+     * cancel the XA transaction. That is accomplished by locking a table using
+     * a standard connection and then issuing a select on the same table using a
+     * XA connection. The select will wait for the required locks to be
+     * available up to the lock timeout. For the test to work correctly the XA
+     * transaction timeout must be less than the lock timeout.
+     *
+     * A dealock watchdog is used to detect the deadlock until the DERBY-6879
+     * issue is fixed.
+     *
+     * @throws SQLException
+     * @throws XAException
+     */
+    public void testDerby6879() throws SQLException, XAException {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
+
+        Connection conn = J2EEDataSource.getConnectionPoolDataSource().getPooledConnection().getConnection();
+        conn.setAutoCommit(false);
+        Statement s = conn.createStatement();
+        s.execute("LOCK TABLE TABLT IN EXCLUSIVE MODE");
+
+        // Get a second connection and global xact
+        // and try to select causing lock timeout
+        XAConnection xaconn2 = xads.getXAConnection();
+        XAResource xar2 = xaconn2.getXAResource();
+        xar2.setTransactionTimeout(2);
+        Xid xid2 = XATestUtil.getXid(6879, 11, 51);
+        Connection conn2 = xaconn2.getConnection();
+        // Set to serializable so we get lock timeout
+        conn2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        xar2.start(xid2, XAResource.TMNOFLAGS);
+        Statement s2 = conn2.createStatement();
+        assertGlobalXactCount(1);
+        DeadlockWatchdog wd = new DeadlockWatchdog(30 * 1000);
+        wd.start();
+        try {
+            ResultSet rs = s2.executeQuery("SELECT * FROM TABLT");
+            fail("Should have gotten lock timeout error: " + LOCKTIMEOUT);
+        } catch (SQLException se) {
+            assertSQLState(LOCKTIMEOUT, se);
+        }
+        wd.stop();
+
+        // xid2 should have already been rolled back so end should fail
+        try {
+            xar2.end(xid2, XAResource.TMSUCCESS);
+            fail("Should have gotten exception ending xid2");
+        } catch (XAException xae) {
+            assertTrue(xae.errorCode >= XAException.XAER_OUTSIDE || xae.errorCode <= XAException.XAER_ASYNC);
+        }
+
+        conn.commit();
+
+        conn.close();
+        conn2.close();
+        xaconn2.close();
+    }
+    
     
     /**
      * The two cases for DERBY-4371 do essentially the same thing. Except doing
@@ -1430,7 +1502,22 @@ public class XATest extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration
                 .clientServerDecorator(baseSuite("XATest:client")));
         
-        return DatabasePropertyTestSetup.setLockTimeouts(suite, 3, 5);
+        Test test = DatabasePropertyTestSetup.setLockTimeouts(suite, 3, 5);
+        test = decorateWithPolicy(test);
+        return test;
+    }   
+    
+    // grant ALL FILES execute, and getPolicy permissions,
+    // as well as write for the trace files.
+    private static Test decorateWithPolicy(Test test) {
+        //
+        // Install a security manager using the initial policy file. This is 
+        // needed foro the DeadlockWatchdog to allow it to access the ThreadMXBean
+        // to check for a deadlock
+        //
+        return new SecurityManagerSetup(test, POLICY_FILE_NAME);
     }
-
+    
+    
 }
+

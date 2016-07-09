@@ -738,6 +738,7 @@ org.apache.derbyTesting.functionTests.util.Barrier.class
 org.apache.derbyTesting.functionTests.util.BigDecimalHandler.class
 org.apache.derbyTesting.functionTests.util.CanonTestCase.class
 org.apache.derbyTesting.functionTests.util.DbFile.class
+org.apache.derbyTesting.functionTests.util.DeadlockWatchdog.class
 org.apache.derbyTesting.functionTests.util.DerbyJUnitTest.class
 org.apache.derbyTesting.functionTests.util.ExtendingInterface.class
 org.apache.derbyTesting.functionTests.util.FTFileUtil.class
