@@ -142,8 +142,12 @@ public class Import extends ImportAbstract{
             }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
-        if(extraArgs.length>0)
-            skip=extraArgs[0];
+        if(extraArgs.length>0){
+             skip=extraArgs[0];
+	     if(skip<0) throw PublicAPI.wrapStandardException(StandardException.newException
+				(SQLState.LANG_INVALID_NUMBEROF_HEADER_LINES)); 
+	     
+	}
         else 
             skip=0;
 
@@ -197,8 +201,12 @@ public class Import extends ImportAbstract{
             }
         }
         catch (StandardException se) { throw PublicAPI.wrapStandardException( se ); }
-	if(extraArgs.length>0)
-            skip=extraArgs[0];
+	if(extraArgs.length>0){
+	    skip=extraArgs[0];
+	    if(skip<0) throw PublicAPI.wrapStandardException(StandardException.newException
+				(SQLState.LANG_INVALID_NUMBEROF_HEADER_LINES)); 
+            
+	}
         else 
             skip=0;
 			performImport(connection,  schemaName,  insertColumnList,columnIndexes, 
@@ -243,7 +251,10 @@ public class Import extends ImportAbstract{
             
             ColumnInfo columnInfo = new ColumnInfo(connection , schemaName ,
                                                    tableName, insertColumnList, 
-                                                   columnIndexes, COLUMNNAMEPREFIX);
+                                                   columnIndexes, COLUMNNAMEPREFIX,readHeaders(inputFileName ,
+												characterDelimiter,
+												columnDelimiter,
+												codeset));
 
             String columnTypeNames = null;
             String udtClassNames = null;
@@ -342,6 +353,43 @@ public class Import extends ImportAbstract{
             //
             _importers.remove( importCounter );
         }
+    }
+    
+    //Read the header lines to get column names to identify columns by name
+    private static String[] readHeaders(String inputFileName ,String characterDelimiter,String columnDelimiter,String codeset) 
+	throws SQLException
+	{
+	try {
+	    if(skip>0){
+                ControlInfo controlFR = new ControlInfo();
+		controlFR.setControlProperties(characterDelimiter,columnDelimiter, codeset);
+
+		ImportReadData importReadData = new ImportReadData(inputFileName, controlFR, (short)0);
+			
+		String[] fullColumnName = new String[importReadData.numberOfColumns];
+		String[] temp = new String[importReadData.numberOfColumns];
+		for(int i=0; i< skip;i++){
+                    importReadData.readNextRow(temp);
+		        for(int j=0;j < importReadData.numberOfColumns;j++){
+			    if(i==0)
+			        fullColumnName[j]=temp[j];	
+			    else
+			    {
+				if(temp[j]!=null)
+				    fullColumnName[j]=fullColumnName[j] + " " + temp[j];
+				
+			    }
+			}
+		}
+		return fullColumnName;
+	    }
+	    return null;
+			
+	}
+	catch(Exception e){
+	
+	throw LoadError.unexpectedError(e);
+	}
     }
 
 	/** virtual method from the abstract class

@@ -30,7 +30,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.Types;
 import java.util.*;
 import org.apache.derby.iapi.jdbc.EngineConnection;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.error.PublicAPI;
 /**
  *	
  * This class provides supportto  create casting/conversions required to 
@@ -56,6 +58,7 @@ class ColumnInfo {
 	private Connection conn;
 	private String tableName;
 	private String schemaName;
+        private String[] headerColumnNames;
     private HashMap<String,String> udtClassNames;
 
 	/**
@@ -73,7 +76,8 @@ class ColumnInfo {
 					  String tName,
 					  String insertColumnList, 
 					  String vtiColumnIndexes,
-					  String vtiColumnPrefix)
+					  String vtiColumnPrefix,
+					  String[] headerColumnNames)
 		throws SQLException 
 	{
 
@@ -84,7 +88,7 @@ class ColumnInfo {
         udtClassNames = new HashMap<String,String>();
 		noOfColumns = 0;
 		this.conn = conn;
-
+		this.headerColumnNames=headerColumnNames;
         if (sName == null) {
             // Use the current schema if no schema is specified.
             sName = ((EngineConnection) conn).getCurrentSchemaName();
@@ -133,9 +137,19 @@ class ColumnInfo {
 			StringTokenizer st = new StringTokenizer(vtiColumnIndexes, ",");
 			while (st.hasMoreTokens()) 
 			{
-				String columnIndex  = (st.nextToken()).trim();
-				vtiColumnNames.add(vtiColumnPrefix + columnIndex);
-				int cIndex = Integer.parseInt(columnIndex );
+				int cIndex;
+				String columnIndex = (st.nextToken()).trim();
+				if("\"".equals(columnIndex.substring(0,1))){
+					
+					cIndex = readHeaders((columnIndex.replace('"', ' ')).trim());
+					vtiColumnNames.add(vtiColumnPrefix + cIndex);
+
+				}
+				else{
+					
+					vtiColumnNames.add(vtiColumnPrefix + columnIndex);
+					cIndex = Integer.parseInt(columnIndex );
+				}
 				if(cIndex > expectedNumberOfCols )
 					expectedNumberOfCols= cIndex ;
 			}
@@ -154,6 +168,24 @@ class ColumnInfo {
 		}
 	}
 
+	//Check for matchng patterns of column names
+	private int readHeaders(String columnPattern) 
+		throws SQLException
+	{
+	    	if(headerColumnNames!=null){
+		
+			for(int i=0;i<headerColumnNames.length;i++){
+				if(headerColumnNames[i].equals(columnPattern)){
+					return i+1;
+				}
+ 			}
+				
+	       		throw PublicAPI.wrapStandardException(StandardException.newException
+				(SQLState.LANG_INVALID_INPUT_COLUMN_NAME, columnPattern));
+		}
+		throw PublicAPI.wrapStandardException(StandardException.newException
+				(SQLState.LANG_INVALID_NUMBEROF_HEADER_LINES));
+	}
 
 	private boolean initializeColumnInfo(String columnPattern)
 		throws SQLException

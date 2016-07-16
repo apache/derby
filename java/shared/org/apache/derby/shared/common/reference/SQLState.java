@@ -964,6 +964,8 @@ public interface SQLState {
     String LANG_SYSTEM_SEQUENCE                                         = "42XAR";
     String LANG_BAD_DISTINCT_AGG                                         = "42XAS";
     String LANG_INVALID_ROWID_SCOPE                                      = "42XAT";
+    String LANG_INVALID_INPUT_COLUMN_NAME                                = "42XAU";
+    String LANG_INVALID_NUMBEROF_HEADER_LINES                            = "42XAV";
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
     // String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE             = "42Y02";

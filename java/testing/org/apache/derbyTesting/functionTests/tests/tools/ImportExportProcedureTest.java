@@ -1881,9 +1881,571 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
             " drop table inventory.orderTable");
         
         //end derby-390 related test cases.
-        
+  
         getConnection().rollback();
         st.close();
+    }
+
+    /* 
+    *tests for Derby-4555
+    */
+    public void test4555ColumnIndexesParsing() throws Exception{	
+
+  	CallableStatement cSt;
+        Statement st = createStatement();
+
+	st.executeUpdate(" create table pet(C1 varchar(50), C2 varchar(50) , C3 varchar(50))");
+
+	st.executeUpdate("insert into pet values('Pet', 'Kind' , 'Age')");
+
+	st.executeUpdate("insert into pet values('Name', 'of' , null)");
+
+	st.executeUpdate("insert into pet values(null, 'Animal' , null)");
+
+	st.executeUpdate("insert into pet values('Rover', 'Dog' , '4')");
+
+	st.executeUpdate("insert into pet values('Spot', 'Cat' , '2')");
+	
+	st.executeUpdate("insert into pet values('Squawky','Parrot','37')");
+	
+	st.executeUpdate(" create table pet1(C1 varchar(50), C2 varchar(50) , C3 int NOT NULL)");
+	
+	SupportFilesSetup.deleteFile("extinout/pet.dat");
+	st.executeUpdate("call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, "
+            + "'PET' , 'extinout/pet.dat', null, null, null) ");
+        
+	st.executeUpdate("delete from pet");
+	
+	// With both indexes and names of the columns for COLUMNINDEXES argument
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog","4"},
+                              { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Only with the names of the columns and multiline headernames for COLUMNINDEXES argument
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet Name\",\"Kind of Animal\",\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog","4"},
+                              { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Changing the order of the header names.	
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , 'C3,C1,C2' , '\"Age\",1,2' ,   'extinout/pet.dat' "
+            + "  , null , null ,null , 0, 3) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from Pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog","4"},
+                              { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+	st.executeUpdate("delete from pet");
+
+	//invalid column name 
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet\",2,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+
+	assertStatementError("42XAU", cSt);
+	
+	//Skip argument is 0 and non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet Name\",2,3' ,   'extinout/petlist.dat' "
+            + "  , null , null , null, 0, 0) ");
+
+	assertStatementError("42XAV", cSt);
+
+	//Skip argument is 2 and non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet Name\",2,3' ,   'extinout/petlist.dat' "
+            + "  , null , null , null, 0, 2) ");
+
+	assertStatementError("XIE04", cSt);
+
+	//Skip argument is 0
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 0) ");
+
+	assertStatementError("42XAV", cSt);
+
+	//Invalid number of header lines of the input file causes NULL value error
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET1' , null , '1,2,\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 1) ");
+
+	assertStatementError("XIE0R", cSt);
+
+	//Invalid number of header lines of the input file causes NULL value error
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET1' , null , '\"Pet\"\"Kind\"\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 1) ");
+
+	assertStatementError("42XAU", cSt);
+
+	//Skip argument is 7 that is greater than number of rows in the file.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 7) ");
+
+	assertStatementError("42XAU", cSt);
+
+	//Column name in capital letters.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,\"AGE\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+        
+	assertStatementError("42XAU", cSt);
+	
+	//Multiple header lines in the input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,\"Kind of Animal\",\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog","4"},
+                              { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Invalid ' " ' marks
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet\"\"Name\",\"Kind\"\"of\"\"Animal\",\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+        
+
+	assertStatementError("42XAU", cSt);
+
+	//Invalid number of header lines of the input file causes NULL value error
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET1' , null , '\"Pet Name\",\"Kind of\",\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 2) ");
+
+	assertStatementError("XIE0R", cSt);	
+
+        //Skip=4
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '\"Pet Name Rover\",2,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 4) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Skip=4
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,\"Age 4\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 4) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Skip=4
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,\"Kind of Animal Dog\",3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 4) ");
+        assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet"),
+                        new String[][]
+                        {
+			      { "Spot", "Cat", "2"},
+                              { "Squawky", "Parrot", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//The number of values in COLUMNINDEXES and INSERTCOLUMNS does not match
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+
+	assertStatementError("42802", cSt);
+
+	//The number of values in COLUMNINDEXES and INSERTCOLUMNS does not match
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,\"Kind of Animal\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+
+	assertStatementError("42802", cSt);
+
+	//The number of values in COLUMNINDEXES and INSERTCOLUMNS does not match
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,\"Age\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+
+	assertStatementError("42802", cSt);
+
+	//Skip argument is -2
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, -2) ");
+
+	assertStatementError("42XAV", cSt);
+
+	//Skip argument is -1
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , null , '1,2,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, -1) ");
+
+	assertStatementError("42XAV", cSt);
+	
+	//Insert only two columns
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , 'C1,C2' , '1,2' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+	
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select C1,C2 from pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog"},
+                              { "Spot", "Cat"},
+                              { "Squawky", "Parrot"},
+                        });
+
+	st.executeUpdate("delete from pet");
+	
+	//Wrong values for INSERTCOLUMNS argument causes NULL value error  
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET1' , 'C1,C2' , '1,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+	
+	assertStatementError("XIE0R", cSt);
+
+	//Insert only two columns, order is different
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , 'C1,C3' , '1,3' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+	
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select C1,C3 from pet"),
+                        new String[][]
+                        {
+			      {"Rover","4"},
+                              { "Spot", "2"},
+                              { "Squawky", "37"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	//Insert only two columns, order is different, with column names
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_BULK(null, "
+            + "'PET' , 'C1,C2' , '\"Pet Name\",\"Kind of Animal\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0, 3) ");
+	
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select C1,C2 from pet"),
+                        new String[][]
+                        {
+			      {"Rover","Dog"},
+                              { "Spot", "Cat"},
+                              { "Squawky", "Parrot"},
+                        });
+
+	st.executeUpdate("delete from pet");
+
+	/*
+         *Tests for SYSCS_IMPORT_TABLE_BULK procedure
+	 */
+	//Skip=0 and non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/petlist.dat', null, null, null, 0, 0) ");
+	
+	assertStatementError("38000", cSt);
+	
+	
+	//Skip=2 and non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/petlist.dat', null, null, null, 0, 2) ");
+	
+	assertStatementError("XJ001", cSt);
+	
+	//Skip=-1
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/pet.dat', null, null, null, 0, -1) ");
+	
+	assertStatementError("42XAV", cSt);
+	
+	//Skip argument is 7 that is greater than number of rows in the file.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/pet.dat', null, null, null, 0, 7) ");
+	assertStatementError("XIE0E", cSt);
+
+	//End of tests for SYSCS_IMPORT_TABLE_BULK procedure
+
+	/**
+         *Tests for SYSCS_IMPORT_DATA procedure
+	 */
+	
+	//COLUMNINDEXES 1,2,"Age". This should fail because no lines are skipped by this procedure
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, "
+            + "'PET1' , null , '1,2,\"AGE\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+
+	assertStatementError("42XAV", cSt);
+
+	//COLUMNINDEXES 1,2,Age. This should fail because no ' " ' in the column name.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, "
+            + "'PET1' , null , '1,2,AGE' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+	
+	assertStatementError("38000", cSt);
+
+	//COLUMNINDEXES 1,2,4. This should fail because no column 4 in the column name.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, "
+            + "'PET1' , null , '1,2,4' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+
+	assertStatementError("38000", cSt);
+
+	//File name is wrong.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, "
+            + "'PET' , null , '1,2,3' ,   'extinout/petlist.dat' "
+            + "  , null , null , null, 0) ");
+        
+
+	assertStatementError("38000", cSt);
+
+	//End of tests for SYSCS_IMPORT_DATA procedure
+
+	/**
+         *Tests for SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedure
+	 */
+
+	//COLUMNINDEXES 1,2,"Age". This should fail because no lines are skipped by this procedure
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(null, "
+            + "'PET1' , null , '1,2,\"AGE\"' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+
+	assertStatementError("42XAV", cSt);
+
+	//COLUMNINDEXES 1,2,Age. This should fail because no ' " ' in the column name.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(null, "
+            + "'PET1' , null , '1,2,AGE' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+	
+	assertStatementError("38000", cSt);
+
+	//COLUMNINDEXES 1,2,4. This should fail because no column 4 in the column name.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(null, "
+            + "'PET1' , null , '1,2,4' ,   'extinout/pet.dat' "
+            + "  , null , null , null, 0) ");
+
+	assertStatementError("38000", cSt);
+
+	//File name is wrong.
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(null, "
+            + "'PET' , null , '1,2,3' ,   'extinout/petlist.dat' "
+            + "  , null , null , null, 0) ");
+        
+
+	assertStatementError("38000", cSt);
+
+	//End of tests for SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE procedure
+
+
+	/**
+         *Tests for SYSCS_IMPORT_TABLE procedure
+	 */	
+	//Non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE(null, 'PET', 'extinout/petlist.dat', null, null, null, 0) ");
+	
+	assertStatementError("38000", cSt);
+
+	st.executeUpdate(" create table pet2(C1 varchar(50), C2 varchar(50))");
+	
+	st.executeUpdate("insert into pet2 values('Rover', 'Dog')");
+
+	st.executeUpdate("insert into pet2 values('Spot', 'Cat')");
+	
+	st.executeUpdate("insert into pet2 values('Squawky','Parrot')");
+
+	SupportFilesSetup.deleteFile("extinout/pet2.dat");
+	st.executeUpdate("call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, "
+            + "'PET2' , 'extinout/pet2.dat', null, null, null) ");
+
+	st.executeUpdate("delete from pet2");
+
+	//Table with only two columns
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE(null, 'PET2', 'extinout/pet2.dat', null, null, null, 0) ");
+
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet2"),
+                        new String[][]
+                        {
+			      {"Rover","Dog"},
+                              { "Spot", "Cat"},
+                              { "Squawky", "Parrot"},
+                        });
+
+	st.executeUpdate("delete from pet2");
+
+	st.executeUpdate(" create table pet3(C1 varchar(50),C2 int, C3 varchar(50))");
+	
+	st.executeUpdate("insert into pet3 values('Rover', 4, 'Dog')");
+
+	st.executeUpdate("insert into pet3 values('Spot', 2,'Cat')");
+	
+	st.executeUpdate("insert into pet3 values('Squawky',37,'Parrot')");
+
+	SupportFilesSetup.deleteFile("extinout/pet3.dat");
+	st.executeUpdate("call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, "
+            + "'PET3' , 'extinout/pet3.dat', null, null, null) ");
+
+	st.executeUpdate("delete from pet3");
+	
+	
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE(null, 'PET3', 'extinout/pet3.dat', null, null, null, 0) ");
+
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet3"),
+                        new String[][]
+                        {
+			      {"Rover","4","Dog"},
+                              { "Spot","2", "Cat"},
+                              { "Squawky", "37","Parrot"},
+                        });
+	st.executeUpdate("delete from pet3");
+	//End of tests for SYSCS_IMPORT_TABLE procedure
+
+
+	/**
+         *Tests for SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE procedure
+	 */	
+	//Non-existent input file
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(null, 'PET', 'extinout/petlist.dat', null, null, null, 0) ");
+	
+	assertStatementError("38000", cSt);
+
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(null, 'PET2', 'extinout/pet2.dat', null, null, null, 0) ");
+
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet2"),
+                        new String[][]
+                        {
+			      {"Rover","Dog"},
+                              { "Spot", "Cat"},
+                              { "Squawky", "Parrot"},
+                        });
+
+
+	st.executeUpdate("delete from pet2");
+	cSt = prepareCall(
+            " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(null, 'PET3', 'extinout/pet3.dat', null, null, null, 0) ");
+
+	assertUpdateCount(cSt, 0);
+
+	JDBC.assertFullResultSet(
+                	st.executeQuery("select * from pet3"),
+                        new String[][]
+                        {
+			      {"Rover","4","Dog"},
+                              { "Spot","2", "Cat"},
+                              { "Squawky", "37","Parrot"},
+                        });
+	st.executeUpdate("delete from pet3");
+	//End of tests for SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE procedure
+
+	
     }
     
     /**

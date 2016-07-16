@@ -173,6 +173,19 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     readNextToken(recordSeparator, 0, recordSeparatorLength, true);
   }
 
+
+  /**if skipHeaderLines is greater than 0, ignore skipHeaderLines number of lines. The way to do that is to just
+  *  look for the record separator
+ 	* @exception	Exception if there is an error
+	*/
+  protected void ignoreHeaderLines() throws Exception {
+    for(int i =0;i<skipLines;i++){
+       if(!readNextToken(recordSeparator, 0, recordSeparatorLength, true))
+          throw LoadError.unexpectedEndOfFile(lineNumber+1);
+    }
+  }
+
+
   /** load the column types from the meta data line to be analyzed
     * later in the constructor of the ImportResultSetMetaData.
 	*/
@@ -652,9 +665,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
        if (hasColumnDefinition){
           ignoreFirstRow();
        }
-       for(int i =0;i<skipLines;i++){
-          ignoreFirstRow();
-       }
+       ignoreHeaderLines();
     }
     if (formatCode == DEFAULT_FORMAT_CODE)
        readVal=readNextDelimitedRow(returnStringArray);

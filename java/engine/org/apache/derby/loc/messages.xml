@@ -2358,6 +2358,17 @@ Guide.
 		<arg>scope</arg>
 	    </msg>
 
+		<msg>
+		<name>42XAU</name>
+		<text>Invalid column name/names in the input file: '{0}' or Wrong number of header lines</text>
+		<arg>columnPattern</arg>
+	    </msg>
+
+		<msg>
+		<name>42XAV</name>
+		<text>Number of header lines should be greater than 0.</text>
+	    </msg>
+
 	        <msg>
                 <name>42XBA</name>
                 <text>The schema, table or column does not exist or the column is not a string type.</text>
