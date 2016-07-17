@@ -70,12 +70,12 @@ import java.sql.PreparedStatement;
   <encoded length> is one of N styles.
   <UL>
   <LI> (5.x format zero) 4 byte Java format integer value 0 - either <raw data> is 0 bytes/bits  or an unknown number of bytes.
-  <LI> (5.x format bits) 4 byte Java format integer value >0 (positive) - number of bits in <raw data>, number of bytes in <raw data>
+  <LI> (5.x format bits) 4 byte Java format integer value &gt;0 (positive) - number of bits in raw data, number of bytes in <raw data>
   is the minimum number of bytes required to store the number of bits.
-  <LI> (Derby format) 1 byte encoded length (0 <= L <= 31) - number of bytes of <raw data> - encoded = 0x80 & L
-  <LI> (Derby format) 3 byte encoded length (32 <= L < 64k) - number of bytes of <raw data> - encoded = 0xA0 <L as Java format unsigned short>
-  <LI> (Derby format) 5 byte encoded length (64k <= L < 2G) - number of bytes of <raw data> - encoded = 0xC0 <L as Java format integer>
-  <LI> (future) to be determined L >= 2G - encoded 0xE0 <encoding of L to be determined>
+  <LI> (Derby format) 1 byte encoded length (0 &lt;= L &lt;= 31) - number of bytes of raw data - encoded = 0x80 &amp; L
+  <LI> (Derby format) 3 byte encoded length (32 &lt;= L &lt; 64k) - number of bytes of raw data - encoded = 0xA0 <L as Java format unsigned short>
+  <LI> (Derby format) 5 byte encoded length (64k &lt;= L &lt; 2G) - number of bytes of raw data - encoded = 0xC0 <L as Java format integer>
+  <LI> (future) to be determined L &gt;= 2G - encoded 0xE0 <encoding of L to be determined>
   (0xE0 is an esacape to allow any number of arbitary encodings in the future).
   </UL>
   <BR>
@@ -750,11 +750,11 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * The <> operator as called from the language module, as opposed to
+	 * The &lt;&gt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <>
-	 * @param right			The value on the right side of the <>
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the two parameters
 	 * are not equal
@@ -783,11 +783,11 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * The < operator as called from the language module, as opposed to
+	 * The &lt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <
-	 * @param right			The value on the right side of the <
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is
 	 *			less than the second operand
@@ -816,11 +816,11 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * The > operator as called from the language module, as opposed to
+	 * The &gt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the >
-	 * @param right			The value on the right side of the >
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is
 	 *			greater than the second operand
@@ -849,11 +849,11 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * The <= operator as called from the language module, as opposed to
+	 * The &lt;= operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <=
-	 * @param right			The value on the right side of the <=
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is
 	 *			less than or equal to the second operand
@@ -882,11 +882,11 @@ abstract class SQLBinary
 	}
 
 	/**
-	 * The >= operator as called from the language module, as opposed to
+	 * The &gt;= operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the >=
-	 * @param right			The value on the right side of the >=
+	 * @param left			The value on the left side of the &gt;=
+	 * @param right			The value on the right side of the &gt;=
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is
 	 *			greater than or equal to the second operand

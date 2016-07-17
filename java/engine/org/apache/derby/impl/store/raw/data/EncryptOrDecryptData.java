@@ -52,7 +52,7 @@ import java.security.PrivilegedAction;
  *       temporary file(n<cid>.dat) in the data segment itself.
  *   3. Rename the current container file (c<cid>.dat) to
  *                                         another file (o<cid>.dat)
- *   4. Rename the new encrypted version of the file (n<cid).dat) to be
+ *   4. Rename the new encrypted version of the file (n&lt;cid).dat) to be
  *                                    the current container file (c<cid>.dat).
  *   5. All the old version of  the container (o<cid>.dat) files are removed
  *      after a successful checkpoint with a new key or on a rollback.

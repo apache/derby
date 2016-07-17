@@ -102,7 +102,7 @@ class LoadError {
 
 
 	/**
-	   Raised if, field & record separators are substring of each other.
+	   Raised if, field and record separators are substring of each other.
 	*/
 	static SQLException fieldAndRecordSeparatorsSubset() {
 		return  PublicAPI.wrapStandardException(

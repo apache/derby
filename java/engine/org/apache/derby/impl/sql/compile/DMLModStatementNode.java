@@ -308,7 +308,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  read columns. The returns a map such that
 
 	  <PRE>
-	  map[heapColId (0 based)] -> readCol id (0 based)
+	  map[heapColId (0 based)] -&gt; readCol id (0 based)
 	  </PRE>
 
 	  @param column_map_length The number of columns(ints) in the map.

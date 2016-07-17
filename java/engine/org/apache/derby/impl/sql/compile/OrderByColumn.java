@@ -45,7 +45,7 @@ class OrderByColumn extends OrderedColumn {
     /**
      * If this sort key is added to the result column list then it is at result column position
      * 1 + resultColumnList.size() - resultColumnList.getOrderBySelect() + addedColumnOffset
-     * If the sort key is already in the result column list then addedColumnOffset < 0.
+     * If the sort key is already in the result column list then addedColumnOffset &lt; 0.
      */
     private int addedColumnOffset = -1;
 

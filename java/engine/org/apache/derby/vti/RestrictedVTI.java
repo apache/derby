@@ -41,7 +41,7 @@ import java.sql.SQLException;
  * because they don't have to fetch all columns and rows. This can mean
  * performance boosts for queries which only need a subset of the Table
  * Function's columns and for queries which compare those columns to constant
- * expressions using the <, <=, =, >, >=, and != operators. This can also mean
+ * expressions using the &lt;, &lt;=, =, &gt;, &gt;=, and != operators. This can also mean
  * performance boosts for LIKE and BETWEEN operations on Table Function
  * columns. For more information, see the commentary on
  * <a href="https://issues.apache.org/jira/browse/DERBY-4357">DERBY-4357</a>.

@@ -62,7 +62,7 @@ public interface MethodBuilder {
 	/**
 		Push a parameter value.
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,param_value
 		</PRE>
 		@param id position of the parameter (zero based).
@@ -72,7 +72,7 @@ public interface MethodBuilder {
 	/**
 		Push a byte constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,byte_value
 		</PRE>
 	*/
@@ -81,7 +81,7 @@ public interface MethodBuilder {
 	/**
 		Push a boolean constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,boolean_value
 		</PRE>
 	*/
@@ -90,7 +90,7 @@ public interface MethodBuilder {
 	/**
 		Push a short constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,short_value
 		</PRE>
 	*/
@@ -99,7 +99,7 @@ public interface MethodBuilder {
 	/**
 		Push a int constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,int_value
 		</PRE>
 	*/
@@ -108,7 +108,7 @@ public interface MethodBuilder {
 	/**
 		Push a long constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,long_value
 		</PRE>
 	*/
@@ -117,7 +117,7 @@ public interface MethodBuilder {
 	/**
 		Push a float constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,float_value
 		</PRE>
 	*/
@@ -126,7 +126,7 @@ public interface MethodBuilder {
 	/**
 		Push a double constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,double_value
 		</PRE>
 	*/
@@ -135,7 +135,7 @@ public interface MethodBuilder {
 	/**
 		Push a String constant onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,String_value
 		</PRE>
 	*/
@@ -144,7 +144,7 @@ public interface MethodBuilder {
 	/**
 		Push a typed null onto the stack
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,null
 		</PRE>
 	*/
@@ -154,7 +154,7 @@ public interface MethodBuilder {
 		Push the contents of the local field onto the stack.
 		This call pushes the this instance required to access the field itself.
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,field_value
 		</PRE>
 
@@ -166,7 +166,7 @@ public interface MethodBuilder {
 		This call requires the instance (reference) to be pushed by the caller.
 
 		<PRE>
-		Stack ...,field_ref  =>
+		Stack ...,field_ref  =&gt;
 		      ...,field_value
 		</PRE>
 		
@@ -176,7 +176,7 @@ public interface MethodBuilder {
 	/**
 		Push the contents of the described static field onto the stack.
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,field_value
 		</PRE>
 	*/
@@ -188,7 +188,7 @@ public interface MethodBuilder {
 	This call does not leave any value on the stack.
 
 	<PRE>
-	Stack ...,value  =>
+	Stack ...,value  =&gt;
 	      ...
 	</PRE>
 	*/
@@ -200,7 +200,7 @@ public interface MethodBuilder {
 		Like the Java language 'field = value', this leaves the value on the stack.
 
 		<PRE>
-		Stack ...,value  =>
+		Stack ...,value  =&gt;
 		      ...,value
 		</PRE>
 	*/
@@ -212,7 +212,7 @@ public interface MethodBuilder {
 		Like the Java language 'field = value', this leaves the value on the stack.
 
 		<PRE>
-		Stack ...,value  =>
+		Stack ...,value  =&gt;
 		      ...,value
 		</PRE>
 	*/
@@ -224,7 +224,7 @@ public interface MethodBuilder {
 		Like the Java language 'field = value', this leaves the value on the stack.
 
 		<PRE>
-		Stack ...,field_ref,value  =>
+		Stack ...,field_ref,value  =&gt;
 		      ...,value
 		</PRE>
 	*/
@@ -238,7 +238,7 @@ public interface MethodBuilder {
 		calls.
 
 		<PRE>
-		Stack ... => [unchanged]
+		Stack ... =&gt; [unchanged]
 		      ...
 		</PRE>
 
@@ -253,7 +253,7 @@ public interface MethodBuilder {
 		to the newly created object.
 
 		<PRE>
-		Stack ...,value* => [numArgs number of values will be popped]
+		Stack ...,value* =&gt; [numArgs number of values will be popped]
 		      ...,new_ref
 		</PRE>
 
@@ -265,7 +265,7 @@ public interface MethodBuilder {
 		Create an instance of an array and push it onto the stack. 
 
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,array_ref
 		</PRE>
 
@@ -278,7 +278,7 @@ public interface MethodBuilder {
 	/**
 		Push this onto the stack.
 		<PRE>
-		Stack ...  =>
+		Stack ...  =&gt;
 		      ...,this_ref
 		</PRE>
 	*/
@@ -289,7 +289,7 @@ public interface MethodBuilder {
 		by upcasting method parameters. It does not put any casting code into the
 		byte code stream. Can only be used for refrences.
 		<PRE>
-		Stack ...,ref =>
+		Stack ...,ref =&gt;
 		      ...,ref
 		</PRE>
 	*/
@@ -299,7 +299,7 @@ public interface MethodBuilder {
 		Cast the top stack value. Correctly down-casts a reference or casts
 		a primitive type (e.g. int to short).
 		<PRE>
-		Stack ...,value =>
+		Stack ...,value =&gt;
 		      ...,cast_value
 		</PRE>
 
@@ -311,7 +311,7 @@ public interface MethodBuilder {
 		Pop the top stack value and push a boolean that is the result of
 		an instanceof check on the popped reference.
 		<PRE>
-		Stack ...,ref =>
+		Stack ...,ref =&gt;
 		      ...,boolean_value
 		</PRE>.
 	*/
@@ -320,7 +320,7 @@ public interface MethodBuilder {
 	/**
 	 * Pop the top value off the stack
 		<PRE>
-		Stack ..., value =>
+		Stack ..., value =&gt;
 		      ...
 		</PRE>.
 	*/
@@ -332,11 +332,11 @@ public interface MethodBuilder {
 		Must only be called if zero or one item exists
 		on the stack.
 		<PRE>
-		Stack value =>
+		Stack value =&gt;
 		      :empty:
 		or
 
-		Stack :empty: =>
+		Stack :empty: =&gt;
 		      :empty:
 
 		</PRE>.
@@ -349,11 +349,11 @@ public interface MethodBuilder {
 		on the stack. If the stack contains a single
 		value then that is popped and used as the returned value.
 		<PRE>
-		Stack value =>
+		Stack value =&gt;
 		      :empty:
 		or
 
-		Stack :empty: =>
+		Stack :empty: =&gt;
 		      :empty:
 
 		</PRE>.
@@ -386,7 +386,7 @@ public interface MethodBuilder {
 		value, then they must use the same number of values from the stack.
 
 		<PRE>
-		Stack ...,ref =>
+		Stack ...,ref =&gt;
 		      ...
 		</PRE>.
 
@@ -403,7 +403,7 @@ public interface MethodBuilder {
 		and restrictions.
 
 		<PRE>
-		Stack ...,boolean_value =>
+		Stack ...,boolean_value =&gt;
 		      ...
 		</PRE>.
 	*/
@@ -435,12 +435,12 @@ public interface MethodBuilder {
 		<PRE>
 		static methods
 
-		Stack ...,value* => [numArgs number of values will be popped]
+		Stack ...,value* =&gt; [numArgs number of values will be popped]
 		      ...,return_value [void methods will not push a value]
 
 		non-static methods
 
-		Stack ...,ref,value* => [numArgs number of values will be popped]
+		Stack ...,ref,value* =&gt; [numArgs number of values will be popped]
 		      ...,return_value [void methods will not push a value]
 		</PRE>
 
@@ -477,12 +477,12 @@ public interface MethodBuilder {
 		<PRE>
 		static methods
 
-		Stack ...,value* => [numArgs number of values will be popped]
+		Stack ...,value* =&gt; [numArgs number of values will be popped]
 		      ...,return_value [void methods will not push a value]
 
 		non-static methods
 
-		Stack ...,ref,value* => [numArgs number of values will be popped]
+		Stack ...,ref,value* =&gt; [numArgs number of values will be popped]
 		      ...,return_value [void methods will not push a value]
 		</PRE>
 
@@ -493,7 +493,7 @@ public interface MethodBuilder {
 		Call super(). Caller must only add this to a constructor.
 		<PRE>
 
-		Stack ... =>
+		Stack ... =&gt;
 		      ... 
 		</PRE>
 
@@ -503,7 +503,7 @@ public interface MethodBuilder {
 	/**
 		Pop an array refrence off the stack and push an element from that array.
 		<PRE>
-		Stack ...,array_ref =>
+		Stack ...,array_ref =&gt;
 		      ...,value
 		</PRE>
 
@@ -514,7 +514,7 @@ public interface MethodBuilder {
 	/**
 		Pop an array reference off the stack, store a value in the array at the passed in offset.
 		<PRE>
-		Stack ...,array_ref, value =>
+		Stack ...,array_ref, value =&gt;
 		      ...
 		</PRE>
 
@@ -526,7 +526,7 @@ public interface MethodBuilder {
 	/**
 		Swap the top two values on the stack.
 		<PRE>
-		Stack ...,valueA,valueB =>
+		Stack ...,valueA,valueB =&gt;
 		      ...,valueB,valueA
 		</PRE>
 	*/
@@ -535,7 +535,7 @@ public interface MethodBuilder {
 	/**
 		Duplicate the top value on the stack.
 		<PRE>
-		Stack ...,value =>
+		Stack ...,value =&gt;
 		      ...,value,value
 		</PRE>
 	*/

@@ -549,9 +549,9 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *
      * Formats are (with x representing value bits):
      * <PRE>
-     * 1 Byte- 00xxxxxx                            val <= 63 (0x3f)
-     * 2 Byte- 01xxxxxx xxxxxxxx                   val > 63 && <= 16383 (0x3fff)
-     * 4 byte- 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx val > 16383 && <= MAX_INT
+     * 1 Byte- 00xxxxxx                            val &lt;= 63 (0x3f)
+     * 2 Byte- 01xxxxxx xxxxxxxx                   val &gt; 63 &amp;&amp; &lt;= 16383 (0x3fff)
+     * 4 byte- 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx val &gt; 16383 &amp;&amp; &lt;= MAX_INT
      * </PRE>
      *
      * @exception IOException if an I/O error happens
@@ -637,13 +637,13 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *
      * Formats are (with x representing value bits):
      * <PRE>
-     * value <= 16383 (0x3fff): 
+     * value &gl;= 16383 (0x3fff): 
      *     2 byte - 00xxxxxx xxxxxxxx 
      *
-     * value > 16383 && <= 0x3fffffff:
+     * value &gt; 16383 &amp;&amp; &lt;= 0x3fffffff:
      *     4 byte - 01xxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
      *
-     * value > 0x3fffffff && <= MAX_LONG:
+     * value &lt; 0x3fffffff &amp;&lt; &lt;= MAX_LONG:
      *     8 byte - 1xxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
      * </PRE>
      *

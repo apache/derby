@@ -48,7 +48,7 @@ import org.apache.derby.iapi.types.RowLocation;
  * the table's rows satisfying the filter as a result set.
  *
  * There are several things we could do during object
- * construction that are done in the open & next calls, to
+ * construction that are done in the open and next calls, to
  * improve performance.
  *
  */

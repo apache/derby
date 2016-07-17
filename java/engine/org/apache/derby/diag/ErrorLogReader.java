@@ -56,13 +56,13 @@ import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 	<PRE>SELECT vti.ts, threadid, cast(xid as int) as xid_int, cast(lccid as int) as lccid_int, logtext 
 		 FROM new org.apache.derby.diag.ErrorLogReader() vti, 
 			(VALUES timestampConstant) t(ts)
-		 WHERE vti.ts <= t.ts AND 
-				vti.ts >
+		 WHERE vti.ts &lt;= t.ts AND 
+				vti.ts &gt;
 					(SELECT MAX(ts) IS NULL ? '2000-01-01 00:00:00.1' : MAX(ts)
 					 FROM new org.apache.derby.diag.ErrorLogReader() vti_i
 					 WHERE (logtext LIKE 'Committing%' OR
 							logtext LIKE 'Rolling%') AND
-						   vti.xid = vti_i.xid AND ts < t.ts)
+						   vti.xid = vti_i.xid AND ts &lt; t.ts)
 		 ORDER BY xid_int, vti.ts
 	</PRE>
 

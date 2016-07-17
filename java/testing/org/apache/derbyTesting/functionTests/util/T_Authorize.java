@@ -48,7 +48,7 @@ public class T_Authorize
 	  This function depends on DDL performed by the authorize.jsql test.
 	  
 	  @param k A key for adding/deleting rows in table t.
-	  @param shouldBeReadOnly true -> the connection should be ReadOnly
+	  @param shouldBeReadOnly true -&gt; the connection should be ReadOnly
 	  */
 	private static void verifyAccess(int k, boolean shouldBeReadOnly)
 		 throws Exception

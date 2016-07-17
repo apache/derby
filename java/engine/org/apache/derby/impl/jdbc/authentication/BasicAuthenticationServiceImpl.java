@@ -45,7 +45,7 @@ import java.sql.SQLException;
  * It is activated upon setting derby.authentication.provider database
  * or system property to 'BUILTIN'.
  * <p>
- * It instantiates & calls the basic User authentication scheme at runtime.
+ * It instantiates and calls the basic User authentication scheme at runtime.
  * <p>
  * In 2.0, users can now be defined as database properties.
  * If derby.database.propertiesOnly is set to true, then in this

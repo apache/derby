@@ -219,7 +219,7 @@ public class StatementPlanCacheTest extends BaseJDBCTestCase {
    
     /**
      * Compile a number of statements based upon the sqlbase
-     * replacing the & with a number increasing from 0 to number - 1
+     * replacing the and with a number increasing from 0 to number - 1
      * 
      * Uses PreparedStatement unless sqlbase starts with CALL then
      * CallableStatement is used.

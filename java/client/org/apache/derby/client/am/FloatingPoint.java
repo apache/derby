@@ -64,9 +64,15 @@ public class FloatingPoint {
     //--------------entry points for runtime representation-----------------------
 
     /**
+     * <p>
      * Build a Java float from a 4-byte floating point representation.
-     * <p/>
-     * This includes DERBY types: <ul> <li> REAL <li> FLOAT(1<=n<=24) </ul>
+     * </p>
+     *
+     * <p>
+     * This includes DERBY types:
+     * </p>
+     *
+     * <ul> <li> REAL <li> FLOAT(1&lt;=n&lt;=24) </ul>
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
      */

@@ -88,7 +88,7 @@ import java.sql.SQLException;
  *             |  V      V                 |                     |
  *|========================|      |=================|      |=================|
  *|    EmbedConnection     |      | EmbedConnection |      | EmbedConnection |
- *|                        |<-----|                 |<-----|                 |
+ *|                        |&lt;-----|                 |&lt;-----|                 |
  *| (DetachableConnection) |      | ProxyConnection |      | ProxyConnection |
  *|========================|      |=================|      |=================|
  *   ^                 | ^             ^                        ^

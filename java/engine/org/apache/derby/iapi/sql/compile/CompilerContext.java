@@ -324,7 +324,7 @@ public interface CompilerContext extends Context
 	 * in execution constructs.  Execution code will have to generate:
 	 *	<pre>
 	 *	(#objectType) (this.getPreparedStatement().getSavedObject(#int))
-	 *  <\pre>
+	 *  </pre>
 	 *
 	 * @param o object to add to the pool of saved objects
 	 * @return the entry # for the object

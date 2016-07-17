@@ -217,8 +217,8 @@ public class DynamicByteArrayOutputStream extends OutputStream {
 		expansion.
 
 		<UL>
-		<LI> buf.length < 128k - increase by 4k
-		<LI> buf.length < 1Mb - increase by 128k
+		<LI> buf.length &lt; 128k - increase by 4k
+		<LI> buf.length &lt; 1Mb - increase by 128k
 		<LI> otherwise increase by 1Mb.
 		</UL>
 

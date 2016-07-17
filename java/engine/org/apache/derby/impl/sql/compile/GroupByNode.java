@@ -63,7 +63,7 @@ import org.apache.derby.impl.sql.execute.AggregatorInfoList;
  * NOTE: A GroupByNode extends FromTable since it can exist in a FromList.
  * <p>
  * There is a lot of room for optimizations here: <UL>
- * <LI> agg(distinct x) group by x => agg(x) group by x (for min and max) </LI>
+ * <LI> agg(distinct x) group by x =&gt; agg(x) group by x (for min and max) </LI>
  * <LI> min()/max() use index scans if possible, no sort may 
  *		be needed. </LI>
  * </UL>
@@ -500,11 +500,11 @@ class GroupByNode extends SingleChildResultSetNode
 	  </pre>
 	 * the query tree ends up looking like this:
 	   <pre>
-	    ProjectRestrictNode RCL -> (ptr to GBN(column[0]), ptr to GBN(column[1]), ptr to GBN(column[4]))
+	    ProjectRestrictNode RCL -&gt; (ptr to GBN(column[0]), ptr to GBN(column[1]), ptr to GBN(column[4]))
 	              |
-	    GroupByNode RCL->(C1, SUM(C2), <agg-input>, <aggregator>, MAX(C3), <agg-input>, <aggregator>)
+	    GroupByNode RCL-&gt;(C1, SUM(C2), &lt;agg-input&gt;, <aggregator>, MAX(C3), &lt;agg-input&gt;, &lt;aggregator&gt;)
 	              |
-	    ProjectRestrict RCL->(C1, C2, C3)
+	    ProjectRestrict RCL-&gt;(C1, C2, C3)
 	              |
 	    FromBaseTable
 	    </pre>

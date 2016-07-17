@@ -169,7 +169,7 @@ public class RowUtil
 	  Copy references for an ExecRow's columns to another ExecRow.
 	  For copying from a compact array to a reconstituted array.
 	  E.g. if positions = {2, 4}, and from = {666, 777} then
-	  to => {null, 666, null, 777}.  Will only go as far as to.getArray().length.
+	  to =&gt; {null, 666, null, 777}.  Will only go as far as to.getArray().length.
 
 	  @param to Place the column references here.  Sparse array
 	  @param from Get the column references from here. Compact array
@@ -400,7 +400,7 @@ public class RowUtil
 	}	
 	/**
 	 * Shift a FormatableBitSet N bits toward the zero end.
-	 * e.g. shift({2,4}) -> {1,3}.
+	 * e.g. shift({2,4}) -&gt; {1,3}.
 	 *
 	 * @param bitSet the bit set
 	 * @param n	the number of bits to shift

@@ -565,26 +565,33 @@ class RAFContainer4 extends RAFContainer {
     }
 
     /**
+     * <p>
      * This method handles what to do when, during a NIO operation we receive a
      * {@code ClosedChannelException}. Note the specialization hierarchy:
-     * <p/>
-     * {@code ClosedChannelException} -> {@code AsynchronousCloseException} ->
+     * </p>
+     * <p>
+     * {@code ClosedChannelException} -&gt; {@code AsynchronousCloseException} -&gt;
      * {@code ClosedByInterruptException}
-     * <p/>
+     * </p>
+     * <p>
      * If {@code e} is a ClosedByInterruptException, we normally start
      * container recovery, i.e. we need to reopen the random access file so we
      * get get a new interruptible channel and continue IO.
-     * <p/>
+     * </p>
+     * <p>
      * If {@code e} is a {@code AsynchronousCloseException} or a plain {@code
      * ClosedChannelException}, the behavior depends of {@code stealthMode}:
-     * <p/>
+     * </p>
+     * <p>
      * If {@code stealthMode == false}, the method will wait for
      * another thread tp finish recovering the IO channel before returning.
-     * <p/>
+     * </p>
+     * <p>
      * If {@code stealthMode == true}, the method throws {@code
      * InterruptDetectedException}, allowing retry at a higher level in the
      * code.  The reason for this is that we sometimes need to release monitors
      * on objects needed by the recovery thread.
+     * </p>
      *
      * @param e Should be an instance of {@code ClosedChannelException}.
      * @param stealthMode If {@code true}, do retry at a higher level

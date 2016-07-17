@@ -727,16 +727,16 @@ public	class DD_Version implements	Formatable
 
 		jbmsVersion.getMinorVersion()*100 +jbmsVersion.getMaintVersion() + (jbmsVersion.isBeta() ? 0 : 1) + 2
 
-		5.0.22 => (0*100) + 22 + 2 =  24 - (5.0 has a unique major number)
-		5.1.2  => (1*100) + 2 + 2  = 104 - (5.1 has a unique major number) 
+		5.0.22 =&gt; (0*100) + 22 + 2 =  24 - (5.0 has a unique major number)
+		5.1.2  =&gt; (1*100) + 2 + 2  = 104 - (5.1 has a unique major number) 
 
 
 		With the switch to the four part scheme in 5.2, the maint number now is in increments of one million,
 		thus the above scheme could lead to duplicate numbers. Note that the major number may not change
 		when the minor external release changes, e.g. 5.2 and 5.3 could share a DD_Version major number.
 
-		5.2.1.100 => (2*100) + 1000100 + 2 = 1000302
-		5.3.1.0   => (3*100) + 1000000 + 2 = 1000302
+		5.2.1.100 =&gt; (2*100) + 1000100 + 2 = 1000302
+		5.3.1.0   =&gt; (3*100) + 1000000 + 2 = 1000302
 
 		
 

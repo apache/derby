@@ -576,7 +576,7 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
     // streamTest5(length, tableName);
     // }
     /**
-     * If length > 32700 insert to a BLOB field. Else, a long varchar field.
+     * If length &gt; 32700 insert to a BLOB field. Else, a long varchar field.
      * 
      * @param length
      *            Padding length

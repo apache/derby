@@ -82,7 +82,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	(non-first) alloc page have N == 0.
 
 	<PRE>
-                             <-- borrowed ->
+                             [ borrowed ]
 	+----------+-------------+---+---------+-------------------+-------------+--------+
 	| FormatId | page header | N | N bytes | alloc extend rows | slot offset |checksum|
 	+----------+-------------+---+---------+-------------------+-------------+--------+
@@ -98,7 +98,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	first physical byte of the container.  Subsequent allocation pages are
 	chained via the nextAllocPageOffset.  Each allocation page is expected to
 	manage at least 1000 user pages (for 1K page size) so this chaining may not
-	be a severe performance hit.  The logical -> physical mapping of an
+	be a severe performance hit.  The logical -&gt; physical mapping of an
 	allocation page is stored in the previous allocation page.  The container
 	object will need to maintain this mapping.
 	<P>
@@ -1074,7 +1074,7 @@ public class AllocPage extends StoredPage
      *     truncated.  The next allocate looks at actual size of file as
      *     does the right thing.
      *
-     * <p)
+     * <p>
      * MT - expect Container level X lock
      *
 	 * @exception  StandardException  Standard exception policy.

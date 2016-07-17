@@ -39,7 +39,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *
  * DERBY-1296 - Setting property derby.system.bootAll causes an Exception
  * 
- * create & shutdown three databases as well as the default
+ * create and shutdown three databases as well as the default
  * shutdown the engine
  * set "derby.system.bootAll"
  * check at least four databases are listed in the driver info

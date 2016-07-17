@@ -426,7 +426,7 @@ public class MultiTest
 	** Given the command file, infer the test name.
 	** Takes the portion of the file name between
 	** the last '.' and the last '/'.  e.g.
-	** x/y/Name.suffix -> Name
+	** x/y/Name.suffix -&gt; Name
 	**
 	*/
 	private static String getTestName(String cmdFile)

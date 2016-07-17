@@ -381,7 +381,7 @@ public final class SQLTime extends DataType
      *<ol>
      *<li>old ISO and IBM European standard: hh.mm[.ss]
      *<li>IBM USA standard: hh[:mm] {AM | PM}
-     *<li>JIS & current ISO: hh:mm[:ss]
+     *<li>JIS and current ISO: hh:mm[:ss]
      *</ol>
      * 
      * @exception StandardException if the syntax is invalid or the value is
@@ -398,7 +398,7 @@ public final class SQLTime extends DataType
      *<ol>
      *<li>old ISO and IBM European standard: hh.mm[.ss]
      *<li>IBM USA standard: hh[:mm] {AM | PM}
-     *<li>JIS & current ISO: hh:mm[:ss]
+     *<li>JIS and current ISO: hh:mm[:ss]
      *</ol>
      * 
      * @exception StandardException if the syntax is invalid or the value is
@@ -841,7 +841,7 @@ public final class SQLTime extends DataType
 	}
 	/**
 	 *	Calculate the encoded time from a Calendar object
-	 *	encoded time is hour << 16 + min << 8 + sec
+	 *	encoded time is hour &lt;&lt; 16 + min &lt;&lt; 8 + sec
 	 *  this function is also used by SQLTimestamp 
 	 *
 	 * @param	cal calendar with time set
@@ -909,7 +909,7 @@ public final class SQLTime extends DataType
 
 	/**
 	 * Compute encoded time value
-	 * Time is represented by hour << 16 + minute << 8 + seconds
+	 * Time is represented by hour &lt;&lt; 16 + minute &lt;&lt; 8 + seconds
 	 */
 	private	int computeEncodedTime(java.util.Date value) throws StandardException
 	{

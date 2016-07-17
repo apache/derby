@@ -114,7 +114,7 @@ public abstract class Restriction implements Serializable
        * </p>
        *
        * <blockquote><pre>
-       *  <     =     <=     >      >=    IS NULL    IS NOT NULL
+       *  &lt;     =     &lt;=     &gt;      &gt;=    IS NULL    IS NOT NULL
        * </pre></blockquote>
        */
     public static class ColumnQualifier extends Restriction
@@ -128,19 +128,19 @@ public abstract class Restriction implements Serializable
         /** Derby serializes these objects in PreparedStatements */
         public static final long serialVersionUID = -8205388794606605844L;
         
-        /**	 Ordering operation constant representing '<' **/
+        /**	 Ordering operation constant representing '&lt;' **/
         public static final int ORDER_OP_LESSTHAN = 0;
 
         /**	 Ordering operation constant representing '=' **/
         public static final int ORDER_OP_EQUALS = 1;
 
-        /**	 Ordering operation constant representing '<=' **/
+        /**	 Ordering operation constant representing '&lt;=' **/
         public static final int ORDER_OP_LESSOREQUALS = 2;
 
-        /**	 Ordering operation constant representing '>' **/
+        /**	 Ordering operation constant representing '&gt;' **/
         public static final int ORDER_OP_GREATERTHAN = 3;
 
-        /**	 Ordering operation constant representing '>=' **/
+        /**	 Ordering operation constant representing '&gt;=' **/
         public static final int ORDER_OP_GREATEROREQUALS = 4;
 
         /**	 Ordering operation constant representing 'IS NULL' **/

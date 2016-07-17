@@ -3421,10 +3421,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 	/**
 	 * Return the "semi" row count of a table.  We are only interested in
-	 * whether the table has 0, 1 or > 1 rows.
+	 * whether the table has 0, 1 or &gt; 1 rows.
 	 *
 	 *
-	 * @return Number of rows (0, 1 or > 1) in table.
+	 * @return Number of rows (0, 1 or &gt; 1) in table.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */

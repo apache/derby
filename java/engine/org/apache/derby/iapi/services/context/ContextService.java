@@ -70,7 +70,7 @@ public final class ContextService //OLD extends Hashtable
         set to -1. This is because nesting is solely represented by
         the stack, with the current context manager on top of the stack.
         This supports multiple levels of nesting across two stacks, e.g.
-        C1->C2->C2->C1->C2.
+        C1-&gt;C2-&gt;C2-&gt;C1-&gt;C2.
 		</UL>
 
 		This thread local is used to find the current context manager. Basically it provides

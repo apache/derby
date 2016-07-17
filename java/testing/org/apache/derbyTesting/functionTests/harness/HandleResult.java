@@ -29,7 +29,7 @@ import java.io.IOException;
 
 /**
   Class: HandleResult
-  Purpose: To capture stdout & stderr to a file
+  Purpose: To capture stdout and stderr to a file
   (PrintWriter is used for writing the output)
 */
 

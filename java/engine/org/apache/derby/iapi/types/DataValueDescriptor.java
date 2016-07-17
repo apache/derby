@@ -693,7 +693,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 						throws StandardException;
 
 	/**
-	 * The SQL language <> operator.  This method is called from the language
+	 * The SQL language &lt;&gt; operator.  This method is called from the language
 	 * module.  The storage module uses the compare method in Orderable.
 	 *
 	 * @param left		The value on the left side of the operator
@@ -708,7 +708,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 						throws StandardException;
 
 	/**
-	 * The SQL language < operator.  This method is called from the language
+	 * The SQL language &lt; operator.  This method is called from the language
 	 * module.  The storage module uses the compare method in Orderable.
 	 *
 	 * @param left		The value on the left side of the operator
@@ -723,7 +723,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 						throws StandardException;
 
 	/**
-	 * The SQL language > operator.  This method is called from the language
+	 * The SQL language &gt; operator.  This method is called from the language
 	 * module.  The storage module uses the compare method in Orderable.
 	 *
 	 * @param left		The value on the left side of the operator
@@ -738,7 +738,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 						throws StandardException;
 
 	/**
-	 * The SQL language <= operator.  This method is called from the language
+	 * The SQL language &lt;= operator.  This method is called from the language
 	 * module.  The storage module uses the compare method in Orderable.
 	 *
 	 * @param left		The value on the left side of the operator
@@ -753,7 +753,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 						throws StandardException;
 
 	/**
-	 * The SQL language >= operator.  This method is called from the language
+	 * The SQL language &gt;= operator.  This method is called from the language
 	 * module.  The storage module uses the compare method in Orderable.
 	 *
 	 * @param left		The value on the left side of the operator
@@ -810,9 +810,9 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 * @param other		The Orderable to compare this one to.
 	 *
-	 * @return  <0 - this Orderable is less than other.
+	 * @return  &lt;0 - this Orderable is less than other.
 	 * 			 0 - this Orderable equals other.
-	 *			>0 - this Orderable is greater than other.
+	 *			&gt;0 - this Orderable is greater than other.
      *
      *			The code should not explicitly look for -1, or 1.
 	 *
@@ -829,9 +829,9 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @param other		The Orderable to compare this one to.
          % @param nullsOrderedLow True if null should be lower than non-NULL
 	 *
-	 * @return  <0 - this Orderable is less than other.
+	 * @return  &lt;0 - this Orderable is less than other.
 	 * 			 0 - this Orderable equals other.
-	 *			>0 - this Orderable is greater than other.
+	 *			&gt;0 - this Orderable is greater than other.
      *
      *			The code should not explicitly look for -1, or 1.
 	 *
@@ -847,8 +847,8 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * values.
 	 *
 	 * @param op	Orderable.ORDER_OP_EQUALS means do an = comparison.
-	 *				Orderable.ORDER_OP_LESSTHAN means compare this < other.
-	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this <= other.
+	 *				Orderable.ORDER_OP_LESSTHAN means compare this &lt; other.
+	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this &lt;= other.
 	 * @param other	The DataValueDescriptor to compare this one to.
 	 * @param orderedNulls	True means to treat nulls as ordered values,
 	 *						that is, treat SQL null as equal to null, and less
@@ -881,8 +881,8 @@ public interface DataValueDescriptor extends Storable, Orderable
          * whether they should be lower than non-NULL values, or higher
 	 *
 	 * @param op	Orderable.ORDER_OP_EQUALS means do an = comparison.
-	 *				Orderable.ORDER_OP_LESSTHAN means compare this < other.
-	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this <= other.
+	 *				Orderable.ORDER_OP_LESSTHAN means compare this &lt; other.
+	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this &lt;= other.
 	 * @param other	The DataValueDescriptor to compare this one to.
 	 * @param orderedNulls	True means to treat nulls as ordered values,
 	 *						that is, treat SQL null as equal to null, and either greater or less

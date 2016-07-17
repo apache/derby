@@ -4926,7 +4926,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      * non-zero fraction to see what happens to the discarded fractional
      * part (scale == 1): Conversions to long should round off in the
      * direction of zero for both positive and negative numbers with a
-     * fractional part >< 0, cf. RoundingMode.DOWN used in the asserts
+     * fractional part &gt;&lt; 0, cf. RoundingMode.DOWN used in the asserts
      * below.
      */
     public void testDerby5536() throws SQLException {

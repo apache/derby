@@ -841,7 +841,7 @@ public class EmbedStatement extends ConnectionChild
      * this result is a ResultSet.  getMoreResults also implicitly
      * closes any current ResultSet obtained with getResultSet.
      *
-     * There are no more results when (!getMoreResults() &&
+     * There are no more results when (!getMoreResults() &amp;&amp;
      * (getUpdateCount() == -1)
      *
      * @return true if the next result is a ResultSet; false if it is
@@ -931,7 +931,7 @@ public class EmbedStatement extends ConnectionChild
      *
      * @param rows the number of rows to fetch
      * @exception SQLException if a database-access error occurs, or the
-     * condition 0 <= rows <= this.getMaxRows() is not satisfied.
+     * condition 0 &lt;= rows &lt;= this.getMaxRows() is not satisfied.
      */
     public void setFetchSize(int rows) throws SQLException {
 		checkStatus();

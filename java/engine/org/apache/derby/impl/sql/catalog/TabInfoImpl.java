@@ -406,7 +406,7 @@ class TabInfoImpl
 	 *
 	 *	@param	row			row to insert
 	 *	@param	tc			transaction
-	 *	@return	row number (>= 0) if duplicate row inserted into an index
+	 *	@return	row number (&gt;= 0) if duplicate row inserted into an index
 	 *			ROWNOTDUPLICATE otherwise
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -428,7 +428,7 @@ class TabInfoImpl
 	 *	@param	tc			transaction controller
 	 *
 	 *
-	 *	@return	row  number (>= 0) if duplicate row inserted into an index
+	 *	@return	row  number (&gt;= 0) if duplicate row inserted into an index
 	 *			ROWNOTDUPLICATE otherwise
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -453,7 +453,7 @@ class TabInfoImpl
 	  @param tc	transaction controller
 	  @param rowLocationOut on output rowLocationOut[0] is set to the
 	         last RowLocation inserted.
-	  @return row number (>= 0) if duplicate row inserted into an index
+	  @return row number (&gt;= 0) if duplicate row inserted into an index
 	  			ROWNOTDUPLICATE otherwise
 	 */
 	private int insertRowListImpl(ExecRow[] rowList, TransactionController tc,
@@ -781,7 +781,7 @@ class TabInfoImpl
 	 * Given an index row and index number return the RowLocation
 	 * in the heap of the first matching row.
 	 * Used by the autoincrement code to get the RowLocation in
-	 * syscolumns given a <tablename, columname> pair.
+	 * syscolumns given a &lt;tablename, columname&gt; pair.
 	 * 
 	 * @see DataDictionaryImpl#computeRowLocation(TransactionController, TableDescriptor, String)
 	 *

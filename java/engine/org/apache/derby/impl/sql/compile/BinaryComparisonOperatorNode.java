@@ -31,7 +31,7 @@ import org.apache.derby.iapi.types.TypeId;
 
 /**
  * This node is the superclass  for all binary comparison operators, such as =,
- * <>, <, etc.
+ * &lt;&gt;, &lt;, etc.
  *
  */
 

@@ -145,7 +145,7 @@ public class DropWhileConnectingTest
         /**
          * Reports the access count for the specified worker thread.
          *
-         * @param id worker thread id, must be in the range [0, threadCount>
+         * @param id worker thread id, must be in the range [0, threadCount&gt;
          * @param accessCount number of successful accesses made to the db
          */
         public synchronized void reportAccessCount(int id, int accessCount) {
@@ -157,7 +157,7 @@ public class DropWhileConnectingTest
          * Reports an unexpected error and the access count for the specified
          * worker thread.
          *
-         * @param id worker thread id, must be in the range [0, threadCount>
+         * @param id worker thread id, must be in the range [0, threadCount&gt;
          * @param accessCount number of successful accesses made to the db
          * @param error error to report
          */

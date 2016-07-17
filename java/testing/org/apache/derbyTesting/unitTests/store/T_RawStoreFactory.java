@@ -6455,7 +6455,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		Insert a single row with single or multiple portions.
 		Update every other field with a long col
 		rollback.
-		The update each column back to a null & rollback
+		The update each column back to a null and rollback
 
 		@exception T_Fail Unexpected behaviour from the API
 		@exception StandardException Unexpected exception from the implementation

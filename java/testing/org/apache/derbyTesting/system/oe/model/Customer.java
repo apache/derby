@@ -30,8 +30,8 @@ import java.sql.Timestamp;
  * <BR>
  * For clarity these fields are renamed in Java
  * <UL>
- * <LI>w_id => warehouse (SQL column C_W_ID)
- * <LI>d_id => district (SQL column C_D_ID)
+ * <LI>w_id =&gt; warehouse (SQL column C_W_ID)
+ * <LI>d_id =&gt; district (SQL column C_D_ID)
  * </UL>
  * <BR>
  * The columns that map to an address are extracted out as

@@ -156,7 +156,7 @@ public class AsynchronousLogShipper extends Thread implements
      * max(MAX, DEFAULT_NUMBER_LOG_BUFFERS*MIN) is the maximum delay between a 
      * log record is committed at the master until it is replicated  to the 
      * slave. Hence the default latency should be atleast greater than the maximum
-     * latency offered by the choice of MIN, hence MAX > DEFAULT_NUMBER_LOG_BUFFERS*MIN.
+     * latency offered by the choice of MIN, hence MAX &gt; DEFAULT_NUMBER_LOG_BUFFERS*MIN.
      */
     private static final long MAX = 5000;
 
@@ -376,7 +376,7 @@ public class AsynchronousLogShipper extends Thread implements
      * action to be taken when a notification from the log shipper is received,
      * 
      * a) Get FI from log buffer
-     * b) If FI >= FI_HIGH
+     * b) If FI &gt;= FI_HIGH
      *     b.1) notify the log shipper thread.
      * c) Else If the time elapsed since last ship is greater than
      *    minShippingInterval
@@ -402,9 +402,9 @@ public class AsynchronousLogShipper extends Thread implements
      * information obtained from the log buffer. This method uses the following
      * steps to arrive at the shipping interval,
      * 
-     * a) FI >= FI_HIGH return -1 (signifies that the waiting time should be 0)
-     * b) FI >  FI_LOW and FI < FI_HIGH return minShippingInterval
-     * c) FI <= FI_LOW return maxShippingInterval.
+     * a) FI &gt;= FI_HIGH return -1 (signifies that the waiting time should be 0)
+     * b) FI &gt;  FI_LOW and FI &lt; FI_HIGH return minShippingInterval
+     * c) FI &lt;= FI_LOW return maxShippingInterval.
      * 
      * @return the shipping interval based on the fill information.
      */

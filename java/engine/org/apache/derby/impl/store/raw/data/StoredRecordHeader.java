@@ -78,7 +78,7 @@ public final class StoredRecordHeader
      * RECORD_VALID_MASK        - A mask of valid bits that can be set 
      *                            currently, such that the following assert can
      *                            be made: 
-     *                              ASSERT((status & ~RECORD_VALID_MASK) == 0))
+     *                              ASSERT((status &amp; ~RECORD_VALID_MASK) == 0))
      **/
     private static final byte RECORD_DELETED = 0x01;
     private static final byte RECORD_OVERFLOW = 0x02;

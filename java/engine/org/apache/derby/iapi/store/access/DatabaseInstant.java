@@ -35,9 +35,9 @@ import java.io.Serializable;
  * event E2. We call this I(E2). By definition
  *
  * <OL>
- * <LI> If I(E1) < I(E2) event E1 occurred before event E2
+ * <LI> If I(E1) &lt; I(E2) event E1 occurred before event E2
  * <LI> If I(E2) = I(E2) event E1 is the same event as E2
- * <LI> If I(E1) > I(E2) event E1 occurred after event E2
+ * <LI> If I(E1) &gt; I(E2) event E1 occurred after event E2
  * </OL>
  *
  * <P>It is not meaningful to compare a DatabaseInstant from one database with a

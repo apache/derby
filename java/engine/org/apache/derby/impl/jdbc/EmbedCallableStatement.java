@@ -789,7 +789,7 @@ public class EmbedCallableStatement extends EmbedPreparedStatement
     /**
      * JDBC 3.0
      *
-     * Retrieves the value of a JDBC REF (<structured-type) parameter as a Ref
+     * Retrieves the value of a JDBC REF (structured-type) parameter as a Ref
      * object in the Java programming language.
      *
      * @param parameterName - the name of the parameter

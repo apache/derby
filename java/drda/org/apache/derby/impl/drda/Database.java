@@ -443,7 +443,7 @@ class Database
      *
      * @throws SQLException if metadata call fails
      * @return <code>true</code> if locators are supported,
-     *         <code>false</code otherwise
+     *         <code>false</code> otherwise
      */
     boolean supportsLocator() throws SQLException
     {

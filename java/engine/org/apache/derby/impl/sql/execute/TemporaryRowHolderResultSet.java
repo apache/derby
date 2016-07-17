@@ -1193,7 +1193,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	  not in the partial row if validColumns.get(N) returns false.  Column N is
 	  in the partial row if validColumns.get(N) returns true.  If column N is
 	  in the partial row then it maps to DataValueDescriptor[M] where M is the
-      count of calls to validColumns.get(i) that return true where i < N.  If
+      count of calls to validColumns.get(i) that return true where i &lt; N.  If
 	  DataValueDescriptor.length is greater than the number of columns 
       indicated by validColumns the extra entries are ignored.  
 	*/

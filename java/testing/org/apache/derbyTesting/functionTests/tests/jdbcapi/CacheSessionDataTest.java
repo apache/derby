@@ -390,7 +390,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
      * Sets the current schema to the name given as argument and returns the
      * schema transition.
      * @param nextSchema schema to transition to
-     * @return a string of the form oldSchema->newSchema
+     * @return a string of the form oldSchema-&gt;newSchema
      * @throws java.sql.SQLException
      */
     public static String getSchemaTransition(String nextSchema)
@@ -412,8 +412,8 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     
     /**
      * Utility that cycles through the legal isolation levels in the following
-     * order: read uncommitted -> read committed -> repeatable read -> 
-     * serializable -> read uncommitted -> ...
+     * order: read uncommitted -&gt; read committed -&gt; repeatable read -&gt; 
+     * serializable -&gt; read uncommitted -&gt; ...
      * @return IsoLevel object representing the isolation level.
      */
     private static IsoLevel cycleIsolation() {

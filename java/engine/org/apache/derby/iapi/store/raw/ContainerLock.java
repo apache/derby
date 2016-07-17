@@ -89,7 +89,7 @@ public final class ContainerLock {
 
 	/**
 		Get an integer representation of the type of the lock. This method is guaranteed
-		to return an integer >= 0 and < C_NUMBER. No correlation between the value
+		to return an integer &gt;= 0 and &t; C_NUMBER. No correlation between the value
 		and one of the static variables (CIS etc.) is guaranteed, except that
 		the values returned do not change.
 	*/

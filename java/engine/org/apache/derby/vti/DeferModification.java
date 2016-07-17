@@ -29,7 +29,7 @@ import java.sql.SQLException;
  * Consider the following statement:<br>
  * UPDATE NEW myVTI(...)
  *  SET cost = cost + 10
- *  WHERE cost < 15
+ *  WHERE cost &lt; 15
  *<p>
  * Updating a column that is used in the WHERE clause might or might not give the VTI implementation trouble;
  * the update might cause the same row to be selected more than once. This problem can be solved by building the

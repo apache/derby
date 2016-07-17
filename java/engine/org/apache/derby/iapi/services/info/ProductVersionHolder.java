@@ -58,7 +58,7 @@ import java.util.Properties;
 	is represented by a int (2G values) we have plenty of room for encoding. If we assign a given
 	majorVersion.minorVersion.fixPack a 10 year life, then we about the maximum number of individual releases
 	it can have is 10 years * 365 days/year = 3650. Thus with the pre 5.2 scheme we would not expect a 
-	5.1.x to have an x > 3650 (approximately). Usually the rate of point releases has been much less than
+	5.1.x to have an x &gt; 3650 (approximately). Usually the rate of point releases has been much less than
 	one per day, 5.1.31 is released about 225 days after GA which makes around a point release every 7 days.
 	But in the encoding we need to be conservative. With fix packs the maximum is about 2 per year and fix
 	packs are only made to the current release, thus with a yearly minor release cycle we would imagine
@@ -80,9 +80,9 @@ import java.util.Properties;
 
     The encoding number must continue to increase so that the
 	
-		encodedMaintB > encodedMaintA
+		encodedMaintB &gt; encodedMaintA
 
-		if (fixPackB > fixPackA) || ((fixPackB == fixPackA) && (bugB > bugA))
+		if (fixPackB &gt; fixPackA) || ((fixPackB == fixPackA) &amp;&amp; (bugB &gt; bugA))
 
 
 	Selected encoding
@@ -368,10 +368,10 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
     /**
      * Return the build number as an integer if possible,
      * mapping from the SVN number.
-     * nnnnn -> returns nnnnn
-     * nnnnnM -> returns -nnnnn indicates a modified code base
-     * nnnnn:mmmmm -> returns -nnnnn
-     * anything else -> returns -1
+     * nnnnn -&gt; returns nnnnn
+     * nnnnnM -&gt; returns -nnnnn indicates a modified code base
+     * nnnnn:mmmmm -&gt; returns -nnnnn
+     * anything else -&gt; returns -1
     */
     public int getBuildNumberAsInt(){
     	if (buildNumber == null)

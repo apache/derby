@@ -94,7 +94,7 @@ public final class ActiveLock extends Lock {
 	/**
 		Wait for a lock to be granted, returns when the lock is granted.
 		<P>
-		The sleep wakeup scheme depends on the two booleans wakeUpNow & potentiallyGranted.
+		The sleep wakeup scheme depends on the two booleans wakeUpNow and potentiallyGranted.
 		  
 		MT - Single thread required - and assumed to be the thread requesting the lock.
 

@@ -84,7 +84,7 @@ import java.util.Vector;
        returns false.
   <LI> Column N is in the partial row if validColumns.isSet(N) returns true.
   <LI> If column N is in the partial row then it maps to row[N].
-	   If N >= row.length then the column is taken as non existent for an
+	   If N &gt;= row.length then the column is taken as non existent for an
 	   insert or update, and not fetched on a fetch.
   </UL>
   If row.length is greater than the number of columns indicated by validColumns
@@ -209,7 +209,7 @@ public class RowUtil
      *                        the number of columns, allow caller to tell
      *                        the maximum column number if it knows.  
      *                        -1  means caller does not know.
-     *                        >=0 number is the largest column number.
+     *                        &gt;=0 number is the largest column number.
      *                           
      * @param columnList valid columns in the row
      *

@@ -289,13 +289,13 @@ public interface NetworkServerMBean {
      * active if the DrdaMaxThreads attribute (<code>derby.drda.maxThreads</code> 
      * property) is 0.</p>
      * <p>
-     * If DrdaMaxThreads is > 0 and DrdaTimeSlice is 0, connections remain 
+     * If DrdaMaxThreads is &gt; 0 and DrdaTimeSlice is 0, connections remain 
      * active until they are closed. If there are more than DrdaMaxThreads 
      * connections, inactive connections will be waiting for some active 
      * connection to close. The connection request will return when the 
      * connection becomes active.</p>
      * <p>
-     * If DrdaMaxThreads is > 0 and DrdaTimeSlice > 0, connections will be 
+     * If DrdaMaxThreads is &gt; 0 and DrdaTimeSlice &gt; 0, connections will be 
      * alternating beetween active and waiting according to Derby's time 
      * slicing algorithm.</p>
      * <p>

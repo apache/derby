@@ -1400,7 +1400,7 @@ public class SURTest extends SURBaseTest {
      * passed down to ScrollInsensitiveResultSet.updateRow does not always
      * contain all the rows of the basetable, cf. the logic of RowChangerImpl.
      * When an explicit list of columns is given as in FOR UPDATE OF
-     * <column-list>, the ExecRow may contains a subset of the the base table
+     * &lt;column-list&gt;, the ExecRow may contains a subset of the the base table
      * columns and ScrollInsensitiveResultSet was not ready to handle that.
      *
      * Test some of the cases which went wrong before the fix.

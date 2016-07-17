@@ -53,14 +53,14 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 Note all branches here are using relative offsets, not absolute program counters.
 
-If the then code leads to the conditional branch offset being too big (>32k)
+If the then code leads to the conditional branch offset being too big (&gt;32k)
 because the then code is larger than 32767 bytes then this is built:
 <code>
      // when else code is present
      if condition branch to tb: (relative offset +8)
      goto_w eb: // indirect for else block (5 bytes)
      tb:
-	    then code (> 32767 bytes)
+	    then code (&gt; 32767 bytes)
 	    goto end:
 	 eb:
 	  else code
@@ -72,7 +72,7 @@ because the then code is larger than 32767 bytes then this is built:
      if condition branch to tb: (relative offset +8)
      goto_w end: // indirect for else block (5 bytes)
      tb:
-	    then code (> 32767 bytes)
+	    then code (&gt; 32767 bytes)
 	 end:
 </code>
 
@@ -84,7 +84,7 @@ the code is:
 	  then code
 	  goto_w end:  // skip else
 	 eb:
-	  else code (> 32767 bytes)
+	  else code (&gt; 32767 bytes)
 	 end:
 </code>
 
@@ -97,10 +97,10 @@ for this is the same as when both the then code and the else code require
      if condition branch to tb: (relative offset +8)
      goto_w eb: // indirect for else block (5 bytes)
      tb:
-	    then code (> 32767 bytes)
+	    then code (&gt; 32767 bytes)
 	    goto_w end:
 	 eb:
-	  else code (> 32767 bytes)
+	  else code (&gt; 32767 bytes)
 	 end:
 </code>
 

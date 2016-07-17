@@ -1786,7 +1786,7 @@ class PredicateList extends QueryTreeNodeVector<Predicate>
 	/**
 	 * Perform transitive closure on join clauses.  For each table in the query,
 	 * we build a list of equijoin clauses of the form:
-	 *		<ColumnReference> <=> <ColumnReference>
+	 *		ColumnReference relop ColumnReference
 	 * Each join clause is put on 2 lists since it joins 2 tables.
 	 * 
 	 * We then walk the array of lists.  We first walk it as the outer list.  

@@ -652,7 +652,7 @@ public class Changes10_9 extends UpgradeChange
 
     /**
      * Regexp pattern to match the file name of a jar file stored in the
-     * database (version >= 10.9).
+     * database (version &gt;= 10.9).
      */
     private Goal[] pattern;
     
@@ -704,7 +704,7 @@ public class Changes10_9 extends UpgradeChange
 
     /**
      * assert that fName has the expected shape of a jar file
-     * in the database (version >= 10.9).
+     * in the database (version &gt;= 10.9).
      */
     private void assertFileNameShape(String fName) {
         assertTrue(matches(fName, pattern));

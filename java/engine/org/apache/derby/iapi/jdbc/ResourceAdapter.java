@@ -171,7 +171,7 @@ import org.apache.derby.iapi.error.StandardException;
 * <BR>
 *
 *                                                     |-------------|
-*                                  |======= produces=>| <B>XAResource</B>  |
+*                                  |======= produces=&gt;| <B>XAResource</B>  |
 *                                  ||                 |-------------|
 *                                  ||                       |
 *                                  ||                     has A
@@ -179,13 +179,13 @@ import org.apache.derby.iapi.error.StandardException;
 *                                  ||  |---------------------
 *                                  ||  V
 * |--------------| produces |--------------| 
-* | <B>XADataSource</B> |=========>| <B>XAConnection</B>
+* | <B>XADataSource</B> |=========&gt;| <B>XAConnection</B>
 * |--------------|          |--------------| 
 *       |                          | 
 *     extends                    extends
 *       |                          | 
 *       |                |-----------------------|   |----------------------|
-*       |                | DB2jPooledConnection |==>| BrokeredConnection |
+*       |                | DB2jPooledConnection |==&gt;| BrokeredConnection |
 *       |                |-----------------------|   |----------------------|
 *       |                          |       ^                  |
 *       |                        has A     |               has A
@@ -198,7 +198,7 @@ import org.apache.derby.iapi.error.StandardException;
 *       |                          |
 *       V                          V
 * |------------|           |----------------------|   |-----------------------|
-* | JDBCDriver |=produces=>| DetachableConnection |==>| XATransactionResource |
+* | JDBCDriver |=produces=&gt;| DetachableConnection |==&gt;| XATransactionResource |
 * | LocalDriver|           |----------------------|   |                       |
 * |------------|                   |                  |   points to :         |
 *                                  |                  |XATransactionController|
@@ -210,7 +210,7 @@ import org.apache.derby.iapi.error.StandardException;
 *                                extends                     extends
 *                                  |                            |
 *                           |-----------------|       |-----------------------|
-*                           | EmbedConnection |-- ?-->|  TransactionResource  |
+*                           | EmbedConnection |-- ?--&gt;|  TransactionResource  |
 *                           |-----------------|       |-----------------------|
 *
 * 
@@ -227,7 +227,7 @@ import org.apache.derby.iapi.error.StandardException;
 *       |                  ||
 *       |                  \/
 *       |                |-----------------------|   |----------------------|
-*       |                | <B>DB2jPooledConnection</B> |==>| <B>BrokeredConnection</B> |
+*       |                | <B>DB2jPooledConnection</B> |==&gt;| <B>BrokeredConnection</B> |
 *       |                |-----------------------|   |----------------------|
 *       |                          |       ^                  |
 *       |                        has A     |               has A
@@ -240,7 +240,7 @@ import org.apache.derby.iapi.error.StandardException;
 *       |                          |
 *       V                          V
 * |------------|           |----------------------|   |-----------------------|
-* | JDBCDriver |=produces=>| EmbedConnection |==>|  TransactionResource  |
+* | JDBCDriver |=produces=&gt;| EmbedConnection |==&gt;|  TransactionResource  |
 * | LocalDriver|           |----------------------|   |-----------------------|
 * |------------| 
 * 
@@ -258,7 +258,7 @@ import org.apache.derby.iapi.error.StandardException;
 *       |
 *       V
 * |------------|            |-----------------|     |-----------------------|
-* | JDBCDriver |==produces=>| <B>EmbedConnection</B> |- ?->| TransactionResource   |
+* | JDBCDriver |==produces=&gt;| <B>EmbedConnection</B> |- ?-&gt;| TransactionResource   |
 * | LocalDriver|            |-----------------|     |-----------------------|
 * |------------|
 

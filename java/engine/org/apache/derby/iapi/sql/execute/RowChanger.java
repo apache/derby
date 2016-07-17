@@ -74,7 +74,7 @@ public interface RowChanger
 	  Open this RowChanger to avoid fixing indexes that do not change
 	  during update operations. 
 
-	  @param fixOnUpdate fixOnUpdat[ix] == true ==> fix index 'ix' on
+	  @param fixOnUpdate fixOnUpdat[ix] == true ==&gt; fix index 'ix' on
 	  an update operation.
 	  @param lockMode	The lock mode to use
 							(row or table, see TransactionController)

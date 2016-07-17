@@ -1,4 +1,5 @@
 /*
+  
 
    Derby - Class org.apache.derby.impl.tools.optional.DBMDWrapper
 
@@ -72,7 +73,7 @@ import org.apache.derby.iapi.sql.dictionary.OptionalTool;
  * 
  * 
  * -- now list metadata in a foreign database
- * call setDatabaseURL( 'com.mysql.jdbc.Driver', 'jdbc:mysql://localhost/world?user=root&password=' );
+ * call setDatabaseURL( 'com.mysql.jdbc.Driver', 'jdbc:mysql://localhost/world?user=root&amp;password=' );
  * 
  * select t.table_schem, t.table_name, c.column_name, c.type_name
  * from table( getTables( 'WORLD', null, null ) ) t,

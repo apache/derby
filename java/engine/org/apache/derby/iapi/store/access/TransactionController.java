@@ -723,7 +723,7 @@ public interface TransactionController
      * Once the first write of a non-readOnly nested transaction is done,
      * then the nested user transaction must be committed or aborted before
      * any write operation is attempted in the parent transaction.  
-     * (p>
+     * <p>
      * fix for DERBY-5493 introduced a behavior change for commits executed
      * against an updatable nested user transaction.  Prior to this change
      * commits would execute a "lazy" commit where commit log record would only
@@ -1009,14 +1009,14 @@ public interface TransactionController
 	|                   | value | op | value |op | returned     |serialization |
 	+-------------------+-------+----+-------+---+--------------+--------------+
 	| x = 5             | {5}   | GE | {5}   |GT |{5,2} .. {5,6}|{4,6} .. {5,6}|
-	| x > 5             | {5}   | GT | null  |   |{6,1} .. {9,1}|{5,6} .. {9,1}|
-	| x >= 5            | {5}   | GE | null  |   |{5,2} .. {9,1}|{4,6} .. {9,1}|
-	| x <= 5            | null  |    | {5}   |GT |{1,1} .. {5,6}|first .. {5,6}|
-  	| x < 5             | null  |    | {5}   |GE |{1,1} .. {4,6}|first .. {4,6}|
-	| x >= 5 and x <= 7 | {5},  | GE | {7}   |GT |{5,2} .. {7,1}|{4,6} .. {7,1}|
-	| x = 5  and y > 2  | {5,2} | GT | {5}   |GT |{5,4} .. {5,6}|{5,2} .. {5,6}|
-	| x = 5  and y >= 2 | {5,2} | GE | {5}   |GT |{5,2} .. {5,6}|{4,6} .. {5,6}|
-	| x = 5  and y < 5  | {5}   | GE | {5,5} |GE |{5,2} .. {5,4}|{4,6} .. {5,4}|
+	| x &gt; 5             | {5}   | GT | null  |   |{6,1} .. {9,1}|{5,6} .. {9,1}|
+	| x &gt;= 5            | {5}   | GE | null  |   |{5,2} .. {9,1}|{4,6} .. {9,1}|
+	| x &lt;= 5            | null  |    | {5}   |GT |{1,1} .. {5,6}|first .. {5,6}|
+  	| x &lt; 5             | null  |    | {5}   |GE |{1,1} .. {4,6}|first .. {4,6}|
+	| x &gt;= 5 and x &lt;= 7 | {5},  | GE | {7}   |GT |{5,2} .. {7,1}|{4,6} .. {7,1}|
+	| x = 5  and y &gt; 2  | {5,2} | GT | {5}   |GT |{5,4} .. {5,6}|{5,2} .. {5,6}|
+	| x = 5  and y &gt;= 2 | {5,2} | GE | {5}   |GT |{5,2} .. {5,6}|{4,6} .. {5,6}|
+	| x = 5  and y &lt; 5  | {5}   | GE | {5,5} |GE |{5,2} .. {5,4}|{4,6} .. {5,4}|
 	| x = 2             | {2}   | GE | {2}   |GT | none         |{1,1} .. {1,1}|
 	+-------------------+-------+----+-------+---+--------------+--------------+
 	</blockquote></pre>
@@ -1069,11 +1069,11 @@ public interface TransactionController
     if (qualifier != null)
     {
         <blockquote><pre>
-		for (int and_clause; and_clause < qualifier.length; and_clause++)
+		for (int and_clause; and_clause &lt; qualifier.length; and_clause++)
 		{
             boolean or_qualifies = false;
 
-            for (int or_clause; or_clause < qualifier[and_clause].length; or_clause++)
+            for (int or_clause; or_clause &lt; qualifier[and_clause].length; or_clause++)
             {
                 <blockquote><pre>
                 DataValueDescriptor key     = 
@@ -1465,7 +1465,7 @@ public interface TransactionController
      * implementation may only track this info under SanityManager.DEBUG mode.
      * If the implementation does not track the info it will return -1 (so
      * code using this call to verify that no congloms are open should check
-     * for return <= 0 rather than == 0).
+     * for return &lt;= 0 rather than == 0).
      * <p>
      * The return value depends on the "which_to_count" parameter as follows:
      * <UL>

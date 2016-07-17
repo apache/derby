@@ -133,7 +133,7 @@ final class GenericStatementContext
      * returned to the application).
      *
      * When the StatementContext object is assigned with setInUse(),
-     * a CancelQueryTask is scheduled if a timeout > 0 has been set.
+     * a CancelQueryTask is scheduled if a timeout &gt; 0 has been set.
      */
     private static class CancelQueryTask
         extends

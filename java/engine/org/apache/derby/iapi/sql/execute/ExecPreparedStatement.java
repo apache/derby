@@ -98,7 +98,7 @@ public interface ExecPreparedStatement
      * </p>
      *
      * <pre>
-     * getActivationClass() == gc && upToDate()
+     * getActivationClass() == gc &amp;&amp; upToDate()
      * </pre>
      *
      * @param gc a generated class that must be identical to {@code

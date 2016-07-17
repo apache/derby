@@ -41,7 +41,7 @@ package org.apache.derbyTesting.junit;
  * the elapsed time is printed out and after R repeats of the test, the average
  * elapsed time is also printed.
  *  
- * If  a test has R repeats and (R>1), then the average elapsed time of the
+ * If  a test has R repeats and (R&gt;1), then the average elapsed time of the
  * (R-1) runs is printed out and the timing info collected as part of the first 
  * testrun is ignored. 
  * If R=1, then the average elapsed time prints time for that

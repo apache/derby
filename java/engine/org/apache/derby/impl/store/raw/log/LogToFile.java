@@ -505,7 +505,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 * there was no support to do write sync until jdk1.4 and then
 	 * there was write sync jvm bug in jdk1.4.1, only in jdk1.4.2 write 
 	 * sync(rws and rwd modes) mechanism can be used correctly.
-	 * Default in JVMS >= jdk1.4.2 is write sync(see the boot method for jvm checks).
+	 * Default in JVMS &gt;= jdk1.4.2 is write sync(see the boot method for jvm checks).
 	 *
 	 * Write sync mechanism support is added  for performance reasons. 
 	 * On commits, logging system has to make sure the log for committed
@@ -1435,7 +1435,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			4               |--------------------------------------(end of log)
 			5                                       |-^-|
 			.                                   Checkpoint Log Record
-			---A--->|<-------B--------->|<-------------C-----------
+			---A---&gt;|&lt;-------B---------&gt;|&lt;-------------C-----------
 		</PRE>
 
 		<P>

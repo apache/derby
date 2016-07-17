@@ -61,9 +61,9 @@ import org.apache.derby.shared.common.sanity.SanityManager;
     Collections consist of a set of objects in which the entries in the collection
     are nested within the length/ code point of the collection.
     <P>
-    Layer B objects with data >=32763 bytes long format is 
+    Layer B objects with data &gt;=32763 bytes long format is 
         2 bytes     Length - length of class, length, and extended total length fields
-                    (high order bit set, indicating >=32763)
+                    (high order bit set, indicating &gt;=32763)
         2 bytes     Type of the object (code point)
         n bytes     Extended total length - length of the object
                     (n = Length - 4)
@@ -261,7 +261,7 @@ class DDMReader
     /**
      * Is there more in this DDM object
      *
-     * @return true if DDM length is > 0
+     * @return true if DDM length is &gt; 0
      */
     protected boolean moreDdmData()
     {
@@ -271,7 +271,7 @@ class DDMReader
     /**
      * Is there more in this DDS object
      *
-     * @return true if DDS length is > 0
+     * @return true if DDS length is &gt; 0
      */
     protected boolean moreDssData()
     {

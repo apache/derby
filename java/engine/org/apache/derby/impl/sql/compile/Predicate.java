@@ -1015,13 +1015,13 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	 *           |           /   \ 
 	 *          PRN     SELECT[1]  SELECT[2] 
 	 *           |         |          | 
-	 *       <FBT:T1>     PRN        PRN 
+	 *       [FBT:T1]     PRN        PRN 
 	 *                     |          |
-	 *                SELECT[3]  <FromBaseTable:T2> 
+	 *                SELECT[3]  [FromBaseTable:T2]
 	 *                     |
 	 *                    PRN
 	 *                     |
-	 *             <FromBaseTable:T3>
+	 *             [FromBaseTable:T3]
 	 *
 	 * Assume also that we have some predicate "SELECT[4].i = <UNION>.j".
 	 * If the optimizer decides to push the predicate to the UNION

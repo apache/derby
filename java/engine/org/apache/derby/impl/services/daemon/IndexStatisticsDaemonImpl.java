@@ -1416,7 +1416,7 @@ public class IndexStatisticsDaemonImpl
          * @param index row index
          * @return {@code -1} if the current and previous key are identical,
          *      the index of the changed part of the key otherwise
-         *      ([0, key length>)
+         *      ([0, key length&gt;)
          * @throws StandardException if comparing the two keys fails
          */
         public int compareWithPrevKey(int index)

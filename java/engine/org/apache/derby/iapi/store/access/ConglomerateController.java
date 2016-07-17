@@ -112,7 +112,7 @@ public interface ConglomerateController extends ConglomPropertyQueryable
      * unknown condition of the controller following a transaction ending error.
      * Use this call when closing all controllers as part of an abort of a 
      * transaction.
-     * <p)
+     * <p>
      * This call is meant to only be used internally by the Storage system,
      * clients of the storage system should use the simple close() interface.
      * <p>

@@ -2279,7 +2279,7 @@ public final class TriggerGeneralTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Derby-388: When a set of inserts & updates is performed on a table
+     * Derby-388: When a set of inserts and updates is performed on a table
      * and each update fires a trigger that in turn performs other updates,
      * Derby will sometimes try to recompile the trigger in the middle
      * of the update process and will throw an NPE when doing so.

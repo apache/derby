@@ -221,7 +221,7 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	** @return The length in bits for this value
 	**
 	** NOTE: could possibly be changed to a long.  As is
-	** we are restricted to 2^(31-3) -> 256meg instead
+	** we are restricted to 2^(31-3) -&gt; 256meg instead
 	** of 2^31 (Integer.MAX_VALUE) like other datatypes
 	** (or 2 gig).  If it is ever changed to a long
 	** be sure to change read/writeExternal which write
@@ -392,18 +392,18 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * Will always do a byte by byte compare.
 	 *
 	 * Given 2 similar bits of unequal lengths (x and y),
-	 * where x.getLength() < y.getLength() but where:
+	 * where x.getLength() &lt; y.getLength() but where:
 	 *
 	 *	 x[0..x.getLength()] == y[0..x.getLength()]
 	 *
-	 * then x < y.
+	 * then x &lt; y.
 	 *
 	 *
 	 * @param other the other bit to compare to
 	 *
-	 * @return -1	- if other <  this
+	 * @return -1	- if other &lt;  this
 	 *			0	- if other == this
-	 *			1	- if other >  this
+	 *			1	- if other &gt;  this
 	 *
 	 */
 	public int compare(FormatableBitSet other)

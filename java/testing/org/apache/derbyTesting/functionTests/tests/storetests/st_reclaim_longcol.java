@@ -371,7 +371,7 @@ public class st_reclaim_longcol extends BaseJDBCTestCase
     /**
      * wait for background thread to convert allocated pages to free pages
      * <p>
-     * Wait until the total number of allocated pages is <= alloc_wait_count.
+     * Wait until the total number of allocated pages is &lt;= alloc_wait_count.
      * The expectation is that the test has performed some deletes and 
      * committed allowing the background task converted empty allocated pages
      * with only deleted rows into free pages.

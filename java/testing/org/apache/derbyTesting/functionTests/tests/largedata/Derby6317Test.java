@@ -109,11 +109,11 @@ Source result set:
 				Scan type=btree
 				Tree height=4
 				start position:
-					>= on first 1 column(s).
+					&gt;= on first 1 column(s).
 					Ordered null semantics on the following columns: 
 					0 
 				stop position:
-					> on first 1 column(s).
+					&gt; on first 1 column(s).
 					Ordered null semantics on the following columns: 
 					0 
 				qualifiers:
@@ -243,11 +243,11 @@ Source result set:
 						Scan type=btree
 						Tree height=-1
 						start position:
-							>= on first 1 column(s).
+							&gt;= on first 1 column(s).
 							Ordered null semantics on the following columns: 
 							0 
 						stop position:
-							> on first 1 column(s).
+							&gt; on first 1 column(s).
 							Ordered null semantics on the following columns: 
 							0 
 						qualifiers:
@@ -277,11 +277,11 @@ Source result set:
 					Scan type=btree
 					Tree height=3
 					start position:
-						>= on first 1 column(s).
+						&gt;= on first 1 column(s).
 						Ordered null semantics on the following columns: 
 						0 
 					stop position:
-						> on first 1 column(s).
+						&gt; on first 1 column(s).
 						Ordered null semantics on the following columns: 
 						0 
 					qualifiers:

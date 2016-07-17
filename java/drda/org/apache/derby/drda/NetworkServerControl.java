@@ -44,24 +44,24 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
     <P>
     <UL>
-    <LI>start [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This starts the Network
+    <LI>start [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  This starts the Network
     Server on the port/host specified or on localhost, port 1527 if no
     host/port is specified and no properties are set to override the 
     defaults. By default a security manager with a default security policy will 
     be installed. The default security policy file is called server.policy. 
     By default the Network Server will only listen for 
     connections from the machine on which it is running. 
-    Use -h 0.0.0.0 to listen on all interfaces or -h &lt;hostname> to listen 
+    Use -h 0.0.0.0 to listen on all interfaces or -h &lt;hostname&gt; to listen 
     on a specific interface on a  multiple IP machine. 
     For documentation on &lt;sslmode&gt;, consult the Server and Administration Guide.</LI>
 
     <LI>shutdown [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;] [-user &lt;username&gt;] [-password &lt;password&gt;]: This shutdowns the Network Server with given user credentials on the host and port specified or on the local host and port 1527(default) if no host or port is specified.  </LI> 
 
-    <LI>ping [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]
+    <LI>ping [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]
     This will test whether the Network Server is up.
     </LI>
 
-    <LI>sysinfo [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This prints 
+    <LI>sysinfo [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  This prints 
     classpath and version information about the Network Server, 
     the JVM and the Derby engine. 
     </LI>
@@ -71,28 +71,28 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     prepared statements, and memory usage for the running Network Server.
     </LI>
 
-    <LI>logconnections {on | off} [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  
+    <LI>logconnections {on | off} [-h &lt;host&gt;] [-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  
     This turns logging of connections on or off.  
     Connections are logged to derby.log. 
     Default is off.</LI>
 
-    <LI>maxthreads &lt;max> [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  
+    <LI>maxthreads &lt;max&gt; [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]:  
     This sets the maximum number of threads that can be used for connections. 
     Default 0 (unlimitted).
     </LI>
 
-    <LI>timeslice &lt;milliseconds> [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]: 
+    <LI>timeslice &lt;milliseconds&gt; [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;]: 
     This sets the time each session can have using a connection thread 
     before yielding to a waiting session. Default is 0 (no yeild).
     
     </LI>
 
-    <LI>trace {on | off} [-s &lt;session id>] [-h &lt;host>] [-p &lt;portnumber>]  [-ssl &lt;sslmode&gt;]: 
+    <LI>trace {on | off} [-s &lt;session id&gt;] [-h &lt;host&gt;] [-p &lt;portnumber&gt;]  [-ssl &lt;sslmode&gt;]: 
     This turns drda tracing on or off for the specified session or if no 
     session is  specified for all sessions. Default is off</LI>
 
 
-    <LI>tracedirectory &lt;tracedirectory> [-h &lt;host>] [-p &lt;portnumber>]  [-ssl &lt;sslmode&gt;]: 
+    <LI>tracedirectory &lt;tracedirectory&gt; [-h &lt;host&gt;] [-p &lt;portnumber&gt;]  [-ssl &lt;sslmode&gt;]: 
     This changes where new trace files will be placed. 
     For sessions with tracing already turned on,  
     trace files remain in the previous location. 
@@ -108,13 +108,13 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     The following is a list of properties that can be set for 
     NetworkServerControl:
 
-    <UL><LI>derby.drda.portNumber=&lt;port number>: This property 
+    <UL><LI>derby.drda.portNumber=&lt;port number&gt;: This property 
     indicates which port should be used for the Network Server. </LI>
 
-    <LI>derby.drda.host=&lt;host name  or ip address >: This property 
+    <LI>derby.drda.host=&lt;host name  or ip address &gt;: This property 
     indicates the ip address to which NetworkServerControl should connect. </LI>
 
-    <LI>derby.drda.traceDirectory=&lt;trace directory>: This property 
+    <LI>derby.drda.traceDirectory=&lt;trace directory&gt;: This property 
     indicates where to put trace files. </LI>
 
     <LI>derby.drda.traceAll=true:  This property turns on tracing for
@@ -123,23 +123,23 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     <LI>derby.drda.logConnections=true:  This property turns on logging
     of connections. Default is connections are not logged.</LI>
 
-    <LI>derby.drda.minThreads=&lt;value>: If this property
-    is set, the &lt;value> number of threads will be created when the Network Server is
+    <LI>derby.drda.minThreads=&lt;value&gt;: If this property
+    is set, the &lt;value&gt; number of threads will be created when the Network Server is
     booted. </LI>
 
-    <LI>derby.drda.maxThreads=&lt;value>: If this property
-    is set, the &lt;value> is the maximum number of connection threads that will be 
+    <LI>derby.drda.maxThreads=&lt;value&gt;: If this property
+    is set, the &lt;value&gt; is the maximum number of connection threads that will be 
     created.  If a session starts when there are no connection threads available
     and the maximum number of threads has been reached, it will wait until a 
     conection thread becomes available. </LI>
 
-    <LI>derby.drda.timeSlice=&lt;milliseconds>: If this property
+    <LI>derby.drda.timeSlice=&lt;milliseconds&gt;: If this property
     is set, the connection threads will not check for waiting sessions until the
-    current session has been working for &lt;milliseconds>.  
+    current session has been working for &lt;milliseconds&gt;.  
     A value of 0 causes the thread to work on the current session until the 
     session exits. If this property is not set, the default value is 0. </LI>
 
-    <LI>derby.drda.sslMode=&lt;sslmode&gt: This property sets the SSL
+    <LI>derby.drda.sslMode=&lt;sslmode&gt; This property sets the SSL
     mode of the server.
     
 </LI>
@@ -206,7 +206,7 @@ public class NetworkServerControl{
      * @param address     The IP address of the Network Server host.
      *                     address cannot be null.
      *
-     * @param portNumber  port number server is to used. If <= 0,
+     * @param portNumber  port number server is to used. If &lt;= 0,
      *                    default port number is used
      *
      * @param userName    The user name for actions requiring authorization.
@@ -258,7 +258,7 @@ public class NetworkServerControl{
      * @param address     The IP address of the Network Server host.
      *                     address cannot be null.
 
-     * @param portNumber  port number server is to used. If <= 0,
+     * @param portNumber  port number server is to used. If &lt;= 0,
      *                    default port number is used
      *                       
      * @throws             Exception on error
@@ -523,7 +523,7 @@ public class NetworkServerControl{
      * should also be set so that clients will yield appropriately.
      *
      * @param max       maximum number of connection threads.
-     *                  If <= 0, connection threads will be created when 
+     *                  If &lt;= 0, connection threads will be created when 
      *                  there are no free connection threads.
      *
      * @exception Exception throws an exception if an error occurs
@@ -551,10 +551,10 @@ public class NetworkServerControl{
 
     /**
      * Set Network Server connection time slice parameter.  
-     * This should be set and is only relevant if setMaxThreads > 0.
+     * This should be set and is only relevant if setMaxThreads &gt; 0.
      *
      * @param timeslice number of milliseconds given to each session before yielding to
-     *                      another session, if <=0, never yield.
+     *                      another session, if &lt;=0, never yield.
      *
      * @exception Exception throws an exception if an error occurs
      * @see #setMaxThreads

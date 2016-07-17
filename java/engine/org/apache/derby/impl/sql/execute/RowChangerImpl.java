@@ -108,7 +108,7 @@ class RowChangerImpl	implements	RowChanger
 		to be updated.  Only used for updates
 	  @param tc the transaction controller
 	  @param baseRowReadList bit set of columns read from base row. 1 based.
-	  @param baseRowReadMap BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
+	  @param baseRowReadMap BaseRowReadMap[heapColId]-&gt;ReadRowColumnId. (0 based)
 	  @exception StandardException		Thrown on error
 	  */
 	public RowChangerImpl(
@@ -272,7 +272,7 @@ class RowChangerImpl	implements	RowChanger
 	  Open this RowChanger to avoid fixing indexes that do not change
 	  during update operations. 
 
-	  @param fixOnUpdate fixOnUpdat[ix] == true ==> fix index 'ix' on
+	  @param fixOnUpdate fixOnUpdat[ix] == true ==&gt; fix index 'ix' on
 	  an update operation.
 	  @param lockMode	The lock mode to use
 							(row or table, see TransactionController)

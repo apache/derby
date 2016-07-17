@@ -46,11 +46,11 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
     METHOD_ID is returned to distinguish between overloaded methods.
 
   <OL>
-        <LI><B>PROCEDURE_CAT</B> String => procedure catalog (may be null)
-        <LI><B>PROCEDURE_SCHEM</B> String => procedure schema (may be null)
-        <LI><B>PROCEDURE_NAME</B> String => procedure name
-        <LI><B>COLUMN_NAME</B> String => column/parameter name 
-        <LI><B>COLUMN_TYPE</B> Short => kind of column/parameter:
+        <LI><B>PROCEDURE_CAT</B> String =&gt; procedure catalog (may be null)
+        <LI><B>PROCEDURE_SCHEM</B> String =&gt; procedure schema (may be null)
+        <LI><B>PROCEDURE_NAME</B> String =&gt; procedure name
+        <LI><B>COLUMN_NAME</B> String =&gt; column/parameter name 
+        <LI><B>COLUMN_TYPE</B> Short =&gt; kind of column/parameter:
       <UL>
       <LI> procedureColumnUnknown - nobody knows
       <LI> procedureColumnIn - IN parameter
@@ -59,22 +59,22 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
       <LI> procedureColumnReturn - procedure return value
       <LI> procedureColumnResult - result column in ResultSet
       </UL>
-  <LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
-        <LI><B>TYPE_NAME</B> String => SQL type name, for a UDT type the
+  <LI><B>DATA_TYPE</B> int =&gt; SQL type from java.sql.Types
+        <LI><B>TYPE_NAME</B> String =&gt; SQL type name, for a UDT type the
   type name is fully qualified
-        <LI><B>PRECISION</B> int => precision
-        <LI><B>LENGTH</B> int => length in bytes of data
-        <LI><B>SCALE</B> short => scale
-        <LI><B>RADIX</B> short => radix
-        <LI><B>NULLABLE</B> short => can it contain NULL?
+        <LI><B>PRECISION</B> int =&gt; precision
+        <LI><B>LENGTH</B> int =&gt; length in bytes of data
+        <LI><B>SCALE</B> short =&gt; scale
+        <LI><B>RADIX</B> short =&gt; radix
+        <LI><B>NULLABLE</B> short =&gt; can it contain NULL?
       <UL>
       <LI> procedureNoNulls - does not allow NULL values
       <LI> procedureNullable - allows NULL values
       <LI> procedureNullableUnknown - nullability unknown
       </UL>
-        <LI><B>REMARKS</B> String => comment describing parameter/column
-        <LI><B>METHOD_ID</B> Short => Derby extra column (overloading)
-        <LI><B>PARAMETER_ID</B> Short => Derby extra column (output order)
+        <LI><B>REMARKS</B> String =&gt; comment describing parameter/column
+        <LI><B>METHOD_ID</B> Short =&gt; Derby extra column (overloading)
+        <LI><B>PARAMETER_ID</B> Short =&gt; Derby extra column (output order)
   </OL>
 
 */

@@ -160,11 +160,11 @@ class ModifyColumnNode extends ColumnDefinitionNode
      * violate any key constraints; 
 	 * the column being altered is 
 	 *   1. part of foreign key constraint 
-	 *         ==> ERROR. This references a Primary Key constraint and the
-	 *             type & lengths of the pkey/fkey must match exactly.
+	 *         ==&gt; ERROR. This references a Primary Key constraint and the
+	 *             type and lengths of the pkey/fkey must match exactly.
 	 *   2. part of a unique/primary key constraint
-	 *         ==> OK if no fkey references this constraint.
-	 *         ==> ERROR if any fkey in the system references this constraint.
+	 *         ==&gt; OK if no fkey references this constraint.
+	 *         ==&gt; ERROR if any fkey in the system references this constraint.
 	 *
 	 * @param td		The Table Descriptor on which the ALTER is being done.
 	 *

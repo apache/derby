@@ -961,7 +961,7 @@ public abstract class BaseTestCase
 
     /**
      * Check if we have old style (before Sun Java 1.7) Solaris interruptible
-     * IO. On Sun Java 1.5 >= update 22 and Sun Java 1.6 this can be disabled
+     * IO. On Sun Java 1.5 &gt;= update 22 and Sun Java 1.6 this can be disabled
      * with Java option {@code -XX:-UseVMInterruptibleIO}. On Sun Java 1.7 it
      * is by default disabled.
      *

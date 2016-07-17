@@ -135,7 +135,7 @@ import org.apache.derby.iapi.util.ByteArray;
   their slots are also moved down.
   A page has no empty slot (an empty page has no slot)
 
-   <BR><B>Record & Field Format</B>
+   <BR><B>Record and Field Format</B>
 
   Record Header format is defined in the StoredRecordHeader class.
   
@@ -1288,7 +1288,7 @@ public class StoredPage extends CachedPage
      * Is this page unfilled?
      * <p>
      * Returns true if page is relatively unfilled, 
-     * which means the page is < 1/2 full and has enough space to insert an
+     * which means the page is &lt; 1/2 full and has enough space to insert an
      * "average" sized row onto the page.
      * <p>
      *
@@ -7683,7 +7683,7 @@ public class StoredPage extends CachedPage
         This method ensures there is enough room to replace the
         old data of length oldLength at the given offset, with the new data of length
         newLength. This method does put any new data on the page, it moves old data around
-        and zeros out any old data when newLength < oldLength. This method does
+        and zeros out any old data when newLength &lt; oldLength. This method does
         update the information in the slot table.
 
         The passed in offset is the correct place to put the data

@@ -484,7 +484,7 @@ public class GenericConstantActionFactory
 	 *  @param numColumns			Number of columns to read
 	 *  @param dependencyId			UUID for dependency system
 	 *  @param baseRowReadList      Map of columns read in.  1 based.
-	 *	@param baseRowReadMap		BaseRowReadMap[heapColId]->ReadRowColumnId.
+	 *	@param baseRowReadMap		BaseRowReadMap[heapColId]-&gt;ReadRowColumnId.
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 *  @param underMerge   True if this is an action of a MERGE statement.

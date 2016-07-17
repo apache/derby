@@ -70,10 +70,10 @@ public class StringUtil
      | 08 BS | 09 HT | 0A NL | 0B VT | 0C NP | 0D CR | 0E SO | 0F SI |
      | 10 DLE| 11 DC1| 12 DC2| 13 DC3| 14 DC4| 15 NAK| 16 SYN| 17 ETB|
      | 18 CAN| 19 EM | 1A SUB| 1B ESC| 1C FS | 1D GS | 1E RS | 1F US |
-     | 20 SP | 21  ! | 22  " | 23  # | 24  $ | 25  % | 26  & | 27  ' |
+     | 20 SP | 21  ! | 22  " | 23  # | 24  $ | 25  % | 26  &amp; | 27  ' |
      | 28  ( | 29  ) | 2A  * | 2B  + | 2C  , | 2D  - | 2E  . | 2F  / |
      | 30  0 | 31  1 | 32  2 | 33  3 | 34  4 | 35  5 | 36  6 | 37  7 |
-     | 38  8 | 39  9 | 3A  : | 3B  ; | 3C  < | 3D  = | 3E  > | 3F  ? |
+     | 38  8 | 39  9 | 3A  : | 3B  ; | 3C  &lt; | 3D  = | 3E  &gt; | 3F  ? |
      | 40  @ | 41  A | 42  B | 43  C | 44  D | 45  E | 46  F | 47  G |
      | 48  H | 49  I | 4A  J | 4B  K | 4C  L | 4D  M | 4E  N | 4F  O |
      | 50  P | 51  Q | 52  R | 53  S | 54  T | 55  U | 56  V | 57  W |
@@ -166,8 +166,8 @@ public class StringUtil
 		The String may be converted back to a byte array using fromHexString.
 		<BR>
 		For each byte (b) two characaters are generated, the first character
-		represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>), the second character
-		represents the low nibble (<code>b & 0x0f</code>).
+		represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>), the second character
+		represents the low nibble (<code>b &ampxs; 0x0f</code>).
 		<BR>
 		The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
 

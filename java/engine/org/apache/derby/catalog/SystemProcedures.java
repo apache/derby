@@ -2157,7 +2157,7 @@ public class SystemProcedures  {
   
 	 /**
      * this procedure switches between the different xplain modes 
-     * @param mode either 0 for explain only, or 1 for explain & execute (default)
+     * @param mode either 0 for explain only, or 1 for explain and execute (default)
      * @throws SQLException
      */
     public static void SYSCS_SET_XPLAIN_MODE(int mode)

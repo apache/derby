@@ -214,12 +214,12 @@ public abstract class IdUtil
 	 * E.g.:
 	 * <p>
 	 * <pre>
-	 *  Argument -> Return
+	 *  Argument -&gt; Return
 	 *  ------------------
-	 *  EVE      -> eve       [will match Java property: derby.user.eve]
-	 *  eVe      -> "eVe"     [will match Java property: derby.user."eVe"]
-	 *  "eve"    -> """eve""" [will match Java property: derby.user."""eVe"""]
-	 *  \eve\    -> "\eve\"   [will match Java property: derby.user."\eve\"]
+	 *  EVE      -&gt; eve       [will match Java property: derby.user.eve]
+	 *  eVe      -&gt; "eVe"     [will match Java property: derby.user."eVe"]
+	 *  "eve"    -&gt; """eve""" [will match Java property: derby.user."""eVe"""]
+	 *  \eve\    -&gt; "\eve\"   [will match Java property: derby.user."\eve\"]
 	 *
 	 * The latter could look this if specified on a Unix shell command line:
 	 *

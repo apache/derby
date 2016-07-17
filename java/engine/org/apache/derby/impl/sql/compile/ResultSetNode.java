@@ -906,8 +906,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @param target            the target node for the insert
 	 * @param inOrder           are source cols in same order as target cols?
 	 * @param colMap			int array representation of correspondence between
-	 *							RCLs - colmap[i] = -1 -> missing in current RCL
-	 *								   colmap[i] = j -> targetRCL(i) <-> thisRCL(j+1)
+	 *							RCLs - colmap[i] = -1 -&gt; missing in current RCL
+	 *								   colmap[i] = j -&gt; targetRCL(i) &lt;-&gt; thisRCL(j+1)
 	 * @return a node that replaces this node and whose RCL matches the target
 	 * RCL. May return this node if no changes to the RCL are needed, or if the
 	 * RCL is modified in-place.
@@ -1836,7 +1836,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * Count the number of distinct aggregates in the list.
 	 * By 'distinct' we mean aggregates of the form:
-	 *	<UL><I>SELECT MAX(DISTINCT x) FROM T<\I><\UL>
+	 *	<I>SELECT MAX(DISTINCT x) FROM T</I>
 	 *
 	 * @return number of aggregates
 	 */

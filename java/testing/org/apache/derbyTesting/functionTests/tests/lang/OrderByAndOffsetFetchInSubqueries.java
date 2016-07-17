@@ -1274,7 +1274,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * One of the productions of {@code <query expression body>}, is
      *
      * <pre>
-     *    <left paren> <query expression body
+     *    &lt;left paren&gt; &lt;query expression body&gt;
      *    [ <order by clause> ] [ <result offset clause> ]
      *    [ <fetch first clause> ] <right paren>
      * </pre>

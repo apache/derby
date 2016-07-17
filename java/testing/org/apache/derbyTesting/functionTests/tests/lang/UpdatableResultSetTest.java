@@ -497,7 +497,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     /**
-     * Negative test - attempt to deleteRow & updateRow on updatable resultset
+     * Negative test - attempt to deleteRow and updateRow on updatable resultset
      * when the resultset is not positioned on a row
      */
     public void testUpdateDeleteRowNotOnRow() throws SQLException {
@@ -557,7 +557,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     /**
-     * Negative test - attempt deleteRow & updateRow on updatable resultset 
+     * Negative test - attempt deleteRow and updateRow on updatable resultset 
      * after closing the resultset
      */
     public void testUpdateDeleteRowOnClosedResultSet() throws SQLException {
@@ -1861,7 +1861,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     }
     
     /**
-     * Positive test - setting the fetch size to > 1 will be ignored by
+     * Positive test - setting the fetch size to &gt; 1 will be ignored by
      * updatable resultset. Same as updatable cursors
      */
     public void testSetFetchSizeOnUpdatableResultSet() throws SQLException {

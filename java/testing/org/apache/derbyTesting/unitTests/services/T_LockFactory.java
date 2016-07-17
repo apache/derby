@@ -511,7 +511,7 @@ public class T_LockFactory extends T_MultiIterations
 
 		Create two lockable objects and pass them off to two threads.
 		Each thread will run lock the first object, set its value then lock
-		the second object & set its value, yield and then release the lock
+		the second object and set its value, yield and then release the lock
 		on one and then on two. Various checks are made to ensure the
 		values are as expected.
 

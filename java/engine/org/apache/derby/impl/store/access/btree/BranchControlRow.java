@@ -1316,7 +1316,7 @@ public class BranchControlRow extends ControlRow
 	 ** pain, and will slow down applications.  It's only
 	 ** needed for consistency checks, so we may want to
 	 ** have implementations that don't bother to maintain it.
-     ** <P)
+     ** <P>
      ** This
 	 **/
 	private void fixChildrensParents(

@@ -27,7 +27,7 @@ package org.apache.derbyTesting.system.oe.model;
  * and are in lower case.
  * For clarity this field are renamed in Java
  * <UL>
- * <LI>w_id => warehouse (SQL column D_W_ID)
+ * <LI>w_id =&gt; warehouse (SQL column D_W_ID)
  * </UL>
  * <BR>
  * The columns that map to an address are extracted out as

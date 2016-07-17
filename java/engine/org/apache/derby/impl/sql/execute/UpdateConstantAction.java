@@ -111,7 +111,7 @@ public class UpdateConstantAction extends WriteCursorConstantAction
 	 *	@param triggerInfo	Array of structures containing trigger info, 
 	 *						if any (may be null)
 	 *  @param baseRowReadList Map of columns read in.  1 based.
-	 *  @param baseRowReadMap BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
+	 *  @param baseRowReadMap BaseRowReadMap[heapColId]-&gt;ReadRowColumnId. (0 based)
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param numColumns	Number of columns being read.
 	 *  @param positionedUpdate	is this a positioned update

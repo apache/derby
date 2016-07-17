@@ -254,8 +254,8 @@ public interface Optimizer
 	 *
 	 * @param predList		The predicate list to check
 	 *
-	 * @return	<= 0 means there is no uniqueness condition
-	 *			> 0 means there is a uniqueness condition on an
+	 * @return	&lt;= 0 means there is no uniqueness condition
+	 *			&gt; 0 means there is a uniqueness condition on an
 	 *			outer table, and the return value is the reciprocal of
 	 *			the maximum number of times the optimizer estimates that each
 	 *			unique key will be returned. For example, 0.5 means the

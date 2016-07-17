@@ -78,7 +78,7 @@ public class Derby4577Test extends StoreBaseTest
      * The update error occurs with the following:
      *   o update of a long row which requires an update on it's overflow page
      *   o The portion of the long row on the overflow page needs to have 
-     *     max(row size, reserved space) + free space on page <= 12  
+     *     max(row size, reserved space) + free space on page &lt;= 12  
      *     (12 causes the error, other values might also).
      *
      * In order to get to this one needs multiple rows on the overflow page,

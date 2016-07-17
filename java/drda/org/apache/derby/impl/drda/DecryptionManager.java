@@ -439,8 +439,8 @@ class DecryptionManager
         The String may be converted back to a byte array using fromHexString.
         <BR>
         For each byte (b) two characaters are generated, the first character
-        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
-        the second character represents the low nibble (<code>b & 0x0f</code>).
+        represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>),
+        the second character represents the low nibble (<code>b &amp; 0x0f</code>).
         <BR>
         The byte at <code>data[offset]</code> is represented by the first two characters in the returned String.
 
@@ -471,9 +471,9 @@ class DecryptionManager
         Convert a string into a byte array in hex format.
         <BR>
         For each character (b) two bytes are generated, the first byte 
-        represents the high nibble (4 bits) in hexidecimal (<code>b & 0xf0</code>),
+        represents the high nibble (4 bits) in hexidecimal (<code>b &amp; 0xf0</code>),
         the second byte 
-        represents the low nibble (<code>b & 0x0f</code>).
+        represents the low nibble (<code>b &amp; 0x0f</code>).
         <BR>
         The character at <code>str.charAt(0)</code> is represented by the first two bytes 
         in the returned String.

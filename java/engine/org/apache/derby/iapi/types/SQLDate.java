@@ -57,7 +57,7 @@ import java.text.ParseException;
 /**
  * This contains an instance of a SQL Date.
  * <p>
- * The date is stored as int (year << 16 + month << 8 + day)
+ * The date is stored as int (year &lt;&lt; 16 + month &lt;&lt; 8 + day)
  * Null is represented by an encodedDate value of 0.
  * Some of the static methods in this class are also used by SQLTime and SQLTimestamp
  * so check those classes if you change the date encoding
@@ -743,7 +743,7 @@ public final class SQLDate extends DataType
 	/**
 	 *	computeEncodedDate extracts the year, month and date from
 	 *	a Calendar value and encodes them as
-	 *		year << 16 + month << 8 + date
+	 *		year &lt;&lt; 16 + month &lt;&lt; 8 + date
 	 *	Use this function will help to remember to add 1 to month
 	 *  which is 0 based in the Calendar class
 	 *	@param cal	the Calendar 

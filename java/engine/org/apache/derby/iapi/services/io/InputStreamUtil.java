@@ -128,7 +128,7 @@ public final class InputStreamUtil {
      * @param is
      *      InputStream to be skipped.
      * @param skippedBytes
-     *      number of bytes to skip. if skippedBytes <= zero, do nothing.
+     *      number of bytes to skip. if skippedBytes &gl;= zero, do nothing.
      * @throws EOFException
      *      if EOF meets before requested number of bytes are skipped.
      * @throws IOException

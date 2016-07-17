@@ -86,7 +86,7 @@ class ValueNodeList extends QueryTreeNodeVector<ValueNode>
 
 
 	/**
-	 * Generate a SQL->Java->SQL conversion tree any node in the list
+	 * Generate a SQL-&gt;Java-&gt;SQL conversion tree any node in the list
 	 * which is not a system built-in type.
 	 * This is useful when doing comparisons, built-in functions, etc. on
 	 * java types which have a direct mapping to system built-in types.

@@ -445,8 +445,8 @@ public interface Optimizable extends Visitable {
 	 *
 	 * @param predList		The predicate list to check
 	 *
-	 * @return	<= 0 means there is no uniqueness condition
-	 *			> 0 means there is a uniqueness condition,
+	 * @return	&lt;= 0 means there is no uniqueness condition
+	 *			&gt; 0 means there is a uniqueness condition,
 	 *			and the return value is the number of rows per scan.
 	 *
 	 * @exception StandardException		Thrown on error

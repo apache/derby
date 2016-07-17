@@ -108,7 +108,7 @@ The JDBC specicification is in theory a single document however clarifications o
 </TABLE>
 
 <HR/>
-<A name="implblob"/A>
+<A name="implblob"></A>
 <H3>java.sql.Blob</H3>
 <H4>Clarification for getBytes(int pos, int length)</H4>
 If the pos (position) argument is greater than the length of the BLOB then an exception is thrown.
@@ -117,7 +117,7 @@ This matches the semantics of the SQL SUBSTR function.
 If the pattern argument has length zero, then the value of start argument will be returned.
 This matches the semantics of the SQL LOCATE function.
 <HR/>
-<A name="implclob"/A>
+<A name="implclob"></A>
 <H3>java.sql.Clob</H3>
 <H4>Clarification for getSubString(int pos, int length)</H4>
 If the pos (position) argument is greater than the length of the CLOB then an exception is thrown.
@@ -126,12 +126,12 @@ This matches the semantics of the SQL SUBSTR function.
 If the searchstr argument has length zero (the empty string), then the value of start argument
 will be returned. This matches the semantics of the SQL LOCATE function.
 <HR/>
-<A name="implconnection"/A>
+<A name="implconnection"></A>
 <H3>java.sql.Connection</H3>
 <H4>Clarification for createStatement(), prepareStatement() and prepareCall()</H4>
 CONCUR_UPDATABLE concurrency is supported for TYPE_FORWARD_ONLY and TYPE_SCROLL_INSENSITIVE ResultSet types only.
 <HR/>
-<A name="implpreparedstatement"/A>
+<A name="implpreparedstatement"></A>
 <H3>java.sql.PreparedStatement</H3>
 <H4>Clarification for  setAsciiStream(),setBinaryStream(),setCharacterStream()</H4>
 In Derby, the stream must have the exact amount of data as the length argument,
@@ -148,7 +148,7 @@ Stream parameter values are not re-used and if a stream is re-used,
 the statement execution will fail with
 'Stream has already been read and end-of-file reached and cannot be re-used.'.
 <HR/>
-<A name="implresultset"/A>
+<A name="implresultset"></A>
 <H3>java.sql.ResultSet</H3>
 <H4>Extension for getXXX()</H4>
 Support for data conversion using the getXXX() methods matches Table B-6 of [JDBC3] with this extension:
@@ -172,7 +172,7 @@ there is no advantage in using this method.
 An ASCII character is defined as an eight bit character (range 0x00 to 0xff),
 see CHAR() function definition by [JDBC3] in appendix C.2.
 <P>
-For character types (Types.CHAR, Types.VARCHAR & Types.LONGVARCHAR),
+For character types (Types.CHAR, Types.VARCHAR and Types.LONGVARCHAR),
 each character in the value is translated to one byte in the ASCII stream:
 <UL>
 <LI> Unicode characters in the range 0x0000 to 0x00ff,
@@ -226,7 +226,7 @@ byte[] data = {0x34, 0x87, 0xc2, 0x1f} then:
 <LI>getString() returns a String with eight characters "3487c21f"
 </UL>
 <HR/>
-<A name="implsqldate"/A>
+<A name="implsqldate"></A>
 <H3>Derby's SQL DATE interactions with JDBC</H3>
 <P>Derby&rsquo;s SQL DATE type represents a date in the form yyyy-mm-dd with no associated time zone information.</P>
 <H4>java.sql.Date</H4>
@@ -313,7 +313,7 @@ byte[] data = {0x34, 0x87, 0xc2, 0x1f} then:
 <P>If the format of the string matches one of the built in formats then a conversion to a java.sql.Date matches that of a SQL DATE value with value yyyy-mm-dd.</P>
 <P>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</P>
 <HR/>
-<A name="implsqltime"/A>
+<A name="implsqltime"></A>
 <H3>Derby's SQL TIME interactions with JDBC</H3>
 <P>Derby&rsquo;s SQL TIME type represents a time of day in the form hh:mm:ss with no associated time zone information.</P>
 <H4>java.sql.Time</H4>
@@ -402,7 +402,7 @@ byte[] data = {0x34, 0x87, 0xc2, 0x1f} then:
 <P>If the format of the string matches one of the built in formats then a conversion to a java.sql.Time matches that of a SQL TIME value with value hh:mm:ss.</P>
 <P>If the string does not match any of the built in formats Derby attempts to use the Java locale specific parser to interpret the string as a date.</P>
 <HR/>
-<A name="implsqltimestamp"/A>
+<A name="implsqltimestamp"></A>
 <H3>Derby's SQL TIMESTAMP interactions with JDBC</H3>
 <P>Derby&rsquo;s SQL TIMESTAMP type represents a time of day in the form yyyy-mm-dd hh:mm:ss.fffffffff (nanosecond granularity) with no associated time zone information.</P>
 <H4>java.sql.Timestamp</H4>

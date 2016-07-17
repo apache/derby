@@ -132,8 +132,8 @@ public class XactId implements TransactionId
 	
 	/**
 		Return	0 if a == b, 
-				+ve number if a > b
-				-ve number if a < b
+				+ve number if a &gt; b
+				-ve number if a &lt; b
 	*/
 	public static long compare(TransactionId a, TransactionId b)
 	{

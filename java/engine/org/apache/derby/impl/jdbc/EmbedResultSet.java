@@ -2293,7 +2293,7 @@ public class EmbedResultSet extends ConnectionChild
 	 * @param rows
 	 *            the number of rows to fetch
 	 * @exception SQLException
-	 *                if a database-access error occurs, or the condition 0 <=
+	 *                if a database-access error occurs, or the condition 0 &lt;=
 	 *                rows is not satisfied.
 	 */
 	public void setFetchSize(int rows) throws SQLException {

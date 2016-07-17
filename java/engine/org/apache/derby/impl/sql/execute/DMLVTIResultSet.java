@@ -39,7 +39,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /**
- * Base class for Insert, Delete & UpdateVTIResultSet
+ * Base class for Insert, Delete and UpdateVTIResultSet
  */
 abstract class DMLVTIResultSet extends DMLWriteResultSet
 {

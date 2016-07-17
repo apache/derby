@@ -179,7 +179,7 @@ public class CollationTest2 extends BaseJDBCTestCase
      * <p>
      * Insert all data to tested against into LIKE_NAMES. A customer table
      * will be filled with this data.
-     * {p>
+     * <p>
      * Insert test cases for like string into the LIKE_TEST_CASES, results
      * are expected only to return a single row.
      * <p>
@@ -987,7 +987,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     /**
      * Check simple boolean compare of string constant to column value.
      * <p>
-     * Check <, <=, =, >=, > of constant to column, ie. of the form
+     * Check &lt;, &lt;=, =, &gt;=, &gt; of constant to column, ie. of the form
      *     select * from table where col boolean constant
      *
      *
@@ -1125,7 +1125,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     /**
      * Check simple boolean compare of string constant to column value.
      * <p>
-     * Check <, <=, =, >=, > of constant to column, ie. of the form
+     * Check &lt;, &glt;=, =, &gt;=, &gt; of constant to column, ie. of the form
      *     select * from table where col boolean constant
      *
      *

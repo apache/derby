@@ -129,7 +129,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * Returns a set of startup properties suitable for VersionMBeanTest.
      * These properties are used to configure JMX in a different JVM.
      * Will set up remote JMX using the port defined by the current test 
-     * configuration, and with JMX security (authentication & SSL) disabled.
+     * configuration, and with JMX security (authentication and SSL) disabled.
      * 
      * @return a set of Java system properties to be set on the command line
      *         when starting a new JVM in order to enable remote JMX.

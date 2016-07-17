@@ -1321,7 +1321,7 @@ public final class DataTypeDescriptor implements Formatable
 	 * Check if this type is comparable with the passed type.
 	 * 
 	 * @param compareWithDTD the type of the instance to compare with this type.
-	 * @param forEquals True if this is an = or <> comparison, false
+	 * @param forEquals True if this is an = or != comparison, false
 	 *					otherwise.
 	 * @param cf		A ClassFactory
 	 * @return true if compareWithDTD is comparable to this type, else false.

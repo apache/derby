@@ -43,13 +43,13 @@ import org.w3c.dom.Element;
  * <p>
  * Although ExecRow is used on the interface, it is not available to
  * users of the API. They should use Row, the exposed super-interface
- * of ExecRow.  <<I couldn't find another way to perform this mapping...>>
+ * of ExecRow.  [I couldn't find another way to perform this mapping...]
  * <p>
  * Valid transitions: <ul>
- * <li> open->close</li>
- * <li> close->open</li>
- * <li> close->finished</li>
- * <li> finished->open</li>
+ * <li> open-&gt;close</li>
+ * <li> close-&gt;open</li>
+ * <li> close-&gt;finished</li>
+ * <li> finished-&gt;open</li>
  * </ul>
  *
  */

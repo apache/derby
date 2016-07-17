@@ -36,8 +36,8 @@ import java.io.ObjectOutput;
  * </ul>
  * The length is encoded like this:
  * <pre>
-            out.writeByte((byte)(byteLength >>> 8));
-            out.writeByte((byte)(byteLength >>> 0));
+            out.writeByte((byte)(byteLength &gt;&gt;&gt; 8));
+            out.writeByte((byte)(byteLength &gt;&gt;&gt; 0));
  * </pre>
  */
 //@Immutable

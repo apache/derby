@@ -1593,7 +1593,7 @@ class DDMWriter
      * @param precision Precision of decimal or numeric type
      * @param scale declared scale
      *
-     * @exception SQLException Thrown if # digits > 31
+     * @exception SQLException Thrown if # digits &gt; 31
      */
     void writeBigDecimal(BigDecimal b, int precision, int scale)
     throws SQLException

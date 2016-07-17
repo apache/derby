@@ -749,11 +749,11 @@ public abstract class DataType
 	}
 
 	/**
-	 * The <> operator as called from the language module, as opposed to
+	 * The &lt;&gt; operator as called from the language module, as opposed to
 	 * the storage module. This default implementations uses compare().
 	 *
-	 * @param left			The value on the left side of the <>
-	 * @param right			The value on the right side of the <>
+	 * @param left			The value on the left side of the &lt;&gt;
+	 * @param right			The value on the right side of the &lt;&gt;
 	 *
 	 * @return	A SQL boolean value telling whether the two parameters
 	 *			are not equal
@@ -770,11 +770,11 @@ public abstract class DataType
 									 left.compare(right) != 0);
 	}
 	/**
-	* The < operator as called from the language module, as opposed to
+	* The &lt; operator as called from the language module, as opposed to
 	* the storage module.
 	*
-	* @param left   The value on the left side of the <
-	* @param right   The value on the right side of the <
+	* @param left   The value on the left side of the &lt;
+	* @param right   The value on the right side of the &lt;
 	*
 	* @return A SQL boolean value telling whether the first operand is less
 	*   than the second operand
@@ -791,11 +791,11 @@ public abstract class DataType
 		  left.compare(right) < 0);
 	}
 	/**
-	 * The > operator as called from the language module, as opposed to
+	 * The &gt; operator as called from the language module, as opposed to
 	 * the storage module. This default implementations uses compare().
 	 *
-	 * @param left			The value on the left side of the >
-	 * @param right			The value on the right side of the >
+	 * @param left			The value on the left side of the &gt;
+	 * @param right			The value on the right side of the &gt;
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is greater
 	 *			than the second operand
@@ -813,11 +813,11 @@ public abstract class DataType
 	}
 
 	/**
-	 * The <= operator as called from the language module, as opposed to
+	 * The &lt;= operator as called from the language module, as opposed to
 	 * the storage module. This default implementations uses compare().
 	 *
-	 * @param left			The value on the left side of the <=
-	 * @param right			The value on the right side of the <=
+	 * @param left			The value on the left side of the &lt;=
+	 * @param right			The value on the right side of the &lt;=
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is less
 	 *			than or equal to the second operand
@@ -835,11 +835,11 @@ public abstract class DataType
 	}
 
 	/**
-	 * The >= operator as called from the language module, as opposed to
+	 * The &gt;= operator as called from the language module, as opposed to
 	 * the storage module. This default implementation uses compare().
 	 *
-	 * @param left			The value on the left side of the >=
-	 * @param right			The value on the right side of the >=
+	 * @param left			The value on the left side of the &gt;=
+	 * @param right			The value on the right side of the &gt;=
 	 *
 	 * @return	A SQL boolean value telling whether the first operand is greater
 	 *			than or equal to the second operand
@@ -899,8 +899,8 @@ public abstract class DataType
          * whether they should be lower than non-NULL values, or higher
 	 *
 	 * @param op	Orderable.ORDER_OP_EQUALS means do an = comparison.
-	 *				Orderable.ORDER_OP_LESSTHAN means compare this < other.
-	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this <= other.
+	 *				Orderable.ORDER_OP_LESSTHAN means compare this &lt; other.
+	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this &lt;= other.
 	 * @param other	The DataValueDescriptor to compare this one to.
 	 * @param orderedNulls	True means to treat nulls as ordered values,
 	 *						that is, treat SQL null as equal to null, and either greater or less
@@ -968,9 +968,9 @@ public abstract class DataType
 	 * @param other		The Orderable to compare this one to.
          % @param nullsOrderedLow True if null should be lower than non-NULL
 	 *
-	 * @return  <0 - this Orderable is less than other.
+	 * @return  &lt;0 - this Orderable is less than other.
 	 * 			 0 - this Orderable equals other.
-	 *			>0 - this Orderable is greater than other.
+	 *			&gt;0 - this Orderable is greater than other.
      *
      *			The code should not explicitly look for -1, or 1.
 	 *
@@ -1027,7 +1027,7 @@ public abstract class DataType
 	}
 
 	/**
-	 * Flip the operator used in a comparison (< -> >).
+	 * Flip the operator used in a comparison (&lt; -&gt; &gt;).
 	 * This is useful when flipping a comparison due to
 	 * type precedence.
 	 * 

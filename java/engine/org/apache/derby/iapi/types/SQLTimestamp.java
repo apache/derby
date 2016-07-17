@@ -880,7 +880,7 @@ public final class SQLTimestamp extends DataType
 		computeEncodedDate sets the date in a Calendar object
 		and then uses the SQLDate function to compute an encoded date
 		The encoded date is
-			year << 16 + month << 8 + date
+			year &lt;&lt; 16 + month &lt;&lt; 8 + date
 		@param value	the value to convert
 		@return 		the encodedDate
 
@@ -896,7 +896,7 @@ public final class SQLTimestamp extends DataType
 	/**
 		computeEncodedTime extracts the hour, minute and seconds from
 		a java.util.Date value and encodes them as
-			hour << 16 + minute << 8 + second
+			hour &lt;&lt; 16 + minute &lt;&lt; 8 + second
 		using the SQLTime function for encoding the data
 		@param value	the value to convert
 		@return 		the encodedTime

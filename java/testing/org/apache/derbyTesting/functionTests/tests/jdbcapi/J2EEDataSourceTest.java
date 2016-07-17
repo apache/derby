@@ -924,7 +924,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * Tests that a pooled connection can successfully be reused
      * (a new connection obtained from it) during the processing
      * of its close event by its listener.
-     * Sections 11.2 & 12.5 of JDBC 4 specification indicate that the
+     * Sections 11.2 and 12.5 of JDBC 4 specification indicate that the
      * connection can be returned to the pool when the
      * ConnectionEventListener.connectionClosed() is called.
      */

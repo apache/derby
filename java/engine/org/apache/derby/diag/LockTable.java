@@ -106,7 +106,7 @@ public class LockTable extends VTITemplate implements VTICosting  {
 
 	/**
 		The normal way of instantiating a LockTable, equivalent to
-		LockTable(org.apache.derby.diag.LockTable->TABLE_AND_ROWLOCK).
+		LockTable(org.apache.derby.diag.LockTable-&gt;TABLE_AND_ROWLOCK).
 		Only shows row and table lock and not latches.  Latches are generally
 		held for very short duration and are not of interest to Derby 
 		users.  Only under abnormal circumstances will one be interested in

@@ -57,7 +57,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
 
     /**
      * Two threads simultaneously updating a table. Threads each
-     * update a separate row with a long value (>32K). NUMALLOCATED
+     * update a separate row with a long value (&gt;32K). NUMALLOCATED
      * pages should not grow past expected value after 500 updates
      * by each thread.
      * 

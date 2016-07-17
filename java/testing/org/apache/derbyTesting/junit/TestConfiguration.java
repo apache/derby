@@ -665,7 +665,7 @@ public final class TestConfiguration {
  
     /**
      * Decorate a test to use a new database that is created upon the
-     * first connection request to the database and shutdown & deleted at
+     * first connection request to the database and shutdown and deleted at
      * tearDown. The configuration differs only from the current configuration
      * by the list of used databases. The new database name
      * is generated automatically as 'singleUse/oneuseXX' where 'XX' is
@@ -686,7 +686,7 @@ public final class TestConfiguration {
 
     /**
      * Decorate a test to use a new database that is created upon the first
-     * connection request to the database and shutdown & deleted at
+     * connection request to the database and shutdown and deleted at
      * tearDown. The configuration differs only from the current configuration
      * by the list of used databases. The generated database name is added at
      * the end of <code>usedDbNames</code> and assigned as a default database
@@ -729,7 +729,7 @@ public final class TestConfiguration {
 
     /**
      * Decorate a test to use a new database that is created upon the
-     * first connection request to the database and shutdown & deleted at
+     * first connection request to the database and shutdown and deleted at
      * tearDown. The configuration differs only from the current configuration
      * by the list of used databases. 
      * The passed database name is mapped to the generated database

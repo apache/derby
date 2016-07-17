@@ -934,7 +934,7 @@ class BCMethod implements MethodBuilder {
 		this
 		word
 		</PRE>
-		word2,word1 -> word2, word1, word2
+		word2,word1 -&gt; word2, word1, word2
 
 		So that we are left with word after the put.
 
@@ -1139,7 +1139,7 @@ class BCMethod implements MethodBuilder {
 	/**
 		Create an array instance
 
-		Stack ... =>
+		Stack ... =&gt;
 		      ...,arrayref
 	*/
 	public void pushNewArray(String className, int size) {

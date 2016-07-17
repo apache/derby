@@ -4345,7 +4345,7 @@ class FromBaseTable extends FromTable
 	 *			index					  row lock
 	 *
 	 *			heap					  row lock if READ_COMMITTED, 
-     *			                          REPEATBLE_READ, or READ_UNCOMMITTED &&
+     *			                          REPEATBLE_READ, or READ_UNCOMMITTED and
      *			                          not specified table lock otherwise, 
      *			                          use optimizer decided best acess 
      *			                          path's lock mode

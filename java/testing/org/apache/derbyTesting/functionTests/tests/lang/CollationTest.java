@@ -438,7 +438,7 @@ public void testPolishCollation() throws SQLException {
       }    
   
 /**
- * Test in list with constant and non constant elements & Norwegian collation
+ * Test in list with constant and non constant elements and Norwegian collation
  * DERBY-6025(Wrong results with IN lists and indexes in territory based 
  *   collation)
  */

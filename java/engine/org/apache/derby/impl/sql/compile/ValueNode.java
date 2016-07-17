@@ -342,7 +342,7 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	/**
-	 * Generate a SQL->Java->SQL conversion tree above the current node
+	 * Generate a SQL-&gt;Java-&gt;SQL conversion tree above the current node
 	 * and bind the new nodes individually.
 	 * This is useful when doing comparisons, built-in functions, etc. on
 	 * java types which have a direct mapping to system built-in types.
@@ -1164,7 +1164,7 @@ public abstract class ValueNode extends QueryTreeNode
 
 	/**
 	 * Returns true if this ValueNode is a relational operator. Relational
-	 * Operators are <, <=, =, >, >=, <> as well as IS NULL and IS NOT
+	 * Operators are &lt;, &lt;=, =, &gt;, &gt;=, &lt;&gt; as well as IS NULL and IS NOT
 	 * NULL. This is the preferred way of figuring out if a ValueNode is
 	 * relational or not. 
 	 * @see RelationalOperator

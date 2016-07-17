@@ -88,7 +88,7 @@ public interface FileResource {
 		throws StandardException;
 
     /**
-     * During hard upgrade to >= 10.9, remove a jar directory (at post-commit 
+     * During hard upgrade to &lt;= 10.9, remove a jar directory (at post-commit 
      * time) from the database.
      * @param f
      * @exception StandardException if an error occurs

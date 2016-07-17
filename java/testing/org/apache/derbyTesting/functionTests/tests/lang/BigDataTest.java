@@ -359,7 +359,7 @@ public class BigDataTest extends BaseJDBCTestCase {
     }
 
     /**
-     * try a column which is > 32767
+     * try a column which is &gt; 32767
      * 
      * @throws SQLException
      */
@@ -376,7 +376,7 @@ public class BigDataTest extends BaseJDBCTestCase {
     }
 
     /**
-     * try several columns > 32767.
+     * try several columns &gt; 32767.
      * 
      * @throws SQLException
      */

@@ -2918,7 +2918,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
    /**
     * This fixture would give:
     * <pre>
-    *   ASSERT FAILED sourceResultSetNumber expected to be >= 0 for T2.X
+    *   ASSERT FAILED sourceResultSetNumber expected to be &gt;= 0 for T2.X
     * </pre>
     * error in sane mode prior to DERBY-4736 due to a missing rebinding
     * operation as a result a the LOJ reordering.  Schema and query originally

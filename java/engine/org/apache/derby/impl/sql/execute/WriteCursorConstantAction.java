@@ -110,7 +110,7 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	 *	@param lockMode		The lock mode to use on the target table
 	 *	@param fkInfo	Structure containing foreign key info, if any (may be null)
 	 *	@param triggerInfo	Structure containing trigger info, if any (may be null)
-	 *  @param baseRowReadMap	BaseRowReadMap[heapColId]->ReadRowColumnId. (0 based)
+	 *  @param baseRowReadMap	BaseRowReadMap[heapColId]-&gt;ReadRowColumnId. (0 based)
      *  @param streamStorableHeapColIds Null for non rep. (0 based)
 	 *  @param singleRowSource		Whether or not source is a single row source
 	 *  @param underMerge   True if this action is under a MERGE statement

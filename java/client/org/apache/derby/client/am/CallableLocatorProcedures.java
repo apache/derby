@@ -409,7 +409,7 @@ class CallableLocatorProcedures
      * @param forLength the number of consecutive bytes to be copied; the value
      *        for length must be 0 or greater.  Specifying a length that goes
      *        beyond the end of the BLOB (i.e., <code>fromPosition + forLength
-     *        > blob.length()</code>), will result in an error.
+     *        &gt; blob.length()</code>), will result in an error.
      * @return a byte array containing up to <code>forLength</code> consecutive
      *         bytes from the <code>BLOB</code> value designated by
      *         <code>sourceLocator</code>, starting with the byte at position
@@ -484,7 +484,7 @@ class CallableLocatorProcedures
      * @param forLength the number of bytes to be written to the
      *        <code>BLOB</code> value from the array of bytes
      *        <code>bytes</code>.  Specifying a length that goes beyond the end
-     *        of the BLOB (i.e., <code>fromPosition + forLength >
+     *        of the BLOB (i.e., <code>fromPosition + forLength &gt;
      *        blob.length()</code>, will result in an error.
      * @param bytes the array of bytes to be written
      */
@@ -876,7 +876,7 @@ class CallableLocatorProcedures
      * @param forLength the number of consecutive characters to be copied; the
      *        value for length must be 0 or greater.  Specifying a length that
      *        goes beyond the end of the CLOB (i.e., <code>fromPosition +
-     *        forLength > clob.length()</code>, will result in an error.
+     *        forLength &gt; clob.length()</code>, will result in an error.
      * @return a string containing up to <code>forLength</code> consecutive
      *         characters from the <code>CLOB</code> value designated by
      *         <code>sourceLocator</code>, starting with the character at
@@ -954,7 +954,7 @@ class CallableLocatorProcedures
      * @param forLength the number of characters to be written to the
      *        <code>CLOB</code> value from the string <code>string</code>.
      *        Specifying a length that goes beyond the end of the CLOB (i.e.,
-     *        <code>fromPosition + forLength > clob.length()</code>, will
+     *        <code>fromPosition + forLength &gt; clob.length()</code>, will
      *        result in an error.
      * @param string the string to be written
      */

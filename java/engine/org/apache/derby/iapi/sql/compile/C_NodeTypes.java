@@ -248,7 +248,7 @@ public interface C_NodeTypes
     static final int FINAL_VALUE = NEXT_SEQUENCE_NODE;
 
     /**
-     * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision
+     * Extensions to this interface can use nodetypes &gt; MAX_NODE_TYPE with out fear of collision
      * with C_NodeTypes
      */
     static final int MAX_NODE_TYPE = 999;

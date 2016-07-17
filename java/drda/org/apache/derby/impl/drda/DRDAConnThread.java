@@ -6283,13 +6283,13 @@ class DRDAConnThread extends Thread {
      * SQLCAGRP : FDOCA EARLY GROUP
      * SQL Communcations Area Group Description
      *
-     * FORMAT FOR SQLAM <= 6
+     * FORMAT FOR SQLAM &lt;= 6
      *   SQLCODE; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLSTATE; DRDA TYPE FCS; ENVLID 0x30; Length Override 5
      *   SQLERRPROC; DRDA TYPE FCS; ENVLID 0x30; Length Override 8
      *   SQLCAXGRP; DRDA TYPE N-GDA; ENVLID 0x52; Length Override 0
      *
-     * FORMAT FOR SQLAM >= 7
+     * FORMAT FOR SQLAM &gt;= 7
      *   SQLCODE; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLSTATE; DRDA TYPE FCS; ENVLID 0x30; Length Override 5
      *   SQLERRPROC; DRDA TYPE FCS; ENVLID 0x30; Length Override 8
@@ -6353,13 +6353,13 @@ class DRDAConnThread extends Thread {
      * SQLCAGRP : FDOCA EARLY GROUP
      * SQL Communcations Area Group Description
      *
-     * FORMAT FOR SQLAM <= 6
+     * FORMAT FOR SQLAM &lt;= 6
      *   SQLCODE; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLSTATE; DRDA TYPE FCS; ENVLID 0x30; Length Override 5
      *   SQLERRPROC; DRDA TYPE FCS; ENVLID 0x30; Length Override 8
      *   SQLCAXGRP; DRDA TYPE N-GDA; ENVLID 0x52; Length Override 0
      *
-     * FORMAT FOR SQLAM >= 7
+     * FORMAT FOR SQLAM &gt;= 7
      *   SQLCODE; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLSTATE; DRDA TYPE FCS; ENVLID 0x30; Length Override 5
      *   SQLERRPROC; DRDA TYPE FCS; ENVLID 0x30; Length Override 8
@@ -6561,7 +6561,7 @@ class DRDAConnThread extends Thread {
      * SQLCAXGRP : EARLY FDOCA GROUP
      * SQL Communications Area Exceptions Group Description
      *
-     * FORMAT FOR SQLAM <= 6
+     * FORMAT FOR SQLAM &lt;= 6
      *   SQLRDBNME; DRDA TYPE FCS; ENVLID 0x30; Length Override 18
      *   SQLERRD1; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLERRD2; DRDA TYPE I4; ENVLID 0x02; Length Override 4
@@ -6583,7 +6583,7 @@ class DRDAConnThread extends Thread {
      *   SQLERRMSG_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 70
      *   SQLERRMSG_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 70
      *
-     * FORMAT FOR SQLAM >= 7
+     * FORMAT FOR SQLAM &gt;= 7
      *   SQLERRD1; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLERRD2; DRDA TYPE I4; ENVLID 0x02; Length Override 4
      *   SQLERRD3; DRDA TYPE I4; ENVLID 0x02; Length Override 4
@@ -6859,12 +6859,12 @@ class DRDAConnThread extends Thread {
      * SQLDARD : FDOCA EARLY ARRAY
      * SQL Descriptor Area Row Description with SQL Communications Area
      *
-     * FORMAT FOR SQLAM <= 6
+     * FORMAT FOR SQLAM &lt;= 6
      *   SQLCARD; ROW LID 0x64; ELEMENT TAKEN 0(all); REP FACTOR 1
      *   SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
      *   SQLDAROW; ROW LID 0x60; ELEMENT TAKEN 0(all); REP FACTOR 0(all)
      *
-     * FORMAT FOR SQLAM >= 7
+     * FORMAT FOR SQLAM &gt;= 7
      *   SQLCARD; ROW LID 0x64; ELEMENT TAKEN 0(all); REP FACTOR 1
      *   SQLDHROW; ROW LID 0xE0; ELEMENT TAKEN 0(all); REP FACTOR 1
      *   SQLNUMROW; ROW LID 0x68; ELEMENT TAKEN 0(all); REP FACTOR 1
@@ -7315,7 +7315,7 @@ class DRDAConnThread extends Thread {
      * - the outer "do ... while ... " loop processes a ROWSET, one row
      *   at a time. For non-ROWSET cursors, and for callable statements,
      *   this loop executes only once.
-     * - the inner "for ... i < numCols ..." loop processes each column
+     * - the inner "for ... i &lt; numCols ..." loop processes each column
      *   in the current row, or each output parmeter in the procedure.
      *
      * Most column data is written directly inline in the QRYDTA block.
@@ -7909,7 +7909,7 @@ class DRDAConnThread extends Thread {
      * SQLDAGRP : EARLY FDOCA GROUP
      * SQL Data Area Group Description
      *
-     * FORMAT FOR SQLAM <= 6
+     * FORMAT FOR SQLAM &lt;= 6
      *   SQLPRECISION; DRDA TYPE I2; ENVLID 0x04; Length Override 2
      *   SQLSCALE; DRDA TYPE I2; ENVLID 0x04; Length Override 2
      *   SQLLENGTH; DRDA TYPE I4; ENVLID 0x02; Length Override 4
@@ -7936,7 +7936,7 @@ class DRDAConnThread extends Thread {
      *   SQLCOMMENTS_m; DRDA TYPE VCS; ENVLID 0x32; Length Override 254
      *   SQLUDTGRP; DRDA TYPE N-GDA; ENVLID 0x51; Length Override 0
      *
-     * FORMAT FOR SQLAM >= 7
+     * FORMAT FOR SQLAM &gt;= 7
      *   SQLPRECISION; DRDA TYPE I2; ENVLID 0x04; Length Override 2
      *   SQLSCALE; DRDA TYPE I2; ENVLID 0x04; Length Override 2
      *   SQLLENGTH; DRDA TYPE I8; ENVLID 0x16; Length Override 8

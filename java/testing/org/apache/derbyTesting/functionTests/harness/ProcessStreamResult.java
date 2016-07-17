@@ -164,11 +164,11 @@ public class ProcessStreamResult implements Runnable
      * timeout period.
      * 
      * Behavior is as follows:
-     * 1) If timeout is set to a valid value (>0) - in this case, if myThread has not
+     * 1) If timeout is set to a valid value (&gt;0) - in this case, if myThread has not
      * finished its work by the time this method was called, then it will wait
      * till the timeout has elapsed or if the myThread has finished its work.
      * 
-     * 2)If timeout is not set ( <= 0) - in this case, if myThread has not
+     * 2)If timeout is not set ( &lt;= 0) - in this case, if myThread has not
      * finished its work by the time this method was called, then it will wait
      * till myThread has finished its work.
      * 

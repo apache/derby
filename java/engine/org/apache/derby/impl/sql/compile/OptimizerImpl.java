@@ -1099,7 +1099,7 @@ class OptimizerImpl implements Optimizer
 	 * is used to 'recover' cost estimate sums that have been lost due to
 	 * the addition/subtraction of the cost estimate for the Optimizable
 	 * at position "joinPosition".  Ex. If the total cost for Optimizables
-	 * at positions < joinPosition is 1500, and then the Optimizable at
+	 * at positions &lt; joinPosition is 1500, and then the Optimizable at
 	 * joinPosition has an estimated cost of 3.14E40, adding those two
 	 * numbers effectively "loses" the 1500. When we later subtract 3.14E40
 	 * from the total cost estimate (as part of "pull" processing), we'll

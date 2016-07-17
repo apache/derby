@@ -702,7 +702,7 @@ public class RAMTransaction
      * implementation may only track this info under SanityManager.DEBUG mode.
      * If the implementation does not track the info it will return -1 (so
      * code using this call to verify that no congloms are open should check
-     * for return <= 0 rather than == 0).
+     * for return &lt;= 0 rather than == 0).
      *
      * The return value depends on the "which_to_count" parameter as follows:
      * OPEN_CONGLOMERATE  - return # of openConglomerate() calls not close()'d.

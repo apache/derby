@@ -58,7 +58,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *   3. The number of elements in the IN list is significantly less
  *      than the number of rows in the target table (in this test
  *      the data rows are not unique w.r.t the IN list values, so
- *      the size of the IN list should generally be <= 1/10th of the
+ *      the size of the IN list should generally be &lt;= 1/10th of the
  *      number rows in the table).
  *
  * If all three of these are true then we expect that Derby will perform
@@ -1485,7 +1485,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
 
     /**
      * Select all rows from DATA_TABLE and store them into an in-memory
-     * map of "foreign_uuid -> rows".  So any given foreign_key_uuid can
+     * map of "foreign_uuid -&gt; rows".  So any given foreign_key_uuid can
      * be mapped to one or more rows from the table.
      *
      * We use the in-memory map to verify that all queries executed

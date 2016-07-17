@@ -123,7 +123,7 @@ public interface Property {
 
         /**
 		derby.stream.error.field=
-			<className>.<fieldName> returning an OutputStream or Writer object>
+			className.fieldName returning an OutputStream or Writer object
 	*/
 	
 	String ERRORLOG_FIELD_PROPERTY = "derby.stream.error.field";
@@ -1318,16 +1318,20 @@ public interface Property {
 
 
     /**
+     * <p>
      * derby.storage.useDefaultFilePermissions = {false,true}
-     * <p/>
+     * </p>
+     * <p>
      * When set to true, the store system will not limit file permissions of
      * files created by Derby to owner, but rely on the current OS default.  On
-     * Unix, this is determined by {@code umask(1)}. Only relevant for JVM >=
+     * Unix, this is determined by {@code umask(1)}. Only relevant for JVM &gt;=
      * 6.
-     * <p/>
+     * </p>
+     * <p>
      * The default value is {@code true} on embedded, but {@code false} on the
      * Network server if started from command line, otherwise it is true for
      * the server, too (i.e. started via API).
+     * </p>
      */
     String STORAGE_USE_DEFAULT_FILE_PERMISSIONS =
         "derby.storage.useDefaultFilePermissions";

@@ -1070,7 +1070,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      -auto commit is true
      -lock count before execution 0
      -lock count after execution 1
-     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -lock count after next on first rs 3 -&gt; 2 now FIXME: explain
      -lock count after first getMoreResults() 2
      -lock count after next on second rs 7
      -lock count after second getMoreResults() 0
@@ -1078,7 +1078,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      -auto commit is false
      -lock count before execution 0
      -lock count after execution 1
-     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -lock count after next on first rs 3 -&gt; 2 now FIXME: explain
      -lock count after first getMoreResults() 2
      -lock count after next on second rs 7
      -lock count after second getMoreResults() 7
@@ -1086,7 +1086,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      -auto commit is true
      -lock count before execution 0
      -lock count after execution 1
-     -lock count after next on first rs 3 -> 2 now FIXME: explain
+     -lock count after next on first rs 3 -&gt; 2 now FIXME: explain
      -executing statement to force auto commit on open call statement
      -lock count after statement execution 0
      -lock count after first getMoreResults() 0

@@ -116,7 +116,7 @@ public class Import extends ImportAbstract{
 	 * @param characterDelimiter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or
-	 *                         appended.(0 - append , > 0 Replace the data)
+	 *                         appended.(0 - append , &gt; 0 Replace the data)
      * @param lobsInExtFile true, if the lobs data is stored in an external file,
      *                      and the reference to it is stored in the main import file.
      * @exception SQLException on errors
@@ -175,7 +175,7 @@ public class Import extends ImportAbstract{
 	 * @param characterDelimiter  Delimiter that is used to quiote non-numeric types
 	 * @param codeset           Codeset of the data in the file
 	 * @param replace          Indicates whether the data in table has to be replaced or
-	 *                         appended.(0 - append , > 0 Replace the data)
+	 *                         appended.(0 - append , &gt; 0 Replace the data)
      * @param lobsInExtFile true, if the lobs data is stored in an external file,
      *                      and the reference is stored in the main import file.
      * @exception SQLException on errors

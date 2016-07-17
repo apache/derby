@@ -1402,7 +1402,7 @@ public class JDBC {
      * @param colsToCheck If non-null then for every bit b
      *   that is set in colsToCheck, we'll compare the (b+1)-th column
      *   of the received result set's current row to the i-th column
-     *   of expectedRow, where 0 <= i < # bits set in colsToCheck.
+     *   of expectedRow, where 0 &lt;= i &lt; # bits set in colsToCheck.
      *   So if colsToCheck is { 0, 3 } then expectedRow should have
      *   two objects and we'll check that:
      *
@@ -1411,7 +1411,7 @@ public class JDBC {
      *
      *   If colsToCheck is null then the (i+1)-th column in the
      *   result set is compared to the i-th column in expectedRow,
-     *   where 0 <= i < expectedRow.length.
+     *   where 0 &lt;= i &lt; expectedRow.length.
      */
     private static void assertRowInResultSet(
             ResultSet rs,

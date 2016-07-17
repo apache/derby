@@ -90,7 +90,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 	private boolean considerSortAvoidancePath;
 
 	/**
-	 Set of object->trulyTheBestAccessPath mappings used to keep track
+	 Set of object-&gt;trulyTheBestAccessPath mappings used to keep track
 	 of which of this Optimizable's "trulyTheBestAccessPath" was the best
 	 with respect to a specific outer query or ancestor node.  In the case
 	 of an outer query, the object key will be an instance of OptimizerImpl.

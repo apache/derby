@@ -52,7 +52,7 @@ public interface CostEstimate extends StoreCostResult
 	 *
 	 * @param other		The cost estimate to compare this one with
 	 *
-	 * @return	< 0 if this < other, 0 if this == other, > 0 if this > other
+	 * @return	&lt; 0 if this &lt; other, 0 if this == other, &gt; 0 if this &gt; other
 	 */
 	double compare(CostEstimate other);
 

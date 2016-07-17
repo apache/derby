@@ -59,7 +59,7 @@ import org.apache.derby.iapi.util.InterruptStatus;
     the buffers. 
 
     Log Buffers are used in circular fashion, each buffer moves through following stages: 
-	freeBuffers --> dirtyBuffers --> freeBuffers. Movement of buffers from one
+	freeBuffers --&gt; dirtyBuffers --&gt; freeBuffers. Movement of buffers from one
     stage to 	another stage is synchronized using	the object(this) of this class. 
 
 	A Checksum log record that has the checksum value for the data that is

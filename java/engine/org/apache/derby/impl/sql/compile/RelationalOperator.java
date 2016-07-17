@@ -259,9 +259,9 @@ interface RelationalOperator
 
 	/**
 	 * Generate an expression that evaluates to true if the result of the
-	 * comparison should be negated.  For example, col > 1 generates
-	 * a comparison operator of <= and a negation of true, while col < 1
-	 * generates a comparison operator of < and a negation of false.
+	 * comparison should be negated.  For example, col &gt; 1 generates
+	 * a comparison operator of &lt;= and a negation of true, while col &lt; 1
+	 * generates a comparison operator of &lt; and a negation of false.
 	 *
 	 * @param mb	The method the generated code is to go into
 	 * @param optTable	The Optimizable table the Qualifier will qualify

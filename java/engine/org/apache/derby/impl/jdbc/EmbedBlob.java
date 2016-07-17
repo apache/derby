@@ -605,7 +605,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
    * Determines the byte position at which the specified byte
    * <code>pattern</code> begins within the <code>BLOB</code>
    * value that this <code>Blob</code> object represents.  The
-   * search for <code>pattern</code. begins at position
+   * search for <code>pattern</code>. begins at position
    * <code>start</code>
    * @param pattern the byte array for which to search
    * @param start the position at which to begin searching; the

@@ -41,7 +41,7 @@ import org.apache.derby.iapi.store.replication.master.MasterFactory;
  * elements that contains dirty log are in dirtyBuffers. Chunks of log records
  * are appended to the buffer element in currentDirtyBuffer. Hence,
  * the life cycle of buffer elements is:
- * freeBuffers -> currentDirtyBuffer -> dirtyBuffers -> freeBuffers
+ * freeBuffers -&gt; currentDirtyBuffer -&gt; dirtyBuffers -&gt; freeBuffers
  *
  * To append chunks of log records to the buffer, use appendLog(...)
  *

@@ -1449,20 +1449,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each procedure description has the the following columns:
      *  <OL>
-     *	<LI><B>PROCEDURE_CAT</B> String => procedure catalog (may be null)
-     *	<LI><B>PROCEDURE_SCHEM</B> String => procedure schema (may be null)
-     *	<LI><B>PROCEDURE_NAME</B> String => procedure name
+     *	<LI><B>PROCEDURE_CAT</B> String =&gt; procedure catalog (may be null)
+     *	<LI><B>PROCEDURE_SCHEM</B> String =&gt; procedure schema (may be null)
+     *	<LI><B>PROCEDURE_NAME</B> String =&gt; procedure name
      *  <LI> reserved for future use
      *  <LI> reserved for future use
      *  <LI> reserved for future use
-     *	<LI><B>REMARKS</B> String => explanatory comment on the procedure
-     *	<LI><B>PROCEDURE_TYPE</B> short => kind of procedure:
+     *	<LI><B>REMARKS</B> String =&gt; explanatory comment on the procedure
+     *	<LI><B>PROCEDURE_TYPE</B> short =&gt; kind of procedure:
      *      <UL>
      *      <LI> procedureResultUnknown - May return a result
      *      <LI> procedureNoResult - Does not return a result
      *      <LI> procedureReturnsResult - Returns a result
      *      </UL>
-     *  <LI><B>SPECIFIC_NAME</B> String => The name which uniquely 
+     *  <LI><B>SPECIFIC_NAME</B> String =&gt; The name which uniquely 
      *  identifies this procedure within its schema (since JDBC 4.0)
      *  </OL>
      *
@@ -1505,8 +1505,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * functions (procedures returning values). Executes the
      * 'getFunctions' query from metadata.properties to obtain the
      * ResultSet to return.<p> Compatibility: This is a new method in
-     * the API which is only available with with Derby versions > 10.1 and
-     * JDK versions >= 1.6 <p>Upgrade: Since this is a new query it
+     * the API which is only available with with Derby versions &gt; 10.1 and
+     * JDK versions &gt;= 1.6 <p>Upgrade: Since this is a new query it
      * does not have an SPS, and will be available as soon as any
      * database, new or old, is booted with the new version of Derby,
      * (in <b>soft and hard</b> upgrade).
@@ -1560,11 +1560,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * <P>Each row in the ResultSet is a parameter description or
      * column description with the following fields:
      *  <OL>
-     *	<LI><B>PROCEDURE_CAT</B> String => procedure catalog (may be null)
-     *	<LI><B>PROCEDURE_SCHEM</B> String => procedure schema (may be null)
-     *	<LI><B>PROCEDURE_NAME</B> String => procedure name
-     *	<LI><B>COLUMN_NAME</B> String => column/parameter name
-     *	<LI><B>COLUMN_TYPE</B> Short => kind of column/parameter:
+     *	<LI><B>PROCEDURE_CAT</B> String =&gt; procedure catalog (may be null)
+     *	<LI><B>PROCEDURE_SCHEM</B> String =&gt; procedure schema (may be null)
+     *	<LI><B>PROCEDURE_NAME</B> String =&gt; procedure name
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column/parameter name
+     *	<LI><B>COLUMN_TYPE</B> Short =&gt; kind of column/parameter:
      *      <UL>
      *      <LI> procedureColumnUnknown - nobody knows
      *      <LI> procedureColumnIn - IN parameter
@@ -1573,19 +1573,19 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> procedureColumnReturn - procedure return value
      *      <LI> procedureColumnResult - result column in ResultSet
      *      </UL>
-     *  <LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
-     *	<LI><B>TYPE_NAME</B> String => SQL type name
-     *	<LI><B>PRECISION</B> int => precision
-     *	<LI><B>LENGTH</B> int => length in bytes of data
-     *	<LI><B>SCALE</B> short => scale
-     *	<LI><B>RADIX</B> short => radix
-     *	<LI><B>NULLABLE</B> short => can it contain NULL?
+     *  <LI><B>DATA_TYPE</B> int =&gt; SQL type from java.sql.Types
+     *	<LI><B>TYPE_NAME</B> String =&gt; SQL type name
+     *	<LI><B>PRECISION</B> int =&gt; precision
+     *	<LI><B>LENGTH</B> int =&gt; length in bytes of data
+     *	<LI><B>SCALE</B> short =&gt; scale
+     *	<LI><B>RADIX</B> short =&gt; radix
+     *	<LI><B>NULLABLE</B> short =&gt; can it contain NULL?
      *      <UL>
      *      <LI> procedureNoNulls - does not allow NULL values
      *      <LI> procedureNullable - allows NULL values
      *      <LI> procedureNullableUnknown - nullability unknown
      *      </UL>
-     *	<LI><B>REMARKS</B> String => comment describing parameter/column
+     *	<LI><B>REMARKS</B> String =&gt; comment describing parameter/column
      *	<LI><B>COLUMN_DEF</B> String
      *	<LI><B>SQL_DATA_TYPE</B> int
      *	<LI><B>SQL_DATETIME_SUB</B> int
@@ -1645,8 +1645,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * function parameters. Executes the
      * 'getFunctionColumns' query from metadata.properties to obtain the
      * ResultSet.<p> Compatibility: This is a new method in
-     * the API which is only available with with Derby versions > 10.1 and
-     * JDK versions >= 1.6 <p>Upgrade: Since this is a new query it
+     * the API which is only available with with Derby versions &gt; 10.1 and
+     * JDK versions &gt;= 1.6 <p>Upgrade: Since this is a new query it
      * does not have an SPS, and will be available as soon as any
      * database, new or old, is booted with the new version of Derby,
      * (in <b>soft and hard</b> upgrade).
@@ -1705,23 +1705,23 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each table description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>TABLE_TYPE</B> String => table type.  Typical types are "TABLE",
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>TABLE_TYPE</B> String =&gt; table type.  Typical types are "TABLE",
      *			"VIEW",	"SYSTEM TABLE", "GLOBAL TEMPORARY",
      *			"LOCAL TEMPORARY", "ALIAS", "SYNONYM".
-     *	<LI><B>REMARKS</B> String => explanatory comment on the table
-     *  <LI><B>TYPE_CAT</B> String => the types catalog (may be
+     *	<LI><B>REMARKS</B> String =&gt; explanatory comment on the table
+     *  <LI><B>TYPE_CAT</B> String =&gt; the types catalog (may be
      *          <code>null</code>)
-     *  <LI><B>TYPE_SCHEM</B> String => the types schema (may be
+     *  <LI><B>TYPE_SCHEM</B> String =&gt; the types schema (may be
      *          <code>null</code>)
-     *  <LI><B>TYPE_NAME</B> String => type name (may be
+     *  <LI><B>TYPE_NAME</B> String =&gt; type name (may be
      *          <code>null</code>)
-     *  <LI><B>SELF_REFERENCING_COL_NAME</B> String => name of the
+     *  <LI><B>SELF_REFERENCING_COL_NAME</B> String =&gt; name of the
      *          designated "identifier" column of a typed table (may
      *          be <code>null</code>)
-     *  <LI><B>REF_GENERATION</B> String => specifies how values in
+     *  <LI><B>REF_GENERATION</B> String =&gt; specifies how values in
      *          SELF_REFERENCING_COL_NAME are created. Values are
      *          "SYSTEM", "USER", "DERIVED". (may be
      *          <code>null</code>)
@@ -1830,7 +1830,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>The catalog column is:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => catalog name
+     *	<LI><B>TABLE_CAT</B> String =&gt; catalog name
      *  </OL>
      *
      * @return ResultSet - each row has a single String column that is a
@@ -1847,7 +1847,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>The table type is:
      *  <OL>
-     *	<LI><B>TABLE_TYPE</B> String => table type.  Typical types are "TABLE",
+     *	<LI><B>TABLE_TYPE</B> String =&gt; table type.  Typical types are "TABLE",
      *			"VIEW",	"SYSTEM TABLE", "GLOBAL TEMPORARY",
      *			"LOCAL TEMPORARY", "ALIAS", "SYNONYM".
      *  </OL>
@@ -1869,49 +1869,49 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each column description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> int => SQL type from java.sql.Types
-     *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
-     *	<LI><B>COLUMN_SIZE</B> int => column size.  For char or date
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name
+     *	<LI><B>DATA_TYPE</B> int =&gt; SQL type from java.sql.Types
+     *	<LI><B>TYPE_NAME</B> String =&gt; Data source dependent type name
+     *	<LI><B>COLUMN_SIZE</B> int =&gt; column size.  For char or date
      *	    types this is the maximum number of characters, for numeric or
      *	    decimal types this is precision.
      *	<LI><B>BUFFER_LENGTH</B> is not used.
-     *	<LI><B>DECIMAL_DIGITS</B> int => the number of fractional digits
-     *	<LI><B>NUM_PREC_RADIX</B> int => Radix (typically either 10 or 2)
-     *	<LI><B>NULLABLE</B> int => is NULL allowed?
+     *	<LI><B>DECIMAL_DIGITS</B> int =&gt; the number of fractional digits
+     *	<LI><B>NUM_PREC_RADIX</B> int =&gt; Radix (typically either 10 or 2)
+     *	<LI><B>NULLABLE</B> int =&gt; is NULL allowed?
      *      <UL>
      *      <LI> columnNoNulls - might not allow NULL values
      *      <LI> columnNullable - definitely allows NULL values
      *      <LI> columnNullableUnknown - nullability unknown
      *      </UL>
-     *	<LI><B>REMARKS</B> String => comment describing column (may be null)
-     * 	<LI><B>COLUMN_DEF</B> String => default value (may be null)
-     *	<LI><B>SQL_DATA_TYPE</B> int => unused
-     *	<LI><B>SQL_DATETIME_SUB</B> int => unused
-     *	<LI><B>CHAR_OCTET_LENGTH</B> int => for char types the
+     *	<LI><B>REMARKS</B> String =&gt; comment describing column (may be null)
+     * 	<LI><B>COLUMN_DEF</B> String =&gt; default value (may be null)
+     *	<LI><B>SQL_DATA_TYPE</B> int =&gt; unused
+     *	<LI><B>SQL_DATETIME_SUB</B> int =&gt; unused
+     *	<LI><B>CHAR_OCTET_LENGTH</B> int =&gt; for char types the
      *       maximum number of bytes in the column
-     *	<LI><B>ORDINAL_POSITION</B> int	=> index of column in table
+     *	<LI><B>ORDINAL_POSITION</B> int	=&gt; index of column in table
      *      (starting at 1)
-     *	<LI><B>IS_NULLABLE</B> String => "NO" means column definitely
+     *	<LI><B>IS_NULLABLE</B> String =&gt; "NO" means column definitely
      *      does not allow NULL values; "YES" means the column might
      *      allow NULL values.  An empty string means nobody knows.
-     *  <LI><B>SCOPE_CATALOG</B> String => catalog of table that is the
+     *  <LI><B>SCOPE_CATALOG</B> String =&gt; catalog of table that is the
      *  scope of a reference attribute (<code>null</code> if DATA_TYPE
      *  isn't REF)
-     *  <LI><B>SCOPE_SCHEMA</B> String => schema of table that is the
+     *  <LI><B>SCOPE_SCHEMA</B> String =&gt; schema of table that is the
      *  scope of a reference attribute (<code>null</code> if the
      *  DATA_TYPE isn't REF)
-     *  <LI><B>SCOPE_TABLE</B> String => table name that this the
+     *  <LI><B>SCOPE_TABLE</B> String =&gt; table name that this the
      *  scope of a reference attribure (<code>null</code> if the
      *  DATA_TYPE isn't REF)
-     *  <LI><B>SOURCE_DATA_TYPE</B> short => source type of a distinct
+     *  <LI><B>SOURCE_DATA_TYPE</B> short =&gt; source type of a distinct
      *  type or user-generated Ref type, SQL type from java.sql.Types
      *  (<code>null</code> if DATA_TYPE isn't DISTINCT or
      *  user-generated REF)
-     *  <LI><B>IS_AUTOINCREMENT</B> String => Indicates whether this
+     *  <LI><B>IS_AUTOINCREMENT</B> String =&gt; Indicates whether this
      *  column is auto incremented
      *  <UL>
      *  <LI> YES --- if the column is auto incremented
@@ -1982,15 +1982,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each privilige description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>GRANTOR</B> => grantor of access (may be null)
-     *	<LI><B>GRANTEE</B> String => grantee of access
-     *	<LI><B>PRIVILEGE</B> String => name of access (SELECT,
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name
+     *	<LI><B>GRANTOR</B> =&gt; grantor of access (may be null)
+     *	<LI><B>GRANTEE</B> String =&gt; grantee of access
+     *	<LI><B>PRIVILEGE</B> String =&gt; name of access (SELECT,
      *      INSERT, UPDATE, REFRENCES, ...)
-     *	<LI><B>IS_GRANTABLE</B> String => "YES" if grantee is permitted
+     *	<LI><B>IS_GRANTABLE</B> String =&gt; "YES" if grantee is permitted
      *      to grant to others; "NO" if not; null if unknown
      *  </OL>
      *
@@ -2032,14 +2032,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each privilige description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>GRANTOR</B> => grantor of access (may be null)
-     *	<LI><B>GRANTEE</B> String => grantee of access
-     *	<LI><B>PRIVILEGE</B> String => name of access (SELECT,
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>GRANTOR</B> =&gt; grantor of access (may be null)
+     *	<LI><B>GRANTEE</B> String =&gt; grantee of access
+     *	<LI><B>PRIVILEGE</B> String =&gt; name of access (SELECT,
      *      INSERT, UPDATE, REFRENCES, ...)
-     *	<LI><B>IS_GRANTABLE</B> String => "YES" if grantee is permitted
+     *	<LI><B>IS_GRANTABLE</B> String =&gt; "YES" if grantee is permitted
      *      to grant to others; "NO" if not; null if unknown
      *  </OL>
      *
@@ -2067,19 +2067,19 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each column description has the following columns:
      *  <OL>
-     *	<LI><B>SCOPE</B> short => actual scope of result
+     *	<LI><B>SCOPE</B> short =&gt; actual scope of result
      *      <UL>
      *      <LI> bestRowTemporary - very temporary, while using row
      *      <LI> bestRowTransaction - valid for remainder of current transaction
      *      <LI> bestRowSession - valid for remainder of current session
      *      </UL>
-     *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
-     *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
-     *	<LI><B>COLUMN_SIZE</B> int => precision
-     *	<LI><B>BUFFER_LENGTH</B> int => not used
-     *	<LI><B>DECIMAL_DIGITS</B> short	 => scale
-     *	<LI><B>PSEUDO_COLUMN</B> short => is this a pseudo column
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name
+     *	<LI><B>DATA_TYPE</B> int =&gt; SQL data type from java.sql.Types
+     *	<LI><B>TYPE_NAME</B> String =&gt; Data source dependent type name
+     *	<LI><B>COLUMN_SIZE</B> int =&gt; precision
+     *	<LI><B>BUFFER_LENGTH</B> int =&gt; not used
+     *	<LI><B>DECIMAL_DIGITS</B> short	 =&gt; scale
+     *	<LI><B>PSEUDO_COLUMN</B> short =&gt; is this a pseudo column
      *      like an Oracle ROWID
      *      <UL>
      *      <LI> bestRowUnknown - may or may not be pseudo column
@@ -2272,14 +2272,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each column description has the following columns:
      *  <OL>
-     *	<LI><B>SCOPE</B> short => is not used
-     *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
-     *	<LI><B>TYPE_NAME</B> String => Data source dependent type name
-     *	<LI><B>COLUMN_SIZE</B> int => precision
-     *	<LI><B>BUFFER_LENGTH</B> int => length of column value in bytes
-     *	<LI><B>DECIMAL_DIGITS</B> short	 => scale
-     *	<LI><B>PSEUDO_COLUMN</B> short => is this a pseudo column
+     *	<LI><B>SCOPE</B> short =&gt; is not used
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name
+     *	<LI><B>DATA_TYPE</B> int =&gt; SQL data type from java.sql.Types
+     *	<LI><B>TYPE_NAME</B> String =&gt; Data source dependent type name
+     *	<LI><B>COLUMN_SIZE</B> int =&gt; precision
+     *	<LI><B>BUFFER_LENGTH</B> int =&gt; length of column value in bytes
+     *	<LI><B>DECIMAL_DIGITS</B> short	 =&gt; scale
+     *	<LI><B>PSEUDO_COLUMN</B> short =&gt; is this a pseudo column
      *      like an Oracle ROWID
      *      <UL>
      *      <LI> versionColumnUnknown - may or may not be pseudo column
@@ -2372,12 +2372,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each primary key column description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>COLUMN_NAME</B> String => column name
-     *	<LI><B>KEY_SEQ</B> short => sequence number within primary key
-     *	<LI><B>PK_NAME</B> String => primary key name (may be null)
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name
+     *	<LI><B>KEY_SEQ</B> short =&gt; sequence number within primary key
+     *	<LI><B>PK_NAME</B> String =&gt; primary key name (may be null)
      *  </OL>
      *
      * @param catalog a catalog name; "" retrieves those without a
@@ -2411,20 +2411,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each primary key column description has the following columns:
      *  <OL>
-     *	<LI><B>PKTABLE_CAT</B> String => primary key table catalog
+     *	<LI><B>PKTABLE_CAT</B> String =&gt; primary key table catalog
      *      being imported (may be null)
-     *	<LI><B>PKTABLE_SCHEM</B> String => primary key table schema
+     *	<LI><B>PKTABLE_SCHEM</B> String =&gt; primary key table schema
      *      being imported (may be null)
-     *	<LI><B>PKTABLE_NAME</B> String => primary key table name
+     *	<LI><B>PKTABLE_NAME</B> String =&gt; primary key table name
      *      being imported
-     *	<LI><B>PKCOLUMN_NAME</B> String => primary key column name
+     *	<LI><B>PKCOLUMN_NAME</B> String =&gt; primary key column name
      *      being imported
-     *	<LI><B>FKTABLE_CAT</B> String => foreign key table catalog (may be null)
-     *	<LI><B>FKTABLE_SCHEM</B> String => foreign key table schema (may be null)
-     *	<LI><B>FKTABLE_NAME</B> String => foreign key table name
-     *	<LI><B>FKCOLUMN_NAME</B> String => foreign key column name
-     *	<LI><B>KEY_SEQ</B> short => sequence number within foreign key
-     *	<LI><B>UPDATE_RULE</B> short => What happens to
+     *	<LI><B>FKTABLE_CAT</B> String =&gt; foreign key table catalog (may be null)
+     *	<LI><B>FKTABLE_SCHEM</B> String =&gt; foreign key table schema (may be null)
+     *	<LI><B>FKTABLE_NAME</B> String =&gt; foreign key table name
+     *	<LI><B>FKCOLUMN_NAME</B> String =&gt; foreign key column name
+     *	<LI><B>KEY_SEQ</B> short =&gt; sequence number within foreign key
+     *	<LI><B>UPDATE_RULE</B> short =&gt; What happens to
      *       foreign key when primary is updated:
      *      <UL>
      *      <LI> importedNoAction - do not allow update of primary
@@ -2438,7 +2438,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeyRestrict - same as importedKeyNoAction
      *                                 (for ODBC 2.x compatibility)
      *      </UL>
-     *	<LI><B>DELETE_RULE</B> short => What happens to
+     *	<LI><B>DELETE_RULE</B> short =&gt; What happens to
      *      the foreign key when primary is deleted.
      *      <UL>
      *      <LI> importedKeyNoAction - do not allow delete of primary
@@ -2451,9 +2451,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeySetDefault - change imported key to default if
      *               its primary key has been deleted
      *      </UL>
-     *	<LI><B>FK_NAME</B> String => foreign key name (may be null)
-     *	<LI><B>PK_NAME</B> String => primary key name (may be null)
-     *	<LI><B>DEFERRABILITY</B> short => can the evaluation of foreign key
+     *	<LI><B>FK_NAME</B> String =&gt; foreign key name (may be null)
+     *	<LI><B>PK_NAME</B> String =&gt; primary key name (may be null)
+     *	<LI><B>DEFERRABILITY</B> short =&gt; can the evaluation of foreign key
      *      constraints be deferred until commit
      *      <UL>
      *      <LI> importedKeyInitiallyDeferred - see SQL92 for definition
@@ -2494,20 +2494,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each foreign key column description has the following columns:
      *  <OL>
-     *	<LI><B>PKTABLE_CAT</B> String => primary key table catalog (may be null)
-     *	<LI><B>PKTABLE_SCHEM</B> String => primary key table schema (may be null)
-     *	<LI><B>PKTABLE_NAME</B> String => primary key table name
-     *	<LI><B>PKCOLUMN_NAME</B> String => primary key column name
-     *	<LI><B>FKTABLE_CAT</B> String => foreign key table catalog (may be null)
+     *	<LI><B>PKTABLE_CAT</B> String =&gt; primary key table catalog (may be null)
+     *	<LI><B>PKTABLE_SCHEM</B> String =&gt; primary key table schema (may be null)
+     *	<LI><B>PKTABLE_NAME</B> String =&gt; primary key table name
+     *	<LI><B>PKCOLUMN_NAME</B> String =&gt; primary key column name
+     *	<LI><B>FKTABLE_CAT</B> String =&gt; foreign key table catalog (may be null)
      *      being exported (may be null)
-     *	<LI><B>FKTABLE_SCHEM</B> String => foreign key table schema (may be null)
+     *	<LI><B>FKTABLE_SCHEM</B> String =&gt; foreign key table schema (may be null)
      *      being exported (may be null)
-     *	<LI><B>FKTABLE_NAME</B> String => foreign key table name
+     *	<LI><B>FKTABLE_NAME</B> String =&gt; foreign key table name
      *      being exported
-     *	<LI><B>FKCOLUMN_NAME</B> String => foreign key column name
+     *	<LI><B>FKCOLUMN_NAME</B> String =&gt; foreign key column name
      *      being exported
-     *	<LI><B>KEY_SEQ</B> short => sequence number within foreign key
-     *	<LI><B>UPDATE_RULE</B> short => What happens to
+     *	<LI><B>KEY_SEQ</B> short =&gt; sequence number within foreign key
+     *	<LI><B>UPDATE_RULE</B> short =&gt; What happens to
      *       foreign key when primary is updated:
      *      <UL>
      *      <LI> importedNoAction - do not allow update of primary
@@ -2521,7 +2521,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeyRestrict - same as importedKeyNoAction
      *                                 (for ODBC 2.x compatibility)
      *      </UL>
-     *	<LI><B>DELETE_RULE</B> short => What happens to
+     *	<LI><B>DELETE_RULE</B> short =&gt; What happens to
      *      the foreign key when primary is deleted.
      *      <UL>
      *      <LI> importedKeyNoAction - do not allow delete of primary
@@ -2534,9 +2534,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeySetDefault - change imported key to default if
      *               its primary key has been deleted
      *      </UL>
-     *	<LI><B>FK_NAME</B> String => foreign key name (may be null)
-     *	<LI><B>PK_NAME</B> String => primary key name (may be null)
-     *	<LI><B>DEFERRABILITY</B> short => can the evaluation of foreign key
+     *	<LI><B>FK_NAME</B> String =&gt; foreign key name (may be null)
+     *	<LI><B>PK_NAME</B> String =&gt; primary key name (may be null)
+     *	<LI><B>DEFERRABILITY</B> short =&gt; can the evaluation of foreign key
      *      constraints be deferred until commit
      *      <UL>
      *      <LI> importedKeyInitiallyDeferred - see SQL92 for definition
@@ -2583,20 +2583,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each foreign key column description has the following columns:
      *  <OL>
-     *	<LI><B>PKTABLE_CAT</B> String => primary key table catalog (may be null)
-     *	<LI><B>PKTABLE_SCHEM</B> String => primary key table schema (may be null)
-     *	<LI><B>PKTABLE_NAME</B> String => primary key table name
-     *	<LI><B>PKCOLUMN_NAME</B> String => primary key column name
-     *	<LI><B>FKTABLE_CAT</B> String => foreign key table catalog (may be null)
+     *	<LI><B>PKTABLE_CAT</B> String =&gt; primary key table catalog (may be null)
+     *	<LI><B>PKTABLE_SCHEM</B> String =&gt; primary key table schema (may be null)
+     *	<LI><B>PKTABLE_NAME</B> String =&gt; primary key table name
+     *	<LI><B>PKCOLUMN_NAME</B> String =&gt; primary key column name
+     *	<LI><B>FKTABLE_CAT</B> String =&gt; foreign key table catalog (may be null)
      *      being exported (may be null)
-     *	<LI><B>FKTABLE_SCHEM</B> String => foreign key table schema (may be null)
+     *	<LI><B>FKTABLE_SCHEM</B> String =&gt; foreign key table schema (may be null)
      *      being exported (may be null)
-     *	<LI><B>FKTABLE_NAME</B> String => foreign key table name
+     *	<LI><B>FKTABLE_NAME</B> String =&gt; foreign key table name
      *      being exported
-     *	<LI><B>FKCOLUMN_NAME</B> String => foreign key column name
+     *	<LI><B>FKCOLUMN_NAME</B> String =&gt; foreign key column name
      *      being exported
-     *	<LI><B>KEY_SEQ</B> short => sequence number within foreign key
-     *	<LI><B>UPDATE_RULE</B> short => What happens to
+     *	<LI><B>KEY_SEQ</B> short =&gt; sequence number within foreign key
+     *	<LI><B>UPDATE_RULE</B> short =&gt; What happens to
      *       foreign key when primary is updated:
      *      <UL>
      *      <LI> importedNoAction - do not allow update of primary
@@ -2610,7 +2610,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeyRestrict - same as importedKeyNoAction
      *                                 (for ODBC 2.x compatibility)
      *      </UL>
-     *	<LI><B>DELETE_RULE</B> short => What happens to
+     *	<LI><B>DELETE_RULE</B> short =&gt; What happens to
      *      the foreign key when primary is deleted.
      *      <UL>
      *      <LI> importedKeyNoAction - do not allow delete of primary
@@ -2623,9 +2623,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> importedKeySetDefault - change imported key to default if
      *               its primary key has been deleted
      *      </UL>
-     *	<LI><B>FK_NAME</B> String => foreign key name (may be null)
-     *	<LI><B>PK_NAME</B> String => primary key name (may be null)
-     *	<LI><B>DEFERRABILITY</B> short => can the evaluation of foreign key
+     *	<LI><B>FK_NAME</B> String =&gt; foreign key name (may be null)
+     *	<LI><B>PK_NAME</B> String =&gt; primary key name (may be null)
+     *	<LI><B>DEFERRABILITY</B> short =&gt; can the evaluation of foreign key
      *      constraints be deferred until commit
      *      <UL>
      *      <LI> importedKeyInitiallyDeferred - see SQL92 for definition
@@ -2694,40 +2694,40 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each type description has the following columns:
      *  <OL>
-     *	<LI><B>TYPE_NAME</B> String => Type name
-     *	<LI><B>DATA_TYPE</B> int => SQL data type from java.sql.Types
-     *	<LI><B>PRECISION</B> int => maximum precision
-     *	<LI><B>LITERAL_PREFIX</B> String => prefix used to quote a literal
+     *	<LI><B>TYPE_NAME</B> String =&gt; Type name
+     *	<LI><B>DATA_TYPE</B> int =&gt; SQL data type from java.sql.Types
+     *	<LI><B>PRECISION</B> int =&gt; maximum precision
+     *	<LI><B>LITERAL_PREFIX</B> String =&gt; prefix used to quote a literal
      *      (may be null)
-     *	<LI><B>LITERAL_SUFFIX</B> String => suffix used to quote a literal
+     *	<LI><B>LITERAL_SUFFIX</B> String =&gt; suffix used to quote a literal
             (may be null)
-     *	<LI><B>CREATE_PARAMS</B> String => parameters used in creating
+     *	<LI><B>CREATE_PARAMS</B> String =&gt; parameters used in creating
      *      the type (may be null)
-     *	<LI><B>NULLABLE</B> short => can you use NULL for this type?
+     *	<LI><B>NULLABLE</B> short =&gt; can you use NULL for this type?
      *      <UL>
      *      <LI> typeNoNulls - does not allow NULL values
      *      <LI> typeNullable - allows NULL values
      *      <LI> typeNullableUnknown - nullability unknown
      *      </UL>
-     *	<LI><B>CASE_SENSITIVE</B> boolean=> is it case sensitive?
-     *	<LI><B>SEARCHABLE</B> short => can you use "WHERE" based on this type:
+     *	<LI><B>CASE_SENSITIVE</B> boolean=&gt; is it case sensitive?
+     *	<LI><B>SEARCHABLE</B> short =&gt; can you use "WHERE" based on this type:
      *      <UL>
      *      <LI> typePredNone - No support
      *      <LI> typePredChar - Only supported with WHERE .. LIKE
      *      <LI> typePredBasic - Supported except for WHERE .. LIKE
      *      <LI> typeSearchable - Supported for all WHERE ..
      *      </UL>
-     *	<LI><B>UNSIGNED_ATTRIBUTE</B> boolean => is it unsigned?
-     *	<LI><B>FIXED_PREC_SCALE</B> boolean => can it be a money value?
-     *	<LI><B>AUTO_INCREMENT</B> boolean => can it be used for an
+     *	<LI><B>UNSIGNED_ATTRIBUTE</B> boolean =&gt; is it unsigned?
+     *	<LI><B>FIXED_PREC_SCALE</B> boolean =&gt; can it be a money value?
+     *	<LI><B>AUTO_INCREMENT</B> boolean =&gt; can it be used for an
      *      auto-increment value?
-     *	<LI><B>LOCAL_TYPE_NAME</B> String => localized version of type name
+     *	<LI><B>LOCAL_TYPE_NAME</B> String =&gt; localized version of type name
      *      (may be null)
-     *	<LI><B>MINIMUM_SCALE</B> short => minimum scale supported
-     *	<LI><B>MAXIMUM_SCALE</B> short => maximum scale supported
-     *	<LI><B>SQL_DATA_TYPE</B> int => unused
-     *	<LI><B>SQL_DATETIME_SUB</B> int => unused
-     *	<LI><B>NUM_PREC_RADIX</B> int => usually 2 or 10
+     *	<LI><B>MINIMUM_SCALE</B> short =&gt; minimum scale supported
+     *	<LI><B>MAXIMUM_SCALE</B> short =&gt; maximum scale supported
+     *	<LI><B>SQL_DATA_TYPE</B> int =&gt; unused
+     *	<LI><B>SQL_DATETIME_SUB</B> int =&gt; unused
+     *	<LI><B>NUM_PREC_RADIX</B> int =&gt; usually 2 or 10
      *  </OL>
      *
      * @return ResultSet - each row is a SQL type description
@@ -2776,16 +2776,16 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each index column description has the following columns:
      *  <OL>
-     *	<LI><B>TABLE_CAT</B> String => table catalog (may be null)
-     *	<LI><B>TABLE_SCHEM</B> String => table schema (may be null)
-     *	<LI><B>TABLE_NAME</B> String => table name
-     *	<LI><B>NON_UNIQUE</B> boolean => Can index values be non-unique?
+     *	<LI><B>TABLE_CAT</B> String =&gt; table catalog (may be null)
+     *	<LI><B>TABLE_SCHEM</B> String =&gt; table schema (may be null)
+     *	<LI><B>TABLE_NAME</B> String =&gt; table name
+     *	<LI><B>NON_UNIQUE</B> boolean =&gt; Can index values be non-unique?
      *      false when TYPE is tableIndexStatistic
-     *	<LI><B>INDEX_QUALIFIER</B> String => index catalog (may be null);
+     *	<LI><B>INDEX_QUALIFIER</B> String =&gt; index catalog (may be null);
      *      null when TYPE is tableIndexStatistic
-     *	<LI><B>INDEX_NAME</B> String => index name; null when TYPE is
+     *	<LI><B>INDEX_NAME</B> String =&gt; index name; null when TYPE is
      *      tableIndexStatistic
-     *	<LI><B>TYPE</B> short => index type:
+     *	<LI><B>TYPE</B> short =&gt; index type:
      *      <UL>
      *      <LI> tableIndexStatistic - this identifies table statistics that are
      *           returned in conjuction with a table's index descriptions
@@ -2793,20 +2793,20 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *      <LI> tableIndexHashed - this is a hashed index
      *      <LI> tableIndexOther - this is some other style of index
      *      </UL>
-     *	<LI><B>ORDINAL_POSITION</B> short => column sequence number
+     *	<LI><B>ORDINAL_POSITION</B> short =&gt; column sequence number
      *      within index; zero when TYPE is tableIndexStatistic
-     *	<LI><B>COLUMN_NAME</B> String => column name; null when TYPE is
+     *	<LI><B>COLUMN_NAME</B> String =&gt; column name; null when TYPE is
      *      tableIndexStatistic
-     *	<LI><B>ASC_OR_DESC</B> String => column sort sequence, "A" => ascending,
-     *      "D" => descending, may be null if sort sequence is not supported;
+     *	<LI><B>ASC_OR_DESC</B> String =&gt; column sort sequence, "A" =&gt; ascending,
+     *      "D" =&gt; descending, may be null if sort sequence is not supported;
      *      null when TYPE is tableIndexStatistic
-     *	<LI><B>CARDINALITY</B> int => When TYPE is tableIndexStatistic, then
+     *	<LI><B>CARDINALITY</B> int =&gt; When TYPE is tableIndexStatistic, then
      *      this is the number of rows in the table; otherwise, it is the
      *      number of unique values in the index.
-     *	<LI><B>PAGES</B> int => When TYPE is  tableIndexStatisic then
+     *	<LI><B>PAGES</B> int =&gt; When TYPE is  tableIndexStatisic then
      *      this is the number of pages used for the table, otherwise it
      *      is the number of pages used for the current index.
-     *	<LI><B>FILTER_CONDITION</B> String => Filter condition, if any.
+     *	<LI><B>FILTER_CONDITION</B> String =&gt; Filter condition, if any.
      *      (may be null)
      *  </OL>
      *
@@ -3085,14 +3085,14 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *
      * <P>Each type description has the following columns:
      *  <OL>
-     *	<LI><B>TYPE_CAT</B> String => the type's catalog (may be null)
-     *	<LI><B>TYPE_SCHEM</B> String => type's schema (may be null)
-     *	<LI><B>TYPE_NAME</B> String => type name
-     *  <LI><B>CLASS_NAME</B> String => Java class name
-     *	<LI><B>DATA_TYPE</B> String => type value defined in java.sql.Types.  
+     *	<LI><B>TYPE_CAT</B> String =&gt; the type's catalog (may be null)
+     *	<LI><B>TYPE_SCHEM</B> String =&gt; type's schema (may be null)
+     *	<LI><B>TYPE_NAME</B> String =&gt; type name
+     *  <LI><B>CLASS_NAME</B> String =&gt; Java class name
+     *	<LI><B>DATA_TYPE</B> String =&gt; type value defined in java.sql.Types.  
      *  One of JAVA_OBJECT, STRUCT, or DISTINCT
-     *	<LI><B>REMARKS</B> String => explanatory comment on the type
-     *  <LI><B>BASE_TYPE</B> short => type code of the source type of
+     *	<LI><B>REMARKS</B> String =&gt; explanatory comment on the type
+     *  <LI><B>BASE_TYPE</B> short =&gt; type code of the source type of
      *  a DISTINCT type or the type that implements the user-generated
      *  reference type of the SELF_REFERENCING_COLUMN of a structured
      *  type as defined in java.sql.Types (<code>null</code> if

@@ -92,7 +92,7 @@ public class StatementFinder {
 
 		@param s the input stream for reading statements from.
 		@param promptDest LocalizedOutput stream to write line
-						continuation prompts ("> ") to. If null,
+						continuation prompts ("&gt; ") to. If null,
 						no such prompts will be written.
 	 */
 	public StatementFinder(LocalizedInput s, LocalizedOutput promptDest) {

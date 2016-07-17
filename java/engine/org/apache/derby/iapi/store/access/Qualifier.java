@@ -95,7 +95,7 @@ import org.apache.derby.iapi.error.StandardException;
   <p>
   Note that any of the arrays qual[0].length ... qual[qual.length -1] may also
   be of length 1, thus no guarantee is made the presence of OR
-  predicates if qual.length > 1. See example 1a.
+  predicates if qual.length &lt; 1. See example 1a.
   <p>
   The following give pseudo-code examples of building Qualifier arrays:
   <p>
@@ -184,7 +184,7 @@ public interface Qualifier
 	 *		<li> CONSTANT 		- can be cached across executions. </li></ul>
 	 * <p>
 	 * <b>NOTE</b>: the following is guaranteed: <i> 
-	 *		VARIANT < SCAN_INVARIANT < QUERY_INVARIANT < CONSTANT
+	 *		VARIANT &lt; SCAN_INVARIANT &lt; QUERY_INVARIANT &lt; CONSTANT
 	 */
 	public static final int VARIANT = 0;
 	public static final int SCAN_INVARIANT = 1;

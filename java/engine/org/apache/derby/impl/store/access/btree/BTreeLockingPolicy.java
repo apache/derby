@@ -170,10 +170,10 @@ public interface BTreeLockingPolicy
      * Given the current latched page and slot number, lock the logically
      * previous key in the table.  There are 3 cases:
      * <p>
-     * slotnumber > 1                       - just lock (slotnumber - 1)
-     * (slotnumber == 1) && (leftmost leaf) - this is the first key in the
+     * slotnumber &gt; 1                       - just lock (slotnumber - 1)
+     * (slotnumber == 1) &amp;&amp; (leftmost leaf) - this is the first key in the
      *                                        table, so lock a "magic" FIRSTKEY.
-     * (slotnumber == 1) && !(leftmost leaf)- traverse left in the tree looking
+     * (slotnumber == 1) &amp;&amp; !(leftmost leaf)- traverse left in the tree looking
      *                                        for a previous key.
      * <p>
      * On successful return from this routine appropriate locking will have

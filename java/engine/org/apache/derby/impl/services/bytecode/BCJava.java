@@ -82,7 +82,7 @@ import java.util.Hashtable;
 	The best way to locate the problem here is to do this (replace
 	ac5.class with the name of your class file):
 	<ol>
-	<li> javap -c -v ac5 >ac5.gp<br>
+	<li> javap -c -v ac5 &gt; ac5.gp<br>
 		 if javap reports "Class not found", and the file ac5.class does
 		 exist in the current directory, then the .class file is probably
 		 corrupt.  Try running mocha on it to see if that works. The
@@ -103,9 +103,9 @@ import java.util.Hashtable;
 	     until it builds or you figure out what is wrong with
 	     the generated code.
 	<li> javac ac5.java
-	<li> javap -v -c ac5 >ac5.jp
-	<li> sed '1,$s/#[0-9]* </# </' ac5.gp > ac5.gn
-	<li> sed '1,$s/#[0-9]* </# </' ac5.jp > ac5.jn<br>
+	<li> javap -v -c ac5 &gt; ac5.jp
+	<li> sed '1,$s/#[0-9]* &lt;/# &lt;/' ac5.gp &gt; ac5.gn
+	<li> sed '1,$s/#[0-9]* &lt;/# &lt;/' ac5.jp &gt; ac5.jn<br>
 	     These seds are to get rid of constant pool entry numbers,
 	     which will be wildly different on the two files.
 	<li> vdiff32 ac5.gn ac5.jn<br>

@@ -194,9 +194,9 @@ public abstract class GenericConglomerate
 	 *
 	 * @param other		The Orderable to compare this one to.
 	 *
-	 * @return  <0 - this Orderable is less than other.
+	 * @return  &lt;0 - this Orderable is less than other.
 	 * 			 0 - this Orderable equals other.
-	 *			>0 - this Orderable is greater than other.
+	 *			&gt;0 - this Orderable is greater than other.
      *
      *			The code should not explicitly look for -1, or 1.
 	 *

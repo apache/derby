@@ -1621,7 +1621,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * return how many rows were filled in.  If fetchNextSet() returns 0
      * then the scan is complete, (ie. the scan is in the same state as if
      * fetchNext() had returned false).  If the scan is not complete then
-     * fetchNext() will return (1 <= row_count <= N).
+     * fetchNext() will return (1 &lt;= row_count &lt;= N).
      * <p>
      * The current position of the scan is undefined if fetchNextSet()
      * is used (ie. mixing fetch()/fetchNext() and fetchNextSet() calls
@@ -1664,10 +1664,10 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * @return The number of qualifying rows found and copied into the 
      *         provided array of rows.  If 0 then the scan is complete, 
      *         otherwise the return value will be: 
-     *         1 <= row_count <= row_array.length
+     *         1 &lt;= row_count &lt;= row_array.length
      *
      * @param row_array         The array of rows to copy rows into.  
-     *                          row_array[].length must >= 1.  This routine
+     *                          row_array[].length must &gt;= 1.  This routine
      *                          assumes that all entries in the array 
      *                          contain complete template rows.
      *

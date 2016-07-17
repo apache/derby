@@ -574,7 +574,7 @@ public class TransactionTable implements Formatable
      * @param recovered  <code> true </code> to search  for transaction 
      *                  that are in prepared during recovery.  
      *                  recovered tranaction. 
-     *                  <code> false > to search for just prepared 
+     *                  <code> false &gt; to search for just prepared 
      *                  transactons. 
      * @return         <code> true if there is a prepared transaction and
      *                  recovered when <code> recovered </code> argument is 

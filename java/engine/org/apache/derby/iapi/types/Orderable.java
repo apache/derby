@@ -28,7 +28,7 @@ import org.apache.derby.iapi.error.StandardException;
   The Orderable interface represents a value that can
   be linearly ordered.
   <P>
-  Currently only supports linear (<, =, <=) operations.
+  Currently only supports linear (&lt;, =, &lt;=) operations.
   Eventually we may want to do other types of orderings,
   in which case there would probably be a number of interfaces
   for each "class" of ordering.
@@ -43,21 +43,21 @@ import org.apache.derby.iapi.error.StandardException;
 public interface Orderable
 {
 
-	/**	 Ordering operation constant representing '<' **/
+	/**	 Ordering operation constant representing '&lt;' **/
 	static final int ORDER_OP_LESSTHAN = 1;
 	/**	 Ordering operation constant representing '=' **/
 	static final int ORDER_OP_EQUALS = 2;
-	/**	 Ordering operation constant representing '<=' **/
+	/**	 Ordering operation constant representing '&lt;=' **/
 	static final int ORDER_OP_LESSOREQUALS = 3;
 
 	/** 
 	 * These 2 ordering operations are used by the language layer
 	 * when flipping the operation due to type precedence rules.
-	 * (For example, 1 < 1.1 -> 1.1 > 1)
+	 * (For example, 1 &lt; 1.1 -&gt; 1.1 &gt; 1)
 	 */
-	/**	 Ordering operation constant representing '>' **/
+	/**	 Ordering operation constant representing '&gt;' **/
 	static final int ORDER_OP_GREATERTHAN = 4;
-	/**	 Ordering operation constant representing '>=' **/
+	/**	 Ordering operation constant representing '&gt;=' **/
 	static final int ORDER_OP_GREATEROREQUALS = 5;
 
 

@@ -467,7 +467,7 @@ public abstract class BaseJDBCTestCase
 
     /**
      * Tear down this fixture, sub-classes should call
-     * super.tearDown(). This cleanups & closes the connection
+     * super.tearDown(). This cleans up and closes the connection
      * if it is open and any statement objects returned through
      * the utility methods.
      */

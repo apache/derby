@@ -149,7 +149,7 @@ public class T_Recovery extends T_Generic {
 		Tests in here come in pairs (Snnn Rnnn), one to set it up, one to test
 		it after recovery.  Information that needs to be passed from the setup
 		to the recovery should, ideally, be written out to a database.  For
-		now, it is written out as a pair of <key,value> long in the file
+		now, it is written out as a pair of (key,value) long in the file
 		T_Recovery.info.
 
 		To make sure you don't accidently tramples on someone else's key, 
@@ -157,8 +157,8 @@ public class T_Recovery extends T_Generic {
 		your key.  Multiple invocations which needs paramaters saved should
 		be encoded futher.
 
-		001 < nnn < 200 -  no recovery undo
-		200 < nnn < 400 -  recovery undo
+		001 &lt; nnn &lt; 200 -  no recovery undo
+		200 &lt; nnn &lt; 400 -  recovery undo
 
 		@exception T_Fail Unexpected behaviour from the API
 	 */

@@ -504,10 +504,10 @@ public class BlobTest
     /**
      * Tests the exceptions thrown by the getBinaryStream
      * (long pos, long length) for the following conditions
-     * a) pos <= 0
-     * b) pos > (length of LOB)
-     * c) length < 0
-     * d) pos + length > (length of LOB).
+     * a) pos &lt;= 0
+     * b) pos &gt; (length of LOB)
+     * c) length &lt; 0
+     * d) pos + length &gt; (length of LOB).
      *
      * @throws SQLException.
      */

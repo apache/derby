@@ -464,7 +464,7 @@ public class JarUtil
     }
 
     /**
-     * Upgrade code: upgrade one jar file to new style (>= 10.9)
+     * Upgrade code: upgrade one jar file to new style (&gt;= 10.9)
      *
      * @param tc transaction controller
      * @param fid the jar file to be upgraded

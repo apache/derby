@@ -923,7 +923,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
     object allocations occur during the execution of this method.
     <P>
     This method performs a binary search on the page and finds the entry i on
-    the page such that entry[i] <= key < entry[i+1].  The result of the search
+    the page such that entry[i] &lt;= key &lt; entry[i+1].  The result of the search
     is filled into the passed in params structure.
 
     @param params the parameters of the search
@@ -1364,9 +1364,9 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 	 **      the same level of this page.
 	 ** <li> This page is the left sibling of its right sibling,
 	 **      and it's the right sibling of its left sibling.
-	 ** <li> The last row on the left sibling is < the first
+	 ** <li> The last row on the left sibling is &lt; the first
 	 **      row on this page.
-	 ** <li> The first row on the right sibling is > than the
+	 ** <li> The first row on the right sibling is &gt; than the
 	 **      the last row on this page.
 	 ** </menu>
 	 ** Note that these last two are really only true if there
@@ -1407,7 +1407,7 @@ public abstract class ControlRow implements AuxObject, TypedFormat
 
 	/**
 	 ** Check that all rows on the page are in order.  This
-	 ** means that each key is > than the previous key.
+	 ** means that each key is &gt; than the previous key.
 
     @exception StandardException Standard exception policy.
 	 **/

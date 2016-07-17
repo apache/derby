@@ -107,7 +107,7 @@ public interface NumberDataValue extends DataValueDescriptor
 	 * @param result		The result of the previous call to this method, null
 	 *						if not called yet.
 	 * @param scale			The scale of the result, for decimal type.  If pass
-	 *						in value < 0, can calculate it dynamically.
+	 *						in value &lt; 0, can calculate it dynamically.
 	 *
 	 * @return	dividend / divisor
 	 *

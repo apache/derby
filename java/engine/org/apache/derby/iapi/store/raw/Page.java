@@ -459,7 +459,7 @@ public interface Page
      * If slot == recordCount(), then the record is inserted in a new slot, no
      * records are moved. <BR>
      *
-     * If slot is > recordCount() or if slot < FIRST_SLOT_NUMBER, an exception
+     * If slot is &gt; recordCount() or if slot &lt; FIRST_SLOT_NUMBER, an exception
      * will be thrown.
      *
      * <P><B>Space Policy</B><BR>
@@ -648,7 +648,7 @@ public interface Page
 		is locked but not fetched.
 		<BR>
 		The fieldId of the first field is 0.
-		If the fieldId is >= the number of fields on the record, 
+		If the fieldId is &gt;= the number of fields on the record, 
 		column is restored to null
 		<P>
 		<B>Locking Policy</B>
@@ -857,7 +857,7 @@ public interface Page
      *
      *
      * @param slot	            the starting slot number
-     * @param numpurges	        number of slots to purge.  If <= 0, 
+     * @param numpurges	        number of slots to purge.  If &lt;= 0, 
      *                          just returns as a no-op.
 	 * @param needDataLogged    if set to true data is logged for purges else 
      *                          only headers.
@@ -895,8 +895,8 @@ public interface Page
      *
      * <BR>DestPage must have at least dest_slot row occupying slot[0] to
      * slot[dest_slot-1].  DestPage must have enough space to take the copied
-     * over data.  Rows that occupied slot number > dest_slot will be moved up
-     * the slot (I.e., slot[dest_slot] -> slot[dest_slot + num_rows]).  
+     * over data.  Rows that occupied slot number &gt; dest_slot will be moved up
+     * the slot (I.e., slot[dest_slot] -&gt; slot[dest_slot + num_rows]).  
      *
      * <BR>If this operation rolls back, this page (the src page) will get the
      * rows back and the dest page will purge the rows that were copied - this
@@ -1016,7 +1016,7 @@ public interface Page
      * after the delete commits.  
      * <p>
      * Will return true if the number of non-deleted rows on the page is
-     * <= "num_non_deleted_rows".  For instance 0 means schedule reclaim
+     * &lt;= "num_non_deleted_rows".  For instance 0 means schedule reclaim
      * only if all rows are deleted, 1 if all rows but one are deleted.  
      * <p>
      * Will return true if the row just deleted is either a long row or long

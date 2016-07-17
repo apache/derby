@@ -36,8 +36,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Tests the following PreparedStatement methods:
- *   -> setCharacterStream(int parameterIndex, InputStream x, int length)
- *   -> setAsciiStream(int parameterIndex, Reader reader, int length)
+ *   -&gt; setCharacterStream(int parameterIndex, InputStream x, int length)
+ *   -&gt; setAsciiStream(int parameterIndex, Reader reader, int length)
  */
 public class CharacterStreamsTest extends BaseJDBCTestCase {
 

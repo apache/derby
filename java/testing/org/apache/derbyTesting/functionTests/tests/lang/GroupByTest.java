@@ -1477,7 +1477,7 @@ public class GroupByTest extends BaseJDBCTestCase {
 	 *  
 	 * The tests below show that GROUP BY and HAVING clauses are able to use a 
 	 *  column which is not part of the SELECT list. This happens for USING
-	 *  clause & NATURAL joins with queries using INNER JOINS and OUTER JOINS.
+	 *  clause and NATURAL joins with queries using INNER JOINS and OUTER JOINS.
 	 *  When using the JOIN with ON clause, we do not run into this problem 
 	 *  because we are expected to qualify the JOIN column with table name 
 	 *  in the SELECT list when using thw ON clause.

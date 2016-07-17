@@ -83,7 +83,7 @@ public interface SortCostController
      * 
      * @param estimatedInputRows   The number of rows that the caller estimates
      *                        will be inserted into the sort.  This number must
-     *                        be >= 0.
+     *                        be &gt;= 0.
      *
      * @param estimatedExportRows   The number of rows that the caller estimates
      *                        will be exported by the sorter.  For instance if
@@ -92,7 +92,7 @@ public interface SortCostController
      *                        estimatedExportRows would be 1.  If no duplicate
      *                        eliminate is to be done then estimatedExportRows 
      *                        would be the same as estimatedInputRows.  This 
-     *                        number must be >= 0.
+     *                        number must be &gt;= 0.
      *
      * @param estimatedRowSize The estimated average row size of the rows 
      *                         being sorted.  This is the client portion of the 

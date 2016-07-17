@@ -486,7 +486,7 @@ public class CursorNode extends DMLStatementNode
 	 *     <LI>if it does not have exactly 1 table in its FROM list;
 	 *         0 tables would occur if we ever support a SELECT without a
 	 *         FROM e.g., for generating a row without an underlying table
-	 *         (like what we do for an INSERT of a VALUES list); >1 tables
+	 *         (like what we do for an INSERT of a VALUES list); &gt;1 tables
 	 *         occurs when joins are in the tree.
 	 *     <LI>if the table in its FROM list is not a base table (REMIND
 	 *         when views/from subqueries are added, this should be relaxed to

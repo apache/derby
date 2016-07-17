@@ -39,8 +39,8 @@ import org.apache.derby.iapi.types.TypeId;
     This node represents a like comparison operator (no escape)
 
     If the like pattern is a constant or a parameter then if possible
-    the like is modified to include a >= and < operator. In some cases
-    the like can be eliminated.  By adding =, >= or < operators it may
+    the like is modified to include a &gt;= and &lt; operator. In some cases
+    the like can be eliminated.  By adding =, &gt;= or &lt; operators it may
     allow indexes to be used to greatly narrow the search range of the
     query, and allow optimizer to estimate number of rows to affected.
 
@@ -48,36 +48,36 @@ import org.apache.derby.iapi.types.TypeId;
     constant or parameter LIKE pattern with prefix followed by optional wild 
     card e.g. Derby%
 
-    CHAR(n), VARCHAR(n) where n < 255
+    CHAR(n), VARCHAR(n) where n &lt; 255
 
-        >=   prefix padded with '\u0000' to length n -- e.g. Derby\u0000\u0000
-        <=   prefix appended with '\uffff' -- e.g. Derby\uffff
+        &gt;=   prefix padded with '\u0000' to length n -- e.g. Derby\u0000\u0000
+        &lt;=   prefix appended with '\uffff' -- e.g. Derby\uffff
 
         [ can eliminate LIKE if constant. ]
 
 
-    CHAR(n), VARCHAR(n), LONG VARCHAR where n >= 255
+    CHAR(n), VARCHAR(n), LONG VARCHAR where n &gt;= 255
 
-        >= prefix backed up one characer
-        <= prefix appended with '\uffff'
+        &gt;= prefix backed up one characer
+        &lt;= prefix appended with '\uffff'
 
         no elimination of like
 
 
     parameter like pattern starts with wild card e.g. %Derby
 
-    CHAR(n), VARCHAR(n) where n <= 256
+    CHAR(n), VARCHAR(n) where n &lt;= 256
 
-        >= '\u0000' padded with '\u0000' to length n
-        <= '\uffff'
+        &gt;= '\u0000' padded with '\u0000' to length n
+        &lt;= '\uffff'
 
         no elimination of like
 
-    CHAR(n), VARCHAR(n), LONG VARCHAR where n > 256
+    CHAR(n), VARCHAR(n), LONG VARCHAR where n &gt; 256
 
-        >= NULL
+        &gt;= NULL
 
-        <= '\uffff'
+        &lt;= '\uffff'
 
 
     Note that the Unicode value '\uffff' is defined as not a character value

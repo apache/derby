@@ -342,7 +342,7 @@ public interface DependencyManager {
     public static final int DROP_AGGREGATE = 51;
 
     /**
-     * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of
+     * Extensions to this interface may use action codes &gt; MAX_ACTION_CODE without fear of
      * clashing with action codes in this base interface.
      */
     public static final int MAX_ACTION_CODE = 0XFFFF;

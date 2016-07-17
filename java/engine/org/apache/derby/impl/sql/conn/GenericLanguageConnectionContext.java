@@ -2884,7 +2884,7 @@ public class GenericLanguageConnectionContext
     /**
       * Reports how many statement levels deep we are.
       *
-      * @return a statement level >= OUTERMOST_STATEMENT
+      * @return a statement level &gt;= OUTERMOST_STATEMENT
       */
     public  int     getStatementDepth()
     { return statementDepth; }

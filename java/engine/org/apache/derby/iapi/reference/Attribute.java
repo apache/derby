@@ -311,7 +311,7 @@ public interface Attribute {
 	 * database owner power before proceeding.  The purpose is to
 	 * avoid failing soft upgrade due to a feature being set but not
 	 * supported until after hard upgrade has taken place (e.g. during
-	 * hard upgrade from 10.1 -> 10.3 or higher if
+	 * hard upgrade from 10.1 -&gt; 10.3 or higher if
 	 * derby.database.sqlAuthorization is set,
 	 * cf. DD_Version#checkVersion).
 	 */

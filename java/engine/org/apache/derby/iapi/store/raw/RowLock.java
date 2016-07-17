@@ -110,7 +110,7 @@ public final class RowLock {
 
 	/**
 		Get an integer representation of the type of the lock. This method is 
-        guaranteed to return an integer >= 0 and < R_NUMBER. No correlation 
+        guaranteed to return an integer &gt;= 0 and &lt; R_NUMBER. No correlation 
         between the value and one of the static variables (CIS etc.) is 
         guaranteed, except that the values returned do not change.
 	*/

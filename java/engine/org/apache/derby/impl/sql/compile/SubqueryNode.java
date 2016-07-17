@@ -1315,7 +1315,7 @@ class SubqueryNode extends ValueNode
 	 *		o  The operator in the new predicate that is added to the subquery
 	 *		   will be a BinaryAllOperatorNode whose bcoNodeType corresponds to 
 	 *		   the negation of the operator that modifies the ALL.
-	 *		   (eg, <> for = ALL, with <> for NOT IN.)
+	 *		   (eg, &lt;&gt; for = ALL, with &lt;&gt; for NOT IN.)
 	 *
 	 * NOTE: This method is called after the underlying subquery has been
 	 * preprocessed, so we build a new Predicate, not just a new expression.

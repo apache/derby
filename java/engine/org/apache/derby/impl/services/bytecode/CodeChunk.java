@@ -1146,7 +1146,7 @@ final class CodeChunk {
      * the given opcode at the program counter pc.
      * <P>
      * Returns a six element integer array of program counters and lengths.
-     * <code. [0] - program counter of the IF opcode (passed in as pc) [1] -
+     * <code> [0] - program counter of the IF opcode (passed in as pc) [1] -
      * program counter of the start of the then block [2] - length of the then
      * block [3] - program counter of the else block, -1 if no else block
      * exists. [4] - length of of the else block, -1 if no else block exists.
@@ -1621,8 +1621,8 @@ final class CodeChunk {
      * This method will split out such expressions in sub-methods
      * and replace the original code with a call to that submethod.
      * <UL>
-     * <LI>this.method(args) ->> this.sub1([parameters])
-     * <LI>this.getter().method(args) ->> this.sub1([parameters])
+     * <LI>this.method(args) -&gt;&gt; this.sub1([parameters])
+     * <LI>this.getter().method(args) -&gt;&gt; this.sub1([parameters])
      * </UL>
      * The assumption is of course that the call to the sub-method
      * is much smaller than the code it replaces.

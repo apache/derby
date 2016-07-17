@@ -475,7 +475,7 @@ class FromList extends    QueryTreeNodeVector<ResultSetNode>
 	 *
 	 *  select j from onerow where exists
 	 *    (select 1 from somerow
-	 *      union select * from diffrow where onerow.j < diffrow.k)
+	 *      union select * from diffrow where onerow.j &lt; diffrow.k)
 	 *
 	 * If "this" is the FromList for the right child of the UNION then it will
 	 * contain both "diffrow" and "onerow", the latter of which was passed

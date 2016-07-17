@@ -39,7 +39,7 @@ import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A BinaryOperatorNode represents a built-in binary operator as defined by
- * the ANSI/ISO SQL standard.  This covers operators like +, -, *, /, =, <, etc.
+ * the ANSI/ISO SQL standard.  This covers operators like +, -, *, /, =, &lt;, etc.
  * Java operators are not represented here: the JSQL language allows Java
  * methods to be called from expressions, but not Java operators.
  *
@@ -384,7 +384,7 @@ class BinaryOperatorNode extends OperatorNode
         return genSQLJavaSQLTree();
     }
 
-	/** generate a SQL->Java->SQL conversion tree above the left and right
+	/** generate a SQL-&gt;Java-&gt;SQL conversion tree above the left and right
 	 * operand of this Binary Operator Node if needed. Subclasses can override
 	 * the default behavior.
 	 */

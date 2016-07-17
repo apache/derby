@@ -136,7 +136,7 @@ public class ExceptionUtil
      * The result is returned as a string, ready to print.
      *
      * If the JVM doesn't have the method Thread.getAllStackTraces
-     * i.e, we are on a JVM < 1.5, or  if we don't have the permissions:
+     * i.e, we are on a JVM &lt; 1.5, or  if we don't have the permissions:
      * java.lang.RuntimePermission "getStackTrace" and "modifyThreadGroup",
      * a message saying so is returned instead.
      *

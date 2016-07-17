@@ -603,11 +603,11 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * The <> operator as called from the language module, as opposed to
+	 * The &lt;&gt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <>
-	 * @param right			The value on the right side of the <>
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the two parameters are
 	 *			not equal
@@ -625,11 +625,11 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * The < operator as called from the language module, as opposed to
+	 * The &lt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <
-	 * @param right			The value on the right side of the <
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the left operand is
 	 *			less than the right operand
@@ -653,11 +653,11 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * The > operator as called from the language module, as opposed to
+	 * The &gt; operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the >
-	 * @param right			The value on the right side of the >
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the left operand is
 	 *			greater than the right operand
@@ -681,11 +681,11 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * The <= operator as called from the language module, as opposed to
+	 * The &lt;= operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the <=
-	 * @param right			The value on the right side of the <=
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the left operand is
 	 *			less than or equal to the right operand
@@ -709,11 +709,11 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * The >= operator as called from the language module, as opposed to
+	 * The &gt;= operator as called from the language module, as opposed to
 	 * the storage module.
 	 *
-	 * @param left			The value on the left side of the >=
-	 * @param right			The value on the right side of the >=
+	 * @param left			The value on the left side of the operator
+	 * @param right			The value on the right side of the operator
 	 *
 	 * @return	A SQL boolean value telling whether the left operand is
 	 *			greater than or equal to the right operand

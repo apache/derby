@@ -451,7 +451,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Test fix for Bug4810 -Connection.commit() & rollback() do not
+     * Test fix for Bug4810 -Connection.commit() and rollback() do not
      * commit/rollback in auto-commit mode.
      */
     public void testBug4810() throws SQLException {

@@ -51,7 +51,7 @@ public interface RoleClosureIterator
      *
      *          a1            a2         a3
      *         / | \           |          |
-     *        /  b  +--------> c          d
+     *        /  b  +--------&gt; c          d
      *       j   |              \        /
      *           e---+           \      /
      *            \   \           \    /

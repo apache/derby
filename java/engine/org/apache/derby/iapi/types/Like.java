@@ -402,13 +402,13 @@ public class Like {
 	}
 
 	/**
-	 * Return the substring from the pattern for the optimization >= clause.
+	 * Return the substring from the pattern for the optimization &gt;= clause.
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
 	 * @param maxWidth	Maximum length of column, for null padding
 	 *
-	 * @return	The String for the >= clause
+	 * @return	The String for the &gt;= clause
 	 */
 	public static String greaterEqualString(String pattern, String escape, int maxWidth)
 	    throws StandardException
@@ -564,13 +564,13 @@ public class Like {
 	}
 
 	/**
-	 * Return the substring from the pattern for the < clause.
+	 * Return the substring from the pattern for the &lt; clause.
 	 *
 	 * @param pattern	The right side of the LIKE
 	 * @param escape	The escape clause
 	 * @param maxWidth	Maximum length of column, for null padding
 	 *
-	 * @return	The String for the < clause
+	 * @return	The String for the &lt; clause
 	 * @exception StandardException thrown if data invalid
 	 */
 	public static String lessThanString(String pattern, String escape, int maxWidth)

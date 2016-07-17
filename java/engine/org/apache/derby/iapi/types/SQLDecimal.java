@@ -814,7 +814,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 * @param divisor	The denominator
 	 * @param result	The result of a previous call to this method, null
 	 *					if not called yet
-	 * @param scale		The result scale, if < 0, calculate the scale according
+	 * @param scale		The result scale, if &lt; 0, calculate the scale according
 	 *					to the actual values' sizes
 	 *
 	 * @return	A SQLDecimal containing the result of the division

@@ -58,7 +58,7 @@ for creating the underlying overflow container.
 The hash table will be built logically as follows (actual implementation
 may differ).  The important points are that the hash value is the standard
 java hash value on the row[key_column_numbers[0], if key_column_numbers.length is 1,
-or row[key_column_numbers[0, 1, ...]] if key_column_numbers.length > 1, 
+or row[key_column_numbers[0, 1, ...]] if key_column_numbers.length &gt; 1, 
 and that duplicate detection is done by the standard java duplicate detection provided by 
 java.util.Hashtable.
 </p>
@@ -176,11 +176,11 @@ public class BackingStoreHashtable
      * RowLocations in a non-null row_source can be added later
      * if there is a use-case that stresses this behavior.
      * <p>
-     * If the number of rows is <= "max_inmemory_rowcnt", then the rows are
+     * If the number of rows is &lt;= "max_inmemory_rowcnt", then the rows are
      * inserted into a java.util.HashMap. In this case no
      * TransactionController is necessary, a "null" tc is valid.
      * <p>
-     * If the number of rows is > "max_inmemory_rowcnt", then the rows will
+     * If the number of rows is &gt; "max_inmemory_rowcnt", then the rows will
      * be all placed in some sort of Access temporary file on disk.  This 
      * case requires a valid TransactionController.
      *

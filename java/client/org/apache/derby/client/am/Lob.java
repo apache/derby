@@ -301,10 +301,10 @@ public abstract class Lob implements UnitOfWorkListener {
      * @param pos a long that contains the position that needs to be checked
      * @param length a long that contains the length that needs to be checked
      * @throws SQLException if
-     *         a) pos <= 0
-     *         b) pos > (length of LOB)
-     *         c) length < 0
-     *         d) (pos -1) + length > (length of LOB)
+     *         a) pos &lt;= 0
+     *         b) pos &gt; (length of LOB)
+     *         c) length &lt; 0
+     *         d) (pos -1) + length &gt; (length of LOB)
      */
     protected void checkPosAndLength(long pos, long length)
     throws SQLException {

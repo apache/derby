@@ -267,7 +267,7 @@ class AppRequester
     /**
      * Is this an AppRequester that supports XA 
      *
-     * return true if XAMGR >= 7, false otherwise
+     * return true if XAMGR &gt;= 7, false otherwise
      **/
 
     protected  boolean isXARequester()

@@ -46,8 +46,8 @@ import org.apache.derby.agg.Aggregator;
  * because they do not satisfy its type bounds. That is because they inherit the
  * Comparable implementation of java.util.Date rather than implementing
  * their own more specific version of Comparable. That is,
- * java.sql.Date implements Comparable<java.util.Date> rather than
- * Comparable<java.sql.Date>.
+ * java.sql.Date implements Comparable&lt;java.util.Date&gt; rather than
+ * Comparable&lt;java.sql.Date&gt;.
  * </p>
  */
 public  class   LobMode<V>    implements  Aggregator<V,V,LobMode<V>>

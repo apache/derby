@@ -1159,7 +1159,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * will in turn call
      * <code>EmbedDatabaseMetaData.getFunctions(String,String,String)</code><p>
      * Compatibility: Only available if both server and client version
-     * > 10.1, and JDK version >= 1.6. Older clients will not have
+     * &lt; 10.1, and JDK version &gt;= 1.6. Older clients will not have
      * this method available. Newer clients will be able to call this
      * method when connected to an older server, but this will be
      * trigger an exception in
@@ -1235,7 +1235,7 @@ public abstract class ClientDatabaseMetaData implements DatabaseMetaData {
      * server. This procedure will in turn call
      * <code>EmbedDatabaseMetaData.getFunctionColumns(String,String,
      * String,String)</code><p> Compatibility: Only available if both
-     * server and client version > 10.1, and JDK version >= 1.6. Older
+     * server and client version &gt; 10.1, and JDK version &gt;= 1.6. Older
      * clients will not have this method available. Newer clients will
      * be able to call this method when connected to an older server,
      * but this will be trigger an exception in

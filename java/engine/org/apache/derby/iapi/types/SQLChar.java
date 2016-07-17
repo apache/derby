@@ -2022,11 +2022,11 @@ readingLoop:
     }
 
     /**
-     * The <> operator as called from the language module, as opposed to
+     * The &lt;&gt; operator as called from the language module, as opposed to
      * the storage module.
      *
-     * @param left          The value on the left side of the <>
-     * @param right         The value on the right side of the <>
+     * @param left          The value on the left side of the operator
+     * @param right         The value on the right side of the operator
      *
      * @return  A SQL boolean value telling whether the two parameters
      * are not equal
@@ -2056,11 +2056,11 @@ readingLoop:
     }
 
     /**
-     * The < operator as called from the language module, as opposed to
+     * The &lt; operator as called from the language module, as opposed to
      * the storage module.
      *
-     * @param left          The value on the left side of the <
-     * @param right         The value on the right side of the <
+     * @param left          The value on the left side of the operator
+     * @param right         The value on the right side of the operator
      *
      * @return  A SQL boolean value telling whether the first operand is
      *          less than the second operand
@@ -2090,11 +2090,11 @@ readingLoop:
     }
 
     /**
-     * The > operator as called from the language module, as opposed to
+     * The &gt; operator as called from the language module, as opposed to
      * the storage module.
      *
-     * @param left          The value on the left side of the >
-     * @param right         The value on the right side of the >
+     * @param left          The value on the left side of the operator
+     * @param right         The value on the right side of the operator
      *
      * @return  A SQL boolean value telling whether the first operand is
      *          greater than the second operand
@@ -2124,11 +2124,11 @@ readingLoop:
     }
 
     /**
-     * The <= operator as called from the language module, as opposed to
+     * The &lt;= operator as called from the language module, as opposed to
      * the storage module.
      *
-     * @param left          The value on the left side of the <=
-     * @param right         The value on the right side of the <=
+     * @param left          The value on the left side of the operator
+     * @param right         The value on the right side of the operator
      *
      * @return  A SQL boolean value telling whether the first operand is
      *          less than or equal to the second operand
@@ -2158,11 +2158,11 @@ readingLoop:
     }
 
     /**
-     * The >= operator as called from the language module, as opposed to
+     * The &gt;= operator as called from the language module, as opposed to
      * the storage module.
      *
-     * @param left          The value on the left side of the >=
-     * @param right         The value on the right side of the >=
+     * @param left          The value on the left side of the operator
+     * @param right         The value on the right side of the operator
      *
      * @return  A SQL boolean value telling whether the first operand is
      *          greater than or equal to the second operand
@@ -2675,9 +2675,9 @@ readingLoop:
      * @param op1               The first String
      * @param op2               The second String
      *
-     * @return  -1 - op1 <  op2
+     * @return  -1 - op1 &lt;  op2
      *           0 - op1 == op2
-     *           1 - op1 > op2
+     *           1 - op1 &gt; op2
      */
     protected static int stringCompare(String op1, String op2)
     {
@@ -2807,9 +2807,9 @@ readingLoop:
      * @param op1               The first String
      * @param op2               The second String
      *
-     * @return  -1 - op1 <  op2
+     * @return  -1 - op1 &lt;  op2
      *           0 - op1 == op2
-     *           1 - op1 > op2
+     *           1 - op1 &gt; op2
      */
     protected static int stringCompare(
     char[]  op1, 

@@ -28,9 +28,9 @@ import java.sql.Timestamp;
  * and are in lower case.
  * For clarity these fields are renamed in Java
  * <UL>
- * <LI>w_id => warehouse (SQL column O_W_ID)
- * <LI>d_id => district (SQL column O_D_ID)
- * <LI>c_id => customer (SQL column O_C_ID)
+ * <LI>w_id =&gt; warehouse (SQL column O_W_ID)
+ * <LI>d_id =&gt; district (SQL column O_D_ID)
+ * <LI>c_id =&gt; customer (SQL column O_C_ID)
  * </UL>
  * <BR>
  * The columns that map to an address are extracted out as

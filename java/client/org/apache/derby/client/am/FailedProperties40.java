@@ -85,11 +85,11 @@ public class FailedProperties40 {
 
     /**
      * <code>getProperties</code> provides a
-     * <code>Map<String,ClientInfoStatus></code> object describing the
+     * <code>Map&lt;String,ClientInfoStatus&gt;</code> object describing the
      * failed properties (as specified in the javadoc for
      * java.sql.SQLClientInfoException).
      *
-     * @return a <code>Map<String,ClientInfoStatus></code> object with
+     * @return a <code>Map&glt;String,ClientInfoStatus&gt;</code> object with
      * the failed property keys and the reason why each failed
      */
     public Map<String,ClientInfoStatus> getProperties() { return failedProps_; }

@@ -173,18 +173,18 @@ class DRDAXAProtocol {
     /** 
      * parse SYNCTYPE for XAMGR lvl 7
      * return synctype value 
-     *   CodePoint.SYNCTYPE_NEW_UOW -> XAResource.start()
-     *   CodePoint.SYNCTYPE_END_UOW -> XAResource.end()
-     *   CodePoint.SYNCTYPE_PREPARE -> XAResource.prepare()
-     *   CodePoint.SYNCTYPE_MIGRATE -> not supported  //SYNCPT MGR LEVEL 5
-     *   CodePoint.SYNCTYPE_REQ_COMMIT -> not supported //SYNCPT MGR LEVEL 5
-     *   CodePoint.SYNCTYPE_COMMITTED -> XAResource.commit()  
+     *   CodePoint.SYNCTYPE_NEW_UOW -&gt; XAResource.start()
+     *   CodePoint.SYNCTYPE_END_UOW -&gt; XAResource.end()
+     *   CodePoint.SYNCTYPE_PREPARE -&gt; XAResource.prepare()
+     *   CodePoint.SYNCTYPE_MIGRATE -&gt; not supported  //SYNCPT MGR LEVEL 5
+     *   CodePoint.SYNCTYPE_REQ_COMMIT -&gt; not supported //SYNCPT MGR LEVEL 5
+     *   CodePoint.SYNCTYPE_COMMITTED -&gt; XAResource.commit()  
      *                                   or local commit for null XID
-     *   CodePoint.SYNCTYPE_REQ_LOG ->  not supported
-     *   CodePoint.SYNCTYPE_REQ_FORGET -> XAResource.forget()
-     *   CodePoint.SYNCTYPE_ROLLBACK -> XAResource.rollback()
-     *   CodePoint.SYNCTYPE_MIGRATED -> not supported
-     *   CodePoint.SYNCTYPE_INDOUBT   -> XAResource.recover();
+     *   CodePoint.SYNCTYPE_REQ_LOG -&gt;  not supported
+     *   CodePoint.SYNCTYPE_REQ_FORGET -&gt; XAResource.forget()
+     *   CodePoint.SYNCTYPE_ROLLBACK -&gt; XAResource.rollback()
+     *   CodePoint.SYNCTYPE_MIGRATED -&gt; not supported
+     *   CodePoint.SYNCTYPE_INDOUBT   -&gt; XAResource.recover();
      * 
      */
     protected int  parseSYNCTYPE() throws DRDAProtocolException

@@ -289,8 +289,8 @@ public interface RawStoreFactory extends Corruptable {
         if this property is set, it will attempt to allocate
         CONTAINER_INITIAL_PAGES, but with no guarentee.
         CONTAIENR_INITIAL_PAGES legally ranges from 1 to
-        MAX_CONTAINER_INITIAL_PAGES.  Values < 1 will
-        be set to 1 and values > MAX_CONTAINER_INITIAL_PAGES will be set to
+        MAX_CONTAINER_INITIAL_PAGES.  Values &lt; 1 will
+        be set to 1 and values &gt; MAX_CONTAINER_INITIAL_PAGES will be set to
         MAX_CONTAINER_INITIAL_PAGES
 
         This property should only be set in the PROPERTIES list in a CREATE

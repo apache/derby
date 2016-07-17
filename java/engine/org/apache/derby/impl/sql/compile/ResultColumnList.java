@@ -2469,7 +2469,7 @@ class ResultColumnList extends QueryTreeNodeVector<ResultColumn>
     }
 
 	/**
-	 * Do the 2 RCLs have the same type & length.
+	 * Do the 2 RCLs have the same type and length.
 	 * This is useful for UNIONs when deciding whether a NormalizeResultSet is required.
 	 *
 	 * @param otherRCL	The other RCL.

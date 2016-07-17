@@ -3799,7 +3799,7 @@ public final class NetworkServerControlImpl {
      * Set the current value of  time slice
      *
      * @param value time slice value
-     * @exception Exception if value is < 0
+     * @exception Exception if value is &lt; 0
      */
     private void setTimeSlice(int value)
         throws Exception

@@ -47,7 +47,7 @@ InputStream.
 Any time store fetches a long column, the value is returned as a stream.
 A long column is any column that at some point was longer than a page, so
 a long column in one table may not be long in another depending on page size.
-<p)
+<p>
 When the column is fetched a new OverflowInputStream is created and then
 the datatype's stream is set using:
  ((StreamStorable)sColumn).setStream(OverflowInputStream);

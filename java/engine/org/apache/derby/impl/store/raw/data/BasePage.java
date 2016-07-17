@@ -129,8 +129,8 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
      * There are 3 latch states for a page:
      *
      * UNLATCHED - (owner == null) 
-     * PRELATCH  - (owner != null) && preLatch
-     * LATCHED   - (owner != null) && !preLatch
+     * PRELATCH  - (owner != null) &amp;&amp; preLatch
+     * LATCHED   - (owner != null) &amp;&amp; !preLatch
      *
      * A page may be "cleaned" while it is either UNLATCHED, or PRELATCH, but
      * it must wait for it to be not LATCHED.
@@ -173,7 +173,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
 		Values for pageStatus flag 
 
 		page goes thru the following transition:
-		VALID_PAGE <-> deallocated page -> free page <-> VALID_PAGE
+		VALID_PAGE &lt;-&gt; deallocated page -&gt; free page &lt;-&gt; VALID_PAGE
 
 		deallocated and free page are both INVALID_PAGE as far as BasePage is concerned.
 		When a page is deallocated, it transitioned from VALID to INVALID.
@@ -1474,7 +1474,7 @@ abstract class BasePage implements Page, DerbyObserver, TypedFormat
      * Also used by access methods after undo of an insert.
      * <p>
      * Will return true if the number of non-deleted rows on the page is
-     * <= "num_non_deleted_rows".  For instance 0 means schedule reclaim
+     * &lt;= "num_non_deleted_rows".  For instance 0 means schedule reclaim
      * only if all rows are deleted, 1 if all rows but one are deleted.  
      * <p>
      * Will return true if the row just deleted is either a long row or long

@@ -596,7 +596,7 @@ public interface ResultSetFactory {
 
 	/**
 		A once result set iterates over its source,
-		raising an error if the source returns > 1 row and
+		raising an error if the source returns &gt; 1 row and
 		returning a row with all columns set to nulls
 		if the source returns no rows.
 

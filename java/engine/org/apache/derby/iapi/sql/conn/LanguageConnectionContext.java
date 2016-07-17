@@ -786,7 +786,7 @@ public interface LanguageConnectionContext extends Context {
     /**
 	  *	Reports how many statement levels deep we are.
 	  *
-	  *	@return	a statement level >= OUTERMOST_STATEMENT
+	  *	@return	a statement level &gt;= OUTERMOST_STATEMENT
 	  */
 	public	int		getStatementDepth();
 
@@ -1050,7 +1050,7 @@ public interface LanguageConnectionContext extends Context {
 	public String getDbname();
 
 	/**
-	 * Check if in SQL standard mode, with support for Grant & Revoke
+	 * Check if in SQL standard mode, with support for Grant and Revoke
 	 *
 	 * @return True if SQL standard permissions are being used
 	 */
