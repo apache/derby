@@ -182,6 +182,7 @@ final class ImportReadData implements java.security.PrivilegedExceptionAction<Ob
     for(int i =0;i<skipLines;i++){
        if(!readNextToken(recordSeparator, 0, recordSeparatorLength, true))
           throw LoadError.unexpectedEndOfFile(lineNumber+1);
+       lineNumber++;
     }
   }
 

@@ -26,6 +26,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.SQLException;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestSuite;
@@ -2066,7 +2067,15 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'PET1' , null , '\"Pet Name\",\"Kind of\",\"Age\"' ,   'extinout/pet.dat' "
             + "  , null , null , null, 0, 2) ");
 
-	assertStatementError("XIE0R", cSt);	
+        try {
+            cSt.execute();
+        }
+        catch ( SQLException se )
+        {
+            assertSQLState( "XIE0R", se );
+            assertTrue("not column C3:"+se.getMessage(),
+                       se.getMessage().indexOf("C3") >= 0);
+        }
 
         //Skip=4
 	cSt = prepareCall(
@@ -2249,7 +2258,17 @@ public class ImportExportProcedureTest extends BaseJDBCTestCase {
 	//Skip argument is 7 that is greater than number of rows in the file.
 	cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_IMPORT_TABLE_BULK(null, 'PET', 'extinout/pet.dat', null, null, null, 0, 7) ");
-	assertStatementError("XIE0E", cSt);
+
+        try {
+            cSt.execute();
+        }
+        catch ( SQLException se )
+        {
+            // Check line number in message:
+            assertSQLState( "XIE0E", se );
+            assertTrue("not line 7:"+se.getMessage(),
+                       se.getMessage().indexOf("7") >= 0);
+        }
 
 	//End of tests for SYSCS_IMPORT_TABLE_BULK procedure
 
