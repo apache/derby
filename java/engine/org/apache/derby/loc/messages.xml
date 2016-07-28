@@ -1897,7 +1897,7 @@ Guide.
 
             <msg>
                 <name>42X50</name>
-                <text>No method was found that matched the method call {0}.{1}({2}), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.</text>
+                <text>No method was found that matched the method call {0}.{1}({2}), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible or the derby.database.classpath property is missing or incorrectly defined.</text>
                 <arg>className</arg>
                 <arg>methodName</arg>
                 <arg>parameterTypes</arg>
@@ -1905,7 +1905,7 @@ Guide.
 
             <msg>
                 <name>42X51</name>
-                <text>The class '{0}' does not exist or is inaccessible. This can happen if the class is not public.</text>
+                <text>The class '{0}' does not exist or is inaccessible. This can happen if the class is not public or the derby.database.classpath property is missing or incorrectly defined.</text>
                 <arg>className</arg>
             </msg>
 

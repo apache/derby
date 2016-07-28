@@ -1014,6 +1014,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         bulkInsert();
         
         miscBugs();
+
+	classpathError();
     }
     
     /**
@@ -1144,6 +1146,46 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "    from TABLE( invert( 1 ) ) s\n"
              );
     }
+
+	/**
+     * test for DERBY-5585
+     */
+    private void classpathError()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function foo( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'Bop.doowop'\n"
+              );
+
+        
+        expectError
+            (
+             "42X51",
+             "values ( foo( 1 ) )"
+             );
+
+	goodStatement
+            (
+             "create function bar( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Integer.doowop'\n"
+             );
+
+        expectError
+            (
+             "42X50",
+             "values ( bar( 1 ) )"
+             );
+     }
     
     /**
      * Verify that a simple VTI returns the correct results.
