@@ -955,7 +955,7 @@ ij> prepare ISC_PROCEDURE as 'create procedure ISC.DUMMY() language java externa
 ij> execute ISC_PROCEDURE;
 0 rows inserted/updated/deleted
 ij> CALL ISC.DUMMY();
-ERROR 42X51: The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR 42X51: The class 'asdf' does not exist or is inaccessible. This can happen if the class is not public or the derby.database.classpath property is missing or incorrectly defined.
 ERROR XJ001: Java exception: 'asdf: java.lang.ClassNotFoundException'.
 ij> drop procedure ISC.DUMMY;
 0 rows inserted/updated/deleted

@@ -560,7 +560,7 @@ select '_foobar' like '__foobar' escape '_' from t1;
 -----
 true 
 ij> prepare ll4 as 'values org.apache.derbyTesting.functionTests.tests.lang.CharUTF8::getMaxDefinedCharAsString() like ?';
-ERROR 42X51: The class 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR 42X51: The class 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8' does not exist or is inaccessible. This can happen if the class is not public or the derby.database.classpath property is missing or incorrectly defined.
 ERROR XJ001: Java exception: 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8: java.lang.ClassNotFoundException'.
 ij> -- boolean expression INSTANCEOF disallowed in values and select clause
 values 1 instanceof int;

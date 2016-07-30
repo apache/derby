@@ -430,7 +430,7 @@ VALUES SIGNATURE_BUG_DERBY_258_D(2356, 16);
 934                 
 ij> -- no method to resolve to (with specified signature)
 VALUES SIGNATURE_BUG_DERBY_258_E();
-ERROR 42X50: No method was found that matched the method call java.lang.Integer.toXXString(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.
+ERROR 42X50: No method was found that matched the method call java.lang.Integer.toXXString(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible or the derby.database.classpath property is missing or incorrectly defined.
 ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_D;
 0 rows inserted/updated/deleted
 ij> DROP FUNCTION SIGNATURE_BUG_DERBY_258_E;
