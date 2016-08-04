@@ -255,10 +255,10 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		 * type, this is also to be consistent with maximumWidth.  Beetle 3906.
 		 */
 		precision = higherTC.getPrecision(operator, leftType, rightType);
-		scale = higherTC.getScale(operator, leftType, rightType);
 
 		if (higherType.getTypeId().isDecimalTypeId()) 
 		{
+			scale = higherTC.getScale(operator, leftType, rightType);
 			maximumWidth = (scale > 0) ? precision + 3 : precision + 1;
 
 			/*
@@ -271,6 +271,7 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 		}
 		else
 		{
+			scale = 0;
 			maximumWidth = higherType.getMaximumWidth();
 		}
 		
@@ -466,10 +467,6 @@ public final class NumericTypeCompiler extends BaseTypeCompiler
 							DataTypeDescriptor rightType)
 	{
 		// Only meaningful for decimal
-		if (getStoredFormatIdFromTypeId() != StoredFormatIds.DECIMAL_TYPE_ID)
-		{
-			return leftType.getScale();
-		}
 
 		long val;
 

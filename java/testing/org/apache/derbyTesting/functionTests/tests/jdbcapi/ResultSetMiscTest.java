@@ -478,6 +478,31 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         stmt.close();
     }
 
+     /**
+     * Test fix for DERBY-853 ResultSetMetaData.getScale 
+     *returns inconsistent values for DOUBLE type.
+     */
+    public void testDerby853() throws SQLException {
+        Connection con = getConnection();
+	
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("create table derby853(d1 decimal(10,2), d2 double)");
+      
+        ResultSet rs = stmt.executeQuery("select d1 - d2 from derby853");
+        ResultSetMetaData rsmd = rs.getMetaData();
+	assertEquals(0, rsmd.getScale(1));
+	assertEquals(15, rsmd.getPrecision(1));
+
+	rs = stmt.executeQuery("select d2 - d1 from derby853");
+	rsmd = rs.getMetaData();
+	assertEquals(0, rsmd.getScale(1));
+	assertEquals(15, rsmd.getPrecision(1));
+
+        stmt.execute("drop table derby853");
+       
+        stmt.close();
+    }
+
     /**
      * Setup up and run the auto-commit tests.
      * 
