@@ -418,6 +418,11 @@ class CreateTableConstantAction extends DDLConstantAction
         long    minValue = bounds[ DataTypeDescriptor.MIN_VALUE_IDX ];
         long    maxValue = bounds[ DataTypeDescriptor.MAX_VALUE_IDX ];
 
+	boolean cycling=false;
+
+	if(info.autoincCycle==1)
+		cycling=true;
+	
         return new CreateSequenceConstantAction
             (
              SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME,
@@ -427,7 +432,7 @@ class CreateTableConstantAction extends DDLConstantAction
              info.autoincInc,
              maxValue,
              minValue,
-             false
+             cycling
              );
     }
 

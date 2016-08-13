@@ -66,6 +66,7 @@ public class ColumnDefinitionNode extends TableElementNode
     GenerationClauseNode   generationClauseNode;
 	long						autoincrementIncrement;
 	long						autoincrementStart;
+        long                                            autoincrementCycle;
 	//This variable tells if the autoincrement column is participating 
 	//in create or alter table. And if it is participating in alter
 	//table, then it further knows if it is represting a change in 
@@ -143,6 +144,7 @@ public class ColumnDefinitionNode extends TableElementNode
                 long[] aii = autoIncrementInfo;
 				autoincrementStart = aii[QueryTreeNode.AUTOINCREMENT_START_INDEX];
 				autoincrementIncrement = aii[QueryTreeNode.AUTOINCREMENT_INC_INDEX];
+				autoincrementCycle = aii[QueryTreeNode.AUTOINCREMENT_CYCLE];
 				//Parser has passed the info about autoincrement column's status in the
 				//following array element. It will tell if the autoinc column is part of 
 				//a create table or if is a part of alter table. And if it is part of 
@@ -349,6 +351,21 @@ public class ColumnDefinitionNode extends TableElementNode
 		}
 		return autoincrementIncrement;
 	}
+
+	/**
+	 * Get the autoincrement cycle value
+	 *
+	 * @return Autoincrement cycle value.
+	 */
+	long getAutoincrementCycle()
+	{
+		if (SanityManager.DEBUG)
+		{			SanityManager.ASSERT(isAutoincrement,
+					"isAutoincrement expected to be true");
+		}
+		return autoincrementCycle;
+	}
+
 
 	/**
 	 * Get the status of this autoincrement column 

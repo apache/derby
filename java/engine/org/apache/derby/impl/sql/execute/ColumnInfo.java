@@ -75,6 +75,7 @@ public class ColumnInfo implements Formatable
 	// autoinc columns.
     long                        autoincStart;
     long                        autoincInc;
+    long                        autoincCycle;
 	//if this is an autoincrement column, then following variable will have CREATE or
 	//MODIFY_COLUMN_DEFAULT_RESTART or MODIFY_COLUMN_DEFAULT_INCREMENT. Otherwise,
 	//this variable will be set to -1.
@@ -130,6 +131,7 @@ public class ColumnInfo implements Formatable
 					   int							action,
 					   long							autoincStart,
 					   long							autoincInc,
+					   long                                                 autoincCycle,
 					   long							autoinc_create_or_modify_Start_Increment)
 	{
 		this.name = name;
@@ -142,6 +144,7 @@ public class ColumnInfo implements Formatable
 		this.action = action;
 		this.autoincStart = autoincStart;
 		this.autoincInc = autoincInc;
+               this.autoincCycle = autoincCycle;
 		this.autoinc_create_or_modify_Start_Increment = autoinc_create_or_modify_Start_Increment;
 	}
 

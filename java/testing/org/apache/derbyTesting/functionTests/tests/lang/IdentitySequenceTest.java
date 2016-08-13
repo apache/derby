@@ -354,6 +354,437 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
             goodStatement( conn, "call syscs_util.syscs_set_database_property( 'derby.locks.waitTimeout', '60' )" );
         }
     }
+
+	    /**
+     * <p>
+     * Tests for newly added cycle option in DERBY-6852.
+     * </p>
+     */
+    public  void    testcycleOption()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        
+        // Test the restart value and syntax of identity column without COMMA. 
+        goodStatement( conn, "create table t( a int generated always as identity(START WITH 2147483647 INCREMENT BY 2 CYCLE) , b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+                 { "-2147483646", "3" },
+             },
+             false
+             );
+        goodStatement( conn, "drop table t" );
+		// Test the restart value and syntax of identity column with COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 2147483647, INCREMENT BY 2, CYCLE) , b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+                 { "-2147483646", "3" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Only Start with. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 47), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "47", "1" },
+                 { "48", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Start with and increment by without COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 47 INCREMENT BY 3), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "47", "1" },
+                 { "50", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Start with and increment by with COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 47, INCREMENT BY 3), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "47", "1" },
+                 { "50", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Start with and increment by with COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 47, INCREMENT BY 3), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "47", "1" },
+                 { "50", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Start with and cycle with COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 2147483647, CYCLE), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+				 { "-2147483647", "3" },
+             },
+             false
+             );
+
+        goodStatement( conn, "drop table t" );
+		//Start with and cycle without COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(START WITH 2147483647 CYCLE), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+				 { "-2147483647", "3" },
+             },
+             false
+             );
+
+ 		goodStatement( conn, "drop table t" );
+		//increment by. 
+		goodStatement( conn, "create table t( a int generated always as identity(INCREMENT BY 3), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "1", "1" },
+                 { "4", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//increment by with COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(INCREMENT BY 3, CYCLE), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "1", "1" },
+                 { "4", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//increment by without COMMA. 
+		goodStatement( conn, "create table t( a int generated always as identity(INCREMENT BY 3, CYCLE), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "1", "1" },
+                 { "4", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Cycle. 
+		goodStatement( conn, "create table t( a int generated always as identity(CYCLE), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "1", "1" },
+                 { "2", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		//Changing the order of the identity column options. 
+		goodStatement( conn, "create table t( a int generated always as identity(increment by 4 start with 4), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "4", "1" },
+                 { "8", "2" },
+             },
+             false
+             );
+		goodStatement( conn, "drop table t" );
+		// Changing the order of identity column options. 
+        goodStatement( conn, "create table t( a int generated always as identity(CYCLE START WITH 2147483647 INCREMENT BY 2 ) , b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+                 { "-2147483646", "3" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		// With comma and without comma. 
+        goodStatement( conn, "create table t( a int generated always as identity(start with 2147483647, increment by 7 cycle) , b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 ), ( 3 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "2147483647", "1" },
+                 { "-2147483648", "2" },
+                 { "-2147483641", "3" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		// Changing the order of identity column options. 
+        goodStatement( conn, "create table t( a int generated always as identity(cycle , increment by 4), b int)" );
+        goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+        assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "1", "1" },
+                 { "5", "2" },
+             },
+             false
+             );
+
+		goodStatement( conn, "drop table t" );
+		// () should be an error 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated by default as identity ())" );
+
+		// Missing "with". 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated by default as identity (start 47))" );
+	
+		// Missing "by". 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated by default as identity (increment 4))" );
+
+		// Redundant cycle
+        expectCompilationError( conn,"42XAJ" ,"create table t(a int generated by default as identity (cycle cycle))" );
+		
+		// Redundant start with  
+        expectCompilationError( conn,"42XAJ" ,"create table t( a int generated by default as identity(start with 4 start with 8))" );
+
+		// Syntax error. 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated by default as identity(start with 4 , , , cycle))" );
+
+		// Syntax error. 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated by default as identity(no cycle))" );
+
+		// try to exceed the maximum value without cycle option. 
+        goodStatement( conn, "create table t( a int generated always as identity(start with 2147483647, increment by 4), b int)" );
+        expectExecutionError( conn,"2200H" ,"insert into t( b ) values ( 1 ), ( 2 )" );
+
+	goodStatement( conn, "drop table t" );
+		// Syntax error. 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated always as identity(START WITH, 47))" );
+		
+		// Syntax error. 
+        expectCompilationError( conn,"42X01" ,"create table t( a int generated always as identity(START WITH 47 ,))" );
+
+		// Does not support cycle option after altering the table. 
+        goodStatement( conn, "create table t( a int generated always as identity(start with 2147483647 cycle), b int)" );
+	goodStatement( conn, "alter table t alter column a set increment by 4" );
+        expectExecutionError( conn,"2200H" ,"insert into t( b ) values ( 1 ), ( 2 )" );
+
+	goodStatement( conn, "drop table t" );
+		// Alter table works fine without cycling with cycle option in the syntax.
+	goodStatement( conn, "create table t( a int generated always as identity(start with 7 increment by 2 cycle), b int)" );
+	goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+	goodStatement( conn, "alter table t alter column a set increment by 4" );
+        goodStatement( conn, "insert into t( b ) values ( 3 ), ( 4 )" );
+	assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "7", "1" },
+                 { "9", "2" },
+		 { "11", "3" },
+                 { "15", "4" },
+             },
+             false
+             );
+
+	goodStatement( conn, "drop table t" );
+		// Does not support cycle option after altering the table. 
+        goodStatement( conn, "create table t( a int generated always as identity(increment by 2 cycle), b int)" );
+	goodStatement( conn, "alter table t alter column a restart with 2147483647" );
+        expectExecutionError( conn,"2200H" ,"insert into t( b ) values ( 1 ), ( 2 )" );
+
+	goodStatement( conn, "drop table t" );
+		// Alter table works fine without cycling with cycle option in the syntax.
+	goodStatement( conn, "create table t( a int generated always as identity(start with 7 increment by 2 cycle), b int)" );
+	goodStatement( conn, "insert into t( b ) values ( 1 ), ( 2 )" );
+	goodStatement( conn, "alter table t alter column a restart with 50" );
+        goodStatement( conn, "insert into t( b ) values ( 3 ), ( 4 )" );
+	assertResults
+            (
+             conn,
+             "select * from t",
+             new String[][]
+             {
+                 { "7", "1" },
+                 { "9", "2" },
+		 { "50", "3" },
+                 { "52", "4" },
+             },
+             false
+             );
+
+	goodStatement( conn, "drop table t" );
+	goodStatement( conn, "create table t( A_6852 int generated always as identity(start with 7 increment by 2 cycle))" );
+		//SELECT from sys.syscolumns with cycle option
+	assertResults
+            (
+             conn,
+             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME ='A_6852'",
+             new String[][]
+             {
+                 { "7", "7", "2" },
+             },
+             false
+             );
+
+	goodStatement( conn, "drop table t" );
+		//SELECT from sys.syscolumns without cycle option
+	goodStatement( conn, "create table T_6852( A_6852 int generated always as identity(start with 7 increment by 2))" );
+
+	assertResults
+            (
+             conn,
+             "select AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME ='A_6852'",
+             new String[][]
+             {
+                 { "7", "7", "2" },
+             },
+             false
+             );
+
+		//SELECT from sys.syssequences without cycle option
+        String  sequenceName = getIdentitySequenceName( conn, "T_6852" );
+
+        // sequence should be in SYS, its name should be based on the table id,
+        // and its start/stop/max/min/cycle values should be correct.
+
+        assertResults
+            (
+             conn,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
+             new String[][]
+             {
+                 { "SYS", sequenceName, "7", "7", "-2147483648", "2147483647", "2", "N" },
+             },
+             false
+             );
+
+	goodStatement( conn, "drop table T_6852" );
+		//SELECT from sys.syssequences with cycle option
+	goodStatement( conn, "create table T_6852( A_6852 int generated always as identity(start with 7 increment by 2 cycle))" );
+
+        sequenceName = getIdentitySequenceName( conn, "T_6852" );
+	assertResults
+            (
+             conn,
+            "select\n" +
+            "    c.schemaName, s.sequenceName, s.currentValue, s.startValue,\n" +
+            "    s.minimumValue, s.maximumValue, s.increment, s.cycleoption\n" +
+            "from sys.syssequences s, sys.sysschemas c\n" +
+            "where s.schemaID = c.schemaID\n" +
+             "and s.sequenceName = '" + sequenceName + "'",
+             new String[][]
+             {
+                 { "SYS", sequenceName, "7", "7", "-2147483648", "2147483647", "2", "Y" },
+             },
+             false
+             );
+	
+	goodStatement( conn, "drop table T_6852" );
+  
+    }
+
     /** Get a scalar integer result from a query */
     private int getScalarInteger( PreparedStatement ps ) throws Exception
     {

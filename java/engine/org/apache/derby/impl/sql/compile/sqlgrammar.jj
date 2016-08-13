@@ -144,6 +144,7 @@ public class SQLParser
     private static final int IDX_MIN_VALUE_OPTION = IDX_MAX_VALUE_OPTION + 1;
     private static final int IDX_CYCLE_OPTION = IDX_MIN_VALUE_OPTION + 1;
     private static final int IDX_OPTION_COUNT = IDX_CYCLE_OPTION + 1;
+   
 
     // indexes into array of clauses for OFFSET FETCH NEXT
     private static final int OFFSET_CLAUSE = 0;
@@ -3993,7 +3994,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 	DataTypeDescriptor[]	typeDescriptor = new DataTypeDescriptor[1];
 	ValueNode			defaultNode = null;
 	String				columnName;
-	long[]				autoIncrementInfo = new long[4];
+	long[]				autoIncrementInfo = new long[5];
 }
 {
 	/*
@@ -4812,6 +4813,7 @@ exactNumber() throws StandardException :
 		}
 	}
 }
+
 /*
  * <A NAME="precision">precision</A>
  */
@@ -11547,24 +11549,88 @@ generationClause() throws StandardException :
 void 
 autoIncrementBeginEnd(long[] autoIncrementInfo) throws StandardException :
 {
-	long		autoIncrementInitial = 1;
-	long		autoIncrementIncrement = 1;
+	 Object[] optionalClauses = new Object[ 3 ];
 }
 {
-        <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
-    {
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
-		return;
+	( LOOKAHEAD({getToken(1).kind == COMMA ||
+	                   getToken(1).kind == START || getToken(1).kind == INCREMENT
+                                            || getToken(1).kind == CYCLE })
+	
+    		( identityColumnOption( autoIncrementInfo , optionalClauses) ) *
+    	)
+      
+}
+
+/*
+ * <A NAME="identityColumnOption">identityColumnOption</A>
+ */
+void 
+identityColumnOption(long[] autoIncrementInfo,Object[] optionalClauses) throws StandardException :
+{
+	int  optionIndex = -1;
+	long		autoIncrementInitial = 1;
+	long		autoIncrementIncrement = 1;
+	long            autoIncrementCycle = 0;
+	Token optionToken = null;
+      
+}
+{
+    (
+        optionToken = <START> <WITH> autoIncrementInitial = exactNumber()
+	{autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementInitial;
+         autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;	 
+	optionIndex = 0;}
+        |
+        optionToken = <INCREMENT> <BY> autoIncrementIncrement = exactNumber()
+	{autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
+         autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
+        optionIndex = 1;} 
+	|
+	optionToken = <CYCLE> autoIncrementCycle = whetherCycle() 
+	{autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = autoIncrementCycle;
+	optionIndex = 2;}
+	|
+	<COMMA> ( LOOKAHEAD({getToken(1).kind == COMMA ||
+	                   getToken(1).kind == RIGHT_PAREN})
+	{optionIndex = -2;}
+	|
+	{return;}
+        )
+	
+        
+    )
+   {
+        if ( optionIndex != -1)
+        {
+	    if(optionIndex == -2)
+	    {
+		throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "Encountered an \",\" ");
+	    }
+            if ( optionalClauses[ optionIndex ] != null )
+            {
+                throw StandardException.newException( SQLState.LANG_DUPLICATE_CS_CLAUSE, optionToken.image );
+            }
+
+            optionalClauses[ optionIndex ] = optionToken;
+        }
     }
-|
-		<START> <WITH> autoIncrementInitial = exactNumber() [<COMMA> <INCREMENT> <BY> autoIncrementIncrement = exactNumber() ]
-    {
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_START_INDEX] = autoIncrementInitial;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
-		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
-		return;
+                     
+}
+
+/*
+ * <A NAME="whetherCycle">whetherCycle</A>
+ */
+long
+whetherCycle() throws StandardException :
+{
+    
+}
+{
+    
+    {        
+        return 1;
     }
+
 }
 
 /*
@@ -13509,7 +13575,7 @@ alterTableAction(TableElementList tableElementList, int[] changeType, int[] beha
 	DataTypeDescriptor	typeDescriptor;
 	Token				tok = null;
 	String				columnName;
-	long[]				autoIncrementInfo = new long[4];
+	long[]				autoIncrementInfo = new long[5];
     boolean             enforced;
     TableName           constraintName;
 }
@@ -13655,7 +13721,7 @@ TableElementNode
 columnAlterClause(String columnName) throws StandardException :
 {
 	ValueNode	defaultNode;
-	long[]				autoIncrementInfo = new long[4];
+	long[]				autoIncrementInfo = new long[5];
 	long				autoIncrementIncrement = 1;
 	long				autoIncrementRestartWith = 1;
 	DataTypeDescriptor	typeDescriptor = null;

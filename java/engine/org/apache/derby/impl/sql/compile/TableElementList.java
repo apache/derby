@@ -455,7 +455,7 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 								columnName,
 								td.getColumnDescriptor( columnName ).getType(),
                                 null, null, null, null, null,
-								ColumnInfo.DROP, 0, 0, 0);
+								ColumnInfo.DROP, 0, 0, 0, 0);
 				break;
 			}
 
@@ -504,6 +504,8 @@ class TableElementList extends QueryTreeNodeVector<TableElementNode>
 								coldef.getAutoincrementStart() : 0),
 							   (coldef.isAutoincrementColumn() ? 
 								coldef.getAutoincrementIncrement() : 0),
+							   (coldef.isAutoincrementColumn() ?
+ 								coldef.getAutoincrementCycle() : 0),
 							   (coldef.isAutoincrementColumn() ? 
 								coldef.getAutoinc_create_or_modify_Start_Increment() : -1));
 

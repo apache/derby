@@ -390,7 +390,11 @@ public class SequenceGenerator
             }
 
             // Otherwise, cycling is allowed.
-            nextValue = _RESTART_VALUE;
+	    if(_INCREMENT>0)
+	        nextValue = _MIN_VALUE;
+	    
+	    else 
+	        nextValue = _MAX_VALUE;
         }
 
         _remainingPreallocatedValues--;
