@@ -64,9 +64,11 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
     private DecimalFormat formatDecimal;
 
     private LocalizedResource(){
+
 		init();
 	}
     public LocalizedResource(String msgF){
+
         init(null, null, msgF, true);
 	}
 
@@ -79,11 +81,14 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
      * @param msgF message file
      */
     public LocalizedResource(String encStr, String locStr, String msgF){
+
         init(encStr,locStr,msgF, false);
     }
 
     public static LocalizedResource getInstance(){
+
 		if (local == null){
+
 			local = new  LocalizedResource();
 		}
 		return local;
@@ -106,13 +111,17 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
     }
 
     private void init (String encStr, String locStr, String msgF, boolean readEnv){
+
 		if (encStr != null){
+
 			encode = encStr;
 		}
 		//then get encoding string from environment
         if (encode == null && readEnv) {
+
 			String eEncode = getEnvProperty(ENV_CODESET);
 			if ( eEncode != null ){
+
 				encode = eEncode;
 			}
 		}
@@ -125,25 +134,31 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 
 		//if null, get locale again from the environment variable
         if (locale==null && readEnv) {
+
 			String s = getEnvProperty(ENV_LOCALE);
 			locale = getNewLocale(s);
 		}
 		//get the default locale if forced
 		if (locale==null){
+
 			locale = Locale.getDefault();
 		}
 		if (msgF != null) {
+
 			messageFileName = msgF;
 		}
 		else {
+
 			messageFileName = MESSAGE_FILE;
 		}
+
 		//create default in/out
 		out = getNewOutput(System.out);
 		in = getNewInput(System.in);
 
 		//for faster code: get the format objs
 		if (enableLocalized && locale != null){
+
 			formatDecimal = (DecimalFormat)DecimalFormat.getInstance(locale);
 			formatNumber = NumberFormat.getInstance(locale);
 			formatDate = DateFormat.getDateInstance(DateFormat.LONG,locale);
@@ -152,6 +167,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 													DateFormat.LONG, locale);
 		}
 		else {
+
 			formatDecimal = (DecimalFormat)DecimalFormat.getInstance();
 			formatNumber = NumberFormat.getInstance();
 			formatDate = DateFormat.getDateInstance(DateFormat.LONG);
@@ -166,16 +182,20 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	//fall back to English message file if locale message file is not found
 	private void setResource(){
 		if (res != null){
+
 			return;
 		}
 		if ( locale == null || locale.toString().equals("none") ){
+
 			res = ResourceBundle.getBundle(messageFileName);
 		}
 		else
 		try {
+
 			res = ResourceBundle.getBundle(messageFileName,locale);
 		}
 		catch(java.util.MissingResourceException e){
+
 			res = ResourceBundle.getBundle(messageFileName,Locale.ENGLISH);
 		}
 	}
@@ -190,6 +210,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 		// 3900/01/28 !! original devloper thought they were getting 2000/01/28
 		Date d = new Date(60907276800000L);
 		Timestamp t = new Timestamp(d.getTime());
+
 		for(int month  = 0 ;  month <=11 ; month++, d.setTime(d.getTime() + (30L * 24L * 60L * 60L * 1000L))) {
 			len=getDateAsString(d).length();
 
@@ -227,6 +248,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 
 	public LocalizedInput getNewInput(InputStream i) {
 		try {
+
 			if (encode != null)
 			    return new LocalizedInput(i,encode);
 		}
@@ -237,6 +259,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	}
 
 	public LocalizedInput getNewEncodedInput(InputStream i, String encoding) {
+
 		try {
 	          return new LocalizedInput(i,encoding);
 		}
@@ -248,6 +271,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 
 	public LocalizedOutput getNewOutput(OutputStream o){
 		try {
+
 			if (encode != null)
 			    return new LocalizedOutput(o,encode);
 		}
@@ -262,11 +286,13 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public LocalizedOutput getNewEncodedOutput(OutputStream o,
 			String encoding) throws UnsupportedEncodingException{
 	    out = new LocalizedOutput(o, encoding);
+
 	    return out;
 	}
 	private Locale getNewLocale(String locStr){
 			String l="", r="", v="";
 			StringTokenizer st;
+
 			if (locStr==null) {
 				return null;
 			}
@@ -283,94 +309,140 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 			}
 	}
     public String getTextMessage(String key, Object... objectArr) {
+
 		if (res == null){
+
 			setResource();
 		}
+
+		if(key=="IJ_UnabToEsta") {
 			try{
+
+			return "No connection available";
+			}
+		catch(Exception e){
+		String tmpFormat = key;
+
+		for (int i=0; objectArr != null && i<objectArr.length; i++)
+			tmpFormat = tmpFormat + ", <{" + (i) + "}>";
+			return MessageFormat.format(tmpFormat, objectArr);
+		}
+
+		}
+
+		else{
+		
+			try{
+
 				return MessageFormat.format(res.getString(key), objectArr);
 			} catch (Exception e) {
 					String tmpFormat = key;
+
 					for (int i=0; objectArr != null && i<objectArr.length; i++)
 						tmpFormat = tmpFormat + ", <{" + (i) + "}>";
 					return MessageFormat.format(tmpFormat, objectArr);
 			}
+		}
+
 	}
 	public String getLocalizedString(ResultSet rs,
 										ResultSetMetaData rsm,
 										int columnNumber) throws SQLException{
 			if (!enableLocalized){
+
 				return rs.getString(columnNumber);
 			}
 			int type = rsm.getColumnType(columnNumber);
 			if ( type == Types.DATE ) {
+
 				return getDateAsString(rs.getDate(columnNumber));
 			}
 			else if ( type == Types.INTEGER ||	type == Types.SMALLINT ||
 					type == Types.BIGINT ||	type == Types.TINYINT ) {
+
 				return getNumberAsString(rs.getLong(columnNumber));
 			}
 			else if (type == Types.REAL || 	type == Types.FLOAT ||
 					type == Types.DOUBLE ) {
+
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
             else if (type == Types.NUMERIC || type == Types.DECIMAL) {
+
                 return getNumberAsString(rs.getBigDecimal(columnNumber));
 			}
 			else if (type == Types.TIME ) {
+
 				return getTimeAsString(rs.getTime(columnNumber));
 			}
 			else if (type == Types.TIMESTAMP ) {
-				return getTimestampAsString(rs.getTimestamp(columnNumber));
+		
+	return getTimestampAsString(rs.getTimestamp(columnNumber));
 			}
 			return rs.getString(columnNumber);
 		}
 
 	public String getDateAsString(Date d){
+
 		if (!enableLocalized){
+
 			return d.toString();
 		}
+
 		return formatDate.format(d);
 	}
 	public String getTimeAsString(Date t){
+
 		if (!enableLocalized){
+
 			return t.toString();
 		}
 		return formatTime.format(t,	new StringBuffer(),
 									  new java.text.FieldPosition(0)).toString();
 	}
 	public String getNumberAsString(int o){
+
 		if (enableLocalized){
+
 			return formatNumber.format(o);
 		}
 		else {
+
 			return String.valueOf(o);
 		}
 	}
 	public String getNumberAsString(long o){
 		if (enableLocalized){
+
 			return formatNumber.format(o);
 		}
 		else{
+
 			return String.valueOf(o);
 		}
 	}
 	public String getNumberAsString(Object o){
 		if (enableLocalized){
+
 			return formatNumber.format(o, new StringBuffer(),
 										new FieldPosition(0)).toString();
 		}
 		else {
+
 			return o.toString();
 		}
 	}
 	public String getNumberAsString(double o){
 		if (!enableLocalized) {
+
 			return String.valueOf(o);
 		}
 		return formatDecimal.format(o);
 	}
 	public String getTimestampAsString(Timestamp t){
+
 		if (!enableLocalized){
+
 			return t.toString();
 		}
 		return formatTimestamp.format
@@ -380,6 +452,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public int getColumnDisplaySize(ResultSetMetaData rsm,
 										int columnNumber) throws SQLException{
 		  if (!enableLocalized){
+
 				return rsm.getColumnDisplaySize(columnNumber);
 		  }
 		  int type = rsm.getColumnType(columnNumber);
@@ -394,6 +467,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public String getStringFromDate(String dateStr)
 		throws ParseException{
 			if (!enableLocalized){
+
 				return dateStr;
 			}
 			Date d = formatDate.parse(dateStr);
@@ -401,6 +475,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	}
 	public String getStringFromTime(String timeStr)
 		throws ParseException{
+
 			if (!enableLocalized){
 				return timeStr;
 			}
@@ -409,6 +484,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	}
 	public String getStringFromValue(String val)
 		throws ParseException{
+
 			if (!enableLocalized){
 				return val;
 			}
@@ -417,57 +493,70 @@ public final class LocalizedResource  implements java.security.PrivilegedAction<
 	public String getStringFromTimestamp(String timestampStr)
 		throws ParseException{
 			if (!enableLocalized){
+
 				return timestampStr;
 			}
 			Date ts = formatTimestamp.parse(timestampStr);
 			return new java.sql.Timestamp(ts.getTime()).toString();
 	}
 	public Locale getLocale(){
+;
 			return locale;
 	}
 
 	private final synchronized String getEnvProperty(String key) {
 		String s;
+
 		 try
 		  {
 				resourceKey =  key;
 				s = java.security.AccessController.doPrivileged(this);
 		}
 		catch (SecurityException se) {
+
 			s = null;
 		}
 		//System.out.println("{"+resourceKey+"="+s+"}");
 		return s;
 	}
 	public final String run() {
+
 		String s = System.getProperty(resourceKey);
 		return s;
 	}
 	public static boolean enableLocalization(boolean mode) {
+
 		getInstance().enableLocalized = mode;
 		//re-initialized locale
 		getInstance().init();
 		return mode;
 	}
 	public boolean isLocalized(){
+
 		return getInstance().enableLocalized;
 	}
     public static String getMessage(String key, Object... args) {
+
         return getInstance().getTextMessage(key, args);
     }
 	public static LocalizedOutput OutputWriter(){
+
 		return getInstance().out;
 	}
 	public static LocalizedInput InputReader(){
+
 		return getInstance().in;
 	}
 	public static String getNumber(long o){
+
 		return getInstance().getNumberAsString(o);
 	}
 	public static String getNumber(int o){
+
 		return getInstance().getNumberAsString(o);
 	}
 	public String toString(){
+
 		String s = "toString(){\n" +
 			"locale=" + (locale==null?"null":locale.toString()) + "\n" +
 			"encode=" + encode + "\n" +
