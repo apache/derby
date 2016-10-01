@@ -301,6 +301,141 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.executeUpdate("drop table DERBY_6368_TAB2");
     }
 
+    public void testDerby6726()
+        throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate( "CREATE TABLE LOG (" +
+                    "ID BIGINT NOT NULL PRIMARY KEY " +
+                    "   GENERATED ALWAYS AS IDENTITY " +
+                    "   (START WITH 1, INCREMENT BY 1)," +
+                    "NAME VARCHAR(80) DEFAULT 'New Log' NOT NULL," +
+                    "VERSION INT NOT NULL," +
+                    "DEPTH_UNITS VARCHAR(12) DEFAULT 'M'," + 
+                    "TOP_DEPTH DOUBLE DEFAULT -999.25," +
+                    "BOTTOM_DEPTH DOUBLE DEFAULT -999.25" +
+                    ")");
+
+        s.executeUpdate("CREATE TABLE CURVE (" +
+                    "ID BIGINT NOT NULL PRIMARY KEY " +
+                    "   GENERATED ALWAYS AS IDENTITY " +
+                    "   (START WITH 1, INCREMENT BY 1)," +
+                    "LOG_ID BIGINT NOT NULL," +
+                    "NAME VARCHAR(80) DEFAULT 'New Curve' NOT NULL," +
+                    "TYPE VARCHAR(40) DEFAULT '.' NOT NULL," +
+                    "VERSION INT NOT NULL," +
+                    "PERSISTENCE VARCHAR(40) DEFAULT 'NUMBER'," +
+                    "DEPTH_UNITS VARCHAR(12) DEFAULT 'M'," + 
+                    "CURVE_UNITS VARCHAR(40) DEFAULT '.'," + 
+                    "TOP_DEPTH DOUBLE DEFAULT -999.25," +
+                    "BOTTOM_DEPTH DOUBLE DEFAULT -999.25," +
+                    "MINCVAL DOUBLE DEFAULT -999.25," + 
+                    "MAXCVAL DOUBLE DEFAULT -999.25," + 
+                    "CREATED_BY VARCHAR(40) DEFAULT USER," +
+                    "CREATE_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    "LAST_UPDATED TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                    ")");
+
+        s.executeUpdate("CREATE TRIGGER CURVE_TRIG_LAST " +
+                    " AFTER UPDATE OF NAME, TYPE, VERSION, PERSISTENCE, " +
+                    "       DEPTH_UNITS, CURVE_UNITS, TOP_DEPTH, " +
+                    "       BOTTOM_DEPTH, MINCVAL, MAXCVAL ON CURVE " +
+                    " REFERENCING OLD AS UPDATEDROW " +
+                    " FOR EACH ROW " +
+                    "    UPDATE CURVE SET LAST_UPDATED=CURRENT_TIMESTAMP " +
+                    "           WHERE ID=UPDATEDROW.ID");
+
+        s.executeUpdate("CREATE TRIGGER CURVE_TRIG_UP " +
+                    " AFTER UPDATE OF TOP_DEPTH, BOTTOM_DEPTH ON CURVE " +
+                    " REFERENCING OLD AS UPDATEDROW " +
+                    " FOR EACH ROW " +
+                    "    UPDATE LOG SET " +
+                    "        TOP_DEPTH=(" +
+                    "            SELECT MIN(TOP_DEPTH) FROM CURVE " +
+                    "                   WHERE LOG_ID=UPDATEDROW.LOG_ID AND " +
+                    "                         TOP_DEPTH<>-999.25), " +
+                    "        BOTTOM_DEPTH=(" +
+                    "            SELECT MAX(BOTTOM_DEPTH) FROM CURVE " +
+                    "                   WHERE LOG_ID=UPDATEDROW.LOG_ID AND " +
+                    "                         BOTTOM_DEPTH<>-999.25) " +
+                    "        WHERE ID=UPDATEDROW.LOG_ID");
+
+        s.executeUpdate("CREATE TABLE CURVE_DATA_NUMBER (" +
+                    "CURVE_ID BIGINT NOT NULL," +
+                    "SEQ_NUM BIGINT NOT NULL," +
+                    "MDEPTH DOUBLE," +
+                    "CVALUE DOUBLE DEFAULT -999.25" +
+                    ")");
+
+        s.executeUpdate("ALTER TABLE CURVE_DATA_NUMBER " +
+                        "  ADD CONSTRAINT CURVE_DATA_NUMBER_CURVE_ID_FK " +
+                        "      FOREIGN KEY (CURVE_ID) REFERENCES CURVE (ID) " +
+                        "      ON DELETE CASCADE");
+
+        s.executeUpdate("ALTER TABLE CURVE_DATA_NUMBER " +
+                        "  ADD CONSTRAINT CURVE_DATA_NUMBER_UN " +
+                        "      UNIQUE (CURVE_ID, SEQ_NUM)");
+
+        s.executeUpdate("CREATE INDEX CURVE_DATA_NUMBER_SEQ_NUM_INDEX " +
+                        "  on CURVE_DATA_NUMBER (SEQ_NUM)");
+
+        s.executeUpdate("CREATE TRIGGER CURVE_DATA_NUMBER_TRIG_UP " +
+                        " AFTER UPDATE OF CURVE_ID, SEQ_NUM, MDEPTH, CVALUE " +
+                        "       ON CURVE_DATA_NUMBER " +
+                        " REFERENCING OLD AS UPDATEDROW " +
+                        " FOR EACH ROW " +
+                        "    UPDATE CURVE SET " + 
+                        "        TOP_DEPTH=(" +
+                        "            SELECT MIN(MDEPTH) FROM CURVE_DATA_NUMBER " +
+                        "                   WHERE CURVE_ID=UPDATEDROW.CURVE_ID AND " +
+                        "                   MDEPTH<>-999.25)," + 
+                        "        BOTTOM_DEPTH=(" +
+                        "            SELECT MAX(MDEPTH) FROM CURVE_DATA_NUMBER " +
+                        "                   WHERE CURVE_ID=UPDATEDROW.CURVE_ID AND " +
+                        "                   MDEPTH<>-999.25)," + 
+                        "        MINCVAL=(" +
+                        "            SELECT MIN(CVALUE) FROM CURVE_DATA_NUMBER " +
+                        "                   WHERE CURVE_ID=UPDATEDROW.CURVE_ID AND " +
+                        "                   CVALUE<>-999.25)," + 
+                        "        MAXCVAL=(" +
+                        "            SELECT MAX(CVALUE) FROM CURVE_DATA_NUMBER " +
+                        "                   WHERE CURVE_ID=UPDATEDROW.CURVE_ID AND " +
+                        "                   CVALUE<>-999.25) " + 
+                        "    WHERE ID=UPDATEDROW.CURVE_ID");
+
+        s.executeUpdate("INSERT INTO LOG (NAME, VERSION) VALUES('TESTLOG',1)");
+
+        s.executeUpdate("INSERT INTO CURVE(LOG_ID,NAME,VERSION) VALUES(1,'GR',1)");
+
+        PreparedStatement ps = prepareStatement(
+                        "INSERT INTO CURVE_DATA_NUMBER " +
+                        "   (CURVE_ID, SEQ_NUM, MDEPTH, CVALUE) " +
+                        "   VALUES(?,?,?,?)");
+
+        for(int i=1; i< 1000; i++) {
+            ps.setInt(1, 1);
+            ps.setInt(2, i);
+            ps.setDouble(3, 1000.0 + i);
+            ps.setDouble(4, 43.0 + i);
+            ps.executeUpdate();
+        }
+
+        s.executeUpdate("UPDATE CURVE_DATA_NUMBER " +
+                        "  SET CURVE_ID=1 WHERE CURVE_ID=1 AND SEQ_NUM=1");
+
+        s.executeUpdate("DROP TRIGGER CURVE_DATA_NUMBER_TRIG_UP");
+        s.executeUpdate("DROP TRIGGER CURVE_TRIG_UP");
+        s.executeUpdate("DROP TRIGGER CURVE_TRIG_LAST");
+        s.executeUpdate("ALTER TABLE CURVE_DATA_NUMBER " +
+                        " DROP CONSTRAINT CURVE_DATA_NUMBER_CURVE_ID_FK");
+        s.executeUpdate("ALTER TABLE CURVE_DATA_NUMBER " +
+                        " DROP CONSTRAINT CURVE_DATA_NUMBER_UN");
+        s.executeUpdate("DROP INDEX CURVE_DATA_NUMBER_SEQ_NUM_INDEX");
+        s.executeUpdate("DROP TABLE LOG");
+        s.executeUpdate("DROP TABLE CURVE");
+        s.executeUpdate("DROP TABLE CURVE_DATA_NUMBER");
+    }
+
 /**
      * Test that invalidating stored statements marks the statement invalid
      *  in SYS.SYSSTATEMENTS. And when one of those invalid statements is
