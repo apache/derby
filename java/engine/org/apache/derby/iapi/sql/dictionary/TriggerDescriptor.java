@@ -411,7 +411,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					referencedCols,
 					referencedColsInTriggerAction,
                     0,
-					td,
+					getTableDescriptor(),
 					-1,
                     false,
                     null);
@@ -423,7 +423,7 @@ public class TriggerDescriptor extends UniqueSQLObjectDescriptor
 					referencedCols,
 					referencedColsInTriggerAction,
 					0,
-					td,
+					getTableDescriptor(),
 					-1,
                     false,
                     null,
