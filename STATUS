@@ -21,6 +21,7 @@ Project info
     period of time can earn a contributor commit access to the codebase.
 
 Official releases:
+ * 10.13.1.1 : Released 2016-10-26
  * 10.12.1.1 : Released 2015-10-11
  * 10.11.1.1 : Released 2014-08-27
  * 10.10.2.0 : Released 2014-04-15
@@ -62,6 +63,7 @@ RECENT VOTES
 
 The community voted to sunset support for Java SE 7. The vote closed on 2015-09-12.
 The community voted to sunset support for Java SE 6. The vote closed on 2014-09-15.
+Release 10.13.1.1 was approved as a release on 2016-10-24, published on 2016-10-26, and announced on 2016-10-29.
 Release 10.12.1.1 was approved as a release on 2015-10-05, published on 2015-10-10, and announced on 2015-10-11.
 Release 10.11.1.1 was approved as a release on 2014-08-25, published on 2014-08-26, and announced on 2014-08-27.
 Release 10.10.2.0 was approved as a release on 2014-04-11, published on 2014-04-15, and announced on 2014-04-17.
@@ -79,7 +81,7 @@ OTHER NEWS
 RELEASE STATUS
 ==============
 
-The community is working on a 10.13.1 feature release.
+The community is working on development in the trunk.
 
 
 
