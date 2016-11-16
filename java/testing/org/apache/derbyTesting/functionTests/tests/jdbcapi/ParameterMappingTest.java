@@ -4987,6 +4987,51 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         rs.close();
     }
 
+    public void testDerby6902()
+        throws SQLException
+    {
+        createStatement().executeUpdate(
+            "create table test6902 (" +
+            "  id bigint primary key," +
+            "  big_number bigint not null," +
+            "  small_number int not null" +
+            ")" );
+
+        PreparedStatement ps6902 = prepareStatement(
+            "delete from test6902 " +
+            "  where big_number < ? - small_number * 1000" );
+
+        try {
+            ps6902.setLong(1, 1470362049757L);
+            ps6902.executeUpdate();
+            fail("without cast, expected setLong to fail");
+        } catch (SQLException e) {
+            assertSQLState( "22003", e );
+        }
+
+        ps6902.setLong(1, 1479058636L); // value < Integer.MAX_VALUE
+        ps6902.executeUpdate();
+
+	// Use a cast on integer column small_number:
+
+        ps6902 = prepareStatement(
+            "delete from test6902 " +
+            "  where big_number < " +
+            "        ? - cast( small_number as bigint) * 1000" );
+
+        ps6902.setLong(1, 1470362049757L);
+        ps6902.executeUpdate();
+
+	// Use a cast on the parameter marker itself:
+
+        ps6902 = prepareStatement(
+            "delete from test6902 " +
+            "  where big_number < " +
+            "        cast( ? as bigint) - small_number * 1000" );
+
+        ps6902.setLong(1, 1470362049757L);
+        ps6902.executeUpdate();
+    }
 
     // Short limits
     //
