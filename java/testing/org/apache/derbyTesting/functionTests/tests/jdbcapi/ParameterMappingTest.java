@@ -5031,6 +5031,59 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         ps6902.setLong(1, 1470362049757L);
         ps6902.executeUpdate();
+
+        try {
+            ps6902.setString( 1,  "abcde" );
+            ps6902.executeUpdate();
+            fail("expected setString to fail with non-numeric string");
+        } catch (SQLException e) {
+            assertSQLState( "22018", e );
+        }
+
+        // Use setString to set integer values, both small and large,
+        // into the statement using CAST to make the parameter BIGINT:
+
+        ps6902.setString(1, "1479058636" ); // value < Integer.MAX_VALUE
+        ps6902.executeUpdate();
+
+        ps6902.setString(1, "1470362049757" );
+        ps6902.executeUpdate();
+
+        try {
+            ps6902 = prepareStatement(
+                "delete from test6902 where small_number * 1000 > ?" );
+            ps6902.setLong( 1, 1470362049757L);
+            ps6902.executeUpdate();
+            fail("Expected out of range exception.");
+        } catch (SQLException e) {
+            assertSQLState( "22003", e );
+        }
+
+        // Algebraically re-formulate the original query:
+
+        ps6902 = prepareStatement(
+            "delete from test6902 " +
+            "  where big_number + small_number * 1000 < ?" );
+        ps6902.setLong( 1, 1470362049757L);
+        ps6902.executeUpdate();
+
+        // Without casts, use setString to set integer values,
+        // small and large:
+
+        ps6902 = prepareStatement(
+            "delete from test6902 " +
+            "  where big_number < ? - small_number * 1000" );
+
+        ps6902.setString(1, "1479058636" ); // value < Integer.MAX_VALUE
+        ps6902.executeUpdate();
+
+        try {
+            ps6902.setString(1, "1470362049757" );
+            ps6902.executeUpdate();
+            fail("expected setString to fail with numeric string > INT_MAX");
+        } catch (SQLException e) {
+            assertSQLState( "22018", e );
+        }
     }
 
     // Short limits
