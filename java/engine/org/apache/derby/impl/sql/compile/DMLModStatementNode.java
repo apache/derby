@@ -95,6 +95,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	private ValueNode		checkConstraints;
 
 	/* Info required to perform referential actions */
+	protected String[] fkSchemaNames; // referencing schema names.
 	protected String[] fkTableNames; // referencing table names.
 	protected int[] fkRefActions;    //type of referential actions 
 	protected ColumnDescriptorList[]  fkColDescriptors;
@@ -908,6 +909,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
         int[]                               raRules;
         boolean[]                           deferrable;
         UUID[]                              fkIds;
+		ArrayList<String>              refSchemaNames = new ArrayList<String>(1);
 		ArrayList<String>              refTableNames = new ArrayList<String>(1);
 		ArrayList<Long>               refIndexConglomNum = new ArrayList<Long>(1);
 		ArrayList<Integer>            refActions = new ArrayList<Integer>(1);
@@ -988,7 +990,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					{
 						//find  the referencing  table Name
 						fktd = fkcd.getTableDescriptor();
-						refTableNames.add(fktd.getSchemaName() + "." + fktd.getName());
+						refSchemaNames.add(fktd.getSchemaName());
+						refTableNames.add(fktd.getName());
                         refActions.add(Integer.valueOf(raRules[inner]));
 						//find the referencing column name required for update null.
 						refColumns = fkcd.getReferencedColumns();
@@ -1056,6 +1059,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		if (size > 0)
 		{
 			fkTableNames = new String[size];
+			fkSchemaNames = new String[size];
 			fkRefActions  = new int[size];
 			fkColDescriptors = new ColumnDescriptorList[size];
 			fkIndexConglomNumbers = new long[size];
@@ -1063,6 +1067,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			for (int i = 0; i < size; i++)
 			{
 				fkTableNames[i] = refTableNames.get(i);
+				fkSchemaNames[i] = refSchemaNames.get(i);
 				fkRefActions[i]  = (refActions.get(i)).intValue();
 				fkColDescriptors[i] =
 					refColDescriptors.get(i);

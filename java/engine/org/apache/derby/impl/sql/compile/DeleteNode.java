@@ -368,7 +368,9 @@ class DeleteNode extends DMLModStatementNode
 					dependentNodes = new StatementNode[noDependents];
 					for(int i =0 ; i < noDependents ; i ++)
 					{
-						dependentNodes[i] = getDependentTableNode(fkTableNames[i],
+						dependentNodes[i] = getDependentTableNode(
+															  fkSchemaNames[i],
+															  fkTableNames[i],
 															  fkRefActions[i],
 															  fkColDescriptors[i]);
 						dependentNodes[i].bindStatement();
@@ -735,22 +737,19 @@ class DeleteNode extends DMLModStatementNode
 	 * DML (UPDATE or DELETE) on the dependent tables. 
 	 * Following function returns the DML Node for the dependent table.
 	 */
-	private StatementNode getDependentTableNode(String tableName, int refAction,
+	private StatementNode getDependentTableNode(String schemaName, String tableName, int refAction,
 												ColumnDescriptorList cdl) throws StandardException
 	{
         DMLModStatementNode node = null;
 
-		int index = tableName.indexOf('.');
-		String schemaName = tableName.substring(0 , index);
-		String tName = tableName.substring(index+1);
 		if(refAction == StatementType.RA_CASCADE)
 		{
-			node = getEmptyDeleteNode(schemaName , tName);
+			node = getEmptyDeleteNode(schemaName , tableName);
 		}
 
 		if(refAction == StatementType.RA_SETNULL)
 		{
-			node = getEmptyUpdateNode(schemaName , tName, cdl);
+			node = getEmptyUpdateNode(schemaName , tableName, cdl);
 		}
 
         // The dependent node should be marked as such, and it should inherit

@@ -1350,4 +1350,56 @@ public class ForeignKeysDeferrableTest extends BaseJDBCTestCase
             assertTrue( dsicve.getConstraintName().startsWith( "SQL" ) );
         }
     }
+
+    /* Regression test for DERBY-6918, which is not directly related
+     * to deferrable foreign key constraints. But this was a convenient
+     * and simple place to add the regression test.
+     */
+    public void testDerby6918()
+                throws SQLException
+    {
+        Statement s = createStatement();
+        s.execute("create schema \"1.a\"");
+        s.execute("create table \"1.a\".\"role\" " +
+                   "( \"id\" integer generated always as identity," +
+                   "  \"name\" varchar(255) not null)" );
+
+        s.execute("alter table \"1.a\".\"role\" " +
+                  "  add constraint \"role_pk\" primary key (\"id\")");
+
+        s.execute("create table \"1.a\".\"user\"" +
+                  " ( \"id\" integer generated always as identity," +
+                  "   \"name\" varchar(255) not null)");
+
+        s.execute("alter table \"1.a\".\"user\" " +
+                  "  add constraint \"user_pk\" primary key (\"id\")");
+
+        s.execute("create table \"1.a\".\"user_role\" " +
+                  " ( \"role\" integer not null," +
+                  "   \"user\" integer not null)");
+
+        s.execute("alter table \"1.a\".\"user_role\"" +
+                  " add constraint \"user_role_fk1\" " +
+                  "     foreign key (\"role\") " +
+                  "     references \"1.a\".\"role\" (\"id\")" +
+                  "     on delete cascade");
+
+        s.execute("alter table \"1.a\".\"user_role\"" +
+                  " add constraint \"user_role_fk2\"" +
+                  "     foreign key (\"user\")" +
+                  "     references \"1.a\".\"user\" (\"id\")" +
+                  "     on delete cascade");
+
+        s.execute("alter table \"1.a\".\"user_role\"" +
+                  "  add constraint \"user_role_u1\"" +
+                  "      unique (\"user\", \"role\")");
+
+        s.execute("insert into \"1.a\".\"role\" (\"name\") values ('r1')");
+        s.execute("insert into \"1.a\".\"user\" (\"name\") values ('u1')");
+        s.execute("insert into \"1.a\".\"user_role\" (\"role\",\"user\") values (1,1)");
+
+        s.execute("select * from \"1.a\".\"user\"");
+
+        s.execute("delete from \"1.a\".\"user\"");
+    }
 }
