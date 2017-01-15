@@ -880,6 +880,10 @@ public abstract class BaseTestCase
         return getSystemProperty("java.version").startsWith("1.7");
     }
 
+    public static final boolean isJava8() {
+        return getSystemProperty("java.version").startsWith("1.8");
+    }
+
     public static final boolean runsWithEmma() {
         return getSystemProperty("java.class.path").indexOf("emma.jar") != -1;
     }

@@ -209,8 +209,19 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         // We need to manipulate private and final fields in order to test
         // deserialization of invalid objects. Disable the security manager
         // for this test case to allow that.
-        suite.addTest(SecurityManagerSetup.noSecurityManager(
-                new SystemPrivilegesPermissionTest("testSerialization")));
+        //
+        // As of Java 9, you can't subvert access controls via this ruse.
+        // Only run this test on Java 8.
+        if (isJava8())
+        {
+            suite.addTest
+                (
+                 SecurityManagerSetup.noSecurityManager
+                     (
+                         new SystemPrivilegesPermissionTest("testSerialization")
+                     )
+                 );
+        }
 
         return suite;
     }
