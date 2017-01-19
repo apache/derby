@@ -2905,7 +2905,7 @@ clp.list(System.out);
      * @return InputStream for the resource
      */
     public static InputStream loadTestResource(String loc) {
-        return new Object().getClass().getResourceAsStream(testResourceHome + loc); 
+        return RunTest.class.getResourceAsStream(testResourceHome + loc); 
     }
     
     /*
