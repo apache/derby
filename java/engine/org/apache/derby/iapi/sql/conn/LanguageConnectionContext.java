@@ -367,7 +367,7 @@ public interface LanguageConnectionContext extends Context {
 	 * compile time locks or autoincrement-- hence we do not provide 
 	 * abortNestedTransaction. 
 	 *
-	 * @exception StandardException thrown on erro
+	 * @exception StandardException thrown on error
 	 *
 	 * @see TransactionController#startNestedUserTransaction
 	 */
