@@ -404,6 +404,11 @@ class LuceneQueryVTI extends StringColumnVTI
 	/**
 	 * Be sure to close the Lucene IndexReader
 	 */
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
 	protected void finalize()
     {
 		try {

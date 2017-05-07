@@ -373,6 +373,11 @@ public abstract class ClientConnection
     // and this will give the driver a chance to close (or otherwise clean up) the objects.
     // Note, however, that there is no guarantee that the garbage collector will ever run.
     // If that is the case, the finalizers will not be called.
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
     protected void finalize() throws Throwable {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "finalize");

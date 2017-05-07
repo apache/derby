@@ -149,6 +149,11 @@ public class ReEncodedInputStream extends InputStream {
     }
     
     
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
     protected void finalize() throws IOException {
     close();
     }

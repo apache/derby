@@ -855,6 +855,11 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
    /*
     If we have a stream, release the resources associated with it.
     */
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
     protected void finalize()
     {
         if (!materialized)

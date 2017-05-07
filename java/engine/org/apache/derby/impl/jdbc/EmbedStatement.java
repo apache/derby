@@ -381,6 +381,11 @@ public class EmbedStatement extends ConnectionChild
      * ResultSet in dynamicResults but all that will happen is that
      * the activation will get marked as unused twice.
      */
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
     protected void finalize() throws Throwable {
         super.finalize();
 

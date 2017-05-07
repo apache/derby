@@ -469,6 +469,11 @@ public class ClientStatement implements Statement, StatementCallbackInterface{
      * It is different from close() method, which also does clean up on server.
      * Changes done as part of DERBY-210. 
      */
+    //
+    // This method in java.lang.Object was deprecated as of build 167
+    // of JDK 9. See DERBY-6932.
+    //
+    @SuppressWarnings("deprecation")
     protected void finalize() throws Throwable {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "finalize");
