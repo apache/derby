@@ -658,10 +658,11 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
 		// Syntax error. 
         expectCompilationError( conn,"42X01" ,"create table t( a int generated always as identity(START WITH 47 ,))" );
 
-		// Does not support cycle option after altering the table. 
+		// Support cycle option after altering the table.
         goodStatement( conn, "create table t( a int generated always as identity(start with 2147483647 cycle), b int)" );
 	goodStatement( conn, "alter table t alter column a set increment by 4" );
-        expectExecutionError( conn,"2200H" ,"insert into t( b ) values ( 1 ), ( 2 )" );
+	goodStatement( conn ,"insert into t( b ) values ( 1 ), ( 2 )" );
+        
 
 	goodStatement( conn, "drop table t" );
 		// Alter table works fine without cycling with cycle option in the syntax.
@@ -684,10 +685,10 @@ public class IdentitySequenceTest extends GeneratedColumnsHelper
              );
 
 	goodStatement( conn, "drop table t" );
-		// Does not support cycle option after altering the table. 
+		// supports cycle option after altering the table.
         goodStatement( conn, "create table t( a int generated always as identity(increment by 2 cycle), b int)" );
 	goodStatement( conn, "alter table t alter column a restart with 2147483647" );
-        expectExecutionError( conn,"2200H" ,"insert into t( b ) values ( 1 ), ( 2 )" );
+    goodStatement( conn ,"insert into t( b ) values ( 1 ), ( 2 )" );
 
 	goodStatement( conn, "drop table t" );
 		// Alter table works fine without cycling with cycle option in the syntax.

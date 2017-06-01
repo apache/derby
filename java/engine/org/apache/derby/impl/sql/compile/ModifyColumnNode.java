@@ -70,10 +70,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
             DataTypeDescriptor dataTypeServices,
             long[] autoIncrementInfo,
             ContextManager cm) throws StandardException {
-        super(name, defaultNode, dataTypeServices, autoIncrementInfo, cm);
-        this.kind = kind;
-    }
-
+    		super(name, defaultNode, dataTypeServices, autoIncrementInfo, cm);
+        	this.kind = kind;
+	}
 	/**
 	 * Get the UUID of the old column default.
 	 *
@@ -304,6 +303,9 @@ class ModifyColumnNode extends ColumnDefinitionNode
                         ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE) {
                     return ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT;
 
+                } else if (autoinc_create_or_modify_Start_Increment ==
+                        ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE) {
+                    return ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE;
                 } else {
                     return ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE;
                 }
@@ -386,11 +388,20 @@ class ModifyColumnNode extends ColumnDefinitionNode
             }
         }
 		if (autoinc_create_or_modify_Start_Increment ==
-				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE){
 			autoincrementIncrement = cd.getAutoincInc();
+			autoincrementCycle = cd.getAutoincCycle();
+			}
 		if (autoinc_create_or_modify_Start_Increment ==
-				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE){
 			autoincrementStart = cd.getAutoincStart();
+			autoincrementCycle = cd.getAutoincCycle();
+		}
+		if (autoinc_create_or_modify_Start_Increment ==
+				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE){
+			autoincrementIncrement = cd.getAutoincInc();
+			autoincrementStart = cd.getAutoincStart();
+		}			
 
 		/* Fill in the DataTypeServices from the DataDictionary */
 		type = cd.getType();

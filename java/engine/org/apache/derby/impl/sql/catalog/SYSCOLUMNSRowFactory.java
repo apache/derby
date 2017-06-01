@@ -29,6 +29,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.types.*;
 import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
@@ -41,15 +42,6 @@ import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.SQLChar;
-import org.apache.derby.iapi.types.SQLInteger;
-import org.apache.derby.iapi.types.SQLLongint;
-import org.apache.derby.iapi.types.SQLVarchar;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
 /**
@@ -63,7 +55,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 {
 	static final String		TABLENAME_STRING = "SYSCOLUMNS";
 
-	protected static final int		SYSCOLUMNS_COLUMN_COUNT = 9;
+	protected static final int		SYSCOLUMNS_COLUMN_COUNT = 10;
 	/* Column #s for syscolumns (1 based) */
 
 	//TABLEID is an obsolete name, it is better to use 
@@ -78,6 +70,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	protected static final int 		SYSCOLUMNS_AUTOINCREMENTVALUE = 7;
 	protected static final int 		SYSCOLUMNS_AUTOINCREMENTSTART = 8;
 	protected static final int		SYSCOLUMNS_AUTOINCREMENTINC = 9;
+	protected static final int		SYSCOLUMNS_AUTOINCREMENTINCCYCLE = 10;
 
 	//private static final String	SYSCOLUMNS_INDEX1_NAME = "SYSCOLUMNS_INDEX1";
 	protected static final int		SYSCOLUMNS_INDEX1_ID = 0;
@@ -115,16 +108,21 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	//	CONSTRUCTORS
 	//
 	/////////////////////////////////////////////////////////////////////////////
+	
+	// SYSCOLUMNSRowFactory class needs to access the DD version to perform soft / hard upgrades if any.
+	private final DataDictionary dataDictionary;
 
-    SYSCOLUMNSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
+
+    SYSCOLUMNSRowFactory(DataDictionary dd,UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		this(uuidf, ef, dvf, TABLENAME_STRING);
+		this(dd, uuidf, ef, dvf, TABLENAME_STRING);
 	}
 
-    SYSCOLUMNSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
+    SYSCOLUMNSRowFactory(DataDictionary dd,UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                  String myName )
 	{
 		super(uuidf,ef,dvf);
+		this.dataDictionary = dd;
 		initInfo(SYSCOLUMNS_COLUMN_COUNT, myName, indexColumnPositions, uniqueness, uuids);
 	}
 
@@ -141,8 +139,18 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	 *
 	 * @exception   StandardException thrown on failure
 	 */
+  	@Override
+  	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
+					throws StandardException{
+	return makeRow(td, getHeapColumnCount());
+	}
 
-	public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
+	@Override
+	public ExecRow makeEmptyRowForCurrentVersion() throws StandardException {
+        return makeRow(null, SYSCOLUMNS_COLUMN_COUNT);
+    }
+
+	private ExecRow makeRow(TupleDescriptor td, int columnCount)
 					throws StandardException
 	{
 		ExecRow    				row;
@@ -156,6 +164,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		long					autoincStart = 0;
 		long					autoincInc = 0;
 		long					autoincValue = 0;
+		boolean					autoincCycle = false;
 		//The SYSCOLUMNS table's autoinc related columns change with different
 		//values depending on what happened to the autoinc column, ie is the 
 		//user adding an autoincrement column, or is user changing the existing 
@@ -178,6 +187,8 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 			autoincInc   = column.getAutoincInc();
 			autoincValue   = column.getAutoincValue();
 			autoinc_create_or_modify_Start_Increment = column.getAutoinc_create_or_modify_Start_Increment();
+			autoincCycle = column.getAutoincCycle();
+
 			if (column.getDefaultInfo() != null)
 			{
 				defaultSerializable = column.getDefaultInfo();
@@ -200,7 +211,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		 */
 
 		/* Build the row to insert  */
-		row = getExecutionFactory().getValueRow(SYSCOLUMNS_COLUMN_COUNT);
+		row = getExecutionFactory().getValueRow(columnCount);
 
 		/* 1st column is REFERENCEID (UUID - char(36)) */
 		row.setColumn(SYSCOLUMNS_REFERENCEID, new SQLChar(tabID));
@@ -247,15 +258,44 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 						  new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, 
 						  new SQLLongint(autoincInc));
+			if (row.nColumns() >= 10) {
+            // This column is present only if the data dictionary version is
+            // 10.14 or higher.
+            row.setColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE,
+					new SQLBoolean(autoincCycle));
+        	}
+			
 		} else if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
 		{//user asked for restart with a new value, so don't change increment by and original start
 			//with values in the SYSCOLUMNS table. Just record the RESTART WITH value as the
 			//next value to be generated in the SYSCOLUMNS table
+
 			ColumnDescriptor  column = (ColumnDescriptor)td;
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, new SQLLongint(
 					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincInc()));
+			if (row.nColumns() >= 10) {
+            // This column is present only if the data dictionary version is
+            // 10.14 or higher.
+            row.setColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE,
+					new SQLBoolean(autoincCycle));
+        	}
+		}
+		else if(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE){
+			ColumnDescriptor  column = (ColumnDescriptor)td;
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, new SQLLongint(
+					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincValue()));
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, new SQLLongint(
+					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincStart()));
+			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, new SQLLongint(
+					column.getTableDescriptor().getColumnDescriptor(colName).getAutoincInc()));
+			if (row.nColumns() >= 10) {
+            // This column is present only if the data dictionary version is
+            // 10.14 or higher.
+            row.setColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE,
+					new SQLBoolean(autoincCycle));
+        	}
 		}
 		else
 		{
@@ -265,6 +305,12 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 						  new SQLLongint());
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC,
 						  new SQLLongint());
+			if (row.nColumns() >= 10) {
+            // This column is present only if the data dictionary version is
+            // 10.14 or higher.
+            row.setColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE,
+					new SQLBoolean(autoincCycle));
+        	}
 		}
 		return row;
 	}
@@ -326,7 +372,14 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(row.nColumns() == SYSCOLUMNS_COLUMN_COUNT, 
+			
+			int expectedCols =
+                dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_14, null)
+                    ? SYSCOLUMNS_COLUMN_COUNT
+                    : (SYSCOLUMNS_COLUMN_COUNT - 1);
+
+
+			SanityManager.ASSERT(row.nColumns() == expectedCols, 
 								 "Wrong number of columns for a SYSCOLUMNS row");
 		}
 
@@ -340,6 +393,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		UUID				uuid = null;
 		UUIDFactory			uuidFactory = getUUIDFactory();
 		long autoincStart, autoincInc, autoincValue;
+		boolean autoincCycle = false;
 
 		DataDescriptorGenerator	ddg = dd.getDataDescriptorGenerator();
 
@@ -421,16 +475,24 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		/* 9th column is AUTOINCREMENTINC (long) */
 		autoincInc = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINC).getLong();
 
+		if (row.nColumns() >= 10){
+			DataValueDescriptor col = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINCCYCLE);
+			autoincCycle = col.getBoolean();
+		}
+
+
 		DataValueDescriptor col = row.getColumn(SYSCOLUMNS_AUTOINCREMENTSTART);
 		autoincStart = col.getLong();
 
 		col = row.getColumn(SYSCOLUMNS_AUTOINCREMENTINC);
 		autoincInc = col.getLong();
 
+		// Hard upgraded tables <=10.13 come with a false autoincCyle before they are first
+		// explicitly set with cycle or no cycle command.
 		colDesc = new ColumnDescriptor(columnName, columnNumber,
 							dataTypeServices, defaultValue, defaultInfo, uuid, 
 							defaultUUID, autoincStart, autoincInc,
-                            autoincValue);
+                            autoincValue, autoincCycle);
 		return colDesc;
 	}
 
@@ -468,7 +530,18 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
             SystemColumnImpl.getColumn("AUTOINCREMENTVALUE", Types.BIGINT, true),
             SystemColumnImpl.getColumn("AUTOINCREMENTSTART", Types.BIGINT, true),
             SystemColumnImpl.getColumn("AUTOINCREMENTINC", Types.BIGINT, true),
+            SystemColumnImpl.getColumn("AUTOINCREMENTCYCLE", Types.BOOLEAN, true)
 
        };
 	}
+
+	@Override
+	public int getHeapColumnCount() throws StandardException {
+        // The CYCLE clause (DERBY-6904) is only supported if the dictionary
+        // version is 10.14 or higher.
+		boolean supportsCycleClause = dataDictionary
+                .checkVersion(DataDictionary.DD_VERSION_DERBY_10_14, null);
+        int heapCols = super.getHeapColumnCount();
+        return supportsCycleClause ? heapCols : (heapCols - 1);
+    }
 }

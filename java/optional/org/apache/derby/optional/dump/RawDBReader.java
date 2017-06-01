@@ -245,7 +245,7 @@ public	class   RawDBReader  implements OptionalTool
              conn,
              controlSchema,
              "SYSCOLUMNS", 
-             "( referenceid char(36), columnname varchar(128), columnnumber int, columndatatype serializable, columndefault serializable, columndefaultid char(36), autoincrementvalue bigint, autoincrementstart bigint, autoincrementinc bigint )",
+             "( referenceid char(36), columnname varchar(128), columnnumber int, columndatatype serializable, columndefault serializable, columndefaultid char(36), autoincrementvalue bigint, autoincrementstart bigint, autoincrementinc bigint, autoincrementcycle boolean )",
              "c90.dat",
              corruptDBLocation,
              encryptionAttributes,

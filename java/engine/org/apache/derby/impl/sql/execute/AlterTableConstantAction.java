@@ -485,6 +485,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART ||
 						 columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT ||
+						 columnInfo[ix].action ==
+						 ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ||
 						 columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE)
 				{
@@ -1233,7 +1235,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                    defaultUUID,
                    columnInfo[ix].autoincStart,
                    columnInfo[ix].autoincInc,
-                   columnInfo[ix].autoinc_create_or_modify_Start_Increment
+                   columnInfo[ix].autoinc_create_or_modify_Start_Increment,
+                   columnInfo[ix].autoincCycle
                    );
 
 		dd.addDescriptor(columnDescriptor, td,
@@ -2058,7 +2061,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									td,
 									columnDescriptor.getDefaultUUID(),
 								    columnInfo[ix].autoincStart,
-								    columnInfo[ix].autoincInc
+								    columnInfo[ix].autoincInc,
+								    columnInfo[ix].autoincCycle
 									);
 		
 
@@ -2124,7 +2128,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									td,
 									columnDescriptor.getDefaultUUID(),
 									columnDescriptor.getAutoincStart(),
-									columnDescriptor.getAutoincInc());
+									columnDescriptor.getAutoincInc(),
+									columnDescriptor.getAutoincCycle());
         
 		// Update the ColumnDescriptor with new default info
 		dd.dropColumnDescriptor(td.getUUID(), colName, tc);
@@ -2181,7 +2186,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 												   defaultUUID,
 												   columnInfo[ix].autoincStart,
 												   columnInfo[ix].autoincInc,
-												   columnInfo[ix].autoinc_create_or_modify_Start_Increment
+												   columnInfo[ix].autoinc_create_or_modify_Start_Increment,
+												   columnInfo[ix].autoincCycle
 												   );
 
 		// Update the ColumnDescriptor with new default info
@@ -2201,12 +2207,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 					 columnInfo[ix].autoincStart, false);
-		}
+		} 
 		// else we are simply changing the default value
 
 		if (
             (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) ||
-            (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
+            (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART) ||
+             (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE) 
             )
         {
             //
@@ -2219,7 +2226,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 
                 // don't clobber the current value of the sequence generator if we
                 // are just changing the increment. see DERBY-6579.
-                if ( columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT )
+                if ( (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) || (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ))
                 {
                     currentValue = dd.peekAtIdentity( td.getSchemaName(), td.getName() );
                 }
@@ -2233,7 +2240,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 csca.executeConstantAction( activation );
 
                 // reset the current value of the sequence generator as necessary
-                if ( columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT )
+                if ( (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT) || (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_CYCLE ) )
                 {
                     SequenceDescriptor  sequence = dd.getSequenceDescriptor
                         ( dd.getSystemSchemaDescriptor(), sequenceName );
@@ -2283,7 +2290,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
            defaultUUID,
            oldColumnDescriptor.getAutoincStart(),
            oldColumnDescriptor.getAutoincInc(),
-           ColumnDefinitionNode.MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT
+           ColumnDefinitionNode.MODIFY_AUTOINCREMENT_ALWAYS_VS_DEFAULT,
+           oldColumnDescriptor.getAutoincCycle()
            );
 
 		// Update the ColumnDescriptor with new default info

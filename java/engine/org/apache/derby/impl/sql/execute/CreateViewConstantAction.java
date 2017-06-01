@@ -187,7 +187,8 @@ class CreateViewConstantAction extends DDLConstantAction
 								   td,
 								   (UUID) null,
 								   columnInfo[ix].autoincStart,
-								   columnInfo[ix].autoincInc
+								   columnInfo[ix].autoincInc,
+								   columnInfo[ix].autoincCycle
 							   );
 			cdlArray[ix] = columnDescriptor;
 		}

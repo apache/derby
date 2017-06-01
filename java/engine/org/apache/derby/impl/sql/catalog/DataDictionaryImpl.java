@@ -777,7 +777,10 @@ public final class	DataDictionaryImpl
 				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
 
                 HashSet<String> newlyCreatedRoutines = new HashSet<String>();
-                
+            	
+            	// log the current dictionary version. Moving this statement to top as SYSCOLUMNSRowFactory
+            	// queries the version info. SEE Derby-6904    
+                dictionaryVersion = softwareVersion;
 				// create any required tables.
 				createDictionaryTables(startParams, bootingTC, ddg);
 				//create procedures for network server metadata
@@ -788,8 +791,6 @@ public final class	DataDictionaryImpl
                 create_SYSCS_procedures(bootingTC, newlyCreatedRoutines );
                 // now grant execute permission on some of these routines
                 grantPublicAccessToSystemRoutines( newlyCreatedRoutines, bootingTC, authorizationDatabaseOwner );
-				// log the current dictionary version
-				dictionaryVersion = softwareVersion;
                 
 				/* Set properties for current and create time 
 				 * DataDictionary versions.
@@ -4372,7 +4373,7 @@ public final class	DataDictionaryImpl
                         (DataValueDescriptor)parameterDefaults[index],
                     (DefaultInfo) null,
                     uuid,
-                    (UUID) null, 0, 0, 0);
+                    (UUID) null, 0, 0, 0, false);
 										
 			addDescriptor(cd, null, SYSCOLUMNS_CATALOG_NUM, 
 						  false, // no chance of duplicates here
@@ -8467,6 +8468,18 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
+	 *	Add autoinccycle columns to an SYSCOLUMNS system catalog
+	 *
+	 *	@param	tc				Transaction controller.
+	 *
+	 *	@exception StandardException Standard Derby error policy
+	 */
+	void upgrade_SYSCOLUMNS_AUTOINCCYCLE(TransactionController tc) throws StandardException{
+		TabInfoImpl ti = coreInfo[SYSCOLUMNS_CORE_NUM];
+		upgrade_addColumns(ti.getCatalogRowFactory(),new int[]{10},tc);
+	}
+
+	/**
 	  *	Add invisible columns to an existing system catalog
 	  *
 	  *	@param	rowFactory				Associated with this catalog.
@@ -9116,7 +9129,7 @@ public final class	DataDictionaryImpl
 		return new ColumnDescriptor
 			(column.getName(), columnPosition, column.getType(), null, null, td,
 			 (UUID) null, // No defaults yet for system columns
-			 0, 0
+			 0, 0, false
 			 );
 	}
 
@@ -9187,7 +9200,7 @@ public final class	DataDictionaryImpl
 		lcoreInfo[SYSTABLES_CORE_NUM] = 
 			new TabInfoImpl(new SYSTABLESRowFactory(luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSCOLUMNS_CORE_NUM] = 
-			new TabInfoImpl(new SYSCOLUMNSRowFactory(luuidFactory, exFactory, dvf));
+			new TabInfoImpl(new SYSCOLUMNSRowFactory(this, luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSCONGLOMERATES_CORE_NUM] = 
 			new TabInfoImpl(new SYSCONGLOMERATESRowFactory(luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSSCHEMAS_CORE_NUM] = 

@@ -360,7 +360,7 @@ class CreateViewNode extends DDLStatementNode
 											 null,
 											 null,
 											 ColumnInfo.CREATE,
-											 0, 0, 0, 0);
+											 0, 0, false, 0);
 		}
 	}
 

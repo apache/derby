@@ -11586,8 +11586,14 @@ identityColumnOption(long[] autoIncrementInfo,Object[] optionalClauses) throws S
          autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.CREATE_AUTOINCREMENT;
         optionIndex = 1;} 
 	|
-	optionToken = <CYCLE> autoIncrementCycle = whetherCycle() 
-	{autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = autoIncrementCycle;
+	optionToken = <CYCLE> 
+	{autoIncrementCycle = 1;
+	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = autoIncrementCycle;
+	optionIndex = 2;}
+	|
+	optionToken = <NO> <CYCLE> 
+	{autoIncrementCycle = 0;
+	autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = autoIncrementCycle;
 	optionIndex = 2;}
 	|
 	<COMMA> ( LOOKAHEAD({getToken(1).kind == COMMA ||
@@ -13723,6 +13729,7 @@ columnAlterClause(String columnName) throws StandardException :
 	ValueNode	defaultNode;
 	long[]				autoIncrementInfo = new long[5];
 	long				autoIncrementIncrement = 1;
+	long				autoIncrementCycle=0;
 	long				autoIncrementRestartWith = 1;
 	DataTypeDescriptor	typeDescriptor = null;
 	int                 alterKind;
@@ -13758,6 +13765,32 @@ columnAlterClause(String columnName) throws StandardException :
 	{
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_INC_INDEX] = autoIncrementIncrement;
 		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
+	}
+|
+	<CYCLE> 
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 1;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
+        return
+            new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
+                                 columnName,
+                                 null,
+                                 null,
+                                 autoIncrementInfo,
+                                 getContextManager());
+	}
+|
+	<NO> <CYCLE> 
+	{
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CYCLE] = 0;
+		autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_CREATE_MODIFY] = ColumnDefinitionNode.MODIFY_AUTOINCREMENT_CYCLE_VALUE;
         return
             new ModifyColumnNode(ModifyColumnNode.K_MODIFY_COLUMN_DEFAULT,
                                  columnName,

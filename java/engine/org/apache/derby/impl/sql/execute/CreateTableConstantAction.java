@@ -287,7 +287,8 @@ class CreateTableConstantAction extends DDLConstantAction
                      defaultUUID,
                      columnInfo[ix].autoincStart,
                      columnInfo[ix].autoincInc,
-                     columnInfo[ix].autoinc_create_or_modify_Start_Increment
+                     columnInfo[ix].autoinc_create_or_modify_Start_Increment,
+                     columnInfo[ix].autoincCycle
                      );
 
                 //
@@ -313,7 +314,8 @@ class CreateTableConstantAction extends DDLConstantAction
                      td,
                      defaultUUID,
                      columnInfo[ix].autoincStart,
-                     columnInfo[ix].autoincInc
+                     columnInfo[ix].autoincInc,
+                     columnInfo[ix].autoincCycle
                      );
             }
 
@@ -420,7 +422,7 @@ class CreateTableConstantAction extends DDLConstantAction
 
 	boolean cycling=false;
 
-	if(info.autoincCycle==1)
+	if(info.autoincCycle)
 		cycling=true;
 	
         return new CreateSequenceConstantAction

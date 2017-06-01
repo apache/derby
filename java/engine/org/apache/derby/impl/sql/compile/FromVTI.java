@@ -1987,7 +1987,7 @@ class FromVTI extends FromTable implements VTIEnvironment
                 (
                  columnName, i+1, dtd,
                  (DataValueDescriptor) null, (DefaultInfo) null, (UUID) null, (UUID) null,
-                 0L, 0L, 0L
+                 0L, 0L, 0L, false
                  );
             rc.setColumnDescriptor( null, coldesc );
         }
